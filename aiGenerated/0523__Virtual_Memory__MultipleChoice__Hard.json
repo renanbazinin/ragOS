@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 22:18:52",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 1608,
+      "total_tokens": 6670
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Virtual Memory",
+      "Paging",
+      "TLB",
+      "Memory Accesses"
+    ],
+    "content": {
+      "text": "מערכת הפעלה משתמשת בזיכרון וירטואלי עם כתובות וירטואליות בנות 32 ביט. גודל דף הוא 4KB. טבלת הדפים היא דו-שכבתית, כאשר כל רמת טבלה (גם ה-Page Directory וגם ה-Page Table) מאוחסנת בדף זיכרון אחד. גודל כל כניסה בטבלת הדפים (PTE/PDE) הוא 4 בתים. למערכת קיים TLB בגודל 4 כניסות, המשתמש במדיניות החלפה LRU (Least Recently Used).\nבהנחה שה-TLB ריק בתחילה, וכי כל הדפים הווירטואליים הנדרשים נמצאים בזיכרון הפיזי (אין Page Faults), כמה גישות לזיכרון הפיזי (לצורך טבלת דפים ולצורך הנתונים) יתבצעו בסך הכל עבור סדרת הגישות לכתובות הווירטואליות הבאות?\n\n0x10000, 0x11000, 0x12000, 0x13000, 0x10000, 0x14000, 0x11000",
+      "code_snippet": null,
+      "options": [
+        "א. 15",
+        "ב. 17",
+        "ג. 19",
+        "ד. 21",
+        "ה. 23"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "הסבר:\nכתובת וירטואלית: 32 ביט. גודל דף: 4KB = 2^12 בתים. לכן, 12 הביטים הפחות משמעותיים הם ה-offset בתוך הדף.\nמספר הדף הווירטואלי (VPN) הוא 32-12 = 20 ביט.\nטבלת דפים דו-שכבתית, כאשר כל רמה מאוחסנת בדף אחד (4KB). גודל כניסה 4 בתים.\nמספר כניסות לדף: 4KB / 4 בתים = 1024 = 2^10.\nלכן, 20 ביטים של ה-VPN יחולקו ל-10 ביטים עבור ה-Page Directory Index (PDI) ו-10 ביטים עבור ה-Page Table Index (PTI).\n\nמספר גישות לזיכרון פיזי עבור תרגום כתובת:\n*   TLB Hit: גישה אחת (לנתונים).\n*   TLB Miss (ללא Page Fault): שתי גישות לטבלת הדפים (אחת ל-PDE ב-Page Directory, אחת ל-PTE ב-Page Table), וגישה אחת לנתונים. סך הכל 3 גישות. ה-TLB מתעדכן.\n\nמעקב אחר הגישות וה-TLB (גודל 4, LRU):\nTLB = {} (ריק בתחילה)\n\n1.  **גישה ל-0x10000 (VPN 0x10)**:\n    *   TLB Miss.\n    *   3 גישות לזיכרון (2 לטבלת דפים + 1 לנתונים).\n    *   TLB: {0x10 (MRU)}\n    *   סה\"כ גישות: 3\n\n2.  **גישה ל-0x11000 (VPN 0x11)**:\n    *   TLB Miss.\n    *   3 גישות לזיכרון.\n    *   TLB: {0x10, 0x11 (MRU)}\n    *   סה\"כ גישות: 3 + 3 = 6\n\n3.  **גישה ל-0x12000 (VPN 0x12)**:\n    *   TLB Miss.\n    *   3 גישות לזיכרון.\n    *   TLB: {0x10, 0x11, 0x12 (MRU)}\n    *   סה\"כ גישות: 6 + 3 = 9\n\n4.  **גישה ל-0x13000 (VPN 0x13)**:\n    *   TLB Miss.\n    *   3 גישות לזיכרון.\n    *   TLB: {0x10, 0x11, 0x12, 0x13 (MRU)} (TLB מלא)\n    *   סה\"כ גישות: 9 + 3 = 12\n\n5.  **גישה ל-0x10000 (VPN 0x10)**:\n    *   TLB Hit.\n    *   1 גישה לזיכרון (לנתונים).\n    *   TLB: {0x11, 0x12, 0x13, 0x10 (MRU)} (0x10 הופך ל-MRU)\n    *   סה\"כ גישות: 12 + 1 = 13\n\n6.  **גישה ל-0x14000 (VPN 0x14)**:\n    *   TLB Miss.\n    *   TLB מלא, 0x11 הוא ה-LRU ויוחלף.\n    *   3 גישות לזיכרון.\n    *   TLB: {0x12, 0x13, 0x10, 0x14 (MRU)}\n    *   סה\"כ גישות: 13 + 3 = 16\n\n7.  **גישה ל-0x11000 (VPN 0x11)**:\n    *   TLB Miss.\n    *   TLB מלא, 0x12 הוא ה-LRU ויוחלף.\n    *   3 גישות לזיכרון.\n    *   TLB: {0x13, 0x10, 0x14, 0x11 (MRU)}\n    *   סה\"כ גישות: 16 + 3 = 19\n\nהתשובה הנכונה היא ג. 19."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

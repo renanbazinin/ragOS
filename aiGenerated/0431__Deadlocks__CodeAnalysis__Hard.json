@@ -1,0 +1,50 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Deadlocks",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 21:31:29",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3900,
+      "output_tokens": 2808,
+      "total_tokens": 12603
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Deadlocks",
+      "Concurrency",
+      "Synchronization",
+      "Mutexes"
+    ],
+    "content": {
+      "text": "יישום מרובה חוטים מדמה מערכת של N יחידות עיבוד המסודרות בטבעת. כל יחידת עיבוד מוגנת על ידי מנעול (mutex). כדי לבצע משימה, חוט צריך לרכוש שתי יחידות עיבוד סמוכות. נתון קוד המממש את ההתנהגות הזו. ענה על השאלות הבאות:",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h> // For sleep\n\n#define NUM_UNITS 5 // N\n\npthread_mutex_t units_mutex[NUM_UNITS];\n\nvoid* worker_thread(void* arg) {\n    int id = *(int*)arg;\n    int unit1 = id;\n    int unit2 = (id + 1) % NUM_UNITS;\n\n    printf(\"Thread %d trying to acquire unit %d and unit %d\\n\", id, unit1, unit2);\n\n    pthread_mutex_lock(&units_mutex[unit1]);\n    printf(\"Thread %d acquired unit %d\\n\", id, unit1);\n    \n    // Simulate some work or contention\n    usleep(10000); // 10ms\n\n    pthread_mutex_lock(&units_mutex[unit2]);\n    printf(\"Thread %d acquired unit %d and unit %d\\n\", id, unit1, unit2);\n\n    // Simulate work in critical section\n    printf(\"Thread %d working with units %d and %d\\n\", id, unit1, unit2);\n    usleep(50000); // 50ms\n\n    pthread_mutex_unlock(&units_mutex[unit2]);\n    printf(\"Thread %d released unit %d\\n\", id, unit2);\n\n    pthread_mutex_unlock(&units_mutex[unit1]);\n    printf(\"Thread %d released unit %d\\n\", id, unit1);\n\n    free(arg);\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_UNITS];\n    int* thread_ids[NUM_UNITS];\n\n    for (int i = 0; i < NUM_UNITS; ++i) {\n        pthread_mutex_init(&units_mutex[i], NULL);\n    }\n\n    for (int i = 0; i < NUM_UNITS; ++i) {\n        thread_ids[i] = (int*)malloc(sizeof(int));\n        *thread_ids[i] = i;\n        pthread_create(&threads[i], NULL, worker_thread, thread_ids[i]);\n    }\n\n    for (int i = 0; i < NUM_UNITS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    for (int i = 0; i < NUM_UNITS; ++i) {\n        pthread_mutex_destroy(&units_mutex[i]);\n    }\n\n    printf(\"All threads finished.\\n\");\n    return 0;\n}"
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "האם הקוד הנתון עלול לסבול מקיפאון (Deadlock)? אם כן, הסבר את התנאים המובילים לקיפאון.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "שנה את פונקציית `worker_thread` כדי למנוע קיפאון, תוך שמירה על מניעה הדדית (mutual exclusion) ליחידות הסמוכות והבטחת התקדמות (progress). מותר לך להשתמש רק במערך המנעולים הקיים (`units_mutex`) ואין להוסיף אובייקטי סנכרון חדשים או לשנות את גודל `NUM_UNITS`.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.1: כן, הקוד הנתון עלול לסבול מקיפאון. תרחיש קיפאון קלאסי יכול להתרחש כאשר כל החוטים מתחילים לפעול בערך באותו זמן ומנסים לרכוש את המנעולים שלהם.\n\nהקיפאון מתרחש מכיוון שמתקיימים ארבעת התנאים ההכרחיים לקיפאון:\n1.  **מניעה הדדית (Mutual Exclusion):** כל מנעול (`units_mutex[i]`) מגן על יחידת עיבוד אחת וניתן להחזיק בו על ידי חוט אחד בלבד בכל רגע נתון.\n2.  **החזק והמתן (Hold and Wait):** כל חוט רוכש את המנעול הראשון שלו (`units_mutex[id]`) ומחזיק בו, ואז מנסה לרכוש את המנעול השני (`units_mutex[(id+1)%NUM_UNITS]`). בזמן שהוא ממתין למנעול השני, הוא ממשיך להחזיק במנעול הראשון.\n3.  **אין דריסה (No Preemption):** מנעולים אינם ניתנים לדריסה. ברגע שחוט רוכש מנעול, הוא יכול לשחרר אותו רק מרצונו.\n4.  **המתנה מעגלית (Circular Wait):** זהו התנאי הקריטי ביותר במקרה זה. אם כל `NUM_UNITS` החוטים יתחילו בו זמנית, כל חוט `id` ירכוש את `units_mutex[id]`. לאחר מכן, חוט `id` ינסה לרכוש את `units_mutex[(id+1)%NUM_UNITS]`, אשר מוחזק על ידי חוט `(id+1)%NUM_UNITS`. כך נוצרת שרשרת המתנה מעגלית: חוט 0 ממתין למנעול 1 (שמוחזק על ידי חוט 1), חוט 1 ממתין למנעול 2 (שמוחזק על ידי חוט 2), וכן הלאה, עד שחוט `NUM_UNITS-1` ממתין למנעול 0 (שמוחזק על ידי חוט 0). כתוצאה מכך, אף חוט לא יכול להתקדם, וכל המערכת נכנסת לקיפאון.\n\n1.2: כדי למנוע קיפאון, יש לשבור את תנאי ההמתנה המעגלית. הדרך הנפוצה והיעילה ביותר לעשות זאת במקרה זה, תוך שימוש במשאבים הקיימים בלבד, היא על ידי אכיפת סדר רכישת משאבים (Resource Ordering).\nהרעיון הוא להגדיר סדר גלובלי למנעולים ולדרוש מכל החוטים לרכוש אותם לפי סדר זה. במקרה שלנו, נבצע רכישה תמיד מהמנעול בעל האינדקס הנמוך יותר למנעול בעל האינדקס הגבוה יותר.\n\nעבור חוט `id` המבקש את יחידות `unit1_idx = id` ו-`unit2_idx = (id + 1) % NUM_UNITS`:\n1.  אם `unit1_idx < unit2_idx` (לדוגמה, חוט 0 רוצה יחידות 0 ו-1), החוט ירכוש קודם את `units_mutex[unit1_idx]` ואז את `units_mutex[unit2_idx]`.\n2.  אם `unit1_idx > unit2_idx` (המקרה המיוחד של חוט `NUM_UNITS-1` שרוצה יחידות `NUM_UNITS-1` ו-0), החוט ירכוש קודם את `units_mutex[unit2_idx]` (שהוא 0) ואז את `units_mutex[unit1_idx]` (שהוא `NUM_UNITS-1`).\n\nיישום זה מבטיח שאין המתנה מעגלית. אף חוט לא ימתין למשאב שמוחזק על ידי חוט אחר שימתין בעצמו למשאב שמוחזק על ידי החוט הראשון, מכיוון שסדר הרכישה גלובלי ומונע יצירת מעגל. לדוגמה, חוט `NUM_UNITS-1` לא ימתין למשאב 0 שמוחזק על ידי חוט 0, בעוד שחוט 0 ממתין למשאב 1. במקום זאת, חוט `NUM_UNITS-1` ינסה לרכוש קודם את משאב 0 (שמוחזק על ידי חוט 0), יחסם וימתין, בעוד שחוט 0 ירכוש את משאב 0 ולאחר מכן את משאב 1. הסדר המוגדר מראש מבטיח שכל חוט יצליח בסופו של דבר לרכוש את שני המנעולים שלו.\n\nהקוד המעודכן עבור `worker_thread`:\n```c\nvoid* worker_thread(void* arg) {\n    int id = *(int*)arg;\n    int unit1_idx = id;\n    int unit2_idx = (id + 1) % NUM_UNITS;\n\n    int first_lock_idx, second_lock_idx;\n\n    if (unit1_idx < unit2_idx) { \n        first_lock_idx = unit1_idx;\n        second_lock_idx = unit2_idx;\n    } else { // Handles the case where unit1_idx is NUM_UNITS-1 and unit2_idx is 0\n        first_lock_idx = unit2_idx; \n        second_lock_idx = unit1_idx;\n    }\n\n    printf(\"Thread %d trying to acquire unit %d and unit %d (ordered: %d then %d)\\n\", id, unit1_idx, unit2_idx, first_lock_idx, second_lock_idx);\n\n    pthread_mutex_lock(&units_mutex[first_lock_idx]);\n    printf(\"Thread %d acquired unit %d\\n\", id, first_lock_idx);\n    \n    usleep(10000); // 10ms\n\n    pthread_mutex_lock(&units_mutex[second_lock_idx]);\n    printf(\"Thread %d acquired unit %d and unit %d (original: %d and %d)\\n\", id, first_lock_idx, second_lock_idx, unit1_idx, unit2_idx);\n\n    printf(\"Thread %d working with units %d and %d\\n\", id, unit1_idx, unit2_idx);\n    usleep(50000); // 50ms\n\n    pthread_mutex_unlock(&units_mutex[second_lock_idx]);\n    printf(\"Thread %d released unit %d\\n\", id, second_lock_idx);\n\n    pthread_mutex_unlock(&units_mutex[first_lock_idx]);\n    printf(\"Thread %d released unit %d\\n\", id, first_lock_idx);\n\n    free(arg);\n    return NULL;\n}\n```"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

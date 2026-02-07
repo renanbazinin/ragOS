@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Memory Management",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 21:33:00",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 901,
+      "output_tokens": 424,
+      "total_tokens": 2203
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Memory Management",
+      "Paging"
+    ],
+    "content": {
+      "text": "איזו סוג של פרגמנטציה קיימת בשיטת ניהול הזיכרון Paging (חלוקה לדפים)?",
+      "code_snippet": null,
+      "options": [
+        "א. פרגמנטציה פנימית בלבד.",
+        "ב. פרגמנטציה חיצונית בלבד.",
+        "ג. גם פרגמנטציה פנימית וגם פרגמנטציה חיצונית.",
+        "ד. אף סוג של פרגמנטציה."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "בשיטת Paging, הזיכרון הפיזי מחולק לדפים (frames) בגודל קבוע. תהליכים מחולקים גם הם לדפים (pages) באותו גודל. כאשר תהליך מוקצה לזיכרון, הוא מקבל דפים שלמים. אם גודל התהליך אינו כפולה של גודל הדף, הדף האחרון שהוקצה לתהליך יכיל שטח לא מנוצל – זוהי פרגמנטציה פנימית. פרגמנטציה חיצונית, שהיא חורים קטנים ולא רציפים בין בלוקים מוקצים, אינה מתרחשת ב-Paging מכיוון שכל יחידות ההקצאה (הדפים) הן בגודל קבוע וניתן להשתמש בכל דף פנוי."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

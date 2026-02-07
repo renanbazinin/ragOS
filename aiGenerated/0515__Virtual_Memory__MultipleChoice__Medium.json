@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 22:16:37",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 967,
+      "output_tokens": 558,
+      "total_tokens": 3373
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Virtual Memory",
+      "Paging",
+      "TLB",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "תהליך מנסה לגשת לכתובת וירטואלית מסוימת. המעבד מחפש את התרגום ב-TLB ומגלה 'פספוס' (TLB miss). לאחר מכן, מערכת ההפעלה מבצעת חיפוש בטבלת הדפים של התהליך ומגלה שהדף קיים בזיכרון הפיזי (RAM) וכי יש לתהליך הרשאה לגשת אליו. מהו הצעד הבא שהמעבד יבצע?",
+      "code_snippet": null,
+      "options": [
+        "א. המעבד יגרום ל-Page Fault, מכיוון שהתרגום לא נמצא ב-TLB.",
+        "ב. המעבד יתרגם את הכתובת הווירטואלית לכתובת פיזית, יטען את התרגום ל-TLB וימשיך בביצוע הפקודה.",
+        "ג. המעבד יגרום ל-Segmentation Fault, כיוון שהתרגום לא נמצא ב-TLB.",
+        "ד. המעבד יבקש ממע' ההפעלה לטעון את הדף מהדיסק לזיכרון הפיזי."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "במקרה של פספוס ב-TLB (TLB miss), המעבד יפנה לטבלת הדפים (Page Table) כדי למצוא את התרגום מהכתובת הווירטואלית לכתובת הפיזית. מכיוון שהדף נמצא בזיכרון הפיזי וקיימות הרשאות גישה, המעבד יבצע את התרגום, יעדכן את ה-TLB עם הרשומה החדשה (כדי לזרז גישות עתידיות לאותו דף), וימשיך בביצוע הפקודה כאילו לא היה פספוס מלכתחילה (אך עם השהיה קלה)."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Memory Management",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 22:06:21",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2670,
+      "output_tokens": 1579,
+      "total_tokens": 6970
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Memory Management",
+      "Dynamic Memory Allocation",
+      "Memory Leaks"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה ב-C. התוכנית מקצה זיכרון למערך של N מצביעים למספרים שלמים, ולאחר מכן מקצה זיכרון ל-N מספרים שלמים בודדים ומאתחלת אותם. לבסוף, היא משחררת את הזיכרון שהוקצה למספרים השלמים הבודדים.\n1. תארו מהי בעיית ניהול הזיכרון המרכזית בתוכנית זו.\n2. הציגו את השינוי הנדרש בקוד כדי לתקן את הבעיה.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n\n#define N 5\n\nint main() {\n    int **arr_of_ptrs;\n    int i;\n\n    // Allocate memory for N integer pointers\n    arr_of_ptrs = (int **)malloc(N * sizeof(int *));\n    if (arr_of_ptrs == NULL) {\n        perror(\"malloc arr_of_ptrs failed\");\n        return 1;\n    }\n\n    // Allocate memory for N integers and store their addresses\n    for (i = 0; i < N; i++) {\n        arr_of_ptrs[i] = (int *)malloc(sizeof(int));\n        if (arr_of_ptrs[i] == NULL) {\n            perror(\"malloc int failed\");\n            // In a real program, a cleanup of previously allocated memory would be needed here.\n            return 1;\n        }\n        *arr_of_ptrs[i] = i * 10; // Initialize values\n    }\n\n    // Print values (optional)\n    printf(\"Values:\\n\");\n    for (i = 0; i < N; i++) {\n        printf(\"arr_of_ptrs[%d] = %d\\n\", i, *arr_of_ptrs[i]);\n    }\n\n    // Free individual integers\n    for (i = 0; i < N; i++) {\n        free(arr_of_ptrs[i]);\n        arr_of_ptrs[i] = NULL; // Good practice to nullify after freeing\n    }\n\n    // Missing: free(arr_of_ptrs);\n\n    return 0;\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "**1. תיאור הבעיה:\n**הבעיה המרכזית בתוכנית היא **דליפת זיכרון (Memory Leak)**.\nהתוכנית מבצעת שתי הקצאות זיכרון דינמיות נפרדות:\nא. `arr_of_ptrs = (int **)malloc(N * sizeof(int *));` - מקצה בלוק זיכרון עבור המערך של המצביעים עצמו.\nב. בתוך הלולאה, `arr_of_ptrs[i] = (int *)malloc(sizeof(int));` - מקצה בלוק זיכרון עבור כל אחד מ-N המספרים השלמים הבודדים.\n\nהלולאה השנייה בתוכנית (`for (i = 0; i < N; i++) { free(arr_of_ptrs[i]); }`) משחררת בהצלחה את כל הזיכרון שהוקצה למספרים השלמים הבודדים.\nאך, בלוק הזיכרון שהוקצה עבור המערך `arr_of_ptrs` עצמו (שנוצר על ידי הקריאה הראשונה ל-`malloc`) **אינו משוחרר לעולם**.\nכתוצאה מכך, הזיכרון הזה נשאר תפוס על ידי התהליך גם לאחר שהפונקציה `main` מסתיימת, והוא אינו זמין לשימוש חוזר על ידי המערכת. זוהי דליפת זיכרון קלאסית, אשר עלולה להצטבר ולגרום לבעיות בביצועי המערכת ובזמינות הזיכרון אם התוכנית רצה לאורך זמן או במחזורים חוזרים.\n\n**2. התיקון הנדרש:\n**כדי לתקן את דליפת הזיכרון, יש להוסיף קריאה ל-`free(arr_of_ptrs);` לאחר שכל המצביעים בתוך המערך שוחררו, ולפני סיום הפונקציה `main`.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n\n#define N 5\n\nint main() {\n    int **arr_of_ptrs;\n    int i;\n\n    arr_of_ptrs = (int **)malloc(N * sizeof(int *));\n    if (arr_of_ptrs == NULL) {\n        perror(\"malloc arr_of_ptrs failed\");\n        return 1;\n    }\n\n    for (i = 0; i < N; i++) {\n        arr_of_ptrs[i] = (int *)malloc(sizeof(int));\n        if (arr_of_ptrs[i] == NULL) {\n            perror(\"malloc int failed\");\n            // Proper cleanup for previously allocated arr_of_ptrs[0...i-1] would be here.\n            // For simplicity of this example, we just exit.\n            return 1;\n        }\n        *arr_of_ptrs[i] = i * 10;\n    }\n\n    printf(\"Values:\\n\");\n    for (i = 0; i < N; i++) {\n        printf(\"arr_of_ptrs[%d] = %d\\n\", i, *arr_of_ptrs[i]);\n    }\n\n    for (i = 0; i < N; i++) {\n        free(arr_of_ptrs[i]);\n        arr_of_ptrs[i] = NULL;\n    }\n\n    // תיקון: שחרור הזיכרון שהוקצה למערך arr_of_ptrs עצמו\n    free(arr_of_ptrs);\n\n    return 0;\n}"
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

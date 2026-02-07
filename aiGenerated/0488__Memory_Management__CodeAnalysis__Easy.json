@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Memory Management",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 22:04:26",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2852,
+      "output_tokens": 1057,
+      "total_tokens": 7154
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Memory Management",
+      "Stack vs Heap",
+      "Dangling Pointers",
+      "Undefined Behavior"
+    ],
+    "content": {
+      "text": "נתונה תוכנית ה-C הבאה. מהי הבעיה העיקרית בקוד הנתון, וכיצד היא קשורה לניהול זיכרון? הסבר מהו הפלט הצפוי של התוכנית (או מדוע הוא אינו מוגדר), וכיצד ניתן לתקן את הקוד כך שיפעל כראוי ויחזיר מערך שלם.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n\nint* createArray() {\n    int arr[5]; // Allocated on the stack\n    for (int i = 0; i < 5; i++) {\n        arr[i] = i * 10;\n    }\n    printf(\"Inside createArray: arr[0] = %d\\n\", arr[0]);\n    return arr; // Returning address of a local stack variable\n}\n\nint main() {\n    int* myArray = createArray();\n    printf(\"Back in main: myArray[0] = %d\\n\", myArray[0]);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הבעיה העיקרית בקוד היא ניסיון להחזיר מצביע למערך מקומי שהוקצה על המחסנית (stack). כאשר הפונקציה `createArray` מסיימת את ריצתה, מסגרת המחסנית שלה נמחקת, והזיכרון שהוקצה למערך `arr` הופך להיות לא חוקי. לכן, המצביע `myArray` ב-`main` הוא מצביע תלוי (dangling pointer) המצביע לזיכרון שכבר אינו מובטח להיות תקף או להכיל את הערכים המקוריים. גישה לזיכרון זה היא התנהגות בלתי מוגדרת (Undefined Behavior).\n\n**הפלט הצפוי:**\nהשורה הראשונה `Inside createArray: arr[0] = 0` תמיד תודפס. \nהשורה השנייה `Back in main: myArray[0] = ...` תדפיס ערך בלתי מוגדר. במערכות מסוימות, ייתכן שתראה 0 (אם זיכרון המחסנית לא נדרס מיד), אך זה אינו מובטח. ייתכנו גם קריסות (segmentation fault) או ערכים אקראיים. לכן, הפלט אינו מוגדר ואינו צפוי להיות עקבי.\n\n**תיקון הקוד:**\nכדי לתקן את הקוד, יש להקצות את המערך באופן דינמי על הערימה (heap) באמצעות `malloc` (או `new` ב-C++), ולזכור לשחרר את הזיכרון באמצעות `free` כאשר הוא אינו נחוץ יותר, כדי למנוע דליפת זיכרון.\n\n**קוד מתוקן לדוגמה:**\n```c\n#include <stdio.h>\n#include <stdlib.h> // For malloc and free\n\nint* createArray() {\n    int* arr = (int*)malloc(5 * sizeof(int)); // Allocated on the heap\n    if (arr == NULL) {\n        perror(\"Failed to allocate memory\");\n        exit(EXIT_FAILURE);\n    }\n    for (int i = 0; i < 5; i++) {\n        arr[i] = i * 10;\n    }\n    printf(\"Inside createArray: arr[0] = %d\\n\", arr[0]);\n    return arr; // Returning address of heap-allocated memory\n}\n\nint main() {\n    int* myArray = createArray();\n    if (myArray != NULL) {\n        printf(\"Back in main: myArray[0] = %d\\n\", myArray[0]);\n        free(myArray); // Free the allocated memory\n        myArray = NULL; // Prevent dangling pointer\n    }\n    return 0;\n}\n```",
+      "difficulty_estimation": "Easy"
+    }
+  }
+}

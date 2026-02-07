@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Memory Management",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 21:53:59",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1964,
+      "output_tokens": 570,
+      "total_tokens": 4290
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Memory Management",
+      "Virtual Memory",
+      "Paging"
+    ],
+    "content": {
+      "text": "נתונה מערכת עם זיכרון וירטואלי של 2GB, גודל דף של 8KB, וזיכרון פיזי של 16GB.\nבהנחה שכל רשומת טבלת דפים (PTE) תופסת 4 בתים, מהם הגדלים של ה-VPN, ה-PFN, וכמה זיכרון פיזי תתפוס טבלת דפים (לינארית) של תהליך, במינימום?\nגודל VPN: ________ גודל PFN: ________ גודל טבלה: ________",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "כתובת וירטואלית היא 31 ביטים (זיכרון וירטואלי 2GB = 2^31 בתים).\nגודל ההיסט הוא 13 ביטים (גודל דף 8KB = 2^13 בתים).\nלכן, גודל ה-VPN הוא 31 - 13 = 18 ביטים.\n\nכתובת פיזית היא 34 ביטים (זיכרון פיזי 16GB = 2^34 בתים).\nגודל ההיסט זהה – 13 ביטים.\nלכן, גודל ה-PFN הוא 34 - 13 = 21 ביטים.\n\nלכל תהליך יש 2^18 דפים וירטואליים (2GB / 8KB = 2^31 / 2^13).\nטבלת הדפים הלינארית מכילה 2^18 רשומות.\nכל רשומה תופסת 4 בתים (נתון).\nלכן, גודל הטבלה כולה הוא 2^18 * 4 בתים = 262,144 * 4 בתים = 1,048,576 בתים = 1MB."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

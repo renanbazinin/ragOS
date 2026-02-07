@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Synchronization",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 21:42:23",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4073,
+      "output_tokens": 2269,
+      "total_tokens": 12768
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Synchronization",
+      "Threads",
+      "Concurrency",
+      "Barriers",
+      "Mutexes",
+      "Condition Variables"
+    ],
+    "content": {
+      "text": "במערכות מרובות חוטים, לעיתים קרובות נדרש לסנכרן תהליכים במספר נקודות שונות במהלך ביצועם. נתונים N חוטים, ומטרתנו לממש מחסום דו-שלבי (Two-Phase Barrier) שניתן לשימוש חוזר. המחסום יסנכרן את N החוטים בשני שלבים עוקבים, כך שכל N החוטים חייבים להשלים שלב אחד לפני שמישהו מהם יוכל להתחיל את השלב הבא, וכן לפני שמישהו מהם יוכל להתחיל את השלב הראשון של המחזור הבא.\n\nיש לממש את מבנה הנתונים `TwoPhaseBarrier` ואת הפונקציות הבאות:\n*   `void init_two_phase_barrier(TwoPhaseBarrier *bar, int N)`: מאתחל את המחסום עבור N חוטים.\n*   `void destroy_two_phase_barrier(TwoPhaseBarrier *bar)`: משחרר משאבים של המחסום.\n*   `void phase1_checkin(TwoPhaseBarrier *bar)`: נקודת סנכרון ראשונה. חוט שקורא לפונקציה זו ממתין עד שכל N החוטים האחרים קראו אף הם ל-`phase1_checkin`. רק אז כולם ממשיכים.\n*   `void phase2_checkin(TwoPhaseBarrier *bar)`: נקודת סנכרון שנייה. חוט שקורא לפונקציה זו ממתין עד שכל N החוטים האחרים קראו אף הם ל-`phase2_checkin`. רק אז כולם ממשיכים.\n\nהמחזור של `phase1_checkin` ואז `phase2_checkin` יכול לחזור על עצמו מספר בלתי מוגבל של פעמים.\nהמימוש חייב להיות חסין בפני תנאי מירוץ (race conditions), קיפאון (deadlock), ורעב (starvation).\nהשתמשו באובייקטי סנכרון סטנדרטיים של POSIX Threads (כגון mutex ו-condition variables).",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "המימוש משתמש ב-mutex אחד וב-condition variable אחד כדי לסנכרן את כל N החוטים. המפתח להבטחת פעולה נכונה במחסום דו-שלבי שניתן לשימוש חוזר הוא ניהול מצב המחזור הנוכחי (current_wave) ומונה החוטים שהגיעו (count).\n\n**מבנה `TwoPhaseBarrier`:**\n```c\n#include <pthread.h>\n\ntypedef struct {\n    int N;\n    int count;          // Threads arrived at the current active wave\n    int current_wave;   // 0 for phase1, 1 for phase2. Increments after all threads pass a phase.\n                        // So, it will be 0 when waiting for phase1_checkin, then 1 for phase2_checkin, then 0 again.\n    pthread_mutex_t mutex;\n    pthread_cond_t cond; // Single condition variable is often sufficient for reusable barriers\n} TwoPhaseBarrier;\n```\n\n**פונקציות המימוש:**\n```c\nvoid init_two_phase_barrier(TwoPhaseBarrier *bar, int N) {\n    bar->N = N;\n    bar->count = 0;\n    bar->current_wave = 0; // Start with phase 0 (phase1_checkin)\n    pthread_mutex_init(&bar->mutex, NULL);\n    pthread_cond_init(&bar->cond, NULL);\n}\n\nvoid destroy_two_phase_barrier(TwoPhaseBarrier *bar) {\n    pthread_mutex_destroy(&bar->mutex);\n    pthread_cond_destroy(&bar->cond);\n}\n\n// Internal helper function for both phases\nvoid phase_checkin(TwoPhaseBarrier *bar, int expected_wave) {\n    pthread_mutex_lock(&bar->mutex);\n\n    // Wait if this thread is too fast and arrived for a future wave\n    // Or if it's too slow and arrived for a past wave (should not happen with correct usage)\n    while (bar->current_wave != expected_wave) {\n        pthread_cond_wait(&bar->cond, &bar->mutex);\n    }\n\n    bar->count++;\n    if (bar->count < bar->N) {\n        // Not the last thread, wait for others in the same wave\n        while (bar->current_wave == expected_wave) { // Wait until the current_wave changes (signaling completion)\n            pthread_cond_wait(&bar->cond, &bar->mutex);\n        }\n    } else {\n        // Last thread for this wave\n        bar->count = 0; // Reset for the next wave\n        bar->current_wave = (bar->current_wave + 1) % 2; // Advance to the next wave (0 -> 1, 1 -> 0)\n        pthread_cond_broadcast(&bar->cond); // Wake up all waiting threads\n    }\n    pthread_mutex_unlock(&bar->mutex);\n}\n\nvoid phase1_checkin(TwoPhaseBarrier *bar) {\n    phase_checkin(bar, 0);\n}\n\nvoid phase2_checkin(TwoPhaseBarrier *bar) {\n    phase_checkin(bar, 1);\n}\n```\n\n**לוגיקת הפעולה:**\n1.  **נעילת mutex**: כל חוט נועל את ה-mutex בכניסה לפונקציה כדי להגן על משתני המצב המשותפים.\n2.  **המתנה לשלב הנכון**: \n    *   `while (bar->current_wave != expected_wave)`: חוטים ממתינים כאן אם הם מנסים להיכנס לשלב שאינו השלב הפעיל כרגע. לדוגמה, אם `current_wave` הוא 0 (מצפה ל-`phase1_checkin`) וחוט מנסה לקרוא ל-`phase2_checkin` (עם `expected_wave` של 1), הוא ימתין. זה מונע מחוטים מהירים להקדים את זמנם לשלב הבא או למחזור הבא.\n3.  **קידום מונה והמתנה**: \n    *   `bar->count++`: החוט מקדם את מונה ההגעה לשלב הנוכחי.\n    *   `if (bar->count < bar->N)`: אם זה לא החוט האחרון שהגיע, הוא ממתין על משתנה התנאי. התנאי `while (bar->current_wave == expected_wave)` מבטיח שהחוט ימשיך להמתין עד שהחוט האחרון ישנה את `current_wave` (כלומר, השלב הנוכחי הושלם).\n4.  **החוט האחרון**: \n    *   `else`: אם זהו החוט ה-N שהגיע לשלב, הוא מבצע את הפעולות הבאות:\n        *   `bar->count = 0`: מאפס את המונה עבור השלב הבא.\n        *   `bar->current_wave = (bar->current_wave + 1) % 2`: מקדם את השלב הפעיל. אם היינו בשלב 0, עוברים לשלב 1; אם היינו בשלב 1, חוזרים לשלב 0 עבור המחזור הבא.\n        *   `pthread_cond_broadcast(&bar->cond)`: מעיר את כל החוטים הממתינים על משתנה התנאי. כעת הם יבדקו מחדש את תנאי ההמתנה שלהם וימשיכו (אלו שחיכו באותו שלב).\n5.  **שחרור mutex**: החוט משחרר את ה-mutex ויוצא מהפונקציה.\n\n**הימנעות מבעיות:**\n*   **Race Conditions**: ה-mutex מגן על כל הגישות למשתני המצב המשותפים (`count`, `current_wave`).\n*   **Deadlock**: לא קיים deadlock מכיוון שכל החוטים פועלים באותו אופן, ורק האחרון מביניהם משחרר את כולם. אין תלות מעגלית במשאבים.\n*   **Starvation**: כל החוטים מעוררים באמצעות `pthread_cond_broadcast`, כך שאף חוט לא נשאר תקוע לנצח.\n*   **Reusability**: ה-`current_wave` ואיפוס ה-`count` מבטיחים שהמחסום עובד נכון למחזורים עוקבים.\n\n**הערה**: המימוש מניח שכל N החוטים אכן יקראו ל-`phase1_checkin` ולאחר מכן ל-`phase2_checkin` (בסדר הנכון) במחזור נתון. אם חוט ינסה לדלג על שלב או לקרוא לשלב לא נכון, הוא ימתין עד שה-`current_wave` יתאים לדרישתו."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Deadlocks",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 21:30:52",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3900,
+      "output_tokens": 2447,
+      "total_tokens": 13597
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Deadlocks",
+      "Synchronization",
+      "Resource Allocation",
+      "Atomic Operations"
+    ],
+    "content": {
+      "text": "במערכת מרובת חוטים (threads), קיימים N_RESOURCES משאבים משותפים, ממוספרים מ-0 עד N_RESOURCES-1. מצבו של כל משאב i מיוצג על ידי המשתנה הגלובלי resource_status[i], כאשר 0 מציין משאב פנוי ו-1 מציין משאב תפוס. חוטים נדרשים לרכוש מספר משאבים בו-זמנית על מנת לבצע משימותיהם. לרשותנו עומדת פקודת חומרה אטומית אחת בלבד, compare_and_swap, אשר פועלת באופן הבא: int compare_and_swap(int* ptr, int old_val, int new_val). פקודה זו משווה באופן אטומי את הערך בכתובת ptr לערך old_val. אם הם זהים, היא מחליפה את הערך ב-ptr ל-new_val. הפקודה מחזירה את הערך שהיה ב-ptr *לפני* הניסיון לבצע את ההחלפה. אסור להשתמש באובייקטי סנכרון אחרים (כגון mutexes או semaphores) או בפעולות אטומיות אחרות מלבד compare_and_swap. יש לממש את הפונקציות acquire_multiple_resources ו-release_multiple_resources כך שתמנענה מצב של קיפאון (deadlock) ותאפשרנה רכישה ושחרור תקינים של קבוצת משאבים.",
+      "code_snippet": "#include <stdlib.h>    // For qsort, malloc, free\n#include <unistd.h>    // For usleep (optional for backoff)\n\n// Assume N_RESOURCES is a global constant\n#define N_RESOURCES 10 // Example value, can be any positive integer\n\n// Global array representing resource status\n// 0 = free, 1 = taken\nint resource_status[N_RESOURCES];\n\n// This function represents the atomic hardware instruction compare_and_swap.\n// For implementation, you will use __sync_val_compare_and_swap (GCC intrinsic).\n// int compare_and_swap(int* ptr, int old_val, int new_val); // Conceptual signature\n\n// Helper for qsort (provided for convenience)\nint compare_ints(const void *a, const void *b) {\n    return (*(int*)a - *(int*)b);\n}\n\n// You need to implement these functions:\nvoid acquire_multiple_resources(int* resources_needed, int num_resources) {\n    // Your implementation here\n}\n\nvoid release_multiple_resources(int* resources_held, int num_resources) {\n    // Your implementation here\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון מבוסס על מניעת קיפאון באמצעות עמידה בתנאי הסדר הכולל (Total Ordering) לרכישת משאבים. כאשר חוט נדרש לרכוש מספר משאבים, הוא ינסה לרכוש אותם תמיד באותו סדר קבוע ומוגדר מראש, במקרה זה, לפי מזהה המשאב (ID) בסדר עולה.\n\n**פונקציית `acquire_multiple_resources`:**\n1.  **מיון משאבים:** ראשית, הפונקציה יוצרת עותק מקומי של רשימת המשאבים הנדרשים וממיינת אותם בסדר עולה. זה מבטיח שכל החוטים ינסו לרכוש את אותם משאבים באותו סדר, ובכך נמנע מצב שבו חוטים מחכים זה לזה במעגל (\"hold and wait\" ו-\"circular wait\").\n2.  **לולאת ניסיון-חזרה (Retry Loop):** הפונקציה נכנסת ללולאה אינסופית שמנסה לרכוש את כל המשאבים. לולאה זו נחוצה מכיוון שייתכן שחלק מהמשאבים אינם פנויים בניסיון הראשון.\n3.  **רכישה סדרתית:** בתוך הלולאה, החוט עובר על רשימת המשאבים הממוינת ומנסה לרכוש כל אחד מהם באמצעות `compare_and_swap`. הקריאה `__sync_val_compare_and_swap(&resource_status[resource_id], 0, 1)` מנסה לשנות את מצב המשאב מ-0 (פנוי) ל-1 (תפוס). אם הפעולה מחזירה 0, המשאב נרכש בהצלחה.\n4.  **שחרור והמתנה (Rollback and Back-off):** אם הפעולה מחזירה 1, המשאב כבר היה תפוס על ידי חוט אחר. במקרה זה, החוט נכשל ברכישת המשאב הנוכחי. עליו לשחרר באופן מיידי את כל המשאבים שכבר רכש בניסיון הנוכחי. פעולה זו מונעת את תנאי \"החזק והמתן\" (Hold and Wait) שמוביל לקיפאון. לאחר השחרור, החוט ממתין פרק זמן קצר (באמצעות `usleep`) כדי להפחית עומס ולמנוע מצב של livelock, ואז מנסה לרכוש מחדש את כל המשאבים מההתחלה.\n5.  **הצלחה:** אם החוט הצליח לרכוש את כל המשאבים ברשימה, הוא יוצא מלולאת הניסיון-חזרה.\n\n**פונקציית `release_multiple_resources`:**\nפונקציה זו פשוט עוברת על רשימת המשאבים שהוחזקו ומשחררת אותם. השחרור מתבצע באמצעות `__sync_val_compare_and_swap`, כאשר החוט מוודא שהמשאב אכן היה תפוס (ערך 1) לפני שחרורו (הגדרת ערך 0). אין צורך בסדר מסוים לשחרור, מכיוון שהחוט מחזיק באופן בלעדי במשאבים אלו.\n\n```c\n#include <stdlib.h>    // For qsort, malloc, free\n#include <unistd.h>    // For usleep\n#include <stdio.h>     // For fprintf, exit (error handling)\n\n// Assume N_RESOURCES is a global constant\n#define N_RESOURCES 10 \n\n// Global array representing resource status\n// 0 = free, 1 = taken\nint resource_status[N_RESOURCES];\n\n// Helper for qsort\nint compare_ints(const void *a, const void *b) {\n    return (*(int*)a - *(int*)b);\n}\n\nvoid acquire_multiple_resources(int* resources_needed, int num_resources) {\n    // Create a local sorted copy to ensure fixed acquisition order\n    int* sorted_resources = (int*)malloc(sizeof(int) * num_resources);\n    if (!sorted_resources) {\n        fprintf(stderr, \"Memory allocation failed for sorted_resources.\\n\");\n        exit(EXIT_FAILURE);\n    }\n    for (int i = 0; i < num_resources; ++i) {\n        sorted_resources[i] = resources_needed[i];\n    }\n    qsort(sorted_resources, num_resources, sizeof(int), compare_ints);\n\n    int acquired_count;\n\n    while (1) { // Retry loop for deadlock prevention\n        acquired_count = 0;\n        int failed_to_acquire = 0;\n\n        for (int i = 0; i < num_resources; ++i) {\n            int resource_id = sorted_resources[i];\n            // Try to acquire the resource using compare_and_swap\n            // __sync_val_compare_and_swap(ptr, old_val, new_val) returns the original value of *ptr\n            if (__sync_val_compare_and_swap(&resource_status[resource_id], 0, 1) == 0) {\n                // Successfully acquired\n                acquired_count++;\n            } else {\n                // Resource was already taken\n                failed_to_acquire = 1;\n                break; // Break from inner loop, need to release and retry\n            }\n        }\n\n        if (!failed_to_acquire) {\n            // All resources successfully acquired\n            break; // Exit the retry loop\n        } else {\n            // Failed to acquire all. Release the ones we did acquire (rollback).\n            for (int j = 0; j < acquired_count; ++j) {\n                int resource_id_to_release = sorted_resources[j];\n                // Release using compare_and_swap: set from 1 (taken) to 0 (free)\n                __sync_val_compare_and_swap(&resource_status[resource_id_to_release], 1, 0);\n            }\n            // Optional: small back-off to reduce contention and livelock risk\n            usleep(rand() % 1000); // Sleep for up to 1ms\n        }\n    }\n\n    free(sorted_resources);\n}\n\nvoid release_multiple_resources(int* resources_held, int num_resources) {\n    // Releasing doesn't require a specific order, as we own them exclusively.\n    // We use compare_and_swap to ensure the resource was indeed held by us (value 1)\n    // before setting it to 0 (free).\n    for (int i = 0; i < num_resources; ++i) {\n        int resource_id = resources_held[i];\n        __sync_val_compare_and_swap(&resource_status[resource_id], 1, 0);\n    }\n}\n```",
+      "difficulty_estimation": "Hard"
+    }
+  }
+}

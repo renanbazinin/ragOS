@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Memory Management",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 22:02:36",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2852,
+      "output_tokens": 594,
+      "total_tokens": 4699
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Memory Management"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה ב-C:\n\nהסבירו בקצרה היכן מאוחסנים המשתנים `global_var`, `stack_var`, והזיכרון שהוקצה עבור `heap_ptr` במרחב הכתובות של התהליך.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n\nint global_var = 10;\n\nvoid func() {\n    int stack_var = 20;\n    int* heap_ptr = (int*)malloc(sizeof(int));\n    if (heap_ptr == NULL) {\n        perror(\"malloc failed\");\n        exit(EXIT_FAILURE);\n    }\n    *heap_ptr = 30;\n    printf(\"Global var address: %p\\n\", &global_var);\n    printf(\"Stack var address: %p\\n\", &stack_var);\n    printf(\"Heap var address: %p\\n\", (void*)heap_ptr);\n    free(heap_ptr);\n}\n\nint main() {\n    func();\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "המשתנה `global_var` הוא משתנה גלובלי מאותחל, ולכן הוא מאוחסן בקטע הנתונים (Data Segment) של מרחב הכתובות של התהליך.\nהמשתנה `stack_var` הוא משתנה מקומי לפונקציה `func`, ולכן הוא מאוחסן על המחסנית (Stack) של התהליך.\nהזיכרון שהוקצה באמצעות `malloc` עבור `heap_ptr` (כלומר, המיקום שאליו `heap_ptr` מצביע) מאוחסן בערימה (Heap) של התהליך. `heap_ptr` עצמו (הפוינטר) הוא משתנה מקומי לפונקציה `func` ולכן מאוחסן על המחסנית, אך השאלה התייחסה לזיכרון *שהוקצה עבורו*, כלומר הזיכרון אליו הוא מצביע."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

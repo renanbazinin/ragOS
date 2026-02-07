@@ -1,0 +1,46 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 22:17:21",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 967,
+      "output_tokens": 577,
+      "total_tokens": 3541
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Virtual Memory",
+      "Paging",
+      "TLB",
+      "Page Faults",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "כאשר המעבד מנסה לגשת לכתובת וירטואלית, ומתרחש TLB Miss, ולאחר מכן מתברר מטבלת הדפים שהדף אינו נמצא בזיכרון הפיזי (page fault), מהי הפעולה העיקרית שמערכת ההפעלה תבצע כדי לטפל בכך?",
+      "code_snippet": null,
+      "options": [
+        "א. המערכת תבצע החלפת דפים (page replacement) ותעדכן את ה-TLB.",
+        "ב. המערכת תסמן את הדף כ\"לא קיים\" ותסיים את התהליך.",
+        "ג. המערכת תטען את הדף מזיכרון המשני (דיסק) לזיכרון הפיזי, תעדכן את טבלת הדפים וה-TLB, ותאפשר את המשך ביצוע ההוראה.",
+        "ד. המערכת תבקש מהתהליך להקצות זיכרון חדש לדף.",
+        "ה. המערכת תתעלם מהגישה ותמשיך לכתובת הבאה."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "כאשר מתרחש page fault, מערכת ההפעלה מטפלת בהפרעה (interrupt) על ידי איתור הדף בזיכרון המשני (דיסק), טעינתו למסגרת פנויה בזיכרון הפיזי (RAM) – ייתכן שתצטרך לבצע החלפת דפים (page replacement) אם אין מסגרות פנויות – עדכון רשומת טבלת הדפים המתאימה כדי שתצביע על המיקום החדש ב-RAM, וכן עדכון ה-TLB (אם הדף נטען למסגרת חדשה או אם ה-TLB עדיין לא הכיל את הרשומה החדשה). לאחר מכן, המערכת חוזרת ומבצעת מחדש את ההוראה שגרמה ל-page fault."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

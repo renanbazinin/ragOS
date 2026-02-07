@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 22:16:56",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 967,
+      "output_tokens": 459,
+      "total_tokens": 2793
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Virtual Memory",
+      "Paging",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "מהו התפקיד המרכזי של ה-dirty bit (ביט ה'מלוכלך') ברשומת טבלת דפים (Page Table Entry) במערכת זיכרון וירטואלי?",
+      "code_snippet": null,
+      "options": [
+        "א. לציין אם הדף הנוכחי נמצא בזיכרון הפיזי או בזיכרון המשני (דיסק).",
+        "ב. לציין אם הדף שונה (נכתב אליו) מאז שהובא לזיכרון הפיזי.",
+        "ג. לציין אם לדף יש הרשאות כתיבה (write permission).",
+        "ד. לציין אם הדף נגיש לשימוש על ידי תהליכי משתמש או רק על ידי הליבה."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ה-dirty bit משמש כדי לסמן אם דף זיכרון בזיכרון הפיזי שונה (נכתב אליו) מאז שהועלה מהדיסק. מידע זה קריטי עבור אלגוריתמי החלפת דפים (page replacement algorithms). אם דף מלוכלך (dirty), יש לכתוב את תוכנו חזרה לדיסק (לשטח ההחלפה או לקובץ המקורי) לפני שניתן לפנות את מסגרת הזיכרון הפיזי שלו. אם הדף אינו מלוכלך, אין צורך לכתוב אותו לדיסק, מה שחוסך פעולת I/O יקרה."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

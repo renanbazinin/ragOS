@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Memory Management",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 22:07:56",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2670,
+      "output_tokens": 2224,
+      "total_tokens": 9491
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Memory Management",
+      "Paging",
+      "TLB",
+      "Cache Locality"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המבצעת סכימה על מערך דו-ממדי גדול של מספרים שלמים. המערכת פועלת עם זיכרון וירטואלי, גודל דף הוא 4KB (קילו-בתים), וגודל ערך `int` הוא 4 בתים. נניח שה-TLB (Translation Lookaside Buffer) קטן מאוד ומכיל מספר מוגבל של תרגומי כתובות (לדוגמה, 4 כניסות). המערך `arr` מוגדר בגודל `N x N` כאשר `N = 1024`.\nשתי פונקציות מוצגות להלן, המבצעות סכימה של כל האיברים במערך.\n\nנתחו איזו פונקציה (sum_row_major או sum_col_major) צפויה לגרום לפחות page faults ופחות TLB misses, והסבירו מדוע. פרטו את כמות ה-page faults וה-TLB misses המשוערת לכל פונקציה.",
+      "code_snippet": "```c\n#include <stdio.h>\n#include <stdlib.h>\n\n#define N 1024 // N x N array\n\nint arr[N][N]; // Global array, initialized with some values\n\nvoid sum_row_major() {\n    long long total_sum = 0;\n    for (int i = 0; i < N; ++i) {\n        for (int j = 0; j < N; ++j) {\n            total_sum += arr[i][j];\n        }\n    }\n    printf(\"Row-major sum: %lld\\n\", total_sum);\n}\n\nvoid sum_col_major() {\n    long long total_sum = 0;\n    for (int j = 0; j < N; ++j) {\n        for (int i = 0; i < N; ++i) {\n            total_sum += arr[i][j];\n        }\n    }\n    printf(\"Column-major sum: %lld\\n\", total_sum);\n}\n\n// main function is omitted for brevity, assume it calls these functions\n// and arr is initialized.\n```",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": 15,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון מבוסס על הבנת אופן אחסון מערכים דו-ממדיים בזיכרון ב-C וכיצד הוא משפיע על ניצול הזיכרון הווירטואלי (paging, TLB).\n\n1.  **גודל המערך וגודל הדף**:\n    *   המערך `arr` הוא בגודל `N x N` כאשר `N = 1024`.\n    *   גודל המערך הכולל הוא `1024 * 1024 * sizeof(int) = 1024 * 1024 * 4 בתים = 4MB`.\n    *   גודל דף הוא `4KB`.\n    *   מספר הדפים הנדרשים לאחסון המערך הוא `4MB / 4KB = 1024 דפים`.\n    *   מערכי C מאוחסנים בזיכרון בסדר שורה-אחר-שורה (row-major order). כלומר, `arr[i][j]` ו-`arr[i][j+1]` הם סמוכים בזיכרון. שורה אחת של המערך (`arr[i][0]` עד `arr[i][N-1]`) תופסת `N * sizeof(int) = 1024 * 4 = 4096 בתים = 1 דף`.\n\n2.  **ניתוח `sum_row_major()`**:\n    *   הלולאה הפנימית עוברת על `j` מ-`0` עד `N-1` עבור `i` קבוע.\n    *   גישה זו היא `arr[i][0], arr[i][1], ..., arr[i][N-1]`.\n    *   דפוס גישה זה הוא **רציף בזיכרון** (contiguous). כל הגישות בתוך הלולאה הפנימית עבור `i` קבוע הן לאלמנטים סמוכים באותה שורה.\n    *   כאשר ניגשים ל-`arr[i][0]`, אם הדף המכיל אותו אינו בזיכרון הפיזי, תתרחש page fault והדף יוטען. דף זה מכיל את כל השורה `i` (מכיוון ששורה תופסת בדיוק דף אחד).\n    *   לאחר מכן, הגישות ל-`arr[i][1]` עד `arr[i][N-1]` יהיו כולן להיטים באותו דף שכבר נטען, ולכן לא יגרמו ל-page faults נוספים עבור שורה זו.\n    *   באופן דומה, עבור TLB: כאשר `arr[i][0]` נגיש, כתובתו הווירטואלית מתורגמת לכתובת פיזית, והתרגום נשמר ב-TLB. כל שאר הגישות באותה שורה ימצאו את התרגום ב-TLB (TLB hit) מכיוון שהן באותו דף.\n    *   **סה\"כ page faults**: בערך `N` page faults (אחד לכל שורה, שכן כל שורה היא דף חדש).\n    *   **סה\"כ TLB misses**: בערך `N` TLB misses (אחד לכל שורה, שכן כל שורה היא דף חדש).\n\n3.  **ניתוח `sum_col_major()`**:\n    *   הלולאה הפנימית עוברת על `i` מ-`0` עד `N-1` עבור `j` קבוע.\n    *   גישה זו היא `arr[0][j], arr[1][j], ..., arr[N-1][j]`.\n    *   דפוס גישה זה **אינו רציף בזיכרון**. `arr[i][j]` ו-`arr[i+1][j]` נמצאים במרחק של `N * sizeof(int) = 4096 בתים = 1 דף` זה מזה.\n    *   כלומר, כל גישה ל-`arr[i][j]` עבור `i` שונה (בתוך הלולאה הפנימית עבור `j` קבוע) תגרום לגישה לדף זיכרון שונה לגמרי. לדוגמה, `arr[0][j]` נמצא בדף `P0`, `arr[1][j]` נמצא בדף `P1` (שונה מ-`P0`), `arr[2][j]` נמצא בדף `P2` (שונה מ-`P0`, `P1`), וכן הלאה.\n    *   לכן, כמעט כל גישה ל-`arr[i][j]` (עבור `i` משתנה) תגרום ל-page fault, שכן סביר להניח שהדף המבוקש אינו נמצא בזיכרון הפיזי או הוצא ממנו עקב המחסור במקום (כי כל הגישות הקודמות היו לדפים שונים).\n    *   באופן דומה, עבור TLB: מכיוון שכל גישה היא לדף שונה, ובהינתן שה-TLB קטן מאוד (לדוגמה, 4 כניסות), כל גישה כזו תגרום כמעט בוודאות ל-TLB miss. ה-TLB לא יכול להכיל את כל תרגומי הכתובות של `N` דפים שונים בבת אחת, ולכן בכל פעם יהיה צורך לטעון תרגום חדש.\n    *   **סה\"כ page faults**: בערך `N * N` page faults (אחד לכל גישה, שכן כל גישה היא לדף אחר).\n    *   **סה\"כ TLB misses**: בערך `N * N` TLB misses (אחד לכל גישה, שכן כל גישה היא לדף אחר).\n\n4.  **מסקנה**:\n    *   הפונקציה `sum_row_major()` תגרום למספר נמוך בהרבה של page faults ו-TLB misses (בערך `N` מול `N*N`), מכיוון שהיא מנצלת טוב יותר את עקרון **לוקליות המרחב (spatial locality)**. היא ניגשת לנתונים באופן רציף בזיכרון, מה שמאפשר לדפים ולשורות מטמון (cache lines) לשרת מספר רב של גישות.\n    *   הפונקציה `sum_col_major()` סובלת מביצועים גרועים בהרבה מכיוון שהיא מדלגת על פני דפים רבים בכל גישה, מה שמוביל ל-page faults ו-TLB misses רבים."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

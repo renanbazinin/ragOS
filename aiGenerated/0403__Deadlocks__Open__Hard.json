@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Deadlocks",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 21:47:16",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3443,
+      "output_tokens": 2618,
+      "total_tokens": 11921
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Deadlocks",
+      "Synchronization",
+      "Concurrency",
+      "Mutexes"
+    ],
+    "content": {
+      "text": "נתונה מערכת מרובת חוטים המטפלת בהעברת נתונים בין שני מאגרים (buffers), `bufferA` ו-`bufferB`. לכל מאגר יש מנעול (mutex) משלו: `mutexA` עבור `bufferA` ו-`mutexB` עבור `bufferB`. חוטים שונים עשויים לנסות לגשת למאגרים אלו, כאשר חלקם זקוקים לגישה לשניהם בו-זמנית (לדוגמה, כדי להעביר נתונים מ-A ל-B או מ-B ל-A).\nהקוד הבא מדגים שתי פונקציות, `transfer_A_to_B` ו-`transfer_B_to_A`, המנסות להעביר נתונים בין המאגרים. שימו לב לסדר נעילת המנעולים בכל פונקציה.\n\n1.  **זיהוי בעיה:** האם קיים תרחיש שבו המערכת המתוארת עלולה להיכנס למצב של קיפאון (Deadlock)? אם כן, תארו את התרחיש הספציפי והסבירו אילו מהתנאים ההכרחיים לקיפאון (Mutual Exclusion, Hold and Wait, No Preemption, Circular Wait) מתקיימים במקרה זה.\n2.  **פתרון:** הציעו שינוי בקוד או אסטרטגיה שתמנע את הקיפאון. יש להציג את השינויים בקוד (אם רלוונטי) או לתאר בבירור את האסטרטגיה.\n3.  **הוכחת נכונות:** הסבירו מדוע הפתרון שהצעתם מונע קיפאון, ואיזה מהתנאים ההכרחיים לקיפאון הוא מפר.",
+      "code_snippet": "```c\n#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h> // For sleep\n\npthread_mutex_t mutexA;\npthread_mutex_t mutexB;\n\nvoid transfer_A_to_B() {\n    pthread_mutex_lock(&mutexA);\n    printf(\"Thread %lu acquired mutexA in A_to_B.\\n\", pthread_self());\n    // Simulate work or data transfer\n    sleep(1);\n    pthread_mutex_lock(&mutexB);\n    printf(\"Thread %lu acquired mutexB in A_to_B.\\n\", pthread_self());\n    // Perform data transfer from A to B\n    printf(\"Thread %lu performing A_to_B transfer.\\n\", pthread_self());\n    pthread_mutex_unlock(&mutexB);\n    pthread_mutex_unlock(&mutexA);\n    printf(\"Thread %lu released both mutexes in A_to_B.\\n\", pthread_self());\n}\n\nvoid transfer_B_to_A() {\n    pthread_mutex_lock(&mutexB);\n    printf(\"Thread %lu acquired mutexB in B_to_A.\\n\", pthread_self());\n    // Simulate work or data transfer\n    sleep(1);\n    pthread_mutex_lock(&mutexA);\n    printf(\"Thread %lu acquired mutexA in B_to_A.\\n\", pthread_self());\n    // Perform data transfer from B to A\n    printf(\"Thread %lu performing B_to_A transfer.\\n\", pthread_self());\n    pthread_mutex_unlock(&mutexA);\n    pthread_mutex_unlock(&mutexB);\n    printf(\"Thread %lu released both mutexes in B_to_A.\\n\", pthread_self());\n}\n\n/* Example main function to demonstrate:\nint main() {\n    pthread_mutex_init(&mutexA, NULL);\n    pthread_mutex_init(&mutexB, NULL);\n    pthread_t t1, t2;\n    pthread_create(&t1, NULL, (void*(*)(void*))transfer_A_to_B, NULL);\n    pthread_create(&t2, NULL, (void*(*)(void*))transfer_B_to_A, NULL);\n    pthread_join(t1, NULL);\n    pthread_join(t2, NULL);\n    pthread_mutex_destroy(&mutexA);\n    pthread_mutex_destroy(&mutexB);\n    return 0;\n}\n*/\n```",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": false,
+      "correct_option": null,
+      "explanation": "1.  **זיהוי בעיה:**\n    כן, קיים תרחיש קיפאון.\n    **תרחיש:**\n    נניח ששני חוטים, T1 ו-T2, מופעלים במקביל:\n    *   T1 קורא ל-`transfer_A_to_B()`\n    *   T2 קורא ל-`transfer_B_to_A()`\n    *   **שלב 1:** T1 מבצע `pthread_mutex_lock(&mutexA)` ומצליח לנעול את `mutexA`.\n    *   **שלב 2:** T2 מבצע `pthread_mutex_lock(&mutexB)` ומצליח לנעול את `mutexB`.\n    *   **שלב 3:** T1 מנסה כעת לבצע `pthread_mutex_lock(&mutexB)`. הוא נחסם מכיוון ש-`mutexB` נעול על ידי T2.\n    *   **שלב 4:** T2 מנסה כעת לבצע `pthread_mutex_lock(&mutexA)`. הוא נחסם מכיוון ש-`mutexA` נעול על ידי T1.\n    בנקודה זו, T1 ממתין ל-`mutexB` שנעול על ידי T2, ו-T2 ממתין ל-`mutexA` שנעול על ידי T1. אף אחד מהם לא יכול להמשיך, והמערכת נכנסת לקיפאון.\n\n    **תנאי קיפאון:**\n    *   **מניעה הדדית (Mutual Exclusion):** מתקיים. המנעולים (`mutexA`, `mutexB`) מאפשרים רק לחוט אחד להחזיק בהם בכל רגע נתון.\n    *   **החזק והמתן (Hold and Wait):** מתקיים. T1 מחזיק ב-`mutexA` וממתין ל-`mutexB`. T2 מחזיק ב-`mutexB` וממתין ל-`mutexA`.\n    *   **אי-הפקעה (No Preemption):** מתקיים. המנעולים לא ניתנים להפקעה מחוט שמחזיק בהם; רק החוט עצמו יכול לשחרר אותם.\n    *   **המתנה מעגלית (Circular Wait):** מתקיים. T1 ממתין למשאב שמוחזק על ידי T2, ו-T2 ממתין למשאב שמוחזק על ידי T1, יוצר מעגל המתנה.\n\n2.  **פתרון:**\n    הדרך הנפוצה והפשוטה ביותר למנוע קיפאון במקרה זה היא להבטיח **סדר קבוע של נעילת המשאבים**. כלומר, כל החוטים שזקוקים למספר משאבים ינעלו אותם תמיד באותו סדר. בדוגמה זו, נחליט שכל החוטים ינעלו תמיד את `mutexA` לפני `mutexB`.\n\n    **שינויים בקוד:**\n    ```c\n#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h> // For sleep\n\npthread_mutex_t mutexA;\npthread_mutex_t mutexB;\n\nvoid transfer_A_to_B_fixed_order() {\n    pthread_mutex_lock(&mutexA); // Acquire mutexA first\n    printf(\"Thread %lu acquired mutexA in A_to_B_fixed_order.\\n\", pthread_self());\n    sleep(1);\n    pthread_mutex_lock(&mutexB); // Then acquire mutexB\n    printf(\"Thread %lu acquired mutexB in A_to_B_fixed_order.\\n\", pthread_self());\n    // Perform data transfer from A to B\n    printf(\"Thread %lu performing A_to_B transfer.\\n\", pthread_self());\n    pthread_mutex_unlock(&mutexB);\n    pthread_mutex_unlock(&mutexA);\n    printf(\"Thread %lu released both mutexes in A_to_B_fixed_order.\\n\", pthread_self());\n}\n\nvoid transfer_B_to_A_fixed_order() {\n    pthread_mutex_lock(&mutexA); // Acquire mutexA first, even if it's for B_to_A\n    printf(\"Thread %lu acquired mutexA in B_to_A_fixed_order.\\n\", pthread_self());\n    sleep(1);\n    pthread_mutex_lock(&mutexB); // Then acquire mutexB\n    printf(\"Thread %lu acquired mutexB in B_to_A_fixed_order.\\n\", pthread_self());\n    // Perform data transfer from B to A\n    printf(\"Thread %lu performing B_to_A transfer.\\n\", pthread_self());\n    pthread_mutex_unlock(&mutexB);\n    pthread_mutex_unlock(&mutexA);\n    printf(\"Thread %lu released both mutexes in B_to_A_fixed_order.\\n\", pthread_self());\n}\n    ```\n\n3.  **הוכחת נכונות:**\n    הפתרון מונע קיפאון על ידי הפרת התנאי של **המתנה מעגלית (Circular Wait)**.\n    כאשר כל החוטים מקפידים על סדר קבוע של נעילת המשאבים (לדוגמה, תמיד `mutexA` ואז `mutexB`), לא ייתכן שחוט אחד (T1) יחזיק ב-`mutexA` וימתין ל-`mutexB`, ובאותו זמן חוט אחר (T2) יחזיק ב-`mutexB` וימתין ל-`mutexA`.\n    אם חוט T1 תופס את `mutexA`, וחוט T2 מנסה לתפוס את `mutexA`, T2 ייחסם. T2 לא יוכל לתפוס את `mutexB` לפני `mutexA` (לפי הכלל החדש של סדר קבוע), ולכן לא יכול להיווצר המצב שבו T2 מחזיק ב-`mutexB` בזמן ש-T1 ממתין לו. הסדר הקבוע מבטיח היררכיה של נעילת משאבים, ובכך מונע היווצרות של מעגל המתנה."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

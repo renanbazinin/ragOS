@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Memory Management",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 22:03:06",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2852,
+      "output_tokens": 855,
+      "total_tokens": 7031
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Memory Management",
+      "Dynamic Memory Allocation",
+      "Memory Leaks"
+    ],
+    "content": {
+      "text": "נתונה תוכנית ה-C הבאה. עברו על הקוד וענו על השאלות הבאות:\n1. מה הפלט של התוכנית כאשר היא רצה?\n2. האם קיימת בעיה כלשהי בתוכנית? אם כן, תארו אותה במפורט והסבירו מדוע היא מתרחשת.\n3. הציעו תיקון לבעיה שזיהיתם.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n\nvoid allocate_and_print() {\n    int* ptr = (int*)malloc(sizeof(int));\n    if (ptr == NULL) {\n        perror(\"malloc failed\");\n        return;\n    }\n    *ptr = 10;\n    printf(\"Value: %d\\n\", *ptr);\n    // Missing free(ptr);\n}\n\nint main() {\n    for (int i = 0; i < 3; ++i) {\n        allocate_and_print();\n    }\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "התוכנית תדפיס:\nValue: 10\nValue: 10\nValue: 10\n\nכן, קיימת בעיה של דליפת זיכרון (memory leak). בפונקציה `allocate_and_print`, אנו מקצים זיכרון באמצעות `malloc` עבור משתנה מסוג `int`. לאחר השימוש בזיכרון והדפסת הערך, הזיכרון שהוקצה אינו משוחרר באמצעות `free`. מכיוון שהפונקציה נקראת בלולאה שלוש פעמים, בכל קריאה מוקצה זיכרון חדש, והזיכרון שהוקצה בקריאות קודמות הופך לבלתי נגיש (unreachable) אך נשאר תפוס, מה שמוביל לדליפת זיכרון. לאורך זמן, בריצות ארוכות או בהקצאות גדולות, הדבר יכול להוביל לצריכת זיכרון מופרזת ואף לקריסת המערכת עקב חוסר בזיכרון זמין.\n\nכדי לתקן את הבעיה, יש לשחרר את הזיכרון שהוקצה באמצעות `free(ptr);` לפני שהפונקציה `allocate_and_print` מסתיימת.\n\nהקוד המתוקן ייראה כך:\n```c\n#include <stdio.h>\n#include <stdlib.h>\n\nvoid allocate_and_print() {\n    int* ptr = (int*)malloc(sizeof(int));\n    if (ptr == NULL) {\n        perror(\"malloc failed\");\n        return;\n    }\n    *ptr = 10;\n    printf(\"Value: %d\\\\n\", *ptr);\n    free(ptr); // תיקון: שחרור הזיכרון\n}\n\nint main() {\n    for (int i = 0; i < 3; ++i) {\n        allocate_and_print();\n    }\n    return 0;\n}\n```"
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

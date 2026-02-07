@@ -1,0 +1,64 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Memory Management",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 21:52:33",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1964,
+      "output_tokens": 1329,
+      "total_tokens": 6392
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Memory Management",
+      "Virtual Memory",
+      "Paging",
+      "TLB"
+    ],
+    "content": {
+      "text": "נתונה מערכת עם זיכרון וירטואלי של 16MB, זיכרון פיזי של 32MB וגודל דף של 4KB. רשומת טבלת דפים (PTE) מכילה 4 ביטים לסטטוס בנוסף לכתובת המסגרת הפיזית (PFN). זמן גישה לזיכרון הראשי הוא 100ns וזמן גישה ל-TLB הוא 20ns. נתון ששיעור הפגיעה (Hit Rate) ב-TLB הוא 95%.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "מהם הגדלים של ה-VPN, ה-PFN ו-Offset בביטים?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "מהו הגודל המינימלי של רשומת טבלת דפים (PTE) בבתים?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.3",
+        "text": "מהו הגודל של טבלת דפים לינארית של תהליך אחד בבתים?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.4",
+        "text": "מהו זמן הגישה האפקטיבי לזיכרון (Effective Access Time - EAT) במערכת זו?",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": 30,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1. חישוב גודל ביטים: \n   זיכרון וירטואלי: 16MB = 2^24 בתים, לכן כתובת וירטואלית היא באורך 24 ביטים.\n   זיכרון פיזי: 32MB = 2^25 בתים, לכן כתובת פיזית היא באורך 25 ביטים.\n   גודל דף: 4KB = 2^12 בתים, לכן ההיסט (Offset) הוא באורך 12 ביטים.\n   VPN (Virtual Page Number): 24 ביטים (VA) - 12 ביטים (Offset) = 12 ביטים.\n   PFN (Physical Frame Number): 25 ביטים (PA) - 12 ביטים (Offset) = 13 ביטים.\n   \n   לכן: VPN = 12 ביטים, PFN = 13 ביטים, Offset = 12 ביטים.\n\n2. גודל רשומת טבלת דפים (PTE):\n   PFN = 13 ביטים.\n   ביטי סטטוס = 4 ביטים.\n   סה\"כ ביטים לרשומת PTE = 13 + 4 = 17 ביטים.\n   כדי לאחסן 17 ביטים, נדרשים מינימום 3 בתים (17 ביטים / 8 ביטים/בית = 2.125, מעוגל למעלה ל-3 בתים).\n   \n   לכן: גודל PTE מינימלי הוא 3 בתים.\n\n3. גודל טבלת דפים לינארית:\n   מספר הדפים הווירטואליים: 2^VPN = 2^12 = 4096 דפים.\n   גודל טבלת הדפים = מספר דפים * גודל PTE.\n   גודל טבלת הדפים = 4096 * 3 בתים = 12288 בתים = 12KB.\n   \n   לכן: גודל טבלת דפים לינארית הוא 12KB.\n\n4. זמן גישה אפקטיבי לזיכרון (EAT):\n   EAT = (שיעור פגיעה ב-TLB * (זמן גישה ל-TLB + זמן גישה לזיכרון)) + (שיעור החטאה ב-TLB * (זמן גישה ל-TLB + 2 * זמן גישה לזיכרון))\n   שיעור פגיעה = 0.95\n   שיעור החטאה = 1 - 0.95 = 0.05\n   זמן גישה ל-TLB = 20ns\n   זמן גישה לזיכרון = 100ns\n   \n   EAT = (0.95 * (20ns + 100ns)) + (0.05 * (20ns + 100ns + 100ns))\n   EAT = (0.95 * 120ns) + (0.05 * 220ns)\n   EAT = 114ns + 11ns\n   EAT = 125ns\n   \n   לכן: זמן הגישה האפקטיבי לזיכרון הוא 125ns."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

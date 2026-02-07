@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Memory Management",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 21:33:08",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 901,
+      "output_tokens": 298,
+      "total_tokens": 2211
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Memory Management",
+      "Virtual Memory"
+    ],
+    "content": {
+      "text": "מהו התפקיד העיקרי של יחידת ניהול הזיכרון (MMU)?",
+      "code_snippet": null,
+      "options": [
+        "א. ניהול תזמון המעבד.",
+        "ב. תרגום כתובות וירטואליות לכתובות פיזיות.",
+        "ג. טיפול בפעולות קלט/פלט של דיסק.",
+        "ד. אחסון הוראות תוכנית."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "יחידת ניהול הזיכרון (MMU) היא רכיב חומרה שאחראי על תרגום כתובות וירטואליות, בהן משתמשים תהליכים, לכתובות פיזיות בזיכרון הראשי (RAM)."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

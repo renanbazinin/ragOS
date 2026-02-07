@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Memory Management",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 22:02:47",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2852,
+      "output_tokens": 728,
+      "total_tokens": 5166
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Memory Management",
+      "Virtual Memory",
+      "Paging",
+      "Heap"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה בשפת C:\n\n```c\n#include <stdio.h>\n#include <stdlib.h>\n\nint main() {\n    int* arr;\n    // Allocate space for 1000 integers\n    arr = (int*) malloc(1000 * sizeof(int));\n\n    if (arr == NULL) {\n        printf(\"Memory allocation failed!\\n\");\n        return 1;\n    }\n\n    // Access some elements to ensure pages are touched\n    for (int i = 0; i < 10; ++i) {\n        arr[i] = i;\n    }\n\n    printf(\"Array allocated and accessed.\\n\");\n\n    free(arr);\n    return 0;\n}\n```\n\nבהנחה שגודל דף זיכרון במערכת הוא 4KB (קילובייט) וכי `sizeof(int)` הוא 4 בתים.\nכמה דפי זיכרון וירטואליים לכל הפחות נדרשים עבור הנתונים שהוקצו על ידי קריאת `malloc` בשורה 7?\nיש להתעלם מזיכרון הנדרש עבור קוד התוכנית, המחסנית, הערימה (למעט הנתונים שהוקצו ב-malloc), וטבלת הדפים. התייחסו אך ורק לזיכרון שהוקצה ישירות עבור המערך `arr`.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "התוכנית מקצה זיכרון עבור 1000 מספרים שלמים (integers) באמצעות `malloc`.\nגודלו של טיפוס `int` הוא 4 בתים.\nלכן, סך הזיכרון המוקצה למערך `arr` הוא: `1000 * 4 בתים = 4000 בתים`.\n\nגודל דף זיכרון נתון כ-4KB, שזה שווה ל-`4 * 1024 בתים = 4096 בתים`.\n\nמכיוון ש-4000 בתים (הזיכרון המוקצה) קטנים מ-4096 בתים (גודל דף בודד), כל הזיכרון שהוקצה עבור המערך `arr` יכול להיכנס לדף זיכרון וירטואלי אחד בלבד.\n\nלכן, נדרש דף זיכרון וירטואלי אחד לכל הפחות עבור נתוני המערך.",
+      "code_snippet": null
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

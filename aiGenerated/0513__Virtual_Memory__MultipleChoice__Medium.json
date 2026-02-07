@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 22:16:17",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 967,
+      "output_tokens": 455,
+      "total_tokens": 2839
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Virtual Memory",
+      "Demand Paging",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "מהו היתרון המרכזי של שימוש במנגנון דפדוף לפי דרישה (Demand Paging) במערכות הפעלה מודרניות?",
+      "code_snippet": null,
+      "options": [
+        "א. הוא מבטל לחלוטין את הצורך בזיכרון החלפה (swap space).",
+        "ב. הוא מאפשר טעינה מהירה יותר של תהליכים על ידי טעינת דפים רק כאשר הם נדרשים.",
+        "ג. הוא מקטין את כמות הזיכרון הפיזי הדרושה לכל תהליך באופן קבוע.",
+        "ד. הוא מפחית את פיצול הזיכרון הפנימי (Internal Fragmentation) בזיכרון הראשי.",
+        "ה. הוא משפר את ביצועי גישת הדיסק על ידי שמירת כל הדפים בזיכרון הראשי."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב'. דפדוף לפי דרישה (Demand Paging) מאפשר למערכת ההפעלה לטעון דפים של תהליך לזיכרון הפיזי רק כאשר הם באמת נדרשים (כלומר, כאשר יש התייחסות אליהם). זה מביא לטעינה מהירה יותר של תהליכים, מכיוון שלא כל התהליך נטען לזיכרון בזמן ההפעלה, וחוסך זיכרון פיזי על ידי שמירת דפים שאינם בשימוש פעיל על הדיסק."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}
