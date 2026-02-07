@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 18:58:44",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4129,
+      "output_tokens": 708,
+      "total_tokens": 6676
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Mutex",
+      "Threads",
+      "Race Conditions"
+    ],
+    "content": {
+      "text": "לפניכם קוד בשפת C המשתמש בחוטים (threads) ובמנעול מסוג Mutex. מה יהיה הפלט של התוכנית בהנחה שכל קריאות המערכת מצליחות?",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n\nint counter = 0;\npthread_mutex_t lock;\n\nvoid* increment_task(void* arg) {\n    for (int i = 0; i < 1000; i++) {\n        pthread_mutex_lock(&lock);\n        counter++;\n        pthread_mutex_unlock(&lock);\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t t1, t2;\n    pthread_mutex_init(&lock, NULL);\n    \n    pthread_create(&t1, NULL, increment_task, NULL);\n    pthread_create(&t2, NULL, increment_task, NULL);\n    \n    pthread_join(t1, NULL);\n    pthread_join(t2, NULL);\n    \n    printf(\"%d\\n\", counter);\n    pthread_mutex_destroy(&lock);\n    return 0;\n}",
+      "options": [
+        "הפלט יהיה תמיד 1000",
+        "הפלט יהיה תמיד 2000",
+        "הפלט יהיה ערך אקראי בין 1000 ל-2000 עקב Race Condition",
+        "התוכנית תיכנס למצב של Deadlock ולא תדפיס דבר"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "הפלט יהיה תמיד 2000",
+      "explanation": "התוכנית יוצרת שני חוטים (threads), כאשר כל אחד מהם מבצע לולאה של 1000 איטרציות המקדמות משתנה גלובלי משותף (counter). מכיוון שפעולת הקידום (counter++) מוקפת בנעילה ושחרור של Mutex (pthread_mutex_lock ו-pthread_mutex_unlock), הקטע הקריטי מוגן. הגנה זו מבטיחה שרק חוט אחד יוכל לגשת למשתנה ולעדכן אותו בכל רגע נתון, ובכך נמנע מצב של Race Condition. לכן, כל 2000 הקידומים (1000 מכל חוט) יתבצעו בהצלחה והתוצאה הסופית תהיה תמיד 2000."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

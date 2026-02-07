@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 18:47:49",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1969,
+      "output_tokens": 749,
+      "total_tokens": 7925
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Threads",
+      "Race Conditions",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "לפניכם קטע קוד בשפת C המשתמש בספריית pthreads. בתוכנית זו, שני חוטים ניגשים למשתנה גלובלי משותף x ומעדכנים אותו ללא שימוש במנגנוני סנכרון (כגון Mutex). מהו הערך המינימלי האפשרי שיודפס על המסך בסיום ריצת התוכנית? הניחו שפעולת העדכון x = x + y מורכבת משלושה שלבים: קריאת הערך של x מהזיכרון לאוגר, הוספת y לאוגר, וכתיבת הערך מהאוגר חזרה לזיכרון.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\nint x = 10;\n\nvoid* thread_func(void* arg) {\n    int y = *(int*)arg;\n    x = x + y;\n    return NULL;\n}\n\nint main() {\n    pthread_t t1, t2;\n    int val1 = 5, val2 = 10;\n    pthread_create(&t1, NULL, thread_func, &val1);\n    pthread_create(&t2, NULL, thread_func, &val2);\n    pthread_join(t1, NULL);\n    pthread_join(t2, NULL);\n    printf(\"%d\\n\", x);\n    return 0;\n}",
+      "options": [
+        "א. 10",
+        "ב. 15",
+        "ג. 20",
+        "ד. 25"
+      ]
+    },
+    "sub_questions": null,
+    "points": 10,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "הערך ההתחלתי של x הוא 10. חוט t1 אמור להוסיף 5 (סך הכל 15) וחוט t2 אמור להוסיף 10 (סך הכל 20). ללא סנכרון, תיתכן תחרות (Race Condition). הערך המינימלי מתקבל בתרחיש הבא: 1. חוט t1 קורא את הערך x=10 לתוך אוגר מקומי. 2. מתבצעת החלפת הקשר (Context Switch) וחוט t2 רץ במלואו: הוא קורא 10, מוסיף 10 וכותב 20 ל-x. 3. חוט t1 ממשיך מהנקודה שעצר: באוגר שלו עדיין שמור הערך 10, הוא מוסיף לו 5 וכותב את התוצאה 15 לתוך x. פעולה זו דורסת את העדכון של חוט t2. לכן, הערך המינימלי האפשרי הוא 15."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 18:55:58",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3682,
+      "output_tokens": 724,
+      "total_tokens": 5753
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Synchronization",
+      "Semaphores",
+      "Threads"
+    ],
+    "content": {
+      "text": "לפניכם קטע קוד בשפת C המשתמש בשני חוטים (threads) לעדכון משתנה גלובלי משותף בשם counter. הסמפור s מאותחל לערך 1.",
+      "code_snippet": "int counter = 0;\nsem_t s;\n\nvoid* increment(void* arg) {\n    for (int i = 0; i < 50; i++) {\n        sem_wait(&s);\n        counter++;\n        sem_post(&s);\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t t1, t2;\n    sem_init(&s, 0, 1);\n    pthread_create(&t1, NULL, increment, NULL);\n    pthread_create(&t2, NULL, increment, NULL);\n    pthread_join(t1, NULL);\n    pthread_join(t2, NULL);\n    printf(\"%d\", counter);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "מהו הערך שיודפס בסיום ריצת התוכנית? הסבירו בקצרה מדוע.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "נניח שמתכנת בטעות הסיר את השורה sem_post(&s); מתוך הלולאה. כיצד תשתנה התנהגות התוכנית?",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": 10,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "10.1: הערך שיודפס הוא 100. כל אחד משני החוטים מבצע 50 איטרציות של הגדלת המשתנה counter. מכיוון שהגישה למשתנה המשותף מוגנת על ידי סמפור בינארי (המשמש כ-Mutex), לא יתרחשו מצבי מרוץ (Race Conditions) וכל העדכונים יישמרו.\n\n10.2: התוכנית תיכנס למצב של קיפאון (Deadlock/Hang). החוט הראשון שיצליח להיכנס לקטע הקריטי יבצע sem_wait ויוריד את ערך הסמפור ל-0. מכיוון שאין sem_post, ערך הסמפור לא יחזור ל-1 לעולם. לכן, באיטרציה השנייה שלו (או כאשר החוט השני ינסה להיכנס), הוא ייחסם ב-sem_wait לנצח."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

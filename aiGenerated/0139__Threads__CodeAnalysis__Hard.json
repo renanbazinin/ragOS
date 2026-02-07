@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 18:51:02",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2248,
+      "output_tokens": 829,
+      "total_tokens": 4672
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Threads",
+      "Concurrency",
+      "Race Conditions",
+      "Pthreads"
+    ],
+    "content": {
+      "text": "לפניכם קוד הכתוב בשפת C המשתמש בספריית pthreads. נניח כי כל הקריאות למערכת מצליחות, וכי התוכנית רצה על מערכת המאפשרת פרה-אמפציה (preemption) בכל עת.\n\n1. מהו הטווח האפשרי (מינימום ומקסימום) של הערך המודפס עבור המשתנה counter בסוף התוכנית? הסבירו.\n2. מהן הספרות האפשריות שיכולות להיות מודפסות על ידי פקודת ה-printf בתוך הפונקציה worker? האם הספרה '3' יכולה להופיע? הסבירו.",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n\nint counter = 0;\n\nvoid* worker(void* arg) {\n    int val = *(int*)arg;\n    int local = counter;\n    local++;\n    counter = local;\n    printf(\"%d\", val);\n    return NULL;\n}\n\nint main() {\n    pthread_t t[3];\n    for (int i = 0; i < 3; i++) {\n        pthread_create(&t[i], NULL, worker, &i);\n    }\n    for (int i = 0; i < 3; i++) {\n        pthread_join(t[i], NULL);\n    }\n    printf(\" Final: %d\\n\", counter);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": 20,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1. טווח הערכים של counter: המינימום הוא 1 והמקסימום הוא 3. המקסימום (3) מתקבל אם החוטים רצים באופן סדרתי או ללא התערבות בקריאה/כתיבה של counter. המינימום (1) מתקבל במצב של Race Condition: כל שלושת החוטים קוראים את הערך ההתחלתי (0) לתוך המשתנה המקומי local, מקדמים אותו ל-1, ואז כותבים כולם 1 חזרה ל-counter.\n\n2. הספרות האפשריות ב-worker: הספרות הן 0, 1, 2, וגם 3. הסיבה לכך היא שהכתובת של i מועברת לכל החוטים (&i). מכיוון ש-i הוא משתנה מקומי ב-main שמשתנה בלולאה, קיים מרוץ (Race Condition) על ערכו. אם חוט מסוים ניגש לכתובת הזיכרון של i רק לאחר שהלולאה ב-main התקדמה או הסתיימה, הוא יראה את הערך המעודכן. מכיוון שהלולאה רצה עד ש-i שווה ל-3, ייתכן שחוט יקרא את הערך 3 מהכתובת לפני ש-main יצא מהלולאה או בזמן ההמתנה ב-join."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 18:49:56",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1969,
+      "output_tokens": 804,
+      "total_tokens": 7304
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Threads",
+      "Concurrency",
+      "Race Conditions",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא בשפת C המשתמש בספריית pthreads. מה מהבאים נכון לגבי הפלט המודפס למסך? הניחו שכל הקריאות ל-pthread_create מצליחות ושהתהליכון הראשי (main) ממתין לסיום כל החוטים לפני ההדפסה.",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n\nint total = 0;\n\nvoid* task(void* arg) {\n    int val = *(int*)arg;\n    total += val;\n    return NULL;\n}\n\nint main() {\n    pthread_t t[2];\n    int i;\n    for (i = 1; i <= 2; i++) {\n        pthread_create(&t[i-1], NULL, task, &i);\n    }\n    for (int j = 0; j < 2; j++) {\n        pthread_join(t[j], NULL);\n    }\n    printf(\"%d\", total);\n    return 0;\n}",
+      "options": [
+        "א. הפלט יהיה תמיד 3",
+        "ב. הפלט יהיה תמיד 6",
+        "ג. הפלט יכול להיות כל מספר שלם בין 1 ל-6",
+        "ד. הפלט יהיה תמיד 0",
+        "ה. לא ניתן לדעת, התוכנית תמיד תסתיים בשגיאת סגמנטציה (Segmentation Fault)"
+      ]
+    },
+    "sub_questions": null,
+    "points": 10,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "הפלט אינו קבוע עקב שתי בעיות סנכרון מרכזיות: 1. העברת משתנה לפי כתובת (Pass by Reference): החוטים מקבלים את הכתובת של משתנה הלולאה i. מכיוון שהם רצים במקביל ללולאה, הערך בכתובת זו עשוי להשתנות לפני שהם קוראים אותו. הערכים האפשריים שחוט יכול לקרוא הם 1, 2, או 3 (הערך של i לאחר סיום הלולאה). 2. מרוץ תהליכונים (Race Condition): הפעולה total += val אינה אטומית (היא מורכבת מקריאה, הוספה וכתיבה). חוט אחד יכול לקרוא את הערך הישן של total, ובזמן שהוא מחשב את הסכום, חוט אחר יעדכן את total, כך שהעדכון של החוט הראשון ידרוס את השני. השילוב של שתי הבעיות מאפשר לקבל כל ערך שלם בטווח 1 עד 6. לדוגמה: אם שני החוטים קראו את הערך i=1 ושניהם קראו total=0, שניהם יכתבו 1 לתוך total והפלט יהיה 1. אם שניהם קראו i=3 ורצו בזה אחר זה, הפלט יהיה 6."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

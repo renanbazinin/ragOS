@@ -1,0 +1,50 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 18:59:09",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4129,
+      "output_tokens": 921,
+      "total_tokens": 8091
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Mutex",
+      "Race Conditions"
+    ],
+    "content": {
+      "text": "לפניכם תוכנית בשפת C המשתמשת בשני חוטים (threads) ובסנכרון מסוג מוטקס (mutex) כדי לקדם מונה משותף. עיינו בקוד וענו על הסעיפים הבאים:",
+      "code_snippet": "1  #include <pthread.h>\n2  #include <stdio.h>\n3  \n4  int counter = 0;\n5  pthread_mutex_t mtx;\n6  \n7  void* func(void* arg) {\n8      for (int i = 0; i < 1000; i++) {\n9          pthread_mutex_lock(&mtx);\n10         counter++;\n11         pthread_mutex_unlock(&mtx);\n12     }\n13     return NULL;\n14 }\n15 \n16 int main() {\n17     pthread_t t1, t2;\n18     pthread_mutex_init(&mtx, NULL);\n19     pthread_create(&t1, NULL, func, NULL);\n20     pthread_create(&t2, NULL, func, NULL);\n21     pthread_join(t1, NULL);\n22     pthread_join(t2, NULL);\n23     printf(\"counter = %d\\n\", counter);\n24     pthread_mutex_destroy(&mtx);\n25     return 0;\n26 }",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "מהו הערך המדויק שיודפס על המסך בסיום ריצת התוכנית?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "נניח כי מחקנו את שורות 9 ו-11 מהקוד (הקריאות ל-lock ול-unlock). מהו הערך המקסימלי שייתכן ויודפס כעת? האם מובטח שהערך יהיה זהה בכל הרצה? הסבירו בקצרה.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "10.1: הערך שיודפס הוא 2000. השימוש במוטקס מבטיח שרק חוט אחד יוכל לבצע את פעולת הקידום (שורה 10) בכל רגע נתון. מכיוון שכל אחד משני החוטים מבצע 1000 קידומים, והסנכרון מונע איבוד עדכונים, התוצאה הסופית היא 2000.\n\n10.2: הערך המקסימלי שייתכן ויודפס הוא 2000 (במקרה שבו התזמון במקרה מנע חפיפה בין החוטים). לא, הערך אינו מובטח להיות זהה בכל הרצה. ללא המוטקס, הפעולה counter++ אינה אטומית (היא מורכבת מקריאה, הוספה וכתיבה), ונוצר מצב מרוץ (Race Condition). חוטים עלולים לקרוא את אותו ערך ישן ולדרוס זה את העדכון של זה, מה שיוביל לערך סופי נמוך מ-2000 (הערך המינימלי התיאורטי הוא 2)."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

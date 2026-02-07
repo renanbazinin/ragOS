@@ -1,0 +1,58 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 18:52:41",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2248,
+      "output_tokens": 1207,
+      "total_tokens": 5586
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Threads",
+      "Concurrency",
+      "Race Conditions",
+      "Synchronization",
+      "Pthreads"
+    ],
+    "content": {
+      "text": "לפניכם קוד בשפת C המשתמש בחוטים (Threads). הניחו כי כל קריאות המערכת מצליחות וכי התוכנית רצה על מערכת מרובת ליבות המאפשרת הרצה מקבילית אמיתית.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\nint total = 0;\npthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;\n\nvoid* worker(void* arg) {\n    int id = *(int*)arg;\n    for (int i = 0; i < 100; i++) {\n        if (id % 2 == 0) {\n            total++;\n        } else {\n            pthread_mutex_lock(&mtx);\n            total++;\n            pthread_mutex_unlock(&mtx);\n        }\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[4];\n    for (int i = 0; i < 4; i++) {\n        pthread_create(&threads[i], NULL, worker, &i);\n    }\n    for (int i = 0; i < 4; i++) {\n        pthread_join(threads[i], NULL);\n    }\n    printf(\"%d\\n\", total);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "101.1",
+        "text": "מהו הערך המקסימלי האפשרי שהתוכנית יכולה להדפיס? הסבירו בקצרה.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "101.2",
+        "text": "האם פלט התוכנית דטרמיניסטי (כלומר, האם תמיד יודפס אותו ערך)? אם לא, ציינו את שתי הסיבות המרכזיות לכך שערכו של total עשוי להשתנות בין הרצות שונות.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "101.3",
+        "text": "נניח ושינינו את שורת יצירת החוט ל-pthread_create(&threads[i], NULL, worker, (void*)(long)i); ואת קריאת ה-id ל-int id = (int)(long)arg;. האם כעת הפלט יהיה דטרמיניסטי ושווה ל-400? נמקו.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": 20,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1. הערך המקסימלי הוא 400. ישנם 4 חוטים וכל אחד מבצע 100 איטרציות של קידום המשתנה total. בתרחיש אידיאלי ללא איבוד עדכונים, הסכום יגיע ל-400.\n2. הפלט אינו דטרמיניסטי משתי סיבות עיקריות:\nא) מרוץ תהליכים על המשתנה i: כל החוטים מקבלים את הכתובת של i בזיכרון של פונקציית main. עד שחוט מתחיל לרוץ וקורא את הערך מהכתובת, הערך של i עשוי להשתנות על ידי הלולאה ב-main (למשל, כל החוטים עשויים לקרוא את הערך 4).\nב) מרוץ תהליכים על total: בתוך פונקציית worker, אם ה-id שנקרא הוא זוגי, הגישה ל-total מתבצעת ללא הגנת Mutex. מכיוון שמספר חוטים יכולים לגשת למשתנה בו-זמנית, עדכונים עלולים ללכת לאיבוד (Lost Update).\n3. לא. למרות שתיקון זה מבטיח שכל חוט יקבל ID ייחודי (0, 1, 2, 3), חוטים 0 ו-2 עדיין יזהו את עצמם כזוגיים (id % 2 == 0) וינסו לקדם את total ללא שימוש במנעול. כתוצאה מכך, עדיין קיים מרוץ תהליכים בין חוט 0 לחוט 2 (ובין שניהם לחוטים האי-זוגיים שמשתמשים במנעול אך לא מונעים מהזוגיים לגשת), ולכן הפלט עדיין לא יהיה דטרמיניסטי ועלול להיות נמוך מ-400."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

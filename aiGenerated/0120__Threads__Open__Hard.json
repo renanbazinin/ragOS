@@ -1,0 +1,51 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 18:45:03",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4085,
+      "output_tokens": 1304,
+      "total_tokens": 7061
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Threads",
+      "Synchronization",
+      "Race Conditions",
+      "Pthreads"
+    ],
+    "content": {
+      "text": "לפניכם מימוש בשפת C של מנגנון 'מחסום' (Barrier) המיועד לשימוש על ידי N תהליכונים (Threads). המטרה היא שכל תהליכון ימתין בנקודת המחסום עד שכל ה-N תהליכונים יגיעו אליה, ורק אז כולם ימשיכו בביצוע. המתכנת מעוניין שהמחסום יהיה 'רב-פעמי' (Reusable), כלומר שניתן יהיה להשתמש בו בלולאה.",
+      "code_snippet": "int count = 0;\npthread_mutex_t m = PTHREAD_MUTEX_INITIALIZER;\npthread_cond_t cv = PTHREAD_COND_INITIALIZER;\n\nvoid barrier_wait(int N) {\n    pthread_mutex_lock(&m);\n    count++;\n    if (count == N) {\n        count = 0;\n        pthread_cond_broadcast(&cv);\n    } else {\n        pthread_cond_wait(&cv, &m);\n    }\n    pthread_mutex_unlock(&m);\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "נניח שהתהליכונים מריצים את הפונקציה הבאה: \nvoid* worker(void* arg) {\n    for(int i=0; i<100; i++) {\n        // Do some work\n        barrier_wait(N);\n    }\n    return NULL;\n}\nהסבירו מדוע המימוש הנתון של barrier_wait אינו תקין עבור שימוש חוזר (reusable barrier) ועלול לגרום לקיפאון (Deadlock) או להתנהגות לא צפויה.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "כיצד תופעת ה-Spurious Wakeup משפיעה על הקוד הנתון? הציעו תיקון לקוד הקיים (ברמת הלוגיקה) שפותר גם את בעיית ה-Spurious Wakeup וגם את בעיית השימוש החוזר.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "6.1: הבעיה המרכזית במימוש היא ה-Race Condition שנוצר בין איטרציות שונות של הלולאה. כאשר התהליכון ה-N מגיע, הוא מאפס את count ל-0 ומבצע broadcast. תהליכון 'מהיר' עשוי להתעורר, לסיים את barrier_wait, לבצע את העבודה של האיטרציה הבאה ולקרוא שוב ל-barrier_wait לפני שתהליכון 'איטי' מהאיטרציה הקודמת בכלל הצליח להתעורר או לצאת מהפונקציה. התהליכון המהיר יקדם את count ל-1, בעוד שתהליכונים אחרים עדיין שייכים ל'סיבוב' הקודם. במצב קיצוני, תהליכון מהיר יכול להשלים סיבוב שלם ולגרום ל-broadcast נוסף בזמן שתהליכונים מהסיבוב הקודם עדיין מחכים, מה שיגרום לערבוב של תהליכונים מאיטרציות שונות וסיכוי גבוה לקיפאון (Deadlock) כי ה-count לא ישקף נכונה את מספר המחכים לסיבוב הנוכחי.\n\n6.2: Spurious Wakeup היא תופעה בה תהליכון מתעורר מ-pthread_cond_wait ללא קבלת סיגנל. בקוד הנתון, אם תהליכון מתעורר בטעות לפני ש-count == N, הוא ימשיך לביצוע (Phase 2) למרות ששאר התהליכונים טרם הגיעו. הפתרון המקובל הוא עטיפת ה-wait בלולאת while. \nכדי לפתור את שתי הבעיות (כולל ה-reusable barrier), ניתן להשתמש בטכניקה של 'דורות' (Generations) או Sense-Reversing Barrier. בשיטה זו, מחזיקים משתנה נוסף המייצג את הדור הנוכחי. תהליכון מחכה עד שהדור משתנה: \nvoid barrier_wait(int N) {\n    pthread_mutex_lock(&m);\n    int my_gen = generation;\n    count++;\n    if (count == N) {\n        count = 0;\n        generation++;\n        pthread_cond_broadcast(&cv);\n    } else {\n        while (my_gen == generation)\n            pthread_cond_wait(&cv, &m);\n    }\n    pthread_mutex_unlock(&m);\n}\nכך, גם אם תהליכון מהיר נכנס שוב, הוא יגדיל את count עבור הדור הבא, בעוד שהתהליכונים האיטיים מחכים לשינוי ב-generation."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 18:58:21",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4073,
+      "output_tokens": 1409,
+      "total_tokens": 9831
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Synchronization",
+      "Semaphores",
+      "Mutexes",
+      "Concurrency",
+      "Starvation"
+    ],
+    "content": {
+      "text": "עליכם לממש מנגנון סנכרון עבור משאב משותף המוגבל ל-M משתמשים בו-זמנית. החוטים במערכת מחולקים לשני סוגים: A ו-B. המגבלות הן:\n1. סך כל החוטים (A ו-B יחד) המשתמשים במשאב לא יעלה על M.\n2. מספר החוטים מסוג A המשתמשים במשאב לא יעלה על K (כאשר K < M).\n3. מניעת הרעבה: אם יש חוטים מסוג B הממתינים בתור לכניסה, חוט חדש מסוג A יוכל להיכנס למשאב רק אם נמצאים בו כרגע פחות מ-K-1 חוטים מסוג A (כלומר, עליו להשאיר מקום פוטנציאלי לחוט מסוג B).\n\nעליכם להשתמש בטכניקת 'העברת המקל' (Pass the Baton) על מנת להבטיח את קיום התנאים ומניעת הרעבה, תוך שימוש בסמפורים ומוטקסים בלבד.",
+      "code_snippet": "typedef struct {\n    int M, K;\n    int inA, inB;\n    int waitA, waitB;\n    sem_t lock;\n    sem_t semA;\n    sem_t semB;\n} ResourceControl;\n\nvoid init(ResourceControl *rc, int M, int K);\nvoid enter_A(ResourceControl *rc);\nvoid leave_A(ResourceControl *rc);\nvoid enter_B(ResourceControl *rc);\nvoid leave_B(ResourceControl *rc);",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "ממשו את פונקציית האתחול init.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "ממשו את הפונקציות enter_A, leave_A, enter_B, leave_B. יש להשתמש בפונקציית עזר release_next המיישמת את לוגיקת העברת המקל.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון משתמש בטכניקת Pass the Baton. הרעיון המרכזי הוא שחוט שנכנס או יוצא בודק אם יש חוטים אחרים שיכולים להיכנס. אם כן, הוא משחרר את הסמפור שלהם מבלי לשחרר את ה-mutex (החוט המשוחרר 'יורש' את ה-mutex). רק אם אין אף חוט שיכול להיכנס, ה-mutex משוחרר.\n\n10.1:\nvoid init(ResourceControl *rc, int M, int K) {\n    rc->M = M; rc->K = K;\n    rc->inA = 0; rc->inB = 0;\n    rc->waitA = 0; rc->waitB = 0;\n    sem_init(&rc->lock, 0, 1);\n    sem_init(&rc->semA, 0, 0);\n    sem_init(&rc->semB, 0, 0);\n}\n\n10.2:\nvoid release_next(ResourceControl *rc) {\n    if (rc->waitB > 0 && (rc->inA + rc->inB < rc->M)) {\n        rc->waitB--; rc->inB++;\n        sem_post(&rc->semB);\n    } else if (rc->waitA > 0 && (rc->inA + rc->inB < rc->M) && (rc->inA < rc->K) && !(rc->waitB > 0 && rc->inA == rc->K - 1)) {\n        rc->waitA--; rc->inA++;\n        sem_post(&rc->semA);\n    } else {\n        sem_post(&rc->lock);\n    }\n}\n\nvoid enter_A(ResourceControl *rc) {\n    sem_wait(&rc->lock);\n    if ((rc->inA + rc->inB < rc->M) && (rc->inA < rc->K) && !(rc->waitB > 0 && rc->inA == rc->K - 1)) {\n        rc->inA++;\n        release_next(rc);\n    } else {\n        rc->waitA++;\n        sem_post(&rc->lock);\n        sem_wait(&rc->semA);\n        release_next(rc);\n    }\n}\n\nvoid leave_A(ResourceControl *rc) {\n    sem_wait(&rc->lock);\n    rc->inA--;\n    release_next(rc);\n}\n\nvoid enter_B(ResourceControl *rc) {\n    sem_wait(&rc->lock);\n    if (rc->inA + rc->inB < rc->M) {\n        rc->inB++;\n        release_next(rc);\n    } else {\n        rc->waitB++;\n        sem_post(&rc->lock);\n        sem_wait(&rc->semB);\n        release_next(rc);\n    }\n}\n\nvoid leave_B(ResourceControl *rc) {\n    sem_wait(&rc->lock);\n    rc->inB--;\n    release_next(rc);\n}"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

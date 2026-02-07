@@ -1,0 +1,57 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 18:42:24",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4085,
+      "output_tokens": 1349,
+      "total_tokens": 7304
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Threads",
+      "Synchronization",
+      "Condition Variables",
+      "Deadlock"
+    ],
+    "content": {
+      "text": "במערכת הפעלה נתונה, ממומש מנגנון לניהול משאבים משותפים (Tokens). המנגנון מאפשר לתהליכונים לבקש מספר מסוים של אסימונים ולשחרר אותם בסיום השימוש. להלן קוד ה-C המממש את המנגנון באמצעות Pthreads:",
+      "code_snippet": "#include <pthread.h>\n\nint available_tokens = 5;\npthread_mutex_t m = PTHREAD_MUTEX_INITIALIZER;\npthread_cond_t c = PTHREAD_COND_INITIALIZER;\n\nvoid request_tokens(int n) {\n    pthread_mutex_lock(&m);\n    while (available_tokens < n) {\n        pthread_cond_wait(&c, &m);\n    }\n    available_tokens -= n;\n    pthread_mutex_unlock(&m);\n}\n\nvoid release_tokens(int n) {\n    pthread_mutex_lock(&m);\n    available_tokens += n;\n    pthread_cond_signal(&c);\n    pthread_mutex_unlock(&m);\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "הסבר מדוע השימוש ב-pthread_cond_signal בפונקציה release_tokens עלול להוביל למצב של Deadlock או הרעבה (Starvation) במערכת בה פועלים מספר תהליכונים המבקשים כמויות שונות של אסימונים. הדגם באמצעות תרחיש ספציפי.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "נניח שבתור למשתנה התנאי c ממתינים התהליכונים הבאים (לפי סדר הגעתם): T1 (מבקש 6 אסימונים), T2 (מבקש 2 אסימונים). כרגע available_tokens = 1. תהליכון T3 קורא ל-release_tokens(2). תאר את השתלשלות האירועים אם המימוש של pthread_cond_signal מעיר את התהליכון הראשון בתור (FIFO).",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.3",
+        "text": "הצע שינוי מינימלי לקוד (שורת קוד אחת) שיפתור את הבעיה שהוצגה בסעיף 10.1, והסבר מדוע פתרון זה יעיל אך עלול להיות יקר מבחינת ביצועים.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "10.1: הבעיה נובעת מכך ש-pthread_cond_signal מעיר תהליכון אחד בלבד מהתור. אם התהליכון שהתעורר דורש יותר אסימונים ממה שיש כרגע ב-available_tokens, הוא יחזור לישון בתוך ה-while. הבעיה היא שהאות (signal) 'אבד' - ייתכן שישנם תהליכונים אחרים בתור שדרישתם קטנה יותר ויכלו להמשיך בריצה עם כמות האסימונים הנוכחית, אך הם לא התעוררו. אם כל התהליכונים שמשחררים אסימונים מסתמכים על signal בודד, המערכת עלולה להיתקע (Deadlock) למרות שיש מספיק משאבים.\n\n10.2: תרחיש: 1. available_tokens = 1. תהליכונים T1(6) ו-T2(2) ישנים בתור c. \n2. T3 משחרר 2 אסימונים: available_tokens מעודכן ל-3.\n3. T3 מבצע signal. לפי FIFO, התהליכון T1 מתעורר.\n4. T1 בודק את התנאי: 3 < 6, לכן הוא מבצע שוב wait וחוזר לישון.\n5. המשתנה available_tokens נשאר 3, אך T2 (שצריך רק 2) נשאר לישון כי אף אחד לא העיר אותו. המערכת במצב של Deadlock אם אין תהליכונים נוספים שיבצעו release.\n\n10.3: הפתרון הוא החלפת pthread_cond_signal(&c) ב-pthread_cond_broadcast(&c). פעולה זו תעיר את כל התהליכונים הממתינים. כל אחד מהם יבדוק את התנאי שלו בתורו (תחת הגנת המוטקס). מי שדרישתו נענית ימשיך, ומי שלא יחזור לישון. זה פותר את הבעיה כי מובטח שכל מי שיכול להתקדם יתעורר. החיסרון (Performance Overhead) הוא 'בעיית העדר' (Thundering Herd) - התעוררות המונית של תהליכונים שרובם יחזרו לישון מיד, מה שגורם להקשרים מיותרים (Context Switches) ותחרות על המוטקס."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

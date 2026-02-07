@@ -141,6 +141,9 @@ export interface AllExamQuestionsResponse {
   questions: ExamQuestion[];
   total: number;
   stats: {
+    total_available: number;
+    returned: number;
+    exams_count: number;
     types: Record<string, number>;
     difficulties: Record<string, number>;
     topics: Record<string, number>;

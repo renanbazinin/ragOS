@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 18:53:50",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2248,
+      "output_tokens": 981,
+      "total_tokens": 14466
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Threads",
+      "Concurrency",
+      "Race Conditions",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "לפניכם תוכנית בשפת C המשתמשת בספריית pthreads. המשתנה g הוא משתנה גלובלי המשותף לכל החוטים ומאותחל ל-0. הניחו כי המערכת משתמשת במעבד יחיד וכי אלגוריתם התזמון הוא Preemptive (ניתן להחליף בין חוטים בכל נקודת זמן, כולל באמצע פעולות אריתמטיות של קריאה וכתיבה לזיכרון). מהו הערך המינימלי והערך המקסימלי האפשריים של המשתנה g עם סיום ריצת התוכנית? נמקו את תשובתכם בעזרת תרחיש הרצה (interleaving) מתאים.",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n\nint g = 0;\n\nvoid* child_func(void* arg) {\n    int temp = g;\n    g = temp + 1;\n    return NULL;\n}\n\nvoid* parent_func(void* arg) {\n    pthread_t tid;\n    int temp = g;\n    g = temp + 1;\n    pthread_create(&tid, NULL, child_func, NULL);\n    pthread_join(tid, NULL);\n    temp = g;\n    g = temp + 1;\n    return NULL;\n}\n\nint main() {\n    pthread_t t1, t2;\n    pthread_create(&t1, NULL, parent_func, NULL);\n    pthread_create(&t2, NULL, parent_func, NULL);\n    pthread_join(t1, NULL);\n    pthread_join(t2, NULL);\n    printf(\"%d\\n\", g);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": 25,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "ערך מקסימלי: 6. זהו המקרה שבו כל הפעולות מתבצעות באופן סדרתי ללא הפרעה. כל חוט אב (parent_func) מבצע 3 קידומים של g: אחד ישירות לפני יצירת הבן, אחד על ידי הבן (child_func), ואחד ישירות לאחר ה-join. כיוון שיש שני חוטי אב, מתבצעים 6 קידומים סה\"כ.\n\nערך מינימלי: 3. כדי להגיע למינימום, ננסה לגרום לאובדן עדכונים (lost updates). נניח שחוט אב T1 קורא g=0. אז חוט T2 רץ את כל המסלול שלו (3 קידומים) ומביא את g ל-3. כעת T1 חוזר ומבצע את הכתיבה שלו: g = 0 + 1 = 1. בשלב זה איבדנו את כל העדכונים של T2 והערך הוא 1. כעת T1 יוצר את חוט הבן שלו (C1). כיוון ש-C1 נוצר לאחר ש-T1 כבר כתב 1, C1 יקרא לפחות 1 ויעדכן ל-2. לאחר מכן T1 יבצע join ויקרא את הערך שכתב הבן (2) ויעדכן ל-3. \nלא ניתן להגיע לערך נמוך מ-3 (כמו 2) מכיוון שכל חוט אב מחולק לשני מקטעי קוד שביניהם יש נקודת סנכרון (join). הקידום האחרון של חוט אב תמיד יתבסס על הערך שנכתב על ידי הבן שלו, והבן תמיד יקרא ערך שנכתב לפחות על ידי הקידום הראשון של האב שלו."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

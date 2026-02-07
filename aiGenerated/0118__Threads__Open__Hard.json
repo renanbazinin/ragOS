@@ -1,0 +1,57 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 18:44:21",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4085,
+      "output_tokens": 1426,
+      "total_tokens": 8482
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Threads",
+      "Synchronization",
+      "Mutex",
+      "Condition Variables"
+    ],
+    "content": {
+      "text": "לפניכם קוד בשפת C המשתמש בספריית pthreads לניהול סנכרון בין תהליכונים. במערכת קיימים שני סוגי תהליכונים: 'Increasers' המעלים מונה משותף, ו-'Checkers' הממתינים שהמונה יגיע לערך סף N ואז מפחיתים ממנו. הנח כי כל הקריאות לפונקציות pthreads מצליחות ושאין בעיות זיכרון.",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n\n#define N 5\nint counter = 0;\npthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;\npthread_cond_t cond = PTHREAD_COND_INITIALIZER;\n\nvoid* increaser(void* arg) {\n    for(int i = 0; i < 1000; i++) {\n        pthread_mutex_lock(&lock);\n        counter++;\n        if (counter >= N) {\n            pthread_cond_broadcast(&cond);\n        }\n        pthread_mutex_unlock(&lock);\n    }\n    return NULL;\n}\n\nvoid* checker(void* arg) {\n    pthread_mutex_lock(&lock);\n    while (counter < N) {\n        pthread_cond_wait(&cond, &lock);\n    }\n    counter -= N;\n    pthread_mutex_unlock(&lock);\n    return NULL;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "מה יהיה הערך הסופי של המשתנה הגלובלי `counter` אם נריץ 10 תהליכוני `increaser` ו-2 תהליכוני `checker`, בהנחה שכל התהליכונים סיימו את ביצועם? פרטו את החישוב.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "מדוע נעשה שימוש בלולאת `while` בשורה `while (counter < N)` בתוך פונקציית ה-`checker`? תארו תרחיש ספציפי (interleaving) שבו החלפת ה-`while` ב-`if` תוביל למצב שבו `counter` יהיה שלילי.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.3",
+        "text": "נניח שהחלפנו את `pthread_cond_broadcast` ב-`pthread_cond_signal`. האם ייתכן מצב שבו תהליכון `checker` ימתין לנצח (Deadlock/Starvation) למרות שהתנאי `counter >= N` התקיים בשלב כלשהו? הסבירו.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.1: כל תהליכון increaser מבצע 1000 הגדלות. ישנם 10 תהליכונים כאלו, לכן סה\"כ יתבצעו 10,000 הגדלות (10 * 1000). כל תהליכון checker מבצע הפחתה אחת של הערך N (שהוא 5). ישנם 2 תהליכונים כאלו, לכן סה\"כ יופחתו 10 (2 * 5). הערך הסופי יהיה: 10,000 - 10 = 9,990.\n\n1.2: השימוש ב-while הכרחי בגלל Mesa Semantics. תרחיש שבו if יכשל: נניח ש-counter=4. שני תהליכוני checker (נקרא להם C1 ו-C2) נכנסים להמתנה ב-cond_wait. תהליכון increaser מעלה את המונה ל-5 וקורא ל-broadcast. שני ה-checkers מתעוררים ומנסים להשיג את ה-mutex. C1 משיג את ה-mutex ראשון, בודק את התנאי (שכבר נבדק לפני ה-wait), מפחית 5 מהמונה (counter=0) ומשחרר את ה-mutex. כעת C2 משיג את ה-mutex. אם היה נעשה שימוש ב-if, הוא היה ממשיך ישר להפחתה ומחסיר 5 מ-0, מה שמוביל ל-counter=-5. שימוש ב-while מכריח את C2 לבדוק שוב את התנאי, לגלות שהוא שוב קטן מ-N ולחזור להמתין.\n\n1.3: כן. במצב שבו יש מספר checkers הממתינים, signal מעיר רק תהליכון אחד. אם התהליכון שהתעורר לא מצליח לסיים את עבודתו (למשל, אם התנאי השתנה שוב לפני שהשיג את ה-lock) או אם ישנם מספר checkers שצריכים להתעורר כדי לצרוך את המשאבים שהצטברו (למשל counter=10), שימוש ב-signal עלול להשאיר checkers אחרים ישנים לנצח למרות שהמשאב זמין. עם זאת, בקוד הספציפי הזה, הבעיה העיקרית ב-signal היא אובדן הודעות (Lost Wakeups) אם ה-signal נשלח כשאין אף אחד שממתין, אך כאן ה-broadcast מבטיח שכל מי שצריך להתעורר יתעורר."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

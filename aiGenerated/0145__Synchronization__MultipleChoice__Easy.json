@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 18:53:57",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1187,
+      "output_tokens": 421,
+      "total_tokens": 2199
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Synchronization",
+      "Race Condition"
+    ],
+    "content": {
+      "text": "מהו מצב מרוץ (Race Condition) בהקשר של סנכרון בין תהליכים או חוטים (threads)?",
+      "code_snippet": null,
+      "options": [
+        "א. מצב שבו שני תהליכים מנסים לגשת לאותו קובץ בדיסק בו-זמנית.",
+        "ב. מצב שבו התוצאה הסופית של התוכנית תלויה בתזמון היחסי של ביצוע הפעולות על משאב משותף.",
+        "ג. מצב שבו תהליך אחד נתקע בלולאה אינסופית ומונע מתהליכים אחרים להשתמש במעבד.",
+        "ד. מצב שבו שני תהליכים מחכים זה לזה לצורך קבלת משאב ואינם יכולים להמשיך בביצועם.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב'. מצב מרוץ (Race Condition) מוגדר כמצב שבו מספר תהליכים או חוטים ניגשים ומשנים נתונים משותפים בו-זמנית, כך שהתוצאה הסופית של החישוב תלויה בסדר הגישה (התזמון) של הישויות השונות למשאב."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 18:45:35",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2248,
+      "output_tokens": 583,
+      "total_tokens": 4724
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Threads",
+      "Pthreads",
+      "Shared Memory"
+    ],
+    "content": {
+      "text": "לפניך קטע קוד בשפת C המשתמש בספריית pthreads. מה יהיה הפלט של התוכנית?",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n\nint shared_val = 5;\n\nvoid* thread_func(void* arg) {\n    int val = *((int*)arg);\n    shared_val += val;\n    return NULL;\n}\n\nint main() {\n    pthread_t t1, t2;\n    int a = 10, b = 20;\n\n    pthread_create(&t1, NULL, thread_func, &a);\n    pthread_join(t1, NULL);\n\n    pthread_create(&t2, NULL, thread_func, &b);\n    pthread_join(t2, NULL);\n\n    printf(\"%d\", shared_val);\n    return 0;\n}",
+      "options": [
+        "5",
+        "15",
+        "25",
+        "35"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "35",
+      "explanation": "התוכנית מתחילה עם משתנה גלובלי shared_val שערכו 5. בשלב הראשון נוצר חוט t1 שמקבל את הערך 10 ומוסיף אותו ל-shared_val. מכיוון שמתבצע pthread_join מיד לאחר מכן, תהליך ה-main עוצר ומחכה ש-t1 יסיים. לאחר ש-t1 מסיים, ערכו של shared_val הוא 15. רק אז נוצר חוט t2 שמקבל את הערך 20 ומוסיף אותו ל-shared_val. שוב מתבצע join ולכן ה-main מחכה ל-t2. בסיום, shared_val שווה ל-35 והוא מודפס למסך. מכיוון שהצטרפות החוטים (join) נעשית באופן סדרתי, אין כאן מצב מרוץ (Race Condition) והתוצאה דטרמיניסטית."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

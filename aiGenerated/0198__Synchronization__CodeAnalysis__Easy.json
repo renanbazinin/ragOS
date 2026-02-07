@@ -1,0 +1,51 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 18:59:40",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4129,
+      "output_tokens": 981,
+      "total_tokens": 8880
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Mutex",
+      "Race Conditions",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתון קוד ה-C הבא המשתמש בספריית pthreads. התוכנית מגדירה משתנה גלובלי counter ויוצרת שני חוטים המריצים את הפונקציה increment המקדמת את המונה 1000 פעמים.",
+      "code_snippet": "1 #include <pthread.h>\n2 #include <stdio.h>\n3 \n4 int counter = 0;\n5 pthread_mutex_t lock;\n6 \n7 void* increment(void* arg) {\n8     for (int i = 0; i < 1000; i++) {\n9         pthread_mutex_lock(&lock);\n10        counter++;\n11        pthread_mutex_unlock(&lock);\n12    }\n13    return NULL;\n14 }\n15 \n16 int main() {\n17     pthread_t t1, t2;\n18     pthread_mutex_init(&lock, NULL);\n19     pthread_create(&t1, NULL, increment, NULL);\n20     pthread_create(&t2, NULL, increment, NULL);\n21     pthread_join(t1, NULL);\n22     pthread_join(t2, NULL);\n23     printf(\"%d\\n\", counter);\n24     return 0;\n25 }",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "מה יהיה הערך המודפס של counter בסיום ריצת התוכנית כפי שהיא?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "נניח שהסרנו את השורות המבצעות נעילה ושחרור של המיוטקס (שורות 9 ו-11). מהו הערך המקסימלי והערך המינימלי האפשריים של counter שיודפסו בסיום הריצה?",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.1: הערך שיודפס הוא 2000. השימוש ב-Mutex בשורות 9 ו-11 מבטיח שרק חוט אחד יוכל לגשת למשתנה המשותף counter בכל רגע נתון. מכיוון שכל חוט מבצע 1000 קידומים, והקידומים מוגנים מפני מרוץ תהליכים, התוצאה הסופית היא 1000 + 1000 = 2000.\n\n1.2: הערך המקסימלי הוא 2000 (במקרה שבו התזמון במקרה מנע התנגשויות). הערך המינימלי הוא 2. הסבר לערך המינימלי: חוט א' קורא את הערך 0 ונעצר לפני הקידום. חוט ב' רץ 999 פעמים ומעדכן את המונה ל-999. חוט א' ממשיך, כותב 1 למונה, ואז קורא את הערך 1 עבור האיטרציה השנייה שלו ונעצר. חוט ב' ממשיך לאיטרציה האחרונה שלו, קורא את הערך 1, וממתין לפני הכתיבה. חוט א' רץ כעת את כל שאר 998 האיטרציות שלו ומסיים (הערך במונה כעת 999). לבסוף חוט ב' חוזר וכותב את הערך 2 (הערך 1 שקרא + 1) למונה."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

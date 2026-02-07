@@ -1,0 +1,51 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 18:57:43",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4073,
+      "output_tokens": 1190,
+      "total_tokens": 9205
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Synchronization",
+      "Atomics",
+      "Barriers",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "מחסום (Barrier) הוא אובייקט סנכרון המבטיח שכל N החוטים המשתתפים הגיעו לנקודה מסוימת לפני שמישהו מהם ממשיך בביצוע. מימוש נאיבי של מחסום המבוסס על מונה (Counter) ו-Mutex בלבד עלול להיכשל או לגרום לביצועים ירודים כאשר המחסום נמצא בשימוש חוזר (Reusable Barrier) בתוך לולאה. בשאלה זו נבחן את טכניקת ה-Sense Reversal המאפשרת מימוש יעיל ובטוח לשימוש חוזר ללא צורך ב-Locking כבד.",
+      "code_snippet": "#include <stdatomic.h>\n\ntypedef struct {\n    atomic_int count;\n    atomic_int sense;\n    int N;\n} Barrier;\n\nvoid init(Barrier* b, int N) {\n    atomic_init(&b->count, N);\n    atomic_init(&b->sense, 0);\n    b->N = N;\n}\n\nvoid wait(Barrier* b) {\n    // Implementation required\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "הסבירו מדוע מימוש מחסום המבוסס על קידום מונה ובדיקת `if (count == N)` (ללא מנגנון נוסף) אינו בטיחותי לשימוש בתוך לולאה. תארו תרחיש (Race Condition) שבו חוט עלול להתקדם לשלב הבא באופן שגוי.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "השלימו את הקוד עבור הפונקציה `wait` המשתמשת בטכניקת ה-Sense Reversal. עליכם להשתמש בפעולות אטומיות בלבד (`atomic_load`, `atomic_store`, `atomic_fetch_sub`) ולהבטיח שהמחסום ניתן לשימוש חוזר אינסופי ללא אתחול חיצוני.",
+        "code_snippet": "void wait(Barrier* b) {\n    // השלימו כאן\n}",
+        "options": null
+      }
+    ],
+    "points": 15,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "10.1: במימוש נאיבי, החוט האחרון שמעלה את המונה ל-N משחרר את שאר החוטים. אם החוטים רצים בלולאה, חוט מהיר במיוחד עשוי לסיים את האיטרציה הנוכחית, להיכנס לאיטרציה הבאה ולהתחיל לשנות את המונה (למשל לאפס אותו או להעלות אותו שוב) לפני שחוטים איטיים יותר הספיקו אפילו לקרוא שהמונה הגיע ל-N. מצב זה יגרום לחוטים האיטיים להיתקע לנצח או לחוט המהיר 'לפרוץ' את המחסום בטרם עת.\n\n10.2: בטכניקת Sense Reversal, אנו משתמשים במשתנה 'sense' גלובלי ובמשתנה מקומי לכל חוט. חוט שנכנס למחסום מחשב מה צריך להיות ה-sense הבא (היפוך של הנוכחי). החוטים ממתינים עד שה-sense הגלובלי ישתנה לערך המבוקש. החוט האחרון שמגיע הוא זה שאחראי לאפס את המונה עבור הסבב הבא ולשנות את ה-sense הגלובלי, ובכך הוא משחרר את כולם.\n\nקוד המימוש:\nvoid wait(Barrier* b) {\n    static _Thread_local int local_sense = 0;\n    local_sense = !local_sense; // היפוך ה-sense המקומי לכל חוט\n    \n    if (atomic_fetch_sub(&b->count, 1) == 1) {\n        // החוט האחרון שהגיע\n        atomic_store(&b->count, b->N); // הכנה לסבב הבא\n        atomic_store(&b->sense, local_sense); // שחרור כל החוטים ע\"י שינוי ה-sense הגלובלי\n    } else {\n        // חוטים שאינם האחרונים מחכים לשינוי ה-sense\n        while (atomic_load(&b->sense) != local_sense) {\n            // Spinning\n        }\n    }\n}"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

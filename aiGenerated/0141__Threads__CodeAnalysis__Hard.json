@@ -1,0 +1,57 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 18:51:41",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2248,
+      "output_tokens": 940,
+      "total_tokens": 4284
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Threads",
+      "Concurrency",
+      "Race Conditions",
+      "Pthreads"
+    ],
+    "content": {
+      "text": "לפניך קטע קוד ב-C המשתמש בספריית pthreads. מטרת התוכנית היא ליצור 5 חוטים (threads), כך שכל חוט ידפיס מזהה ייחודי (0 עד 4) שהועבר לו בזמן היצירה. הנח כי כל הקריאות ל-pthread_create ו-pthread_join מצליחות.",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n\n#define NUM_THREADS 5\n\nvoid* thread_func(void* arg) {\n    int id = *((int*)arg);\n    printf(\"%d \", id);\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n    for (int i = 0; i < NUM_THREADS; i++) {\n        pthread_create(&threads[i], NULL, thread_func, &i);\n    }\n    for (int i = 0; i < NUM_THREADS; i++) {\n        pthread_join(threads[i], NULL);\n    }\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "האם הפלט של התוכנית יהיה בהכרח פרמוטציה של המספרים {0, 1, 2, 3, 4}? הסבירו מדוע.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "האם ייתכן מצב בו אחד החוטים ידפיס את הערך 5? נמקו.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.3",
+        "text": "הציעו שינוי מינימלי לקוד (שורות בודדות) שיבטיח שכל חוט ידפיס מזהה ייחודי בין 0 ל-NUM_THREADS-1.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": 25,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1. לא, הפלט לא יהיה בהכרח פרמוטציה של 0-4. הבעיה היא שכל החוטים מקבלים את הכתובת של אותו משתנה מקומי i. מכיוון שהחוטים רצים במקביל ללולאת ה-main, ייתכן שערך המשתנה i ישתנה ב-main לפני שחוט מסוים יספיק לקרוא אותו ב-thread_func. זהו Race Condition על המשתנה i.\n2. כן, ייתכן בהחלט. אם לולאת היצירה (הלולאה הראשונה) מסתיימת לפני שאחד החוטים ניגש לזיכרון של i, הערך של i יהיה 5 (תנאי העצירה של הלולאה), וזה מה שהחוט ידפיס.\n3. ישנן שתי דרכים נפוצות לתיקון: א. הקצאת מערך של מזהים (למשל int ids[NUM_THREADS]) והעברת הכתובת של המקום ה-i במערך לכל חוט. ב. העברת הערך של i ישירות על ידי Casting ל-(void*) ב-pthread_create וביצוע Casting חזרה ל-int בתוך ה-thread_func (עובד כי גודל void* בדרך כלל גדול או שווה ל-int)."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

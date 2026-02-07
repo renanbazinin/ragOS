@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 18:48:46",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1969,
+      "output_tokens": 712,
+      "total_tokens": 4568
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Threads",
+      "Pthreads",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "לפניך קטע קוד בשפת C המשתמש בספריית pthreads. בהנחה שכל הקריאות למערכת מצליחות, וכי פעולת הקידום (count++) מתבצעת באופן אטומי (כלומר, אין איבוד עדכונים עקב Race Condition), מה יהיה הפלט של התוכנית?",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n\nint count = 0;\n\nvoid* increment(void* arg) {\n    int limit = *(int*)arg;\n    for (int i = 0; i < limit; i++) {\n        count++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t t1, t2, t3;\n    int val1 = 10, val2 = 20, val3 = 30;\n\n    pthread_create(&t1, NULL, increment, &val1);\n    pthread_join(t1, NULL);\n\n    pthread_create(&t2, NULL, increment, &val2);\n    pthread_create(&t3, NULL, increment, &val3);\n\n    pthread_join(t2, NULL);\n    pthread_join(t3, NULL);\n\n    printf(\"%d\", count);\n    return 0;\n}",
+      "options": [
+        "א. 30",
+        "ב. 50",
+        "ג. 60",
+        "ד. 10",
+        "ה. התוצאה אינה קבועה"
+      ]
+    },
+    "sub_questions": null,
+    "points": 10,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "התוכנית מתחילה בביצוע ה-main. החוט הראשון (t1) נוצר עם הערך 10. פקודת ה-pthread_join(t1) גורמת לתהליך הראשי להמתין עד ש-t1 יסיים. בשלב זה count שווה ל-10. לאחר מכן, נוצרים שני חוטים נוספים (t2 ו-t3) כמעט במקביל. t2 מבצע 20 איטרציות ו-t3 מבצע 30 איטרציות. מכיוון שצוין בשאלה שיש להניח שאין Race Condition (פעולות אטומיות), הערך הסופי של count יהיה סכום כל ההוספות שבוצעו על ידי כל החוטים: 10 (מ-t1) + 20 (מ-t2) + 30 (מ-t3) = 60."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

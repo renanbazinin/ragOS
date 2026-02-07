@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 18:56:53",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1598,
+      "output_tokens": 806,
+      "total_tokens": 4587
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Synchronization",
+      "Semaphores",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "במערכת הפעלה נתונה, ישנו משאב משותף הנגיש לשני סוגי תהליכים: קוראים (Readers) וכותבים (Writers). עליכם לממש פתרון סנכרון בשפת C באמצעות סמפורים בלבד המקיים את התנאים הבאים:\n1. מספר הקוראים שיכולים לגשת למשאב בו-זמנית מוגבל לכל היותר ל-5.\n2. כותב יכול לגשת למשאב רק אם אין בו קוראים כלל.\n3. בזמן שכותב ניגש למשאב, אף קורא או כותב אחר לא יכול לגשת אליו (בלעדיות).\n4. מניעת הרעבה של כותבים: ברגע שכותב ממתין בתור, קוראים חדשים לא יורשו להיכנס למשאב עד שהכותב יסיים.",
+      "code_snippet": "sem_t mutex;          // Protects read_count\nsem_t resource;       // Controls access to the resource\nsem_t read_limit;     // Limits number of concurrent readers\nsem_t service_queue;  // Prevents writer starvation\nint read_count = 0;\n\n// Initialize semaphores and implement reader() and writer()",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": 20,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון עושה שימוש בארבעה סמפורים:\n1. הסמפור service_queue (אותחל ל-1) משמש כ'שומר סף'. גם קוראים וגם כותבים חייבים לעבור דרכו. אם כותב ממתין עליו, קוראים חדשים ייחסמו, מה שמונע הרעבת כותבים.\n2. הסמפור read_limit (אותחל ל-5) מבטיח שלא יותר מ-5 קוראים ישהו במשאב בו-זמנית.\n3. הסמפור resource (אותחל ל-1) מבטיח בלעדיות לכותב. הקורא הראשון שנכנס נועל אותו, והקורא האחרון שיוצא משחרר אותו.\n4. הסמפור mutex (אותחל ל-1) מגן על המשתנה המשותף read_count.\n\nמימוש ה-Writer:\nsem_wait(&service_queue);\nsem_wait(&resource);\n// Writing...\nsem_post(&resource);\nsem_post(&service_queue);\n\nמימוש ה-Reader:\nsem_wait(&service_queue);\nsem_wait(&read_limit);\nsem_wait(&mutex);\nread_count++;\nif (read_count == 1) sem_wait(&resource);\nsem_post(&mutex);\nsem_post(&service_queue);\n\n// Reading...\n\nsem_wait(&mutex);\nread_count--;\nif (read_count == 0) sem_post(&resource);\nsem_post(&mutex);\nsem_post(&read_limit);"
+    },
+    "difficulty_estimation": "Medium"
+  }
+}
