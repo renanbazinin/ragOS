@@ -1,0 +1,53 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 20:05:52",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4129,
+      "output_tokens": 2324,
+      "total_tokens": 10586
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Threads",
+      "Condition Variables",
+      "Mutexes",
+      "Reusable Barrier",
+      "Deadlock"
+    ],
+    "content": {
+      "text": "נתונה מחסום (barrier) לשימוש חוזר הממומש באמצעות mutex ו-condition variables. המחסום מיועד לסנכרן N חוטים כך שכולם יגיעו לנקודה מסוימת בתוכנית לפני שמי מהם ימשיך הלאה. לאחר שחרור המחסום, הוא אמור להיות מוכן לשימוש חוזר.\n\nקראו את קוד המחסום והשימוש בו בקוד המצורף:",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h> // For sleep\n\n#define NUM_THREADS 5\n#define NUM_ITERATIONS 3 // How many times threads pass the barrier\n\npthread_mutex_t barrier_mutex = PTHREAD_MUTEX_INITIALIZER;\npthread_cond_t barrier_cond = PTHREAD_COND_INITIALIZER;\nint barrier_count = 0;\nint barrier_threshold = NUM_THREADS;\n\nvoid my_barrier_wait() {\n    pthread_mutex_lock(&barrier_mutex);\n    barrier_count++;\n    if (barrier_count == barrier_threshold) {\n        // Last thread to arrive\n        barrier_count = 0; // Reset for next use\n        pthread_cond_broadcast(&barrier_cond);\n    } else {\n        // Not the last thread, wait\n        pthread_cond_wait(&barrier_cond, &barrier_mutex);\n    }\n    pthread_mutex_unlock(&barrier_mutex);\n}\n\nvoid* thread_func(void* arg) {\n    long tid = (long)arg;\n    for (int i = 0; i < NUM_ITERATIONS; ++i) {\n        printf(\"Thread %ld arrived at barrier for iteration %d.\\n\", tid, i + 1);\n        my_barrier_wait();\n        printf(\"Thread %ld passed barrier for iteration %d.\\n\", tid, i + 1);\n        usleep(10000); // Simulate work after barrier\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n    for (long i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, thread_func, (void*)i);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"All threads finished.\\n\");\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "זהו את הבעיה העיקרית במנגנון הסנכרון של המחסום הנתון, במיוחד בהקשר של שימוש חוזר. הסבירו מדוע זו בעיה ומה ההשלכות שלה (לדוגמה, האם עלול להיווצר Deadlock, Livelock או התנהגות שגויה אחרת).",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "תקנו את קוד הפונקציה `my_barrier_wait` כך שיפעל באופן תקין לשימוש חוזר, תוך שימוש באובייקטי סנכרון הקיימים (mutex ו-condition variables) ומינימום שינויים. הציגו את הקוד המתוקן והסבירו את התיקון שלכם.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.1: הבעיה העיקרית במחסום הנתון היא תנאי מרוץ (race condition) שעלול להתרחש כאשר המחסום מיועד לשימוש חוזר. הבעיה נובעת מהאיפוס המוקדם של `barrier_count` ל-0 על ידי החוט האחרון שהגיע, מיד לאחר קריאה ל-`pthread_cond_broadcast`.\nאם חוט שהתעורר מה-`pthread_cond_wait` (בעקבות ה-broadcast) מתזמן מחדש *לפני* שהוא יצא מהאזור הקריטי (כלומר, לפני ה-`pthread_mutex_unlock`), וחוט אחר (מהמחזור הבא של המחסום, או אפילו חוט שהתעורר מה-broadcast ורץ מהר) מגיע, הוא יראה ש-`barrier_count` כבר אופס ל-0.\nכתוצאה מכך, חוט שהתעורר זה עתה עלול לבדוק שוב את התנאי `barrier_count == barrier_threshold` (או `barrier_count < barrier_threshold`) ולמצוא אותו שוב שגוי עבור המחזור הנוכחי, ולכן יחזור מיד למצב המתנה (wait) עבור המחזור הבא של המחסום. זה יוצר מצב שבו חלק מהחוטים נתקעים במחסום הנוכחי, בעוד אחרים ממשיכים.\nההשלכה היא מצב של Deadlock או Livelock, כאשר חלק מהחוטים נתקעים ב-`pthread_cond_wait` מבלי שאי פעם יגיעו כולם (N חוטים) ל-`barrier_count == barrier_threshold` עבור המחזור שהם נמצאים בו, כיוון שחוטים אחרים כבר 'קפצו' למחזור הבא של המחסום. גם אם לא deadlock מוחלט, התנהגות התוכנית תהיה שגויה ולא תסנכרן את החוטים כנדרש.\n\n1.2: כדי לתקן את הבעיה ולממש מחסום לשימוש חוזר באופן תקין, נשתמש במשתנה נוסף הנקרא 'דור' (`generation` או `phase`). משתנה זה יאפשר לחוטים להבחין בין מחזורי המחסום השונים. רק כאשר החוט האחרון מגיע, הוא יקדם את הדור ויבצע broadcast, ובכך ישחרר את כל החוטים שמחכים לדור הנוכחי. חוטים שהתעוררו חייבים לוודא שהדור שלהם (הדור שהם חיכו לו) אינו תואם יותר לדור הגלובלי, מה שמעיד שהמחסום התקדם.\n\n**קוד מתוקן לפונקציה `my_barrier_wait`:**\n```c\n// יש להוסיף הצהרה גלובלית:\n// int barrier_generation = 0; // Added for reusable barrier\n\nvoid my_barrier_wait() {\n    pthread_mutex_lock(&barrier_mutex);\n    int my_generation = barrier_generation; // לכידת הדור הנוכחי של החוט\n    barrier_count++;\n    if (barrier_count == barrier_threshold) {\n        // החוט האחרון שהגיע\n        barrier_count = 0;           // איפוס המונה\n        barrier_generation++;        // קידום הדור\n        pthread_cond_broadcast(&barrier_cond); // שחרור כל החוטים\n    } else {\n        // לא החוט האחרון, המתן. לולאת while מטפלת בהתעוררויות שווא ומוודאת התקדמות דור.\n        while (my_generation == barrier_generation) {\n            pthread_cond_wait(&barrier_cond, &barrier_mutex);\n        }\n    }\n    pthread_mutex_unlock(&barrier_mutex);\n}\n```\n\n**הסבר התיקון:**\nהוספנו את המשתנה הגלובלי `barrier_generation` ואת המשתנה המקומי `my_generation`.\n1.  כל חוט, בכניסה ל-`my_barrier_wait`, שומר את ערך `barrier_generation` הנוכחי ב-`my_generation` שלו.\n2.  החוט האחרון שמגיע למחסום (כאשר `barrier_count == barrier_threshold`) הוא זה שאחראי לאפס את `barrier_count` *ולקדם* את `barrier_generation`. לאחר מכן הוא מבצע `pthread_cond_broadcast`.\n3.  חוטים אחרים שמחכים ב-`pthread_cond_wait` יתעוררו. כעת, במקום לצאת מיד מהפונקציה, הם בודקים בלולאת `while` האם `my_generation` שלהם עדיין שווה ל-`barrier_generation` הגלובלי. כל עוד הם זהים, זה אומר שהמחסום לא התקדם עבורם, והם יחזרו למצב המתנה (או שזו הייתה התעוררות שווא). רק כאשר `barrier_generation` התקדם (על ידי החוט האחרון), `my_generation` של החוט כבר לא יהיה שווה ל-`barrier_generation` הגלובלי, והחוט יוכל לצאת מהלולאה ולהמשיך.\nתיקון זה מבטיח שכל החוטים ימתינו למחזור הנכון של המחסום ולא יקפצו למחזור הבא בטרם עת, ובכך מונע את תנאי המרוץ ותופעות ה-Deadlock/Livelock הפוטנציאליות בשימוש חוזר במחסום."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

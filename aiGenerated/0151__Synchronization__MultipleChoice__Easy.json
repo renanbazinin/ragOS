@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 19:43:58",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1187,
+      "output_tokens": 357,
+      "total_tokens": 2169
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Synchronization",
+      "Mutex"
+    ],
+    "content": {
+      "text": "מהי מטרתו העיקרית של מנעול (mutex) בסנכרון תהליכים?",
+      "code_snippet": null,
+      "options": [
+        "א. למנוע מצב של קיפאון (deadlock).",
+        "ב. להבטיח גישה בלעדית למשאב משותף (mutual exclusion).",
+        "ג. לאפשר לתהליכים להחליף נתונים ביניהם.",
+        "ד. לוודא שכל התהליכים ירוצו באותו סדר.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב'. מנעול (mutex) משמש בעיקר להבטחת גישה בלעדית לקטע קריטי (critical section) או למשאב משותף, כדי למנוע תנאי מרוץ (race conditions) ולהבטיח עקביות נתונים. בעוד שהוא יכול להיות חלק מפתרון למניעת קיפאון, זו אינה מטרתו העיקרית בפני עצמה."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

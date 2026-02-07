@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 19:51:18",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1598,
+      "output_tokens": 2066,
+      "total_tokens": 7782
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "Open",
+    "topic": [
+      "Synchronization",
+      "Race Conditions",
+      "Semaphores",
+      "Mutexes"
+    ],
+    "content": {
+      "text": "נתונים שני חוטים, `incrementer` ו-`decrementer`, אשר ניגשים למשתנה גלובלי משותף `counter`. החוט `incrementer` מגדיל את `counter` ב-`N` פעמים, והחוט `decrementer` מקטין את `counter` ב-`N` פעמים.\nהציגו את קוד המקור עבור שני החוטים ואת פונקציית `main` המפעילה אותם (ללא סנכרון). הסבירו מדוע קיים מצב מרוץ (race condition) בקוד זה ומה יכול להיות הערך הסופי השגוי של `counter`.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\n#define N 1000000\n\nint counter = 0;\n\nvoid* incrementer(void* arg) {\n    for (int i = 0; i < N; i++) {\n        counter++;\n    }\n    return NULL;\n}\n\nvoid* decrementer(void* arg) {\n    for (int i = 0; i < N; i++) {\n        counter--;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t tid1, tid2;\n\n    pthread_create(&tid1, NULL, incrementer, NULL);\n    pthread_create(&tid2, NULL, decrementer, NULL);\n\n    pthread_join(tid1, NULL);\n    pthread_join(tid2, NULL);\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "7.1",
+        "text": "עדכנו את הקוד שהוצג בסעיף הקודם באמצעות סמפורים (semaphores) או mutexים כך שהערך הסופי של `counter` יהיה תמיד 0. הציגו את הקוד המעודכן והסבירו את השינויים.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": 15,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הסבר למצב מרוץ (Race Condition):\nפעולות הגידול (`counter++`) וההקטנה (`counter--`) אינן אטומיות. כל אחת מהן מורכבת בדרך כלל ממספר הוראות מעבד:\n1. טעינת הערך הנוכחי של `counter` מזיכרון לתוך רגיסטר.\n2. ביצוע פעולת הגידול/הקטנה על הרגיסטר.\n3. שמירת הערך המעודכן מהרגיסטר בחזרה לזיכרון ב-`counter`.\n\nמצב מרוץ מתרחש כאשר שני החוטים מנסים לבצע פעולות אלו בו-זמנית, והגישה לזיכרון משתלבת ביניהן באופן לא צפוי. לדוגמה, אם `counter` שווה 0:\n* חוט `incrementer` טוען את `0` לרגיסטר שלו.\n* מתבצע מיתוג הקשר (context switch) לחוט `decrementer`.\n* חוט `decrementer` טוען גם הוא את `0` לרגיסטר שלו.\n* חוט `decrementer` מקטין את הרגיסטר שלו ל`-1` ושומר את `-1` בחזרה ל-`counter`. כעת `counter` שווה `-1`.\n* מתבצע מיתוג הקשר בחזרה לחוט `incrementer`.\n* חוט `incrementer` מגדיל את הרגיסטר שלו ל-`1` (זוכרים, הוא התחיל מ-`0`!).\n* חוט `incrementer` שומר את `1` בחזרה ל-`counter`. כעת `counter` שווה `1`.\n\nבמקרה זה, למרות שבוצעו פעולת גידול אחת ופעולת הקטנה אחת, הערך הסופי אינו `0` אלא `1`. באופן דומה, הערך הסופי יכול להיות `-1`. מכיוון שזה קורה `N` פעמים, הערך הסופי של `counter` יכול להיות כל מספר בין `-N` ל-`N` (כולל), ולא בהכרח `0`.\n\nפתרון באמצעות סמפור (Sub-question 7.1):\nכדי למנוע את מצב המרוץ ולהבטיח ש-`counter` יהיה `0` בסיום, יש להגן על האזור הקריטי (הפעולות `counter++` ו-`counter--`) באמצעות מנגנון סנכרון כמו סמפור בינארי (המשמש כמו mutex). הסמפור יבטיח שרק חוט אחד יוכל לגשת לאזור הקריטי בכל רגע נתון.\n\nקוד מעודכן:\n```c\n#include <stdio.h>\n#include <pthread.h>\n#include <semaphore.h> // נדרש עבור סמפורים\n\n#define N 1000000\n\nint counter = 0;\nsem_t mutex; // הכרזת סמפור\n\nvoid* incrementer(void* arg) {\n    for (int i = 0; i < N; i++) {\n        sem_wait(&mutex); // נכנס לאזור הקריטי\n        counter++;\n        sem_post(&mutex); // יוצא מהאזור הקריטי\n    }\n    return NULL;\n}\n\nvoid* decrementer(void* arg) {\n    for (int i = 0; i < N; i++) {\n        sem_wait(&mutex); // נכנס לאזור הקריטי\n        counter--;\n        sem_post(&mutex); // יוצא מהאזור הקריטי\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t tid1, tid2;\n    sem_init(&mutex, 0, 1); // אתחול סמפור בינארי לערך 1 (פתוח)\n\n    pthread_create(&tid1, NULL, incrementer, NULL);\n    pthread_create(&tid2, NULL, decrementer, NULL);\n\n    pthread_join(tid1, NULL);\n    pthread_join(tid2, NULL);\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    sem_destroy(&mutex); // שחרור משאבי הסמפור\n    return 0;\n}\n```\n\nהסבר השינויים:\n1. **הכרזת סמפור:** הוספנו משתנה מסוג `sem_t` בשם `mutex` גלובלי.\n2. **אתחול סמפור:** בפונקציית `main`, קראנו ל-`sem_init(&mutex, 0, 1)` כדי לאתחל את הסמפור. הפרמטר `0` מציין שהסמפור ישמש בין חוטים באותו תהליך, והפרמטר `1` מאתחל אותו כסמפור בינארי (mutex) זמין.\n3. **כניסה לאזור קריטי:** לפני כל גישה ל-`counter` (בתוך הלולאות של `incrementer` ו-`decrementer`), קראנו ל-`sem_wait(&mutex)`. קריאה זו חוסמת את החוט אם הסמפור אינו זמין, ומאפשרת לו להמשיך רק כאשר הסמפור הופך זמין (ואז מקטינה את ערכו).\n4. **יציאה מאזור קריטי:** לאחר סיום הפעולה על `counter`, קראנו ל-`sem_post(&mutex)`. קריאה זו משחררת את הסמפור ומאפשרת לחוט אחר (אם יש כזה שממתין) להיכנס לאזור הקריטי.\n5. **שחרור משאבי סמפור:** בסיום `main`, קראנו ל-`sem_destroy(&mutex)` כדי לשחרר את המשאבים שהוקצו לסמפור.\n\nשינויים אלו מבטיחים בלעדיות הדדית (mutual exclusion) על הגישה למשתנה `counter`, ובכך מונעים את מצב המרוץ ומבטיחים שהערך הסופי של `counter` יהיה תמיד `0`."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

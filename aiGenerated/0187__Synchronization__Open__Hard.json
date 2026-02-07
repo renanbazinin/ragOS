@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 19:54:48",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4073,
+      "output_tokens": 1971,
+      "total_tokens": 12218
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Synchronization",
+      "Concurrency",
+      "Threads",
+      "Mutexes",
+      "Condition Variables"
+    ],
+    "content": {
+      "text": "ממשו אובייקט סנכרון בשם `QuotaGate` אשר מאפשר למכסה קבועה של חוטים, `N`, להיכנס לקטע קריטי. לאחר ש-`N` חוטים נכנסו לקטע הקריטי, כל חוט נוסף שינסה להיכנס יחסם. השער נפתח מחדש (כלומר, מאפשר ל-`N` חוטים חדשים להיכנס) רק לאחר שכל `N` החוטים שהיו בקטע הקריטי יצאו ממנו. יש לממש את האובייקט כך שיהיה ניתן לשימוש חוזר אינסופי.\n\nהשלימו את המימוש של הפונקציות `enter` ו-`exit_quota_gate` עבור מבנה הנתונים `QuotaGate` הנתון, תוך שימוש ב-`pthread_mutex_t` וב-`pthread_cond_t`. עליכם להגדיר את השדות הנדרשים בתוך מבנה `QuotaGate` ולממש גם את פונקציות ה-`init_quota_gate` ו-`destroy_quota_gate`.",
+      "code_snippet": "```c\n#include <pthread.h>\n#include <stdlib.h>\n\n// You need to define the struct QuotaGate and implement its functions.\ntypedef struct {\n    // Define your fields here\n} QuotaGate;\n\n// Initializes the QuotaGate with a given quota N\nvoid init_quota_gate(QuotaGate *gate, int N);\n\n// Destroys the QuotaGate resources\nvoid destroy_quota_gate(QuotaGate *gate);\n\n// Thread calls this to enter the critical section\nvoid enter(QuotaGate *gate);\n\n// Thread calls this to exit the critical section\nvoid exit_quota_gate(QuotaGate *gate);\n```",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון משתמש בשני מונים ובמשתנה תנאי (condition variable) אחד בנוסף למוטקס אחד:\n1.  `N`: המכסה המקסימלית של חוטים המורשים להיכנס לקטע הקריטי בכל מחזור.\n2.  `current_entries`: מונה כמה חוטים כבר נכנסו לקטע הקריטי במחזור הנוכחי. כאשר מונה זה מגיע ל-`N`, חוטים נוספים יחסמו בכניסה.\n3.  `threads_waiting_to_exit`: מונה כמה חוטים מתוך ה-`N` שנכנסו עדיין נמצאים בקטע הקריטי (כלומר, טרם קראו ל-`exit_quota_gate`). כאשר מונה זה מגיע ל-0, זה מצביע על כך שכל החוטים מהמחזור הנוכחי יצאו, וניתן לאפס את השער למחזור הבא.\n4.  `mutex`: מנעול להגנה על המונים ועל גישה למשתנה התנאי.\n5.  `can_enter`: משתנה תנאי עבור חוטים הממתינים להיכנס לקטע הקריטי. חוטים אלו יקבלו איתות כאשר מחזור חדש מתחיל.\n\n**פונקציית `init_quota_gate`**: מאתחלת את המונים ומשתני הסנכרון.\n\n**פונקציית `destroy_quota_gate`**: משחררת את משאבי הסנכרון.\n\n**פונקציית `enter`**:\n*   החוט נועל את המוטקס.\n*   הוא בודק אם `current_entries` שווה ל-`N`. אם כן, זה אומר שמכסת החוטים למחזור הנוכחי כבר נכנסה, ולכן הוא ממתין על `can_enter`.\n*   כאשר החוט מתעורר (כי מחזור חדש התחיל), הוא מגדיל את `current_entries` (כדי לסמן שנכנס חוט נוסף למחזור החדש) ואת `threads_waiting_to_exit` (כדי לסמן שהוא נמצא כעת בתוך הקטע הקריטי).\n*   החוט משחרר את המוטקס.\n\n**פונקציית `exit_quota_gate`**:\n*   החוט נועל את המוטקס.\n*   הוא מקטין את `threads_waiting_to_exit` (כדי לסמן שיצא מהקטע הקריטי).\n*   אם `threads_waiting_to_exit` הגיע ל-0, זה אומר שכל `N` החוטים מהמחזור הקודם יצאו. במקרה זה:\n    *   מאפסים את `current_entries` ל-0, מה שמאפשר לחוטים חדשים להיכנס במחזור הבא.\n    *   שולחים איתות `broadcast` לכל החוטים הממתינים על `can_enter`, כדי לעורר אותם ולאפשר להם להתחיל להיכנס למחזור הבא.\n*   החוט משחרר את המוטקס.\n\nהפתרון מבטיח שאך ורק `N` חוטים ייכנסו בכל מחזור, ושהמחזור הבא יתחיל רק לאחר שכל `N` החוטים הקודמים יצאו. השימוש ב-`pthread_cond_broadcast` מבטיח שכל החוטים הממתינים בכניסה יתעוררו כאשר השער נפתח מחדש, ויכולים להתחרות על הכניסה.\n\n```c\n#include <pthread.h>\n#include <stdlib.h>\n\ntypedef struct {\n    int N;                      // The quota (max threads allowed in critical section per cycle)\n    int current_entries;        // Number of threads that have entered in the current cycle\n    int threads_waiting_to_exit; // Number of threads that are currently inside the critical section from the current cycle\n    pthread_mutex_t mutex;\n    pthread_cond_t can_enter;   // Condition variable for threads waiting to enter\n} QuotaGate;\n\nvoid init_quota_gate(QuotaGate *gate, int N) {\n    gate->N = N;\n    gate->current_entries = 0;\n    gate->threads_waiting_to_exit = 0;\n    pthread_mutex_init(&gate->mutex, NULL);\n    pthread_cond_init(&gate->can_enter, NULL);\n}\n\nvoid destroy_quota_gate(QuotaGate *gate) {\n    pthread_mutex_destroy(&gate->mutex);\n    pthread_cond_destroy(&gate->can_enter);\n}\n\nvoid enter(QuotaGate *gate) {\n    pthread_mutex_lock(&gate->mutex);\n\n    // Wait if N threads have already entered in the current cycle.\n    // This means the current batch is full, and we must wait for it to complete.\n    while (gate->current_entries == gate->N) {\n        pthread_cond_wait(&gate->can_enter, &gate->mutex);\n    }\n\n    gate->current_entries++;\n    gate->threads_waiting_to_exit++; // Increment this when a thread enters, to track how many are still inside\n\n    pthread_mutex_unlock(&gate->mutex);\n}\n\nvoid exit_quota_gate(QuotaGate *gate) {\n    pthread_mutex_lock(&gate->mutex);\n\n    gate->threads_waiting_to_exit--;\n\n    // If this is the last thread from the current cycle to exit,\n    // reset the gate for the next cycle and notify waiting threads.\n    if (gate->threads_waiting_to_exit == 0) {\n        gate->current_entries = 0; // Reset entry count for the next cycle\n        pthread_cond_broadcast(&gate->can_enter); // Wake up all threads waiting to enter\n    }\n\n    pthread_mutex_unlock(&gate->mutex);\n}\n```"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

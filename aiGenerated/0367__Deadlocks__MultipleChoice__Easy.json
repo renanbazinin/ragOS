@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Deadlocks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 21:07:24",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 896,
+      "output_tokens": 325,
+      "total_tokens": 2404
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Deadlocks",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "אם תנאי 'אי-נתיקה' (No Preemption) אינו מתקיים, כלומר ניתן לבצע נתיקה של משאבים, אזי עדיין ייתכן קיפאון (deadlock).",
+      "code_snippet": null,
+      "options": [
+        "נכון",
+        "לא נכון"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "לא נכון",
+      "explanation": "לא נכון. קיפאון (deadlock) מתרחש רק כאשר כל ארבעת התנאים ההכרחיים מתקיימים: מניעה הדדית (Mutual Exclusion), אחיזה והמתנה (Hold and Wait), אי-נתיקה (No Preemption), והמתנה מעגלית (Circular Wait). אם תנאי 'אי-נתיקה' אינו מתקיים, כלומר ניתן ליטול משאב מחוט שמחזיק בו, אזי אחד מהתנאים ההכרחיים לקיפאון נמנע, ולכן קיפאון אינו יכול להתרחש."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

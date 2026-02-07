@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Deadlocks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 21:11:51",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 1344,
+      "total_tokens": 6079
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Deadlocks",
+      "Synchronization",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא המשתמש בשני מנעולים (mutexes), `mutexA` ו-`mutexB`, ובשני תהליכונים, `thread_func1` ו-`thread_func2`. ההנחה היא ששני המנעולים מאותחלים כראוי וששני התהליכונים רצים במקביל. איזה מהטענות הבאות נכונה לגבי קטע קוד זה?",
+      "code_snippet": "#include <pthread.h>\n\n// Assume mutexA and mutexB are initialized globally.\npthread_mutex_t mutexA;\npthread_mutex_t mutexB;\n\nvoid* thread_func1(void* arg) {\n    pthread_mutex_lock(&mutexA);\n    // Critical section 1: uses mutexA\n    pthread_mutex_lock(&mutexB);\n    // Critical section 2: uses mutexA and mutexB\n    pthread_mutex_unlock(&mutexB);\n    pthread_mutex_unlock(&mutexA);\n    return NULL;\n}\n\nvoid* thread_func2(void* arg) {\n    pthread_mutex_lock(&mutexB); // Different acquisition order\n    // Critical section 3: uses mutexB\n    pthread_mutex_lock(&mutexA); // Different acquisition order\n    // Critical section 4: uses mutexB and mutexA\n    pthread_mutex_unlock(&mutexA);\n    pthread_mutex_unlock(&mutexB);\n    return NULL;\n}\n// Assume main function creates and runs thread_func1 and thread_func2 concurrently.",
+      "options": [
+        "א. הקוד לעולם לא יגיע למצב של Deadlock, מכיוון שכל תהליכון משחרר את המנעולים בסדר הפוך לסדר שבו תפס אותם.",
+        "ב. הקוד יגיע ל-Deadlock בוודאות בכל הרצה, מכיוון שסדר תפיסת המנעולים שונה בין התהליכונים.",
+        "ג. הקוד עלול להגיע למצב של Deadlock עקב הפרה של תנאי \"אין מניעה מוקדמת\" (No Preemption), כיוון שהמנעולים אינם ניתנים להפקעה.",
+        "ד. הקוד עלול להגיע למצב של Deadlock עקב הפרה של תנאי \"החזקה והמתנה\" (Hold and Wait) ו\"המתנה מעגלית\" (Circular Wait).",
+        "ה. ניתן למנוע את ה-Deadlock בקלות על ידי החלפת כל קריאות `pthread_mutex_lock` ל-`pthread_mutex_trylock`."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ד",
+      "explanation": "התשובה הנכונה היא ד'.\nהקוד מדגים מצב קלאסי של Deadlock שיכול להתרחש עקב הפרה של שני תנאים הכרחיים ל-Deadlock:\n1.  **החזקה והמתנה (Hold and Wait)**: כל אחד מהתהליכונים תופס מנעול אחד (thread_func1 תופס את mutexA, ו-thread_func2 תופס את mutexB) ולאחר מכן ממתין למנעול נוסף (thread_func1 ממתין ל-mutexB, ו-thread_func2 ממתין ל-mutexA) מבלי לשחרר את המנעול שכבר תפס.\n2.  **המתנה מעגלית (Circular Wait)**: נוצרת שרשרת המתנה מעגלית: thread_func1 ממתין למשאב (mutexB) המוחזק על ידי thread_func2, אשר ממתין בתורו למשאב (mutexA) המוחזק על ידי thread_func1.\nשני התנאים הנוספים ל-Deadlock, **מניעה הדדית (Mutual Exclusion)** ו**אין מניעה מוקדמת (No Preemption)**, מתקיימים באופן טאבוטי במנעולים (mutexes).\n\nא. שגויה. Deadlock אכן יכול להתרחש, כפי שהוסבר לעיל.\nב. שגויה. Deadlock אינו מובטח בכל הרצה; הוא תלוי בתזמון המדויק של פעולות התהליכונים, אך הוא אפשרי מאוד.\nג. שגויה. למרות שתנאי \"אין מניעה מוקדמת\" מתקיים במנעולים (לא ניתן להפקיע מנעול מתהליכון שתפס אותו), הוא אינו הגורם הישיר ל-Deadlock במקרה זה. הבעיה העיקרית נובעת מסדר תפיסת המשאבים השונה בין התהליכונים שמוביל להמתנה מעגלית.\nה. שגויה. שימוש ב-`pthread_mutex_trylock` מאפשר לתהליכון לנסות לתפוס מנעול מבלי להיחסם אם הוא תפוס. זהו כלי שימושי לאיתור וטיפול ב-Deadlock (למשל, על ידי שחרור מנעולים שכבר נתפסו וניסיון חוזר), אך הוא אינו מונע את תנאי ה-Deadlock מלהתקיים מלכתחילה. כדי למנוע Deadlock, נדרשת אסטרטגיה כמו תפיסת מנעולים בסדר קבוע ומוסכם על ידי כל התהליכונים."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

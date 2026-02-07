@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 19:43:51",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1187,
+      "output_tokens": 395,
+      "total_tokens": 2603
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Synchronization",
+      "Mutex"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של שימוש ב-mutex (מנעול הדדי) במערכת הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. לאפשר תקשורת אמינה בין תהליכים שונים.",
+        "ב. למנוע מצב של רעב (starvation) של תהליכים.",
+        "ג. להבטיח שרק תהליך אחד יבצע קטע קוד קריטי בכל רגע נתון.",
+        "ד. לסנכרן את עבודת המעבד עם התקני קלט/פלט.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג'. המטרה העיקרית של mutex (מנעול הדדי) היא להגן על קטעים קריטיים של קוד (critical sections) המשתמשים במשאבים משותפים. בכך, הוא מבטיח שרק תהליך או חוט חישוב אחד יוכל לגשת למשאב המשותף ולשנות אותו בכל רגע נתון, ובכך למנוע תנאי מרוץ (race conditions) ולהבטיח עקביות נתונים."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

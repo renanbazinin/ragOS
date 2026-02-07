@@ -1,0 +1,50 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Deadlocks",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 21:26:08",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2852,
+      "output_tokens": 1391,
+      "total_tokens": 6530
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Deadlocks",
+      "Concurrency",
+      "Synchronization",
+      "Mutexes",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא המשתמש במנעולים (mutexes) ובחוטים (threads) לסינכרון. נתח את הקוד וענה על השאלה:",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h> // For sleep\n\npthread_mutex_t mutexA;\npthread_mutex_t mutexB;\n\nvoid* thread_func1(void* arg) {\n    printf(\"Thread 1: Trying to lock mutexA...\\n\");\n    pthread_mutex_lock(&mutexA);\n    printf(\"Thread 1: Locked mutexA. Trying to lock mutexB...\\n\");\n    sleep(1); // Introduce delay to increase likelihood of deadlock\n    pthread_mutex_lock(&mutexB);\n    printf(\"Thread 1: Locked mutexB. Doing work...\\n\");\n    // Simulate work\n    sleep(1);\n    pthread_mutex_unlock(&mutexB);\n    pthread_mutex_unlock(&mutexA);\n    printf(\"Thread 1: Unlocked mutexA and mutexB. Exiting.\\n\");\n    return NULL;\n}\n\nvoid* thread_func2(void* arg) {\n    printf(\"Thread 2: Trying to lock mutexB...\\n\");\n    pthread_mutex_lock(&mutexB);\n    printf(\"Thread 2: Locked mutexB. Trying to lock mutexA...\\n\");\n    sleep(1); // Introduce delay\n    pthread_mutex_lock(&mutexA);\n    printf(\"Thread 2: Locked mutexA. Doing work...\\n\");\n    // Simulate work\n    sleep(1);\n    pthread_mutex_unlock(&mutexA);\n    pthread_mutex_unlock(&mutexB);\n    printf(\"Thread 2: Unlocked mutexB and mutexA. Exiting.\\n\");\n    return NULL;\n}\n\nint main() {\n    pthread_t tid1, tid2;\n\n    pthread_mutex_init(&mutexA, NULL);\n    pthread_mutex_init(&mutexB, NULL);\n\n    pthread_create(&tid1, NULL, thread_func1, NULL);\n    pthread_create(&tid2, NULL, thread_func2, NULL);\n\n    pthread_join(tid1, NULL);\n    pthread_join(tid2, NULL);\n\n    pthread_mutex_destroy(&mutexA);\n    pthread_mutex_destroy(&mutexB);\n\n    printf(\"Main: Both threads finished.\\n\");\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "a",
+        "text": "האם קטע קוד זה עלול להוביל למצב קיפאון (deadlock)? אם כן, הסבר מדוע וציין אילו מהתנאים ההכרחיים למצב קיפאון מתקיימים בקוד זה.",
+        "code_snippet": null,
+        "options": [
+          "כן",
+          "לא"
+        ],
+        "solution": {
+          "is_present_in_file": true,
+          "correct_option": "כן",
+          "explanation": "כן, קטע קוד זה עלול להוביל למצב קיפאון (deadlock). מצב קיפאון מתרחש כאשר שני חוטים או יותר חוסמים זה את זה וכל אחד מהם ממתין למשאב שמוחזק על ידי חוט אחר במעגל. ארבעת התנאים ההכרחיים למצב קיפאון מתקיימים בקוד זה:\n\n1.  **מניעה הדדית (Mutual Exclusion)**: מתקיים. המנעולים `mutexA` ו-`mutexB` מבטיחים שרק חוט אחד יכול להחזיק כל מנעול בזמן נתון. אם חוט אחד לוקח מנעול, חוט אחר לא יכול לקחת אותו עד שהוא ישוחרר.\n\n2.  **החזק והמתן (Hold and Wait)**: מתקיים. חוט `thread_func1` מחזיק את `mutexA` וממתין ל-`mutexB`. במקביל, חוט `thread_func2` מחזיק את `mutexB` וממתין ל-`mutexA`. כל חוט מחזיק במשאב אחד לפחות בזמן שהוא ממתין למשאב נוסף.\n\n3.  **אי-הפקעה (No Preemption)**: מתקיים. לא ניתן להפקיע מנעול מחוט שמחזיק אותו. המנעולים ישוחררו רק מרצונם החופשי של החוטים המחזיקים אותם, באמצעות `pthread_mutex_unlock`.\n\n4.  **המתנה מעגלית (Circular Wait)**: מתקיים. קיים מעגל המתנה: חוט `thread_func1` ממתין ל-`mutexB` שמוחזק על ידי `thread_func2`, וחוט `thread_func2` ממתין ל-`mutexA` שמוחזק על ידי `thread_func1`. זה יוצר תלות מעגלית שמונעת מכל אחד מהחוטים להתקדם.\n\nכתוצאה מכך, אם החוטים ירוצו בסדר קריטי שבו כל אחד מהם יתפוס מנעול אחד וינסה לתפוס את השני, שניהם ייתקעו בהמתנה אינסופית."
+        }
+      }
+    ],
+    "points": 15,
+    "solution": null,
+    "difficulty_estimation": "Medium"
+  }
+}

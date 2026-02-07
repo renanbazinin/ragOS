@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 20:07:08",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4129,
+      "output_tokens": 2208,
+      "total_tokens": 11024
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Threads",
+      "Mutex",
+      "Condition Variables",
+      "Semaphores",
+      "Barrier"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C הבאה המשתמשת בחוטים (threads) ובמנגנוני סנכרון (mutexes, condition variables, semaphores) לביצוע עבודה מתואמת. התוכנית מיועדת לבצע את השלבים הבאים:\n1.  **שלב ההכנה**: כל חוט מבצע פעולת הכנה מקומית.\n2.  **שלב ההמתנה הגלובלי**: כל החוטים ממתינים זה לזה עד שכולם יסיימו את שלב ההכנה. רק אז הם יכולים להמשיך.\n3.  **שלב העבודה המתואמת**: החוטים מקדמים מונה גלובלי משותף `global_counter` באופן סבבי (thread 0, thread 1, ..., thread N_THREADS-1, ואז שוב thread 0 וכן הלאה), כאשר כל חוט מבצע `K_ITERATIONS` קידומים. \n\nבהינתן N_THREADS=3 ו-K_ITERATIONS=2, ובהנחה שכל קריאות המערכת הצליחו, מה יהיה ערכו הסופי של `global_counter`? האם קיימים מצבי מרוץ (race conditions) או קיפאון (deadlocks) בקוד? פרט את תשובתך באופן מלא ומנומק.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <semaphore.h>\n\n#define N_THREADS 3 \n#define K_ITERATIONS 2 \n\nint global_counter = 0; \n\n// Barrier synchronization\npthread_mutex_t barrier_mutex;\npthread_cond_t barrier_cond;\nint threads_at_barrier = 0;\n\n// Turn-based synchronization\nsem_t turn_semaphores[N_THREADS]; // One semaphore per thread\n\nvoid* worker_thread(void* arg) {\n    long thread_id = (long)arg;\n\n    // Phase 1: Local Setup\n    printf(\"Thread %ld: Starting setup...\\n\", thread_id);\n    // Simulate setup time if needed\n    printf(\"Thread %ld: Setup complete.\\n\", thread_id);\n\n    // Phase 2: Barrier synchronization - wait for all threads to complete setup\n    pthread_mutex_lock(&barrier_mutex);\n    threads_at_barrier++;\n    if (threads_at_barrier == N_THREADS) {\n        printf(\"All threads reached barrier. Signaling...\\n\");\n        pthread_cond_broadcast(&barrier_cond); // Signal all waiting threads\n    } else {\n        while (threads_at_barrier < N_THREADS) {\n            pthread_cond_wait(&barrier_cond, &barrier_mutex); // Wait for signal\n        }\n    }\n    pthread_mutex_unlock(&barrier_mutex);\n    printf(\"Thread %ld: Passed barrier.\\n\", thread_id);\n\n    // Phase 3: Coordinated Work - ordered increment of global_counter\n    for (int i = 0; i < K_ITERATIONS; ++i) {\n        sem_wait(&turn_semaphores[thread_id]); // Wait for my turn\n\n        // Critical section\n        global_counter++;\n        printf(\"Thread %ld: Incrementing global_counter to %d (iteration %d)\\n\", thread_id, global_counter, i);\n\n        sem_post(&turn_semaphores[(thread_id + 1) % N_THREADS]); // Signal next thread\n    }\n\n    printf(\"Thread %ld: Finished all work.\\n\", thread_id);\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[N_THREADS];\n\n    // Initialize synchronization primitives\n    pthread_mutex_init(&barrier_mutex, NULL);\npthread_cond_init(&barrier_cond, NULL);\n\n    for (int i = 0; i < N_THREADS; ++i) {\n        sem_init(&turn_semaphores[i], 0, 0); // All initially 0\n    }\n    sem_post(&turn_semaphores[0]); // Grant turn to thread 0 to start\n\n    // Create threads\n    for (long i = 0; i < N_THREADS; ++i) {\n        if (pthread_create(&threads[i], NULL, worker_thread, (void*)i) != 0) {\n            perror(\"Failed to create thread\");\n            return 1;\n        }\n    }\n\n    // Join threads\n    for (int i = 0; i < N_THREADS; ++i) {\n        if (pthread_join(threads[i], NULL) != 0) {\n            perror(\"Failed to join thread\");\n            return 1;\n        }\n    }\n\n    printf(\"Main: All threads finished. Final global_counter = %d\\n\", global_counter);\n\n    // Destroy synchronization primitives\n    pthread_mutex_destroy(&barrier_mutex);\npthread_cond_destroy(&barrier_cond);\n    for (int i = 0; i < N_THREADS; ++i) {\n        sem_destroy(&turn_semaphores[i]);\n    }\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "**ערך סופי של global_counter:**\nהערך הסופי של `global_counter` יהיה 6. כל אחד מ-`N_THREADS` החוטים מקדם את המונה `K_ITERATIONS` פעמים. מכיוון שהסנכרון מבטיח שכל קידום מתבצע באופן אטומי ומוגן, כל הקידומים יצטברו בצורה נכונה. לכן, סך הקידומים יהיה `N_THREADS * K_ITERATIONS = 3 * 2 = 6`.\n\n**מצבי מרוץ או קיפאון:**\nהקוד **אינו מכיל מצבי מרוץ או קיפאון** עבור התרחיש המתואר, והוא מסונכרן באופן נכון בשני השלבים:\n\n1.  **שלב ההמתנה הגלובלי (Barrier Synchronization):**\n    *   החוטים משתמשים ב-`pthread_mutex_t` (`barrier_mutex`) וב-`pthread_cond_t` (`barrier_cond`) יחד עם מונה `threads_at_barrier` כדי ליישם מחסום (barrier). \n    *   המונה `threads_at_barrier` מוגן על ידי המוטקס (`barrier_mutex`), מה שמונע מצב מרוץ על עדכון המונה.\n    *   החוט האחרון שמגיע למחסום (כאשר `threads_at_barrier == N_THREADS`) משדר (broadcast) לכל החוטים הממתינים באמצעות `pthread_cond_broadcast`, ובכך משחרר אותם להמשך הריצה.\n    *   שאר החוטים ממתינים באמצעות `pthread_cond_wait` בתוך לולאת `while`, המבטיחה בדיקה חוזרת של התנאי (`threads_at_barrier < N_THREADS`) גם במקרה של התעוררות שווא (spurious wakeup), ובכך מבטיחה שכל החוטים יעברו את המחסום רק כאשר כולם הגיעו אליו.\n    *   אין קיפאון מכיוון שכל החוטים בסופו של דבר יגיעו למחסום, והחוט האחרון ישחרר את כולם.\n\n2.  **שלב העבודה המתואמת (Ordered Processing):**\n    *   החוטים משתמשים במערך של סמפורים (`turn_semaphores`) כדי לאכוף סדר סבבי קפדני בקידום `global_counter`.\n    *   כל סמפור מיועד לחוט ספציפי (חוט `i` ממתין על `turn_semaphores[i]` ומאותת לחוט `(i+1)%N_THREADS` באמצעות `sem_post(&turn_semaphores[(thread_id + 1) % N_THREADS])`).\n    *   הסמפור `turn_semaphores[0]` מאותחל ל-1 ב-`main` כדי לאפשר לחוט 0 להתחיל ראשון, בעוד שאר הסמפורים מאותחלים ל-0.\n    *   דפוס זה מבטיח שרק חוט אחד בכל פעם ניגש ל-`global_counter` ומקדם אותו, ובכך מונע מצב מרוץ על המונה. \n    *   אין קיפאון מכיוון שיש תמיד חוט אחד שיכול להמשיך (זה שהסמפור שלו הוא 1), והוא תמיד יעביר את ה\"תור\" לחוט הבא בסבב."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

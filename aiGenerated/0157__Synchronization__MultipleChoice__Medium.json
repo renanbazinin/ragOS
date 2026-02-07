@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 19:45:43",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1118,
+      "output_tokens": 1066,
+      "total_tokens": 9604
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "Synchronization",
+      "Race Conditions",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתון קוד C הבא המשתמש במשתנה גלובלי `counter` ובשני תהליכונים (threads) המנסים להגדיל אותו. המשתנה `counter` מאותחל ל-0. כל אחד משני התהליכונים מגדיל את `counter` 1000 פעמים. מהו הערך הסופי האפשרי של `counter` לאחר ששני התהליכונים סיימו את פעולתם?",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\nint counter = 0;\n\nvoid* increment_thread(void* arg) {\n    for (int i = 0; i < 1000; i++) {\n        counter++;\n    }\n    return NULL;\n}\n\n// ההנחה היא שפונקציית main יוצרת שני תהליכונים הקוראים ל-increment_thread,\n// ממתינה להם, ואז מדפיסה את counter.",
+      "options": [
+        "א. 2000 בלבד",
+        "ב. כל ערך בין 1 ל-2000 כולל",
+        "ג. כל ערך בין 1000 ל-2000 כולל",
+        "ד. כל ערך בין 1001 ל-2000 כולל",
+        "ה. 0 בלבד"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "הבעיה המתוארת היא תנאי מרוץ (Race Condition). הפעולה `counter++` אינה אטומית. היא מורכבת בדרך כלל משלושה שלבים: טעינת הערך של `counter` לתוך אוגר, הגדלת הערך באוגר, ושמירת הערך החדש מהאוגר חזרה ל-`counter`. כאשר שני תהליכונים מבצעים פעולה זו במקביל ללא מנגנוני סנכרון, ייתכנו תרחישי ביצוע שונים.\n\nהערך המקסימלי האפשרי הוא 2000. זה יקרה אם אחד התהליכונים מסיים את כל 1000 ההגדלות שלו לפני שהשני מתחיל, או אם פעולות ה-`load-increment-store` של כל תהליכון מתבצעות באופן כזה שאין איבוד עדכונים.\n\nהערך המינימלי האפשרי הוא 1. תרחיש לדוגמה:\n1. תהליכון A טוען את `counter` (שהוא 0) לאוגר שלו (R_A=0).\n2. תהליכון B טוען את `counter` (שהוא 0) לאוגר שלו (R_B=0).\n3. תהליכון A מגדיל את הערך באוגר שלו ל-1 (R_A=1).\n4. תהליכון B מגדיל את הערך באוגר שלו ל-1 (R_B=1).\n5. תהליכון A שומר את הערך (1) מן האוגר שלו ל-`counter`. כעת `counter` שווה ל-1.\n6. תהליכון B שומר את הערך (1) מן האוגר שלו ל-`counter`. כעת `counter` נשאר שווה ל-1.\nבמקרה זה, שתי פעולות `counter++` גרמו להגדלה אחת בלבד של `counter`. תרחיש קיצוני נוסף לערך מינימלי הוא אם תהליכון A טוען את 0, ואז תהליכון B מבצע את כל 1000 ההגדרות שלו (מעלה את `counter` ל-1000), ואז תהליכון A שומר את הערך 1 (שאותו חישב קודם לכן) חזרה ל-`counter`, הרי ש-`counter` יסיים ב-1.\n\nלכן, הערך הסופי של `counter` יכול להיות כל מספר שלם בין 1 ל-2000, כולל."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Semaphores",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 20:49:37",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4278,
+      "output_tokens": 2962,
+      "total_tokens": 17671
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "Open",
+    "topic": [
+      "Semaphores",
+      "Concurrency",
+      "Resource Management",
+      "Deadlock",
+      "Starvation"
+    ],
+    "content": {
+      "text": "מערכת מורכבת מ-N תהליכי עבודה (Worker Threads) ומשני סוגי משאבים משותפים: ResourceA (סה\"כ MAX_A יחידות) ו-ResourceB (סה\"כ MAX_B יחידות). משימות מגיעות באופן דינמי. כל משימה דורשת req_A יחידות מ-ResourceA ו-req_B יחידות מ-ResourceB. תהליך עבודה לוקח משימה וצריך לרכוש את *כל* המשאבים הנדרשים באופן אטומי לפני תחילת המשימה, ולשחרר אותם כולם בסיום. בנוסף, למערכת יש מדיניות שמגבילה את המספר הכולל של *משימות פעילות* (משימות שמחזיקות משאבים ומבצעות כעת) ל-MAX_CONCURRENT_TASKS. כל הפעולות של סמפורים הן POSIX standard (`sem_init`, `sem_wait`, `sem_post`, `sem_getvalue`, `sem_trywait`).\n\nא. כתבו את חתימות הפונקציות `acquire_resources(int req_A, int req_B)` ו-`release_resources(int req_A, int req_B)`.\nב. יישמו את הפונקציות הללו באמצעות סמפורים (מונים ו/או בינאריים/Mutex), תוך הקפדה על הדרישות הבאות:\n   1. לא יוקצו יותר מ-MAX_A יחידות מ-ResourceA ולא יותר מ-MAX_B יחידות מ-ResourceB.\n   2. לא יהיו יותר מ-MAX_CONCURRENT_TASKS משימות פעילות בו זמנית.\n   3. המערכת תהיה נקייה מקיפאון (Deadlock-free).\n   4. מנעו הרעבה (Starvation) ככל הניתן בפתרון שלכם.\nג. הסבירו במפורט כיצד הפתרון שלכם מונע קיפאון והרעבה.",
+      "code_snippet": "/* גלובליים / אתחול */\n#include <semaphore.h>\n#include <unistd.h> // for usleep\n\nsem_t sem_A;\nsem_t sem_B;\nsem_t sem_concurrent;\nsem_t mutex_resource_alloc; // להגנה על הקצאת משאבים מרובים\n\nvoid init_synchronization(int MAX_A, int MAX_B, int MAX_CONCURRENT_TASKS) {\n    sem_init(&sem_A, 0, MAX_A);\n    sem_init(&sem_B, 0, MAX_B);\n    sem_init(&sem_concurrent, 0, MAX_CONCURRENT_TASKS);\n    sem_init(&mutex_resource_alloc, 0, 1);\n}\n\nvoid destroy_synchronization() {\n    sem_destroy(&sem_A);\n    sem_destroy(&sem_B);\n    sem_destroy(&sem_concurrent);\n    sem_destroy(&mutex_resource_alloc);\n}\n\n/* פונקציות שיש לממש */\nvoid acquire_resources(int req_A, int req_B);\nvoid release_resources(int req_A, int req_B);",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "פתרון:\n\n**א. חתימות הפונקציות:**\n```c\nvoid acquire_resources(int req_A, int req_B);\nvoid release_resources(int req_A, int req_B);\n```\n\n**ב. יישום הפונקציות:**\n```c\nvoid acquire_resources(int req_A, int req_B) {\n    // 1. תפוס מקום למשימה מקבילה. זה מגביל את המספר הכולל של משימות שיכולות לנסות לרכוש משאבים.\n    sem_wait(&sem_concurrent);\n\n    // 2. היכנס לקטע קריטי להקצאת משאבים. זה מבטיח שרק תהליך אחד בכל פעם יבדוק וירכוש משאבים.\n    while (1) {\n        sem_wait(&mutex_resource_alloc);\n\n        int val_A, val_B;\n        // בדוק את כמות המשאבים הזמינים. `sem_getvalue` אינה אטומית עם `sem_wait`.\n        // לכן, אנחנו בתוך critical section המוגן על ידי `mutex_resource_alloc`.\n        sem_getvalue(&sem_A, &val_A);\n        sem_getvalue(&sem_B, &val_B);\n\n        if (val_A >= req_A && val_B >= req_B) {\n            // כל המשאבים זמינים. רכוש אותם.\n            // רכישה ביחידות בודדות בתוך הקטע הקריטי.\n            for (int i = 0; i < req_A; ++i) {\n                sem_wait(&sem_A);\n            }\n            for (int i = 0; i < req_B; ++i) {\n                sem_wait(&sem_B);\n            }\n            sem_post(&mutex_resource_alloc); // שחרר את המוטקס לאחר רכישה מוצלחת\n            break; // יצא מהלולאה, המשאבים נרכשו בהצלחה\n        } else {\n            // המשאבים אינם זמינים במלואם. שחרר את המוטקס זמנית ואז נסה שוב.\n            sem_post(&mutex_resource_alloc);\n            usleep(1000); // המתן זמן קצר כדי למנוע busy-waiting ולאפשר לתהליכים אחרים לנסות\n        }\n    }\n}\n\nvoid release_resources(int req_A, int req_B) {\n    // שחרר יחידות של ResourceA\n    for (int i = 0; i < req_A; ++i) {\n        sem_post(&sem_A);\n    }\n    // שחרר יחידות של ResourceB\n    for (int i = 0; i < req_B; ++i) {\n        sem_post(&sem_B);\n    }\n    // שחרר את המקום של המשימה המקבילה\n    sem_post(&sem_concurrent);\n}\n```\n\n**ג. הסבר על מניעת קיפאון והרעבה:**\n\n**מניעת קיפאון (Deadlock Prevention):**\nקיפאון מתרחש כאשר מתקיימים ארבעה תנאים: מניעה הדדית (Mutual Exclusion), החזקה והמתנה (Hold and Wait), אי-הפקעה (No Preemption), והמתנה מעגלית (Circular Wait). הפתרון המוצע מונע קיפאון על ידי שבירת תנאי ה\"החזקה והמתנה\" וה\"המתנה מעגלית\" באופן הבא:\n\n1.  **מניעת הקצאה חלקית (Acquire All or None):** הפונקציה `acquire_resources` משתמשת בסמפור בינארי `mutex_resource_alloc` כדי להגן על קטע קריטי שבו מתבצעת הבדיקה והרכישה של המשאבים `ResourceA` ו-`ResourceB`. תהליך חייב לרכוש את `mutex_resource_alloc` לפני שהוא יכול לבדוק אם המשאבים זמינים. בתוך הקטע הקריטי, התהליך בודק אם *כל* המשאבים הנדרשים (req_A ו-req_B) זמינים באמצעות `sem_getvalue`. רק אם כל המשאבים זמינים, הוא רוכש אותם (באמצעות לולאות של `sem_wait`). אם לא כל המשאבים זמינים, התהליך משחרר את `mutex_resource_alloc` וחוזר לנסות מאוחר יותר. גישה זו מבטיחה שתהליך רוכש את כל המשאבים הנדרשים לו או אף אחד מהם, ובכך נמנע מצב של \"החזקה והמתנה\" שבו תהליך מחזיק במשאב אחד וממתין למשאב אחר, מה שיכול להוביל לקיפאון. מכיוון שרק תהליך אחד יכול לבצע את שלב הבדיקה והרכישה האטומית בכל רגע נתון, לא ייתכן מצב שבו שני תהליכים יחזיקו חלקים מהמשאבים וימתינו זה לזה באופן מעגלי.\n2.  **מניעת המתנה מעגלית (Circular Wait):** למרות שההקצאה האטומית היא המנגנון העיקרי למניעת קיפאון, אם היינו רוכשים את המשאבים בנפרד, היה נדרש סדר קבוע. בפתרון זה, הסדר שבו נרכשים `sem_A` ואז `sem_B` בתוך הקטע הקריטי תורם גם הוא למניעת המתנה מעגלית, אך כאמור, המנגנון של \"הקצה הכל או כלום\" הוא המשמעותי יותר.\n\n**מניעת הרעבה (Starvation Prevention):**\nסמפורי POSIX (כמו אלה המשמשים כאן) בדרך כלל מיישמים תור המתנה הוגן (FIFO - First-In, First-Out) עבור קריאות `sem_wait`. המשמעות היא שתהליכים שממתינים לסמפור יתעוררו בסדר שבו הם נכנסו לתור ההמתנה. זה מסייע במניעת הרעבה במספר דרכים:\n\n1.  **הוגנות ב-`sem_concurrent`:** תהליכים הממתינים למקום במגבלת המשימות המקבילות (`sem_concurrent`) יקבלו את מקומם בסדר הוגן, מה שמבטיח שכל משימה תקבל בסופו של דבר הזדמנות לנסות לרכוש משאבים.\n2.  **הוגנות ב-`mutex_resource_alloc`:** תהליכים הממתינים להיכנס לקטע הקריטי של הקצאת המשאבים (המוגן על ידי `mutex_resource_alloc`) יקבלו את הגישה בסדר הוגן. זה מבטיח שכל תהליך יקבל הזדמנות לבדוק את זמינות המשאבים.\n3.  **הוגנות בסמפורי המשאבים (`sem_A`, `sem_B`):** כאשר תהליך מצליח להיכנס לקטע הקריטי ומוצא שכל המשאבים זמינים, הוא מבצע סדרת קריאות `sem_wait` כדי לרכוש אותם. אם אחד מהסמפורים הללו נחסם, התהליך ימתין בתור הוגן.\n4.  **הפחתת Busy-Waiting:** השימוש ב-`usleep(1000)` בתוך לולאת ה-`while(1)` כאשר המשאבים אינם זמינים, מפחית את ה-busy-waiting. במקום שתהליך ינסה שוב ושוב באופן מיידי, הוא ממתין זמן קצר, מה שמפנה את המעבד לתהליכים אחרים ומאפשר למשאבים להשתחרר. זה גם נותן לתהליכים אחרים (אשר ממתינים ל-`mutex_resource_alloc`) הזדמנות לרכוש את המוטקס ולנסות את מזלם.\n\nלמרות שהפתרון אינו מבטיח מניעת הרעבה אבסולוטית (לדוגמה, תהליך הדורש כמות גדולה מאוד של משאבים עלול למצוא את עצמו ממתין זמן רב אם משימות קטנות יותר ממשיכות להגיע ולרכוש את המשאבים הזמינים), הוא מקטין משמעותית את הסיכון להרעבה על ידי שילוב של הוגנות מובנית בסמפורי POSIX והפחתת busy-waiting."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

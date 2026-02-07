@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 19:58:05",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4073,
+      "output_tokens": 2415,
+      "total_tokens": 15278
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Synchronization",
+      "Threads",
+      "Concurrency",
+      "Mutexes",
+      "Condition Variables",
+      "Readers-Writers Problem"
+    ],
+    "content": {
+      "text": "במערכת הפעלה נתונה, קיים משאב משותף שניתן לגשת אליו ממספר חוטים במקביל. עם זאת, עקב מגבלות חומרה, לכל היותר M חוטים יכולים לגשת למשאב בו-זמנית (M הוא פרמטר אתחול). בנוסף, למשאב יש שני מצבי גישה: 'קריאה' ו-'כתיבה'.\n\n- חוטים במצב 'קריאה' יכולים לגשת למשאב במקביל, כל עוד המספר הכולל של חוטים הניגשים למשאב (קריאה + כתיבה) אינו עולה על M.\n- רק חוט אחד במצב 'כתיבה' יכול לגשת למשאב בכל רגע נתון.\n- אם חוט 'כתיבה' ממתין, אין לאפשר לחוטי 'קריאה' חדשים להתחיל לגשת למשאב (כדי למנוע הרעבה של כותבים).\n- אם חוט 'קריאה' ממתין, יש לאפשר לו להמשיך אם ישנם פחות מ-M חוטים פעילים ואין כותב ממתין.\n\nממשו את מבנה הנתונים `LimitedAccessResource` ואת הפעולות `init`, `destroy`, `acquire_read_access`, `release_read_access`, `acquire_write_access`, ו-`release_write_access` תוך שימוש באובייקטי סנכרון של POSIX (mutexes ו-condition variables). עליכם למנוע מצבי קיפאון (deadlocks) והרעבה (starvation) של כותבים, תוך ניצול מקסימלי של המשאב הנתון (עד M חוטים בו-זמנית).",
+      "code_snippet": "typedef struct {\n    int max_concurrent_slots; // M\n    int active_readers;       // Number of readers currently accessing\n    int active_writer;        // 1 if a writer is active, 0 otherwise\n    int waiting_readers;      // Number of readers waiting\n    int waiting_writers;      // Number of writers waiting\n\n    pthread_mutex_t mutex;\n    pthread_cond_t reader_cond;\n    pthread_cond_t writer_cond;\n} LimitedAccessResource;\n\nvoid init(LimitedAccessResource *res, int M) {\n    // Implement this function\n}\n\nvoid destroy(LimitedAccessResource *res) {\n    // Implement this function\n}\n\nvoid acquire_read_access(LimitedAccessResource *res) {\n    // Implement this function\n}\n\nvoid release_read_access(LimitedAccessResource *res) {\n    // Implement this function\n}\n\nvoid acquire_write_access(LimitedAccessResource *res) {\n    // Implement this function\n}\n\nvoid release_write_access(LimitedAccessResource *res) {\n    // Implement this function\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון משתמש ב-mutex יחיד להגנה על המשתנים המשותפים (מונה קוראים פעילים, כותב פעיל, מוני קוראים וכותבים ממתינים), ובשני משתני תנאי (condition variables): אחד לקוראים ואחד לכותבים. המשתנים `active_readers` ו-`active_writer` עוקבים אחר מספר החוטים הפעילים, בעוד `waiting_readers` ו-`waiting_writers` עוקבים אחר החוטים הממתינים. הפרמטר `max_concurrent_slots` מגדיר את מגבלת ה-M הכוללת.\n\n**מניעת קיפאון (Deadlock Prevention):**\nהפתרון מונע קיפאון על ידי כך שחוט לעולם אינו מקבל חלק מהמשאבים שלו. חוט ממתין עד שכל התנאים לגישה מתקיימים, כולל מספר המקומות הפנויים וכללי העדיפות לכותבים. התלות ההדדית מנוהלת באמצעות משתני התנאי המאפשרים שחרור חוטים ממתינים באופן מבוקר.\n\n**מניעת הרעבה (Starvation Prevention):**\nהפתרון נותן עדיפות לכותבים (Writer Preference) באופן הבא:\n1.  **לכותבים עדיפות על פני קוראים חדשים:** ב-`acquire_read_access`, קורא ממתין אם `waiting_writers > 0` (כלומר, יש כותב שממתין). זה מונע מקוראים חדשים להיכנס ולגרום לכותב להמתין זמן רב.\n2.  **כותבים מתעוררים ראשונים:** ב-`release_read_access` וב-`release_write_access`, אם ישנם כותבים ממתינים (`waiting_writers > 0`) והתנאים מאפשרים לכותב להתקדם (לדוגמה, אין קוראים פעילים ב-`release_read_access` או שהכותב הפעיל סיים ב-`release_write_access`), אז משתנה התנאי של הכותבים (`writer_cond`) מסומן ראשון.\n\n**מקסימום מקביליות (Maximum Concurrency):**\n-   עד M חוטים יכולים לגשת למשאב בו-זמנית, כל עוד הם קוראים, ואין כותב פעיל או ממתין.\n-   `pthread_cond_broadcast` משמש לשחרור קבוצת קוראים בבת אחת כאשר אין כותבים ממתינים, מה שמאפשר למספר קוראים להיכנס למשאב כל עוד יש מקום (`(active_readers + active_writer) < max_concurrent_slots`).\n\n**מימוש הפונקציות:**\n```c\n#include <pthread.h>\n#include <stdlib.h>\n\ntypedef struct {\n    int max_concurrent_slots; // M\n    int active_readers;       // Number of readers currently accessing\n    int active_writer;        // 1 if a writer is active, 0 otherwise\n    int waiting_readers;      // Number of readers waiting\n    int waiting_writers;      // Number of writers waiting\n\n    pthread_mutex_t mutex;\n    pthread_cond_t reader_cond;\n    pthread_cond_t writer_cond;\n} LimitedAccessResource;\n\nvoid init(LimitedAccessResource *res, int M) {\n    res->max_concurrent_slots = M;\n    res->active_readers = 0;\n    res->active_writer = 0;\n    res->waiting_readers = 0;\n    res->waiting_writers = 0;\n    pthread_mutex_init(&res->mutex, NULL);\n    pthread_cond_init(&res->reader_cond, NULL);\n    pthread_cond_init(&res->writer_cond, NULL);\n}\n\nvoid destroy(LimitedAccessResource *res) {\n    pthread_mutex_destroy(&res->mutex);\n    pthread_cond_destroy(&res->reader_cond);\n    pthread_cond_destroy(&res->writer_cond);\n}\n\nvoid acquire_read_access(LimitedAccessResource *res) {\n    pthread_mutex_lock(&res->mutex);\n    res->waiting_readers++;\n    while (res->active_writer > 0 || \n           res->waiting_writers > 0 || \n           (res->active_readers + res->active_writer) >= res->max_concurrent_slots) {\n        pthread_cond_wait(&res->reader_cond, &res->mutex);\n    }\n    res->waiting_readers--;\n    res->active_readers++;\n    pthread_mutex_unlock(&res->mutex);\n}\n\nvoid release_read_access(LimitedAccessResource *res) {\n    pthread_mutex_lock(&res->mutex);\n    res->active_readers--;\n    // If this was the last reader and there are waiting writers, wake up one writer.\n    if (res->active_readers == 0 && res->waiting_writers > 0) {\n        pthread_cond_signal(&res->writer_cond);\n    } else if ((res->active_readers + res->active_writer) < res->max_concurrent_slots) {\n        // If there's still space and no writer is waiting, wake up readers.\n        if (res->waiting_writers == 0) {\n             pthread_cond_broadcast(&res->reader_cond);\n        }\n    }\n    pthread_mutex_unlock(&res->mutex);\n}\n\nvoid acquire_write_access(LimitedAccessResource *res) {\n    pthread_mutex_lock(&res->mutex);\n    res->waiting_writers++;\n    while (res->active_readers > 0 || \n           res->active_writer > 0 || \n           (res->active_readers + res->active_writer) >= res->max_concurrent_slots) {\n        pthread_cond_wait(&res->writer_cond, &res->mutex);\n    }\n    res->waiting_writers--;\n    res->active_writer = 1;\n    pthread_mutex_unlock(&res->mutex);\n}\n\nvoid release_write_access(LimitedAccessResource *res) {\n    pthread_mutex_lock(&res->mutex);\n    res->active_writer = 0;\n    // After a writer leaves, prioritize waiting writers.\n    if (res->waiting_writers > 0) {\n        pthread_cond_signal(&res->writer_cond);\n    } else {\n        // No waiting writers, wake up all waiting readers that can fit.\n        pthread_cond_broadcast(&res->reader_cond);\n    }\n    pthread_mutex_unlock(&res->mutex);\n}\n```",
+      "difficulty_estimation": "Hard"
+    }
+  }
+}

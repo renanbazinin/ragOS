@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Deadlocks",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 21:24:00",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3900,
+      "output_tokens": 1442,
+      "total_tokens": 7376
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Deadlocks",
+      "Concurrency",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתון קוד C הבא המשתמש בשני מנעולים (mutexes) ובשני תהליכונים (threads). קראו את הקוד בעיון. האם קוד זה עלול להוביל למצב של קיפאון (deadlock)? אם כן, הסבירו מדוע וכיצד ניתן למנוע זאת.",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h> // For sleep\n\npthread_mutex_t mutex1;\npthread_mutex_t mutex2;\n\nvoid* thread_func1(void* arg) {\n    printf(\"Thread 1: Trying to lock mutex1...\\n\");\n    pthread_mutex_lock(&mutex1);\n    printf(\"Thread 1: Locked mutex1. Trying to lock mutex2...\\n\");\n    sleep(1); // Simulate work or context switch\n    pthread_mutex_lock(&mutex2);\n    printf(\"Thread 1: Locked mutex2. Critical section...\\n\");\n    // Do some work\n    pthread_mutex_unlock(&mutex2);\n    pthread_mutex_unlock(&mutex1);\n    printf(\"Thread 1: Unlocked mutexes.\\n\");\n    return NULL;\n}\n\nvoid* thread_func2(void* arg) {\n    printf(\"Thread 2: Trying to lock mutex2...\\n\");\n    pthread_mutex_lock(&mutex2);\n    printf(\"Thread 2: Locked mutex2. Trying to lock mutex1...\\n\");\n    sleep(1); // Simulate work or context switch\n    pthread_mutex_lock(&mutex1);\n    printf(\"Thread 2: Locked mutex1. Critical section...\\n\");\n    // Do some work\n    pthread_mutex_unlock(&mutex1);\n    pthread_mutex_unlock(&mutex2);\n    printf(\"Thread 2: Unlocked mutexes.\\n\");\n    return NULL;\n}\n\nint main() {\n    pthread_mutex_init(&mutex1, NULL);\n    pthread_mutex_init(&mutex2, NULL);\n\n    pthread_t t1, t2;\n    pthread_create(&t1, NULL, thread_func1, NULL);\n    pthread_create(&t2, NULL, thread_func2, NULL);\n\n    pthread_join(t1, NULL);\n    pthread_join(t2, NULL);\n\n    pthread_mutex_destroy(&mutex1);\n    pthread_mutex_destroy(&mutex2);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": false,
+      "correct_option": null,
+      "explanation": "כן, קוד זה עלול להוביל למצב של קיפאון (deadlock).\n\n**הסבר:** קיפאון יכול להתרחש בתרחיש הבא:\n1.  Thread 1 תופס בהצלחה את `mutex1`.\n2.  במקביל, Thread 2 תופס בהצלחה את `mutex2`.\n3.  לאחר מכן, Thread 1 מנסה לתפוס את `mutex2`, אך הוא כבר תפוס על ידי Thread 2. לכן, Thread 1 נחסם וממתין ש-Thread 2 ישחרר את `mutex2`.\n4.  באותו זמן, Thread 2 מנסה לתפוס את `mutex1`, אך הוא כבר תפוס על ידי Thread 1. לכן, Thread 2 נחסם וממתין ש-Thread 1 ישחרר את `mutex1`.\n\nכתוצאה מכך, שני התהליכונים ממתינים זה לזה באופן הדדי ואינסופי, וזהו מצב של קיפאון (Circular Wait).\n\n**מניעה:** הדרך הנפוצה והפשוטה ביותר למנוע קיפאון במקרה זה היא להבטיח סדר עקבי של תפיסת מנעולים (consistent locking order) בכל התהליכונים. כלומר, שכל התהליכונים ינסו לתפוס את המנעולים באותו סדר. לדוגמה, שניהם יתפסו קודם את `mutex1` ואז את `mutex2`.\n\n**דוגמה לתיקון (שמירה על סדר `mutex1` ואז `mutex2`):**\n```c\nvoid* thread_func1(void* arg) {\n    printf(\"Thread 1: Trying to lock mutex1...\\n\");\n    pthread_mutex_lock(&mutex1);\n    printf(\"Thread 1: Locked mutex1. Trying to lock mutex2...\\n\");\n    pthread_mutex_lock(&mutex2);\n    printf(\"Thread 1: Locked mutex2. Critical section...\\n\");\n    pthread_mutex_unlock(&mutex2);\n    pthread_mutex_unlock(&mutex1);\n    printf(\"Thread 1: Unlocked mutexes.\\n\");\n    return NULL;\n}\n\nvoid* thread_func2(void* arg) {\n    printf(\"Thread 2: Trying to lock mutex1...\\n\"); // Changed order\n    pthread_mutex_lock(&mutex1);\n    printf(\"Thread 2: Locked mutex1. Trying to lock mutex2...\\n\"); // Changed order\n    pthread_mutex_lock(&mutex2);\n    printf(\"Thread 2: Locked mutex2. Critical section...\\n\");\n    pthread_mutex_unlock(&mutex2); // Unlocked in correct order\n    pthread_mutex_unlock(&mutex1); // Unlocked in correct order\n    printf(\"Thread 2: Unlocked mutexes.\\n\");\n    return NULL;\n}\n```"
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

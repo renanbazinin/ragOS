@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Deadlocks",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 21:24:35",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3900,
+      "output_tokens": 1566,
+      "total_tokens": 7818
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Deadlocks",
+      "Synchronization",
+      "Concurrency",
+      "Mutexes"
+    ],
+    "content": {
+      "text": "נתון קוד C המשתמש בספריות `pthread` ליצירת שני תהליכונים (threads) ושני מנעולים (mutexes). כל תהליכון מנסה לרכוש את שני המנעולים בסדר מסוים. נתחו את הקוד הבא וענו על השאלה:\n\nהאם קיים סיכון לקיפאון (deadlock) בקוד זה? אם כן, הסבירו מדוע וכיצד ניתן למנוע אותו. אם לא, הסבירו מדוע.",
+      "code_snippet": "```c\n#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h> // For sleep\n\npthread_mutex_t mutexA;\npthread_mutex_t mutexB;\n\nvoid* thread1_func(void* arg) {\n    printf(\"Thread 1: Trying to lock mutexA...\\n\");\n    pthread_mutex_lock(&mutexA);\n    printf(\"Thread 1: Locked mutexA. Trying to lock mutexB...\\n\");\n    sleep(1); // Simulate some work or context switch\n    pthread_mutex_lock(&mutexB);\n    printf(\"Thread 1: Locked mutexB. Doing work...\\n\");\n    // Critical section\n    pthread_mutex_unlock(&mutexB);\n    pthread_mutex_unlock(&mutexA);\n    printf(\"Thread 1: Unlocked mutexA and mutexB. Exiting.\\n\");\n    return NULL;\n}\n\nvoid* thread2_func(void* arg) {\n    printf(\"Thread 2: Trying to lock mutexB...\\n\");\n    pthread_mutex_lock(&mutexB);\n    printf(\"Thread 2: Locked mutexB. Trying to lock mutexA...\\n\");\n    sleep(1); // Simulate some work or context switch\n    pthread_mutex_lock(&mutexA);\n    printf(\"Thread 2: Locked mutexA. Doing work...\\n\");\n    // Critical section\n    pthread_mutex_unlock(&mutexA);\n    pthread_mutex_unlock(&mutexB);\n    printf(\"Thread 2: Unlocked mutexB and mutexA. Exiting.\\n\");\n    return NULL;\n}\n\n// main function (not part of the snippet for analysis, but for context)\n// int main() {\n//     pthread_t tid1, tid2;\n//     pthread_mutex_init(&mutexA, NULL);\n//     pthread_mutex_init(&mutexB, NULL);\n\n//     pthread_create(&tid1, NULL, thread1_func, NULL);\n//     pthread_create(&tid2, NULL, thread2_func, NULL);\n\n//     pthread_join(tid1, NULL);\n//     pthread_join(tid2, NULL);\n\n//     pthread_mutex_destroy(&mutexA);\n//     pthread_mutex_destroy(&mutexB);\n//     return 0;\n// }\n```",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": false,
+      "correct_option": null,
+      "explanation": "כן, קיים סיכון לקיפאון (deadlock) בקוד זה. הקיפאון יכול להתרחש כאשר תהליכון 1 רוכש בהצלחה את `mutexA` ותהליכון 2 רוכש בהצלחה את `mutexB`. בשלב זה, תהליכון 1 מחזיק ב-`mutexA` וממתין ל-`mutexB` (שמוחזק על ידי תהליכון 2), בעוד שתהליכון 2 מחזיק ב-`mutexB` וממתין ל-`mutexA` (שמוחזק על ידי תהליכון 1). נוצרת כאן המתנה מעגלית.\n\nהתנאים לקיפאון מתקיימים:\n1.  **מניעה הדדית (Mutual Exclusion):** המנעולים מבטיחים שרק תהליכון אחד יכול להחזיק משאב (מנעול) בכל רגע נתון. תנאי זה מתקיים.\n2.  **החזקה והמתנה (Hold and Wait):** כל תהליכון מחזיק במנעול אחד וממתין למנעול נוסף. תהליכון 1 מחזיק ב-`mutexA` וממתין ל-`mutexB`, ותהליכון 2 מחזיק ב-`mutexB` וממתין ל-`mutexA`. תנאי זה מתקיים.\n3.  **אי-הפקעה (No Preemption):** לא ניתן להפקיע מנעול מתהליכון שמחזיק בו בכוח. תנאי זה מתקיים.\n4.  **המתנה מעגלית (Circular Wait):** תהליכון 1 ממתין למשאב שמוחזק על ידי תהליכון 2, ותהליכון 2 ממתין למשאב שמוחזק על ידי תהליכון 1, ויוצר מעגל תלות. תנאי זה מתקיים.\n\n**פתרון למניעת קיפאון:**\nכדי למנוע קיפאון זה, יש להבטיח סדר עקבי ברכישת המנעולים על ידי כל התהליכונים. לדוגמה, שני התהליכונים צריכים לרכוש קודם את `mutexA` ולאחר מכן את `mutexB` (או להיפך, כל עוד הסדר זהה בשניהם).\n\nדוגמה לתיקון:\n```c\nvoid* thread1_func(void* arg) {\n    pthread_mutex_lock(&mutexA);\n    sleep(1);\n    pthread_mutex_lock(&mutexB);\n    // Critical section\n    pthread_mutex_unlock(&mutexB);\n    pthread_mutex_unlock(&mutexA);\n    return NULL;\n}\n\nvoid* thread2_func(void* arg) {\n    pthread_mutex_lock(&mutexA); // Changed order to match thread1\n    sleep(1);\n    pthread_mutex_lock(&mutexB); // Changed order to match thread1\n    // Critical section\n    pthread_mutex_unlock(&mutexB);\n    pthread_mutex_unlock(&mutexA);\n    return NULL;\n}\n```"
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

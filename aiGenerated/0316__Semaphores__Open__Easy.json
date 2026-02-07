@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Semaphores",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 20:43:39",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2862,
+      "output_tokens": 879,
+      "total_tokens": 5111
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "Open",
+    "topic": [
+      "Semaphores",
+      "Concurrency",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "מהו סמפור (Semaphore) במערכת הפעלה? הסבר את מטרתו, את שתי הפעולות הבסיסיות שלו (wait/P ו-signal/V), ותאר בקצרה כיצד ניתן להשתמש בו למימוש הדדיות (Mutual Exclusion) ולסנכרון בין תהליכים.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "סמפור הוא משתנה שלם (integer variable) המאפשר שליטה על גישה למשאבים משותפים בין תהליכים מקבילים. הוא משמש לפתרון בעיות סנכרון ותיאום במערכות הפעלה.\n\nהפעולות הבסיסיות של סמפור הן:\n1.  **wait (נקרא גם P או down)**: פעולה זו מקטינה את ערך הסמפור באחד. אם ערך הסמפור הופך שלילי, התהליך המבצע את הפעולה נחסם (מוכנס לרשימת המתנה) עד שסמפור יגדל. פעולה זו היא אטומית.\n2.  **signal (נקרא גם V או up)**: פעולה זו מגדילה את ערך הסמפור באחד. אם יש תהליכים חסומים ברשימת ההמתנה של הסמפור, אחד מהם משוחרר (מועבר למצב מוכן). פעולה זו היא אטומית.\n\nשימושים עיקריים:\n*   **הדדיות (Mutual Exclusion)**: כדי להבטיח שרק תהליך אחד ייכנס לקטע קריטי (critical section) בכל רגע נתון, ניתן להשתמש בסמפור בינארי (מוטקס - mutex) המאותחל ל-1. לפני הכניסה לקטע הקריטי, תהליך יבצע `wait()` על הסמפור. לאחר היציאה מהקטע הקריטי, הוא יבצע `signal()` על הסמפור.\n    ```c\n    semaphore mutex = 1;\n\n    void process() {\n        // ...\n        wait(mutex); // Enter critical section\n        // Critical Section Code\n        signal(mutex); // Exit critical section\n        // ...\n    }\n    ```\n*   **סנכרון (Synchronization)**: סמפורים יכולים לשמש לסנכרון אירועים בין תהליכים. לדוגמה, תהליך א' יכול לאותת לתהליך ב' שאירוע מסוים התרחש. סמפור ספירה (counting semaphore) יכול לאותחל ל-0. תהליך א' יבצע `signal()` כשהאירוע מתרחש, ותהליך ב' יבצע `wait()` לפני שהוא ממשיך, ובכך יבטיח שהאירוע התרחש.\n    ```c\n    semaphore event_occurred = 0; // Initialize to 0\n\n    // Process A\n    void producer() {\n        // ... produce item\n        signal(event_occurred); // Signal that item is ready\n        // ...\n    }\n\n    // Process B\n    void consumer() {\n        // ...\n        wait(event_occurred); // Wait for item to be ready\n        // ... consume item\n    }\n    ```"
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

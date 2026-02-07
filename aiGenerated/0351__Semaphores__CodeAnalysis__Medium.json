@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Semaphores",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 21:00:38",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2864,
+      "output_tokens": 2101,
+      "total_tokens": 7793
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Semaphores",
+      "Concurrency",
+      "Threads",
+      "Mutual Exclusion"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המשתמשת בסמפור בינארי על מנת להגן על קטע קריטי בו משתנה גלובלי משותף (shared_resource) מעודכן. התוכנית יוצרת 3 תהליכונים (threads) המנסים לגשת לקטע הקריטי. הקוד הבא מציג את לוגיקת התוכנית:\n\n```c\n#include <stdio.h>\n#include <pthread.h>\n#include <semaphore.h>\n#include <unistd.h> // for sleep\n\nsem_t mutex;\nint shared_resource = 0; // A simple shared resource\n\nvoid* thread_function(void* arg) {\n    long thread_id = (long)arg;\n\n    printf(\"Thread %ld trying to enter critical section.\\n\", thread_id);\n    sem_wait(&mutex); // P operation\n\n    // Critical Section\n    shared_resource++;\n    printf(\"Thread %ld entered critical section. shared_resource = %d\\n\", thread_id, shared_resource);\n    sleep(1); // Simulate work\n    shared_resource--;\n    printf(\"Thread %ld exiting critical section. shared_resource = %d\\n\", thread_id, shared_resource);\n\n    sem_post(&mutex); // V operation\n    printf(\"Thread %ld released critical section.\\n\", thread_id);\n\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[3];\n    int i;\n\n    // Initialize semaphore with initial value 1 (for mutual exclusion)\n    sem_init(&mutex, 0, 1);\n\n    for (i = 0; i < 3; i++) {\n        pthread_create(&threads[i], NULL, thread_function, (void*)(long)i);\n    }\n\n    for (i = 0; i < 3; i++) {\n        pthread_join(threads[i], NULL);\n    }\n\n    sem_destroy(&mutex);\n    printf(\"Main: All threads finished. Final shared_resource = %d\\n\", shared_resource);\n\n    return 0;\n}\n```\n\n1. תארו פלט אפשרי אחד של התוכנית. הסבירו מדוע הוא אפשרי.\n2. מה יקרה אם נחליף את השורות `shared_resource--;` ו-`sem_post(&mutex);` כך ש-`sem_post(&mutex);` תבוצע לפני `shared_resource--;` בתוך הפונקציה `thread_function`? האם עלול להיווצר מצב מרוץ (race condition) או חוסר עקביות בנתונים? נמקו.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1. **פלט אפשרי והסבר:**\nהסמפור `mutex` מאותחל לערך 1, מה שהופך אותו לסמפור בינארי המשמש להדדיות (mutual exclusion). כלומר, רק תהליכון אחד יכול להיכנס לקטע הקריטי בכל רגע נתון. הפעולה `sem_wait(&mutex)` (המקבילה ל-P) מקטינה את ערך הסמפור וממתינה אם הוא 0. הפעולה `sem_post(&mutex)` (המקבילה ל-V) מגדילה את ערך הסמפור.\nבתוך הקטע הקריטי, `shared_resource` מוגדל ואז מוקטן. מכיוון שרק תהליכון אחד יכול להיות בקטע הקריטי, ערכו של `shared_resource` יעלה ל-1 כאשר תהליכון נכנס, ויחזור ל-0 כאשר הוא יוצא. לכן, הפלט יראה שכל תהליכון נכנס ויוצא מהקטע הקריטי בנפרד, וערך `shared_resource` יהיה תמיד 1 בתוך הקטע הקריטי (לאחר ההגדלה) ו-0 מחוץ לו (לאחר ההקטנה).\n\n**פלט אפשרי לדוגמה:**\n```\nThread 0 trying to enter critical section.\nThread 1 trying to enter critical section.\nThread 2 trying to enter critical section.\nThread 0 entered critical section. shared_resource = 1\nThread 0 exiting critical section. shared_resource = 0\nThread 0 released critical section.\nThread 1 entered critical section. shared_resource = 1\nThread 1 exiting critical section. shared_resource = 0\nThread 1 released critical section.\nThread 2 entered critical section. shared_resource = 1\nThread 2 exiting critical section. shared_resource = 0\nThread 2 released critical section.\nMain: All threads finished. Final shared_resource = 0\n```\n(הערה: סדר ההודעות \"trying to enter critical section\" יכול להשתנות בהתאם לתיזמון של מתזמן התהליכונים, אך סדר הכניסה והיציאה מהקטע הקריטי יהיה מוגן על ידי הסמפור).\n\n2. **השלכות של שינוי סדר הפעולות:**\nאם נחליף את השורות `shared_resource--;` ו-`sem_post(&mutex);` כך ש-`sem_post(&mutex);` תבוצע לפני `shared_resource--;` בתוך הפונקציה `thread_function`, נקבל את הקוד הבא (באופן לוגי):\n```c\n    // ... קוד קודם ...\n    shared_resource++;\n    printf(\"Thread %ld entered critical section. shared_resource = %d\\n\", thread_id, shared_resource);\n    sleep(1); // Simulate work\n\n    sem_post(&mutex); // V operation - הסמפור משוחרר מוקדם מדי!\n    printf(\"Thread %ld released critical section (prematurely).\\n\", thread_id);\n\n    shared_resource--; // פעולה זו מתבצעת כעת מחוץ לקטע הקריטי המוגן!\n    printf(\"Thread %ld exiting critical section. shared_resource = %d\\n\", thread_id, shared_resource);\n    // ... קוד קודם ...\n```\nבמקרה כזה, התהליכון ישחרר את הסמפור (כלומר, יאפשר לתהליכון אחר להיכנס לקטע הקריטי) *לפני* שהוא מסיים את כל העבודה בקטע הקריטי (בפרט, לפני שהוא מקטין את `shared_resource`).\n\nזה יוביל ל:\n*   **מצב מרוץ (Race Condition)**: תהליכון אחד יכול לשחרר את הסמפור, ואז תהליכון אחר יכול להיכנס לקטע הקריטי ולהגדיל את `shared_resource`. אם התהליכון הראשון עדיין לא הספיק להקטין את `shared_resource` לפני שהתהליכון השני מגדיל אותו, ערכו של `shared_resource` יכול להגיע ל-2 (או יותר אם יש יותר תהליכונים), מה שמנוגד להנחת ההדדיות.\n*   **חוסר עקביות בנתונים**: ערך `shared_resource` לא יהיה מוגן כהלכה. הוא יכול להגיע לערכים גבוהים מ-1 בתוך מה שהיה אמור להיות הקטע הקריטי, ובסופו של דבר ערכו הסופי ב-`main` עשוי להיות שונה מ-0, מה שמצביע על שגיאה לוגית. לדוגמה, תהליכון A מגדיל את `shared_resource` ל-1, משחרר את הסמפור. מיד לאחר מכן, תהליכון B נכנס לקטע הקריטי ומגדיל את `shared_resource` ל-2. רק אז תהליכון A ממשיך ומקטין את `shared_resource` ל-1, ואז תהליכון B מקטין אותו ל-0. זה יוצר חוסר עקביות בזמן אמת ופוטנציאל לנתונים שגויים.\n\nהשינוי הזה למעשה מזיז את חלק מהפעולות שהיו אמורות להיות מוגנות על ידי הסמפור אל מחוץ לקטע הקריטי המוגן, ובכך מבטל את מנגנון ההדדיות הרצויה ומציג פגיעות למצבי מרוץ."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

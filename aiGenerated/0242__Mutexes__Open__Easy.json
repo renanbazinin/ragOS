@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 20:12:58",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2084,
+      "output_tokens": 1236,
+      "total_tokens": 6708
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Mutexes",
+      "Synchronization",
+      "Race Conditions"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C בה מספר חוטים (threads) מנסים לעדכן מונה גלובלי משותף (global shared counter) במקביל. קוד התוכנית מוצג מטה.\nהסבירו מדוע קוד זה עלול להוביל לתוצאות שגויות, והציעו פתרון לבעיה באמצעות שימוש במוטקס (mutex) על ידי הצגת הקוד המתוקן במלואו.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\n#define NUM_THREADS 5\n#define INCREMENTS_PER_THREAD 100000\n\nlong long global_counter = 0;\n\nvoid *thread_function(void *arg) {\n    for (int i = 0; i < INCREMENTS_PER_THREAD; i++) {\n        global_counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    for (int i = 0; i < NUM_THREADS; i++) {\n        pthread_create(&threads[i], NULL, thread_function, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; i++) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final counter value: %lld\\n\", global_counter);\n    printf(\"Expected value: %lld\\n\", (long long)NUM_THREADS * INCREMENTS_PER_THREAD);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הבעיה בקוד המקורי היא תנאי מירוץ (race condition). מספר חוטים ניגשים ומשנים את המשתנה המשותף `global_counter` בו זמנית. הפעולה `global_counter++` אינה אטומית; היא מורכבת מקריאת הערך הנוכחי, הגדלתו באחד, וכתיבת הערך החדש בחזרה. אם שני חוטים או יותר מנסים לבצע פעולה זו במקביל, ייתכן שחוט אחד יקרא את הערך, חוט שני יקרא את אותו ערך לפני שהחוט הראשון הספיק לכתוב את הערך המוגדל, ושניהם יגדילו את אותו ערך ויכתבו אותו בחזרה, מה שיוביל לאובדן עדכונים ולתוצאה סופית שגויה (נמוכה מהצפוי).\n\nכדי לפתור את תנאי המירוץ, נשתמש במוטקס (mutex) כדי להבטיח שרק חוט אחד יוכל לגשת לקטע הקריטי (העדכון של `global_counter`) בכל רגע נתון. המוטקס יגן על המשתנה המשותף. לפני עדכון המונה, כל חוט ינעל את המוטקס באמצעות `pthread_mutex_lock`. לאחר העדכון, החוט ישחרר את המוטקס באמצעות `pthread_mutex_unlock`. בנוסף, יש לאתחל את המוטקס לפני השימוש ולשחרר את המשאבים שלו בסיום.\n\nהקוד המתוקן:\n```c\n#include <stdio.h>\n#include <pthread.h>\n\n#define NUM_THREADS 5\n#define INCREMENTS_PER_THREAD 100000\n\nlong long global_counter = 0;\npthread_mutex_t counter_mutex; // הצהרה על מוטקס\n\nvoid *thread_function(void *arg) {\n    for (int i = 0; i < INCREMENTS_PER_THREAD; i++) {\n        pthread_mutex_lock(&counter_mutex); // נעילת המוטקס\n        global_counter++;\n        pthread_mutex_unlock(&counter_mutex); // שחרור המוטקס\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    pthread_mutex_init(&counter_mutex, NULL); // אתחול המוטקס\n\n    for (int i = 0; i < NUM_THREADS; i++) {\n        pthread_create(&threads[i], NULL, thread_function, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; i++) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final counter value: %lld\\n\", global_counter);\n    printf(\"Expected value: %lld\\n\", (long long)NUM_THREADS * INCREMENTS_PER_THREAD);\n\n    pthread_mutex_destroy(&counter_mutex); // שחרור משאבי המוטקס\n\n    return 0;\n}\n```"
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

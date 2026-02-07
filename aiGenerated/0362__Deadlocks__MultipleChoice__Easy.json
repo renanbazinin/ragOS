@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Deadlocks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 21:06:49",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 896,
+      "output_tokens": 366,
+      "total_tokens": 2681
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Deadlocks",
+      "Concurrency",
+      "Processes"
+    ],
+    "content": {
+      "text": "קיפאון (deadlock) מתרחש כאשר:",
+      "code_snippet": null,
+      "options": [
+        "תהליך אחד בלבד ממתין למשאב.",
+        "מספר תהליכים ממתינים למשאבים זה מזה בשרשרת מעגלית.",
+        "תהליך ממתין למשאב שאינו קיים.",
+        "תהליך נכנס ללולאה אינסופית."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "מספר תהליכים ממתינים למשאבים זה מזה בשרשרת מעגלית.",
+      "explanation": "קיפאון (deadlock) מתרחש כאשר קבוצה של תהליכים חוסמת זה את זה, כך שכל תהליך בקבוצה ממתין למשאב המוחזק על ידי תהליך אחר באותה קבוצה. תנאי זה ידוע גם כתנאי 'המתנה מעגלית' (Circular Wait), והוא תנאי הכרחי להתרחשות קיפאון, יחד עם שלושה תנאים נוספים: הדרה הדדית, החזקה והמתנה, ואי-הפקעה."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

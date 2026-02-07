@@ -1,0 +1,50 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Semaphores",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 20:58:25",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2864,
+      "output_tokens": 2091,
+      "total_tokens": 10476
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Semaphores",
+      "Concurrency",
+      "Processes",
+      "IPC"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המשתמשת בסמפור לתיאום בין תהליכים בנים. התוכנית יוצרת מספר תהליכי בן (NUM_CHILDREN = 3), וכל אחד מהם מנסה להיכנס לקטע קריטי המוגן על ידי הסמפור. לאחר הכניסה, התהליך מדפיס הודעה, מדמה עבודה, מדפיס הודעה נוספת ויוצא מהקטע הקריטי.\n\nנתחו את הקוד וענו על השאלות הבאות:",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n#include <semaphore.h>\n#include <sys/mman.h> // For shared memory with semaphore\n\n#define NUM_CHILDREN 3\n\nsem_t *shared_semaphore; // Pointer to shared semaphore\n\nvoid child_task(int id) {\n    printf(\"Child %d (PID %d): Trying to access resource.\\n\", id, getpid());\n    sem_wait(shared_semaphore); // Acquire lock\n    // Critical Section\n    printf(\"Child %d (PID %d): *** Entered Critical Section ***\\n\", id, getpid());\n    sleep(1); // Simulate work\n    printf(\"Child %d (PID %d): --- Exiting Critical Section ---\\n\", id, getpid());\n    sem_post(shared_semaphore); // Release lock\n    exit(0);\n}\n\nint main() {\n    setbuf(stdout, NULL); // Disable buffering for immediate output\n\n    // Allocate shared memory for the semaphore\n    shared_semaphore = mmap(NULL, sizeof(sem_t), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);\n    if (shared_semaphore == MAP_FAILED) {\n        perror(\"mmap failed\");\n        return 1;\n    }\n\n    // Initialize semaphore for process sharing (1), initial value 1 (mutual exclusion)\n    if (sem_init(shared_semaphore, 1, 1) == -1) {\n        perror(\"sem_init failed\");\n        return 1;\n    }\n\n    pid_t pids[NUM_CHILDREN];\n\n    for (int i = 0; i < NUM_CHILDREN; i++) {\n        pids[i] = fork();\n        if (pids[i] == -1) {\n            perror(\"fork failed\");\n            return 1;\n        } else if (pids[i] == 0) { // Child process\n            child_task(i);\n        }\n    }\n\n    // Parent waits for all children\n    for (int i = 0; i < NUM_CHILDREN; i++) {\n        wait(NULL);\n    }\n\n    printf(\"Parent: All children finished. Cleaning up.\\n\");\n\n    // Destroy the semaphore\n    if (sem_destroy(shared_semaphore) == -1) {\n        perror(\"sem_destroy failed\");\n        return 1;\n    }\n\n    // Unmap shared memory\n    if (munmap(shared_semaphore, sizeof(sem_t)) == -1) {\n        perror(\"munmap failed\");\n        return 1;\n    }\n\n    return 0;\n}"
+    },
+    "sub_questions": [
+      {
+        "id": "8.1",
+        "text": "מהו פלט אפשרי אחד של התוכנית? ציינו במפורש מה מובטח לגבי סדר ההדפסות של ההודעות '*** Entered Critical Section ***' ו-'--- Exiting Critical Section ---' ביחס זו לזו, ומדוע.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.2",
+        "text": "אם נשנה את ערך האתחול של הסמפור מ-1 ל-NUM_CHILDREN (כלומר, sem_init(shared_semaphore, 1, NUM_CHILDREN)), כיצד זה ישפיע על הפלט ועל מאפייני התיאום בין התהליכים? האם עדיין מובטח שרק תהליך אחד יהיה בקטע הקריטי בכל רגע נתון?",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "8.1. פלט אפשרי אחד של התוכנית יכול להיות כדוגמה הבאה (סדר ההודעות 'Trying to access resource' יכול להשתנות, אך סדר הכניסה/יציאה מהקטע הקריטי יהיה תמיד סדרתי):\nChild 0 (PID XXX): Trying to access resource.\nChild 1 (PID YYY): Trying to access resource.\nChild 2 (PID ZZZ): Trying to access resource.\nChild 0 (PID XXX): *** Entered Critical Section ***\nChild 0 (PID XXX): --- Exiting Critical Section ---\nChild 2 (PID ZZZ): *** Entered Critical Section ***\nChild 2 (PID ZZZ): --- Exiting Critical Section ---\nChild 1 (PID YYY): *** Entered Critical Section ***\nChild 1 (PID YYY): --- Exiting Critical Section ---\nParent: All children finished. Cleaning up.\n\nמובטח שרק תהליך אחד יכול להימצא בקטע הקריטי (בין קריאת `sem_wait` לקריאת `sem_post`) בכל רגע נתון. הסיבה לכך היא שהסמפור מאותחל לערך 1, מה שמקנה לו תכונת הדדיות (mutual exclusion). כתוצאה מכך, עבור כל תהליך בן בנפרד, ההודעה '*** Entered Critical Section ***' תמיד תודפס לפני ההודעה '--- Exiting Critical Section ---' של אותו תהליך. בנוסף, מובטח שלא תופיענה שתי הודעות '*** Entered Critical Section ***' ברצף ללא הודעת '--- Exiting Critical Section ---' ביניהן, כלומר, תמיד תהיה זוגיות של כניסה ויציאה מהקטע הקריטי, ותהליך אחד יסיים את הקטע הקריטי לפני שתהליך אחר ייכנס אליו.\n\n8.2. אם נשנה את ערך האתחול של הסמפור ל-NUM_CHILDREN (כלומר, 3), הסמפור יהפוך לסמפור סופר (counting semaphore) המאפשר עד 3 תהליכים להיכנס לקטע הקריטי בו-זמנית.\nההשפעה על הפלט תהיה שכל שלושת תהליכי הבן יוכלו לעבור את קריאת `sem_wait` כמעט מיד, ללא חסימה, ולהיכנס לקטע הקריטי שלהם במקביל. כתוצאה מכך, הפלט של ההודעות '*** Entered Critical Section ***' ו-'--- Exiting Critical Section ---' לא יהיה בהכרח סדרתי (תהליך אחד מסיים לפני שהבא נכנס). לדוגמה, ייתכן שכל שלושת תהליכי הבן ידפיסו את הודעת הכניסה לקטע הקריטי לפני שמישהו מהם ידפיס את הודעת היציאה.\nעדיין מובטח שעבור כל תהליך בן *ספציפי*, הודעת הכניסה שלו תופיע לפני הודעת היציאה שלו. אולם, *לא* מובטח שרק תהליך אחד יהיה בקטע הקריטי בכל רגע נתון; בפועל, עד שלושה תהליכים יכולים להיות שם בו-זמנית. הדדיות (mutual exclusion) אינה נשמרת במקרה זה.\nדוגמה לפלט אפשרי במקרה זה:\nChild 0 (PID XXX): Trying to access resource.\nChild 1 (PID YYY): Trying to access resource.\nChild 2 (PID ZZZ): Trying to access resource.\nChild 0 (PID XXX): *** Entered Critical Section ***\nChild 1 (PID YYY): *** Entered Critical Section ***\nChild 2 (PID ZZZ): *** Entered Critical Section ***\nChild 1 (PID YYY): --- Exiting Critical Section ---\nChild 0 (PID XXX): --- Exiting Critical Section ---\nChild 2 (PID ZZZ): --- Exiting Critical Section ---\nParent: All children finished. Cleaning up."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

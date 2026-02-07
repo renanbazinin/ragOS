@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 19:45:06",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1118,
+      "output_tokens": 741,
+      "total_tokens": 5521
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Synchronization",
+      "Mutexes",
+      "Threads"
+    ],
+    "content": {
+      "text": "בתוכנית C הכוללת מספר תהליכונים (threads) המעדכנים משתנה משותף `counter`, נעשה שימוש ב-`pthread_mutex_t` בשם `lock` כדי להגן על הקטע הקריטי. איזו מהטענות הבאות נכונה לגבי השימוש ב-`lock`?",
+      "code_snippet": null,
+      "options": [
+        "א. אם תהליכון רוכש את ה-`lock` ולאחר מכן מנסה לרכוש אותו שוב (לפני שחרורו), התוכנית תיכנס ככל הנראה למצב של קיפאון (deadlock).",
+        "ב. תהליכון יכול לשחרר בהצלחה `lock` שנרכש על ידי תהליכון אחר.",
+        "ג. אם תהליכון רוכש את ה-`lock` וקורא ל-`pthread_exit()` מבלי לשחררו, ה-`lock` ישוחרר אוטומטית על ידי המערכת.",
+        "ד. השימוש ב-`pthread_mutex_lock` וב-`pthread_mutex_unlock` מבטיח שהתהליכונים יבצעו את עדכוני `counter` תמיד באותו סדר."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "נכון. עבור mutex רגיל (PTHREAD_MUTEX_NORMAL, שהוא ברירת המחדל), תהליכון המנסה לרכוש mutex שכבר נמצא בבעלותו ייחסם וייכנס למצב של קיפאון (self-deadlock). mutexים רקורסיביים (PTHREAD_MUTEX_RECURSIVE) מאפשרים זאת, אך אינם ברירת המחדל.\n\nלא נכון לגבי ב': ניסיון לשחרר mutex שלא נרכש על ידי התהליכון הקורא הוא התנהגות בלתי מוגדרת (undefined behavior) ובדרך כלל יגרום לשגיאה או קריסה.\n\nלא נכון לגבי ג': אם תהליכון יוצא תוך כדי החזקת mutex, ה-mutex נשאר נעול. זהו מקור נפוץ לבעיות כאשר תהליכונים אחרים ימתינו ל-mutex זה לנצח. mutexים רובסטיים (robust mutexes) מטפלים בתרחיש זה אך אינם ברירת המחדל.\n\nלא נכון לגבי ד': mutexים מבטיחים בלעדיות לקטע קריטי, ובכך מונעים תנאי מרוץ (race conditions) ומבטיחים את נכונות הערך הסופי. עם זאת, הם אינם מבטיחים סדר מסוים שבו תהליכונים יבצעו את הפעולות בתוך הקטע הקריטי."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

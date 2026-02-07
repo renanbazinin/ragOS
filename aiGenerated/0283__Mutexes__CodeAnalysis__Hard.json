@@ -1,0 +1,50 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 20:31:57",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4847,
+      "output_tokens": 2805,
+      "total_tokens": 14361
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Mutexes",
+      "Deadlock",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתונה מערכת המנהלת שני תורים מקושרים, `listA` ו-`listB`, כאשר כל תור מוגן על ידי מנעול (mutex) משלו. מטרת המערכת היא לאפשר העברת פריטים בין התורים באופן בטוח במקביל. להלן מימוש חלקי של הפונקציות `transfer_A_to_B` ו-`transfer_B_to_A` המיועדות להעביר פריט מתור אחד לשני. קוד העזר לניהול הרשימות (אתחול, הוספה, הסרה) תקין ומוגן על ידי המנעולים של הרשימה המתאימה. שימו לב כי פעולות הוספה והסרה בתוך פונקציות ה-`transfer` מניחות שהמנעול המתאים כבר נתפס על ידי הפונקציה הקוראת ואינן תופסות מנעולים בעצמן.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <pthread.h>\n#include <unistd.h> // for usleep\n\n// Assume a simple linked list structure for demonstration\ntypedef struct Node {\n    int data;\n    struct Node* next;\n} Node;\n\ntypedef struct {\n    Node* head;\n    pthread_mutex_t mutex;\n    int count; \n} List;\n\n// Global lists (assume they are initialized elsewhere)\nList listA;\nList listB;\n\n// Problematic functions\nvoid transfer_A_to_B() {\n    pthread_mutex_lock(&listA.mutex);\n    // Simulate some work to increase deadlock probability\n    usleep(10000); // 10ms\n\n    int item = -1;\n    // Remove from listA (protected by listA.mutex)\n    if (listA.head != NULL) {\n        Node* temp = listA.head;\n        item = temp->data;\n        listA.head = listA.head->next;\n        free(temp);\n        listA.count--;\n    }\n\n    if (item != -1) {\n        pthread_mutex_lock(&listB.mutex);\n        \n        // Add to listB (protected by listB.mutex)\n        Node* new_node = (Node*)malloc(sizeof(Node));\n        new_node->data = item;\n        new_node->next = NULL;\n        if (listB.head == NULL) {\n            listB.head = new_node;\n        } else {\n            Node* current = listB.head;\n            while (current->next != NULL) {\n                current = current->next;\n            }\n            current->next = new_node;\n        }\n        listB.count++;\n\n        pthread_mutex_unlock(&listB.mutex);\n    }\n    pthread_mutex_unlock(&listA.mutex);\n}\n\nvoid transfer_B_to_A() {\n    pthread_mutex_lock(&listB.mutex);\n    // Simulate some work to increase deadlock probability\n    usleep(10000); // 10ms\n\n    int item = -1;\n    // Remove from listB (protected by listB.mutex)\n    if (listB.head != NULL) {\n        Node* temp = listB.head;\n        item = temp->data;\n        listB.head = listB.head->next;\n        free(temp);\n        listB.count--;\n    }\n\n    if (item != -1) {\n        pthread_mutex_lock(&listA.mutex);\n        \n        // Add to listA (protected by listA.mutex)\n        Node* new_node = (Node*)malloc(sizeof(Node));\n        new_node->data = item;\n        new_node->next = NULL;\n        if (listA.head == NULL) {\n            listA.head = new_node;\n        } else {\n            Node* current = listA.head;\n            while (current->next != NULL) {\n                current = current->next;\n            }\n            current->next = new_node;\n        }\n        listA.count++;\n        \n        pthread_mutex_unlock(&listA.mutex);\n    }\n    pthread_mutex_unlock(&listB.mutex);\n}"
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "תארו את הבעיה העיקרית במימוש הנוכחי של פונקציות ההעברה (`transfer_A_to_B` ו-`transfer_B_to_A`). הסבירו כיצד בעיה זו יכולה להתרחש, תוך פירוט רצף פעולות של שני חוטים (threads) לפחות המדגים את הבעיה.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "הציעו תיקון למימוש כך שהבעיה שתוארה בסעיף א' תימנע. כתבו את הקוד המתוקן עבור שתי הפונקציות (`transfer_A_to_B` ו-`transfer_B_to_A`) תוך שמירה על יעילות סבירה.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.1. **הבעיה:**\nהבעיה העיקרית במימוש הנוכחי היא קיפאון (Deadlock). קיפאון יכול להתרחש כאשר שני חוטים מנסים לתפוס את המנעולים של `listA` ו-`listB` בסדר הפוך.\n\n**תיאור רצף פעולות המדגים קיפאון:**\nנניח שקיימים שני חוטים, חוט 1 וחוט 2:\n*   **חוט 1** קורא לפונקציה `transfer_A_to_B()`:\n    *   תופס את המנעול של `listA` (`pthread_mutex_lock(&listA.mutex)`).\n    *   מבצע פעולות פנימיות (למשל, `usleep`).\n    *   מנסה לתפוס את המנעול של `listB` (`pthread_mutex_lock(&listB.mutex)`). בשלב זה, אם `listB.mutex` כבר תפוס על ידי חוט אחר, חוט 1 יחסם.\n*   באותו זמן, **חוט 2** קורא לפונקציה `transfer_B_to_A()`:\n    *   תופס את המנעול של `listB` (`pthread_mutex_lock(&listB.mutex)`).\n    *   מבצע פעולות פנימיות (למשל, `usleep`).\n    *   מנסה לתפוס את המנעול של `listA` (`pthread_mutex_lock(&listA.mutex)`). בשלב זה, אם `listA.mutex` כבר תפוס על ידי חוט אחר, חוט 2 יחסם.\n\nבשלב זה, חוט 1 מחזיק במנעול של `listA` וממתין למנעול של `listB` (שמוחזק על ידי חוט 2). במקביל, חוט 2 מחזיק במנעול של `listB` וממתין למנעול של `listA` (שמוחזק על ידי חוט 1). שני החוטים חסומים באופן הדדי ואינם יכולים להתקדם, מה שגורם לקיפאון.\n\n1.2. **תיקון:**\nכדי למנוע קיפאון, יש לאכוף סדר קבוע לרכישת המנעולים. כלומר, כל חוט שצריך לתפוס את שני המנעולים (של `listA` ושל `listB`) יתפוס אותם תמיד באותו סדר (לדוגמה, תמיד קודם את `listA.mutex` ואז את `listB.mutex`). לאחר סיום הפעולות, יש לשחרר את המנעולים בסדר הפוך מהסדר בו נתפסו.\n\n**קוד מתוקן:**\n```c\n// Fixed functions\nvoid transfer_A_to_B() {\n    pthread_mutex_lock(&listA.mutex); // Lock A first (consistent order)\n    pthread_mutex_lock(&listB.mutex); // Then lock B\n    \n    // Simulate some work\n    usleep(10000); // 10ms\n\n    int item = -1;\n    // Remove from listA (protected by listA.mutex)\n    if (listA.head != NULL) {\n        Node* temp = listA.head;\n        item = temp->data;\n        listA.head = listA.head->next;\n        free(temp);\n        listA.count--;\n    }\n\n    if (item != -1) {\n        // Add to listB (protected by listB.mutex)\n        Node* new_node = (Node*)malloc(sizeof(Node));\n        new_node->data = item;\n        new_node->next = NULL;\n        if (listB.head == NULL) {\n            listB.head = new_node;\n        } else {\n            Node* current = listB.head;\n            while (current->next != NULL) {\n                current = current->next;\n            }\n            current->next = new_node;\n        }\n        listB.count++;\n    }\n    \n    pthread_mutex_unlock(&listB.mutex); // Unlock B first (reverse order of locking)\n    pthread_mutex_unlock(&listA.mutex); // Then unlock A\n}\n\nvoid transfer_B_to_A() {\n    pthread_mutex_lock(&listA.mutex); // Lock A first (consistent order)\n    pthread_mutex_lock(&listB.mutex); // Then lock B\n    \n    // Simulate some work\n    usleep(10000); // 10ms\n\n    int item = -1;\n    // Remove from listB (protected by listB.mutex)\n    if (listB.head != NULL) {\n        Node* temp = listB.head;\n        item = temp->data;\n        listB.head = listB.head->next;\n        free(temp);\n        listB.count--;\n    }\n\n    if (item != -1) {\n        // Add to listA (protected by listA.mutex)\n        Node* new_node = (Node*)malloc(sizeof(Node));\n        new_node->data = item;\n        new_node->next = NULL;\n        if (listA.head == NULL) {\n            listA.head = new_node;\n        } else {\n            Node* current = listA.head;\n            while (current->next != NULL) {\n                current = current->next;\n            }\n            current->next = new_node;\n        }\n        listA.count++;\n    }\n    \n    pthread_mutex_unlock(&listB.mutex); // Unlock B first (reverse order of locking)\n    pthread_mutex_unlock(&listA.mutex); // Then unlock A\n}\n```"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

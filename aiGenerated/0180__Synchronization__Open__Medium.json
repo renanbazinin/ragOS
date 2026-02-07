@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 19:52:32",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1598,
+      "output_tokens": 1745,
+      "total_tokens": 8131
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "Open",
+    "topic": [
+      "Synchronization",
+      "Reader-Writer Problem",
+      "Pthreads"
+    ],
+    "content": {
+      "text": "נתונה מערכת המכילה משאב משותף (לדוגמה, מבנה נתונים) אליו ניגשים מספר תהליכונים (threads) משני סוגים: כותבים (Writers) וקוראים (Readers). תהליכונים כותבים משנים את המשאב, ותהליכונים קוראים קוראים אותו בלבד. יש לממש מנגנון סנכרון עבור גישה למשאב המשותף כך שיעמוד בדרישות הבאות:\n1. רק תהליכון כותב אחד יכול לגשת למשאב המשותף בכל רגע נתון.\n2. מספר תהליכונים קוראים יכולים לגשת למשאב המשותף בו זמנית.\n3. אף תהליכון כותב לא יכול לגשת למשאב כאשר תהליכון קורא כלשהו ניגש אליו, ולהיפך (אין גישה בו זמנית של קוראים וכותבים).\n4. לתהליכונים כותבים יש עדיפות: אם תהליכון כותב ממתין לגישה למשאב, אף תהליכון קורא חדש לא יוכל להתחיל לקרוא עד שהכותב יסיים את פעולתו וישחרר את המשאב.\n\nיש להציג את קטעי הקוד הרלוונטיים עבור תהליכון כותב ותהליכון קורא, תוך שימוש במנגנוני סנכרון של POSIX (mutexes ו-condition variables), ולהסביר את פעולת המנגנון.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": 15,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "פתרון בעיית קוראים-כותבים עם עדיפות לכותבים באמצעות mutexes ו-condition variables של POSIX:\n\nמשתנים גלובליים לתיאום:\n```c\npthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;\npthread_cond_t reader_cond = PTHREAD_COND_INITIALIZER;\npthread_cond_t writer_cond = PTHREAD_COND_INITIALIZER;\n\nint readers_reading = 0;   // מספר הקוראים הפעילים כרגע\nint writers_writing = 0;   // 1 אם כותב פעיל, 0 אחרת\nint writers_waiting = 0;   // מספר הכותבים הממתינים לגישה\n```\n\nפונקציות כניסה ויציאה עבור תהליכון כותב:\n```c\nvoid writer_entry() {\n    pthread_mutex_lock(&mutex);\n    writers_waiting++;\n    while (readers_reading > 0 || writers_writing > 0) {\n        pthread_cond_wait(&writer_cond, &mutex);\n    }\n    writers_waiting--;\n    writers_writing = 1;\n    pthread_mutex_unlock(&mutex);\n}\n\nvoid writer_exit() {\n    pthread_mutex_lock(&mutex);\n    writers_writing = 0;\n    if (writers_waiting > 0) {\n        pthread_cond_signal(&writer_cond); // מעיר כותב ממתין אחד\n    } else {\n        pthread_cond_broadcast(&reader_cond); // מעיר את כל הקוראים הממתינים\n    }\n    pthread_mutex_unlock(&mutex);\n}\n```\n\nפונקציות כניסה ויציאה עבור תהליכון קורא:\n```c\nvoid reader_entry() {\n    pthread_mutex_lock(&mutex);\n    while (writers_writing > 0 || writers_waiting > 0) {\n        pthread_cond_wait(&reader_cond, &mutex);\n    }\n    readers_reading++;\n    pthread_mutex_unlock(&mutex);\n}\n\nvoid reader_exit() {\n    pthread_mutex_lock(&mutex);\n    readers_reading--;\n    if (readers_reading == 0 && writers_waiting > 0) {\n        pthread_cond_signal(&writer_cond); // אם אין יותר קוראים וכותבים ממתינים, מעיר כותב אחד\n    }\n    pthread_mutex_unlock(&mutex);\n}\n```\n\nהסבר:\n*   **`mutex`**: מגן על הגישה למשתנים המשותפים (`readers_reading`, `writers_writing`, `writers_waiting`) כדי למנוע תנאי מירוץ.\n*   **`readers_reading`**: מונה את מספר הקוראים שנמצאים כרגע בקטע הקריטי. כאשר ערכו אפס, אין קוראים פעילים.\n*   **`writers_writing`**: דגל (0 או 1) המציין אם כותב כלשהו נמצא כרגע בקטע הקריטי. רק כותב אחד יכול להיות פעיל בכל רגע.\n*   **`writers_waiting`**: מונה את מספר הכותבים שממתינים להיכנס לקטע הקריטי. משמש ליישום עדיפות לכותבים.\n\n**היגיון עדיפות לכותבים:**\n1.  **כניסת כותב (`writer_entry`)**: כותב מעלה את `writers_waiting` וממתין אם יש קוראים פעילים (`readers_reading > 0`) או כותב אחר פעיל (`writers_writing > 0`). לאחר מכן, הוא מוריד את `writers_waiting` ומסמן את עצמו ככותב פעיל.\n2.  **כניסת קורא (`reader_entry`)**: קורא ממתין אם יש כותב פעיל (`writers_writing > 0`) או אם יש כותבים ממתינים (`writers_waiting > 0`). תנאי `writers_waiting > 0` הוא המפתח לעדיפות לכותבים – קוראים חדשים לא יורשו להיכנס אם יש כותב שממתין. אם אין כותבים פעילים או ממתינים, הקורא מעלה את `readers_reading` ונכנס לקטע הקריטי.\n3.  **יציאת כותב (`writer_exit`)**: כותב מסיים ומאפס את `writers_writing`. אם יש כותבים ממתינים (`writers_waiting > 0`), הוא מעיר רק אחד מהם באמצעות `pthread_cond_signal(&writer_cond)` כדי לאפשר לכותב הבא להיכנס (שכן רק כותב אחד יכול להיות פעיל). רק אם אין כותבים ממתינים, הוא מעיר את כל הקוראים הממתינים באמצעות `pthread_cond_broadcast(&reader_cond)`.\n4.  **יציאת קורא (`reader_exit`)**: קורא מסיים ומוריד את `readers_reading`. אם הוא היה הקורא האחרון (`readers_reading == 0`) ויש כותבים ממתינים (`writers_waiting > 0`), הוא מעיר כותב אחד באמצעות `pthread_cond_signal(&writer_cond)` כדי לאפשר לכותב להיכנס כעת כשהמשאב פנוי מקוראים."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

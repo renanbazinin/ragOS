@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Deadlocks",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 21:18:12",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3443,
+      "output_tokens": 2386,
+      "total_tokens": 9286
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Deadlocks",
+      "Resource Management",
+      "Synchronization",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתונה מערכת מרובת חוטים בה קיימים שני סוגי משאבים: Resource A ו-Resource B. ידוע כי קיימים סך הכל `TotalA` יחידות מ-Resource A ו-`TotalB` יחידות מ-Resource B. חוטים במערכת מבצעים פעולות הדורשות כמות מסוימת של יחידות מכל אחד מהמשאבים בו-זמנית (לדוגמה, חוט מבקש `a` יחידות מ-A ו-`b` יחידות מ-B).\n\nעליכם לממש מנהל משאבים (Resource Manager) ב-C/C++ שיספק שתי פונקציות:\n1.  `request_resources(int a, int b)`: חוט קורא לפונקציה זו כדי לבקש `a` יחידות מ-Resource A ו-`b` יחידות מ-Resource B.\n2.  `release_resources(int a, int b)`: חוט קורא לפונקציה זו כדי לשחרר `a` יחידות מ-Resource A ו-`b` יחידות מ-Resource B.\n\nהמימוש שלכם חייב לעמוד בדרישות הבאות:\n*   **מניעת קיפאון (Deadlock Prevention):** המערכת לעולם לא תיכנס למצב קיפאון.\n*   **חופש מרעב (Starvation-Free):** אם בקשה למשאבים יכולה להתמלא בסופו של דבר (כלומר, סך המשאבים הנדרשים זמין במערכת), היא אכן תתמלא בתוך זמן סופי. יש להבטיח הוגנות במידת האפשר.\n*   **מימוש:** השתמשו באובייקטי סנכרון סטנדרטיים של POSIX Threads (כגון mutexes, condition variables, semaphores).\n\nיש לכלול את הגדרת מבנה הנתונים של מנהל המשאבים, פונקציית אתחול, ומימוש מלא של `request_resources` ו-`release_resources`. בנוסף, הסבירו בפירוט כיצד המימוש שלכם מבטיח מניעת קיפאון וחופש מרעב.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון מתבסס על עקרון \"בקש הכל או כלום\" (All-or-nothing) בשילוב עם משתני תנאי (condition variables) כדי למנוע קיפאון ולהבטיח חופש מרעב.\n\n### מבנה הנתונים של מנהל המשאבים:\n```c\n#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n\ntypedef struct {\n    int total_A;\n    int total_B;\n    int available_A;\n    int available_B;\n    pthread_mutex_t lock;\n    pthread_cond_t cond;\n} ResourceManager;\n\n// פונקציית אתחול למנהל המשאבים\nvoid init_resource_manager(ResourceManager *rm, int initial_A, int initial_B) {\n    rm->total_A = initial_A;\n    rm->total_B = initial_B;\n    rm->available_A = initial_A;\n    rm->available_B = initial_B;\n    pthread_mutex_init(&rm->lock, NULL);\n    pthread_cond_init(&rm->cond, NULL);\n}\n\n// פונקציית השמדה למנהל המשאבים\nvoid destroy_resource_manager(ResourceManager *rm) {\n    pthread_mutex_destroy(&rm->lock);\n    pthread_cond_destroy(&rm->cond);\n}\n\n// פונקציה לבקשת משאבים\nvoid request_resources(ResourceManager *rm, int a, int b) {\n    pthread_mutex_lock(&rm->lock);\n\n    // חוט ממתין בלולאה כל עוד אין מספיק משאבים משני הסוגים\n    // ה-while loop מבטיח שגם לאחר התעוררות, התנאי נבדק שוב (spurious wakeup)\n    // וכן במקרה שחוט אחר לקח את המשאבים לפנינו.\n    while (rm->available_A < a || rm->available_B < b) {\n        // משחרר את המנעול ונכנס למצב המתנה. כשהוא מתעורר, הוא רוכש את המנעול שוב.\n        pthread_cond_wait(&rm->cond, &rm->lock);\n    }\n\n    // יש מספיק משאבים, מבצעים הקצאה\n    rm->available_A -= a;\n    rm->available_B -= b;\n    printf(\"Thread %lu acquired: A=%d, B=%d. Available: A=%d, B=%d\\n\",\n           pthread_self(), a, b, rm->available_A, rm->available_B);\n\n    pthread_mutex_unlock(&rm->lock);\n}\n\n// פונקציה לשחרור משאבים\nvoid release_resources(ResourceManager *rm, int a, int b) {\n    pthread_mutex_lock(&rm->lock);\n\n    // משחרר את המשאבים ומעדכן את המונים\n    rm->available_A += a;\n    rm->available_B += b;\n    printf(\"Thread %lu released: A=%d, B=%d. Available: A=%d, B=%d\\n\",\n           pthread_self(), a, b, rm->available_A, rm->available_B);\n\n    // מאותת לכל החוטים הממתינים לבדוק שוב את תנאי הבקשה שלהם.\n    // שימוש ב-broadcast חיוני למניעת רעב.\n    pthread_cond_broadcast(&rm->cond);\n\n    pthread_mutex_unlock(&rm->lock);\n}\n```\n\n### הסבר:\n\n**1. מניעת קיפאון (Deadlock Prevention):**\nהמימוש מונע קיפאון על ידי מניעת קיום של התנאי \"החזק והמתן\" (Hold and Wait) וכן על ידי מניעת קיום של \"מעגל המתנה\" (Circular Wait).\n*   **\"בקש הכל או כלום\" (All-or-nothing):** חוט שמבקש משאבים לעולם לא יחזיק חלק מהמשאבים הנדרשים וימתין לאחרים. הוא תמיד ממתין (באמצעות `pthread_cond_wait`) עד שכל המשאבים הנדרשים (גם מ-A וגם מ-B) זמינים עבורו. רק כאשר כל המשאבים זמינים, הוא רוכש אותם באופן אטומי (תחת הגנת המוטקס). מצב זה מבטיח שאף חוט לא יחזיק משאבים בזמן שהוא ממתין למשאבים נוספים, ובכך נמנע התנאי של \"החזק והמתן\".\n*   **נעילה אטומית:** המוטקס `rm->lock` מגן על המשתנים `available_A` ו-`available_B` ועל כל תהליך הבדיקה וההקצאה. זה מבטיח שאף שני חוטים לא יקבלו החלטות סותרות לגבי זמינות המשאבים בו-זמנית, ושפעולת ההקצאה היא אטומית. מכיוון שהקצאת המשאבים היא אטומית וכוללת את כל המשאבים הנדרשים, לא יכול להיווצר מצב של מעגל המתנה שבו חוטים ממתינים זה לזה למשאבים שהם כבר החלו להחזיק.\n\n**2. חופש מרעב (Starvation-Free):**\nהמימוש מבטיח חופש מרעב בזכות השימוש ב-`pthread_cond_broadcast`:\n*   **`pthread_cond_broadcast` ב-`release_resources`:** כאשר חוט משחרר משאבים, הוא קורא ל-`pthread_cond_broadcast`. פעולה זו מעירה את *כל* החוטים הממתינים על משתנה התנאי `cond`.\n*   **בדיקה מחודשת של התנאי:** כל חוט שהתעורר חוזר לבדוק את התנאי בלולאת ה-`while` (`rm->available_A < a || rm->available_B < b`). מאחר שכל המשאבים משוחררים בסופו של דבר, וכל חוט ממתין מקבל הזדמנות לבדוק אם בקשתו יכולה להתמלא, כל בקשה שניתן למלאה (כלומר, יש מספיק משאבים במערכת הכוללת) תתמלא בתוך זמן סופי. אין חוט ספציפי שיכול \"להיתקע\" לנצח בזמן שחוטים אחרים מקבלים משאבים, מכיוון שכל שחרור משאבים נותן לכולם הזדמנות שווה לבדוק את תנאיהם.\n*   **הוגנות:** שימוש ב-`pthread_cond_broadcast` מספק רמה טובה של הוגנות בכך שהוא מאפשר לכל בקשה פוטנציאלית להתמלא, גם אם היא לא הראשונה שהגיעה לתור ההמתנה. זה מונע מצב שבו בקשות קטנות יותר, שיכולות להתמלא מיד עם שחרור משאבים, נחסמות על ידי בקשה גדולה יותר שנמצאת בראש התור אך עדיין לא יכולה להתמלא."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

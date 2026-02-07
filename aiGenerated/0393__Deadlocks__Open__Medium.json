@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Deadlocks",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 21:15:02",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3559,
+      "output_tokens": 1719,
+      "total_tokens": 8942
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "Open",
+    "topic": [
+      "Deadlocks",
+      "Synchronization",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתונים שני תהליכונים (threads), P1 ו-P2, המנסים לגשת לשני משאבים משותפים, R1 ו-R2. כל משאב מוגן על ידי מנעול (mutex) נפרד, M1 ו-M2 בהתאמה.\n\nהקוד הבא מציג את אופן הגישה למשאבים על ידי שני התהליכונים:\n\n```c\n#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h> // For sleep\n\npthread_mutex_t M1;\npthread_mutex_t M2;\n\nvoid* thread_func_P1(void* arg) {\n    printf(\"P1: Trying to acquire M1...\\n\");\n    pthread_mutex_lock(&M1);\n    printf(\"P1: Acquired M1. Trying to acquire M2...\\n\");\n    sleep(1); // Simulate work or context switch\n    pthread_mutex_lock(&M2);\n    printf(\"P1: Acquired M2. Critical section...\\n\");\n    // Critical section\n    pthread_mutex_unlock(&M2);\n    printf(\"P1: Released M2.\\n\");\n    pthread_mutex_unlock(&M1);\n    printf(\"P1: Released M1. Exiting.\\n\");\n    return NULL;\n}\n\nvoid* thread_func_P2(void* arg) {\n    printf(\"P2: Trying to acquire M2...\\n\");\n    pthread_mutex_lock(&M2);\n    printf(\"P2: Acquired M2. Trying to acquire M1...\\n\");\n    sleep(1); // Simulate work or context switch\n    pthread_mutex_lock(&M1);\n    printf(\"P2: Acquired M1. Critical section...\\n\");\n    // Critical section\n    pthread_mutex_unlock(&M1);\n    printf(\"P2: Released M1.\\n\");\n    pthread_mutex_unlock(&M2);\n    printf(\"P2: Released M2. Exiting.\\n\");\n    return NULL;\n}\n```\n\n1. האם קיימת אפשרות לקיפאון (deadlock) בתרחיש זה? נמקו והסבירו אילו מתנאי הקיפאון (Mutual exclusion, Hold-and-wait, No preemption, Circular wait) מתקיימים במקרה זה.\n2. הציעו פתרון לבעיית הקיפאון על ידי שינוי הקוד הנתון, והסבירו מדוע הפתרון שלכם מונע קיפאון.",
+      "code_snippet": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1. כן, קיימת אפשרות לקיפאון (deadlock) בתרחיש זה. הקיפאון יתרחש אם P1 יתפוס את M1 ו-P2 יתפוס את M2 בו זמנית, ולאחר מכן כל אחד מהם ינסה לתפוס את המנעול השני שמוחזק על ידי האחר.\n\nתנאי הקיפאון המתקיימים הם:\n*   **מניעה הדדית (Mutual exclusion)**: מתקיים. המנעולים M1 ו-M2 הם mutexes, מה שאומר שרק תהליכון אחד יכול להחזיק בכל מנעול נתון בזמן מסוים. אין אפשרות למשאב להישאר משותף לחלוטין.\n*   **החזק והמתן (Hold and Wait)**: מתקיים. תהליכון P1 מחזיק במנעול M1 וממתין למנעול M2. תהליכון P2 מחזיק במנעול M2 וממתין למנעול M1.\n*   **אי-הפקעה (No Preemption)**: מתקיים. המנעולים לא יכולים להילקח בכוח מתהליכון שמחזיק בהם. תהליכון חייב לשחרר את המנעול מרצונו.\n*   **המתנה מעגלית (Circular Wait)**: מתקיים. P1 ממתין למנעול M2 שמוחזק על ידי P2, ו-P2 ממתין למנעול M1 שמוחזק על ידי P1. זה יוצר מעגל המתנה.\n\n2. כדי למנוע קיפאון, ניתן להבטיח סדר קבוע לרכישת המשאבים (מנעולים) על ידי כל התהליכונים. גישה זו שוברת את תנאי ה'המתנה מעגלית'.\n\n**פתרון מוצע**: כל התהליכונים ירכשו את M1 תחילה, ולאחר מכן את M2. לדוגמה, נשנה את הפונקציה `thread_func_P2` כך שתתפוס את M1 לפני M2:\n\n```c\nvoid* thread_func_P2(void* arg) {\n    printf(\"P2: Trying to acquire M1...\\n\");\n    pthread_mutex_lock(&M1); // Changed order\n    printf(\"P2: Acquired M1. Trying to acquire M2...\\n\");\n    sleep(1); // Simulate work or context switch\n    pthread_mutex_lock(&M2); // Changed order\n    printf(\"P2: Acquired M2. Critical section...\\n\");\n    // Critical section\n    pthread_mutex_unlock(&M2);\n    printf(\"P2: Released M2.\\n\");\n    pthread_mutex_unlock(&M1);\n    printf(\"P2: Released M1. Exiting.\\n\");\n    return NULL;\n}\n```\n\n**הסבר מדוע הפתרון מונע קיפאון**: על ידי אכיפת סדר רכישה עקבי (לדוגמה, תמיד M1 ואז M2), אנו מבטיחים שלא תיווצר לעולם שרשרת המתנה מעגלית. אם P1 תופס את M1 וממתין ל-M2, ו-P2 מגיע ומנסה לתפוס את M1, P2 ייחסם על M1 עד ש-P1 ישחרר אותו. P1 יצליח לתפוס את M2, יסיים את הקטע הקריטי, וישחרר את שני המנעולים. רק אז P2 יוכל להמשיך ולתפוס את M1 (ולאחר מכן את M2). מכיוון שאין אפשרות ש-P1 יחזיק את M1 וימתין ל-M2, בעוד P2 יחזיק את M2 וימתין ל-M1, תנאי ה'המתנה מעגלית' נשבר והקיפאון נמנע."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

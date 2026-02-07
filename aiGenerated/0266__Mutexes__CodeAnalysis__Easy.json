@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 20:23:30",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4189,
+      "output_tokens": 1361,
+      "total_tokens": 7761
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Mutexes",
+      "Concurrency",
+      "Race Conditions",
+      "Threads",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המשתמשת במספר תהליכונים (threads) כדי להגדיל מונה גלובלי. עיין בקוד הבא. מהו הפלט הצפוי של התוכנית? האם הפלט יהיה תמיד זהה בריצות שונות? אם לא, מדוע? כיצד ניתן לתקן את הקוד כך שהמונה יגיע תמיד לערך הנכון?",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <stdlib.h> // For exit\n\n#define NUM_THREADS 5\n#define INCREMENTS_PER_THREAD 100000\n\nint counter = 0;\n\nvoid *increment_counter(void *arg) {\n    for (int i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n        counter++;\n    }\n    pthread_exit(NULL);\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        if (pthread_create(&threads[i], NULL, increment_counter, NULL) != 0) {\n            perror(\"Failed to create thread\");\n            exit(EXIT_FAILURE);\n        }\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        if (pthread_join(threads[i], NULL) != 0) {\n            perror(\"Failed to join thread\");\n            exit(EXIT_FAILURE);\n        }\n    }\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפלט הצפוי התיאורטי של התוכנית הוא 500000 (כלומר, NUM_THREADS * INCREMENTS_PER_THREAD). אולם, בפועל, הפלט יהיה לרוב נמוך יותר מ-500000 וגם לא יהיה זהה בין ריצות שונות של התוכנית. הסיבה לכך היא תנאי מרוץ (Race Condition).\n\nפעולת `counter++` אינה אטומית. היא מורכבת משלוש פעולות ברמה נמוכה יותר (קריאת ערך המונה לתוך רגיסטר, הגדלת הערך ברגיסטר, וכתיבת הערך המעודכן בחזרה לזיכרון). כאשר מספר תהליכונים מבצעים פעולה זו במקביל ללא סנכרון, ייתכן שתהליכון אחד יקרא את ערך המונה, יגדיל אותו, אך לפני שיספיק לכתוב אותו בחזרה לזיכרון, תהליכון אחר יקרא את אותו ערך ישן של המונה. כתוצאה מכך, אחת מההגדלות (increments) תאבד, והמונה לא יגיע לערכו הסופי הנכון.\n\nכדי לתקן את הקוד ולהבטיח שהמונה יגיע תמיד לערך הנכון, יש להשתמש ב-mutex (מנעול הדדי) כדי להגן על הגישה למשתנה המשותף `counter`. יש לאתחל את ה-mutex לפני יצירת התהליכונים, לנעול אותו לפני הגישה ל-`counter++` ולשחרר אותו מיד לאחר מכן, ולבסוף להרוס את ה-mutex בסיום התוכנית. התיקון ייראה כך:\n\n```c\n#include <stdio.h>\n#include <pthread.h>\n#include <stdlib.h>\n\n#define NUM_THREADS 5\n#define INCREMENTS_PER_THREAD 100000\n\nint counter = 0;\npthread_mutex_t mutex; // הצהרה על mutex גלובלי\n\nvoid *increment_counter(void *arg) {\n    for (int i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n        pthread_mutex_lock(&mutex);   // נעילת ה-mutex לפני גישה למשתנה המשותף\n        counter++;\n        pthread_mutex_unlock(&mutex); // שחרור ה-mutex לאחר הגישה\n    }\n    pthread_exit(NULL);\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n    pthread_mutex_init(&mutex, NULL); // אתחול ה-mutex\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        if (pthread_create(&threads[i], NULL, increment_counter, NULL) != 0) {\n            perror(\"Failed to create thread\");\n            exit(EXIT_FAILURE);\n        }\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        if (pthread_join(threads[i], NULL) != 0) {\n            perror(\"Failed to join thread\");\n            exit(EXIT_FAILURE);\n        }\n    }\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    pthread_mutex_destroy(&mutex); // השמדת ה-mutex\n    return 0;\n}\n```"
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

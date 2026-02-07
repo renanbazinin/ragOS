@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 20:20:28",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3905,
+      "output_tokens": 2570,
+      "total_tokens": 15089
+    }
+  },
+  "question": {
+    "id": 100,
+    "type": "Open",
+    "topic": [
+      "Mutexes",
+      "Condition Variables",
+      "Synchronization",
+      "Producer-Consumer",
+      "Fairness",
+      "Priority"
+    ],
+    "content": {
+      "text": "נתונה בעיית ה-Bounded Buffer (מאגר חסום) עבור מספר מפיקים (Producers) וצרכנים (Consumers). המאגר יכול להכיל עד `BUFFER_SIZE` פריטים. מפיקים מוסיפים פריטים למאגר, וצרכנים מוציאים פריטים מהמאגר. יש לוודא סנכרון נכון כדי למנוע תנאי מרוץ, קיפאון (deadlock) והרעבה (starvation).\n\nבנוסף, נדרש שהמימוש יתעדף צרכנים על פני מפיקים כאשר שניהם ממתינים. כלומר, אם גם צרכנים וגם מפיקים ממתינים לפעולה, הצרכנים יקבלו קדימות בכניסה לקטע הקריטי ובביצוע פעולתם (dequeue) לפני שמפיקים יוכלו להוסיף פריטים (enqueue).\n\nהשלימו את המימוש באמצעות `pthread_mutex_t` ו-`pthread_cond_t` בלבד. עליכם להגדיר את מבנה הנתונים `BoundedBuffer` ולהשלים את הפונקציות `buffer_init`, `buffer_destroy`, `buffer_enqueue`, ו-`buffer_dequeue`.",
+      "code_snippet": "#include <pthread.h>\n#include <stdlib.h>\n#include <stdio.h>\n\n#define BUFFER_SIZE 10\n\ntypedef struct {\n    int buffer[BUFFER_SIZE];\n    int head; // Index of the next item to dequeue\n    int tail; // Index of the next slot to enqueue into\n    int count; // Current number of items in buffer\n\n    pthread_mutex_t mutex;\n    pthread_cond_t not_full; // Signaled when buffer is not full\n    pthread_cond_t not_empty; // Signaled when buffer is not empty\n\n    // Add any additional synchronization variables needed for consumer priority\n    int waiting_consumers;\n\n} BoundedBuffer;\n\nvoid buffer_init(BoundedBuffer *buf);\nvoid buffer_destroy(BoundedBuffer *buf);\nvoid buffer_enqueue(BoundedBuffer *buf, int item);\nint buffer_dequeue(BoundedBuffer *buf);\n"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": false,
+      "correct_option": null,
+      "explanation": "המימוש דורש שימוש במוטקס אחד להגנה על מבנה הנתונים של ה-Bounded Buffer, ושני משתני תנאי (Condition Variables): אחד למצב שהמאגר אינו מלא (`not_full`) ואחד למצב שהמאגר אינו ריק (`not_empty`). כדי ליישם את עדיפות הצרכנים, נשתמש במונה `waiting_consumers` אשר יספור כמה צרכנים ממתינים כרגע על משתנה התנאי `not_empty`.\n\n**הסבר מפורט:**\n1.  **`BoundedBuffer` struct:** מכיל את המאגר עצמו, אינדקסים `head` ו-`tail`, מונה `count`, המוטקסים ומשתני התנאי. הוספנו את `waiting_consumers` כדי לעקוב אחר צרכנים ממתינים.\n2.  **`buffer_init`:** מאתחל את כל השדות לערכי ההתחלה שלהם, כולל איפוס המוטקס ומשתני התנאי.\n3.  **`buffer_destroy`:** משחרר את המשאבים של המוטקס ומשתני התנאי.\n4.  **`buffer_enqueue` (מפיק):**\n    *   המפיק נועל את המוטקס.\n    *   הוא בודק את התנאי לכניסה: האם המאגר מלא (`buf->count == BUFFER_SIZE`) או האם יש צרכנים שממתינים (`buf->waiting_consumers > 0`). אם אחד מהתנאים הללו מתקיים, המפיק צריך להמתין.\n    *   המפיק קורא ל-`pthread_cond_wait(&buf->not_full, &buf->mutex)` כדי להמתין. הוא משחרר את המוטקס באופן אוטומטי ונכנס למצב שינה. כשהוא מתעורר, הוא נועל מחדש את המוטקס.\n    *   לאחר שהתנאים מתקיימים, המפיק מוסיף פריט למאגר ומעדכן את המונים.\n    *   לבסוף, הוא מאותת ל-`not_empty` (`pthread_cond_signal`) כדי להעיר צרכן פוטנציאלי שממתין.\n    *   המפיק משחרר את המוטקס.\n5.  **`buffer_dequeue` (צרכן):**\n    *   הצרכן נועל את המוטקס.\n    *   הוא בודק את התנאי לכניסה: האם המאגר ריק (`buf->count == 0`). אם כן, הצרכן מגדיל את `waiting_consumers` וקורא ל-`pthread_cond_wait(&buf->not_empty, &buf->mutex)` כדי להמתין. כשהוא מתעורר, הוא מקטין את `waiting_consumers` ונועל מחדש את המוטקס.\n    *   לאחר שהתנאי מתקיים, הצרכן מוציא פריט מהמאגר ומעדכן את המונים.\n    *   כאן מגיע החלק הקריטי לעדיפות: אם לאחר שהצרכן הוציא פריט, מונה הצרכנים הממתינים (`waiting_consumers`) ירד ל-0, זה אומר שאין יותר צרכנים שממתינים. במצב זה, יש לאפשר למפיקים שחיכו בגלל עדיפות הצרכנים להמשיך. לכן, משתמשים ב-`pthread_cond_broadcast(&buf->not_full)` כדי להעיר את כל המפיקים הממתינים על `not_full`. המפיקים יתעוררו, ינעלו את המוטקס מחדש, ויבדקו שוב את התנאי שלהם (שכעת `waiting_consumers` הוא 0, וייתכן שהמאגר כבר לא מלא).\n    *   הצרכן משחרר את המוטקס ומחזיר את הפריט.\n\n**הקפדה על עדיפות ופתרון בעיות:**\n*   **מניעת תנאי מרוץ:** המוטקס `buf->mutex` מגן על כל הגישה למשתנים המשותפים (`head`, `tail`, `count`, `waiting_consumers`).\n*   **מניעת קיפאון (Deadlock):** הסדר של נעילה ושחרור המוטקס הוא עקבי. אין סדר נעילה מורכב שיכול להוביל לקיפאון.\n*   **מניעת הרעבה (Starvation):** עדיפות הצרכנים מונעת הרעבת צרכנים כאשר מפיקים פעילים. ה-`broadcast` מבטיח שמפיקים לא יורעבו כאשר אין יותר צרכנים ממתינים. השימוש ב-`while` בלולאות ההמתנה מטפל ב-spurious wakeups ומוודא שהתנאי אכן מתקיים לפני ההמשך.\n\n```c\n#include <pthread.h>\n#include <stdlib.h>\n#include <stdio.h>\n\n#define BUFFER_SIZE 10\n\ntypedef struct {\n    int buffer[BUFFER_SIZE];\n    int head; // Index of the next item to dequeue\n    int tail; // Index of the next slot to enqueue into\n    int count; // Current number of items in buffer\n\n    pthread_mutex_t mutex;\n    pthread_cond_t not_full; // Signaled when buffer is not full\n    pthread_cond_t not_empty; // Signaled when buffer is not empty\n\n    int waiting_consumers; // Number of consumers waiting on not_empty\n\n} BoundedBuffer;\n\nvoid buffer_init(BoundedBuffer *buf) {\n    buf->head = 0;\n    buf->tail = 0;\n    buf->count = 0;\n    buf->waiting_consumers = 0;\n    pthread_mutex_init(&buf->mutex, NULL);\n    pthread_cond_init(&buf->not_full, NULL);\n    pthread_cond_init(&buf->not_empty, NULL);\n}\n\nvoid buffer_destroy(BoundedBuffer *buf) {\n    pthread_mutex_destroy(&buf->mutex);\n    pthread_cond_destroy(&buf->not_full);\n    pthread_cond_destroy(&buf->not_empty);\n}\n\nvoid buffer_enqueue(BoundedBuffer *buf, int item) {\n    pthread_mutex_lock(&buf->mutex);\n\n    // Producer waits if buffer is full OR if there are consumers waiting (consumer priority)\n    while (buf->count == BUFFER_SIZE || buf->waiting_consumers > 0) {\n        pthread_cond_wait(&buf->not_full, &buf->mutex);\n    }\n\n    buf->buffer[buf->head] = item;\n    buf->head = (buf->head + 1) % BUFFER_SIZE;\n    buf->count++;\n\n    pthread_cond_signal(&buf->not_empty); // Wake up a waiting consumer\n\n    pthread_mutex_unlock(&buf->mutex);\n}\n\nint buffer_dequeue(BoundedBuffer *buf) {\n    pthread_mutex_lock(&buf->mutex);\n\n    // Consumer waits if buffer is empty\n    while (buf->count == 0) {\n        buf->waiting_consumers++; // Increment count of waiting consumers\n        pthread_cond_wait(&buf->not_empty, &buf->mutex);\n        buf->waiting_consumers--; // Decrement count of waiting consumers after waking up\n    }\n\n    int item = buf->buffer[buf->tail];\n    buf->tail = (buf->tail + 1) % BUFFER_SIZE;\n    buf->count--;\n\n    // If no consumers are waiting, broadcast to all producers (they might be waiting due to consumer priority)\n    // Otherwise, just signal one producer if the buffer was full.\n    // Using broadcast here is safer as producers might be waiting on `waiting_consumers > 0` condition.\n    pthread_cond_broadcast(&buf->not_full);\n\n    pthread_mutex_unlock(&buf->mutex);\n    return item;\n}\n```"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

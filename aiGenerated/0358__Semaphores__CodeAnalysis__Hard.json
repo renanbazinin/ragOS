@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Semaphores",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 21:05:01",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3751,
+      "output_tokens": 2452,
+      "total_tokens": 10720
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Semaphores",
+      "Concurrency",
+      "Deadlock"
+    ],
+    "content": {
+      "text": "נתונה בעיית סנכרון בה שני סוגי תהליכונים (thread_X ו-thread_Y) מנסים לגשת לשני משאבים שיתופיים, המיוצגים על ידי סמפורים בינאריים A ו-B. שני הסמפורים מאותחלים לערך 1. הקוד הבא מתאר את לוגיקת הגישה למשאבים עבור כל סוג תהליכון, וכן את פונקציית main המאתחלת ומפעילה אותם. נתחו את הקוד וענו על השאלות הבאות:\n\n1.  האם הקוד הנתון פותר נכונה את בעיית הסנכרון? אם לא, מהי הבעיה וכיצד היא מתרחשת (תארו תרחיש ספציפי)?\n2.  הציעו פתרון מתוקן לקוד אשר מונע את הבעיה, והסבירו מדוע הוא פותר אותה.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <semaphore.h>\n#include <unistd.h> // For sleep\n\nsem_t A;\nsem_t B;\n\nvoid* thread_X(void* arg) {\n    printf(\"Thread X: Trying to acquire semaphore A\\n\");\n    sem_wait(&A);\n    printf(\"Thread X: Acquired semaphore A, trying to acquire B\\n\");\n    sleep(1); // Simulate work or context switch\n    sem_wait(&B);\n    printf(\"Thread X: Acquired both A and B\\n\");\n    // Critical section\n    printf(\"Thread X: Releasing semaphores\\n\");\n    sem_post(&B);\n    sem_post(&A);\n    return NULL;\n}\n\nvoid* thread_Y(void* arg) {\n    printf(\"Thread Y: Trying to acquire semaphore B\\n\");\n    sem_wait(&B);\n    printf(\"Thread Y: Acquired semaphore B, trying to acquire A\\n\");\n    sleep(1); // Simulate work or context switch\n    sem_wait(&A);\n    printf(\"Thread Y: Acquired both B and A\\n\");\n    // Critical section\n    printf(\"Thread Y: Releasing semaphores\\n\");\n    sem_post(&A);\n    sem_post(&B);\n    return NULL;\n}\n\nint main() {\n    sem_init(&A, 0, 1);\n    sem_init(&B, 0, 1);\n\n    pthread_t tid_x, tid_y;\n\n    printf(\"Main: Creating threads...\\n\");\n    pthread_create(&tid_x, NULL, thread_X, NULL);\n    pthread_create(&tid_y, NULL, thread_Y, NULL);\n\n    pthread_join(tid_x, NULL);\n    pthread_join(tid_y, NULL);\n\n    sem_destroy(&A);\n    sem_destroy(&B);\n\n    printf(\"Main: Both threads finished (or deadlocked)\\n\");\n    return 0;\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הקוד הנתון סובל מבעיית קיפאון (Deadlock). נסביר את התרחיש הבעייתי ואת הפתרון הנכון.\n\n**1. זיהוי הבעיה ותיאור התרחיש הבעייתי:**\nהקוד הנתון אינו פותר נכונה את בעיית הסנכרון והוא מוביל למצב של קיפאון (Deadlock). הסיבה לכך היא ששני סוגי התהליכונים מנסים לרכוש את המשאבים (הסמפורים) בסדר שונה:\n*   `thread_X` מנסה לרכוש את A ואז את B.\n*   `thread_Y` מנסה לרכוש את B ואז את A.\n\nתרחיש ספציפי המוביל לקיפאון:\n1.  `thread_X` מתחיל לרוץ ומבצע בהצלחה `sem_wait(&A)`. כעת `thread_X` מחזיק בסמפור A.\n2.  `thread_X` מבצע `sleep(1)`, מה שמאפשר ל-`thread_Y` לקבל הקצאת מעבד ולהתחיל לרוץ.\n3.  `thread_Y` מתחיל לרוץ ומבצע בהצלחה `sem_wait(&B)`. כעת `thread_Y` מחזיק בסמפור B.\n4.  `thread_Y` מבצע `sleep(1)`.\n5.  כאשר `thread_X` מתעורר מהשינה, הוא מנסה לבצע `sem_wait(&B)`. מכיוון ש-`thread_Y` מחזיק כעת בסמפור B, `thread_X` נחסם וממתין לשחרור B.\n6.  כאשר `thread_Y` מתעורר מהשינה, הוא מנסה לבצע `sem_wait(&A)`. מכיוון ש-`thread_X` מחזיק כעת בסמפור A, `thread_Y` נחסם וממתין לשחרור A.\n\nבשלב זה, `thread_X` מחכה ל-`thread_Y` שישחרר את B, ו-`thread_Y` מחכה ל-`thread_X` שישחרר את A. נוצר מעגל המתנה הדדית (circular wait), והמערכת נכנסת למצב קיפאון. שני התהליכונים חסומים ולא יוכלו להמשיך.\n\n**2. פתרון מתוקן:**\nהדרך הנפוצה למנוע קיפאון במקרה זה היא לוודא שכל התהליכונים מנסים לרכוש את המשאבים באותו סדר קבוע (resource hierarchy). לדוגמה, שניהם ירכשו תמיד את A ואז את B. במימוש זה, אם `thread_X` רוכש את A, הוא ינסה לרכוש את B. אם `thread_Y` גם רוצה את A, הוא יחסם עד ש-`thread_X` ישחרר אותו (לאחר שסיים את כל המקטע הקריטי ושחרר את B ואז את A). כך נמנעת המתנה מעגלית.\n\n**קוד מתוקן לדוגמה (שינוי ב-`thread_Y`):**\n```c\n#include <stdio.h>\n#include <pthread.h>\n#include <semaphore.h>\n#include <unistd.h> // For sleep\n\nsem_t A;\nsem_t B;\n\nvoid* thread_X_corrected(void* arg) { // Renamed for clarity, logic is same as original thread_X\n    printf(\"Thread X (Corrected): Trying to acquire semaphore A\\n\");\n    sem_wait(&A);\n    printf(\"Thread X (Corrected): Acquired semaphore A, trying to acquire B\\n\");\n    sleep(1); // Simulate work or context switch\n    sem_wait(&B);\n    printf(\"Thread X (Corrected): Acquired both A and B\\n\");\n    // Critical section\n    printf(\"Thread X (Corrected): Releasing semaphores\\n\");\n    sem_post(&B);\n    sem_post(&A);\n    return NULL;\n}\n\nvoid* thread_Y_corrected(void* arg) { // Corrected to acquire A then B\n    printf(\"Thread Y (Corrected): Trying to acquire semaphore A\\n\"); // Changed order\n    sem_wait(&A); // Always acquire A first\n    printf(\"Thread Y (Corrected): Acquired semaphore A, trying to acquire B\\n\");\n    sleep(1); // Simulate work or context switch\n    sem_wait(&B);\n    printf(\"Thread Y (Corrected): Acquired both A and B\\n\");\n    // Critical section\n    printf(\"Thread Y (Corrected): Releasing semaphores\\n\");\n    sem_post(&B);\n    sem_post(&A);\n    return NULL;\n}\n\nint main() {\n    sem_init(&A, 0, 1);\n    sem_init(&B, 0, 1);\n\n    pthread_t tid_x, tid_y;\n\n    printf(\"Main: Creating corrected threads...\\n\");\n    pthread_create(&tid_x, NULL, thread_X_corrected, NULL);\n    pthread_create(&tid_y, NULL, thread_Y_corrected, NULL);\n\n    pthread_join(tid_x, NULL);\n    pthread_join(tid_y, NULL);\n\n    sem_destroy(&A);\n    sem_destroy(&B);\n\n    printf(\"Main: Both corrected threads finished successfully\\n\");\n    return 0;\n}\n```\n**הסבר לפתרון המתוקן:**\nעל ידי אכיפת סדר רכישה אחיד (A ואז B) לכל התהליכונים, אנו מבטלים את התנאי של המתנה מעגלית, שהוא אחד מארבעת התנאים ההכרחיים לקיפאון. אם `thread_X` מחזיק ב-A וממתין ל-B, ו-`thread_Y` מנסה לרכוש את A, הוא יחסם ב-`sem_wait(&A)` עד ש-`thread_X` ישחרר את A (לאחר שסיים את כל המקטע הקריטי ושחרר את B ואז את A). כך, אף פעם לא ייווצר מצב שבו `thread_X` מחכה ל-B ו-`thread_Y` מחכה ל-A בו-זמנית."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

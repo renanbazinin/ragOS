@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 20:15:05",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2046,
+      "output_tokens": 1755,
+      "total_tokens": 7526
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Mutexes",
+      "Synchronization",
+      "Deadlocks"
+    ],
+    "content": {
+      "text": "הסבר את ההבדל בין mutex רגיל (שאינו רקורסיבי) לבין mutex רקורסיבי. כתוב קטע קוד ב-C שבו שימוש ב-mutex רגיל יוביל לקיפאון (deadlock), אך שימוש ב-mutex רקורסיבי יפתור את הבעיה. הסבר בפירוט מדוע קטע הקוד גורם לקיפאון עם mutex רגיל וכיצד mutex רקורסיבי פותר זאת.",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n\n// הגדרת mutex גלובלי\npthread_mutex_t my_mutex;\n\n// פונקציה פנימית המנסה לנעול את ה-mutex\nvoid inner_function() {\n    printf(\"Inner function: Trying to lock mutex...\\n\");\n    pthread_mutex_lock(&my_mutex); // ניסיון נעילה שני על אותו mutex\n    printf(\"Inner function: Mutex locked. Doing work...\\n\");\n    // סימולציה של עבודה\n    pthread_mutex_unlock(&my_mutex);\n    printf(\"Inner function: Mutex unlocked.\\n\");\n}\n\n// פונקציה חיצונית המנסה לנעול את ה-mutex וקוראת לפונקציה הפנימית\nvoid outer_function() {\n    printf(\"Outer function: Trying to lock mutex...\\n\");\n    pthread_mutex_lock(&my_mutex); // ניסיון נעילה ראשון\n    printf(\"Outer function: Mutex locked. Calling inner function...\\n\");\n    inner_function(); // זו תנסה לנעול את אותו mutex שוב\n    printf(\"Outer function: Inner function returned. Doing more work...\\n\");\n    // סימולציה של עבודה נוספת\n    pthread_mutex_unlock(&my_mutex);\n    printf(\"Outer function: Mutex unlocked.\\n\");\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": 10,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "ההבדל העיקרי בין mutex רגיל (שאינו רקורסיבי) ל-mutex רקורסיבי טמון באופן שבו הם מטפלים בניסיונות רכישה חוזרים על ידי אותו חוט (thread) שכבר מחזיק ב-mutex.\n\n1.  **Mutex רגיל (PTHREAD_MUTEX_NORMAL):**\n    *   מטרתו העיקרית היא להבטיח בלעדיות הדדית (mutual exclusion) – רק חוט אחד יכול להחזיק בו בזמן נתון.\n    *   אם חוט שכבר מחזיק ב-mutex רגיל מנסה לרכוש אותו שוב (לקרוא ל-`pthread_mutex_lock` עליו), הוא יחסם באופן קבוע (deadlock) או יקבל שגיאה, מכיוון שה-mutex כבר נעול על ידו ואינו מאפשר רכישה חוזרת. אתחול ברירת המחדל של mutex ב-POSIX הוא רגיל: `pthread_mutex_init(&my_mutex, NULL);`\n\n2.  **Mutex רקורסיבי (PTHREAD_MUTEX_RECURSIVE):**\n    *   מאפשר לחוט שכבר מחזיק ב-mutex לרכוש אותו שוב מספר פעמים מבלי להיחסם.\n    *   ה-mutex שומר מונה פנימי של מספר הפעמים שהחוט הנוכחי רכש אותו. כל קריאה ל-`pthread_mutex_lock` מגדילה את המונה, וכל קריאה ל-`pthread_mutex_unlock` מקטינה אותו.\n    *   ה-mutex ישוחרר בפועל (כלומר, יהיה זמין לחוטים אחרים) רק כאשר החוט המחזיק בו יבצע מספר שווה של קריאות `pthread_mutex_unlock` כמספר הקריאות `pthread_mutex_lock` שביצע. אתחול mutex רקורסיבי מתבצע כך:\n        ```c\n        pthread_mutexattr_t attr;\n        pthread_mutexattr_init(&attr);\n        pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);\n        pthread_mutex_init(&my_mutex, &attr);\n        pthread_mutexattr_destroy(&attr);\n        ```\n\n**הסבר לקטע הקוד:**\nבקטע הקוד הנתון:\n*   הפונקציה `outer_function` רוכשת את ה-`my_mutex` באמצעות `pthread_mutex_lock(&my_mutex);`\n*   לאחר מכן, `outer_function` קוראת ל-`inner_function`.\n*   הפונקציה `inner_function` מנסה לרכוש את ה-`my_mutex` *שוב* באמצעות `pthread_mutex_lock(&my_mutex);`\n\n**עם mutex רגיל (לאחר אתחול `pthread_mutex_init(&my_mutex, NULL);`):**\n*   כאשר `inner_function` מנסה לנעול את `my_mutex`, ה-mutex כבר נעול על ידי אותו חוט (החוט שמריץ את `outer_function` ואז קורא ל-`inner_function`).\n*   mutex רגיל אינו מאפשר רכישה חוזרת על ידי אותו חוט. לכן, החוט נחסם בניסיון לנעול את ה-mutex, ומכיוון שהוא עצמו מחזיק ב-mutex, הוא לא יוכל לשחרר אותו לעולם. זה מוביל לקיפאון (deadlock) של החוט עם עצמו. התוכנית תיתקע.\n\n**עם mutex רקורסיבי (לאחר אתחול עם `PTHREAD_MUTEX_RECURSIVE`):**\n*   כאשר `inner_function` מנסה לנעול את `my_mutex`, ה-mutex מזהה שהחוט שכבר מחזיק בו מנסה לרכוש אותו שוב.\n*   הפעולה `pthread_mutex_lock` מצליחה, והמונה הפנימי של ה-mutex מוגדל (במקרה זה, מ-1 ל-2).\n*   הפונקציות ממשיכות לפעול כרגיל.\n*   כאשר `inner_function` קוראת ל-`pthread_mutex_unlock`, המונה קטן (מ-2 ל-1).\n*   כאשר `outer_function` קוראת ל-`pthread_mutex_unlock`, המונה קטן שוב (מ-1 ל-0).\n*   רק כשהמונה מגיע ל-0, ה-mutex משוחרר בפועל וחוטים אחרים יכולים לרכוש אותו. במקרה זה, התוכנית תרוץ ללא קיפאון.\n*   לכן, השימוש ב-mutex רקורסיבי פותר את בעיית הקיפאון העצמי במקרה זה."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 20:08:09",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 860,
+      "output_tokens": 414,
+      "total_tokens": 2402
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Mutexes",
+      "Concurrency",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "מה קורה כאשר חוט (thread) מנסה לנעול (lock) מנעול הדדי (mutex) שכבר נתפס על ידי חוט אחר?",
+      "code_snippet": null,
+      "options": [
+        "החוט ממשיך בביצוע מיד.",
+        "החוט נכנס ללולאת המתנה פעילה (busy-wait).",
+        "החוט נחסם (blocks) עד שהמנעול משוחרר.",
+        "התוכנית קורסת."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "החוט נחסם (blocks) עד שהמנעול משוחרר.",
+      "explanation": "כאשר חוט מנסה לרכוש מנעול הדדי (mutex) שכבר נתפס על ידי חוט אחר, החוט המנסה לרכוש את המנעול נכנס למצב חסימה. הוא ימתין עד שהחוט המחזיק במנעול ישחרר אותו, ורק אז יוכל לנסות לרכוש אותו שוב (או שחוט אחר ירכוש אותו קודם, תלוי במדיניות התזמון). מטרת המנעול ההדדי היא להבטיח גישה הדדית בלעדית לקטע קריטי, ולכן חסימה היא ההתנהגות הצפויה והנכונה."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

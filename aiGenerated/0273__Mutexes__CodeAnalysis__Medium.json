@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 20:25:47",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3648,
+      "output_tokens": 1826,
+      "total_tokens": 9027
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Mutexes",
+      "Concurrency",
+      "Race Conditions",
+      "Pthreads"
+    ],
+    "content": {
+      "text": "נתונה תוכנית ה-C הבאה המשתמשת ב-pthreads ובמנעולים (mutexes) כדי לעדכן שני משתנים גלובליים משותפים על ידי מספר תהליכונים (threads). נתחו את התוכנית וענו על השאלות הבאות בהנחה שכל קריאות המערכת מצליחות:\n\n1. מהו הערך *הצפוי* הסופי של `shared_counter_a` ושל `shared_counter_b`?\n2. מהם הערכים *האפשריים* הסופיים של `shared_counter_a` ושל `shared_counter_b` לאחר הרצת התוכנית מספר פעמים?\n3. הסבירו את ההבדל בין התנהגות העדכון של `shared_counter_a` לזו של `shared_counter_b`, ומהו הסיכון הטמון בגישה ל-`shared_counter_b` כפי שהיא ממומשת.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <unistd.h>\n\n#define NUM_THREADS 5\n#define ITERATIONS_PER_THREAD 100000\n\nint shared_counter_a = 0;\nint shared_counter_b = 0;\npthread_mutex_t counter_mutex;\n\nvoid* thread_func(void* arg) {\n    long thread_id = (long)arg;\n    for (int i = 0; i < ITERATIONS_PER_THREAD; ++i) {\n        // Protecting shared_counter_a with mutex\n        pthread_mutex_lock(&counter_mutex);\n        shared_counter_a++;\n        pthread_mutex_unlock(&counter_mutex);\n\n        // Accessing shared_counter_b without mutex\n        shared_counter_b++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    pthread_mutex_init(&counter_mutex, NULL);\n\n    for (long i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, thread_func, (void*)i);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    pthread_mutex_destroy(&counter_mutex);\n\n    printf(\"Final shared_counter_a: %d\\n\", shared_counter_a);\n    printf(\"Final shared_counter_b: %d\\n\", shared_counter_b);\n\n    return 0;\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1. **ערכים צפויים:**\n   - `shared_counter_a`: כל תהליכון מבצע `ITERATIONS_PER_THREAD` (שהוא 100,000) איטרציות, וישנם `NUM_THREADS` (שהוא 5) תהליכונים. כל עדכון של `shared_counter_a` מוגן על ידי המנעול `counter_mutex`. לכן, הערך הצפוי והנכון של `shared_counter_a` יהיה `NUM_THREADS * ITERATIONS_PER_THREAD = 5 * 100,000 = 500,000`.\n   - `shared_counter_b`: באופן לוגי, גם `shared_counter_b` אמור לעבור את אותו מספר עדכונים: `5 * 100,000 = 500,000`.\n\n2. **ערכים אפשריים:**\n   - `shared_counter_a`: הערך האפשרי היחיד עבור `shared_counter_a` הוא `500,000`. המנעול מבטיח שכל פעולת `shared_counter_a++` תתבצע בצורה אטומית ובטוחה ממירוץ תהליכים.\n   - `shared_counter_b`: הערך האפשרי עבור `shared_counter_b` יהיה בין 1 (אם רק תהליכון אחד הספיק לעדכן אותו לפני שכל השאר סיימו או אם מתזמן המשימות גרם לאובדן כל העדכונים למעט אחד) ל-`500,000` (כולל). כלומר, הוא יכול להיות כל ערך בטווח זה, אך לרוב הוא יהיה נמוך מהערך הצפוי של `500,000`. הוא יכול גם להיות 0 אם אף תהליכון לא הספיק לעדכן אותו (אך זה לא סביר עם `pthread_join`). תיאורטית, הוא יכול להיות גם `500,000` במקרה נדיר מאוד של ריצה חסרת מזל של מתזמן התהליכונים, אך הדבר אינו מובטח ואינו סביר.\n\n3. **הסבר ההבדל והסיכון:**\n   - `shared_counter_a` מוגן על ידי `counter_mutex`. לפני כל פעולת הגדלה (`shared_counter_a++`), התהליכון נועל את המנעול, ולאחר הפעולה הוא משחרר אותו. זה מבטיח שהפעולה `shared_counter_a++` (שהיא למעשה קריאה, הגדלה וכתיבה) תתבצע כאופרציה אטומית, ללא הפרעה מתהליכונים אחרים. לכן, אין מצב מרוץ (race condition) עבור `shared_counter_a`, והערך הסופי שלו תמיד יהיה נכון וצפוי.\n   - `shared_counter_b` אינו מוגן על ידי המנעול. הגישה ל-`shared_counter_b` והגדלתו (`shared_counter_b++`) מתבצעת מחוץ לקטע הקריטי המוגן. פעולת הגדלה `x++` אינה אטומית; היא מורכבת משלושה שלבים: 1. קריאת הערך הנוכחי של `x` לתוך רגיסטר. 2. הגדלת הערך ברגיסטר. 3. כתיבת הערך המעודכן חזרה ל-`x`. כאשר מספר תהליכונים מנסים לבצע פעולה זו בו-זמנית, עלול להיווצר מצב מרוץ. לדוגמה, שני תהליכונים יכולים לקרוא את אותו ערך של `shared_counter_b` (למשל 100), שניהם יגדילו אותו ל-101 ברגיסטרים שלהם, ושניהם יכתבו חזרה 101. במקרה כזה, בוצעו שתי פעולות הגדלה אך `shared_counter_b` גדל רק באחד במקום בשניים. כתוצאה מכך, הערך הסופי של `shared_counter_b` יהיה לרוב נמוך מהערך הצפוי, והוא אינו דטרמיניסטי. הסיכון הוא שהתוכנית תפיק תוצאות שגויות ולא עקביות, מה שעלול להוביל לבאגים קשים לאיתור ביישומים מורכבים יותר."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

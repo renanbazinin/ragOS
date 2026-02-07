@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 19:47:58",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 968,
+      "output_tokens": 1416,
+      "total_tokens": 7504
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Synchronization",
+      "Deadlock",
+      "Condition Variables",
+      "Concurrency",
+      "Multithreading"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C++ המממשת מחסום (barrier) ל-`NUM_THREADS` תהליכונים, המיועד לשימוש חוזר במספר סבבים. התהליכונים מבצעים עבודה, מגיעים למחסום, ממתינים שכל שאר התהליכונים יגיעו, ואז ממשיכים. המחסום מוגדר כדלקמן: \n\nמה יקרה כאשר התוכנית תרוץ עם `NUM_THREADS = 3`?",
+      "code_snippet": "#include <iostream>\n#include <vector>\n#include <thread>\n#include <mutex>\n#include <condition_variable>\n#include <chrono>\n\nconst int NUM_THREADS = 3;\nstd::mutex mtx;\nstd::condition_variable cv;\nint arrived_count = 0;\n\nvoid barrier_function() {\n    std::unique_lock<std::mutex> lock(mtx);\n    arrived_count++;\n\n    if (arrived_count == NUM_THREADS) {\n        cv.notify_one(); // נקודת הכשל הפוטנציאלית\n        arrived_count = 0; // איפוס לסבב הבא\n    } else {\n        cv.wait(lock);\n    }\n}\n\nvoid worker_thread() {\n    std::this_thread::sleep_for(std::chrono::milliseconds(10));\n    barrier_function(); // סבב ראשון\n    std::this_thread::sleep_for(std::chrono::milliseconds(10));\n    barrier_function(); // סבב שני\n}\n\nint main() {\n    std::vector<std::thread> threads;\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        threads.emplace_back(worker_thread);\n    }\n    for (auto& t : threads) {\n        t.join();\n    }\n    // This line will likely not be reached due to deadlock\n    // std::cout << \"Main finished.\" << std::endl;\n    return 0;\n}",
+      "options": [
+        "א. התוכנית תרוץ בהצלחה ותסיים את פעולתה כרגיל.",
+        "ב. יתרחש מצב של מרוץ (race condition) אך התוכנית תמיד תסיים בהצלחה.",
+        "ג. יתרחש קיפאון (deadlock) של חלק מהתהליכונים בסבב השני של המחסום.",
+        "ד. יתרחש קיפאון (deadlock) של כל התהליכונים כבר בסבב הראשון של המחסום.",
+        "ה. התוכנית תקרוס עקב גישה לא חוקית לזיכרון."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "התשובה הנכונה היא ג'.\nהבעיה טמונה בשימוש ב-`cv.notify_one()` במקום `cv.notify_all()` כאשר `arrived_count == NUM_THREADS` במחסום רב-פעמי.\n\nבסבב הראשון של המחסום:\n1. שלושת התהליכונים (T1, T2, T3) קוראים ל-`barrier_function()`.\n2. `arrived_count` יגיע ל-3. אחד התהליכונים (נניח T3) יגיע ראשון לשלב זה ויקרא ל-`cv.notify_one()`.\n3. `arrived_count` יתאפס ל-0.\n4. `cv.notify_one()` יעיר רק תהליכון אחד מבין שני התהליכונים האחרים שממתינים (T1 או T2). נניח ש-T1 מתעורר.\n5. כעת, T1 ו-T3 ממשיכים לאחר המחסום (T3 כי הוא קרא ל-`notify_one` ולא נכנס ל-`wait`, ו-T1 כי הוא התעורר). T2 נשאר במצב המתנה (waiting) מהסבב הראשון.\n\nבסבב השני של המחסום:\n1. T1 ו-T3 קוראים שוב ל-`barrier_function()`.\n2. `arrived_count` יגיע ל-1 (מ-T1) ואז ל-2 (מ-T3).\n3. T1 ו-T3 ייכנסו למצב המתנה (calling `cv.wait(lock)`), מכיוון ש-`arrived_count` לא יגיע ל-`NUM_THREADS` (שהוא 3). הם ימתינו לתהליכון השלישי.\n4. T2 עדיין ממתין מהסבב הראשון ולעולם לא יתעורר, מכיוון שהאות `notify_one` כבר נשלח בסבב הראשון והוא לא נבחר להתעורר, ואין מי שיעיר אותו שוב. לכן, `arrived_count` לעולם לא יגיע ל-3 בסבב השני.\n5. התוצאה היא ש-T1 ו-T3 ימתינו ללא הגבלת זמן (deadlock), מכיוון שהם ממתינים לתהליכון השלישי (שכבר נמצא בקיפאון מהסבב הראשון), ו-T2 עצמו בקיפאון. זהו קיפאון של חלק מהתהליכונים (T1, T2, T3 כולם בסופו של דבר) שנובע מהשימוש השגוי ב-`notify_one` במקום `notify_all` במחסום רב-פעמי."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

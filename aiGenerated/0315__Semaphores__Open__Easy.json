@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Semaphores",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 20:43:28",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2862,
+      "output_tokens": 1354,
+      "total_tokens": 5879
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "Open",
+    "topic": [
+      "Semaphores",
+      "Concurrency",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "הסבירו מהו סמפור (Semaphore) וכיצד הוא משמש לסנכרון בין תהליכים (או ת'רדים). פרטו את פעולות הבסיס שלו (`wait`/`P` ו-`signal`/`V`) והדגימו שימוש פשוט בסמפור בינארי (mutex) כדי להגן על קטע קריטי (critical section).",
+      "code_snippet": "/* C/C++ style pseudocode using POSIX semaphores */\n#include <semaphore.h>\n#include <stdio.h>\n\nsem_t mutex; // A binary semaphore (mutex)\n\n// Initialize the semaphore\nvoid init_semaphore() {\n    // sem_init(semaphore, pshared, value)\n    // pshared = 0 for threads in the same process\n    // value = 1 for a binary semaphore (mutex) initially unlocked\n    sem_init(&mutex, 0, 1);\n}\n\n// Function demonstrating critical section protection\nvoid access_critical_section() {\n    // P operation: acquire the lock\n    sem_wait(&mutex);\n\n    // Critical section: code that accesses shared resources\n    printf(\"Thread/Process entered critical section.\\n\");\n    // ... perform operations on shared data ...\n    printf(\"Thread/Process exiting critical section.\\n\");\n\n    // V operation: release the lock\n    sem_post(&mutex);\n}\n\n// Example of how it might be used\nint main() {\n    init_semaphore();\n    // Multiple threads/processes could call access_critical_section()\n    access_critical_section();\n    // ... other calls ...\n    sem_destroy(&mutex); // Clean up the semaphore\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "סמפור הוא כלי סנכרון המאפשר לתהליכים (או ת'רדים) לשתף משאבים מוגבלים או לתאם את פעולותיהם. הוא מורכב ממשתנה שלם (integer variable) שניתן לגשת אליו רק באמצעות שתי פעולות אטומיות (שאינן ניתנות להפרעה): `wait` (הידועה גם כ-`P` או `down`) ו-`signal` (הידועה גם כ-`V` או `up`).\n\n**פעולות הבסיס:**\n1.  **`wait` (או `P`)**: פעולה זו מורידה את ערך הסמפור באחד. אם ערך הסמפור הופך שלילי, התהליך הקורא לפעולה נחסם ונכנס לתור המתנה של הסמפור, עד שיוכל להמשיך. פעולה זו משמשת בדרך כלל לפני כניסה לקטע קריטי או לפני גישה למשאב.\n2.  **`signal` (או `V`)**: פעולה זו מעלה את ערך הסמפור באחד. אם ערך הסמפור קטן או שווה לאפס (מה שמעיד על כך שיש תהליכים חסומים בתור), אחד מהתהליכים החסומים משוחרר ומועבר למצב מוכן (ready). פעולה זו משמשת בדרך כלל לאחר יציאה מקטע קריטי או לאחר שחרור משאב.\n\n**סמפור בינארי (Mutex) והגנה על קטע קריטי:**\nסמפור בינארי הוא סמפור שערכו יכול להיות רק 0 או 1. הוא משמש במיוחד להשגת הדדיות בלעדית (mutual exclusion) בקטעים קריטיים, כלומר להבטיח שרק תהליך אחד יבצע את הקטע הקריטי בכל רגע נתון.\nכדי להגן על קטע קריטי באמצעות סמפור בינארי, יש לאתחל את הסמפור לערך 1. לפני הכניסה לקטע הקריטי, כל תהליך מבצע פעולת `wait` על הסמפור. אם הסמפור הוא 1, הוא הופך ל-0 והתהליך נכנס. אם הסמפור כבר 0 (כי תהליך אחר נמצא בקטע הקריטי), התהליך נחסם. לאחר היציאה מהקטע הקריטי, התהליך מבצע פעולת `signal` על הסמפור, מה שמחזיר את ערכו ל-1 ומשחרר תהליך חסום (אם יש כזה).\n\n**הדגמה בקוד:**\nהקוד המצורף מדגים שימוש בסמפור בינארי (mutex) כדי להגן על קטע קריטי. הסמפור `mutex` מאותחל ל-1. הפונקציה `sem_wait(&mutex)` מנסה לרכוש את המנעול (להיכנס לקטע הקריטי). אם המנעול פנוי (ערך הסמפור 1), הוא הופך ל-0 והתהליך ממשיך. אם המנעול תפוס (ערך הסמפור 0), התהליך נחסם. לאחר סיום העבודה בקטע הקריטי, הפונקציה `sem_post(&mutex)` משחררת את המנעול (מעלה את ערך הסמפור ל-1), ובכך מאפשרת לתהליך אחר להיכנס לקטע הקריטי."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

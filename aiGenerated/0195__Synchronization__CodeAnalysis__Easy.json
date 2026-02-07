@@ -1,0 +1,51 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 19:58:42",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4129,
+      "output_tokens": 1995,
+      "total_tokens": 8889
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Race Conditions",
+      "Mutexes",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המשתמשת בחוטים (threads) לקידום מונה גלובלי משותף. עיין בקוד וזהה את הבעיה הקיימת.",
+      "code_snippet": "1 #include <stdio.h>\n2 #include <pthread.h>\n3 #include <stdlib.h>\n\n4 #define NUM_THREADS 5\n5 #define INCREMENTS_PER_THREAD 100000\n\n6 int counter = 0;\n\n7 void* increment_counter(void* arg) {\n8   for (int i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n9     counter++;\n10  }\n11  return NULL;\n12}\n\n13 int main() {\n14  pthread_t threads[NUM_THREADS];\n\n15  for (int i = 0; i < NUM_THREADS; ++i) {\n16    if (pthread_create(&threads[i], NULL, increment_counter, NULL) != 0) {\n17      perror(\"Failed to create thread\");\n18      return 1;\n19    }\n20  }\n\n21  for (int i = 0; i < NUM_THREADS; ++i) {\n22    if (pthread_join(threads[i], NULL) != 0) {\n23      perror(\"Failed to join thread\");\n24      return 1;\n25    }\n26  }\n\n27  printf(\"Final counter value: %d\\n\", counter);\n28  printf(\"Expected counter value: %d\\n\", NUM_THREADS * INCREMENTS_PER_THREAD);\n\n29  return 0;\n30}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "8.1",
+        "text": "תאר בקצרה את הבעיה שעלולה להתרחש בהרצת הקוד הנתון, והסבר מדוע ערך המונה הסופי אינו צפוי להיות תמיד שווה לערך המצופה.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.2",
+        "text": "תקן את הקוד המקורי כך שיפעל באופן תקין ויבטיח שכל הקידומים יבוצעו כראוי, כלומר, ערך המונה הסופי יהיה תמיד שווה לערך המצופה. השתמש במנעול (mutex) לצורך הסנכרון. ציין אילו שורות קוד הוספת/שינית ומה תפקידן.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "8.1: הבעיה בקוד הנתון היא \"מצב מרוץ\" (Race Condition). הפעולה `counter++` אינה אטומית, אלא מורכבת משלוש פעולות בסיסיות: קריאת ערך המונה מהזיכרון, הגדלתו באחד, וכתיבת הערך החדש בחזרה לזיכרון. כאשר מספר חוטים מריצים פעולה זו במקביל ללא סנכרון, ייתכן שחוט אחד יקרא את ערך המונה, וטרם יספיק לכתוב את הערך המוגדל, יתזמן המעבד חוט אחר שיקרא גם הוא את אותו ערך ישן. כתוצאה מכך, שני החוטים יבצעו הגדלה אך ערך המונה יוגדל פעם אחת בלבד, וקידומים ילכו לאיבוד. לכן, ערך המונה הסופי יהיה בדרך כלל נמוך מהערך המצופה (NUM_THREADS * INCREMENTS_PER_THREAD).\n\n8.2: כדי לתקן את הבעיה, יש להגן על הגישה למשתנה המשותף `counter` באמצעות מנעול (mutex). יש להכריז על מנעול גלובלי, לאתחל אותו, ולנעול ולשחרר אותו סביב הקטע הקריטי (הגדלת המונה).\n\nהקוד המתוקן ייראה כך:\n\n```c\n#include <stdio.h>\n#include <pthread.h>\n#include <stdlib.h>\n\n#define NUM_THREADS 5\n#define INCREMENTS_PER_THREAD 100000\n\nint counter = 0;\npthread_mutex_t counter_mutex; // שורה חדשה: הכרזה על מנעול\n\nvoid* increment_counter(void* arg) {\n  for (int i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n    pthread_mutex_lock(&counter_mutex);   // שורה חדשה: נעילת המוטקס לפני הגישה לקטע הקריטי\n    counter++;\n    pthread_mutex_unlock(&counter_mutex); // שורה חדשה: שחרור המוטקס לאחר הגישה לקטע הקריטי\n  }\n  return NULL;\n}\n\nint main() {\n  pthread_t threads[NUM_THREADS];\n\n  pthread_mutex_init(&counter_mutex, NULL); // שורה חדשה: אתחול המנעול\n\n  for (int i = 0; i < NUM_THREADS; ++i) {\n    if (pthread_create(&threads[i], NULL, increment_counter, NULL) != 0) {\n      perror(\"Failed to create thread\");\n      return 1;\n    }\n  }\n\n  for (int i = 0; i < NUM_THREADS; ++i) {\n    if (pthread_join(threads[i], NULL) != 0) {\n      perror(\"Failed to join thread\");\n      return 1;\n    }\n  }\n\n  printf(\"Final counter value: %d\\n\", counter);\n  printf(\"Expected counter value: %d\\n\", NUM_THREADS * INCREMENTS_PER_THREAD);\n\n  pthread_mutex_destroy(&counter_mutex); // שורה חדשה: השמדת המנעול\n\n  return 0;\n}\n```\n\n**הסבר לשינויים:**\n1.  **`pthread_mutex_t counter_mutex;`**: הוספנו משתנה גלובלי מסוג `pthread_mutex_t` כדי לייצג את המנעול שיגן על המונה. (שורה 7 בקוד המתוקן)\n2.  **`pthread_mutex_init(&counter_mutex, NULL);`**: אתחלנו את המנעול בתחילת פונקציית `main`. (שורה 22 בקוד המתוקן)\n3.  **`pthread_mutex_lock(&counter_mutex);`**: לפני הגישה למשתנה `counter` בתוך הלולאה בפונקציה `increment_counter`, אנו נועלים את המוטקס. זה מבטיח שרק חוט אחד יכול להיכנס לקטע קריטי זה בכל רגע נתון. (שורה 10 בקוד המתוקן)\n4.  **`pthread_mutex_unlock(&counter_mutex);`**: לאחר שחרור הגישה למשתנה `counter` בתוך הלולאה, אנו משחררים את המוטקס, ומאפשרים לחוטים אחרים להיכנס לקטע הקריטי. (שורה 12 בקוד המתוקן)\n5.  **`pthread_mutex_destroy(&counter_mutex);`**: השמדנו את המנעול בסוף פונקציית `main` כדי לשחרר את המשאבים שהוקצו לו. (שורה 36 בקוד המתוקן)\n\nשינויים אלה מבטיחים שהפעולה `counter++` תתבצע באופן אטומי עבור כל חוט, ומונעים את מצב המרוץ, כך שערך המונה הסופי יהיה תמיד נכון."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

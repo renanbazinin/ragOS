@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Deadlocks",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 21:24:48",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2852,
+      "output_tokens": 1169,
+      "total_tokens": 5632
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Deadlocks",
+      "Concurrency",
+      "Mutexes",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא המשתמש בשני מנעולים ושני תהליכונים (threads). נתחו את הקוד וענו על השאלה: האם קטע הקוד עלול להוביל למצב של קיפאון (Deadlock)? נמקו את תשובתכם.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <unistd.h> // For sleep\n\npthread_mutex_t mutex1;\npthread_mutex_t mutex2;\n\nvoid* thread_func1(void* arg) {\n    printf(\"Thread 1: Trying to acquire mutex1...\\n\");\n    pthread_mutex_lock(&mutex1);\n    printf(\"Thread 1: Acquired mutex1. Trying to acquire mutex2...\\n\");\n    sleep(1); // Simulate work or context switch\n    pthread_mutex_lock(&mutex2);\n    printf(\"Thread 1: Acquired mutex2. Critical section...\\n\");\n    // Critical section\n    pthread_mutex_unlock(&mutex2);\n    pthread_mutex_unlock(&mutex1);\n    printf(\"Thread 1: Released mutexes.\\n\");\n    return NULL;\n}\n\nvoid* thread_func2(void* arg) {\n    printf(\"Thread 2: Trying to acquire mutex2...\\n\");\n    pthread_mutex_lock(&mutex2);\n    printf(\"Thread 2: Acquired mutex2. Trying to acquire mutex1...\\n\");\n    sleep(1); // Simulate work or context switch\n    pthread_mutex_lock(&mutex1);\n    printf(\"Thread 2: Acquired mutex1. Critical section...\\n\");\n    // Critical section\n    pthread_mutex_unlock(&mutex1);\n    pthread_mutex_unlock(&mutex2);\n    printf(\"Thread 2: Released mutexes.\\n\");\n    return NULL;\n}\n\nint main() {\n    pthread_t tid1, tid2;\n\n    pthread_mutex_init(&mutex1, NULL);\n    pthread_mutex_init(&mutex2, NULL);\n\n    pthread_create(&tid1, NULL, thread_func1, NULL);\n    pthread_create(&tid2, NULL, thread_func2, NULL);\n\n    pthread_join(tid1, NULL);\n    pthread_join(tid2, NULL);\n\n    pthread_mutex_destroy(&mutex1);\n    pthread_mutex_destroy(&mutex2);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "כן, קטע הקוד עלול להוביל למצב של קיפאון (Deadlock).\n\nקיפאון מתרחש כאשר כל אחד משני התהליכונים (threads) מחזיק במשאב (מנעול) אחד וממתין למשאב השני המוחזק על ידי התהליכון האחר. במקרה זה:\n\n*   **תהליכון 1 (thread_func1)** מנסה לרכוש את `mutex1` ולאחר מכן את `mutex2`.\n*   **תהליכון 2 (thread_func2)** מנסה לרכוש את `mutex2` ולאחר מכן את `mutex1`.\n\n**תרחיש לקיפאון:**\n1.  תהליכון 1 מתחיל לרוץ ורוכש בהצלחה את `mutex1`.\n2.  מתרחש מעבר הקשר (context switch) ותהליכון 2 מתחיל לרוץ.\n3.  תהליכון 2 רוכש בהצלחה את `mutex2`.\n4.  כעת, תהליכון 1 מנסה לרכוש את `mutex2`, אך הוא כבר מוחזק על ידי תהליכון 2. לכן, תהליכון 1 נחסם וממתין לשחרורו.\n5.  תהליכון 2 מנסה לרכוש את `mutex1`, אך הוא כבר מוחזק על ידי תהליכון 1. לכן, תהליכון 2 נחסם וממתין לשחרורו.\n\nבמצב זה, שני התהליכונים חסומים באופן הדדי וכל אחד מהם ממתין למשאב שהשני מחזיק, וכך נוצר קיפאון. הכללת ה-`sleep(1)` בקוד מגבירה את הסיכוי למעבר הקשר כזה שיביא לתרחיש הקיפאון."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Deadlocks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 21:11:00",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 733,
+      "total_tokens": 8499
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Deadlocks",
+      "Synchronization",
+      "Resource Allocation"
+    ],
+    "content": {
+      "text": "במערכת הפעלה קיימים N תהליכים. קיימים שני סוגי משאבים: ResourceA עם M_A מופעים, ו-ResourceB עם M_B מופעים. כל תהליך זקוק למופע אחד מ-ResourceA ולמופע אחד מ-ResourceB כדי לבצע את משימתו. כל התהליכים מקפידים על סדר קבוע של תפיסת משאבים: תחילה ResourceA, ולאחר מכן ResourceB. \n\nאיזו מהטענות הבאות נכונה בהכרח לגבי מצבי קיפאון (deadlocks) במערכת זו?",
+      "code_snippet": null,
+      "options": [
+        "א. מצב קיפאון בלתי אפשרי, ללא קשר לערכי N, M_A ו-M_B (כל עוד הם חיוביים).",
+        "ב. מצב קיפאון אפשרי אם N גדול יותר מ-M_A וגם מ-M_B.",
+        "ג. מצב קיפאון אפשרי רק אם M_A=1 ו-M_B=1 ו-N>1.",
+        "ד. מצב קיפאון אפשרי אם סכום המופעים הזמינים (M_A + M_B) קטן מ-N + 1.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "התשובה הנכונה היא א'. אחת מארבעת התנאים ההכרחיים למצב קיפאון הוא 'המתנה מעגלית' (Circular Wait). כאשר כל התהליכים מקפידים על סדר קבוע בתפיסת המשאבים (במקרה זה, תמיד ResourceA ואז ResourceB), נמנעת האפשרות ליצירת מעגל המתנה. תהליך שתופס את ResourceB לעולם לא ימתין ל-ResourceA, מכיוון שהוא כבר תפס אותו לפני ResourceB. לכן, לא ניתן ליצור שרשרת המתנה מעגלית שבה תהליך T1 ממתין למשאב שמוחזק על ידי T2, ותהליך T2 ממתין למשאב שמוחזק על ידי T1 (או שרשרת ארוכה יותר). מניעת תנאי 'המתנה מעגלית' מספיקה למניעת מצבי קיפאון, ללא קשר למספר התהליכים או למספר מופעי המשאבים הזמינים (כל עוד קיימים מופעים חיוביים). יש לשים לב כי שיטה זו מונעת קיפאון אך אינה מונעת בהכרח הרעבה (starvation)."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Semaphores",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 20:41:05",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 970,
+      "output_tokens": 2340,
+      "total_tokens": 15486
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Semaphores",
+      "Concurrency",
+      "Race Conditions",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא המשתמש בסמפור מסוג POSIX counting semaphore. הסמפור `mutex` מאותחל לערך 1 (בינארי). שני תהליכונים (threads), `thread_func(0)` ו-`thread_func(1)`, מורצים במקביל. נניח שהחלפות הקשר (context switches) יכולות להתרחש בכל נקודה בין פקודות. מהו הערך הסופי *האפשרי* של `shared_data` לאחר ששני התהליכונים סיימו את ריצתם?",
+      "code_snippet": "#include <semaphore.h>\n#include <pthread.h>\n#include <stdio.h>\n\nsem_t mutex;\nint shared_data = 0;\n\nvoid* thread_func(void* arg) {\n    long id = (long)arg;\n\n    // Critical section 1\n    sem_wait(&mutex);\n    shared_data++;\n    sem_post(&mutex);\n\n    // Conditional extra post by thread 0\n    if (id % 2 == 0) {\n        sem_post(&mutex);\n    }\n\n    // Critical section 2\n    sem_wait(&mutex);\n    shared_data--;\n    sem_post(&mutex);\n\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[2];\n\n    sem_init(&mutex, 0, 1); // Initialize as a binary semaphore\n\n    pthread_create(&threads[0], NULL, thread_func, (void*)0);\n    pthread_create(&threads[1], NULL, thread_func, (void*)1);\n\n    pthread_join(threads[0], NULL);\n    pthread_join(threads[1], NULL);\n\n    sem_destroy(&mutex);\n    printf(\"Final shared_data: %d\\n\", shared_data);\n    return 0;\n}",
+      "options": [
+        "א. 0 בלבד",
+        "ב. 1 בלבד",
+        "ג. 0 או -1",
+        "ד. 1 או -1",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ה",
+      "explanation": "הסמפור `mutex` מאותחל ל-1, ונועד לשמש להדדיות (mutual exclusion). עם זאת, סמפור POSIX counting semaphore יכול לקבל ערכים גדולים מ-1 כאשר `sem_post` נקראת יותר פעמים מ-`sem_wait` (בניגוד ל-mutex רגיל שלא ניתן 'לשחרר' אותו יותר מפעם אחת מבלי לנעול אותו שוב). \n\nנתבונן בשני תהליכונים, `T0` (id=0) ו-`T1` (id=1):\n*   כל תהליכון מבצע שתי פעולות `sem_wait` ושתי פעולות `sem_post` על `mutex` עבור גישה ל`shared_data`.\n*   `T0` מבצע פעולת `sem_post` נוספת (בגלל התנאי `id % 2 == 0`).\n\nבסך הכל, `T0` מבצע 2 `wait` ו-3 `post`. `T1` מבצע 2 `wait` ו-2 `post`. \nהמשמעות היא ש-`T0` 'משחרר' את הסמפור פעם אחת יותר מדי. זהו המקור לבעיה ולמגוון תוצאות אפשריות.\n\n**ניתוח אפשרויות לערך `shared_data`:**\nהערך `shared_data` מתחיל ב-0, עובר שני `++` ושני `--`. אם לא היו תנאי מרוץ, הערך הסופי היה 0. אולם, קריאת ה-`sem_post` הנוספת של `T0` יכולה לשבור את ההדדיות.\n\n1.  **מקרה אפשרי: `shared_data` שווה 0 (ללא תנאי מרוץ קריטי על `shared_data`):**\n    אם ה-`sem_post` הנוסף של `T0` מתרחש אחרי ש`T1` כבר ביצע את שני הבלוקים המוגנים שלו, או אם סדר הריצה לא מאפשר כניסה בו זמנית של שני תהליכונים לבלוקים המוגנים על `shared_data`. לדוגמה:\n    *   `T0` מבצע `wait`, `++` (shared_data=1), `post`.\n    *   `T1` מבצע `wait`, `++` (shared_data=2), `post`.\n    *   `T0` מבצע `post` נוסף (mutex=2).\n    *   `T0` מבצע `wait`, `--` (shared_data=1), `post`.\n    *   `T1` מבצע `wait`, `--` (shared_data=0), `post`.\n    בסיום: `shared_data=0`.\n\n2.  **מקרה אפשרי: `shared_data` שווה 1 (עם תנאי מרוץ):**\n    זה קורה כאשר ה-`sem_post` הנוסף של `T0` גורם לערך של `mutex` לעלות ל-2, מה שמאפשר לשני תהליכונים להיכנס לבלוקים מוגנים בו-זמנית. נניח את סדר הפעולות הבא:\n    *   `T0`: `sem_wait` (mutex=0), `shared_data++` (shared_data=1), `sem_post` (mutex=1).\n    *   `T0`: `sem_post` (mutex=2). (כעת `shared_data=1`, `mutex=2`)\n    *   `T1`: `sem_wait` (mutex=1). (T1 נכנס לבלוק הראשון שלו)\n    *   `T0`: `sem_wait` (mutex=0). (T0 נכנס לבלוק השני שלו, בו-זמנית עם T1)\n    *   בנקודה זו, `shared_data=1`. `T1` עומד לבצע `shared_data++` ו-`T0` עומד לבצע `shared_data--`. זהו תנאי מרוץ קלאסי (read-modify-write).\n    *   **אם הכתיבה של `T1` (shared_data++) מתרחשת אחרי הכתיבה של `T0` (shared_data--):**\n        1.  `T1` קורא `shared_data` (1).\n        2.  `T0` קורא `shared_data` (1).\n        3.  `T0` כותב `shared_data=0`.\n        4.  `T1` כותב `shared_data=2`.\n        (בסיום תנאי המרוץ, `shared_data=2`)\n    *   `T1`: `sem_post` (mutex=1).\n    *   `T0`: `sem_post` (mutex=2).\n    *   `T1`: `sem_wait` (mutex=1), `shared_data--` (shared_data=1), `sem_post` (mutex=2).\n    בסיום: `shared_data=1`.\n\n3.  **מקרה אפשרי: `shared_data` שווה -1 (עם תנאי מרוץ):**\n    נמשיך מהנקודה שבה `shared_data=1`, `mutex=0` ושני התהליכונים בבלוקים המוגנים שלהם בו-זמנית.\n    *   **אם הכתיבה של `T0` (shared_data--) מתרחשת אחרי הכתיבה של `T1` (shared_data++):**\n        1.  `T1` קורא `shared_data` (1).\n        2.  `T0` קורא `shared_data` (1).\n        3.  `T1` כותב `shared_data=2`.\n        4.  `T0` כותב `shared_data=0`.\n        (בסיום תנאי המרוץ, `shared_data=0`)\n    *   `T1`: `sem_post` (mutex=1).\n    *   `T0`: `sem_post` (mutex=2).\n    *   `T1`: `sem_wait` (mutex=1), `shared_data--` (shared_data=-1), `sem_post` (mutex=2).\n    בסיום: `shared_data=-1`.\n\nלסיכום, עקב ה-`sem_post` הנוסף של תהליכון 0, הסמפור יכול לעלות לערך הגדול מ-1, מה שמבטל למעשה את ההדדיות ומאפשר לשני תהליכונים להיכנס לאזורים קריטיים בו-זמנית. הדבר מוביל לתנאי מרוץ על המשתנה `shared_data` שיכול להסתיים בערכים שונים. הערכים האפשריים הם 0, 1 או -1. מכיוון שאף אחת מהאפשרויות א-ד לא מכסה את כל המקרים האפשריים, תשובה ה' היא הנכונה."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

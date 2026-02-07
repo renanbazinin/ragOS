@@ -16,10 +16,13 @@ import re
 import time
 import json
 import google.generativeai as genai
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # ── Configuration ────────────────────────────────────────────────────────────
 
-API_KEY = "AIzaSyBcpYQuCJmPX5USke5WedVF6y4mkV3WWzQ"
+API_KEY = os.getenv("GEMINI_API_KEY", "")
 MODEL_NAME = "gemini-2.5-flash"  # fast + cheap; switch to "gemini-2.5-pro" for harder PDFs
 TESTS_DIR = os.path.join(os.path.dirname(__file__), "tests")
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "output")

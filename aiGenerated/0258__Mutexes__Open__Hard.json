@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 20:19:12",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3905,
+      "output_tokens": 2737,
+      "total_tokens": 18963
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Mutexes",
+      "Synchronization",
+      "Concurrency",
+      "Fairness",
+      "Semaphores",
+      "Atomic Operations"
+    ],
+    "content": {
+      "text": "מנעולים סטנדרטיים (כגון `pthread_mutex_t`) מספקים הגנה הדדית (mutual exclusion) אך אינם מבטיחים הוגנות (fairness) בסדר הכניסה לקטע הקריטי. במערכות עם עומס גבוה, חוטים מסוימים עלולים לסבול מהרעבה (starvation) ולעולם לא לזכות במנעול, גם אם הם ממתינים זמן רב.\n\nמטרת שאלה זו היא לממש מנעול הוגן, אשר מבטיח שחוטים ירכשו את המנעול בסדר הגעתם (FIFO – First-In, First-Out). יש להשתמש בסמפורים (`sem_t`) ובפעולות אטומיות (כגון `atomic_uint` מ-C11 או `__sync_fetch_and_add` ב-GCC/Clang) לצורך המימוש, ללא שימוש ישיר ב-`pthread_mutex_t` או `pthread_cond_t`.\n\nהגדירו את מבנה הנתונים עבור המנעול ההוגן (`fair_mutex_t`) ולממש את הפונקציות הבאות: `fair_mutex_init`, `fair_mutex_destroy`, `fair_mutex_lock`, ו-`fair_mutex_unlock`.\n\nהניחו כי מספר החוטים הממתינים במקביל למנעול לא יעלה על `MAX_TICKETS` (קבוע שתגדירו).",
+      "code_snippet": "#include <semaphore.h>\n#include <stdatomic.h>\n\n#define MAX_TICKETS 1024 // Maximum number of unique tickets that can be simultaneously outstanding\n\ntypedef struct fair_mutex {\n    // TODO: Add necessary members for a fair mutex\n} fair_mutex_t;\n\nvoid fair_mutex_init(fair_mutex_t *mutex);\nvoid fair_mutex_destroy(fair_mutex_t *mutex);\nvoid fair_mutex_lock(fair_mutex_t *mutex);\nvoid fair_mutex_unlock(fair_mutex_t *mutex);\n",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "כדי לממש מנעול הוגן מסוג FIFO, נשתמש במנגנון \"כרטיסים\" (tickets). כל חוט שמבקש לרכוש את המנעול מקבל מספר כרטיס ייחודי, והחוטים רוכשים את המנעול לפי סדר הכרטיסים. כדי להפוך את המנגנון לחוסם (blocking) במקום ספינינג (spinning), נשתמש במערך של סמפורים, כאשר כל חוט ממתין על הסמפור הספציפי שלו, בהתאם למספר הכרטיס שקיבל.\n\n**מבנה הנתונים:**\n*   `next_ticket` (`atomic_uint`): מונה אטומי המקצה את מספר הכרטיס הבא. כל חוט שמבקש מנעול מקדם מונה זה ומקבל את הערך הקודם ככרטיס שלו.\n*   `now_serving` (`atomic_uint`): מונה אטומי המציין איזה כרטיס תורו להיכנס לקטע הקריטי.\n*   `wait_semaphores[MAX_TICKETS]` (`sem_t`): מערך של סמפורים. חוט שמקבל כרטיס `N` ומגלה שזה עדיין לא תורו (`now_serving != N`), ימתין על הסמפור `wait_semaphores[N % MAX_TICKETS]`. הסמפורים מאותחלים ל-0 (נעולים).\n*   `state_guard` (`sem_t`): סמפור בינארי (מאותחל ל-1) המשמש להגן על הגישה למונים `next_ticket` ו-`now_serving` ועל פעולות ה-`sem_post` בזמן ה-`unlock`, כדי למנוע מצבי מירוץ ולשמור על עקביות המצב הפנימי של המנעול.\n\n**הסבר לפעולות:**\n\n*   `fair_mutex_init`: מאתחל את המונים האטומיים ל-0. מאתחל את `state_guard` ל-1. מאתחל את כל הסמפורים במערך `wait_semaphores` ל-0 (כלומר, כולם נעולים בתחילה).\n\n*   `fair_mutex_destroy`: משחרר את המשאבים של הסמפורים (`sem_destroy`).\n\n*   `fair_mutex_lock`:\n    1.  החוט רוכש את `state_guard` (`sem_wait`) כדי להבטיח גישה יחידה למנגנון הקצאת הכרטיסים ולעדכון המצב.\n    2.  החוט מקבל כרטיס ייחודי על ידי קידום אטומי של `next_ticket` (`atomic_fetch_add`) ושמירת הערך הקודם (`my_ticket`).\n    3.  החוט משחרר את `state_guard` (`sem_post`).\n    4.  החוט בודק אם `my_ticket` שווה ל-`now_serving`. אם כן, זהו תורו של החוט להיכנס מיד לקטע הקריטי (אין צורך להמתין על סמפור). הוא ממשיך בביצוע.\n    5.  אם `my_ticket` אינו שווה ל-`now_serving`, החוט ממתין על הסמפור הספציפי שלו: `sem_wait(&mutex->wait_semaphores[my_ticket % MAX_TICKETS])`. זה חוסם את החוט עד שישוחרר על ידי החוט הקודם בתור.\n\n*   `fair_mutex_unlock`:\n    1.  החוט רוכש את `state_guard` (`sem_wait`) כדי להגן על עדכון המונים ופעולות ה-`sem_post`.\n    2.  החוט מקדם את `now_serving` באופן אטומי (`atomic_fetch_add`), ובכך מסמן שהכרטיס הבא בתור יכול להיכנס לקטע הקריטי.\n    3.  החוט מחשב את מספר הכרטיס של החוט הבא בתור (`next_waiter_ticket = current_ticket + 1`).\n    4.  החוט בודק אם יש חוט שממתין לכרטיס הבא בתור (כלומר, אם `next_waiter_ticket` קטן מ-`next_ticket` הנוכחי, מה שאומר שחוט כבר לקח את הכרטיס הזה והוא ממתין). אם כן, הוא משחרר את הסמפור המתאים (`sem_post`) כדי להעיר את החוט הבא בתור.\n    5.  החוט משחרר את `state_guard` (`sem_post`).\n\n**הערה על `MAX_TICKETS`:** השימוש במודולו (`% MAX_TICKETS`) עלול לגרום לבעיות אם מספר כרטיסים שונים (שאינם נשמרים בו זמנית) ממופים לאותו סמפור בעוד חוטים עדיין ממתינים. בשאלה זו, אנו מניחים ש-`MAX_TICKETS` גדול מספיק כדי למנוע מצב שבו חוטים עם כרטיסים `X` ו-`X + MAX_TICKETS` ממתינים בו-זמנית על אותו סמפור, או שניתן להחשיב את `MAX_TICKETS` כמספר המרבי של חוטים שיכולים להמתין למנעול בכל רגע נתון.",
+      "code_snippet": "#include <semaphore.h>\n#include <stdatomic.h>\n#include <stdio.h>\n\n#define MAX_TICKETS 1024 // Maximum number of unique tickets that can be simultaneously outstanding\n\ntypedef struct fair_mutex {\n    atomic_uint next_ticket; // Next available ticket number\n    atomic_uint now_serving; // Ticket number of the thread currently holding the lock\n    sem_t wait_semaphores[MAX_TICKETS]; // Each thread waits on its specific semaphore\n    sem_t state_guard; // Binary semaphore to protect access to next_ticket, now_serving, and sem_post operations.\n} fair_mutex_t;\n\nvoid fair_mutex_init(fair_mutex_t *mutex) {\n    atomic_init(&mutex->next_ticket, 0);\n    atomic_init(&mutex->now_serving, 0);\n    sem_init(&mutex->state_guard, 0, 1); // Initialize state_guard as a binary semaphore (unlocked)\n    for (int i = 0; i < MAX_TICKETS; ++i) {\n        sem_init(&mutex->wait_semaphores[i], 0, 0); // All waiting semaphores start at 0 (locked)\n    }\n}\n\nvoid fair_mutex_destroy(fair_mutex_t *mutex) {\n    sem_destroy(&mutex->state_guard);\n    for (int i = 0; i < MAX_TICKETS; ++i) {\n        sem_destroy(&mutex->wait_semaphores[i]);\n    }\n}\n\nvoid fair_mutex_lock(fair_mutex_t *mutex) {\n    sem_wait(&mutex->state_guard); // Acquire guard to get a ticket and protect state updates\n    unsigned int my_ticket = atomic_fetch_add(&mutex->next_ticket, 1); // Atomically get next ticket\n    sem_post(&mutex->state_guard); // Release entry gate\n\n    // Check if it's my turn immediately\n    if (my_ticket == atomic_load(&mutex->now_serving)) {\n        // It's my turn, proceed without waiting on a semaphore\n        return;\n    } else {\n        // Not my turn, wait on my specific semaphore\n        sem_wait(&mutex->wait_semaphores[my_ticket % MAX_TICKETS]);\n    }\n}\n\nvoid fair_mutex_unlock(fair_mutex_t *mutex) {\n    sem_wait(&mutex->state_guard); // Acquire guard to update now_serving and potentially post to next waiter\n    unsigned int current_ticket = atomic_load(&mutex->now_serving); // Get current serving ticket\n    atomic_fetch_add(&mutex->now_serving, 1); // Increment now_serving for the next thread\n\n    unsigned int next_waiter_ticket = current_ticket + 1;\n\n    // If there's a thread waiting for the next ticket, unblock it\n    // This check ensures we only post if a thread has already acquired that ticket\n    if (next_waiter_ticket < atomic_load(&mutex->next_ticket)) {\n        sem_post(&mutex->wait_semaphores[next_waiter_ticket % MAX_TICKETS]);\n    }\n    sem_post(&mutex->state_guard); // Release guard\n}\n",
+      "difficulty_estimation": "Hard"
+    }
+  }
+}

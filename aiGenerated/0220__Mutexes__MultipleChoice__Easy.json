@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 20:07:37",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 860,
+      "output_tokens": 450,
+      "total_tokens": 2370
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Mutexes",
+      "Synchronization",
+      "Concurrency",
+      "Race Conditions"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של מנעול הדדי (mutex)?",
+      "code_snippet": null,
+      "options": [
+        "למנוע קיפאון (deadlock).",
+        "להבטיח גישה הוגנת למשאבים משותפים.",
+        "להגן על קטעים קריטיים (critical sections) מפני מצבי מרוץ (race conditions).",
+        "לאפשר למספר תהליכונים לגשת למשאב משותף בו זמנית."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "להגן על קטעים קריטיים (critical sections) מפני מצבי מרוץ (race conditions).",
+      "explanation": "מנעול הדדי (mutex) נועד בראש ובראשונה להבטיח בלעדיות הדדית (mutual exclusion) בקטעים קריטיים של קוד. כאשר תהליכון אחד מחזיק במנעול, תהליכונים אחרים המנסים לרכוש את אותו המנעול נחסמים עד שהמנעול משוחרר. פעולה זו מונעת מצבי מרוץ (race conditions) ודואגת לעקביות של נתונים משותפים. אף על פי שמנעולים יכולים להיות חלק מפתרונות למניעת קיפאון או הרעבה, זו אינה מטרתם העיקרית. הם אינם מאפשרים גישה בו זמנית למשאב משותף, אלא בדיוק ההפך."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

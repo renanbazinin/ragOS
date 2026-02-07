@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 20:08:58",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 961,
+      "output_tokens": 887,
+      "total_tokens": 4089
+    }
+  },
+  "question": {
+    "id": 6,
+    "type": "MultipleChoice",
+    "topic": [
+      "Synchronization",
+      "Mutexes",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא:\n\n```c\npthread_mutex_t my_mutex;\n\nvoid *thread_func(void *arg) {\n    pthread_mutex_lock(&my_mutex);\n    // קטע קריטי 1\n    pthread_mutex_lock(&my_mutex); // ניסיון נעילה שני\n    // קטע קריטי 2\n    pthread_mutex_unlock(&my_mutex);\n    pthread_mutex_unlock(&my_mutex);\n    return NULL;\n}\n\nint main() {\n    pthread_mutex_init(&my_mutex, NULL); // מנעול רגיל (PTHREAD_MUTEX_NORMAL)\n    // ... יצירת והפעלת thread_func בחוט נפרד ...\n    pthread_mutex_destroy(&my_mutex);\n    return 0;\n}\n```\n\nבמידה וחוט יחיד מריץ את הפונקציה `thread_func`, מה יקרה בניסיון הנעילה השני של `my_mutex`?",
+      "code_snippet": "pthread_mutex_t my_mutex;\n\nvoid *thread_func(void *arg) {\n    pthread_mutex_lock(&my_mutex);\n    // קטע קריטי 1\n    pthread_mutex_lock(&my_mutex); // ניסיון נעילה שני\n    // קטע קריטי 2\n    pthread_mutex_unlock(&my_mutex);\n    pthread_mutex_unlock(&my_mutex);\n    return NULL;\n}\n\nint main() {\n    pthread_mutex_init(&my_mutex, NULL); // מנעול רגיל (PTHREAD_MUTEX_NORMAL)\n    // ... יצירת והפעלת thread_func בחוט נפרד ...\n    pthread_mutex_destroy(&my_mutex);\n    return 0;\n}",
+      "options": [
+        "הנעילה השנייה תצליח ללא בעיה.",
+        "התהליך ייכנס למצב קיפאון (deadlock).",
+        "הנעילה השנייה תחזיר שגיאה (error).",
+        "התנהגות בלתי מוגדרת (Undefined behavior)."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "התהליך ייכנס למצב קיפאון (deadlock).",
+      "explanation": "כאשר חוט מנסה לנעול מנעול רגיל (PTHREAD_MUTEX_NORMAL), כפי שמוגדר על ידי `pthread_mutex_init(&my_mutex, NULL)`, שכבר נמצא ברשותו, פונקציית `pthread_mutex_lock` תחסום את החוט ותמתין לשחרור המנעול. מכיוון שהחוט ממתין לעצמו לשחרר את המנעול, הוא לעולם לא יוכל להמשיך ולשחרר אותו, מה שמוביל למצב של קיפאון עצמי (self-deadlock). ישנם סוגי מנעולים אחרים, כמו מנעולים רקורסיביים (PTHREAD_MUTEX_RECURSIVE), המאפשרים נעילה חוזרת על ידי אותו חוט, אך זה אינו המקרה עבור מנעול רגיל. מנעולי מסוג `PTHREAD_MUTEX_ERRORCHECK` היו מחזירים שגיאה במצב זה."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

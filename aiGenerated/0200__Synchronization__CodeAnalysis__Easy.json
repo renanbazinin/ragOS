@@ -1,0 +1,51 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 19:59:39",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4129,
+      "output_tokens": 1489,
+      "total_tokens": 9361
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Threads",
+      "Race Conditions",
+      "Mutex"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה, המשתמשת במספר חוטים כדי להגדיל מונה משותף. קבוע N מייצג את מספר הפעמים שכל חוט יגדיל את המונה, וקבוע T מייצג את מספר החוטים. ניתן להניח שכל קריאות המערכת הצליחו.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\n#define T 4 // מספר חוטים\n#define N 100000 // מספר הגדלות לכל חוט\n\nint counter = 0;\n\nvoid* increment_counter(void* arg) {\n    for (int i = 0; i < N; ++i) {\n        counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[T];\n\n    for (int i = 0; i < T; ++i) {\n        pthread_create(&threads[i], NULL, increment_counter, NULL);\n    }\n\n    for (int i = 0; i < T; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "101.1",
+        "text": "מהו טווח הערכים האפשריים (מינימום ומקסימום) שיודפס עבור counter בסוף ריצת התוכנית? הסבירו מדוע.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "101.2",
+        "text": "תקנו את הקוד הנתון כך שהתוכנית תדפיס תמיד את הערך הנכון (T*N). השתמשו ב-mutexים בלבד. צרפו את הקוד המתוקן והסבירו בקצרה את השינויים.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "101.1: טווח הערכים האפשרי הוא בין N ל- T*N (כולל קצוות). ערך מקסימלי: T*N. זה יקרה אם, במקרה, אף פעם לא יתרחש מצב מרוץ והפעולות על המונה יהיו אטומיות למעשה, כלומר כל הגדלה של המונה תתבצע במלואה לפני שחוט אחר ינסה לגשת אליו. ערך מינימלי: N. זה יקרה עקב מצבי מרוץ (Race Conditions). פעולת 'counter++' אינה אטומית, והיא מתורגמת לקריאה של הערך, הגדלתו, וכתיבתו בחזרה. אם שני חוטים קוראים את אותו ערך של counter בו-זמנית, שניהם יגדילו אותו ויכתבו אותו בחזרה, מה שיגרום לאחת ההגדלות 'להיעלם' או להידרס. במקרה הקיצוני ביותר, כל החוטים (למעט אולי אחד שסיים את כל הגדלותיו) יאבדו את רוב ההגדלות שלהם, ורק N הגדלות (של חוט בודד שסיים את כל פעולותיו) או קצת יותר מזה ישארו במונה הסופי.\n\n101.2: כדי לתקן את מצב המרוץ ולהבטיח שהמונה יגיע תמיד לערך T*N, יש להשתמש ב-mutex כדי להגן על הגישה למשתנה counter. הנה הקוד המתוקן:\n\n```c\n#include <stdio.h>\n#include <pthread.h>\n\n#define T 4 // מספר חוטים\n#define N 100000 // מספר הגדלות לכל חוט\n\nint counter = 0;\npthread_mutex_t mutex; // הגדרת mutex גלובלי\n\nvoid* increment_counter(void* arg) {\n    for (int i = 0; i < N; ++i) {\n        pthread_mutex_lock(&mutex);   // נעילת mutex לפני גישה למונה\n        counter++;\n        pthread_mutex_unlock(&mutex); // שחרור mutex לאחר הגישה למונה\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[T];\n\n    pthread_mutex_init(&mutex, NULL); // אתחול ה-mutex\n\n    for (int i = 0; i < T; ++i) {\n        pthread_create(&threads[i], NULL, increment_counter, NULL);\n    }\n\n    for (int i = 0; i < T; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    pthread_mutex_destroy(&mutex); // השמדת ה-mutex\n\n    return 0;\n}\n```\n\nהשינויים כוללים: (1) הגדרת משתנה `pthread_mutex_t mutex` גלובלי. (2) אתחול ה-mutex באמצעות `pthread_mutex_init` בפונקציה `main`. (3) עטיפת פעולת ההגדלה `counter++` בקריאות `pthread_mutex_lock` ו-`pthread_mutex_unlock` בתוך פונקציית `increment_counter`, מה שמבטיח שרק חוט אחד יוכל לבצע את הפעולה הזו בכל רגע נתון. (4) השמדת ה-mutex באמצעות `pthread_mutex_destroy` בסוף פונקציית `main`."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

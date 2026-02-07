@@ -1,0 +1,58 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Semaphores",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 21:06:04",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3751,
+      "output_tokens": 3091,
+      "total_tokens": 18785
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Semaphores",
+      "Producer-Consumer",
+      "Concurrency",
+      "Deadlock",
+      "Starvation"
+    ],
+    "content": {
+      "text": "נתון קוד C הבא לבעיית יצרן-צרכן. המערכת משתמשת בחוצץ משותף בגודל קבוע (BUFFER_SIZE). בנוסף לסמפורים הסטנדרטיים (`mutex`, `full`, `empty`), נעשה שימוש בסמפור נוסף `production_limit` המאותחל ל-`MAX_CONCURRENT_PRODUCTION`. מטרת ה-`production_limit` היא להגביל את מספר היצרנים שיכולים *בו-זמנית להיות בשלב של יצירת פריט וניסיון להוסיפו לחוצץ* (כלומר, בין הקריאה הראשונה ל-`sem_wait(&production_limit)` ועד הקריאה האחרונה ל-`sem_post(&production_limit)`). נתחו את הקוד הנתון וענו על השאלות הבאות:",
+      "code_snippet": "#include <semaphore.h>\n#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n\n#define BUFFER_SIZE 5\n#define MAX_CONCURRENT_PRODUCTION 2 // מספר היצרנים המקסימלי שיכולים להיות בשלב יצירה והוספה\n\nint buffer[BUFFER_SIZE];\nint in = 0;\nint out = 0;\n\nsem_t mutex; // להגנה הדדית על גישה לחוצץ\nsem_t full;  // סופר מקומות מלאים בחוצץ\nsem_t empty; // סופר מקומות פנויים בחוצץ\nsem_t production_limit; // מגביל יצרנים פעילים בו-זמנית\n\n// מדמה יצירת פריט (למשל, עבודה חישובית)\nint produce_item_sim() {\n    // sleep(1); // לדמות עבודה\n    return rand() % 100;\n}\n\n// מדמה צריכת פריט (למשל, עבודה חישובית)\nvoid consume_item_sim(int item) {\n    // sleep(1); // לדמות עבודה\n    (void)item; // למנוע אזהרת משתנה שאינו בשימוש\n}\n\nvoid *producer(void *arg) {\n    int item;\n    for (int i = 0; i < 10; ++i) { // כל יצרן מייצר 10 פריטים\n        // שלב 1: יצירת פריט והוספה לחוצץ, מוגבל ע\"י production_limit\n        sem_wait(&production_limit); // (1) רכישת production_limit\n\n        item = produce_item_sim(); // יצירת הפריט\n\n        sem_wait(&empty); // (2) המתנה למקום פנוי\n        sem_wait(&mutex);  // (3) רכישת mutex לגישה לחוצץ\n\n        // קטע קריטי: הוספת פריט לחוצץ\n        buffer[in] = item;\n        in = (in + 1) % BUFFER_SIZE;\n        printf(\"Producer %ld: Added item %d. Buffer state: full=%d\\n\", (long)arg, item, sem_getvalue(&full));\n\n        sem_post(&mutex); // (4) שחרור mutex\n        sem_post(&full);  // (5) איתות על מקום מלא\n\n        sem_post(&production_limit); // (6) שחרור production_limit\n    }\n    return NULL;\n}\n\nvoid *consumer(void *arg) {\n    int item;\n    for (int i = 0; i < 10; ++i) { // כל צרכן צורך 10 פריטים\n        sem_wait(&full);  // (7) המתנה למקום מלא\n        sem_wait(&mutex);  // (8) רכישת mutex לגישה לחוצץ\n\n        // קטע קריטי: הסרת פריט מהחוצץ\n        item = buffer[out];\n        out = (out + 1) % BUFFER_SIZE;\n        printf(\"Consumer %ld: Removed item %d. Buffer state: full=%d\\n\", (long)arg, item, sem_getvalue(&full));\n\n        sem_post(&mutex);  // (9) שחרור mutex\n        sem_post(&empty); // (10) איתות על מקום פנוי\n\n        consume_item_sim(item); // צריכת הפריט (ניתן לעשות במקביל)\n    }\n    return NULL;\n}\n\nint main() {\n    sem_init(&mutex, 0, 1);\n    sem_init(&full, 0, 0);\n    sem_init(&empty, 0, BUFFER_SIZE);\n    sem_init(&production_limit, 0, MAX_CONCURRENT_PRODUCTION);\n\n    pthread_t prod_threads[3], cons_threads[3];\n\n    for (long i = 0; i < 3; ++i) {\n        pthread_create(&prod_threads[i], NULL, producer, (void *)(i + 1));\n        pthread_create(&cons_threads[i], NULL, consumer, (void *)(i + 1));\n    }\n\n    for (int i = 0; i < 3; ++i) {\n        pthread_join(prod_threads[i], NULL);\n        pthread_join(cons_threads[i], NULL);\n    }\n\n    sem_destroy(&mutex);\n    sem_destroy(&full);\n    sem_destroy(&empty);\n    sem_destroy(&production_limit);\n\n    return 0;\n}\n"
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "האם המימוש הנתון משיג באופן נכון את המטרה המיועדת של `production_limit`?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "האם קוד זה מציג פוטנציאל לקיפאון (deadlock) או הרעבה (starvation)? נמקו.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.3",
+        "text": "דונו ברמת המקביליות המושגת על ידי מימוש זה, בהתחשב בתפקידו של `production_limit`.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": 10,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "### פתרון שאלה 1\n\n**1.1 האם המימוש הנתון משיג באופן נכון את המטרה המיועדת של `production_limit`?**\n\nכן, המימוש משיג באופן נכון את המטרה. הסמפור `production_limit` נרכש לפני תחילת שלב יצירת הפריט והוספתו לחוצץ (שורה 1 בקוד היצרן) ומשוחרר רק לאחר סיום כל השלבים הללו, כולל הוספת הפריט בפועל לחוצץ ושחרור הסמפורים `mutex` ו-`full` (שורה 6 בקוד היצרן). המשמעות היא שבכל רגע נתון, לא יותר מ-`MAX_CONCURRENT_PRODUCTION` יצרנים יכולים להיות בו-זמנית בתוך קטע הקוד המוגן על ידי `production_limit`, אשר כולל את `produce_item_sim()`, המתנה למקום פנוי בחוצץ, רכישת מנעול, הוספה לחוצץ, ושחרור מנעולים.\n\n**1.2 האם קוד זה מציג פוטנציאל לקיפאון (deadlock) או הרעבה (starvation)? נמקו.**\n\n**קיפאון (Deadlock):**\nלא, הקוד אינו מציג פוטנציאל לקיפאון. הסמפורים נרכשים ומשוחררים בסדר עקבי:\n*   **יצרן:** `production_limit` -> `empty` -> `mutex`\n*   **צרכן:** `full` -> `mutex`\nאין כאן תלות מעגלית בין הסמפורים. `production_limit` משמש כמעין 'שער כניסה' לשלב היצרן, ואינו יוצר תלות הדדית עם הסמפורים `empty` או `full` באופן שיכול להוביל לקיפאון. יצרן שלוקח `production_limit` אך נחסם על `empty` או `mutex` לא ימנע מצרכן לשחרר `full` או `empty`.\n\n**הרעבה (Starvation):**\nהקוד עצמו אינו מציג מנגנון מובנה המבטיח הוגנות (fairness) בין חוטים, בדומה לסמפורים רגילים שאינם בהכרח הוגנים. עם זאת, אין תרחיש מובהק של הרעבה כתוצאה מכשל לוגי בלוגיקת הסמפורים עצמה. אם חוטים ממתינים בתור לסמפור (כמו `empty` או `mutex`), ייתכן שחוט מסוים יקבל את הסמפור שוב ושוב לפני חוטים אחרים, אך זהו מאפיין כללי של סמפורים ללא תור הוגן, ולא כשל לוגי בפתרון הספציפי. הסמפור `production_limit` עלול לגרום לכך שיצרנים רבים ימתינו מחוץ לקטע המוגן, אך ברגע שהם נכנסים, הם מתמודדים על משאבי החוצץ בצורה סטנדרטית.\n\n**1.3 דונו ברמת המקביליות המושגת על ידי מימוש זה, בהתחשב בתפקידו של `production_limit`.**\n\nהמימוש משפיע על רמת המקביליות בכמה דרכים:\n\n*   **הגבלת יצרנים פעילים:** `production_limit` מגביל את מספר היצרנים שיכולים לבצע את `produce_item_sim()` *וגם* לנסות להוסיף פריטים לחוצץ בו-זמנית ל-`MAX_CONCURRENT_PRODUCTION`. זהו יתרון אם `produce_item_sim()` היא פעולה עתירת משאבים (למשל, CPU או זיכרון) שאיננו רוצים שכל היצרנים יבצעו במקביל ללא הגבלה. אם `MAX_CONCURRENT_PRODUCTION` נמוך מאוד (למשל 1), זה עלול להפחית את המקביליות הכוללת של היצרנים.\n\n*   **הפרדת שלבים:** ה-`produce_item_sim()` מתבצעת כחלק מהקטע המוגן על ידי `production_limit`, אך `consume_item_sim()` מתבצעת מחוץ לכל מנעול או סמפור מיוחד בצרכן. זה מאפשר לצרכנים לצרוך פריטים במקביל ללא הגבלה נוספת מעבר לזמינות הפריטים בחוצץ עצמו. זוהי הפרדה נכונה שממקסמת את המקביליות של פעולת הצריכה.\n\n*   **צוואר בקבוק פוטנציאלי:** אם `MAX_CONCURRENT_PRODUCTION` קטן מ-`BUFFER_SIZE` ומספר היצרנים גדול, ה-`production_limit` יכול להפוך לצוואר בקבוק, שיגביל את קצב הוספת הפריטים לחוצץ, גם אם יש מקומות פנויים רבים בחוצץ (`empty` > 0). מצד שני, אם `MAX_CONCURRENT_PRODUCTION` גדול מדי או שווה למספר היצרנים הכולל, ייתכן שתפקידו של `production_limit` יפחת או יהפוך ללא רלוונטי, וההגבלה העיקרית תהיה על ידי `empty` ו-`mutex` בלבד.\n\nבסך הכל, המימוש מאפשר שליטה עדינה יותר על התנהגות היצרנים, במחיר של פוטנציאל להפחתת מקביליות אם `MAX_CONCURRENT_PRODUCTION` נבחר נמוך מדי ביחס ליכולות המערכת או מספר היצרנים."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

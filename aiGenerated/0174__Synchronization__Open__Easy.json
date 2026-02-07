@@ -1,0 +1,35 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 19:50:20",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3682,
+      "output_tokens": 1286,
+      "total_tokens": 9142
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא בשפת C, המבוצע על ידי מספר חוטים במקביל. קטע הקוד מנסה לעדכן משתנה גלובלי משותף בשם `shared_counter`.\n\n```c\n#include <stdio.h>\n#include <pthread.h>\n\nint shared_counter = 0; // משתנה גלובלי משותף\n\nvoid *increment_counter(void *arg) {\n    for (int i = 0; i < 100000; i++) {\n        shared_counter++;\n    }\n    return NULL;\n}\n```\n\n1. הסבר מדוע קטע קוד זה עלול להוביל לתוצאה שגויה (כלומר, לא 200000 אם שני חוטים מריצים אותו). ציין את שם הבעיה הספציפית.\n2. הצע פתרון לבעיה זו באמצעות מנגנון סנכרון מתאים (לדוגמה, מוטקס) וכתוב את קטע הקוד המתוקן עבור הפונקציה `increment_counter`.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\nint shared_counter = 0; // משתנה גלובלי משותף\n\nvoid *increment_counter(void *arg) {\n    for (int i = 0; i < 100000; i++) {\n        shared_counter++;\n    }\n    return NULL;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "**חלק 1: הסבר הבעיה**\nהבעיה בקטע הקוד הנתון היא 'תנאי מירוץ' (Race Condition). כאשר מספר חוטים מנסים לעדכן את המשתנה `shared_counter` במקביל ללא סנכרון, הפעולה `shared_counter++` אינה אטומית. היא מורכבת משלוש פעולות ברמה נמוכה יותר:\n1.  קריאת הערך הנוכחי של `shared_counter` מהזיכרון.\n2.  הגדלת הערך ב-1.\n3.  כתיבת הערך החדש בחזרה לזיכרון.\nאם שני חוטים קוראים את אותו ערך של `shared_counter` לפני שאחד מהם מספיק לכתוב את הערך המוגדל בחזרה, שני החוטים יגדילו את אותו ערך ורק ההגדלה של אחד מהם תשרוד, מה שיוביל לאובדן עדכונים ולתוצאה סופית שגויה (נמוכה מהצפוי).\n\n**חלק 2: פתרון באמצעות מוטקס**\nכדי לפתור את בעיית תנאי המירוץ, יש להגן על הקטע הקריטי (הפעולה `shared_counter++`) באמצעות מנגנון סנכרון, כגון מוטקס (mutex). מוטקס מבטיח שבכל רגע נתון רק חוט אחד יוכל להיכנס לקטע הקריטי ולעדכן את המשתנה המשותף. יש לאתחל את המוטקס לפני יצירת החוטים ולשחרר אותו בסיום.\n\nלהלן קטע הקוד המתוקן עבור הפונקציה `increment_counter`:\n\n```c\n#include <stdio.h>\n#include <pthread.h>\n\nint shared_counter = 0; // משתנה גלובלי משותף\npthread_mutex_t counter_mutex; // מוטקס להגנה על המונה\n\nvoid *increment_counter_safe(void *arg) {\n    for (int i = 0; i < 100000; i++) {\n        pthread_mutex_lock(&counter_mutex); // נעל את המוטקס לפני כניסה לקטע הקריטי\n        shared_counter++;\n        pthread_mutex_unlock(&counter_mutex); // שחרר את המוטקס לאחר היציאה מהקטע הקריטי\n    }\n    return NULL;\n}\n\n// הערה: בקוד הראשי (main), יש לאתחל ולשחרר את המוטקס:\n// int main() {\n//     pthread_mutex_init(&counter_mutex, NULL);\n//     // קוד ליצירת חוטים והפעלת increment_counter_safe\n//     // לדוגמה:\n//     // pthread_t tid1, tid2;\n//     // pthread_create(&tid1, NULL, increment_counter_safe, NULL);\n//     // pthread_create(&tid2, NULL, increment_counter_safe, NULL);\n//     // pthread_join(tid1, NULL);\n//     // pthread_join(tid2, NULL);\n//     // printf(\"Final counter value: %d\\n\", shared_counter); // אמור להיות 200000\n//     pthread_mutex_destroy(&counter_mutex);\n//     return 0;\n// }\n```",
+      "difficulty_estimation": "Easy"
+    }
+  }
+}

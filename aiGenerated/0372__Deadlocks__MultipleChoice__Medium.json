@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Deadlocks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 21:08:40",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1159,
+      "output_tokens": 621,
+      "total_tokens": 5775
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Deadlocks",
+      "Synchronization",
+      "Resource Management"
+    ],
+    "content": {
+      "text": "איזו מהטענות הבאות לגבי קיפאון (Deadlock) ושיטות הטיפול בו נכונה?",
+      "code_snippet": null,
+      "options": [
+        "א. שיטות מניעת קיפאון (Deadlock Prevention) תמיד מבטיחות ניצול משאבים אופטימלי.",
+        "ב. אלגוריתם הבנקאי (Banker's Algorithm) הוא דוגמה לשיטת גילוי קיפאון (Deadlock Detection).",
+        "ג. הרעבה (Starvation) לעולם אינה יכולה להתרחש במערכת שבה קיפאון נמנע לחלוטין.",
+        "ד. הפרת תנאי 'מניעה הדדית' (Mutual Exclusion) היא דרך אפשרית למנוע קיפאון, אך אינה ישימה לכל סוגי המשאבים."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ד",
+      "explanation": "הסבר: \nא. לא נכון. שיטות מניעת קיפאון (לדוגמה, דרישת כל המשאבים מראש או אי-הפקעה) עלולות להוביל לניצול משאבים נמוך מכיוון שהן מחזיקות משאבים שלא בשימוש או מונעות הפקעה יעילה.\nב. לא נכון. אלגוריתם הבנקאי הוא שיטה למניעת קיפאון (Deadlock Avoidance), לא גילוי קיפאון (Deadlock Detection).\nג. לא נכון. הרעבה יכולה להתרחש גם במערכות שמונעות קיפאון (לדוגמה, תהליך בעל עדיפות נמוכה שנדחה באופן תמידי על ידי תהליכים בעלי עדיפות גבוהה יותר, ללא קשר לקיפאון).\nד. נכון. אם ניתן לאפשר למשאב שימוש משותף (לדוגמה, קריאה מקובץ), אין צורך ב'מניעה הדדית' עבורו, ובכך נמנע קיפאון הקשור למשאב זה. עם זאת, עבור משאבים שאינם ניתנים לשיתוף (כמו מדפסת), הפרת תנאי זה אינה אפשרית."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

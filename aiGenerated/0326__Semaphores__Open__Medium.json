@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Semaphores",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 20:47:58",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2630,
+      "output_tokens": 2329,
+      "total_tokens": 8887
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "Open",
+    "topic": [
+      "Synchronization",
+      "Semaphores"
+    ],
+    "content": {
+      "text": "מחסום (Barrier) הוא אובייקט סנכרון המיועד ל-N חוטים. כאשר חוט קורא לפעולת `barrier_wait()`, הוא ממתין עד שכל N החוטים קראו לפעולה זו. רק כאשר כל N החוטים הגיעו למחסום, כולם משוחררים בו זמנית וממשיכים בביצוע. המחסום צריך להיות ניתן לשימוש חוזר (reusable), כלומר, לאחר שכל החוטים שוחררו, ניתן להשתמש בו שוב באותו אופן לסנכרון השלב הבא.\nתארו כיצד ניתן לממש מחסום ניתן לשימוש חוזר עבור N חוטים באמצעות סמפורים (POSIX semaphores) ומבנה נתונים פשוט. כתבו את קוד ה-C/C++ עבור הפונקציות `barrier_init()`, `barrier_destroy()` ו-`barrier_wait()`, והסבירו את תפקיד כל סמפור ואת לוגיקת הפעולה של המחסום.",
+      "code_snippet": "```c\n#include <semaphore.h>\n#include <stdlib.h> // For malloc, free (though not directly used in the Barrier struct itself here)\n\ntypedef struct {\n    int N; // Total number of threads for the barrier\n    int count; // Number of threads arrived at the barrier\n    sem_t mutex; // Protects 'count'\n    sem_t turnstile; // Blocks threads until all arrive\n    sem_t turnstile2; // Used to reset the barrier for reuse\n} Barrier;\n\nvoid barrier_init(Barrier *b, int num_threads) {\n    b->N = num_threads;\n    b->count = 0;\n    sem_init(&b->mutex, 0, 1); // Mutex initially open\n    sem_init(&b->turnstile, 0, 0); // Turnstile initially locked\n    sem_init(&b->turnstile2, 0, 1); // Turnstile2 initially open\n}\n\nvoid barrier_destroy(Barrier *b) {\n    sem_destroy(&b->mutex);\n    sem_destroy(&b->turnstile);\n    sem_destroy(&b->turnstile2);\n}\n\nvoid barrier_wait(Barrier *b) {\n    // Phase 1: Gathering threads and releasing them\n    sem_wait(&b->mutex);\n    b->count++;\n    if (b->count == b->N) {\n        sem_wait(&b->turnstile2); // Close turnstile2 to prevent early reset\n        for (int i = 0; i < b->N; i++) {\n            sem_post(&b->turnstile); // Open turnstile to release all threads\n        }\n    }\n    sem_post(&b->mutex);\n\n    sem_wait(&b->turnstile); // All threads wait here until released\n\n    // Phase 2: Resetting the barrier for reuse\n    sem_wait(&b->mutex);\n    b->count--;\n    if (b->count == 0) {\n        for (int i = 0; i < b->N; i++) {\n            sem_post(&b->turnstile2); // Reopen turnstile2 for the next cycle\n        }\n    }\n    sem_post(&b->mutex);\n}\n```",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון מבוסס על מימוש מחסום דו-פאזי (two-phase barrier) באמצעות שני סמפורים (POSIX semaphores) ומונה.\n\n**מבנה הנתונים:**\n*   `N`: מספר החוטים הכולל המשתתפים במחסום.\n*   `count`: מונה העוקב אחר מספר החוטים שהגיעו למחסום בשלב הנוכחי.\n*   `mutex`: סמפור בינארי (או mutex) המשמש להגנה על המונה `count` מפני תנאי מירוץ. מאותחל ל-1 (פתוח).\n*   `turnstile`: סמפור ספירה המאותחל ל-0. חוטים נחסמים עליו עד שכל N החוטים יגיעו. הוא נפתח על ידי החוט האחרון שהגיע.\n*   `turnstile2`: סמפור ספירה המאותחל ל-1. משמש לסנכרון האיפוס של המחסום, כך שרק לאחר שכל N החוטים עברו את המחסום ו\"יצאו\" ממנו, הוא מוכן שוב לשימוש.\n\n**פעולת `barrier_init(Barrier *b, int num_threads)`:**\n*   מאחלת את `N` ל-`num_threads`.\n*   מאחלת את `count` ל-0.\n*   מאחלת את `mutex` ל-1 (פתוח).\n*   מאחלת את `turnstile` ל-0 (סגור).\n*   מאחלת את `turnstile2` ל-1 (פתוח).\n\n**פעולת `barrier_wait(Barrier *b)`:**\n\n**שלב 1: איסוף חוטים והגעה למחסום**\n1.  **`sem_wait(&b->mutex);`**: כל חוט רוכש את ה-`mutex` כדי להגן על הגישה ל-`count`. זה מבטיח שרק חוט אחד מעדכן את `count` בכל רגע נתון.\n2.  **`b->count++;`**: החוט מגדיל את המונה `count`.\n3.  **`if (b->count == b->N)`**: אם זהו החוט ה-N שהגיע למחסום (החוט האחרון):\n    *   **`sem_wait(&b->turnstile2);`**: החוט ה-N סוגר את `turnstile2`. זה מבטיח שאף חוט לא יוכל להיכנס לשלב השני של המחסום (איפוס) לפני שכל החוטים עברו את השלב הראשון. זה מונע מחוטים מהמחזור הבא \"להקדים\" חוטים מהמחזור הנוכחי.\n    *   **`for (int i = 0; i < b->N; i++) { sem_post(&b->turnstile); }`**: החוט ה-N משחרר N פעמים את `turnstile`. פעולה זו פותחת את `turnstile` ומאפשרת לכל N החוטים (כולל הוא עצמו) להמשיך הלאה מהנקודה בה הם חסומים ב-`sem_wait(&b->turnstile)`.\n4.  **`sem_post(&b->mutex);`**: החוט משחרר את ה-`mutex`.\n\n**שלב 2: המתנה לשחרור ואיפוס המחסום**\n5.  **`sem_wait(&b->turnstile);`**: כל החוטים, כולל החוט ה-N, מגיעים לכאן ונחסמים על `turnstile` עד שהוא נפתח על ידי החוט ה-N (בשלב 1). ברגע ש-`turnstile` נפתח, כל החוטים עוברים.\n6.  **`sem_wait(&b->mutex);`**: החוטים רוכשים שוב את ה-`mutex` כדי לעדכן את המונה `count` (כעת הוא משמש לספירת יציאה מהמחסום).\n7.  **`b->count--;`**: החוט מקטין את המונה `count`.\n8.  **`if (b->count == 0)`**: אם זהו החוט האחרון שיוצא מהמחסום (כלומר, כל N החוטים עברו את המחסום ו\"יצאו\" ממנו):\n    *   **`for (int i = 0; i < b->N; i++) { sem_post(&b->turnstile2); }`**: החוט האחרון משחרר N פעמים את `turnstile2`. פעולה זו פותחת מחדש את `turnstile2` ומאפשרת למחסום להיות מוכן לשימוש חוזר בסבב הבא.\n9.  **`sem_post(&b->mutex);`**: החוט משחרר את ה-`mutex`.\n\n**הסבר תפקיד הסמפורים בפתרון זה:**\n*   **`mutex`**: סמפור בינארי המגן על המשתנה `count`. הוא מבטיח שרק חוט אחד יכול לגשת ולשנות את `count` בכל רגע נתון, ובכך מונע תנאי מירוץ.\n*   **`turnstile`**: משמש כ\"שער כניסה\" למחסום. הוא חוסם את כל החוטים עד שכולם יגיעו. רק החוט האחרון (ה-N) פותח אותו N פעמים כדי לשחרר את כל החוטים בו זמנית.\n*   **`turnstile2`**: משמש כ\"שער יציאה\" וכמנגנון איפוס למחסום. הוא מבטיח שכל N החוטים עברו את השלב הראשון של המחסום (כלומר, כולם שוחררו מ-`turnstile`) לפני שהמחסום יתאפס ויהיה מוכן לשימוש חוזר. החוט ה-N סוגר אותו כדי למנוע כניסה מוקדמת לשלב האיפוס, והחוט האחרון שיוצא מהמחסום פותח אותו מחדש."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

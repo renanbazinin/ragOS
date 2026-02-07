@@ -17,8 +17,11 @@ import sys
 import json
 import argparse
 import chromadb
+from dotenv import load_dotenv
 from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
 import google.generativeai as genai
+
+load_dotenv()
 
 # ── Configuration ────────────────────────────────────────────────────────────
 
@@ -27,7 +30,7 @@ CHROMA_DIR = os.path.join(PROJECT_DIR, "chroma_db")
 COLLECTION_NAME = "os_exam_questions"
 EMBEDDING_MODEL = "paraphrase-multilingual-MiniLM-L12-v2"
 
-API_KEY = "AIzaSyBcpYQuCJmPX5USke5WedVF6y4mkV3WWzQ"
+API_KEY = os.getenv("GEMINI_API_KEY", "")
 # Allow overriding the Gemini model via environment variable for pilots
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
 

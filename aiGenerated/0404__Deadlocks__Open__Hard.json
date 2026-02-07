@@ -1,0 +1,63 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Deadlocks",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 21:19:50",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3443,
+      "output_tokens": 2815,
+      "total_tokens": 13810
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Deadlocks",
+      "Synchronization",
+      "Resource Management",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "במערכת מרובת תהליכונים (threads), קיפאון (deadlock) הוא מצב קריטי שיש למנוע או לטפל בו. שאלה זו בוחנת את הבנתך בגורמים לקיפאון ובדרכים למנוע אותו, תוך התייחסות לתרחיש ספציפי ומימוש קוד.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "a",
+        "text": "תאר בקצרה את ארבעת התנאים ההכרחיים להתרחשות קיפאון במערכת.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "b",
+        "text": "נתונה מערכת עם שני משאבים משותפים, `ResourceA` ו-`ResourceB`, כאשר כל אחד מהם מוגן על ידי מנעול (mutex) נפרד. במערכת פועלים מספר תהליכוני עבודה (worker threads), וכל תהליכון זקוק לשניהם, `ResourceA` ו-`ResourceB`, כדי לבצע את משימתו. תאר תרחיש ספציפי (באמצעות רצף פעולות או פסאודו-קוד) שבו יכול להתרחש קיפאון במערכת זו. הסבר מדוע תרחיש זה מוביל לקיפאון תוך התייחסות לארבעת התנאים שתיארת בסעיף א'.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "c",
+        "text": "בהתבסס על התרחיש שתואר בסעיף ב', כתוב פונקציית C/C++ בשם `acquire_both_resources()` המקבלת מצביעים למנעולים של `ResourceA` ו-`ResourceB` (לדוגמה, `pthread_mutex_t*`). הפונקציה צריכה לרכוש את שני המשאבים באופן בטוח, כך שתמנע את הקיפאון שתואר. עליך להשתמש במנעולי `pthread_mutex_t` בלבד. אין לשנות את סדר הרכישה של המנעולים בתוך הפונקציה (כלומר, `ResourceA` ואז `ResourceB`), אך מותר להשתמש בפונקציות נעילה לא חוסמות (לדוגמה, `pthread_mutex_trylock`).",
+        "code_snippet": "void acquire_both_resources(pthread_mutex_t* resA_mutex, pthread_mutex_t* resB_mutex) {\n    // Implement your solution here\n}",
+        "options": null
+      },
+      {
+        "id": "d",
+        "text": "הסבר איזו אסטרטגיה למניעת קיפאון (Deadlock Prevention) או הימנעות מקיפאון (Deadlock Avoidance) יישמת בסעיף ג'. דון ביתרונות ובחסרונות של אסטרטגיה זו, לרבות השלכותיה על ביצועי המערכת (לדוגמה, רעב או ניצול משאבים).",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "א. ארבעת התנאים ההכרחיים לקיפאון:\n1.  **מניעה הדדית (Mutual Exclusion):** לפחות משאב אחד חייב להיות בלעדי, כלומר, רק תהליך אחד יכול להשתמש בו בכל רגע נתון. אם תהליך אחר מבקש את המשאב, עליו להמתין עד שהתהליך הראשון ישחרר אותו.\n2.  **החזקה והמתנה (Hold and Wait):** תהליך חייב להחזיק לפחות במשאב אחד ובמקביל לבקש משאבים נוספים המוחזקים על ידי תהליכים אחרים.\n3.  **אי-שלילה (No Preemption):** משאבים אינם ניתנים לשלילה בכוח. הם יכולים להשתחרר רק באופן וולונטרי על ידי התהליך שמחזיק בהם, לאחר שסיים את השימוש בהם.\n4.  **המתנה מעגלית (Circular Wait):** קיימת שרשרת מעגלית של שניים או יותר תהליכים, כאשר כל תהליך בשרשרת ממתין למשאב המוחזק על ידי התהליך הבא בשרשרת.\n\nב. תרחיש קיפאון:\nנניח שיש שני תהליכונים, Thread 0 ו-Thread 1.\nהתרחיש הבא יכול להוביל לקיפאון:\n1.  Thread 0 רוכש את `ResourceA`.\n    (`pthread_mutex_lock(&mutexA);`)\n2.  Thread 1 רוכש את `ResourceB`.\n    (`pthread_mutex_lock(&mutexB);`)\n3.  Thread 0 מנסה לרכוש את `ResourceB`. הוא נחסם מכיוון ש-Thread 1 מחזיק בו.\n    (`pthread_mutex_lock(&mutexB);` - Thread 0 נחסם)\n4.  Thread 1 מנסה לרכוש את `ResourceA`. הוא נחסם מכיוון ש-Thread 0 מחזיק בו.\n    (`pthread_mutex_lock(&mutexA);` - Thread 1 נחסם)\n\n**הסבר מדוע תרחיש זה מוביל לקיפאון:**\n*   **מניעה הדדית:** מתקיימת עבור `mutexA` ו-`mutexB`, שכן רק תהליכון אחד יכול להחזיק בכל מנעול בכל רגע נתון.\n*   **החזקה והמתנה:** Thread 0 מחזיק ב-`mutexA` וממתין ל-`mutexB`. Thread 1 מחזיק ב-`mutexB` וממתין ל-`mutexA`.\n*   **אי-שלילה:** המנעולים אינם נשללים בכוח. הם ישוחררו רק כאשר התהליכונים יחליטו לשחרר אותם (וזה לא יקרה כי הם חסומים).\n*   **המתנה מעגלית:** נוצרה שרשרת המתנה מעגלית: Thread 0 ממתין למשאב ש-Thread 1 מחזיק בו (`mutexB`), ו-Thread 1 ממתין למשאב ש-Thread 0 מחזיק בו (`mutexA`).\n\nכל ארבעת התנאים מתקיימים, ולכן המערכת נמצאת בקיפאון.\n\nג. מימוש פונקציית `acquire_both_resources()`:\n```c\n#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h> // For sleep\n\nvoid acquire_both_resources(pthread_mutex_t* resA_mutex, pthread_mutex_t* resB_mutex) {\n    while (1) { // Keep trying until both resources are acquired\n        // Try to acquire ResourceA\n        int resA_locked = pthread_mutex_trylock(resA_mutex);\n\n        if (resA_locked == 0) { // Successfully acquired ResourceA\n            // Try to acquire ResourceB\n            int resB_locked = pthread_mutex_trylock(resB_mutex);\n            if (resB_locked == 0) { // Successfully acquired ResourceB\n                // Both resources acquired, exit loop\n                return;\n            } else { // Could not acquire ResourceB\n                // Release ResourceA and retry\n                pthread_mutex_unlock(resA_mutex);\n                // Optional: Add a small delay to avoid busy-waiting or to allow other threads to progress\n                usleep(1000); // Sleep for 1ms\n            }\n        } else { // Could not acquire ResourceA\n            // Optional: Add a small delay\n            usleep(1000); // Sleep for 1ms\n        }\n    }\n}\n```\n\nד. אסטרטגיה, יתרונות וחסרונות:\nהאסטרטגיה שיושמה היא וריאציה של **מניעת קיפאון (Deadlock Prevention)**, ובפרט, שבירת התנאי של **החזקה והמתנה (Hold and Wait)**.\nבמקום לאפשר לתהליך להחזיק במשאבים שכבר רכש בזמן שהוא ממתין למשאבים נוספים, הפונקציה `acquire_both_resources` מנסה לרכוש את כל המשאבים הנדרשים (במקרה זה, שניים) בו-זמנית או לשחרר את כל המשאבים שכבר נרכשו אם לא ניתן לרכוש את כולם.\nבמקרה הספציפי של המימוש, אם תהליכון מצליח לרכוש את `ResourceA` אך נכשל ברכישת `ResourceB` (כי הוא מוחזק על ידי תהליכון אחר), הוא משחרר את `ResourceA` שהחזיק בו ומנסה שוב. זה מבטיח שאף תהליכון לא יחזיק במשאב אחד וימתין לאחר, ובכך נמנעת ההמתנה המעגלית שמובילה לקיפאון.\n\n**יתרונות:**\n*   **מניעת קיפאון מובטחת:** המנגנון מבטיח שאף תהליכון לא יחזיק במשאב אחד וימתין למשאב אחר, ובכך מונע את התנאי של Hold and Wait ואת הקיפאון.\n*   **פשטות יחסית ליישום:** עבור מספר קטן של משאבים, כמו במקרה זה, קל יחסית ליישם את הלוגיקה של ניסיון רכישה ושחרור.\n\n**חסרונות:**\n*   **רעב (Starvation) פוטנציאלי:** ייתכן שתהליכון מסוים ינסה שוב ושוב לרכוש את המשאבים, אך תמיד ייכשל (לדוגמה, אם יש עומס רב ותהליכונים אחרים תמיד מצליחים לרכוש לפניו). הוספת `usleep()` עוזרת להפחית את הצריכה של CPU אך לא מונעת רעב לחלוטין.\n*   **חוסר יעילות / בזבוז משאבים (Resource Utilization):** המשאבים שנרכשו ונשחררו מיד (כמו `ResourceA` בתרחיש שבו `ResourceB` לא זמין) אינם מנוצלים ביעילות. תהליכון עלול לבצע פעולות רכישה ושחרור רבות לפני שיצליח לרכוש את כל המשאבים הדרושים.\n*   **עלויות ביצועים (Performance Overhead):** השימוש ב-`pthread_mutex_trylock` בלולאה, יחד עם השחרור והניסיון החוזר, יכול להוביל לצריכת CPU גבוהה (busy-waiting) אם המשאבים תפוסים לפרקי זמן ארוכים. הוספת `usleep` מקטינה את הצריכה אך מגדילה את זמן ההמתנה.\n*   **מורכבות עם מספר רב של משאבים:** עבור מספר גדול של משאבים, יישום לוגיקה זו הופך למורכב יותר (לדוגמה, צורך לשחרר מספר משאבים שנרכשו חלקית) ופחות יעיל."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

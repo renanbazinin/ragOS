@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Semaphores",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 20:42:08",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 970,
+      "output_tokens": 949,
+      "total_tokens": 5663
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Semaphores",
+      "Concurrency",
+      "Barrier Synchronization",
+      "Deadlock"
+    ],
+    "content": {
+      "text": "נתון קטע קוד בשפת C המממש מחסום (barrier) עבור N תהליכים באמצעות סמפורים. המחסום מיועד לשימוש חוזר (reusable). מהי התוצאה הסבירה ביותר כאשר קוד זה מופעל מספר פעמים על ידי אותם N תהליכים?",
+      "code_snippet": "#include <pthread.h>\n#include <semaphore.h>\n#include <stdio.h>\n\n#define N 5 // מספר התהליכים במחסום\n\nsem_t barrier_sem;\npthread_mutex_t count_mutex; // מנעול להגנה על המונה\nint count = 0;\n\n// יש לאתחל את הסמפורים ואת המוטקס לפני השימוש:\n// sem_init(&barrier_sem, 0, 0); // סמפור המחסום מאותחל ל-0\n// pthread_mutex_init(&count_mutex, NULL); // מוטקס מאותחל ל-1\n\nvoid barrier_wait() {\n    pthread_mutex_lock(&count_mutex); // תפוס מנעול\n    count++;\n    if (count == N) {\n        // התהליך האחרון הגיע\n        for (int i = 0; i < N; ++i) {\n            sem_post(&barrier_sem); // שחרר את כל התהליכים\n        }\n    }\n    pthread_mutex_unlock(&count_mutex); // שחרר מנעול\n\n    sem_wait(&barrier_sem); // המתן לשחרור\n}",
+      "options": [
+        "א. התהליכים יסתנכרנו בהצלחה בכל פעם, אך עלולה להיות בעיית רעב (starvation) לחלק מהם.",
+        "ב. התהליכים יסתנכרנו בהצלחה בפעם הראשונה, אך בשימושים חוזרים חלק מהם ימתינו ללא סוף (deadlock).",
+        "ג. התהליכים יסתנכרנו בהצלחה בפעם הראשונה, אך בשימושים חוזרים חלק מהם יעברו את המחסום מוקדם מדי (race condition).",
+        "ד. הקוד יגרום לקיפאון (deadlock) כבר בניסיון הראשון, מכיוון שהתהליך האחרון אינו ממתין על הסמפור."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "תשובה ב' נכונה. בפעם הראשונה, המחסום יפעל כצפוי: כל N התהליכים יגיעו, המונה `count` יגיע ל-N, התהליך האחרון ישלח N אותות (`sem_post`) לסמפור `barrier_sem`, וכל N התהליכים ימתינו (`sem_wait`) ויעברו את המחסום.\nאולם, הקוד אינו מאפס את המונה `count` לאחר שכל התהליכים עברו את המחסום. לכן, בשימוש חוזר (במחזור השני), כאשר התהליכים יקראו שוב ל-`barrier_wait()`, המונה `count` ימשיך לעלות מעבר ל-N. התנאי `if (count == N)` לעולם לא יתקיים שוב לאחר הפעם הראשונה, ולכן אף תהליך לא ישלח אותות ל-`barrier_sem`. כתוצאה מכך, כל התהליכים ימתינו ללא סוף ב-`sem_wait(&barrier_sem)` מבלי לקבל אותות, מה שיוביל לקיפאון (deadlock)."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

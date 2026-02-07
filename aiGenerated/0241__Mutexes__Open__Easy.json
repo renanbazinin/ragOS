@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 20:12:37",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2084,
+      "output_tokens": 1414,
+      "total_tokens": 7440
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Mutexes",
+      "Synchronization",
+      "Race Conditions",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C פשוטה המשתמשת במשתנה גלובלי משותף `shared_counter` המוגדל על ידי מספר תהליכונים (threads) במקביל.\nא. הסבר מדוע הקוד הנתון עלול להוביל לתוצאות שגויות.\nב. הצע פתרון לבעיה באמצעות שימוש ב-mutex, ועדכן את קטע הקוד בהתאם.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\nint shared_counter = 0; // משתנה גלובלי משותף\n\nvoid* increment_thread(void* arg) {\n    for (int i = 0; i < 100000; i++) {\n        shared_counter++; // פעולה לא אטומית\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t tid[2]; // נניח שני תהליכונים\n    \n    // יצירת התהליכונים\n    pthread_create(&tid[0], NULL, increment_thread, NULL);\n    pthread_create(&tid[1], NULL, increment_thread, NULL);\n    \n    // המתנה לסיום התהליכונים\n    pthread_join(tid[0], NULL);\n    pthread_join(tid[1], NULL);\n    \n    printf(\"Final counter value: %d\\n\", shared_counter);\n    \n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "א. הבעיה בקוד הנתון היא תנאי מרוץ (race condition). הפעולה `shared_counter++` אינה פעולה אטומית. היא מורכבת למעשה משלוש פעולות:\n1. קריאת הערך הנוכחי של `shared_counter` לתוך אוגר.\n2. הגדלת הערך באוגר ב-1.\n3. כתיבת הערך החדש מהאוגר בחזרה ל-`shared_counter`.\nכאשר מספר תהליכונים מבצעים את הפעולה הזו במקביל, ייתכן ששני תהליכונים יקראו את אותו ערך של `shared_counter` לפני שאחד מהם הספיק לכתוב בחזרה את הערך המוגדל. במקרה כזה, הגדלה אחת תאבד, והמונה הסופי יהיה נמוך מהצפוי. לדוגמה, אם `shared_counter` הוא 0, תהליכון A קורא 0, תהליכון B קורא 0. תהליכון A מגדיל ל-1 וכותב 1. תהליכון B מגדיל ל-1 וכותב 1. במקום 2, המונה נשאר 1.\n\nב. כדי לפתור את בעיית תנאי המרוץ, נשתמש ב-mutex (מנעול הדדי). Mutex מבטיח שרק תהליכון אחד יוכל להיכנס לקטע קריטי (critical section) בכל רגע נתון. הקטע הקריטי במקרה זה הוא הפעולה `shared_counter++`.\n\nנאתחל משתנה `pthread_mutex_t`, ננעל אותו לפני הקטע הקריטי ונשחרר אותו אחריו.\n\n```c\n#include <stdio.h>\n#include <pthread.h>\n\nint shared_counter = 0;\npthread_mutex_t counter_mutex; // הצהרה על mutex\n\nvoid* increment_thread_safe(void* arg) {\n    for (int i = 0; i < 100000; i++) {\n        pthread_mutex_lock(&counter_mutex); // נעל את המוטקס\n        shared_counter++;                   // קטע קריטי מוגן\n        pthread_mutex_unlock(&counter_mutex); // שחרר את המוטקס\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t tid[2];\n    \n    // אתחול המוטקס\n    pthread_mutex_init(&counter_mutex, NULL);\n    \n    // יצירת התהליכונים\n    pthread_create(&tid[0], NULL, increment_thread_safe, NULL);\n    pthread_create(&tid[1], NULL, increment_thread_safe, NULL);\n    \n    // המתנה לסיום התהליכונים\n    pthread_join(tid[0], NULL);\n    pthread_join(tid[1], NULL);\n    \n    printf(\"Final counter value: %d\\n\", shared_counter);\n    \n    // השמדת המוטקס\n    pthread_mutex_destroy(&counter_mutex);\n    \n    return 0;\n}\n```\nבפתרון זה, בכל פעם שתהליכון רוצה לגשת ל-`shared_counter`, הוא מנסה לנעול את `counter_mutex`. אם המוטקס כבר נעול על ידי תהליכון אחר, התהליכון הנוכחי ימתין עד שהמוטקס ישוחרר. לאחר שהפעולה `shared_counter++` הסתיימה, המוטקס משוחרר, ומאפשר לתהליכון אחר לגשת לקטע הקריטי. כך מובטח שרק תהליכון אחד מבצע את ההגדלה בכל רגע נתון, והתוצאה הסופית תהיה נכונה (200,000 במקרה זה)."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

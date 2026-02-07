@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Deadlocks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 21:12:13",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 1418,
+      "total_tokens": 5651
+    }
+  },
+  "question": {
+    "id": 6,
+    "type": "MultipleChoice",
+    "topic": [
+      "Deadlocks",
+      "Concurrency",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא המשתמש בשני מנעולים (mutexes) ושני תהליכונים (threads) ב-C++:\n\n```cpp\n#include <iostream>\n#include <thread>\n#include <mutex>\n#include <chrono>\n\nstd::mutex mutexA;\nstd::mutex mutexB;\n\nvoid thread1_func() {\n    std::cout << \"Thread 1: Trying to lock mutexA...\" << std::endl;\n    mutexA.lock();\n    std::cout << \"Thread 1: Locked mutexA. Trying to lock mutexB...\" << std::endl;\n    std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Simulate work\n    mutexB.lock();\n    std::cout << \"Thread 1: Locked mutexB.\" << std::endl;\n    // ... critical section ...\n    mutexB.unlock();\n    mutexA.unlock();\n    std::cout << \"Thread 1: Unlocked mutexA and mutexB.\" << std::endl;\n}\n\nvoid thread2_func() {\n    std::cout << \"Thread 2: Trying to lock mutexB...\" << std::endl;\n    mutexB.lock();\n    std::cout << \"Thread 2: Locked mutexB. Trying to lock mutexA...\" << std::endl;\n    std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Simulate work\n    mutexA.lock();\n    std::cout << \"Thread 2: Locked mutexA.\" << std::endl;\n    // ... critical section ...\n    mutexA.unlock();\n    mutexB.unlock();\n    std::cout << \"Thread 2: Unlocked mutexA and mutexB.\" << std::endl;\n}\n\nint main() {\n    std::thread t1(thread1_func);\n    std::thread t2(thread2_func);\n\n    t1.join();\n    t2.join();\n\n    std::cout << \"Main: All threads finished.\" << std::endl;\n    return 0;\n}\n```\n\nבהתייחס לקטע הקוד לעיל, איזו מהטענות הבאות נכונה ביותר לגבי האפשרות למבוי סתום (deadlock)?",
+      "code_snippet": null,
+      "options": [
+        "א. מבוי סתום אינו אפשרי בקוד זה מכיוון שכל תהליכון מנסה לנעול את המנעולים בזמן אחר.",
+        "ב. מבוי סתום אפשרי, והדרך היחידה למנוע אותו היא להשתמש במנגנון `std::lock` עבור שני המנעולים יחד.",
+        "ג. מבוי סתום אפשרי, והוא נגרם עקב העובדה שכל תהליכון מנסה לנעול את המשאבים בסדר שונה, מה שמהווה הפרה של התנאי \"המתנה מעגלית\" (Circular Wait).",
+        "ד. מבוי סתום אינו אפשרי בקוד זה מכיוון שאין תלות בין המנעולים.",
+        "ה. מבוי סתום אפשרי, אך ניתן למנוע אותו רק על ידי שימוש ב- `try_lock` ובדיקה חוזרת בלולאה עד להשגת שני המנעולים."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "הקוד הנתון מדגים תרחיש קלאסי של מבוי סתום (deadlock) העומד בכל ארבעת התנאים ההכרחיים למבוי סתום:\n1.  **Mutual Exclusion (מניעה הדדית)**: המנעולים (`std::mutex`) מספקים מניעה הדדית; רק תהליכון אחד יכול להחזיק במנעול בכל רגע נתון.\n2.  **Hold and Wait (החזק והמתן)**: כל תהליכון תופס מנעול אחד (תהליכון 1 תופס את `mutexA`, תהליכון 2 תופס את `mutexB`) וממתין לתפוס את המנעול השני.\n3.  **No Preemption (אין דריסה)**: המנעולים אינם נלקחים בכוח מהתהליכונים; הם משוחררים רק מרצון על ידי התהליכון שמחזיק בהם.\n4.  **Circular Wait (המתנה מעגלית)**: זהו התנאי המרכזי שמופר כאן. תהליכון 1 מחזיק ב-`mutexA` וממתין ל-`mutexB` (שייתכן ומוחזק על ידי תהליכון 2). תהליכון 2 מחזיק ב-`mutexB` וממתין ל-`mutexA` (שייתכן ומוחזק על ידי תהליכון 1). נוצרת שרשרת המתנה מעגלית: תהליכון 1 ממתין למשאב שתהליכון 2 מחזיק, ותהליכון 2 ממתין למשאב שתהליכון 1 מחזיק. הסיבה העיקרית למצב זה היא הסדר השונה שבו התהליכונים מנסים לנעול את המשאבים.\n\nלכן, טענה ג' נכונה: מבוי סתום אפשרי, והוא נגרם עקב העובדה שכל תהליכון מנסה לנעול את המשאבים בסדר שונה, מה שמהווה הפרה של התנאי \"המתנה מעגלית\"."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

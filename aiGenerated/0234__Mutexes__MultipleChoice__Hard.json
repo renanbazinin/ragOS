@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 20:10:31",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 970,
+      "output_tokens": 879,
+      "total_tokens": 4457
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Mutexes",
+      "Concurrency",
+      "Deadlock",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא ב-C המשתמש ב-POSIX threads וב-mutex:\n```c\n#include <pthread.h>\n#include <stdio.h>\n\npthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;\nint shared_counter = 0;\n\nvoid safe_increment(int val) {\n    pthread_mutex_lock(&mtx);\n    if (val < 0) {\n        printf(\"Invalid value, returning.\\n\");\n        return; // Potential bug: returning without unlocking\n    }\n    shared_counter += val;\n    pthread_mutex_unlock(&mtx);\n}\n\nvoid* thread_routine(void* arg) {\n    for (int i = 0; i < 10000; ++i) {\n        safe_increment(i);\n    }\n    // If this path was taken, it would cause a deadlock:\n    // safe_increment(-1);\n    return NULL;\n}\n\nint main() {\n    pthread_t t1, t2;\n    pthread_create(&t1, NULL, thread_routine, NULL);\n    pthread_create(&t2, NULL, thread_routine, NULL);\n    pthread_join(t1, NULL);\n    pthread_join(t2, NULL);\n    printf(\"Final shared_counter: %d\\n\", shared_counter);\n    return 0;\n}\n```\nבהתייחס לפונקציה `safe_increment`, איזו מהטענות הבאות נכונה לגבי פוטנציאל הבעיות בקוד?",
+      "code_snippet": null,
+      "options": [
+        "א. הקוד נכון לחלוטין ואין בו פוטנציאל לבעיות תזמון (concurrency issues) או קיפאון (deadlock).",
+        "ב. קיים בקוד מצב מרוץ (race condition) על `shared_counter` מכיוון שה-mutex אינו מגן עליו בצורה נכונה.",
+        "ג. קיים בקוד פוטנציאל לקיפאון (deadlock) אם פונקציית `safe_increment` תקרא עם ערך שלילי.",
+        "ד. הקוד עלול לגרום לשחרור כפול של ה-mutex (double unlock) אם פונקציית `safe_increment` תקרא עם ערך שלילי."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "התשובה הנכונה היא ג'. בפונקציה `safe_increment`, ה-mutex נתפס באמצעות `pthread_mutex_lock(&mtx)`. אם התנאי `val < 0` מתקיים, הפונקציה מבצעת `return` מוקדם מבלי לשחרר את ה-mutex. במצב כזה, ה-mutex נשאר נעול, וכל ניסיון עתידי של תהליכון אחר (או של אותו תהליכון) לתפוס את ה-mutex באמצעות `pthread_mutex_lock` יחסם לצמיתות, מה שיוביל למצב של קיפאון (deadlock). אין כאן מצב מרוץ על `shared_counter` בתוך הקטע המוגן, וגם לא שחרור כפול של ה-mutex מכיוון ש-`pthread_mutex_unlock` פשוט לא נקרא כלל."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

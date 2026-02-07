@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 20:09:54",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 961,
+      "output_tokens": 563,
+      "total_tokens": 5290
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Mutexes",
+      "Synchronization",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "מה יקרה אם תהליך (thread) ינסה לנעול מנעול הדדי (mutex) שאינו רקורסיבי (non-recursive) שכבר ננעל על ידו?",
+      "code_snippet": null,
+      "options": [
+        "הפעולה תחזור בהצלחה והתהליך ימשיך בביצוע.",
+        "התהליך יכנס למצב קיפאון (deadlock).",
+        "התהליך יסיים את פעולתו עם שגיאה.",
+        "הפעולה תיכשל ותחזיר קוד שגיאה (לדוגמה, EDEADLK), אך התהליך ימשיך לפעול."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "התהליך יכנס למצב קיפאון (deadlock).",
+      "explanation": "מנעול הדדי שאינו רקורסיבי (non-recursive mutex) מיועד להיות ננעל רק פעם אחת על ידי תהליך נתון. אם אותו תהליך ינסה לנעול אותו שוב, המנעול יתפוס שהוא כבר ננעל. ברוב המימושים הסטנדרטיים (לדוגמה, PTHREAD_MUTEX_NORMAL ב-POSIX), התהליך המנסה לנעול את המנעול יכנס למצב המתנה (block) עד שהמנעול ישוחרר. מכיוון שהתהליך עצמו הוא זה שמחזיק במנעול, והוא נמצא במצב המתנה, הוא לעולם לא ישחרר את המנעול, וכך יכנס למצב של קיפאון עצמי (self-deadlock). במקרים מסוימים (לדוגמה, PTHREAD_MUTEX_ERRORCHECK ב-POSIX), המערכת עשויה לזהות ניסיון זה ולהחזיר קוד שגיאה (כמו EDEADLK) במקום להיכנס לקיפאון, אך עצם הניסיון מצביע על בעיה לוגית חמורה שעלולה להוביל לקיפאון."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

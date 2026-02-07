@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 19:55:27",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4073,
+      "output_tokens": 2394,
+      "total_tokens": 13385
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Synchronization",
+      "Threads",
+      "Concurrency",
+      "Mutexes",
+      "Condition Variables",
+      "Barriers"
+    ],
+    "content": {
+      "text": "מערכת מרובת חוטים צריכה לעבד פריטים בקבוצות. קיים משאב משותף שיש לאפס (reset) לאחר כל K פריטים שמעובדים. הפעולה `reset_resource()` חייבת להתבצע בדיוק פעם אחת לאחר ש-K פריטים עובדו, וכל החוטים שהשתתפו בעיבוד קבוצה זו חייבים להמתין שהאיפוס יסתיים לפני שימשיכו לעבוד על הקבוצה הבאה. יש לממש את אובייקט הסנכרון `BatchProcessor` ואת הפונקציות `init`, `destroy`, ו-`process_item` תוך שימוש במנעולים (mutexes) ומשתני תנאי (condition variables) בלבד. אין לשנות את חתימת הפונקציה `reset_resource` או להוסיף לה פרמטרים. יש להקפיד על סנכרון נכון, מניעת מצבי מירוץ (race conditions) ומבוי סתום (deadlocks), ולהבטיח קריאה יחידה ל-`reset_resource` בכל K קריאות ל-`process_item`.",
+      "code_snippet": "/* Include headers like <pthread.h> for mutexes and condition variables */\n\n// Function to be called by the system, simulates resource reset\nvoid reset_resource() {\n    // This function simulates work and should be called exactly once\n    // every K calls to process_item.\n    // In a real scenario, this might involve re-initializing a data structure,\n    // resetting a hardware component, etc.\n}\n\ntypedef struct {\n    // TODO: Add fields here\n} BatchProcessor;\n\nvoid init(BatchProcessor *bp, int K) {\n    // TODO: Implement\n}\n\nvoid destroy(BatchProcessor *bp) {\n    // TODO: Implement\n}\n\nvoid process_item(BatchProcessor *bp) {\n    // TODO: Implement\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון משתמש במנגנון מחסום מחזורי (Cyclic Barrier) כדי לסנכרן את החוטים. אובייקט `BatchProcessor` מכיל את השדות הבאים:\n- `K`: גודל הקבוצה הנדרש.\n- `count`: מונה כמה חוטים כבר נכנסו לקריאה ל-`process_item` עבור הקבוצה הנוכחית.\n- `generation`: מונה את מספר הקבוצה הנוכחית. משתנה זה חיוני כדי להבחין בין חוטים הממתינים מקבוצות שונות במקרה של שימוש חוזר באובייקט הסנכרון.\n- `mutex`: מנעול להגנה על המונים (`count`, `generation`) מפני מצבי מירוץ.\n- `cond`: משתנה תנאי המשמש להמתנה ושחרור חוטים.\n\n**מימוש קוד:**\n```c\n#include <pthread.h>\n\n// Function to be called by the system, simulates resource reset\nvoid reset_resource() {\n    // This function simulates work and should be called exactly once\n    // every K calls to process_item.\n    // In a real scenario, this might involve re-initializing a data structure,\n    // resetting a hardware component, etc.\n}\n\ntypedef struct {\n    int K;                  // Batch size\n    int count;              // Number of threads currently in the batch\n    int generation;         // Counter for batch cycles\n    pthread_mutex_t mutex;\n    pthread_cond_t cond;\n} BatchProcessor;\n\nvoid init(BatchProcessor *bp, int K) {\n    bp->K = K;\n    bp->count = 0;\n    bp->generation = 0;\n    pthread_mutex_init(&bp->mutex, NULL);\n    pthread_cond_init(&bp->cond, NULL);\n}\n\nvoid destroy(BatchProcessor *bp) {\n    pthread_mutex_destroy(&bp->mutex);\n    pthread_cond_destroy(&bp->cond);\n}\n\nvoid process_item(BatchProcessor *bp) {\n    pthread_mutex_lock(&bp->mutex);\n\n    int my_generation = bp->generation; \n\n    bp->count++;\n\n    if (bp->count == bp->K) { // This is the K-th thread in the batch\n        reset_resource();\n        bp->count = 0;          // Reset count for next batch\n        bp->generation++;       // Advance generation, signaling batch completion\n        pthread_cond_broadcast(&bp->cond); // Wake up all waiting threads\n    } else { \n        // Not the last thread, wait until the generation advances\n        // (meaning current batch is done and reset by the K-th thread)\n        while (bp->generation == my_generation) {\n            pthread_cond_wait(&bp->cond, &bp->mutex);\n        }\n    }\n\n    pthread_mutex_unlock(&bp->mutex);\n}\n```\n\n**הסבר מפורט:**\n\n**פונקציית `init`:**\nמאתחלת את השדות `K`, `count` (ל-0, משום שאף חוט עדיין לא נכנס לקבוצה הראשונה), `generation` (ל-0, קבוצה ראשונה), ומאתחלת את המנעול ומשתנה התנאי של `pthread`. אתחול נכון של אובייקטי הסנכרון הוא קריטי.\n\n**פונקציית `destroy`:**\nמשחררת את המשאבים של המנעול ומשתנה התנאי. חשוב לבצע זאת כדי למנוע דליפות זיכרון ומשאבי מערכת.\n\n**פונקציית `process_item`:**\n1.  **כניסה לאזור קריטי:** החוט נועל את ה-`mutex` באמצעות `pthread_mutex_lock(&bp->mutex)`. זה מבטיח שרק חוט אחד יוכל לשנות את המונים (`count`, `generation`) בכל רגע נתון, ובכך מונע מצבי מירוץ.\n2.  **שמירת דור (Generation):** החוט שומר את ערך ה-`generation` הנוכחי לתוך משתנה מקומי (`my_generation`). זהו מנגנון חיוני במחסומים מחזוריים. הוא מאפשר לחוטים לדעת לאיזה מחזור (קבוצה) הם שייכים. חוטים מקבוצה קודמת שהתעוררו (אך עדיין לא יצאו מהלולאה) או חוטים מקבוצה עתידית לא יושפעו בטעות מה-`broadcast` הנוכחי, ויוכלו להמתין לדור הנכון שלהם.\n3.  **קידום מונה הקבוצה:** החוט מקדם את המונה `count` (`bp->count++`), המייצג את מספר החוטים שנכנסו לקבוצה הנוכחית.\n4.  **זיהוי החוט האחרון בקבוצה:**\n    *   **`if (bp->count == bp->K)`:** אם ה-`count` שווה ל-`K`, החוט הנוכחי הוא האחרון בקבוצה. זהו החוט שאחראי לבצע את פעולות הסיום של הקבוצה:\n        *   **`reset_resource()`:** קריאה לפונקציית איפוס המשאב. מכיוון שרק החוט ה-K-י מגיע לכאן, מובטח שהפעולה תתבצע בדיוק פעם אחת עבור כל קבוצה של K פריטים.\n        *   **`bp->count = 0;`:** איפוס המונה `count` ל-0, כדי להתחיל לספור את החוטים עבור הקבוצה הבאה.\n        *   **`bp->generation++;`:** קידום מונה ה-`generation`. פעולה זו היא הסימן לכל החוטים הממתינים שהקבוצה הנוכחית הסתיימה, ושהמשאב אופס.\n        *   **`pthread_cond_broadcast(&bp->cond);`:** שידור לכל החוטים הממתינים על משתנה התנאי. כל החוטים שהמתינו (כלומר, הגיעו לפני החוט ה-K-י) יתעוררו ויבדקו את תנאי ההמתנה שלהם.\n5.  **המתנת חוטים שאינם אחרונים:**\n    *   **`else { while (bp->generation == my_generation) { pthread_cond_wait(&bp->cond, &bp->mutex); } }`:** אם החוט אינו החוט ה-K-י, הוא נכנס ללולאת המתנה. הוא ממתין על משתנה התנאי (`pthread_cond_wait`) כל עוד ה-`generation` הנוכחי של האובייקט (`bp->generation`) שווה ל-`my_generation` (הדור שהחוט הזה ראה כשנכנס). תנאי זה מבטיח שהחוט ימתין עד שהחוט ה-K-י יבצע את האיפוס ויקדם את ה-`generation`. כשה-`generation` של האובייקט מתקדם, החוט יודע שהקבוצה שלו הסתיימה ושהמשאב אופס, והוא יכול להמשיך.\n6.  **יציאה מאזור קריטי:** החוט משחרר את ה-`mutex` באמצעות `pthread_mutex_unlock(&bp->mutex)`. כעת הוא יכול להמשיך בעבודתו, בידיעה שהמשאב מוכן לקבוצה הבאה של פריטים."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

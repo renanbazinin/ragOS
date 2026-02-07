@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 20:10:47",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 970,
+      "output_tokens": 977,
+      "total_tokens": 4196
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Mutexes",
+      "Deadlock",
+      "Concurrency",
+      "Pthreads"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא המשתמש בספריית `pthread` ב-C. מה תהיה התוצאה הסבירה ביותר כאשר תהליך יפעיל את הפונקציה `main`?",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h> // For sleep\n\npthread_mutex_t my_mutex;\n\nvoid* bar(void* arg) {\n    printf(\"Thread %ld: Entering bar, trying to lock mutex...\\n\", (long)pthread_self());\n    pthread_mutex_lock(&my_mutex);\n    printf(\"Thread %ld: Mutex locked in bar.\\n\", (long)pthread_self());\n    // Do some work\n    sleep(1);\n    pthread_mutex_unlock(&my_mutex);\n    printf(\"Thread %ld: Mutex unlocked in bar.\\n\", (long)pthread_self());\n    return NULL;\n}\n\nvoid* foo(void* arg) {\n    printf(\"Thread %ld: Entering foo, trying to lock mutex...\\n\", (long)pthread_self());\n    pthread_mutex_lock(&my_mutex);\n    printf(\"Thread %ld: Mutex locked in foo.\\n\", (long)pthread_self());\n    \n    // Call bar from foo\n    bar(NULL); // This is the problematic part if bar tries to lock the same mutex again\n    \n    printf(\"Thread %ld: Back in foo, unlocking mutex...\\n\", (long)pthread_self());\n    pthread_mutex_unlock(&my_mutex);\n    printf(\"Thread %ld: Mutex unlocked in foo.\\n\", (long)pthread_self());\n    return NULL;\n}\n\nint main() {\n    pthread_mutex_init(&my_mutex, NULL);\n    pthread_t tid;\n    pthread_create(&tid, NULL, foo, NULL);\n    pthread_join(tid, NULL);\n    pthread_mutex_destroy(&my_mutex);\n    return 0;\n}",
+      "options": [
+        "א. התוכנית תרוץ בהצלחה, תדפיס הודעות מ-`foo` ולאחר מכן מ-`bar` ברצף, ותסיים פעולה.",
+        "ב. התוכנית תיכנס למצב של קיפאון (deadlock) כאשר הפונקציה `bar` תנסה לנעול את המנעול, מכיוון שהמנעול כבר מוחזק על ידי אותו תהליך (thread).",
+        "ג. התוכנית תקרוס עקב פעולת מנעול לא חוקית (invalid mutex operation).",
+        "ד. התוכנית תדפיס הודעת שגיאה אך תמשיך לרוץ, כאשר `bar` לא תצליח לרכוש את המנעול."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "מנעול `pthread_mutex_t` שמאותחל עם תכונות ברירת מחדל (NULL) הוא מנעול מסוג 'רגיל' (PTHREAD_MUTEX_NORMAL). מנעול מסוג זה אינו מאפשר לתהליך (thread) שכבר מחזיק בו לנעול אותו שוב. כאשר `foo` נועלת את `my_mutex` ומיד לאחר מכן קוראת ל-`bar` שבתורה מנסה לנעול את אותו המנעול, התהליך ינסה לנעול מנעול שהוא כבר מחזיק בו. במצב כזה, `pthread_mutex_lock` יגרום לתהליך להיכנס למצב המתנה אינסופי (deadlock), מכיוון שהוא ממתין לשחרור מנעול שהוא עצמו צריך לשחרר."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

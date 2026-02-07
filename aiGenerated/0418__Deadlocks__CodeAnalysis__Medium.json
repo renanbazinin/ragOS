@@ -1,0 +1,64 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Deadlocks",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 21:25:15",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2852,
+      "output_tokens": 2852,
+      "total_tokens": 9088
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Deadlocks",
+      "Synchronization",
+      "Mutexes",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא המדמה שני חוטים המנסים לבצע פעולות על משאבים שונים. נתחו את הקוד וענו על השאלות:",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <unistd.h>\n\npthread_mutex_t mutex1;\npthread_mutex_t mutex2;\n\nvoid* thread_func1(void* arg) {\n    printf(\"Thread 1: Attempting to lock mutex1...\\n\");\n    pthread_mutex_lock(&mutex1);\n    printf(\"Thread 1: Locked mutex1. Attempting to lock mutex2...\\n\");\n    usleep(100000); // Simulate some work or context switch\n    pthread_mutex_lock(&mutex2);\n    printf(\"Thread 1: Locked mutex2. Performing operations...\\n\");\n    // Critical section\n    printf(\"Thread 1: Releasing mutex2...\\n\");\n    pthread_mutex_unlock(&mutex2);\n    printf(\"Thread 1: Releasing mutex1...\\n\");\n    pthread_mutex_unlock(&mutex1);\n    printf(\"Thread 1: Exiting.\\n\");\n    return NULL;\n}\n\nvoid* thread_func2(void* arg) {\n    printf(\"Thread 2: Attempting to lock mutex2...\\n\");\n    pthread_mutex_lock(&mutex2);\n    printf(\"Thread 2: Locked mutex2. Attempting to lock mutex1...\\n\");\n    usleep(100000); // Simulate some work or context switch\n    pthread_mutex_lock(&mutex1);\n    printf(\"Thread 2: Locked mutex1. Performing operations...\\n\");\n    // Critical section\n    printf(\"Thread 2: Releasing mutex1...\\n\");\n    pthread_mutex_unlock(&mutex1);\n    printf(\"Thread 2: Releasing mutex2...\\n\");\n    pthread_mutex_unlock(&mutex2);\n    printf(\"Thread 2: Exiting.\\n\");\n    return NULL;\n}\n\nint main() {\n    pthread_t t1, t2;\n\n    pthread_mutex_init(&mutex1, NULL);\n    pthread_mutex_init(&mutex2, NULL);\n\n    pthread_create(&t1, NULL, thread_func1, NULL);\n    pthread_create(&t2, NULL, thread_func2, NULL);\n\n    pthread_join(t1, NULL);\n    pthread_join(t2, NULL);\n\n    pthread_mutex_destroy(&mutex1);\n    pthread_mutex_destroy(&mutex2);\n\n    printf(\"Main: Both threads finished.\\n\");\n    return 0;\n}\n",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "a",
+        "text": "האם קטע הקוד הנתון עלול להוביל לקיפאון (Deadlock)? נמקו את תשובתכם תוך התייחסות לתנאים ההכרחיים לקיפאון.",
+        "code_snippet": null,
+        "options": [
+          "כן",
+          "לא"
+        ],
+        "solution": {
+          "is_present_in_file": true,
+          "correct_option": "כן",
+          "explanation": "כן, קטע הקוד עלול להוביל לקיפאון (Deadlock). קיפאון יכול להתרחש כאשר מתקיימים ארבעת התנאים ההכרחיים לקיפאון:\n1.  **מניעה הדדית (Mutual Exclusion)**: המנעולים `mutex1` ו-`mutex2` הם משאבים שאינם ניתנים לשיתוף. רק חוט אחד יכול להחזיק במנעול נתון בכל רגע נתון.\n2.  **החזקה והמתנה (Hold and Wait)**: חוט 1 לוכד את `mutex1` ולאחר מכן מנסה לנעול את `mutex2`. במקביל, חוט 2 לוכד את `mutex2` ולאחר מכן מנסה לנעול את `mutex1`. כל חוט מחזיק במשאב אחד (מנעול) וממתין למשאב אחר שמוחזק על ידי חוט אחר.\n3.  **אי-הפקעה (No Preemption)**: לא ניתן להפקיע מנעול מחוט שהחזיק בו; רק החוט עצמו יכול לשחרר אותו באופן יזום באמצעות `pthread_mutex_unlock`.\n4.  **המתנה מעגלית (Circular Wait)**: חוט 1 ממתין למשאב (`mutex2`) שמוחזק על ידי חוט 2, בעוד שחוט 2 ממתין למשאב (`mutex1`) שמוחזק על ידי חוט 1. נוצרת שרשרת המתנה מעגלית.\n\n**תרחיש לדוגמה לקיפאון:**\nא.  חוט 1 מבצע `pthread_mutex_lock(&mutex1)` ומצליח לנעול את `mutex1`.\nב.  חוט 2 מבצע `pthread_mutex_lock(&mutex2)` ומצליח לנעול את `mutex2`.\nג.  חוט 1 מנסה לבצע `pthread_mutex_lock(&mutex2)`, אך `mutex2` נעול על ידי חוט 2, ולכן חוט 1 נחסם ונכנס למצב המתנה.\nד.  חוט 2 מנסה לבצע `pthread_mutex_lock(&mutex1)`, אך `mutex1` נעול על ידי חוט 1, ולכן חוט 2 נחסם ונכנס למצב המתנה.\nבשלב זה, שני החוטים חסומים באופן הדדי וממתינים זה לזה, מה שמוביל לקיפאון."
+        }
+      },
+      {
+        "id": "b",
+        "text": "הצע פתרון לבעיית הקיפאון בקטע קוד זה. הצג את קטע הקוד המתוקן והסבר בקצרה מדוע הפתרון מונע קיפאון.",
+        "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <unistd.h>\n\npthread_mutex_t mutex1;\npthread_mutex_t mutex2;\n\n// Solution: Ensure consistent lock ordering\nvoid* thread_func1_fixed(void* arg) {\n    printf(\"Thread 1 (fixed): Attempting to lock mutex1...\\n\");\n    pthread_mutex_lock(&mutex1);\n    printf(\"Thread 1 (fixed): Locked mutex1. Attempting to lock mutex2...\\n\");\n    usleep(100000);\n    pthread_mutex_lock(&mutex2);\n    printf(\"Thread 1 (fixed): Locked mutex2. Performing operations...\\n\");\n    // Critical section\n    printf(\"Thread 1 (fixed): Releasing mutex2...\\n\");\n    pthread_mutex_unlock(&mutex2);\n    printf(\"Thread 1 (fixed): Releasing mutex1...\\n\");\n    pthread_mutex_unlock(&mutex1);\n    printf(\"Thread 1 (fixed): Exiting.\\n\");\n    return NULL;\n}\n\nvoid* thread_func2_fixed(void* arg) {\n    printf(\"Thread 2 (fixed): Attempting to lock mutex1...\\n\"); // Changed order\n    pthread_mutex_lock(&mutex1);\n    printf(\"Thread 2 (fixed): Locked mutex1. Attempting to lock mutex2...\\n\"); // Changed order\n    usleep(100000);\n    pthread_mutex_lock(&mutex2);\n    printf(\"Thread 2 (fixed): Locked mutex2. Performing operations...\\n\");\n    // Critical section\n    printf(\"Thread 2 (fixed): Releasing mutex2...\\n\");\n    pthread_mutex_unlock(&mutex2);\n    printf(\"Thread 2 (fixed): Releasing mutex1...\\n\");\n    pthread_mutex_unlock(&mutex1);\n    printf(\"Thread 2 (fixed): Exiting.\\n\");\n    return NULL;\n}\n\nint main_fixed() { // Renamed main to avoid conflict if compiled with original\n    pthread_t t1, t2;\n\n    pthread_mutex_init(&mutex1, NULL);\n    pthread_mutex_init(&mutex2, NULL);\n\n    pthread_create(&t1, NULL, thread_func1_fixed, NULL);\n    pthread_create(&t2, NULL, thread_func2_fixed, NULL);\n\n    pthread_join(t1, NULL);\n    pthread_join(t2, NULL);\n\n    pthread_mutex_destroy(&mutex1);\n    pthread_mutex_destroy(&mutex2);\n\n    printf(\"Main (fixed): Both threads finished.\\n\");\n    return 0;\n}",
+        "options": null,
+        "solution": {
+          "is_present_in_file": true,
+          "correct_option": null,
+          "explanation": "הפתרון הנפוץ והפשוט ביותר למניעת קיפאון במקרה זה הוא לוודא שכל החוטים מנסים לתפוס את המנעולים באותו סדר קבוע (Fixed Lock Ordering). על ידי אכיפת סדר קבוע לרכישת מנעולים, אנו מונעים את תנאי ההמתנה המעגלית (Circular Wait).\n\nכפי שמוצג בקטע הקוד המתוקן, גם `thread_func1_fixed` וגם `thread_func2_fixed` מנסים לתפוס קודם את `mutex1` ולאחר מכן את `mutex2`. המשמעות היא שאף פעם לא ייווצר מצב שבו חוט 1 מחזיק את `mutex1` וממתין ל-`mutex2`, בעוד חוט 2 מחזיק את `mutex2` וממתין ל-`mutex1`.\n\n**הסבר מדוע הפתרון מונע קיפאון:**\nאם חוט 1 לוכד את `mutex1`, וחוט 2 מנסה גם הוא לנעול את `mutex1`, חוט 2 יחסם וימתין שחוט 1 ישחרר את `mutex1`. חוט 1, לאחר שינעל את `mutex1`, ימשיך לנעול את `mutex2`. אם `mutex2` פנוי, הוא ינעל אותו ויבצע את פעולותיו. אם `mutex2` היה נעול על ידי חוט אחר (שלא ייתכן שיהיה חוט 2, כי הוא ממתין ל-`mutex1`), חוט 1 היה ממתין לו, אך עדיין לא נוצרת המתנה מעגלית בין חוט 1 לחוט 2. בסופו של דבר, חוט 1 ישחרר את שני המנעולים, ואז חוט 2 יוכל לנעול את `mutex1` ואז את `mutex2` (או להיפך, אם חוט 2 היה הראשון לתפוס את `mutex1`).\n\nבדרך זו, אנו מבטיחים שגם אם חוטים מתחרים על אותם משאבים, הם יעשו זאת בסדר עקבי, ובכך נמנע את היווצרות שרשרת ההמתנה המעגלית, שהיא אחד מארבעת התנאים ההכרחיים לקיפאון."
+        }
+      }
+    ],
+    "points": 25,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": null
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

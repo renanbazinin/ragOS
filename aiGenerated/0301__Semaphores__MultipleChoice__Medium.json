@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Semaphores",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 20:38:19",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1032,
+      "output_tokens": 862,
+      "total_tokens": 3569
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Semaphores",
+      "Synchronization",
+      "Mutual Exclusion"
+    ],
+    "content": {
+      "text": "נתון קטע קוד המשתמש במנגנון סמפור (Semaphore) להגנה על משאב משותף. איזה מההצהרות הבאות מתארת נכונה את מטרת השימוש בסמפור בקטע קוד זה?",
+      "code_snippet": "#include <semaphore.h>\n#include <pthread.h>\n#include <stdio.h>\n\nsem_t mutex;\nint shared_resource = 0;\n\nvoid* thread_func(void* arg) {\n    sem_wait(&mutex); // P operation\n    // Critical section\n    shared_resource++;\n    printf(\"Thread %ld: shared_resource = %d\\n\", (long)pthread_self(), shared_resource);\n    sem_post(&mutex); // V operation\n    return NULL;\n}\n\nint main() {\n    sem_init(&mutex, 0, 1); // Initialize semaphore for mutual exclusion\n    pthread_t t1, t2;\n\n    pthread_create(&t1, NULL, thread_func, NULL);\n    pthread_create(&t2, NULL, thread_func, NULL);\n\n    pthread_join(t1, NULL);\n    pthread_join(t2, NULL);\n\n    sem_destroy(&mutex);\n    return 0;\n}",
+      "options": [
+        "א. להבטיח שרק תהליך אחד יבצע את פעולת ההדפסה בכל רגע נתון.",
+        "ב. למנוע מצב שבו שני תהליכים ניגשים למשתנה shared_resource בו-זמנית.",
+        "ג. לסנכרן את סדר ההדפסה של התהליכים כך שתהליך t1 תמיד ידפיס לפני t2.",
+        "ד. להגביל את מספר הפעמים שניתן להגדיל את shared_resource לשניים בלבד.",
+        "ה. לאפשר לתהליכים להמתין זה לזה עד ששניהם יסיימו את הפעולה הקריטית."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "הסמפור 'mutex' מאותחל לערך 1, מה שהופך אותו לסמפור בינארי (mutex). הפעולה 'sem_wait(&mutex)' מונעת מתהליכים נוספים להיכנס לקטע הקריטי אם תהליך אחר כבר נמצא בו (מורידה את ערך הסמפור ל-0 וגורמת לתהליכים אחרים להמתין). הפעולה 'sem_post(&mutex)' משחררת את הסמפור ומאפשרת לתהליך ממתין להיכנס (מעלה את ערך הסמפור ל-1). לכן, מטרתו העיקרית היא להבטיח שבכל רגע נתון רק תהליך אחד יוכל לגשת למשתנה המשותף 'shared_resource' ולבצע עליו פעולות, ובכך למנוע תנאי מרוץ (race condition) ולוודא עקביות נתונים. אפשרות א' נכונה חלקית כיוון שההדפסה נמצאת בתוך הקטע הקריטי, אך המטרה העיקרית היא הגנה על המשאב המשותף עצמו."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

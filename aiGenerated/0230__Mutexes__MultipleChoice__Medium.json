@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 20:09:17",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 961,
+      "output_tokens": 479,
+      "total_tokens": 2912
+    }
+  },
+  "question": {
+    "id": 6,
+    "type": "MultipleChoice",
+    "topic": [
+      "Mutexes",
+      "Synchronization",
+      "Deadlocks"
+    ],
+    "content": {
+      "text": "נתון מנעול (mutex) סטנדרטי שאינו רקורסיבי. מה יקרה אם תהליך שכבר מחזיק במנעול ינסה לרכוש אותו שוב?",
+      "code_snippet": null,
+      "options": [
+        "א) התהליך ייחסם לצמיתות (deadlock).",
+        "ב) התהליך ירכוש את המנעול בהצלחה.",
+        "ג) הפעולה תחזיר שגיאה.",
+        "ד) ההתנהגות אינה מוגדרת."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א) התהליך ייחסם לצמיתות (deadlock).",
+      "explanation": "בתכנון סטנדרטי של מנעול (mutex) שאינו רקורסיבי, כאשר תהליך שכבר מחזיק במנעול מנסה לרכוש אותו שוב, הוא ינסה לנעול משאב שכבר נעול על ידו. כיוון שהמנעול אינו רקורסיבי, הוא אינו מזהה שהתהליך המנסה לנעול הוא אותו תהליך שכבר מחזיק בו. לכן, התהליך ייחסם וימתין לשחרור המנעול, אך הוא עצמו זה שאמור לשחרר אותו – מה שמוביל למצב של קיפאון (deadlock). מנעולים רקורסיביים מתוכננים להתמודד עם מצב זה על ידי מעקב אחר מספר הרכישות של המנעול על ידי אותו תהליך, אך זו אינה ההתנהגות הסטנדרטית של מנעול שאינו רקורסיבי."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

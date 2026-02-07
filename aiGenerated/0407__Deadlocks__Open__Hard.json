@@ -1,0 +1,51 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Deadlocks",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 21:21:43",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3443,
+      "output_tokens": 3172,
+      "total_tokens": 13686
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "Open",
+    "topic": [
+      "Deadlocks",
+      "Concurrency",
+      "Synchronization",
+      "Mutexes"
+    ],
+    "content": {
+      "text": "נתונה מערכת בנקאית הממומשת באמצעות קוד C++ כפי שמוצג להלן. המערכת מאפשרת העברת כספים בין חשבונות שונים. כל חשבון מוגן על ידי מנעול (mutex) משלו כדי להבטיח עקביות במהלך טרנזקציות. פונקציית `transfer` מקבלת מזהי חשבון מקור ויעד וסכום להעברה.",
+      "code_snippet": "#include <iostream>\n#include <thread>\n#include <mutex>\n#include <vector>\n#include <map>\n#include <chrono>\n\n// Assume Account IDs are integers\nstd::map<int, std::mutex> account_locks;\nstd::map<int, double> account_balances;\n\n// Initialize accounts (for example purposes)\nvoid init_accounts(int num_accounts) {\n    for (int i = 0; i < num_accounts; ++i) {\n        account_locks[i]; // Default constructs mutex for each account ID\n        account_balances[i] = 100.0;\n    }\n}\n\n// Transaction function\nvoid transfer(int from_account_id, int to_account_id, double amount) {\n    // Simulate some work before locking\n    std::this_thread::sleep_for(std::chrono::milliseconds(10));\n\n    std::cout << \"Thread \" << std::this_thread::get_id() << \": Trying to lock \" << from_account_id << \" and \" << to_account_id << std::endl;\n\n    // Acquire locks for the source and destination accounts\n    account_locks[from_account_id].lock();\n    account_locks[to_account_id].lock();\n\n    // Check for sufficient balance and perform transfer\n    if (account_balances[from_account_id] >= amount) {\n        account_balances[from_account_id] -= amount;\n        account_balances[to_account_id] += amount;\n        std::cout << \"Thread \" << std::this_thread::get_id() << \": Transferred \" << amount\n                  << \" from \" << from_account_id << \" to \" << to_account_id << std::endl;\n    } else {\n        std::cout << \"Thread \" << std::this_thread::get_id() << \": Insufficient balance in \"\n                  << from_account_id << \" to transfer \" << amount << std::endl;\n    }\n\n    // Release locks\n    account_locks[to_account_id].unlock();\n    account_locks[from_account_id].unlock();\n}\n\nint main() {\n    init_accounts(3); // Initialize accounts 0, 1, 2\n\n    // Create multiple threads attempting transfers\n    // This specific combination is designed to demonstrate deadlock potential\n    std::thread t1(transfer, 0, 1, 10.0);\n    std::thread t2(transfer, 1, 0, 20.0);\n    std::thread t3(transfer, 0, 2, 5.0);\n    std::thread t4(transfer, 2, 0, 15.0);\n\n    t1.join();\n    t2.join();\n    t3.join();\n    t4.join();\n\n    std::cout << \"\\nFinal Balances:\" << std::endl;\n    for (int i = 0; i < 3; ++i) {\n        std::cout << \"Account \" << i << \": \" << account_balances[i] << std::endl;\n    }\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "a",
+        "text": "האם בקוד הנתון קיים פוטנציאל לדדלוק? אם כן, תארו מצב ספציפי (לדוגמה, עם חוטים T1 ו-T2 ומזהי חשבונות ספציפיים) שבו דדלוק יתרחש. הסבירו בקצרה מדוע זהו דדלוק על בסיס ארבעת התנאים ההכרחיים (מניעה הדדית, החזק והמתן, אי-הפקעה, המתנה מעגלית).",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "b",
+        "text": "הציעו שינוי מינימלי בקוד של פונקציית `transfer` כדי למנוע דדלוק. כתבו את הקוד המתוקן והסבירו בקצרה מדוע השינוי מונע דדלוק.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "### פתרון סעיף א' - זיהוי דדלוק\n\n**כן, בקוד הנתון קיים פוטנציאל לדדלוק.**\n\n**תיאור מצב ספציפי לדדלוק:**\nנניח ששני חוטים, T1 ו-T2, מבצעים טרנזקציות בו-זמנית:\n*   חוט T1 קורא ל-`transfer(0, 1, 10.0)` (מעביר מחשבון 0 לחשבון 1).\n*   חוט T2 קורא ל-`transfer(1, 0, 20.0)` (מעביר מחשבון 1 לחשבון 0).\n\nהתרחיש שיוביל לדדלוק הוא כדלקמן:\n1.  חוט T1 מבצע `account_locks[0].lock()` ותופס את המנעול של חשבון 0.\n2.  חוט T2 מבצע `account_locks[1].lock()` ותופס את המנעול של חשבון 1.\n3.  חוט T1 מנסה לבצע `account_locks[1].lock()` אך המנעול תפוס על ידי T2. T1 נכנס למצב המתנה.\n4.  חוט T2 מנסה לבצע `account_locks[0].lock()` אך המנעול תפוס על ידי T1. T2 נכנס למצב המתנה.\n\nבמצב זה, T1 מחזיק במנעול ש-T2 זקוק לו, ו-T2 מחזיק במנעול ש-T1 זקוק לו. שני החוטים ממתינים זה לזה לנצח, ולכן מתרחש דדלוק.\n\n**הסבר על בסיס ארבעת התנאים ההכרחיים לדדלוק:**\n1.  **מניעה הדדית (Mutual Exclusion):** כל מנעול (mutex) של חשבון יכול להיות מוחזק על ידי חוט אחד בלבד בכל רגע נתון. זה מתקיים בקוד כי `std::mutex` הוא אובייקט סנכרון בלעדי.\n2.  **החזק והמתן (Hold and Wait):** חוטים מחזיקים במשאב אחד (מנעול של חשבון) וממתינים למשאב נוסף שתפוס על ידי חוט אחר. בדוגמה לעיל, T1 מחזיק את מנעול 0 וממתין למנעול 1, ו-T2 מחזיק את מנעול 1 וממתין למנעול 0.\n3.  **אי-הפקעה (No Preemption):** משאבים (מנעולים) אינם ניתנים להפקעה בכוח מחוט שמחזיק בהם. חוט חייב לשחרר אותם מרצונו. זה מתקיים עם `std::mutex`.\n4.  **המתנה מעגלית (Circular Wait):** קיימת שרשרת של חוטים, שבה כל חוט ממתין למשאב שמוחזק על ידי החוט הבא בשרשרת, והחוט האחרון ממתין למשאב שמוחזק על ידי החוט הראשון. בדוגמה שלנו, T1 ממתין ל-T2, ו-T2 ממתין ל-T1, ויוצרים מעגל המתנה.\n\n### פתרון סעיף ב' - מניעת דדלוק\n\nכדי למנוע דדלוק, ניתן להטיל סדר גלובלי על רכישת המשאבים (המנעולים). במקרה זה, נגדיר כי יש לרכוש תמיד את המנעול של החשבון בעל המזהה הקטן יותר, ורק לאחר מכן את המנעול של החשבון בעל המזהה הגדול יותר. זה מבטל את תנאי ה'המתנה מעגלית'.\n\n**קוד `transfer` מתוקן:**\n```c++\nvoid transfer(int from_account_id, int to_account_id, double amount) {\n    std::this_thread::sleep_for(std::chrono::milliseconds(10));\n\n    // קביעת סדר נעילה עקבי על בסיס מזהי החשבונות\n    // תמיד ננעל קודם את המזהה הקטן יותר, ואז את הגדול יותר\n    std::mutex& lock1 = (from_account_id < to_account_id) ? account_locks[from_account_id] : account_locks[to_account_id];\n    std::mutex& lock2 = (from_account_id < to_account_id) ? account_locks[to_account_id] : account_locks[from_account_id];\n\n    int first_id = (from_account_id < to_account_id) ? from_account_id : to_account_id;\n    int second_id = (from_account_id < to_account_id) ? to_account_id : from_account_id;\n\n    std::cout << \"Thread \" << std::this_thread::get_id() << \": Trying to lock \" << first_id << \" then \" << second_id << std::endl;\n\n    // רכישת המנעולים בסדר קבוע\n    lock1.lock();\n    lock2.lock();\n\n    // לאחר הנעילה, נשמור על ההתייחסות המקורית לחשבונות המקור והיעד\n    double* actual_from_balance = &account_balances[from_account_id];\n    double* actual_to_balance = &account_balances[to_account_id];\n\n    // בדיקת יתרה מספקת וביצוע ההעברה\n    if (*actual_from_balance >= amount) {\n        *actual_from_balance -= amount;\n        *actual_to_balance += amount;\n        std::cout << \"Thread \" << std::this_thread::get_id() << \": Transferred \" << amount\n                  << \" from \" << from_account_id << \" to \" << to_account_id << std::endl;\n    } else {\n        std::cout << \"Thread \" << std::this_thread::get_id() << \": Insufficient balance in \"\n                  << from_account_id << \" to transfer \" << amount << std::endl;\n    }\n\n    // שחרור המנעולים בסדר הפוך לסדר הרכישה (פרקטיקה מומלצת)\n    lock2.unlock();\n    lock1.unlock();\n}\n```\n\n**הסבר מדוע השינוי מונע דדלוק:**\nהשינוי מבטל את תנאי ה'המתנה מעגלית' (Circular Wait). על ידי הטלת סדר גלובלי ועקבי לרכישת מנעולים (תמיד קודם המנעול של החשבון בעל המזהה הקטן יותר, ואז את המנעול של החשבון בעל המזהה הגדול יותר), אנו מבטיחים שלעולם לא תיווצר שרשרת המתנה מעגלית. אם חוט T1 מנסה להעביר מ-0 ל-1, וחוט T2 מנסה להעביר מ-1 ל-0, שניהם ינסו לרכוש קודם את המנעול של חשבון 0 (מכיוון ש-0 < 1). החוט שיצליח לתפוס את מנעול 0 ראשון, ימשיך לנסות לתפוס את מנעול 1. החוט השני ימתין למנעול 0. במצב זה, תמיד אחד החוטים יתקדם, ולא ייתכן מצב שבו כל חוט מחזיק במשאב שחוט אחר זקוק לו, ובו בזמן ממתין למשאב שמוחזק על ידי אותו חוט אחר, בסבב מעגלי."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

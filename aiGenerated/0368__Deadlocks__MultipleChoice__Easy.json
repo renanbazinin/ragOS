@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Deadlocks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 21:07:33",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 896,
+      "output_tokens": 346,
+      "total_tokens": 2654
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Deadlocks",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "איזה מהתנאים הבאים אינו תנאי הכרחי להתרחשות קיפאון (Deadlock)?",
+      "code_snippet": null,
+      "options": [
+        "הדרה הדדית (Mutual Exclusion)",
+        "החזק והמתן (Hold and Wait)",
+        "הקצאה דינמית של משאבים (Dynamic Resource Allocation)",
+        "אי-הפקעה (No Preemption)",
+        "המתנה מעגלית (Circular Wait)"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "הקצאה דינמית של משאבים (Dynamic Resource Allocation)",
+      "explanation": "ארבעת התנאים ההכרחיים לקיפאון (Deadlock) הם: הדרה הדדית, החזק והמתן, אי-הפקעה והמתנה מעגלית. 'הקצאה דינמית של משאבים' אינה אחד מתנאים אלה, אלא מתארת שיטה להקצאת משאבים או התנהגות של המערכת ולא תנאי הכרחי לקיפאון."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Semaphores",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 21:00:17",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2864,
+      "output_tokens": 1980,
+      "total_tokens": 9963
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Semaphores",
+      "Concurrency",
+      "Pthreads"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה בשפת C, המשתמשת בסמפורים ובתהליכונים (pthreads). יש לנתח את הקוד ולענות על השאלות הבאות:",
+      "code_snippet": "#include <pthread.h>\n#include <semaphore.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h> // For usleep\n\n#define NUM_THREADS 5\n#define SEM_VALUE 2 // Allow up to 2 threads concurrently\n\nsem_t my_semaphore;\nint g_critical_count = 0; // To track concurrent threads\n\nvoid* thread_func(void* arg) {\n    int id = *(int*)arg;\n    \n    printf(\"Thread %d starting...\\n\", id);\n\n    sem_wait(&my_semaphore); // Acquire semaphore\n\n    // Critical section\n    g_critical_count++;\n    printf(\"Thread %d entered critical section. Current concurrent threads: %d\\n\", id, g_critical_count);\n    usleep(100000); // Simulate work\n    g_critical_count--;\n    printf(\"Thread %d exiting critical section. Current concurrent threads: %d\\n\", id, g_critical_count);\n\n    sem_post(&my_semaphore); // Release semaphore\n\n    printf(\"Thread %d finished.\\n\", id);\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n    int thread_ids[NUM_THREADS];\n\n    // Initialize semaphore allowing SEM_VALUE concurrent accesses\n    if (sem_init(&my_semaphore, 0, SEM_VALUE) != 0) {\n        perror(\"sem_init failed\");\n        return 1;\n    }\n\n    printf(\"Main: Creating %d threads...\\n\", NUM_THREADS);\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        thread_ids[i] = i + 1;\n        if (pthread_create(&threads[i], NULL, thread_func, &thread_ids[i]) != 0) {\n            perror(\"pthread_create failed\");\n            return 1;\n        }\n    }\n\n    printf(\"Main: All threads created. Waiting for them to finish...\\n\");\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Main: All threads finished.\\n\");\n\n    sem_destroy(&my_semaphore); // Destroy semaphore\n    return 0;\n}"
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "מהו פלט אפשרי אחד של התוכנית? (אין צורך לרשום את כל הפלט, אלא דוגמה מייצגת של סדר האירועים וערכי המשתנים המודפסים)",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "מהו המספר המקסימלי של תהליכונים שיכולים להימצא בקטע הקריטי (בין קריאות sem_wait ל-sem_post) בו-זמנית? נמקו את תשובתכם.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.3",
+        "text": "האם ייתכן מצב של קיפאון (deadlock) בתוכנית זו? נמקו את תשובתכם.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.1. פלט אפשרי של התוכנית:\nהתוכנית יוצרת 5 תהליכונים. הסמפור my_semaphore מאותחל לערך 2. המשמעות היא שעד 2 תהליכונים יכולים להיכנס לקטע הקריטי (הקוד שבין sem_wait ל-sem_post) בו-זמנית. המשתנה g_critical_count עוקב אחר מספר התהליכונים בקטע הקריטי, ולכן ערכו המקסימלי יהיה 2. סדר ההדפסות של 'starting' ו-'finished' עבור התהליכונים יכול להשתנות, אך סדר הכניסה והיציאה מהקטע הקריטי יהיה מוגבל על ידי הסמפור. יש לזכור ש-printf אינה פעולה אטומית, וייתכנו שיבושים קלים בפלט אם שני תהליכונים מנסים להדפיס בו-זמנית, אך המבנה הכללי ישקף את ההגבלה של הסמפור.\n\nדוגמת פלט אפשרי:\nMain: Creating 5 threads...\nThread 1 starting...\nThread 2 starting...\nThread 3 starting...\nThread 4 starting...\nThread 5 starting...\nMain: All threads created. Waiting for them to finish...\nThread 1 entered critical section. Current concurrent threads: 1\nThread 2 entered critical section. Current concurrent threads: 2\nThread 1 exiting critical section. Current concurrent threads: 1\nThread 3 entered critical section. Current concurrent threads: 2\nThread 2 exiting critical section. Current concurrent threads: 1\nThread 4 entered critical section. Current concurrent threads: 2\nThread 1 finished.\nThread 3 exiting critical section. Current concurrent threads: 1\nThread 5 entered critical section. Current concurrent threads: 2\nThread 2 finished.\nThread 4 exiting critical section. Current concurrent threads: 1\nThread 3 finished.\nThread 5 exiting critical section. Current concurrent threads: 0\nThread 4 finished.\nThread 5 finished.\nMain: All threads finished.\n\n1.2. המספר המקסימלי של תהליכונים בקטע הקריטי בו-זמנית הוא 2.\nהסמפור my_semaphore מאותחל לערך SEM_VALUE, שהוא 2. המשמעות היא ששני תהליכונים יכולים לבצע sem_wait בהצלחה ולהיכנס לקטע הקריטי לפני שמישהו יבצע sem_post. ברגע ששני תהליכונים בפנים, כל תהליכון שלישי שינסה לבצע sem_wait יחסם עד שאחד מהתהליכונים שבפנים יבצע sem_post וישחרר את הסמפור. המשתנה g_critical_count, שמתעד את מספר התהליכונים בקטע הקריטי, לעולם לא יעלה על 2, מה שמוכיח את ההגבלה.\n\n1.3. לא, לא ייתכן מצב של קיפאון (deadlock) בתוכנית זו.\nכל קריאה ל-sem_wait תמיד מלווה בקריאה תואמת ל-sem_post בתוך אותה פונקציית תהליכון (thread_func). אין תרחיש שבו תהליכון רוכש את הסמפור ולא משחרר אותו (למשל, עקב מסלול שגיאה שגורם ליציאה מוקדמת או לולאה אינסופית לפני sem_post). אין כאן מספר משאבים הנרכשים בסדר שונה על ידי תהליכונים שונים, שהיא אחת הסיבות הנפוצות לקיפאון. התהליך הראשי (main) רק יוצר וממתין לתהליכונים ומעורבותו בפעולות הסמפור אינה יכולה לגרום לקיפאון עם תהליכוני העבודה. התוכנית מתוכננת בצורה כזו שכל תהליכון רוכש משאב אחד (מקום בסמפור) ומשחרר אותו באופן עקבי, מה שמונע קיפאון."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

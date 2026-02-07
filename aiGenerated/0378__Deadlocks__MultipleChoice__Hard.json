@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Deadlocks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 21:10:24",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 1215,
+      "total_tokens": 7566
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Deadlocks"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא בשפת C++ המכיל שלושה תהליכונים (threads) ושלושה מנעולים (mutexes). כל תהליכון מנסה לתפוס שני מנעולים בסדר מסוים.\n\n```cpp\n#include <iostream>\n#include <thread>\n#include <mutex>\n#include <vector>\n#include <chrono> // For std::this_thread::sleep_for\n\nstd::mutex m1, m2, m3;\n\nvoid thread_func_1() {\n    m1.lock();\n    std::this_thread::sleep_for(std::chrono::milliseconds(10)); // Simulate work\n    m2.lock();\n    // Do some work\n    m2.unlock();\n    m1.unlock();\n}\n\nvoid thread_func_2() {\n    m2.lock();\n    std::this_thread::sleep_for(std::chrono::milliseconds(10)); // Simulate work\n    m3.lock();\n    // Do some work\n    m3.unlock();\n    m2.unlock();\n}\n\nvoid thread_func_3() {\n    m3.lock();\n    std::this_thread::sleep_for(std::chrono::milliseconds(10)); // Simulate work\n    m1.lock();\n    // Do some work\n    m1.unlock();\n    m3.unlock();\n}\n```\n\nבהנחה שכל שלושת התהליכונים מופעלים במקביל, איזו מהטענות הבאות מתארת באופן המדויק ביותר את הסיבה למצב קיפאון פוטנציאלי בקוד הנתון?",
+      "code_snippet": null,
+      "options": [
+        "א. לא ייתכן מצב קיפאון מכיוון שכל מנעול נתפס ומשוחרר בסופו של דבר.",
+        "ב. מצב קיפאון ייתכן, והוא נובע בעיקר מהפרה של תנאי \"החזק והמתן\" (Hold and Wait).",
+        "ג. מצב קיפאון ייתכן, והוא נובע בעיקר מהפרה של תנאי \"המתנה מעגלית\" (Circular Wait).",
+        "ד. מצב קיפאון ייתכן, אך הוא אינו נובע מתנאי קיפאון קלאסיים אלא מתזמון לא נכון של קריאות ל-`sleep_for`.",
+        "ה. מצב קיפאון ייתכן, וניתן למנוע אותו באופן יעיל על ידי הבטחת סדר תפיסה היררכי קבוע של המנעולים (לדוגמה, תמיד M1 ואז M2 ואז M3)."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "הסבר: מצב קיפאון (deadlock) ייתכן בקוד הנתון. הוא נובע באופן מובהק מהפרה של תנאי \"המתנה מעגלית\" (Circular Wait). שלושת התהליכונים יוצרים שרשרת המתנה מעגלית: תהליכון 1 תופס את M1 וממתין ל-M2; תהליכון 2 תופס את M2 וממתין ל-M3; תהליכון 3 תופס את M3 וממתין ל-M1. אם כל אחד מהם יתפוס את המנעול הראשון שלו וינסה לתפוס את המנעול השני, כולם ימתינו זה לזה באופן אינסופי.\n\nא. לא נכון. עצם השחרור הסופי של המנעולים אינו מונע קיפאון אם סדר התפיסה מאפשר מעגל המתנה לפני השחרור.\nב. נכון שתנאי \"החזק והמתן\" מתקיים (כל תהליכון מחזיק במנעול אחד וממתין לאחר), אך \"המתנה מעגלית\" היא הסיבה הספציפית והישירה ביותר לקיפאון במקרה זה, ומתארת טוב יותר את דפוס הבעיה.\nד. לא נכון. קריאות ל-`sleep_for` רק מגדילות את הסיכוי שתיווצר הסיטואציה שתוביל לקיפאון, אך הן אינן הגורם היסודי לקיפאון. הגורם הוא סדר תפיסת המנעולים המאפשר המתנה מעגלית.\nה. נכון שזו דרך יעילה למנוע קיפאון על ידי שבירת תנאי ההמתנה המעגלית, אך השאלה מבקשת לתאר באופן המדויק ביותר את הסיבה לקיפאון בקוד הנתון, ולא להציע פתרון."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

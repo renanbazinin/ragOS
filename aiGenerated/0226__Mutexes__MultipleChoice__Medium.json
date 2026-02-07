@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 20:08:35",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 961,
+      "output_tokens": 553,
+      "total_tokens": 2934
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Synchronization",
+      "Mutexes",
+      "Deadlocks"
+    ],
+    "content": {
+      "text": "בהינתן מנעול (mutex) שאינו רקורסיבי (non-recursive), חוט המנסה לנעול אותו פעם שנייה מבלי לשחרר אותו קודם לכן, ייכנס למצב של קיפאון (deadlock).",
+      "code_snippet": "pthread_mutex_t my_mutex;\n\nvoid *thread_func(void *arg) {\n    pthread_mutex_lock(&my_mutex); // First lock\n    // ... critical section ...\n    pthread_mutex_lock(&my_mutex); // Second lock by the same thread\n    // ... This line will cause a deadlock ...\n    pthread_mutex_unlock(&my_mutex);\n    pthread_mutex_unlock(&my_mutex);\n    return NULL;\n}\n\nint main() {\n    // Initialize a default (non-recursive) mutex\n    pthread_mutex_init(&my_mutex, NULL);\n    // Assume thread_func is created and run\n    return 0;\n}",
+      "options": [
+        "נכון",
+        "לא נכון"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "נכון",
+      "explanation": "נכון. מנעול (mutex) שאינו רקורסיבי מיועד להבטיח בלעדיות (mutual exclusion) כך שרק חוט אחד יכול להחזיק בו בכל רגע נתון. כאשר חוט מנסה לנעול מנעול שכבר ננעל על ידו (ולא שוחרר), המערכת רואה זאת כניסיון לנעול מנעול תפוס. מכיוון שהחוט עצמו מחזיק במנעול ואינו יכול לשחרר אותו לפני הנעילה הנוספת, הוא ייכנס למצב המתנה אינסופי (deadlock) לעצמו. בניגוד לכך, מנעול רקורסיבי מאפשר לחוט שנועל אותו לנעול אותו שוב ושוב, כל עוד הוא גם משחרר אותו מספר פעמים זהה."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

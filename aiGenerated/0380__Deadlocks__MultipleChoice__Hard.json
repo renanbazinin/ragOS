@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Deadlocks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 21:11:28",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 1631,
+      "total_tokens": 7362
+    }
+  },
+  "question": {
+    "id": 6,
+    "type": "MultipleChoice",
+    "topic": [
+      "Deadlocks",
+      "Concurrency",
+      "C++ STL"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא ב-C++ המשתמש ב-`std::mutex`:\n\n```cpp\n#include <iostream>\n#include <thread>\n#include <mutex>\n#include <chrono>\n\nstd::mutex m1, m2;\n\nvoid process_data_A() {\n    m1.lock();\n    std::this_thread::sleep_for(std::chrono::milliseconds(50));\n    m2.lock();\n    std::cout << \"Process A acquired m1 and m2\\n\";\n    // ... critical section ...\n    m2.unlock();\n    m1.unlock();\n}\n\nvoid process_data_B() {\n    m2.lock();\n    std::this_thread::sleep_for(std::chrono::milliseconds(50));\n    m1.lock();\n    std::cout << \"Process B acquired m2 and m1\\n\";\n    // ... critical section ...\n    m1.unlock();\n    m2.unlock();\n}\n\nint main() {\n    std::thread t1(process_data_A);\n    std::thread t2(process_data_B);\n\n    t1.join();\n    t2.join();\n\n    std::cout << \"Main finished.\\n\";\n    return 0;\n}\n```\n\nאיזו מהטענות הבאות מתארת את הדרך *הנכונה והבטוחה ביותר* למנוע מצב קיפאון (deadlock) בקוד זה, תוך שימוש ביכולות ספריית ה-STL ב-C++?",
+      "code_snippet": null,
+      "options": [
+        "א. יש לשנות את סדר נעילת המנעולים בפונקציה `process_data_B` כך שתמיד תנעל את `m1` ואז את `m2`, בדומה ל-`process_data_A`.",
+        "ב. להשתמש ב-`std::lock_guard<std::mutex>` במקום קריאות `lock()` ו-`unlock()` ישירות, אך זה לא ימנע את הקיפאון.",
+        "ג. במקום `lock()` ישיר, יש להשתמש ב-`m1.try_lock()` ו-`m2.try_lock()` ובמקרה של כישלון לשחרר את המנעולים שננעלו ולנסות שוב (backoff).",
+        "ד. בכל אחת מהפונקציות (`process_data_A` ו-`process_data_B`), יש להחליף את הקריאות ל-`m1.lock(); m2.lock();` (או `m2.lock(); m1.lock();`) בקריאה אחת ל-`std::lock(m1, m2);` ולאחר מכן ליצור אובייקטי `std::unique_lock` עם `std::adopt_lock`.",
+        "ה. אין דרך למנוע קיפאון בקוד זה ללא שינוי מהותי בארכיטקטורה של התוכנית."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ד",
+      "explanation": "הקוד המקורי יכול לגרום למצב קיפאון (deadlock) בשל סדר נעילה שונה של המנעולים בשני התהליכים (`process_data_A` נועלת את `m1` ואז את `m2`, ואילו `process_data_B` נועלת את `m2` ואז את `m1`). אם כל תהליך מצליח לנעול את המנעול הראשון שלו לפני שהשני נועל את המנעול הראשון שלו, שניהם ימתינו זה לזה באופן אינסופי (מצב של 'החזק והמתן' ו'המתנה מעגלית').\n\nא. שינוי סדר הנעילה לשני התהליכים (למשל, תמיד `m1` ואז `m2`) אכן ימנע קיפאון, שכן הוא מבטל את תנאי ה'המתנה מעגלית'. זוהי דרך נכונה למנוע קיפאון, אך לא בהכרח ה'טובה ביותר' או ה'בטוחה ביותר' תוך שימוש ביכולות ספציפיות של ה-STL עבור מצב של נעילת מספר מנעולים במקביל, מכיוון שהיא דורשת הקפדה ידנית על הסדר בכל מקום בקוד.\nב. שימוש ב-`std::lock_guard` משפר את בטיחות הקוד מבחינת שחרור מנעולים אוטומטי (RAII) במקרה של יציאה מהבלוק או זריקת חריגה, אך הוא לא משנה את סדר הנעילה הפוטנציאלי לקיפאון אם הסדר נשאר שונה בין התהליכים.\nג. שימוש ב-`try_lock()` עם backoff הוא אכן אסטרטגיה למניעת קיפאון (על ידי ביטול תנאי ה'החזק והמתן' או 'אין כפייה'), אך היא דורשת מימוש ידני של לוגיקת הניסיון החוזר והיא מורכבת יותר מאשר הפתרון של `std::lock` עבור מצב זה של נעילת מספר מנעולים קבועים.\nד. הפונקציה `std::lock(m1, m2);` היא הפתרון המומלץ והבטוח ביותר בספריית ה-STL של C++ עבור נעילת מספר מנעולים במקביל. היא מבצעת את הנעילה של כל המנעולים באופן אטומי, כלומר, או שכל המנעולים ננעלים בהצלחה, או שאף אחד מהם לא ננעל (ובמקרה כזה היא מנסה שוב). בכך היא מונעת מצב שבו תהליך אחד מחזיק במנעול אחד וממתין למנעול אחר (hold and wait) בעוד תהליך אחר עושה את אותו הדבר בסדר הפוך. לאחר קריאה ל-`std::lock`, יש להשתמש ב-`std::unique_lock` עם `std::adopt_lock` כדי להעביר את הבעלות על המנעולים ל-RAII (Resource Acquisition Is Initialization) ולהבטיח שחרור נכון ואוטומטי של המנעולים בסיום הסקופ.\nה. טענה זו אינה נכונה; קיימות דרכים למנוע קיפאון בקוד זה, כפי שמודגם באפשרויות האחרות."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 20:02:02",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3136,
+      "output_tokens": 1141,
+      "total_tokens": 6043
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Deadlock",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה המשתמשת בתהליכונים (threads) ובמנעולים (mutexes). עיין בקוד וקבע האם ייתכן מצב של קיפאון (deadlock) במהלך ריצת התוכנית. נמק את תשובתך.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <unistd.h> // For sleep\n\npthread_mutex_t mutexA;\npthread_mutex_t mutexB;\n\nvoid* thread_func1(void* arg) {\n    printf(\"Thread 1: Trying to lock mutexA...\\n\");\n    pthread_mutex_lock(&mutexA);\n    printf(\"Thread 1: Locked mutexA. Trying to lock mutexB...\\n\");\n    sleep(1); // Simulate work or context switch opportunity\n    pthread_mutex_lock(&mutexB);\n    printf(\"Thread 1: Locked mutexB. Doing work...\\n\");\n    // Critical section\n    pthread_mutex_unlock(&mutexB);\n    printf(\"Thread 1: Unlocked mutexB.\\n\");\n    pthread_mutex_unlock(&mutexA);\n    printf(\"Thread 1: Unlocked mutexA. Exiting.\\n\");\n    return NULL;\n}\n\nvoid* thread_func2(void* arg) {\n    printf(\"Thread 2: Trying to lock mutexB...\\n\");\n    pthread_mutex_lock(&mutexB);\n    printf(\"Thread 2: Locked mutexB. Trying to lock mutexA...\\n\");\n    sleep(1); // Simulate work or context switch opportunity\n    pthread_mutex_lock(&mutexA);\n    printf(\"Thread 2: Locked mutexA. Doing work...\\n\");\n    // Critical section\n    pthread_mutex_unlock(&mutexA);\n    printf(\"Thread 2: Unlocked mutexA.\\n\");\n    pthread_mutex_unlock(&mutexB);\n    printf(\"Thread 2: Unlocked mutexB. Exiting.\\n\");\n    return NULL;\n}\n\nint main() {\n    pthread_t tid1, tid2;\n\n    pthread_mutex_init(&mutexA, NULL);\n    pthread_mutex_init(&mutexB, NULL);\n\n    printf(\"Main: Creating threads...\\n\");\n    pthread_create(&tid1, NULL, thread_func1, NULL);\n    pthread_create(&tid2, NULL, thread_func2, NULL);\n\n    pthread_join(tid1, NULL);\n    pthread_join(tid2, NULL);\n\n    pthread_mutex_destroy(&mutexA);\n    pthread_mutex_destroy(&mutexB);\n\n    printf(\"Main: All threads finished. Exiting.\\n\");\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "כן, ייתכן מצב של קיפאון (deadlock) בתוכנית זו.\n\nהקיפאון יכול להתרחש בתרחיש הבא:\n1.  תהליכון 1 (thread_func1) רוכש את `mutexA`.\n2.  תהליכון 2 (thread_func2) רוכש את `mutexB`.\n3.  כעת, תהליכון 1 מנסה לרכוש את `mutexB` (שכבר מוחזק על ידי תהליכון 2) ונחסם.\n4.  באותו זמן, תהליכון 2 מנסה לרכוש את `mutexA` (שכבר מוחזק על ידי תהליכון 1) ונחסם.\n\nבמצב זה, שני התהליכונים חסומים וכל אחד מהם ממתין למנעול שמוחזק על ידי השני. תנאי הקיפאון מתקיימים: החזקה והמתנה (Hold and Wait), מניעה הדדית (Mutual Exclusion), אין דריסה מוקדמת (No Preemption), והמתנה מעגלית (Circular Wait). הוספת ה-`sleep(1)` בתהליכונים מגדילה את הסיכוי להתרחשות מצב זה על ידי יצירת חלון זמן שבו הסדר הבעייתי יכול להתקיים, אך הוא אפשרי גם בלעדיו בשל חוסר סדר מובטח ברכישת המנעולים."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

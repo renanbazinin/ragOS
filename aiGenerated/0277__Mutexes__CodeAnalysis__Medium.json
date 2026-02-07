@@ -1,0 +1,63 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 20:27:32",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3648,
+      "output_tokens": 2607,
+      "total_tokens": 11342
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Mutexes",
+      "Threads",
+      "Concurrency",
+      "Shared Memory"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה המשתמשת ב-pthread וב-mutex:\nמטרת התוכנית היא להגדיל מונה גלובלי (shared_counter) על ידי מספר תהליכונים (threads) ולהדפיס את מצבו. ענו על השאלות הבאות בהתבסס על הקוד הנתון:",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <unistd.h> // For usleep\n\n#define NUM_THREADS 5\n#define NUM_INCREMENTS_PER_THREAD 2\n\nint shared_counter = 0;\npthread_mutex_t counter_mutex;\n\nvoid *thread_func(void *arg) {\n    int i;\n    int thread_id = *(int*)arg;\n    int local_val_at_increment;\n\n    for (i = 0; i < NUM_INCREMENTS_PER_THREAD; i++) {\n        pthread_mutex_lock(&counter_mutex);\n        // Critical section\n        shared_counter++;\n        local_val_at_increment = shared_counter; // Capture value inside critical section\n        pthread_mutex_unlock(&counter_mutex);\n\n        // This print is outside the critical section\n        printf(\"Thread %d: Counter incremented to %d (shared: %d)\\n\",\n               thread_id, local_val_at_increment, shared_counter);\n        usleep(1000); // Simulate some work/delay\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n    int thread_ids[NUM_THREADS];\n\n    pthread_mutex_init(&counter_mutex, NULL);\n\n    for (int i = 0; i < NUM_THREADS; i++) {\n        thread_ids[i] = i + 1;\n        pthread_create(&threads[i], NULL, thread_func, &thread_ids[i]);\n    }\n\n    for (int i = 0; i < NUM_THREADS; i++) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final shared_counter value: %d\\n\", shared_counter);\n\n    pthread_mutex_destroy(&counter_mutex);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "מה יהיה הערך הסופי של המשתנה `shared_counter` בסיום ריצת התוכנית? נמק.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "תארו פלט אפשרי אחד של התוכנית. הסבירו מדוע הערך המודפס תחת \"shared: %d\" בשורה `printf(\"Thread %d: Counter incremented to %d (shared: %d)\\n\", ...)` עשוי להיות שונה מהערך המודפס תחת \"Counter incremented to %d\" באותה שורה.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.3",
+        "text": "האם ייתכנו תנאי מרוץ (race conditions) בתוכנית זו? אם כן, ציינו היכן ומדוע. אם לא, הסבירו מדוע.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.4",
+        "text": "מה יקרה אם נזיז את שורת ה-`printf` (שורה 20 בקוד המקורי) אל תוך ה-critical section, מיד לאחר שורת `local_val_at_increment = shared_counter;` (שורה 17 בקוד המקורי)? תארו פלט אפשרי במקרה זה והסבירו את ההבדל מהמקרה המקורי.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.  הערך הסופי של `shared_counter` יהיה 10.\n    ישנם NUM_THREADS (5) תהליכונים, וכל תהליכון מבצע NUM_INCREMENTS_PER_THREAD (2) הגדלות. כל הגדלה של `shared_counter` מוגנת על ידי mutex (`counter_mutex`), מה שמבטיח שכל הגדלה מתבצעת באופן אטומי וללא תנאי מרוץ. לכן, כל 5*2=10 ההגדלות יבוצעו בהצלחה, והמונה יגיע לערך 10.\n\n2.  פלט אפשרי אחד יכול להיות: (הסדר של שורות ה-printf יכול להשתנות)\n    ```\n    Thread 1: Counter incremented to 1 (shared: 1)\n    Thread 2: Counter incremented to 2 (shared: 2)\n    Thread 3: Counter incremented to 3 (shared: 3)\n    Thread 4: Counter incremented to 4 (shared: 4)\n    Thread 5: Counter incremented to 5 (shared: 5)\n    Thread 1: Counter incremented to 6 (shared: 6)\n    Thread 2: Counter incremented to 7 (shared: 7)\n    Thread 3: Counter incremented to 8 (shared: 8)\n    Thread 4: Counter incremented to 9 (shared: 9)\n    Thread 5: Counter incremented to 10 (shared: 10)\n    Final shared_counter value: 10\n    ```\n    \n    עם זאת, ייתכן גם פלט שבו הערך של `shared_counter` המודפס תחת \"shared: %d\" יהיה גבוה יותר מהערך של `local_val_at_increment`. לדוגמה:\n    ```\n    Thread 1: Counter incremented to 1 (shared: 3)\n    Thread 2: Counter incremented to 2 (shared: 3)\n    Thread 3: Counter incremented to 3 (shared: 3)\n    Thread 4: Counter incremented to 4 (shared: 4)\n    Thread 5: Counter incremented to 5 (shared: 5)\n    Thread 1: Counter incremented to 6 (shared: 7)\n    Thread 2: Counter incremented to 7 (shared: 7)\n    Thread 3: Counter incremented to 8 (shared: 8)\n    Thread 4: Counter incremented to 9 (shared: 9)\n    Thread 5: Counter incremented to 10 (shared: 10)\n    Final shared_counter value: 10\n    ```\n    ההבדל נובע מכך ש-`local_val_at_increment` הוא משתנה מקומי לכל קריאה של הלולאה בתהליכון, והוא מקבל את ערכו של `shared_counter` *בזמן* ההגדלה, כאשר ה-mutex נעול. לעומת זאת, `shared_counter` (המודפס כ-\"shared: %d\") הוא משתנה גלובלי, והגישה אליו בשורת ה-`printf` מתבצעת *לאחר* שה-mutex שוחרר. בשלב זה, תהליכונים אחרים יכלו כבר לנעול את ה-mutex, להגדיל את `shared_counter`, ולשחרר אותו שוב, כך שהערך הגלובלי יכול להיות גבוה יותר מזה שנקלט במשתנה המקומי של התהליכון הנוכחי.\n\n3.  לא, לא ייתכנו תנאי מרוץ על המשתנה `shared_counter` בכל הנוגע לפעולת ההגדלה (`shared_counter++`). פעולה זו מוגנת באופן מלא על ידי ה-`counter_mutex`. כל תהליכון חייב לנעול את ה-mutex לפני שהוא ניגש ל-`shared_counter` כדי להגדיל אותו, ומשחרר אותו רק לאחר מכן. זה מבטיח אקסקלוסיביות הדדית (mutual exclusion) עבור הגישה למונה. עם זאת, יש לזכור שפעולת ה-`printf` עצמה אינה מוגנת על ידי ה-mutex, מה שאומר ששורות הפלט מתהליכונים שונים יכולות להתערבב באופן לא צפוי. זו אינה 'תנאי מרוץ' במובן של שינוי לא נכון של נתונים משותפים, אלא 'מרוץ' על משאב הפלט (stdout).\n\n4.  אם נזיז את שורת ה-`printf` אל תוך ה-critical section, מיד לאחר שורת `local_val_at_increment = shared_counter;`, הפלט ישתנה באופן הבא:\n    *   הפלט יהיה תמיד עקבי: הערך המודפס תחת \"Counter incremented to %d\" והערך תחת \"shared: %d\" יהיו תמיד זהים, ויישקפו את הערך של `shared_counter` מיד לאחר הגדלתו על ידי אותו תהליכון.\n    *   שורות הפלט של התהליכונים השונים לא יתערבבו ביניהן. כל שורת `printf` תבוצע במלואה כאשר ה-mutex נעול, מה שיבטיח שאף תהליכון אחר לא יפריע להדפסה או ישנה את `shared_counter` באמצע ההדפסה של תהליכון אחר. הפלט יהיה סדרה של הגדלות, כאשר כל הגדלה וההדפסה שלה מהוות יחידה אטומית.\n    *   הסדר הכרונולוגי של ההגדלות וההדפסה ישקף את סדר רכישת ה-mutex על ידי התהליכונים. לדוגמה:\n        ```\n        Thread 1: Counter incremented to 1 (shared: 1)\n        Thread 2: Counter incremented to 2 (shared: 2)\n        Thread 1: Counter incremented to 3 (shared: 3)\n        Thread 3: Counter incremented to 4 (shared: 4)\n        ...\n        ```\n    ההבדל המרכזי הוא שההדפסה הופכת לחלק מהפעולה האטומית, ובכך מבטיחה עקביות בין הערך המקומי שנקלט לערך הגלובלי בזמן ההדפסה, ומונעת ערבוב של פלט תהליכונים שונים."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 20:19:39",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3905,
+      "output_tokens": 2468,
+      "total_tokens": 10117
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Mutexes",
+      "Synchronization",
+      "Threads",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "במערכות הפעלה, מיוטקס (mutex) משמש להבטחת מניעה הדדית לקטע קריטי. עם זאת, מיוטקס רגיל עלול לגרום לקיפאון (deadlock) אם חוט שכבר מחזיק במיוטקס ינסה לרכוש אותו שוב. כדי לפתור בעיה זו, קיים מושג של 'מיוטקס רה-כניסתי' (reentrant mutex), המאפשר לחוט שרכש את המיוטקס לרכוש אותו שוב מספר פעמים מבלי להיחסם, כל עוד הוא גם ישחרר אותו את אותו מספר פעמים.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "הגדירו במדויק את התכונות הנדרשות ממיוטקס רה-כניסתי, בדומה להגדרת תכונות למנעול קוראים-כותבים. התייחסו לנקודות הבאות:\n1. מניעה הדדית (Mutual Exclusion) בין חוטים שונים.\n2. יכולת כניסה חוזרת (Reentrancy) לחוט המחזיק במיוטקס.\n3. שחרור נכון של המיוטקס.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "ממשו מיוטקס רה-כניסתי באמצעות ספריות Pthreads (mutexes ו-condition variables). עליכם להגדיר את מבנה הנתונים של המיוטקס הרה-כניסתי ולממש את הפעולות `init`, `destroy`, `lock` ו-`unlock`. שימו לב שאין להשתמש בפונקציות Pthreads ספציפיות למיוטקס רה-כניסתי (כגון `PTHREAD_MUTEX_RECURSIVE`), אלא לממש את הלוגיקה בעצמכם על בסיס מיוטקסים רגילים ומשתני תנאי.",
+        "code_snippet": " #include <pthread.h>\n #include <stdio.h> // For pthread_self()\n #include <stdlib.h> // For malloc/free\n\n typedef struct {\n     pthread_mutex_t internal_mutex;\n     pthread_cond_t cond;\n     pthread_t owner;\n     int recursion_count;\n } ReentrantMutex;\n\n void reentrant_mutex_init(ReentrantMutex *rm) {\n     // TODO: Implement\n }\n\n void reentrant_mutex_destroy(ReentrantMutex *rm) {\n     // TODO: Implement\n }\n\n void reentrant_mutex_lock(ReentrantMutex *rm) {\n     // TODO: Implement\n }\n\n void reentrant_mutex_unlock(ReentrantMutex *rm) {\n     // TODO: Implement\n }",
+        "options": null
+      },
+      {
+        "id": "1.3",
+        "text": "הסבירו בקצרה כיצד המימוש שלכם בסעיף הקודם מבטיח את התכונות שהגדרתם בסעיף 1.1.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.1: הגדרת תכונות למיוטקס רה-כניסתי:\n1.  **מניעה הדדית (Mutual Exclusion):** בכל רגע נתון, רק חוט אחד יכול להיות ה\"בעלים\" של המיוטקס הרה-כניסתי. חוטים אחרים שינסו לרכוש אותו ייחסמו עד שהבעלים הנוכחי ישחרר אותו לחלוטין (כלומר, מונה הכניסות יגיע ל-0).\n2.  **יכולת כניסה חוזרת (Reentrancy):** חוט שכבר רכש את המיוטקס (הוא הבעלים הנוכחי) יכול לבצע קריאות חוזרות ל-`lock` מבלי להיחסם. כל קריאה כזו תגדיל את מונה הכניסות.\n3.  **שחרור נכון (Proper Release):** חוט יכול לשחרר את המיוטקס רק אם הוא הבעלים הנוכחי. כל קריאה ל-`unlock` תפחית את מונה הכניסות. רק כאשר מונה הכניסות מגיע ל-0, המיוטקס נחשב משוחרר לחלוטין, וחוט אחר יכול לרכוש אותו.\n\n1.2: מימוש מיוטקס רה-כניסתי:\n```c\n #include <pthread.h>\n #include <stdio.h> // For pthread_self(), fprintf\n #include <stdlib.h> // For malloc/free\n\n typedef struct {\n     pthread_mutex_t internal_mutex;\n     pthread_cond_t cond;\n     pthread_t owner;\n     int recursion_count;\n } ReentrantMutex;\n\n void reentrant_mutex_init(ReentrantMutex *rm) {\n     pthread_mutex_init(&rm->internal_mutex, NULL);\n     pthread_cond_init(&rm->cond, NULL);\n     rm->owner = 0; // No owner initially (pthread_self() returns non-zero)\n     rm->recursion_count = 0;\n }\n\n void reentrant_mutex_destroy(ReentrantMutex *rm) {\n     // It's good practice to ensure no one holds the lock when destroying.\n     // In a robust system, you might add checks or assert recursion_count == 0.\n     pthread_mutex_destroy(&rm->internal_mutex);\n     pthread_cond_destroy(&rm->cond);\n     rm->owner = 0;\n     rm->recursion_count = 0;\n }\n\n void reentrant_mutex_lock(ReentrantMutex *rm) {\n     pthread_t current_thread = pthread_self();\n\n     pthread_mutex_lock(&rm->internal_mutex);\n\n     if (rm->owner == current_thread) {\n         // Current thread already owns the mutex, just increment count\n         rm->recursion_count++;\n     } else {\n         // Mutex is owned by another thread or unowned.\n         // Wait until it's unowned (recursion_count == 0).\n         while (rm->recursion_count != 0) {\n             pthread_cond_wait(&rm->cond, &rm->internal_mutex);\n         }\n         // Now it's unowned, this thread becomes the owner\n         rm->owner = current_thread;\n         rm->recursion_count = 1;\n     }\n     pthread_mutex_unlock(&rm->internal_mutex);\n }\n\n void reentrant_mutex_unlock(ReentrantMutex *rm) {\n     pthread_t current_thread = pthread_self();\n\n     pthread_mutex_lock(&rm->internal_mutex);\n\n     if (rm->owner != current_thread) {\n         // Error: Thread trying to unlock does not own the mutex.\n         // In a robust system, this would be an assertion failure or return an error code.\n         fprintf(stderr, \"Error: Thread %lu trying to unlock a mutex it doesn't own!\\n\", (unsigned long)current_thread);\n         pthread_mutex_unlock(&rm->internal_mutex);\n         return;\n     }\n\n     rm->recursion_count--;\n\n     if (rm->recursion_count == 0) {\n         // Mutex is now fully released. Reset owner and signal waiting threads.\n         rm->owner = 0; // No owner\n         pthread_cond_broadcast(&rm->cond); // Wake up all waiting threads\n     }\n     pthread_mutex_unlock(&rm->internal_mutex);\n }\n```\n\n1.3: הסבר על עמידה בתכונות:\n1.  **מניעה הדדית:** המימוש משתמש ב-`internal_mutex` כדי להגן על המשתנים הפנימיים `owner` ו-`recursion_count`. רק חוט אחד יכול לשנות או לבדוק את המשתנים הללו בו זמנית. בנוסף, חוט יכול להפוך לבעלים של המיוטקס (`rm->owner = current_thread`) רק כאשר `rm->recursion_count` הוא 0, מה שמבטיח שאין בעלים קודם. כלומר, רק חוט אחד יכול להיות הבעלים של המיוטקס בכל רגע נתון. חוטים אחרים שינסו לרכוש את המיוטקס כשהוא בבעלות חוט אחר (`rm->recursion_count != 0`) ייחסמו על ידי `pthread_cond_wait` עד שהבעלים הנוכחי ישחרר אותו לחלוטין.\n2.  **יכולת כניסה חוזרת:** כאשר חוט קורא ל-`reentrant_mutex_lock` ובודק ש-`rm->owner == current_thread`, הוא מגלה שהוא כבר הבעלים. במקרה זה, במקום להיחסם, הוא פשוט מגדיל את `rm->recursion_count` וממשיך. זה מאפשר לחוט הבעלים להיכנס לקטע הקריטי מספר פעמים.\n3.  **שחרור נכון:** חוט יכול לקרוא ל-`reentrant_mutex_unlock` רק אם `rm->owner == current_thread`. אם חוט אחר מנסה לשחרר, המימוש מזהה זאת (עם הודעת שגיאה) ומונע את השחרור הלא חוקי. כל קריאה ל-`unlock` מקטינה את `rm->recursion_count`. רק כאשר `rm->recursion_count` מגיע ל-0, המיוטקס משוחרר לחלוטין (ה-`owner` מאופס), ו-`pthread_cond_broadcast` נקרא כדי להעיר חוטים ממתינים, המאפשר לחוט חדש לרכוש את המיוטקס."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

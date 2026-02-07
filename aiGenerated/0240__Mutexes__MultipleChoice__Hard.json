@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 20:12:14",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 970,
+      "output_tokens": 874,
+      "total_tokens": 4581
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Mutexes",
+      "Deadlock",
+      "Concurrency",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתון קוד C++ הבא המשתמש ב-std::mutex וב-std::thread. מהי הטענה הנכונה ביותר לגבי הרצת התוכנית?",
+      "code_snippet": "#include <iostream>\n#include <thread>\n#include <mutex>\n#include <chrono>\n\nstd::mutex mtx1;\nstd::mutex mtx2;\n\nvoid thread_func_A() {\n    mtx1.lock();\n    std::this_thread::sleep_for(std::chrono::milliseconds(10)); // Simulate work/delay\n    mtx2.lock();\n    std::cout << \"Thread A acquired both locks\\n\";\n    mtx2.unlock();\n    mtx1.unlock();\n}\n\nvoid thread_func_B() {\n    mtx2.lock();\n    std::this_thread::sleep_for(std::chrono::milliseconds(10)); // Simulate work/delay\n    mtx1.lock();\n    std::cout << \"Thread B acquired both locks\\n\";\n    mtx1.unlock();\n    mtx2.unlock();\n}\n\nint main() {\n    std::thread t1(thread_func_A);\n    std::thread t2(thread_func_B);\n    t1.join();\n    t2.join();\n    return 0;\n}",
+      "options": [
+        "א. התוכנית תמיד תרוץ בהצלחה ותדפיס את שתי ההודעות.",
+        "ב. התוכנית תמיד תיכנס למצב של קיפאון (deadlock).",
+        "ג. התוכנית עשויה להיכנס למצב של קיפאון (deadlock), אך אינה מובטחת לעשות זאת.",
+        "ד. התוכנית עלולה לגרום לתנאי מרוץ (race condition) עקב שימוש לא נכון במנעולים.",
+        "ה. התוכנית תרוץ בהצלחה, אך סדר ההדפסה אינו מובטח."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "הקוד מדגים תרחיש קלאסי של קיפאון (deadlock). שני התהליכונים (threads) מנסים לתפוס שני מנעולים (mutexes) בסדר הפוך. תהליכון A תופס את mtx1 ואז מנסה לתפוס את mtx2. תהליכון B תופס את mtx2 ואז מנסה לתפוס את mtx1. אם מתזמן המערכת (scheduler) יאפשר לתהליכון A לתפוס את mtx1 ולתהליכון B לתפוס את mtx2 בערך באותו זמן, לפני שאחד מהם מספיק לתפוס את המנעול השני, שניהם ייחסמו ויחכו זה לזה באופן אינסופי. עם זאת, קיפאון אינו מובטח. ייתכן שאחד התהליכונים יספיק לתפוס את שני המנעולים ולשחרר אותם לפני שהתהליכון השני יגיע לנקודת התנגשות, ובמקרה כזה התוכנית תרוץ בהצלחה. לכן, התוכנית עשויה להיכנס לקיפאון, אך זה לא מובטח."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

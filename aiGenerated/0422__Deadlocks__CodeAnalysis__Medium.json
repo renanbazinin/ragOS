@@ -1,0 +1,64 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Deadlocks",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 21:26:29",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2852,
+      "output_tokens": 1526,
+      "total_tokens": 8104
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Deadlocks",
+      "Concurrency",
+      "Synchronization",
+      "Mutexes"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא המשתמש במנעולים (mutexes) של pthreads. נתח את הקוד וענה על השאלות:",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <unistd.h> // For sleep\n\npthread_mutex_t mutex1;\npthread_mutex_t mutex2;\n\nvoid* thread_func1(void* arg) {\n    printf(\"Thread 1: Attempting to lock mutex1...\\n\");\n    pthread_mutex_lock(&mutex1);\n    printf(\"Thread 1: Locked mutex1. Attempting to lock mutex2...\\n\");\n    sleep(1); // Introduce a delay to increase likelihood of deadlock\n    pthread_mutex_lock(&mutex2);\n    printf(\"Thread 1: Locked mutex2. Critical section...\\n\");\n    // Do some work\n    pthread_mutex_unlock(&mutex2);\n    printf(\"Thread 1: Unlocked mutex2.\\n\");\n    pthread_mutex_unlock(&mutex1);\n    printf(\"Thread 1: Unlocked mutex1. Exiting.\\n\");\n    return NULL;\n}\n\nvoid* thread_func2(void* arg) {\n    printf(\"Thread 2: Attempting to lock mutex2...\\n\");\n    pthread_mutex_lock(&mutex2);\n    printf(\"Thread 2: Locked mutex2. Attempting to lock mutex1...\\n\");\n    sleep(1); // Introduce a delay to increase likelihood of deadlock\n    pthread_mutex_lock(&mutex1);\n    printf(\"Thread 2: Locked mutex1. Critical section...\\n\");\n    // Do some work\n    pthread_mutex_unlock(&mutex1);\n    printf(\"Thread 2: Unlocked mutex1.\\n\");\n    pthread_mutex_unlock(&mutex2);\n    printf(\"Thread 2: Unlocked mutex2. Exiting.\\n\");\n    return NULL;\n}\n\nint main() {\n    pthread_t tid1, tid2;\n\n    pthread_mutex_init(&mutex1, NULL);\n    pthread_mutex_init(&mutex2, NULL);\n\n    printf(\"Main: Creating threads...\\n\");\n    pthread_create(&tid1, NULL, thread_func1, NULL);\n    pthread_create(&tid2, NULL, thread_func2, NULL);\n\n    pthread_join(tid1, NULL);\n    pthread_join(tid2, NULL);\n\n    pthread_mutex_destroy(&mutex1);\n    pthread_mutex_destroy(&mutex2);\n\n    printf(\"Main: All threads finished. Exiting.\\n\");\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "a",
+        "text": "האם עלול להיווצר קיפאון (deadlock) בתוכנית זו?",
+        "code_snippet": null,
+        "options": [
+          "כן",
+          "לא"
+        ],
+        "solution": {
+          "is_present_in_file": true,
+          "correct_option": "כן",
+          "explanation": "קיפאון אכן עלול להיווצר. המצב הקלאסי של קיפאון מתרחש כאשר שני חוטים או יותר מנסים לתפוס משאבים (במקרה זה, מנעולים) בסדר הפוך. חוט 1 תופס את `mutex1` ואז מנסה לתפוס את `mutex2`. חוט 2 תופס את `mutex2` ואז מנסה לתפוס את `mutex1`. אם חוט 1 תופס את `mutex1` וחוט 2 תופס את `mutex2` בערך באותו זמן, ואז כל אחד מנסה לתפוס את המנעול השני, שניהם יחסמו וייכנסו למצב של קיפאון (המתנה מעגלית)."
+        }
+      },
+      {
+        "id": "b",
+        "text": "כיצד ניתן למנוע קיפאון במקרה זה?",
+        "code_snippet": null,
+        "options": null,
+        "solution": {
+          "is_present_in_file": true,
+          "correct_option": null,
+          "explanation": "ניתן למנוע קיפאון על ידי אכיפת סדר תפיסת משאבים עקבי (Resource Ordering). כלומר, כל החוטים צריכים לתפוס את המנעולים באותו סדר. לדוגמה, שניהם יתפסו תמיד את `mutex1` קודם ואז את `mutex2`. זה מונע את התנאי של המתנה מעגלית (Circular Wait), שהוא הגורם העיקרי לקיפאון במקרה זה. דרכים נוספות למניעה כוללות: \n1.  **החזקה והמתנה (Hold and Wait):** ניתן למנוע על ידי דרישה מחוט לתפוס את כל המשאבים הדרושים לו בבת אחת, או לשחרר את כל המשאבים שהוא מחזיק לפני שהוא מנסה לתפוס משאב נוסף. במקרה זה, חוט יכול לנסות לתפוס את שני המנעולים באופן אטומי (לדוגמה, באמצעות `pthread_mutex_trylock` עם לוגיקת חזרה ושחרור אם לא הצליח לתפוס את שניהם). \n2.  **אי קדימות (No Preemption):** ניתן להשתמש בשיטות בהן ניתן להפקיע משאב מחוט שמחזיק בו, אך זה פחות נפוץ וקשה ליישום עם מנעולים סטנדרטיים. \n3.  **המתנה מעגלית (Circular Wait):** זוהי הבעיה העיקרית כאן, והיא נמנעת ביעילות על ידי אכיפת סדר תפיסת משאבים."
+        }
+      }
+    ],
+    "points": 15,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": null
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

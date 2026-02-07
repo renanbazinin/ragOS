@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 20:08:44",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 961,
+      "output_tokens": 536,
+      "total_tokens": 2426
+    }
+  },
+  "question": {
+    "id": 6,
+    "type": "MultipleChoice",
+    "topic": [
+      "Synchronization",
+      "Mutexes",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "מה יקרה אם תהליך ינסה לנעול מנעול (mutex) לא-רקורסיבי שכבר ננעל על ידו?",
+      "code_snippet": "pthread_mutex_t my_mutex;\n\n// Initialize mutex (e.g., PTHREAD_MUTEX_NORMAL)\npthread_mutex_init(&my_mutex, NULL);\n\n// Thread A acquires the mutex\npthread_mutex_lock(&my_mutex);\n\n// Thread A attempts to acquire the same mutex again\npthread_mutex_lock(&my_mutex); // What happens here?",
+      "options": [
+        "התהליך יכנס למצב קיפאון (deadlock) עם עצמו.",
+        "פונקציית pthread_mutex_lock תחזיר שגיאה (error code).",
+        "המנעול יינעל בהצלחה שוב, והתהליך ימשיך לרוץ.",
+        "מערכת ההפעלה תסיים את ריצת התהליך."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "התהליך יכנס למצב קיפאון (deadlock) עם עצמו.",
+      "explanation": "כאשר תהליך מנסה לנעול מחדש מנעול לא-רקורסיבי (כמו PTHREAD_MUTEX_NORMAL ב-pthreads) שהוא כבר מחזיק בו, המערכת תגרום לתהליך להיחסם בניסיון לרכוש את המנעול. מכיוון שהתהליך עצמו מחזיק במנעול, הוא לעולם לא ישחרר אותו (כי הוא חסום), וכתוצאה מכך הוא יכנס למצב קיפאון עצמי (self-deadlock). מנעולים רקורסיביים (כמו PTHREAD_MUTEX_RECURSIVE) מתוכננים להתמודד עם מצב זה על ידי מעקב אחר מספר הנעילות על ידי אותו תהליך."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

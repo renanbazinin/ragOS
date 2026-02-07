@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Semaphores",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 20:41:21",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 970,
+      "output_tokens": 867,
+      "total_tokens": 4329
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "Semaphores",
+      "Synchronization",
+      "Mutual Exclusion",
+      "Race Conditions"
+    ],
+    "content": {
+      "text": "נתון קטע קוד בשפת C המשתמש בסמפור (semaphore) מסוג `sem_t` כדי להגן על אזור קריטי (critical section). מטרת הקוד היא להבטיח הדדיות (mutual exclusion) על המשתנה `shared_data`. הסמפור מאותחל בערך התחלתי של 2. איזו טענה מהבאות נכונה בנוגע להתנהגות הקוד?",
+      "code_snippet": "#include <semaphore.h>\n#include <pthread.h>\n#include <stdio.h>\n\nsem_t mutex;\nint shared_data = 0;\n\nvoid* worker(void* arg) {\n    // Simulate some work\n    // ...\n    sem_wait(&mutex); // P operation\n    \n    // Critical Section\n    shared_data++;\n    printf(\"Thread %ld: shared_data = %d\\n\", (long)pthread_self(), shared_data);\n    \n    sem_post(&mutex); // V operation\n    // Simulate more work\n    // ...\n    return NULL;\n}\n\nint main() {\n    // Initialization of the semaphore\n    sem_init(&mutex, 0, 2); // !!! The subtle point is here !!!\n    \n    // Create multiple threads\n    pthread_t t1, t2, t3;\n    pthread_create(&t1, NULL, worker, NULL);\n    pthread_create(&t2, NULL, worker, NULL);\n    pthread_create(&t3, NULL, worker, NULL);\n    \n    pthread_join(t1, NULL);\n    pthread_join(t2, NULL);\n    pthread_join(t3, NULL);\n    \n    sem_destroy(&mutex);\n    printf(\"Final shared_data: %d\\n\", shared_data);\n    return 0;\n}",
+      "options": [
+        "א. המנגנון יעבוד כשורה ויבטיח הדדיות (mutual exclusion).",
+        "ב. המנגנון יוביל למצב של קיפאון (deadlock).",
+        "ג. המנגנון יאפשר כניסה בו-זמנית של עד שני תהליכים לאזור הקריטי, ובכך יפר את הדדיות (mutual exclusion).",
+        "ד. המנגנון יוביל להרעבה (starvation) של תהליכים."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "סמפור בינארי (או mutex) שמטרתו להבטיח הדדיות (mutual exclusion) חייב להיות מאותחל בערך 1. ערך זה מבטיח שרק תהליך אחד יוכל לבצע `sem_wait` בהצלחה ולהיכנס לאזור הקריטי בכל רגע נתון. כאשר הסמפור מאותחל בערך 2, המשמעות היא ששני תהליכים יכולים לבצע `sem_wait` בהצלחה ולהיכנס לאזור הקריטי בו-זמנית. הדבר מפר את עקרון ההדדיות ועלול להוביל לתנאי מרוץ (race condition) על המשתנה `shared_data` או כל משאב משותף אחר באזור הקריטי."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

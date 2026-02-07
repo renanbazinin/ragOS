@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 19:44:14",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1118,
+      "output_tokens": 809,
+      "total_tokens": 4287
+    }
+  },
+  "question": {
+    "id": 3,
+    "type": "MultipleChoice",
+    "topic": [
+      "Synchronization",
+      "Race Conditions",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C++ המשתמשת בחוטים (threads) לשם עדכון משתנה גלובלי משותף:\n```cpp\n#include <iostream>\n#include <thread>\n#include <vector>\n\nvolatile int shared_counter = 0; // משתנה משותף\n\nvoid increment_function() {\n    for (int i = 0; i < 100000; ++i) {\n        shared_counter++;\n    }\n}\n\nint main() {\n    std::vector<std::thread> threads;\n    for (int i = 0; i < 2; ++i) {\n        threads.emplace_back(increment_function);\n    }\n\n    for (std::thread& t : threads) {\n        t.join();\n    }\n\n    std::cout << \"Final counter value: \" << shared_counter << std::endl;\n    return 0;\n}\n```\nכאשר מריצים את הקוד לעיל, מהי הטענה הנכונה לגבי ערכו הסופי של `shared_counter`?",
+      "code_snippet": null,
+      "options": [
+        "א. הערך הסופי תמיד יהיה 200000.",
+        "ב. הערך הסופי תמיד יהיה 0.",
+        "ג. הערך הסופי תמיד יהיה קטן מ-200000.",
+        "ד. הערך הסופי אינו מובטח, והוא יכול להיות קטן מ-200000 עקב תנאי מירוץ (race condition).",
+        "ה. הערך הסופי אינו מובטח, והוא יכול להיות גדול מ-200000 עקב תנאי מירוץ (race condition)."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ד",
+      "explanation": "הקוד מכיל תנאי מירוץ (race condition) על המשתנה המשותף `shared_counter`. פעולת ה-`++` אינה אטומית, אלא מורכבת מכמה שלבים (קריאת הערך הנוכחי, הגדלת הערך, וכתיבת הערך החדש). כאשר שני חוטים מנסים לעדכן את המונה במקביל ללא מנגנון סנכרון (כמו mutex), ייתכן שחוט אחד יקרא את הערך, חוט אחר יקרא את אותו הערך ויעדכן אותו, ואז החוט הראשון יכתוב את הערך המיושן שלו, ובכך 'ידרוס' את העדכון של החוט השני. כתוצאה מכך, חלק מהעדכונים עלולים ללכת לאיבוד, והערך הסופי יהיה קטן מ-200000. הערך אינו מובטח ומשתנה בין הרצות שונות. הוא לא יכול להיות גדול מ-200000, שכן כל פעולה רק אמורה להגדיל את המונה באחד."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

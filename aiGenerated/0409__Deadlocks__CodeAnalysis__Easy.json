@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Deadlocks",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 21:22:34",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3900,
+      "output_tokens": 1857,
+      "total_tokens": 8230
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Deadlocks",
+      "Concurrency",
+      "Mutexes"
+    ],
+    "content": {
+      "text": "נתון קטע קוד בשפת C המשתמש בספריות ת'רדים ומנעולים (pthread). שני חוטים (thread_A ו-thread_B) מנסים לגשת למשאבים המוגנים על ידי מנעולים (mutex_X ו-mutex_Y). עיין בקוד המצורף וענה על השאלה הבאה:\n\nהאם קטע קוד זה יכול להוביל למצב של קיפאון (deadlock)? אם כן, הסבר מדוע וכיצד ניתן למנוע אותו. אם לא, הסבר מדוע.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <unistd.h> // For sleep\n\npthread_mutex_t mutex_X;\npthread_mutex_t mutex_Y;\n\nvoid* thread_A_func(void* arg) {\n    printf(\"Thread A: Attempting to lock mutex_X...\\n\");\n    pthread_mutex_lock(&mutex_X);\n    printf(\"Thread A: Locked mutex_X. Sleeping...\\n\");\n    sleep(1); // Simulate work or delay\n\n    printf(\"Thread A: Attempting to lock mutex_Y...\\n\");\n    pthread_mutex_lock(&mutex_Y);\n    printf(\"Thread A: Locked mutex_Y. Critical section A...\\n\");\n\n    // Critical section A\n    printf(\"Thread A: Releasing mutex_Y...\\n\");\n    pthread_mutex_unlock(&mutex_Y);\n    printf(\"Thread A: Releasing mutex_X...\\n\");\n    pthread_mutex_unlock(&mutex_X);\n    printf(\"Thread A: Exiting.\\n\");\n    return NULL;\n}\n\nvoid* thread_B_func(void* arg) {\n    printf(\"Thread B: Attempting to lock mutex_Y...\\n\");\n    pthread_mutex_lock(&mutex_Y);\n    printf(\"Thread B: Locked mutex_Y. Sleeping...\\n\");\n    sleep(1); // Simulate work or delay\n\n    printf(\"Thread B: Attempting to lock mutex_X...\\n\");\n    pthread_mutex_lock(&mutex_X);\n    printf(\"Thread B: Locked mutex_X. Critical section B...\\n\");\n\n    // Critical section B\n    printf(\"Thread B: Releasing mutex_X...\\n\");\n    pthread_mutex_unlock(&mutex_X);\n    printf(\"Thread B: Releasing mutex_Y...\\n\");\n    pthread_mutex_unlock(&mutex_Y);\n    printf(\"Thread B: Exiting.\\n\");\n    return NULL;\n}\n\nint main() {\n    pthread_t thread_A, thread_B;\n\n    pthread_mutex_init(&mutex_X, NULL);\n    pthread_mutex_init(&mutex_Y, NULL);\n\n    pthread_create(&thread_A, NULL, thread_A_func, NULL);\n    pthread_create(&thread_B, NULL, thread_B_func, NULL);\n\n    pthread_join(thread_A, NULL);\n    pthread_join(thread_B, NULL);\n\n    pthread_mutex_destroy(&mutex_X);\n    pthread_mutex_destroy(&mutex_Y);\n\n    printf(\"Main: Program finished.\\n\");\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "כן, קטע קוד זה יכול להוביל למצב של קיפאון (deadlock). קיפאון הוא מצב שבו שני חוטים או יותר ממתינים זה לזה באופן בלתי הפיך למשאבים שהם צריכים כדי להמשיך.\n\nבמקרה זה, התנאים לקיפאון מתקיימים:\n1.  **מניעה הדדית (Mutual Exclusion)**: המנעולים (mutex_X, mutex_Y) מבטיחים שרק חוט אחד יכול להחזיק במשאב (המנעול) בכל רגע נתון.\n2.  **החזקה והמתנה (Hold and Wait)**: חוט A מחזיק במנעול X וממתין למנעול Y. במקביל, חוט B מחזיק במנעול Y וממתין למנעול X.\n3.  **אין שחרור מוקדם (No Preemption)**: אף חוט לא יכול לקחת בכוח מנעול מחוט אחר. המנעולים משוחררים רק על ידי החוט שתפס אותם.\n4.  **המתנה מעגלית (Circular Wait)**: קיים מעגל המתנה: חוט A ממתין למנעול Y שמוחזק על ידי חוט B, וחוט B ממתין למנעול X שמוחזק על ידי חוט A.\n\n**תרחיש לדוגמה לקיפאון:**\n1.  חוט A נועל את `mutex_X`.\n2.  חוט B נועל את `mutex_Y`.\n3.  חוט A מנסה לנעול את `mutex_Y` אך הוא תפוס על ידי חוט B, ולכן חוט A נחסם וממתין.\n4.  חוט B מנסה לנעול את `mutex_X` אך הוא תפוס על ידי חוט A, ולכן חוט B נחסם וממתין.\nבמצב זה, שני החוטים חסומים באופן הדדי, וכל אחד מהם מחזיק במשאב שהשני זקוק לו, וכך נוצר קיפאון.\n\n**מניעת קיפאון:**\nהדרך הנפוצה ביותר למנוע קיפאון במקרה זה היא על ידי אכיפת סדר קבוע ללקיחת המנעולים. אם כל החוטים ינסו לתפוס את המנעולים באותו סדר (לדוגמה, תמיד קודם `mutex_X` ואז `mutex_Y`), אזי תנאי ההמתנה המעגלית לא יכול להתקיים.\n\n**תיקון הקוד:**\nיש לשנות את הפונקציה `thread_B_func` כך שתנסה לנעול את `mutex_X` לפני `mutex_Y`, בדיוק כמו `thread_A_func`.\n\n**קוד מתוקן לדוגמה עבור `thread_B_func`:**\n```c\nvoid* thread_B_func(void* arg) {\n    printf(\"Thread B: Attempting to lock mutex_X...\\n\");\n    pthread_mutex_lock(&mutex_X); // סדר המנעולים שונה\n    printf(\"Thread B: Locked mutex_X. Sleeping...\\n\");\n    sleep(1);\n\n    printf(\"Thread B: Attempting to lock mutex_Y...\\n\");\n    pthread_mutex_lock(&mutex_Y); // סדר המנעולים שונה\n    printf(\"Thread B: Locked mutex_Y. Critical section B...\\n\");\n\n    printf(\"Thread B: Releasing mutex_Y...\\n\");\n    pthread_mutex_unlock(&mutex_Y);\n    printf(\"Thread B: Releasing mutex_X...\\n\");\n    pthread_mutex_unlock(&mutex_X);\n    printf(\"Thread B: Exiting.\\n\");\n    return NULL;\n}\n```"
+    },
+    "difficulty_estimation": "Easy"
+  }
+}
