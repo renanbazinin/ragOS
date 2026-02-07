@@ -26,9 +26,10 @@ export default function PracticePage() {
 
   // Filters
   const [showFilters, setShowFilters] = useState(false);
-  const [filterTopic, setFilterTopic] = useState('');
+  const [filterTopics, setFilterTopics] = useState<string[]>([]);
   const [filterType, setFilterType] = useState('');
   const [filterDifficulty, setFilterDifficulty] = useState('');
+  const [filterSubject, setFilterSubject] = useState('');
 
   // Exams state
   const [exams, setExams] = useState<ExamSummary[]>([]);
@@ -44,7 +45,7 @@ export default function PracticePage() {
   const [examFilterType, setExamFilterType] = useState('');
   const [examFilterDifficulty, setExamFilterDifficulty] = useState('');
   const [examFilterYear, setExamFilterYear] = useState('');
-  const [examFilterTopic, setExamFilterTopic] = useState('');
+  const [examFilterTopics, setExamFilterTopics] = useState<string[]>([]);
   const [examLimit, setExamLimit] = useState<number>(50);
   const [showExamFilters, setShowExamFilters] = useState(false);
   const [selectedExamFiles, setSelectedExamFiles] = useState<string[]>([]);
@@ -66,7 +67,8 @@ export default function PracticePage() {
     setLoading(true);
     try {
       const res = await getAIQuestions({
-        topic: filterTopic || undefined,
+        topics: filterTopics.length > 0 ? filterTopics : undefined,
+        subject: filterSubject || undefined,
         question_type: filterType || undefined,
         difficulty: filterDifficulty || undefined,
         page,
@@ -80,7 +82,7 @@ export default function PracticePage() {
     } finally {
       setLoading(false);
     }
-  }, [filterTopic, filterType, filterDifficulty, page]);
+  }, [filterTopics, filterSubject, filterType, filterDifficulty, page]);
 
   useEffect(() => {
     if (tab === 'ai') {
@@ -120,7 +122,7 @@ export default function PracticePage() {
         question_type: examFilterType || undefined,
         difficulty: examFilterDifficulty || undefined,
         year: examFilterYear || undefined,
-        topic: examFilterTopic || undefined,
+        topics: examFilterTopics.length > 0 ? examFilterTopics : undefined,
         filenames: selectedExamFiles.length > 0 ? selectedExamFiles : undefined,
         limit: examLimit,
         shuffle: true,
@@ -132,7 +134,7 @@ export default function PracticePage() {
     } finally {
       setMixLoading(false);
     }
-  }, [examFilterType, examFilterDifficulty, examFilterYear, examFilterTopic, selectedExamFiles, examLimit]);
+  }, [examFilterType, examFilterDifficulty, examFilterYear, examFilterTopics, selectedExamFiles, examLimit]);
 
   const toggleExamFileSelection = (filename: string) => {
     setSelectedExamFiles(prev =>
@@ -245,11 +247,12 @@ export default function PracticePage() {
                 Shuffle
               </button>
 
-              {(filterTopic || filterType || filterDifficulty) && (
+              {(filterTopics.length > 0 || filterType || filterDifficulty || filterSubject) && (
                 <button className="clear-filters-btn" onClick={() => {
-                  setFilterTopic('');
+                  setFilterTopics([]);
                   setFilterType('');
                   setFilterDifficulty('');
+                  setFilterSubject('');
                   setPage(1);
                 }}>
                   Clear Filters
@@ -260,13 +263,46 @@ export default function PracticePage() {
             {showFilters && (
               <div className="filters">
                 <div className="filter-group">
-                  <label>Topic</label>
-                  <select value={filterTopic} onChange={(e) => setFilterTopic(e.target.value)}>
-                    <option value="">All Topics</option>
-                    {aiStats && Object.keys(aiStats.topics).map(t => (
-                      <option key={t} value={t}>{t} ({aiStats.topics[t]})</option>
+                  <label>Subject</label>
+                  <select value={filterSubject} onChange={(e) => { setFilterSubject(e.target.value); setPage(1); }}>
+                    <option value="">All Subjects</option>
+                    {aiStats && Object.entries(aiStats.subjects).map(([s, count]) => (
+                      <option key={s} value={s}>{s} ({count})</option>
                     ))}
                   </select>
+                </div>
+                <div className="filter-group">
+                  <label>Topics {filterTopics.length > 0 && `(${filterTopics.length})`}</label>
+                  <div className="multi-select-dropdown">
+                    <div className="multi-select-header" onClick={(e) => {
+                      const el = (e.currentTarget.nextElementSibling as HTMLElement);
+                      el.style.display = el.style.display === 'block' ? 'none' : 'block';
+                    }}>
+                      {filterTopics.length === 0 ? 'All Topics' : filterTopics.join(', ')}
+                      <ChevronDown size={14} />
+                    </div>
+                    <div className="multi-select-options" style={{ display: 'none' }}>
+                      {filterTopics.length > 0 && (
+                        <div className="multi-select-item clear-item" onClick={() => setFilterTopics([])}>
+                          ✕ Clear all
+                        </div>
+                      )}
+                      {aiStats && Object.entries(aiStats.topics).map(([t, count]) => (
+                        <label key={t} className="multi-select-item">
+                          <input
+                            type="checkbox"
+                            checked={filterTopics.includes(t)}
+                            onChange={() => {
+                              setFilterTopics(prev =>
+                                prev.includes(t) ? prev.filter(x => x !== t) : [...prev, t]
+                              );
+                            }}
+                          />
+                          {t} ({count})
+                        </label>
+                      ))}
+                    </div>
+                  </div>
                 </div>
                 <div className="filter-group">
                   <label>Type</label>
@@ -552,13 +588,37 @@ export default function PracticePage() {
                       </select>
                     </div>
                     <div className="filter-group">
-                      <label>Topic</label>
-                      <select value={examFilterTopic} onChange={(e) => setExamFilterTopic(e.target.value)}>
-                        <option value="">All Topics</option>
-                        {examFilterOptions && Object.entries(examFilterOptions.topics).map(([t, count]) => (
-                          <option key={t} value={t}>{t} ({count})</option>
-                        ))}
-                      </select>
+                      <label>Topics {examFilterTopics.length > 0 && `(${examFilterTopics.length})`}</label>
+                      <div className="multi-select-dropdown">
+                        <div className="multi-select-header" onClick={(e) => {
+                          const el = (e.currentTarget.nextElementSibling as HTMLElement);
+                          el.style.display = el.style.display === 'block' ? 'none' : 'block';
+                        }}>
+                          {examFilterTopics.length === 0 ? 'All Topics' : examFilterTopics.join(', ')}
+                          <ChevronDown size={14} />
+                        </div>
+                        <div className="multi-select-options" style={{ display: 'none' }}>
+                          {examFilterTopics.length > 0 && (
+                            <div className="multi-select-item clear-item" onClick={() => setExamFilterTopics([])}>
+                              ✕ Clear all
+                            </div>
+                          )}
+                          {examFilterOptions && Object.entries(examFilterOptions.topics).map(([t, count]) => (
+                            <label key={t} className="multi-select-item">
+                              <input
+                                type="checkbox"
+                                checked={examFilterTopics.includes(t)}
+                                onChange={() => {
+                                  setExamFilterTopics(prev =>
+                                    prev.includes(t) ? prev.filter(x => x !== t) : [...prev, t]
+                                  );
+                                }}
+                              />
+                              {t} ({count})
+                            </label>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                     <div className="filter-group">
                       <label>
@@ -579,12 +639,12 @@ export default function PracticePage() {
                       <Shuffle size={16} />
                       Shuffle &amp; Apply
                     </button>
-                    {(examFilterType || examFilterDifficulty || examFilterYear || examFilterTopic) && (
+                    {(examFilterType || examFilterDifficulty || examFilterYear || examFilterTopics.length > 0) && (
                       <button className="clear-filters-btn" onClick={() => {
                         setExamFilterType('');
                         setExamFilterDifficulty('');
                         setExamFilterYear('');
-                        setExamFilterTopic('');
+                        setExamFilterTopics([]);
                       }}>
                         Clear Filters
                       </button>
