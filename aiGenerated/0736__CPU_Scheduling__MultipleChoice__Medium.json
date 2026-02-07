@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "CPU Scheduling",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 23:56:59",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1200,
+      "output_tokens": 470,
+      "total_tokens": 2811
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "CPU Scheduling",
+      "Round Robin",
+      "Scheduling Algorithms"
+    ],
+    "content": {
+      "text": "באלגוריתם תזמון Round Robin (RR), מה קורה כאשר גודל הקוונטה (time quantum) שואף לאינסוף?",
+      "code_snippet": null,
+      "options": [
+        "א. האלגוריתם הופך להיות שקול ל-Shortest Job First (SJF).",
+        "ב. האלגוריתם הופך להיות שקול ל-First-Come, First-Served (FCFS).",
+        "ג. האלגוריתם הופך להיות שקול ל-Priority Scheduling עם עדיפות קבועה.",
+        "ד. האלגוריתם מפסיק להיות אלגוריתם תזמון יעיל וגורם להרבה החלפות הקשר.",
+        "ה. זמן התגובה הממוצע שואף לאפס."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב. האלגוריתם הופך להיות שקול ל-First-Come, First-Served (FCFS).",
+      "explanation": "כאשר גודל הקוונטה באלגוריתם Round Robin שואף לאינסוף, כל תהליך מקבל את ה-CPU ורץ עד להשלמתו המלאה ללא הפרעה, אלא אם כן תהליך אחר מגיע לפניו. זהו בדיוק המאפיין של אלגוריתם First-Come, First-Served (FCFS), שבו התהליכים מבוצעים לפי סדר הגעתם ורצים עד לסיום ה-burst שלהם."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

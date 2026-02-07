@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "CPU Scheduling",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 00:17:54",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2670,
+      "output_tokens": 1533,
+      "total_tokens": 7661
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "CPU Scheduling",
+      "Round Robin"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה, המדמה יצירה של שלושה תהליכים (חוטים) המבצעים עבודת מעבד. יש להניח כי כל התהליכים מגיעים למצב Ready בו-זמנית (בזמן 0) וממוקמים בתור ה-Ready לפי סדר יצירתם (A, B, C). זמני הריצה (burst times) של התהליכים הם כדלקמן:\n- תהליך A: 20 יחידות זמן\n- תהליך B: 10 יחידות זמן\n- תהליך C: 30 יחידות זמן\n\nהמערכת משתמשת באלגוריתם תזמון Round Robin עם קוואנטום (quantum) של 10 יחידות זמן. יש להניח שאין תקורה (overhead) על החלפת הקשר (context switch).\n\nמה יהיה סדר ההדפסה של הודעות ה-\"finished\" עבור התהליכים A, B, ו-C? יש לפרט את מצב תור ה-Ready ואת לוח הזמנים של המעבד לאורך הריצה.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <unistd.h>\n\n// Simulate CPU work\nvoid cpu_burst(int iterations) {\n    volatile int x = 0; // volatile to prevent compiler optimizations\n    for (int i = 0; i < iterations; ++i) {\n        x++;\n    }\n}\n\n// Thread function for Process A\nvoid* process_A(void* arg) {\n    printf(\"Process A started\\n\");\n    cpu_burst(200000000); // Represents ~20 units of time\n    printf(\"Process A finished\\n\");\n    return NULL;\n}\n\n// Thread function for Process B\nvoid* process_B(void* arg) {\n    printf(\"Process B started\\n\");\n    cpu_burst(100000000); // Represents ~10 units of time\n    printf(\"Process B finished\\n\");\n    return NULL;\n}\n\n// Thread function for Process C\nvoid* process_C(void* arg) {\n    printf(\"Process C started\\n\");\n    cpu_burst(300000000); // Represents ~30 units of time\n    printf(\"Process C finished\\n\");\n    return NULL;\n}\n\nint main() {\n    pthread_t tid_A, tid_B, tid_C;\n\n    // Create threads (assume they become ready almost simultaneously)\n    pthread_create(&tid_A, NULL, process_A, NULL);\n    pthread_create(&tid_B, NULL, process_B, NULL);\n    pthread_create(&tid_C, NULL, process_C, NULL);\n\n    // Wait for threads to finish\n    pthread_join(tid_A, NULL);\n    pthread_join(tid_B, NULL);\n    pthread_join(tid_C, NULL);\n\n    printf(\"Main finished\\n\");\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": 10,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "האלגוריתם Round Robin מבצע ריצה של כל תהליך בתור ה-Ready למשך יחידות זמן של הקוואנטום (10 יחידות), או עד לסיום ה-burst שלו, המוקדם מביניהם. תהליכים שלא סיימו חוזרים לסוף תור ה-Ready.\n\nנתונים:\n- תהליך A: 20 יחידות זמן\n- תהליך B: 10 יחידות זמן\n- תהליך C: 30 יחידות זמן\n- קוואנטום: 10 יחידות זמן\n- הגעה: כל התהליכים בזמן 0.\n- תור Ready ראשוני: [A, B, C]\n\nמעקב אחר הריצה:\n1.  **זמן 0-10:** תהליך A רץ.\n    -   A נותר: 10 יחידות.\n    -   תור Ready: [B, C, A] (A עובר לסוף התור)\n2.  **זמן 10-20:** תהליך B רץ (מסיים את ה-burst שלו, שהוא 10 יחידות).\n    -   B נותר: 0 יחידות. **B מסיים.**\n    -   **פלט:** \"Process B finished\"\n    -   תור Ready: [C, A]\n3.  **זמן 20-30:** תהליך C רץ.\n    -   C נותר: 20 יחידות.\n    -   תור Ready: [A, C] (C עובר לסוף התור)\n4.  **זמן 30-40:** תהליך A רץ (מסיים את ה-burst שלו, שהוא 10 יחידות).\n    -   A נותר: 0 יחידות. **A מסיים.**\n    -   **פלט:** \"Process A finished\"\n    -   תור Ready: [C]\n5.  **זמן 40-50:** תהליך C רץ.\n    -   C נותר: 10 יחידות.\n    -   תור Ready: [C] (C עובר לסוף התור)\n6.  **זמן 50-60:** תהליך C רץ (מסיים את ה-burst שלו, שהוא 10 יחידות).\n    -   C נותר: 0 יחידות. **C מסיים.**\n    -   **פלט:** \"Process C finished\"\n    -   תור Ready: []\n\nסדר ההדפסה הסופי של הודעות ה-\"finished\" יהיה: B, A, C."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

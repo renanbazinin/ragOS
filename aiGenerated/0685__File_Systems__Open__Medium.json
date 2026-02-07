@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "File Systems",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 23:33:19",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2275,
+      "output_tokens": 1637,
+      "total_tokens": 7140
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "File Systems"
+    ],
+    "content": {
+      "text": "משתמש יוצר קובץ חדש במערכת קבצים מסוג ext4. לאחר מכן, הוא יוצר hard link לקובץ זה, ולאחר מכן symbolic link לאותו קובץ. תארו בפירוט מה מתרחש ברמת מערכת הקבצים (inodes, בלוקי נתונים, ספריות) בכל אחד מהשלבים הללו. כמו כן, הסבירו מה יקרה במקרים הבאים (בנפרד, בהתבסס על המצב הסופי לאחר יצירת כל הקישורים): א. המשתמש מוחק את הקובץ המקורי. ב. המשתמש מוחק את ה-hard link. ג. המשתמש מוחק את ה-symbolic link. נמקו את תשובותיכם.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הסבר מפורט על השלבים:\n\n1.  **יצירת הקובץ המקורי (לדוגמה, 'original_file.txt'):**\n    *   מערכת הקבצים מקצה inode חדש עבור הקובץ. ה-inode מכיל מטא-דאטה כגון בעלות, הרשאות, גודל, זמני גישה/שינוי, ומצביעים לבלוקי הנתונים. מונים ה-link count (מספר הקישורים לאותו inode) מאותחל ל-1.\n    *   מוקצים בלוקי נתונים מהדיסק לאחסון תוכן הקובץ, והמצביעים ב-inode מתעדכנים.\n    *   נוצרת רשומת ספרייה (directory entry) בספרייה שבה נוצר הקובץ. רשומה זו מקשרת את שם הקובץ ('original_file.txt') למספר ה-inode שלו.\n\n2.  **יצירת Hard Link (לדוגמה, 'hard_link.txt'):**\n    *   נוצרת רשומת ספרייה חדשה בספרייה הנוכחית (או אחרת), המקשרת את השם החדש ('hard_link.txt') *לאותו מספר inode* של הקובץ המקורי. כלומר, שני שמות הקבצים מצביעים על אותו inode.\n    *   מונה ה-link count ב-inode המשותף גדל ל-2.\n    *   לא מוקצים inodes או בלוקי נתונים חדשים עבור ה-hard link עצמו, מכיוון שהוא רק שם נוסף לאותו inode ונתונים קיימים.\n\n3.  **יצירת Symbolic Link (Soft Link) (לדוגמה, 'soft_link.txt'):**\n    *   מערכת הקבצים מקצה inode *חדש* עבור ה-symbolic link. זהו inode שונה לחלוטין מה-inode של הקובץ המקורי.\n    *   מוקצים בלוקי נתונים עבור ה-inode החדש של ה-symbolic link. בלוקי נתונים אלה *אינם* מכילים את תוכן הקובץ המקורי, אלא את ה-*נתיב* (path) לקובץ המקורי ('original_file.txt').\n    *   נוצרת רשומת ספרייה חדשה המקשרת את השם ('soft_link.txt') למספר ה-inode של ה-symbolic link.\n    *   מונה ה-link count של ה-inode של ה-symbolic link מאותחל ל-1. מונה ה-link count של ה-inode של הקובץ המקורי נשאר 2.\n\n**השפעות מחיקה (בהתבסס על המצב הסופי):**\n\nא. **מחיקת הקובץ המקורי ('original_file.txt'):**\n    *   רשומת הספרייה של 'original_file.txt' נמחקת. \n    *   מונה ה-link count של ה-inode המשותף (עבור 'original_file.txt' ו-'hard_link.txt') יורד מ-2 ל-1.\n    *   מכיוון שמונה ה-link count עדיין גדול מ-0 (הוא 1, בגלל ה-hard link), ה-inode ובלוקי הנתונים שלו *לא משוחררים*. הקובץ עדיין נגיש במלואו דרך ה-hard link ('hard_link.txt').\n    *   ה-symbolic link ('soft_link.txt') הופך ל-'קישור תלוי' (dangling link) או 'קישור שבור' (broken link), מכיוון שהוא עדיין מצביע לנתיב 'original_file.txt' שאינו קיים עוד כרשומת ספרייה, ולכן ניסיון גישה דרכו ייכשל (או יצביע על קובץ אחר אם נוצר קובץ חדש באותו נתיב).\n\nב. **מחיקת ה-Hard Link ('hard_link.txt'):**\n    *   רשומת הספרייה של 'hard_link.txt' נמחקת.\n    *   מונה ה-link count של ה-inode המשותף יורד מ-2 ל-1.\n    *   ה-inode ובלוקי הנתונים שלו *לא משוחררים*, מכיוון שהקובץ המקורי ('original_file.txt') עדיין קיים ומונה ה-link count הוא 1. הקובץ עדיין נגיש דרך 'original_file.txt'.\n    *   ה-symbolic link ('soft_link.txt') ממשיך לפעול כרגיל, מכיוון שהוא מצביע לנתיב של הקובץ המקורי שעדיין קיים.\n\nג. **מחיקת ה-Symbolic Link ('soft_link.txt'):**\n    *   רשומת הספרייה של 'soft_link.txt' נמחקת.\n    *   מונה ה-link count של ה-inode של ה-symbolic link יורד מ-1 ל-0.\n    *   ה-inode של ה-symbolic link ובלוקי הנתונים שלו (שמכילים את הנתיב לקובץ המקורי) *משוחררים* בחזרה למערכת הקבצים.\n    *   הקובץ המקורי ('original_file.txt') וה-hard link שלו ('hard_link.txt') *אינם מושפעים כלל* ונותרים שלמים ונגישים, מכיוון שמחיקת symbolic link משפיעה רק על הקישור עצמו ולא על היעד שאליו הוא מצביע."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

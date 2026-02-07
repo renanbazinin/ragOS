@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "File Systems",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 23:32:23",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2275,
+      "output_tokens": 1376,
+      "total_tokens": 6576
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "File Systems"
+    ],
+    "content": {
+      "text": "נתונה מערכת קבצים חדשה וריקה. גודל בלוק במערכת הקבצים הוא 4KB. משתמש מבצע את הפעולות הבאות בסדר כרונולוגי:\n1. יוצר קובץ בשם `original.txt` המכיל את הטקסט \"Hello Operating Systems!\" (גודל הטקסט הוא 27 בתים).\n2. יוצר קישור קשיח (hard link) בשם `hardlink.txt` המצביע אל `original.txt`.\n3. יוצר קישור רך (soft link / symbolic link) בשם `softlink.txt` המצביע אל `original.txt`.\n4. מוחק את הקובץ `original.txt`.\n\nענה על השאלות הבאות, תוך פירוט ההסבר לכל שלב:\nא. כמה inodes וכמה בלוקי נתונים (data blocks) יהיו בשימוש לאחר סיום פעולה 3? נמק.\nב. תאר מה קורה במערכת הקבצים (ברמת ה-inodes והבלוקים) כאשר מבוצעת פעולה 4. נמק.\nג. מה תהיה התוצאה של ניסיון לקרוא את התוכן של `hardlink.txt` לאחר פעולה 4? נמק.\nד. מה תהיה התוצאה של ניסיון לקרוא את התוכן של `softlink.txt` לאחר פעולה 4? נמק.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "א. לאחר סיום פעולה 3:\n   - הקובץ `original.txt` דורש inode אחד (לאחסון מטא-דאטה כמו הרשאות, בעלים, זמנים) ובלוק נתונים אחד (4KB) לאחסון התוכן \"Hello Operating Systems!\". גודל התוכן (27 בתים) קטן מבלוק אחד, ולכן נדרש בלוק אחד בלבד.\n   - הקישור הקשיח `hardlink.txt` אינו דורש inode חדש או בלוק נתונים חדש. הוא בסך הכל יוצר כניסה חדשה בספרייה המצביעה לאותו inode של `original.txt`. מונה הקישורים (link count) של ה-inode המקורי גדל ל-2 (כעת גם `original.txt` וגם `hardlink.txt` מצביעים אליו).\n   - הקישור הרך `softlink.txt` דורש inode חדש משלו, מכיוון שהוא קובץ מסוג מיוחד ( symbolic link). בנוסף, הוא דורש בלוק נתונים אחד לאחסון המחרוזת של הנתיב אליו הוא מצביע (\"original.txt\"). אורך המחרוזת הוא 12 בתים, הנכנסים בבלוק נתונים אחד.\n   - סך הכל בשימוש: 2 inodes (אחד עבור הקובץ המקורי/קישור קשיח, ואחד עבור הקישור הרך) ו-2 בלוקי נתונים (אחד עבור תוכן הקובץ, ואחד עבור הנתיב של הקישור הרך).\n\nב. כאשר מבוצעת פעולה 4 (מחיקת `original.txt`):\n   - כניסת הספרייה עבור `original.txt` מוסרת מהספרייה הראשית.\n   - מונה הקישורים (link count) של ה-inode אליו הצביעו `original.txt` וגם `hardlink.txt` מופחת ב-1 (מ-2 ל-1). מונה הקישורים מציין כמה שמות קבצים שונים מצביעים לאותו inode.\n   - ה-inode ובלוק הנתונים המכיל את התוכן \"Hello Operating Systems!\" אינם משוחררים ואינם נמחקים, מכיוון שמונה הקישורים עדיין גדול מ-0 (הוא 1, בגלל `hardlink.txt`). הנתונים עדיין נגישים דרך הקישור הקשיח.\n   - ה-inode ובלוק הנתונים של `softlink.txt` אינם מושפעים כלל, מכיוון שהם קיימים באופן עצמאי.\n\nג. ניסיון לקרוא את התוכן של `hardlink.txt` לאחר פעולה 4:\n   - הקריאה תצליח. `hardlink.txt` עדיין מצביע ל-inode המקורי. מכיוון שמונה הקישורים של ה-inode עדיין 1, ה-inode ובלוק הנתונים שלו נותרו שלמים ונגישים. מערכת הקבצים עדיין רואה את הקובץ כקיים דרך הקישור הקשיח. התוכן \"Hello Operating Systems!\" ייקרא בהצלחה.\n\nד. ניסיון לקרוא את התוכן של `softlink.txt` לאחר פעולה 4:\n   - הקריאה תיכשל. `softlink.txt` מכיל את הנתיב \"original.txt\". כאשר מערכת ההפעלה תנסה לפתור נתיב זה, היא תגלה שהקובץ `original.txt` אינו קיים עוד בספרייה. הקישור הרך הפך ל\"קישור שבור\" (dangling link), ומערכת ההפעלה תחזיר שגיאה (לדוגמה, \"No such file or directory\"). הקישור הרך תלוי בקיומו של קובץ היעד. "
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "File Systems",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 23:48:47",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3062,
+      "output_tokens": 1850,
+      "total_tokens": 9749
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "File Systems",
+      "Sparse Files",
+      "System Calls",
+      "lseek",
+      "write"
+    ],
+    "content": {
+      "text": "נתונה תוכנית ה-C הבאה המבצעת פעולות על קובץ במערכת קבצים מסוג ext4 (או כל מערכת קבצים נפוצה אחרת התומכת בקבצים דלילים - sparse files). יש להניח שגודל הבלוק במערכת הקבצים הוא 4096 בתים (4KB). התוכנית רצה בסביבה שבה היא יכולה ליצור קבצים ולכתוב אליהם בהצלחה.\n\nלאחר שהתוכנית מסיימת את ריצתה, ענו על השאלות הבאות:\n1. מה יהיה גודלו הלוגי של הקובץ `sparse_file_test.bin` כפי שיוצג על ידי פקודת `ls -l` (השדה שמציין את מספר הבתים בקובץ)? נמקו.\n2. כמה בלוקים פיזיים (מגודל 4KB כל אחד) יוקצו בפועל על הדיסק עבור הקובץ `sparse_file_test.bin`? נמקו.\n3. אם נקרא את תוכן הקובץ מתחילתו ועד סופו (באופן לוגי) באמצעות קריאות `read` רצופות, מה יהיו 10 הבתים הראשונים שנקראו? ומה יהיה הבייט האחרון שנקרא (במיקום `seek_offset` + 1 - 1)? נמקו.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <fcntl.h>\n#include <string.h>\n#include <sys/stat.h>\n\n#define FILENAME \"sparse_file_test.bin\"\n\nint main() {\n    int fd;\n    char initial_data[] = \"START\"; // 5 bytes\n    char final_data = 'E';         // 1 byte\n    off_t seek_offset = 100 * 1024 * 1024; // 100 MB\n\n    // Open the file for writing, create if it doesn't exist, truncate if it does\n    fd = open(FILENAME, O_CREAT | O_TRUNC | O_WRONLY, 0644);\n    if (fd == -1) {\n        perror(\"Error opening file\");\n        return 1;\n    }\n\n    // Write initial data\n    if (write(fd, initial_data, strlen(initial_data)) == -1) {\n        perror(\"Error writing initial data\");\n        close(fd);\n        return 1;\n    }\n\n    // Seek to a large offset\n    if (lseek(fd, seek_offset, SEEK_SET) == (off_t)-1) {\n        perror(\"Error seeking\");\n        close(fd);\n        return 1;\n    }\n\n    // Write a single byte at the new offset\n    if (write(fd, &final_data, 1) == -1) {\n        perror(\"Error writing final data\");\n        close(fd);\n        return 1;\n    }\n\n    // Close the file\n    close(fd);\n\n    // The program ends here.\n    return 0;\n}"
+    },
+    "sub_questions": null,
+    "points": 25,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1. **גודל לוגי של הקובץ:**\n   הגודל הלוגי של הקובץ נקבע על ידי המיקום הגבוה ביותר אליו נכתב בייט כלשהו, בתוספת מספר הבתים שנכתבו באותה פעולה. בתחילה נכתבים 5 בתים (\"START\"), מה שקובע את גודל הקובץ ל-5 בתים. לאחר מכן, מתבצעת קריאת `lseek` למיקום `100 * 1024 * 1024` בתים (שהם 104,857,600 בתים). קריאת `lseek` לבדה אינה משנה את גודל הקובץ. רק פעולת כתיבה (write) במיקום זה או מעבר לו תגדיל את גודל הקובץ. לבסוף, נכתב בייט יחיד ('E') במיקום זה. לכן, הגודל הלוגי של הקובץ יהיה `104,857,600 + 1 = 104,857,601` בתים. פקודת `ls -l` תציג גודל זה.\n\n2. **בלוקים פיזיים שיוקצו על הדיסק:**\n   מערכות קבצים מודרניות רבות (כמו ext4) תומכות בקבצים דלילים (sparse files). המשמעות היא שפערים גדולים בקובץ שנוצרו על ידי `lseek` מעבר ל-EOF ואז כתיבה, אינם גורמים להקצאת בלוקים פיזיים על הדיסק עבור הפער. בלוקים מוקצים רק כאשר נתונים נכתבים בפועל לתוכם. במקרה זה:\n   *   הכתיבה הראשונית של \"START\" (5 בתים) תדרוש בלוק פיזי אחד (כי 5 בתים קטנים מ-4096 בתים, אך עדיין תופסים בלוק שלם).\n   *   קריאת ה-`lseek` לא תקצה בלוקים עבור הפער של כמעט 100MB.\n   *   הכתיבה של הבייט היחיד 'E' במיקום `104,857,600` תדרוש הקצאת בלוק פיזי נוסף (הבלוק המכיל את המיקום הזה).\n   לכן, סך הכל יוקצו 2 בלוקים פיזיים על הדיסק עבור הקובץ (1 בלוק לנתונים הראשונים, 1 בלוק לנתון האחרון). הגודל הפיזי שיתפוס הקובץ על הדיסק יהיה `2 * 4096 = 8192` בתים.\n\n3. **תוכן הקובץ בקריאה:**\n   *   **10 הבתים הראשונים:** הקובץ מתחיל עם הנתונים \"START\" (5 בתים). הפער שנוצר בין סוף הכתיבה הראשונית (בייט 5) ועד לתחילת הכתיבה במיקום `104,857,600` (בייט 104,857,600) יכיל מבחינה לוגית בתים עם ערך אפס (null bytes, '\\0'). לכן, 10 הבתים הראשונים שנקראו יהיו: `'S', 'T', 'A', 'R', 'T', '\\0', '\\0', '\\0', '\\0', '\\0'` (כלומר, \"START\" ואחריו 5 אפסים).\n   *   **הבייט האחרון שנקרא (במיקום `seek_offset` + 1 - 1):** הבייט האחרון שנקרא באופן לוגי הוא הבייט שהוצב במיקום `seek_offset`, שהוא 'E'. כלומר, הבייט במיקום `104,857,600` יכיל את התו 'E'."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

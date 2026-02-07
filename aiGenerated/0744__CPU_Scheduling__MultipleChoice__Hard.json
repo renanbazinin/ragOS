@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "CPU Scheduling",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 00:01:40",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 1658,
+      "total_tokens": 7932
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "CPU Scheduling",
+      "SRTF",
+      "Round Robin"
+    ],
+    "content": {
+      "text": "נתונים ארבעה תהליכים (P1, P2, P3, P4) עם זמני הגעה (Arrival Time) וזמני ריצה (Burst Time) כדלקמן:\n\nP1: AT=0, BT=10\nP2: AT=1, BT=1\nP3: AT=2, BT=2\nP4: AT=3, BT=10\n\nהשווה בין ממוצע זמן ההמתנה (Average Waiting Time) של כל התהליכים בשיטות התזמון הבאות:\n1. SRTF (Shortest Remaining Time First)\n2. Round Robin (RR) עם קוונטום (Quantum) בגודל 3 יחידות זמן.\n\nאיזו מהטענות הבאות נכונה?",
+      "code_snippet": null,
+      "options": [
+        "א. ממוצע זמן ההמתנה ב-SRTF גבוה יותר מאשר ב-RR.",
+        "ב. ממוצע זמן ההמתנה ב-SRTF נמוך יותר מאשר ב-RR.",
+        "ג. ממוצע זמן ההמתנה זהה בשתי השיטות.",
+        "ד. לא ניתן לקבוע ללא מידע נוסף על עומס המערכת."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "נבצע מעקב (trace) עבור כל אחת משיטות התזמון:\n\n**1. SRTF (Shortest Remaining Time First):**\n-   **t=0**: P1 מגיע (BT=10). P1 רץ.\n-   **t=1**: P2 מגיע (BT=1). זמן הריצה הנותר של P2 (1) קצר מזה של P1 (9). P1 נקטע (preempted). P2 רץ.\n-   **t=2**: P2 מסתיים. P3 מגיע (BT=2). זמן הריצה הנותר של P3 (2) קצר מזה של P1 (9). P3 רץ.\n-   **t=4**: P3 מסתיים. P4 מגיע (BT=10). זמן הריצה הנותר של P1 (9) קצר מזה של P4 (10). P1 רץ.\n-   **t=13**: P1 מסתיים. P4 רץ.\n-   **t=23**: P4 מסתיים.\n\n**זמני סיום (Completion Time - CT):**\nP2: 2\nP3: 4\nP1: 13\nP4: 23\n\n**זמני מחזור (Turnaround Time - TAT = CT - AT):**\nP2: 2 - 1 = 1\nP3: 4 - 2 = 2\nP1: 13 - 0 = 13\nP4: 23 - 3 = 20\n\n**זמני המתנה (Waiting Time - WT = TAT - BT):**\nP2: 1 - 1 = 0\nP3: 2 - 2 = 0\nP1: 13 - 10 = 3\nP4: 20 - 10 = 10\n\n**ממוצע זמן המתנה ב-SRTF:** (0 + 0 + 3 + 10) / 4 = 13 / 4 = 3.25\n\n**2. Round Robin (RR) עם קוונטום (Quantum) בגודל 3:**\n-   **t=0**: P1 מגיע (BT=10). P1 רץ.\n-   **t=1**: P2 מגיע. (P1 ממשיך לרוץ כי הקוונטום שלו לא תם).\n-   **t=2**: P3 מגיע. (P1 ממשיך לרוץ).\n-   **t=3**: P1 מסיים קוונטום. P1 (נותרו 7) עובר לסוף התור. תור: P2, P3, P4, P1(7). P2 רץ (BT=1).\n-   **t=4**: P2 מסתיים. תור: P3, P4, P1(7). P3 רץ (BT=2).\n-   **t=6**: P3 מסתיים. תור: P4, P1(7). P4 רץ (BT=10).\n-   **t=9**: P4 מסיים קוונטום. P4 (נותרו 7) עובר לסוף התור. תור: P1(7), P4(7). P1 רץ (נותרו 7).\n-   **t=12**: P1 מסיים קוונטום. P1 (נותרו 4) עובר לסוף התור. תור: P4(7), P1(4). P4 רץ (נותרו 7).\n-   **t=15**: P4 מסיים קוונטום. P4 (נותרו 4) עובר לסוף התור. תור: P1(4), P4(4). P1 רץ (נותרו 4).\n-   **t=18**: P1 מסתיים. תור: P4(4). P4 רץ (נותרו 4).\n-   **t=22**: P4 מסתיים.\n\n**זמני סיום (Completion Time - CT):**\nP2: 4\nP3: 6\nP1: 18\nP4: 22\n\n**זמני מחזור (Turnaround Time - TAT = CT - AT):**\nP2: 4 - 1 = 3\nP3: 6 - 2 = 4\nP1: 18 - 0 = 18\nP4: 22 - 3 = 19\n\n**זמני המתנה (Waiting Time - WT = TAT - BT):**\nP2: 3 - 1 = 2\nP3: 4 - 2 = 2\nP1: 18 - 10 = 8\nP4: 19 - 10 = 9\n\n**ממוצע זמן המתנה ב-RR:** (2 + 2 + 8 + 9) / 4 = 21 / 4 = 5.25\n\n**השוואה:**\nממוצע זמן ההמתנה ב-SRTF הוא 3.25.\nממוצע זמן ההמתנה ב-RR הוא 5.25.\n\nלכן, ממוצע זמן ההמתנה ב-SRTF נמוך יותר מאשר ב-RR."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

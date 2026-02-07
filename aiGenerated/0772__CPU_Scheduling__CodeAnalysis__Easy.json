@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "CPU Scheduling",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 00:15:17",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2646,
+      "output_tokens": 1188,
+      "total_tokens": 8407
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "CPU Scheduling",
+      "Processes",
+      "System Calls"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה:\nהניחו כי המערכת בעלת מעבד יחיד (single CPU) וכי אלגוריתם תזמון המעבד הוא FCFS (First Come, First Served).\nהניחו שכל קריאות המערכת (system calls) מצליחות.\nהפלט הסטנדרטי אינו מבוּפר (unbuffered).\nמהו הפלט הסופי של התוכנית?",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\nvoid child_task(char c, int count) {\n    for (int i = 0; i < count; ++i) {\n        printf(\"%c\", c);\n    }\n    exit(0);\n}\n\nint main() {\n    pid_t pid1, pid2;\n\n    setbuf(stdout, NULL); // Unbuffered output\n\n    printf(\"P\"); \n\n    pid1 = fork();\n    if (pid1 == 0) { // Child 1\n        child_task('A', 3);\n    }\n\n    if (pid1 > 0) { // Parent continues after first fork\n        printf(\"M\"); \n        pid2 = fork();\n        if (pid2 == 0) { // Child 2\n            child_task('B', 2);\n        }\n    }\n\n    if (pid1 > 0 && pid2 > 0) { // Only parent after both forks\n        printf(\"F\"); \n        wait(NULL); \n        wait(NULL); \n        printf(\"E\\n\"); \n    }\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "התהליך הראשי מתחיל ומדפיס 'P'.\nלאחר מכן הוא קורא ל-`fork()` ויוצר את תהליך הבן הראשון (Child 1).\nעל פי אלגוריתם FCFS, התהליך הראשי ממשיך לרוץ מכיוון שהוא היה על המעבד והוא לא נחסם (קריאת ה-`fork` הסתיימה).\nהתהליך הראשי מדפיס 'M'.\nלאחר מכן הוא קורא שוב ל-`fork()` ויוצר את תהליך הבן השני (Child 2).\nהתהליך הראשי ממשיך לרוץ (שוב, FCFS והוא לא נחסם), מדפיס 'F'.\nלאחר מכן התהליך הראשי קורא ל-`wait(NULL)` ונחסם, ממתין לתהליכי בנים שיסתיימו.\nבנקודה זו, תהליך הבן הראשון (Child 1) ותהליך הבן השני (Child 2) נמצאים שניהם בתור התורים של המעבד.\nמכיוון ש-Child 1 נוצר לפני Child 2 (והוכנס לתור לפניו), על פי FCFS הוא יקבל את המעבד ראשון.\nChild 1 ירוץ וידפיס את התו 'A' שלוש פעמים (AAA). לאחר מכן הוא יסיים את פעולתו באמצעות `exit(0)`.\nכאשר Child 1 מסיים, התהליך הראשי שהמתין לתהליכים בנים הופך להיות מוכן שוב (מכיוון שאחד מילדיו סיים).\nכעת, בתור התורים יש את Child 2 ואת התהליך הראשי (שתהליך הבן הראשון סיים, והוא נכנס לתור מאוחר יותר מ-Child 2).\nעל פי FCFS, Child 2 יקבל את המעבד.\nChild 2 ירוץ וידפיס את התו 'B' פעמיים (BB). לאחר מכן הוא יסיים את פעולתו.\nכאשר Child 2 מסיים, התהליך הראשי (שכבר היה מוכן) מקבל את המעבד.\nהתהליך הראשי ימשיך מנקודת הקריאה ל-`wait(NULL)` הראשונה (שכבר חזרה עבור Child 1) ויבצע את הקריאה השנייה ל-`wait(NULL)` (שכבר חזרה עבור Child 2). כלומר, הוא יצא ממצב חסימה.\nלאחר מכן הוא ידפיס 'E' וירד שורה, ויסיים את פעולתו.\nלכן, הפלט הסופי של התוכנית יהיה: PMFAAABBE\n"
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

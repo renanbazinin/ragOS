@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Paging",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 22:51:55",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1024,
+      "output_tokens": 320,
+      "total_tokens": 2284
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Paging",
+      "Memory Management",
+      "Virtual Memory"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של שיטת ה-Paging בניהול זיכרון?",
+      "code_snippet": null,
+      "options": [
+        "א. למנוע פרגמנטציה חיצונית (external fragmentation).",
+        "ב. להאיץ את ביצועי המעבד.",
+        "ג. לנהל התקני קלט/פלט.",
+        "ד. ליישם החלפת הקשר (context switch).",
+        "ה. אף אחת מהתשובות האחרות אינה נכונה."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "א. כפי שנלמד, Paging היא שיטה לניהול זיכרון וירטואלי שמטרתה העיקרית היא למנוע פרגמנטציה חיצונית על ידי חלוקת הזיכרון הפיזי והלוגי לדפים ופריימים בגודל קבוע."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

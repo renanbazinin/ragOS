@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "CPU Scheduling",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 23:54:27",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1126,
+      "output_tokens": 376,
+      "total_tokens": 2256
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "CPU Scheduling"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של מתזמן המעבד (CPU Scheduler) במערכת הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. לנהל את הזיכרון הפיזי של המערכת.",
+        "ב. להחליט איזה תהליך ירוץ על המעבד ומתי.",
+        "ג. לטפל בפסיקות חומרה וקריאות מערכת.",
+        "ד. לאבטח את המערכת מפני גישה לא מורשית.",
+        "ה. אף אחת מהתשובות האחרות אינה נכונה."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב. מתזמן המעבד אחראי לבחור מבין התהליכים המוכנים להרצה, איזה מהם יוקצה למעבד ובאיזו עת. מטרותיו כוללות מקסום ניצול המעבד, מתן זמני תגובה הולמים, והבטחת הגינות בין התהליכים. ניהול זיכרון, טיפול בפסיקות, ואבטחה הם תפקידים אחרים של מערכת ההפעלה."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

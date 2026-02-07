@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 00:40:07",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1930,
+      "output_tokens": 2027,
+      "total_tokens": 6514
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "Open",
+    "topic": [
+      "Concurrency",
+      "Synchronization",
+      "Producer-Consumer"
+    ],
+    "content": {
+      "text": "באופן כללי, מערכת הפעלה מספקת אובייקטי סנכרון כגון Mutexes ו-Condition Variables כדי לאפשר לחוטים לתאם את פעולותיהם.\nבשאלה זו נתבקש לממש Bounded Buffer (מחסנית חסומה), שהוא מבנה נתונים נפוץ המאפשר לחוטים יצרנים (Producers) להכניס נתונים ולחוטים צרכנים (Consumers) להוציא נתונים באופן בטוח ומסונכרן.\nה-Bounded Buffer הוא בעל גודל קבוע (CAPACITY) ויש לממש אותו כבאפר מעגלי.\nפעולת `put` מוסיפה פריט ל-buffer. אם ה-buffer מלא, החוט הקורא ל-`put` צריך לחכות עד שיתפנה מקום.\nפעולת `get` מסירה פריט מה-buffer. אם ה-buffer ריק, החוט הקורא ל-`get` צריך לחכות עד שפריט יהיה זמין.\nיש להבטיח גישה הדדית בלעדית (mutual exclusion) ל-buffer עצמו.\nממשו את הפונקציות `put` ו-`get` תוך שימוש ב-Mutexes ו-Condition Variables בלבד (ניתן להשתמש בספריית `pthread`). אין צורך לממש את `init` ו-`destroy`.",
+      "code_snippet": "#include <pthread.h>\n#include <stdlib.h> // For malloc/free\n\n#define CAPACITY 10 // Example capacity\n\ntypedef struct {\n    int *buffer;\n    int head;\n    int tail;\n    int count;\n    pthread_mutex_t mutex;\n    pthread_cond_t not_full;\n    pthread_cond_t not_empty;\n} BoundedBuffer;\n\n// Provided functions (no need to implement)\nvoid init_buffer(BoundedBuffer *bb) {\n    bb->buffer = (int *)malloc(sizeof(int) * CAPACITY);\n    bb->head = 0;\n    bb->tail = 0;\n    bb->count = 0;\n    pthread_mutex_init(&bb->mutex, NULL);\n    pthread_cond_init(&bb->not_full, NULL);\n    pthread_cond_init(&bb->not_empty, NULL);\n}\n\nvoid destroy_buffer(BoundedBuffer *bb) {\n    free(bb->buffer);\n    pthread_mutex_destroy(&bb->mutex);\n    pthread_cond_destroy(&bb->not_full);\n    pthread_cond_destroy(&bb->not_empty);\n}\n\n// Functions to implement\nvoid put(BoundedBuffer *bb, int item) {\n    // Your implementation here\n}\n\nint get(BoundedBuffer *bb) {\n    // Your implementation here\n    return -1; // Placeholder\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון דורש שימוש ב-Mutex אחד כדי להבטיח Mutual Exclusion (גישה בלעדית) למבנה הנתונים של ה-Bounded Buffer (ה-buffer עצמו, head, tail, ו-count). בנוסף, יש צורך בשני Condition Variables:\n1.  `not_full`: משמש לאותת לחוטים יצרנים (Producers) כאשר יש מקום פנוי ב-buffer (כלומר, ה-buffer אינו מלא). יצרן ימתין על משתנה תנאי זה אם ה-buffer מלא.\n2.  `not_empty`: משמש לאותת לחוטים צרכנים (Consumers) כאשר יש פריטים זמינים ב-buffer (כלומר, ה-buffer אינו ריק). צרכן ימתין על משתנה תנאי זה אם ה-buffer ריק.\n\n**מימוש פונקציית `put`:**\n```c\nvoid put(BoundedBuffer *bb, int item) {\n    pthread_mutex_lock(&bb->mutex);\n    while (bb->count == CAPACITY) { // Buffer is full, wait\n        pthread_cond_wait(&bb->not_full, &bb->mutex);\n    }\n    bb->buffer[bb->tail] = item;\n    bb->tail = (bb->tail + 1) % CAPACITY;\n    bb->count++;\n    pthread_cond_signal(&bb->not_empty); // Signal that buffer is no longer empty\n    pthread_mutex_unlock(&bb->mutex);\n}\n```\n1.  נועלת את ה-mutex כדי להגן על הגישה ל-buffer.\n2.  בודקת בלולאת `while` האם ה-buffer מלא (`bb->count == CAPACITY`). אם כן, החוט קורא ל-`pthread_cond_wait(&bb->not_full, &bb->mutex)`. פעולה זו משחררת את ה-mutex באופן אטומי ומכניסה את החוט למצב המתנה על `not_full`. כאשר החוט יתעורר, ה-mutex יינעל מחדש. חשוב להשתמש בלולאת `while` ולא ב-`if` מכיוון שחוטים יכולים להתעורר מסיבות שונות (spurious wakeup) או שחוט אחר תפס את המקום לפני שהחוט הנוכחי הספיק לפעול.\n3.  כאשר יש מקום, הפריט מוכנס ל-buffer במיקום `bb->tail`.\n4.  `bb->tail` מקודם (בצורה מעגלית).\n5.  `bb->count` מקודם.\n6.  החוט מאותת ל-`not_empty` (`pthread_cond_signal`) כדי להודיע לכל צרכן שממתין שיש כעת פריט זמין.\n7.  משחרר את ה-mutex.\n\n**מימוש פונקציית `get`:**\n```c\nint get(BoundedBuffer *bb) {\n    pthread_mutex_lock(&bb->mutex);\n    while (bb->count == 0) { // Buffer is empty, wait\n        pthread_cond_wait(&bb->not_empty, &bb->mutex);\n    }\n    int item = bb->buffer[bb->head];\n    bb->head = (bb->head + 1) % CAPACITY;\n    bb->count--;\n    pthread_cond_signal(&bb->not_full); // Signal that buffer is no longer full\n    pthread_mutex_unlock(&bb->mutex);\n    return item;\n}\n```\n1.  נועלת את ה-mutex כדי להגן על הגישה ל-buffer.\n2.  בודקת בלולאת `while` האם ה-buffer ריק (`bb->count == 0`). אם כן, החוט קורא ל-`pthread_cond_wait(&bb->not_empty, &bb->mutex)`. פעולה זו משחררת את ה-mutex באופן אטומי ומכניסה את החוט למצב המתנה על `not_empty`. כאשר החוט יתעורר, ה-mutex יינעל מחדש. גם כאן, שימוש בלולאת `while` הוא קריטי.\n3.  כאשר יש פריט, הפריט מוצא מה-buffer במיקום `bb->head`.\n4.  `bb->head` מקודם (בצורה מעגלית).\n5.  `bb->count` מקודם.\n6.  החוט מאותת ל-`not_full` (`pthread_cond_signal`) כדי להודיע לכל יצרן שממתין שיש כעת מקום פנוי.\n7.  משחרר את ה-mutex.\n\nחשוב לציין ששימוש ב-`pthread_cond_signal` מספיק במקרה זה מכיוון שרק חוט אחד (יצרן או צרכן) יכול להמשיך לאחר כל פעולת `put` או `get` בהתאמה. אם היינו רוצים להעיר את כל החוטים הממתינים (למשל, במקרים מורכבים יותר או אם יש מספר מקומות/פריטים שנוספו/הוסרו), היינו משתמשים ב-`pthread_cond_broadcast`."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

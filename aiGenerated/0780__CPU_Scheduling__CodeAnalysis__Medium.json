@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "CPU Scheduling",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 00:19:13",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2670,
+      "output_tokens": 1776,
+      "total_tokens": 12404
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "CPU Scheduling"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה, המדמה פעולת מתזמן מעבד (CPU Scheduler) פשוט. המתזמן פועל בשיטת תעדוף מונעת (Preemptive Priority), כאשר מספר גבוה יותר מציין עדיפות גבוהה יותר. במקרה של שוויון בעדיפות, המתזמן יבחר בתהליך בעל ה-PID הנמוך יותר (First Come, First Served - FCFS, אם כי במקרה זה ה-PID הוא קריטריון שבירת שוויון קבוע). כל יחידת זמן (time unit) מייצגת ריצה של יחידת זמן אחת עבור התהליך הנבחר. יש להניח שכל התהליכים מגיעים בזמן 0.\n\nכמה החלפות הקשר (context switches) יתרחשו במהלך ריצת התוכנית, מרגע התחלת הריצה ועד שכל התהליכים יסיימו?",
+      "code_snippet": "#include <stdio.h>\n#include <stdbool.h>\n\n// Represents a simplified Process Control Block (PCB)\ntypedef struct {\n    int pid;\n    int burst_time;\n    int priority; // Higher number = higher priority\n    int remaining_time;\n} PCB;\n\n// Global variables simulating current running process state\nint current_running_pid = -1;\nint context_switches_count = 0;\n\n// Simulates a scheduler's decision for one time unit\n// Assumes all processes arrive at time 0.\nvoid schedule_and_run_unit(PCB processes[], int num_processes) {\n    int chosen_idx = -1;\n    int highest_priority_found = -1;\n\n    // Find the highest priority ready process\n    for (int i = 0; i < num_processes; ++i) {\n        if (processes[i].remaining_time > 0) { // Process is not finished\n            if (chosen_idx == -1 || // First ready process found\n                processes[i].priority > highest_priority_found ||\n                (processes[i].priority == highest_priority_found && processes[i].pid < processes[chosen_idx].pid)) { // Tie-breaking: lower PID\n                \nhighest_priority_found = processes[i].priority;\n                chosen_idx = i;\n            }\n        }\n    }\n\n    if (chosen_idx != -1) {\n        if (processes[chosen_idx].pid != current_running_pid) {\n            // Context switch occurred\n            if (current_running_pid != -1) { // Only count if there was a previous process running\n                context_switches_count++;\n            }\n            current_running_pid = processes[chosen_idx].pid;\n        }\n        processes[chosen_idx].remaining_time--; // Run for one unit\n    }\n}\n\nint main() {\n    PCB processes[3] = {\n        {.pid = 1, .burst_time = 5, .priority = 2, .remaining_time = 5}, \n        {.pid = 2, .burst_time = 3, .priority = 3, .remaining_time = 3},\n        {.pid = 3, .burst_time = 4, .priority = 1, .remaining_time = 4}\n    };\n    int num_processes = 3;\n\n    int total_finished_processes = 0;\n    while (total_finished_processes < num_processes) {\n        schedule_and_run_unit(processes, num_processes);\n\n        total_finished_processes = 0;\n        for (int i = 0; i < num_processes; ++i) {\n            if (processes[i].remaining_time == 0) {\n                total_finished_processes++;\n            }\n        }\n    }\n    return 0;\n}",
+      "options": [
+        "א. 0",
+        "ב. 1",
+        "ג. 2",
+        "ד. 3",
+        "ה. 4"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "במהלך ריצת התוכנית, המתזמן בוחר תמיד בתהליך עם העדיפות הגבוהה ביותר מבין התהליכים שטרם סיימו. במקרה של שוויון בעדיפות, נבחר תהליך בעל ה-PID הנמוך יותר. אנו סופרים החלפת הקשר כאשר ה-PID של התהליך הנבחר לריצה שונה מה-PID של התהליך שרץ ביחידת הזמן הקודמת, למעט הבחירה הראשונה של תהליך (ממצב של אף תהליך לא רץ).\n\nלהלן מעקב אחר הריצה:\n- תהליכים: P1 (PID=1, Burst=5, Priority=2), P2 (PID=2, Burst=3, Priority=3), P3 (PID=3, Burst=4, Priority=1).\n- מצב התחלתי: current_running_pid = -1, context_switches_count = 0.\n\n1.  **יחידות זמן 1-3:** P2 בעל העדיפות הגבוהה ביותר (3).\n    *   ביחידת זמן 1, P2 נבחר. current_running_pid משתנה מ-1 ל-2. זו הבחירה הראשונה, לא נספרת כהחלפת קשר.\n    *   ביחידות זמן 2-3, P2 ממשיך לרוץ. אין החלפת קשר. P2 מסיים ביחידת זמן 3.\n    *   בסיום: P2 סיים. current_running_pid = 2, context_switches_count = 0.\n\n2.  **יחידות זמן 4-8:** P1 (Priority=2) ו-P3 (Priority=1) נותרו. P1 בעל העדיפות הגבוהה יותר.\n    *   ביחידת זמן 4, P1 נבחר. current_running_pid משתנה מ-2 ל-1. **נספרת החלפת הקשר הראשונה (1).**\n    *   ביחידות זמן 5-8, P1 ממשיך לרוץ. אין החלפת קשר. P1 מסיים ביחידת זמן 8.\n    *   בסיום: P1 סיים. current_running_pid = 1, context_switches_count = 1.\n\n3.  **יחידות זמן 9-12:** P3 (Priority=1) נותר.\n    *   ביחידת זמן 9, P3 נבחר. current_running_pid משתנה מ-1 ל-3. **נספרת החלפת הקשר השנייה (2).**\n    *   ביחידות זמן 10-12, P3 ממשיך לרוץ. אין החלפת קשר. P3 מסיים ביחידת זמן 12.\n    *   בסיום: P3 סיים. current_running_pid = 3, context_switches_count = 2.\n\nסה\"כ החלפות הקשר: 2."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

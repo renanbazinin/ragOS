@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 22:46:12",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3180,
+      "output_tokens": 1249,
+      "total_tokens": 6528
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Virtual Memory",
+      "Copy-on-Write",
+      "Processes",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המשתמשת בזיכרון ויוצרת תהליך בן באמצעות `fork()`. יש להניח שמערכת ההפעלה מיישמת מנגנון Copy-on-Write (COW) עבור העתקת דפי זיכרון ב-`fork()`.\n\nנתון קטע הקוד הבא:\n\nהריצו את התוכנית, ונתחו את פלטה. הסבירו מדוע הפלט הוא כזה, תוך התייחסות למנגנון הזיכרון הווירטואלי ומנגנון ה-Copy-on-Write.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\n#define BUFFER_SIZE (4 * 1024 * 1024) // 4MB\n\nint main() {\n    int *buffer = (int *)malloc(BUFFER_SIZE);\n    if (buffer == NULL) {\n        perror(\"malloc failed\");\n        return 1;\n    }\n\n    // Initialize buffer\n    for (int i = 0; i < BUFFER_SIZE / sizeof(int); ++i) {\n        buffer[i] = 0; // Initialize all to 0\n    }\n\n    printf(\"Parent: Initial value at buffer[0] = %d\\n\", buffer[0]);\n\n    pid_t pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        free(buffer);\n        return 1;\n    } else if (pid == 0) { // Child process\n        sleep(1); // Ensure parent prints initial value first\n        printf(\"Child: Modifying buffer[0]...\\n\");\n        buffer[0] = 999; // Modify the first element\n        printf(\"Child: Value at buffer[0] after modification = %d\\n\", buffer[0]);\n        free(buffer); // Child frees its copy\n        exit(0);\n    } else { // Parent process\n        wait(NULL); // Wait for child to finish\n        printf(\"Parent: Value at buffer[0] after child modified it = %d\\n\", buffer[0]);\n        free(buffer); // Parent frees its copy\n    }\n\n    return 0;\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "התוכנית מתחילה באלוקציה ואיפוס של חוצץ זיכרון גדול (4MB) על ידי תהליך האב. לאחר מכן, האב מדפיס את הערך ההתחלתי של `buffer[0]`, שהוא 0.\n\nכאשר מתבצעת קריאת המערכת `fork()`, נוצר תהליך בן. מערכת ההפעלה, המשתמשת במנגנון Copy-on-Write (COW), משכפלת את מרחב הכתובות הווירטואלי של האב עבור הבן. אך בתחילה, שני התהליכים (האב והבן) חולקים את אותם דפי זיכרון פיזיים (physical pages) עבור האזור `buffer`. דפים אלו מסומנים כ-read-only בטבלאות הדפים של שני התהליכים.\n\nכאשר תהליך הבן ניגש לשנות את `buffer[0]` (בשורה `buffer[0] = 999;`), מתרחש page fault (כיוון שהדף מסומן כ-read-only). מערכת ההפעלה מזהה שזהו דף COW, ולכן היא יוצרת עותק פרטי חדש של הדף הפיזי המכיל את `buffer[0]` עבור תהליך הבן. הבן כותב את הערך 999 לעותק הפרטי שלו. הערך בזיכרון הפיזי המקורי של האב נשאר 0.\n\nהבן מדפיס את הערך 999 (מהעותק הפרטי שלו) ואז מסיים. האב ממתין לסיום הבן (`wait(NULL)`). לאחר מכן, האב מדפיס שוב את הערך של `buffer[0]` ממרחב הכתובות שלו. כיוון שהאב מעולם לא שינה את הדף בעצמו, והשינוי של הבן בוצע על עותק פרטי, הערך של `buffer[0]` במרחב האב נשאר 0.\n\nלכן, הפלט יהיה:\nParent: Initial value at buffer[0] = 0\nChild: Modifying buffer[0]...\nChild: Value at buffer[0] after modification = 999\nParent: Value at buffer[0] after child modified it = 0"
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "CPU Scheduling",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 00:24:52",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4397,
+      "output_tokens": 4054,
+      "total_tokens": 16786
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "CPU Scheduling",
+      "Processes",
+      "Concurrency",
+      "System Calls"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה, המריצה מספר תהליכי בן במקביל. יש להניח שהמערכת כוללת מעבד יחיד (single CPU) וכל קריאות המערכת מצליחות.\n`fflush(stdout)` מבוצע לאחר כל הדפסה כדי להבטיח שהפלט נכתב מיד.\n`CPU_BURST_ITERATIONS` מייצג לולאה שלוקחת כ-200 מילישניות, ו-`IO_BURST_US` הוא 50 מילישניות.\n",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\n#define N 3 // Number of children\n#define CPU_BURST_ITERATIONS 100000000 // A significant CPU load (approx 200ms)\n#define IO_BURST_US 50000 // 50 milliseconds\n\nvoid child_task(int id) {\n    pid_t pid = getpid();\n    printf(\"Child %d (PID %d): Start\\n\", id, pid);\n    fflush(stdout);\n\n    if (id % 2 == 0) { // Even ID: CPU-bound\n        for (long k = 0; k < CPU_BURST_ITERATIONS; k++);\n        printf(\"Child %d (PID %d): CPU Work Done\\n\", id, pid);\n        fflush(stdout);\n    } else { // Odd ID: I/O-bound (sleep)\n        usleep(IO_BURST_US);\n        printf(\"Child %d (PID %d): Sleep Done\\n\", id, pid);\n        fflush(stdout);\n    }\n\n    printf(\"Child %d (PID %d): End\\n\", id, pid);\n    fflush(stdout);\n    exit(0);\n}\n\nint main() {\n    printf(\"Parent (PID %d): Initializing\\n\", getpid());\n    fflush(stdout);\n\n    pid_t pids[N];\n    for (int i = 0; i < N; ++i) {\n        pids[i] = fork();\n        if (pids[i] == -1) {\n            perror(\"fork failed\");\n            exit(1);\n        } else if (pids[i] == 0) {\n            child_task(i);\n        }\n    }\n\n    printf(\"Parent (PID %d): All children forked\\n\", getpid());\n    fflush(stdout);\n\n    for (int i = 0; i < N; ++i) {\n        int status;\n        pid_t child_pid = wait(&status);\n        printf(\"Parent (PID %d): Child %d terminated\\n\", getpid(), child_pid);\n        fflush(stdout);\n    }\n\n    printf(\"Parent (PID %d): Finalizing\\n\", getpid());\n    fflush(stdout);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "8.1",
+        "text": "תארו פלט אפשרי אחד של התוכנית תחת אלגוריתם תזמון FIFO (First-In, First-Out). הסבירו את סדר האירועים המוביל לפלט זה.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.2",
+        "text": "תארו פלט אפשרי אחד של התוכנית תחת אלגוריתם תזמון Round Robin עם קוואנטום של 10 מילישניות. הסבירו את ההבדלים המרכזיים בפלט בהשוואה לאלגוריתם FIFO, וכיצד הם נובעים מההתנהגות של Round Robin.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.3",
+        "text": "האם סדר הפלטים של תהליכי הבן (הודעות ה-'Start', 'CPU Work Done'/'Sleep Done', ו-'End') יהיה דטרמיניסטי לחלוטין תחת אלגוריתם Round Robin? נמקו.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הסבר כללי:\nהתוכנית יוצרת שלושה תהליכי בן (C0, C1, C2) מהתהליך הראשי (P). תהליכים C0 ו-C2 מבצעים עבודה עתירת מעבד (כ-200ms), בעוד שתהליך C1 מבצע פעולת I/O (שינה למשך 50ms). התהליך האב ממתין לכל הבנים.\n\n8.1. פלט אפשרי תחת אלגוריתם FIFO (First-In, First-Out):\nב-FIFO, תהליכים רצים ללא הפסקה מרגע שהם נבחרים ועד שהם מסיימים או נחסמים. בהנחה שתהליכי הבן נכנסים לתור המוכנים בסדר יצירתם (C0, C1, C2):\n\n**סדר אירועים:**\n1.  **P מתחיל:** מדפיס \"Parent (PID X): Initializing\" ואז \"Parent (PID X): All children forked\".\n2.  **P נחסם:** קורא `wait()` וממתין לילדים.\n3.  **C0 רץ (CPU-bound):** נבחר ראשון. מדפיס \"Child 0 (PID Y): Start\". מבצע את לולאת המעבד כ-200ms ללא הפרעה. מדפיס \"Child 0 (PID Y): CPU Work Done\" ו-\"Child 0 (PID Y): End\". C0 מסיים.\n4.  **P מתעורר:** מקבל הודעה על סיום C0. מדפיס \"Parent (PID X): Child Y terminated\".\n5.  **P נחסם שוב:** קורא `wait()` וממתין לילדים הבאים.\n6.  **C1 רץ (I/O-bound):** נבחר שני. מדפיס \"Child 1 (PID Z): Start\". קורא `usleep(50000)` ונחסם למשך 50ms.\n7.  **C2 רץ (CPU-bound):** מכיוון ש-C1 חסום, C2 נבחר. מדפיס \"Child 2 (PID W): Start\". מבצע את לולאת המעבד כ-200ms ללא הפרעה. מדפיס \"Child 2 (PID W): CPU Work Done\" ו-\"Child 2 (PID W): End\". C2 מסיים.\n8.  **P מתעורר:** מקבל הודעה על סיום C2. מדפיס \"Parent (PID X): Child W terminated\".\n9.  **P נחסם שוב:** קורא `wait()` וממתין לילדים הבאים.\n10. **C1 מתעורר:** לאחר 50ms (שעברו בזמן ש-C0 ו-C2 רצו). C1 הופך למוכן.\n11. **C1 רץ:** מדפיס \"Child 1 (PID Z): Sleep Done\" ו-\"Child 1 (PID Z): End\". C1 מסיים.\n12. **P מתעורר:** מקבל הודעה על סיום C1. מדפיס \"Parent (PID X): Child Z terminated\".\n13. **P מסיים:** מדפיס \"Parent (PID X): Finalizing\".\n\n**פלט אפשרי:**\nParent (PID X): Initializing\nParent (PID X): All children forked\nChild 0 (PID Y): Start\nChild 0 (PID Y): CPU Work Done\nChild 0 (PID Y): End\nParent (PID X): Child Y terminated\nChild 1 (PID Z): Start\nChild 2 (PID W): Start\nChild 2 (PID W): CPU Work Done\nChild 2 (PID W): End\nParent (PID X): Child W terminated\nChild 1 (PID Z): Sleep Done\nChild 1 (PID Z): End\nParent (PID X): Child Z terminated\nParent (PID X): Finalizing\n\n8.2. פלט אפשרי תחת אלגוריתם Round Robin (קוואנטום 10ms):\nב-Round Robin, תהליכים מופסקים מראש (preempted) לאחר זמן קוואנטום, וניתנת להם הזדמנות נוספת לפי תור. תהליך שנחסם (למשל, בגלל I/O) מוסר מהתור ומוחזר אליו כשהוא מוכן שוב.\n\n**סדר אירועים (מקוצר):**\n1.  **P מתחיל:** מדפיס \"Parent (PID X): Initializing\" ואז \"Parent (PID X): All children forked\".\n2.  **P נחסם:** קורא `wait()`.\n3.  **C0 רץ (10ms):** מדפיס \"Child 0 (PID Y): Start\". מבצע חלק מעבודת המעבד. מופסק.\n4.  **C1 רץ (10ms):** מדפיס \"Child 1 (PID Z): Start\". קורא `usleep(50000)` ונחסם.\n5.  **C2 רץ (10ms):** מדפיס \"Child 2 (PID W): Start\". מבצע חלק מעבודת המעבד. מופסק.\n6.  **C0 ו-C2 מתחלפים:** ממשיכים לרוץ 10ms כל אחד, מתקדמים בעבודת המעבד שלהם.\n7.  **C1 מתעורר (לאחר 50ms):** מתווסף חזרה לתור המוכנים. מכיוון שהוא תהליך I/O-bound, הוא יקבל את המעבד יחסית במהירות לאחר שהתעורר.\n8.  **C1 רץ (10ms):** מדפיס \"Child 1 (PID Z): Sleep Done\" ו-\"Child 1 (PID Z): End\". C1 מסיים.\n9.  **P מתעורר:** מקבל הודעה על סיום C1. מדפיס \"Parent (PID X): Child Z terminated\".\n10. **P נחסם שוב:** קורא `wait()`.\n11. **C0 ו-C2 ממשיכים:** מתחלפים בקבלת המעבד עד שכל אחד מסיים את 200ms המעבד שלו.\n12. **C0 מסיים:** מדפיס \"Child 0 (PID Y): CPU Work Done\" ו-\"Child 0 (PID Y): End\".\n13. **P מתעורר:** מדפיס \"Parent (PID X): Child Y terminated\".\n14. **P נחסם שוב:** קורא `wait()`.\n15. **C2 מסיים:** מדפיס \"Child 2 (PID W): CPU Work Done\" ו-\"Child 2 (PID W): End\".\n16. **P מתעורר:** מדפיס \"Parent (PID X): Child W terminated\".\n17. **P מסיים:** מדפיס \"Parent (PID X): Finalizing\".\n\n**פלט אפשרי (מסודר יותר):**\nParent (PID X): Initializing\nParent (PID X): All children forked\nChild 0 (PID Y): Start\nChild 1 (PID Z): Start\nChild 2 (PID W): Start\nChild 1 (PID Z): Sleep Done\nChild 1 (PID Z): End\nParent (PID X): Child Z terminated\nChild 0 (PID Y): CPU Work Done\nChild 0 (PID Y): End\nParent (PID X): Child Y terminated\nChild 2 (PID W): CPU Work Done\nChild 2 (PID W): End\nParent (PID X): Child W terminated\nParent (PID X): Finalizing\n\n**הבדלים מרכזיים בהשוואה ל-FIFO:**\n*   **סדר הודעות ה-`Start`:** ב-Round Robin, הודעות ה-`Start` של כל הילדים יופיעו בהתחלה בזו אחר זו (או לסירוגין) במהירות, מכיוון שכל ילד מקבל קוואנטום קצר כדי להתחיל. ב-FIFO, הודעת `Start` של ילד אחד תופיע, ואז הוא יסיים את פעולתו לפני שילד אחר יתחיל.\n*   **סיום תהליכי I/O-bound:** ב-Round Robin, תהליך C1 (I/O-bound) יסיים את פעולתו ויודפסו הודעות ה-`Sleep Done` וה-`End` שלו הרבה לפני שתהליכי C0 ו-C2 (CPU-bound) יסיימו את עבודת המעבד שלהם. כתוצאה מכך, הודעת ה-`Parent: Child Z terminated` (עבור C1) תופיע מוקדם יותר בפלט. ב-FIFO, תהליכי ה-CPU-bound סיימו ראשונים כי הם לא הופסקו.\n*   **אינטרליבינג (Interleaving):** באופן כללי, תהיה יותר אינטרליבינג (ערבוב) בין הפלטים של תהליכי ה-CPU-bound (C0 ו-C2) ב-Round Robin, מכיוון שהם מתחלפים על המעבד. ב-FIFO, הם רצים ברצף.\n\n8.3. האם סדר הפלטים של תהליכי הבן יהיה דטרמיניסטי לחלוטין תחת אלגוריתם Round Robin? נמקו.\n**לא, סדר הפלטים של תהליכי הבן לא יהיה דטרמיניסטי לחלוטין תחת אלגוריתם Round Robin.**\n\n**נימוק:**\nאף על פי שאלגוריתם Round Robin הוא אלגוריתם תזמון מוגדר, ישנם מספר גורמים שיכולים להשפיע על הסדר המדויק של הפלטים ולהפוך אותו ללא דטרמיניסטי:\n1.  **סדר הכנסת תהליכים לתור המוכנים:** כאשר תהליכים הופכים למוכנים (למשל, לאחר `fork` או לאחר סיום `usleep`), הסדר המדויק שבו הם מתווספים לתור המוכנים של המערכת יכול להשתנות מעט בין הרצות שונות, בהתאם למיקרו-תזמונים של קריאות מערכת או אירועי קלט/פלט.\n2.  **הבדלים זעירים בזמני ביצוע:** זמני הריצה של לולאות CPU או השהיות I/O אינם מדויקים לחלוטין ויכולים להשתנות במילישניות בודדות בין הרצות שונות עקב עומס מערכת, הפרעות, קאש, וכו'. שינויים אלו יכולים להשפיע על מתי בדיוק תהליך CPU-bound מסיים את הקוואנטום שלו או מתי תהליך I/O-bound מתעורר, ובכך לשנות את סדר התור.\n3.  **מדיניות תזמון פנימית:** מערכות הפעלה מודרניות מורכבות, וגם אם הליבה משתמשת ב-Round Robin בבסיסה, ייתכנו תת-מערכות תזמון נוספות (למשל, לטיפול באירועי מערכת, מנגנוני I/O) שיכולות להכניס אי-דטרמיניסטיות לסדר הקוואנטומים המוקצים בפועל. לדוגמה, אם שני תהליכים הופכים למוכנים בדיוק באותו רגע, הסדר שבו הם יתווספו לתור המוכנים יכול להיות תלוי בפרטים מימושיים של מערכת ההפעלה.\n\nלכן, בעוד שהדפוס הכללי של Round Robin (אינטרליבינג, תהליכי I/O מסיימים מוקדם יותר) יישמר, הסדר המדויק של כל שורת פלט בודדת, במיוחד בין תהליכים בעלי אופי דומה (C0 ו-C2), יכול להשתנות בין הרצות שונות."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

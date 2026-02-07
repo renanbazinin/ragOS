@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 00:46:02",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5571,
+      "output_tokens": 1129,
+      "total_tokens": 10712
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Concurrency",
+      "Race Conditions",
+      "Threads",
+      "Shared Memory"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המשתמשת בחוטים (threads) לקידום מונה גלובלי משותף. שני חוטים מריצים את אותה פונקציה שמקדמת את המונה מספר קבוע של פעמים. אין שימוש במנגנוני סנכרון. מהו טווח הערכים האפשרי (מינימלי ומקסימלי) עבור המונה הגלובלי `counter` לאחר ששני החוטים סיימו את ריצתם? נניח ש-`N_INCREMENTS` הוא 100.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\n#define N_INCREMENTS 100 // כל חוט יקדם את המונה מספר זה של פעמים\n#define NUM_THREADS 2    // מספר החוטים\n\nint counter = 0;\n\nvoid* thread_func(void* arg) {\n    for (int i = 0; i < N_INCREMENTS; ++i) {\n        counter++; // פעולה לא אטומית\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, thread_func, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הערך המקסימלי האפשרי עבור `counter` הוא 200. זה מתרחש כאשר אין הפרעה בין פעולות הקידום של החוטים, וכל אחד מהם מבצע את 100 הקידומים שלו באופן רציף וללא איבוד נתונים. בסך הכל מתבצעים 2 * 100 = 200 קידומים בהצלחה.\n\nהערך המינימלי האפשרי עבור `counter` הוא 100. זה מתרחש עקב תנאי מירוץ (race condition) בפעולת `counter++`. פעולה זו אינה אטומית ומורכבת משלושה שלבים: קריאת הערך הנוכחי של `counter` לתוך אוגר, הגדלת הערך באוגר, וכתיבת הערך החדש מהאוגר בחזרה ל-`counter`. תרחיש לדוגמה שמוביל לערך מינימלי הוא:\n1. חוט 1 קורא את הערך הנוכחי של `counter` (שהוא 0) ומאחסן אותו באוגר פרטי שלו. (reg_T1 = 0)\n2. מתרחש מעבר הקשר (context switch) לחוט 2.\n3. חוט 2 מריץ את כל 100 הקידומים שלו בהצלחה, ללא הפרעה. `counter` מגיע ל-100.\n4. מתרחש מעבר הקשר בחזרה לחוט 1.\n5. חוט 1 ממשיך את פעולת הקידום שלו: הוא מגדיל את הערך שקרא בתחילה (0) ל-1, וכותב 1 ל-`counter`. כעת, `counter` מוגדר ל-1, למרות שחוט 2 כבר קידם אותו ל-100, ובכך הוא דרס את כל הקידומים של חוט 2.\n6. חוט 1 ממשיך את יתרת הקידומים שלו (99 פעמים נוספות), כאשר בכל פעם הוא קורא את הערך הנוכחי של `counter` (שמתחיל מ-1) ומקדמו. בסיום, `counter` יגיע ל-100.\nבמקרה זה, כל הקידומים של חוט 2 (למעט אולי האחרון שחוט 1 דרס) אבדו עקב פעולת הדריסה של חוט 1, ורק הקידומים של חוט 1 נשמרו, כך שהמונה הסופי הוא 100."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 22:45:57",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3180,
+      "output_tokens": 1755,
+      "total_tokens": 11295
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Virtual Memory",
+      "Paging",
+      "Copy-on-Write",
+      "Fork"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המשתמשת בזיכרון וירטואלי ובמנגנון Copy-on-Write (COW).\nנתון:\n*   גודל דף זיכרון (PAGE_SIZE) הוא 4KB.\n*   המערך `arr` בגודל 1MB (ARRAY_SIZE) מוקצה באמצעות `malloc` בתהליך האב.\n*   הלולאה שמאחלת את המערך מבטיחה שכל הדפים של המערך יוקצו פיזית בתהליך האב ויהיו מוכנים ל-COW.\n*   המערכת ההפעלה תומכת באופן מלא ב-Copy-on-Write עבור דפי זיכרון ששונו.\n\nבהתבסס על הקוד הנתון וההנחות, מהו המספר המקסימלי של דפים פיזיים שישמשו את המערך `arr` במקביל על ידי שני התהליכים (האב והילד) בכל שלב של ריצת התוכנית? הסבר את חישובך.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n#include <string.h>\n\n#define PAGE_SIZE 4096 // 4KB\n#define ARRAY_SIZE (256 * PAGE_SIZE) // 1MB array, 256 pages\n\nint main() {\n    int *arr = (int *)malloc(ARRAY_SIZE);\n    if (arr == NULL) {\n        perror(\"malloc failed\");\n        return 1;\n    }\n\n    // Initialize array - this brings all pages into memory for the parent\n    // and prepares them for COW if fork happens later.\n    for (int i = 0; i < ARRAY_SIZE / sizeof(int); ++i) {\n        arr[i] = i;\n    }\n\n    pid_t pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        free(arr);\n        return 1;\n    } else if (pid == 0) { // Child process\n        // Modify elements at specific locations\n        arr[0] = -1; // Modifies the first page\n        arr[PAGE_SIZE / sizeof(int) + 5] = -2; // Modifies the second page\n        arr[2 * PAGE_SIZE / sizeof(int) + 10] = -3; // Modifies the third page\n        \n        exit(0);\n    } else { // Parent process\n        wait(NULL);\n        free(arr);\n    }\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הסבר:\n1.  **אתחול בתהליך האב:** המערך `arr` בגודל 1MB (ARRAY_SIZE) מוקצה באמצעות `malloc`. הלולאה מאחלת את כל האלמנטים במערך. מכיוון ש-`PAGE_SIZE` הוא 4KB, מערך בגודל 1MB דורש `1MB / 4KB = 1024KB / 4KB = 256` דפים פיזיים. בשלב זה, רק תהליך האב קיים, וכל 256 הדפים הללו מוקצים לו.\n2.  **קריאת `fork()`:** כאשר `fork()` נקרא, נוצר תהליך ילד. בזכות מנגנון ה-Copy-on-Write (COW), תהליך הילד אינו מקבל מיד עותק משלו של כל דפי הזיכרון של האב. במקום זאת, שני התהליכים חולקים את אותם 256 דפים פיזיים. דפים אלו מסומנים כקריאה בלבד (read-only) עבור שני התהליכים. בשלב זה, לא מוקצים דפים פיזיים *נוספים* עבור המערך בתהליך הילד.\n3.  **שינויים בתהליך הילד:** תהליך הילד משנה שלושה אלמנטים במערך `arr`:\n    *   `arr[0] = -1;` משנה את האלמנט הראשון, שנמצא בדף הראשון של המערך.\n    *   `arr[PAGE_SIZE / sizeof(int) + 5] = -2;` משנה אלמנט בדף השני של המערך.\n    *   `arr[2 * PAGE_SIZE / sizeof(int) + 10] = -3;` משנה אלמנט בדף השלישי של המערך.\n    כאשר תהליך הילד מנסה לכתוב לדף המסומן כ-read-only, מתרחש \"Copy-on-Write Page Fault\". מערכת ההפעלה מיירטת את הפעולה, יוצרת עותק חדש של הדף עבור תהליך הילד, מעתיקה אליו את התוכן המקורי, משנה את טבלת הדפים של הילד כך שתצביע על הדף החדש, ומשנה את ההרשאות של הדף החדש לכתיבה וקריאה. דף זה נשאר read-only עבור האב.\n    מכיוון שהילד משנה שלושה אלמנטים שנמצאים בשלושה דפים *שונים*, יתרחשו 3 אירועי COW Page Faults, ויוקצו 3 דפים פיזיים חדשים עבור הילד.\n4.  **מספר דפים מקסימלי במקביל:**\n    *   תהליך האב עדיין משתמש ב-256 הדפים המקוריים (כולל שלושת הדפים שהילד עשה להם עותק, שעדיין נגישים לאב בגרסתם המקורית). כלומר, 256 דפים פיזיים מוקצים עבור המערך של האב.\n    *   תהליך הילד משתמש ב-3 דפים פיזיים *חדשים* (שהם עותקים של הדפים המקוריים 1, 2, 3) וב-253 דפים משותפים עם האב (הדפים שלא שונו).\n    *   המספר הכולל של דפים פיזיים הייחודיים לאב או לילד, או משותפים, הוא:\n        256 דפים (של האב) + 3 דפים (נוספים שנוצרו עבור הילד, שהם עותקים של דפים שהיו שייכים לאב והאב עדיין משתמש בהם בגרסתם המקורית) = 259 דפים.\n    נקודת המקסימום היא לאחר שהילד ביצע את כל השינויים לפני שהוא מסיים, כאשר גם האב וגם הילד קיימים וכל הדפים המדוברים נמצאים בזיכרון פיזי.",
+      "code_snippet": null
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

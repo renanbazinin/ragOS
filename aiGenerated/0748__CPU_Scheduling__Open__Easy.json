@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "CPU Scheduling",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 00:02:16",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2314,
+      "output_tokens": 517,
+      "total_tokens": 3759
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "CPU Scheduling",
+      "FCFS"
+    ],
+    "content": {
+      "text": "תארו את אלגוריתם תזמון המעבד First-Come, First-Served (FCFS). מהו היתרון העיקרי שלו, ומהו חיסרון משמעותי אחד שיכול להיות לו במערכת מרובת תהליכים?",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "תיאור: אלגוריתם FCFS (First-Come, First-Served) מתזמן תהליכים לפי סדר הגעתם לתור המוכנים (ready queue). התהליך הראשון שמגיע מקבל את המעבד ורץ עד לסיום פעולתו, או עד שהוא נכנס למצב המתנה (למשל, עבור קלט/פלט), והוא אינו נקטע (non-preemptive).\n\nיתרון עיקרי: היתרון הבולט ביותר של FCFS הוא פשטותו הרבה ליישום והבנה. הוא אינו דורש חישובים מורכבים או מעקב אחרי זמנים, מה שהופך אותו לקל מאוד למימוש במערכות הפעלה.\n\nחיסרון משמעותי: החיסרון המרכזי של FCFS הוא שהוא עלול לסבול מ\"אפקט השיירה\" (convoy effect). מצב זה מתרחש כאשר תהליך ארוך מאוד (בעל זמן ביצוע ארוך) מגיע ראשון ומשתלט על המעבד, וגורם לכל התהליכים הקצרים יותר שהגיעו אחריו להמתין זמן רב באופן לא יעיל. זה יכול להוביל לזמני המתנה וזמני מחזור (turnaround time) ממוצעים גבוהים מאוד עבור כלל המערכת, ולפגיעה בביצועים הכוללים."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

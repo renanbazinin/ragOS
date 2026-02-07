@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "File Systems",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 23:52:00",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3062,
+      "output_tokens": 2100,
+      "total_tokens": 11701
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "File Systems",
+      "Disk Management",
+      "Inodes",
+      "Block Allocation"
+    ],
+    "content": {
+      "text": "במערכת הפעלה, ניהול קבצים דורש הבנה כיצד קבצים מאוחסנים פיזית על הדיסק. נתונה מערכת קבצים היפותטית המשתמשת במבנה Inode סטנדרטי, הכולל מצביעים ישירים (direct pointers), מצביע עקיף יחיד (single indirect pointer), ומצביע עקיף כפול (double indirect pointer). כל מצביע מצביע לבלוק אחד. הבלוקים העקיפים מכילים מצביעים לבלוקים אחרים (נתונים או עקיפים נוספים). המטרה היא לחשב את מספר הבלוקים הפיזיים הכולל על הדיסק שקובץ מסוים תופס, בהתחשב בגודלו הלוגי ובמבנה ה-Inode. מספר הבלוקים הכולל צריך לכלול גם את בלוקי הנתונים וגם את הבלוקים המשמשים לאחסון המצביעים העקיפים.\n\nיש לממש את הפונקציה `calculate_total_blocks` המקבלת מצביע למבנה `inode_t` ומחזירה את מספר הבלוקים הפיזיים הכולל. יש להשתמש בקבועים ובמבנה הנתונים המוגדרים מטה. שימו לב לטיפול נכון במקרים של קבצים קטנים וגדולים מאוד, ולוודא חישוב מדויק עבור בלוקי המצביעים העקיפים.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h> \n\n#define BLOCK_SIZE 4096       // גודל בלוק בבתים\n#define NUM_DIRECT_PTRS 12    // מספר מצביעים ישירים ב-inode\n#define PTRS_PER_BLOCK (BLOCK_SIZE / sizeof(int)) // מספר מצביעים בבלוק עקיף (בהנחה שמצביע הוא int)\n\n// מבנה Inode פשוט\ntypedef struct inode {\n    long i_size; // גודל הקובץ בבתים\n    // לצורך שאלה זו, אין צורך במימוש בפועל של המצביעים,\n    // אלא רק בהבנת המבנה הלוגי וחישוב המקום\n} inode_t;\n\n// יש לממש פונקציה זו\nint calculate_total_blocks(inode_t *inode) {\n    // Implement your solution here\n    return 0; // Placeholder\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": 25,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון דורש חישוב מדורג של הבלוקים הנדרשים בכל רמה של מצביעים (ישירים, עקיפים יחידים, עקיפים כפולים). יש לזכור שבלוקים עקיפים (single/double indirect blocks) עצמם תופסים מקום על הדיסק וצריך לספור אותם בנוסף לבלוקי הנתונים.\n\n1.  **חישוב בלוקי נתונים:** תחילה, נחשב כמה בלוקי נתונים נדרשים עבור הקובץ. אם גודל הקובץ הוא 0, אין צורך בבלוקי נתונים. אחרת, נשתמש בחישוב תקרה: `(i_size + BLOCK_SIZE - 1) / BLOCK_SIZE`.\n2.  **מצביעים ישירים:** עד `NUM_DIRECT_PTRS` בלוקים מטופלים על ידי מצביעים ישירים. בלוקים אלו אינם דורשים בלוקים נוספים עבור המצביעים עצמם.\n3.  **מצביעים עקיפים יחידים:** אם מספר בלוקי הנתונים גדול מ-`NUM_DIRECT_PTRS`, נצטרך להשתמש במצביע העקיף היחיד. בלוק זה יכול להכיל `PTRS_PER_BLOCK` מצביעים. אם יש צורך בבלוק זה (כלומר, אם ישנם בלוקי נתונים שחורגים מיכולת הכיסוי של המצביעים הישירים), הוא עצמו תופס בלוק פיזי אחד על הדיסק.\n4.  **מצביעים עקיפים כפולים:** אם מספר בלוקי הנתונים גדול ממה שיכולים לכסות המצביעים הישירים והעקיפים היחידים יחד (`NUM_DIRECT_PTRS + PTRS_PER_BLOCK`), נצטרך להשתמש במצביע העקיף הכפול. בלוק זה מכיל מצביעים לבלוקים עקיפים יחידים. הוא עצמו תופס בלוק פיזי אחד על הדיסק. בנוסף, כל אחד מבלוקי המצביעים העקיפים היחידים שהוא מצביע אליהם תופס גם הוא בלוק פיזי אחד. יש לחשב כמה בלוקים עקיפים יחידים כאלה נדרשים.\n\n**מימוש:**\n```c\n#include <stdio.h>\n#include <stdlib.h> \n\n#define BLOCK_SIZE 4096       // גודל בלוק בבתים\n#define NUM_DIRECT_PTRS 12    // מספר מצביעים ישירים ב-inode\n#define PTRS_PER_BLOCK (BLOCK_SIZE / sizeof(int)) // מספר מצביעים בבלוק עקיף (בהנחה שמצביע הוא int)\n\n// מבנה Inode פשוט\ntypedef struct inode {\n    long i_size; // גודל הקובץ בבתים\n    // לצורך שאלה זו, אין צורך במימוש בפועל של המצביעים,\n    // אלא רק בהבנת המבנה הלוגי וחישוב המקום\n} inode_t;\n\nint calculate_total_blocks(inode_t *inode) {\n    if (inode->i_size == 0) {\n        return 0;\n    }\n\n    // מספר בלוקי הנתונים הנדרשים עבור הקובץ\n    long num_data_blocks = (inode->i_size + BLOCK_SIZE - 1) / BLOCK_SIZE;\n    long total_physical_blocks = num_data_blocks; // מתחילים עם בלוקי הנתונים עצמם\n\n    // בדיקה עבור בלוק מצביעים עקיפים יחידים\n    // אם יש יותר בלוקי נתונים מאשר המצביעים הישירים יכולים לכסות\n    if (num_data_blocks > NUM_DIRECT_PTRS) {\n        total_physical_blocks += 1; // מוסיפים בלוק אחד עבור בלוק המצביעים העקיפים היחידים עצמו\n    }\n\n    // בדיקה עבור בלוק מצביעים עקיפים כפולים\n    // ויש גם לחשב את בלוקי המצביעים העקיפים היחידים שמתחתיו\n    // היכולת הכוללת של מצביעים ישירים ועקיפים יחידים\n    long covered_by_direct_and_single_indirect = NUM_DIRECT_PTRS + PTRS_PER_BLOCK;\n\n    if (num_data_blocks > covered_by_direct_and_single_indirect) {\n        total_physical_blocks += 1; // מוסיפים בלוק אחד עבור בלוק המצביעים העקיפים הכפולים עצמו\n\n        // נחשב כמה בלוקי מצביעים עקיפים יחידים נדרשים תחת הבלוק העקיף הכפול\n        // אלו הבלוקים שחורגים מיכולת הכיסוי של המצביעים הישירים והעקיפים היחידים\n        long remaining_data_blocks_for_double = num_data_blocks - covered_by_direct_and_single_indirect;\n        // חישוב תקרה של כמה בלוקי מצביעים עקיפים יחידים נדרשים כדי להצביע ל-remaining_data_blocks_for_double\n        long num_single_indirect_blocks_under_double = (remaining_data_blocks_for_double + PTRS_PER_BLOCK - 1) / PTRS_PER_BLOCK;\n        total_physical_blocks += num_single_indirect_blocks_under_double; // מוסיפים את בלוקי המצביעים העקיפים היחידים האלה\n    }\n\n    return (int)total_physical_blocks;\n}\n```\n",
+      "difficulty_estimation": "Hard"
+    }
+  }
+}

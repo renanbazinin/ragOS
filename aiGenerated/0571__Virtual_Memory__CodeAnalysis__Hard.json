@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 22:48:06",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3618,
+      "output_tokens": 2627,
+      "total_tokens": 12062
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Virtual Memory",
+      "Page Faults",
+      "Copy-on-Write",
+      "Process Management"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המבצעת הקצאת זיכרון גדולה, מאתחלת אותה, מבצעת fork(), ולאחר מכן תהליך הבן משנה חלקים מהזיכרון שהוקצה. עליך לנתח את השימוש בזיכרון הפיזי והווירטואלי ואת מספר תקלות הדף (page faults) שיתרחשו. הקוד הבא יורץ על מערכת לינוקס עם גודל דף של 4096 בתים (PAGE_SIZE) וגודל של int הוא 4 בתים.\n\nנתח את התוכנית וציין:\n1.  כמה זיכרון וירטואלי (VAS) מוקצה למערך large_array בתהליך האב מיד לאחר שלב 1?\n2.  כמה זיכרון פיזי (RAM) נצרך על ידי המערך large_array בתהליך האב מיד לאחר שלב 2 (לפני fork)?\n3.  כמה זיכרון פיזי (RAM) נצרך על ידי המערך large_array *בסה\"כ* עבור שני התהליכים (האב והבן) מיד לאחר שלב 3 (לאחר fork ולפני כל שינוי על ידי הבן)?\n4.  כמה תקלות דף (page faults) יתרחשו *בסה\"כ* כתוצאה מהלולאה בשלב 4 בתהליך הבן?\n5.  כמה זיכרון פיזי (RAM) נצרך על ידי המערך large_array *בסה\"כ* עבור שני התהליכים (האב והבן) לאחר שלב 4 (לאחר שהבן סיים את השינויים)?\n\nבכל סעיף יש לפרט את החישוב ולהסביר את התשובה בהתבסס על מנגנוני זיכרון וירטואלי, כולל העתקה בכתיבה (Copy-on-Write).",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n#include <string.h>\n\n#define GB (1024 * 1024 * 1024)\n#define NUM_INTS (GB / sizeof(int))\n#define PAGE_SIZE 4096 // Common page size\n\nint main() {\n    int *large_array;\n    pid_t pid;\n\n    // שלב 1: הקצאת זיכרון\n    printf(\"Allocating a large array...\\n\");\n    large_array = (int *)malloc(NUM_INTS * sizeof(int));\n    if (large_array == NULL) {\n        perror(\"malloc failed\");\n        return 1;\n    }\n\n    // שלב 2: אתחול המערך\n    // לולאה זו מבטיחה שכל הדפים של המערך יוכנסו לזיכרון הפיזי.\n    printf(\"Initializing array to touch all pages...\\n\");\n    for (long i = 0; i < NUM_INTS; ++i) {\n        large_array[i] = i;\n    }\n    printf(\"Array initialization complete.\\n\");\n\n    // שלב 3: יצירת תהליך בן\n    pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        return 1;\n    } else if (pid == 0) { // תהליך הבן\n        printf(\"Child process (PID %d) started.\\n\", getpid());\n        // שלב 4: שינוי במערך על ידי הבן\n        // הבן משנה מספר שלם אחד בכל דף, מה שיפעיל CoW עבור כל דף כזה.\n        for (long i = 0; i < NUM_INTS; i += (PAGE_SIZE / sizeof(int))) {\n            large_array[i] = -1; // שינוי כדי להפעיל CoW\n        }\n        printf(\"Child process (PID %d) finished modifications.\\n\", getpid());\n        exit(0);\n    } else { // תהליך האב\n        printf(\"Parent process (PID %d) forked child (PID %d).\\n\", getpid(), pid);\n        printf(\"Parent waiting for child...\\n\");\n        wait(NULL); // המתן שהבן יסיים\n        printf(\"Child finished. Parent exiting.\\n\");\n    }\n\n    free(large_array);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": 25,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "ניתוח התוכנית:\nנתונים:\n*   גודל המערך large_array: 1GB = 1024 * 1024 * 1024 בתים.\n*   גודל int: 4 בתים.\n*   מספר האיברים במערך: NUM_INTS = 1GB / 4B = 256 * 1024 * 1024 איברים.\n*   גודל דף (PAGE_SIZE): 4096 בתים.\n*   מספר הדפים הדרושים למערך: 1GB / 4096B = 262,144 דפים.\n\n1.  **זיכרון וירטואלי (VAS) לאחר שלב 1 (הקצאה)**:\n    מיד לאחר הקצאת הזיכרון באמצעות malloc, מערכת ההפעלה מקצה לתהליך האב מרחב כתובות וירטואלי של 1GB עבור large_array. בשלב זה, לרוב לא מוקצה זיכרון פיזי בפועל, אלא רק מופרש מקום במרחב הכתובות הווירטואלי.\n    **תשובה: 1GB**.\n\n2.  **זיכרון פיזי (RAM) לאחר שלב 2 (אתחול)**:\n    לולאת האתחול for (long i = 0; i < NUM_INTS; ++i) { large_array[i] = i; } גורמת לנגיעה (כתיבה) בכל איבר במערך. כתוצאה מכך, כל דף וירטואלי המכיל חלק מהמערך יקבל תקלת דף (page fault) בפעם הראשונה שייגש אליו. מערכת ההפעלה תאלץ להביא את הדף הזה לזיכרון הפיזי. מכיוון שכל איברי המערך נכתבים, כל הדפים המרכיבים את המערך (262,144 דפים) יובאו לזיכרון הפיזי.\n    **תשובה: 1GB**.\n\n3.  **זיכרון פיזי (RAM) לאחר שלב 3 (fork), לפני שינויים**: \n    כאשר מתבצעת קריאה ל-fork(), תהליך הבן נוצר כמעט כעותק זהה של תהליך האב. אולם, במערכות הפעלה מודרניות (כמו לינוקס) מתבצע שימוש במנגנון העתקה בכתיבה (Copy-on-Write - CoW) עבור דפי זיכרון. משמעות הדבר היא שבתחילה, האב והבן חולקים את אותם דפים פיזיים עבור הזיכרון המשותף (כמו large_array). דפים חדשים יוקצו רק כאשר אחד מהתהליכים ינסה לשנות דף שמשותף לשניהם. לכן, בשלב זה, למרות שיש שני תהליכים, הזיכרון הפיזי הכולל שנצרך על ידי המערך עדיין נשאר זהה.\n    **תשובה: 1GB**.\n\n4.  **תקלות דף (page faults) כתוצאה משלב 4 (שינוי הבן)**:\n    הלולאה בתהליך הבן משנה איבר אחד בכל דף וירטואלי: for (long i = 0; i < NUM_INTS; i += (PAGE_SIZE / sizeof(int))). \n    *   PAGE_SIZE / sizeof(int) = 4096 / 4 = 1024. זהו מספר האיברים בתוך דף בודד.\n    *   הלולאה קופצת ב-1024 איברים בכל איטרציה, כלומר היא נכנסת לדף וירטואלי חדש בכל פעם. \n    *   מספר האיטרציות (ומכאן מספר הדפים שהבן ישנה) הוא: NUM_INTS / (PAGE_SIZE / sizeof(int)) = (256 * 1024 * 1024) / 1024 = 256 * 1024 = 262,144.\n    כל כתיבה לדף וירטואלי שעדיין משותף (במצב CoW) תגרום לתקלת דף. מערכת ההפעלה תייצר עותק פרטי של הדף הפיזי עבור תהליך הבן, תמפה אותו למרחב הכתובות של הבן, והבן יוכל לשנות אותו באופן עצמאי. מכיוון שהבן משנה איבר בכל אחד מ-262,144 הדפים המרכיבים את המערך, כל אחד משינויים אלה יפעיל תקלת דף ויגרום ליצירת עותק פרטי של הדף.\n    **תשובה: 262,144 תקלות דף**.\n\n5.  **זיכרון פיזי (RAM) לאחר שלב 4 (לאחר שינויי הבן)**:\n    לאחר שהבן סיים את השינויים, כל דף שהבן שינה (כלומר, כל 262,144 הדפים) קיבל עותק פיזי נפרד בזיכרון. \n    *   האב ממשיך להשתמש ב-1GB המקורי של הדפים הפיזיים.\n    *   הבן יצר 1GB של עותקים פיזיים משלו (262,144 דפים חדשים). \n    לכן, סך הזיכרון הפיזי שנצרך על ידי המערך עבור שני התהליכים יהיה הסכום של הזיכרון הפיזי של האב והבן.\n    **תשובה: 2GB** (1GB לאב + 1GB לבן)."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

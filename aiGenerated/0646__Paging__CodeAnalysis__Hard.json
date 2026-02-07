@@ -1,0 +1,59 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Paging",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 23:23:03",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3971,
+      "output_tokens": 2799,
+      "total_tokens": 14734
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Paging",
+      "Virtual Memory",
+      "TLB",
+      "Page Faults",
+      "Memory Access Time"
+    ],
+    "content": {
+      "text": "נתונה מערכת הפעלה המשתמשת בזיכרון וירטואלי עם מנגנון Paging. להלן הפרטים הטכניים של המערכת:\n*   גודל עמוד: 4KB (קילו-בתים).\n*   TLB (Translation Lookaside Buffer): מכיל 64 כניסות, בשיטת אסוציאטיבית מלאה (Fully Associative).\n*   מדיניות החלפה ב-TLB: LRU (Least Recently Used).\n*   זמן גישה לזיכרון פיזי: 100ns.\n*   זמן בדיקת TLB: 10ns.\n*   מבנה טבלת עמודים: שני סבבים (Two-level page table). כל סבב דורש גישת זיכרון אחת.\n*   זמן טיפול ב-Page Fault (כולל קריאה מהדיסק): 10ms (מילי-שניות).\n*   מרחב כתובות וירטואלי ופיזי: 32 סיביות.\n\nנתונה התוכנית הבאה בשפת C/C++, המאתחלת מטריצה גדולה. יש להניח שהזיכרון המוקצה למטריצה אינו נמצא בזיכרון הפיזי בתחילת ריצת התוכנית (כלומר, כל גישה ראשונית לעמוד חדש תגרום ל-Page Fault). יש להתייחס רק לגישות הזיכרון הנובעות מגישה לאיברי המטריצה.",
+      "code_snippet": "#define ROWS 2048\n#define COLS 2048\n\nint matrix[ROWS][COLS]; // Global array, allocated in BSS/data segment\n\nvoid initialize_matrix() {\n    for (int i = 0; i < ROWS; ++i) {\n        for (int j = 0; j < COLS; ++j) {\n            matrix[i][j] = i * COLS + j; // Memory access here\n        }\n    }\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "כמה Page Faults סך הכל יתרחשו במהלך ריצת הפונקציה initialize_matrix? נמקו.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "כמה TLB Misses סך הכל יתרחשו במהלך ריצת הפונקציה initialize_matrix? נמקו.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.3",
+        "text": "מהו זמן הגישה האפקטיבי הממוצע (Effective Access Time - EAT) לגישת זיכרון יחידה (עבור גישות לאיברי המטריצה בלבד) במהלך ריצת הפונקציה initialize_matrix? הציגו את החישוב המלא.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "פתרון:\n\n**סעיף 1.1: חישוב Page Faults**\nגודל המטריצה: `2048 שורות * 2048 עמודות * sizeof(int)`.\nכאשר `sizeof(int) = 4` בתים:\n`2048 * 2048 * 4 = 2^11 * 2^11 * 2^2 = 2^24` בתים = 16 מגה-בתים (MB).\nגודל עמוד: `4KB = 2^12` בתים.\nמספר העמודים הכולל שהמטריצה תופסת: `16MB / 4KB = 2^24 / 2^12 = 2^12 = 4096` עמודים.\nהגישה למטריצה בתוך הלולאות היא סדרתית (row-major), כלומר, `matrix[i][j]` ולאחר מכן `matrix[i][j+1]` תהיה בכתובת רציפה בזיכרון הווירטואלי.\nמכיוון שכל הזיכרון המוקצה למטריצה אינו נמצא בזיכרון הפיזי בתחילת הריצה (cold start), כל גישה ראשונה לעמוד חדש תגרום ל-Page Fault. הפונקציה `initialize_matrix` עוברת על כל איברי המטריצה, ולכן תגרום לגישה לכל `4096` העמודים הייחודיים.\nלפיכך, מספר ה-Page Faults הכולל יהיה: **4096**.\n\n**סעיף 1.2: חישוב TLB Misses**\nמספר גישות הזיכרון הכולל (לצורך גישה לאיברי המטריצה): `N_accesses = 2048 * 2048 = 4,194,304` גישות.\nמספר שלמים (integers) בעמוד: `4KB / sizeof(int) = 4096 / 4 = 1024` שלמים לעמוד.\nכל שורה במטריצה מכילה `2048` שלמים. לכן, כל שורה תתפרס על פני `2048 / 1024 = 2` עמודים.\nבכל איטרציה של הלולאה החיצונית (`for i`), אנו ניגשים לשני עמודים וירטואליים שונים.\nלדוגמה, עבור `i=0`, נגש לעמודים המכילים את `matrix[0][0]` עד `matrix[0][2047]`. אלו יהיו שני עמודים רציפים (נניח עמוד `P_0` ועמוד `P_1`).\n1.  הגישה הראשונה לעמוד `P_0` (לדוגמה `matrix[0][0]`) תגרום ל-TLB Miss, והכניסה עבור `P_0` תוכנס ל-TLB.\n2.  הגישות הבאות ל-`P_0` (עד `1023` פעמים) יהיו TLB Hits.\n3.  הגישה הראשונה לעמוד `P_1` (לדוגמה `matrix[0][1024]`) תגרום ל-TLB Miss, והכניסה עבור `P_1` תוכנס ל-TLB.\n4.  הגישות הבאות ל-`P_1` (עד `1023` פעמים) יהיו TLB Hits.\nלכן, עבור כל שורה (`i`), יתרחשו 2 TLB Misses (אחד לכל עמוד בשורה).\nסה\"כ שורות: `2048`.\nסה\"כ TLB Misses: `2048 שורות * 2 TLB Misses/שורה = 4096`.\n\nמכיוון שגודל ה-TLB הוא `64` כניסות, וכל שורה מכניסה שתי כניסות חדשות, ה-TLB יתמלא לאחר `32` שורות (`64 / 2`). בשלב זה, מדיניות ה-LRU תגרום לכניסות ישנות (מהשורות הראשונות) להיזרק מה-TLB כדי לפנות מקום לכניסות חדשות. מכיוון שמספר העמודים הכולל (`4096`) גדול בהרבה מגודל ה-TLB (`64`), וכניסות ה-TLB לא נשארות ב-TLB לאורך זמן רב מספיק כדי להיות נגישות שוב (הלולאה החיצונית לא חוזרת על עצמה), כל גישה ראשונית לעמוד חדש בכל איטרציה של `i` תגרום ל-TLB Miss.\nלכן, סך הכל יתרחשו: **4096 TLB Misses**.\n\n**סעיף 1.3: חישוב Effective Access Time (EAT)**\nזמן גישה אפקטיבי (EAT) מחושב לפי הנוסחה:\n`EAT = (N_tlb_hit * T_tlb_hit) + (N_tlb_miss * (T_pt_walk + T_pf_service)) / N_accesses`\nכאשר:\n*   מספר גישות זיכרון כולל (`N_accesses`) = `4,194,304` (מגישה לאיברי המטריצה)\n*   מספר TLB Misses (`N_tlb_miss`) = `4096` (מחישוב בסעיף 1.2)\n*   מספר TLB Hits (`N_tlb_hit`) = `N_accesses - N_tlb_miss = 4,194,304 - 4096 = 4,190,208`\n*   זמן TLB Hit (`T_tlb_hit`) = `10ns`\n*   זמן טיול בטבלת עמודים (`T_pt_walk`) = `2 סבבים * 100ns/סבב = 200ns` (כי טבלת עמודים היא דו-שכבתית וכל סבב דורש גישת זיכרון אחת).\n*   זמן טיפול ב-Page Fault (`T_pf_service`) = `10ms = 10,000,000ns`.\n(הערה: כל TLB Miss בפונקציה זו מוביל ל-Page Fault, כפי שחושב בסעיף א', מכיוון שכל גישה היא לעמוד חדש שאינו בזיכרון)\n\nנחשב תחילה את סך כל הזמן שלוקח לביצוע הפונקציה:\n`Total_Time = (N_tlb_hit * T_tlb_hit) + (N_tlb_miss * (T_pt_walk + T_pf_service))`\n`Total_Time = (4,190,208 * 10ns) + (4096 * (200ns + 10,000,000ns))`\n`Total_Time = 41,902,080ns + (4096 * 10,000,200ns)`\n`Total_Time = 41,902,080ns + 40,960,819,200ns`\n`Total_Time = 41,002,721,280ns`\n\nכעת נחשב את זמן הגישה האפקטיבי הממוצע (EAT):\n`EAT = Total_Time / N_accesses`\n`EAT = 41,002,721,280ns / 4,194,304`\n`EAT = 9775.875ns` (בערך)\n\nזמן הגישה האפקטיבי הממוצע הוא: **9775.875ns**."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

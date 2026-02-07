@@ -1,0 +1,70 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 22:44:17",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3180,
+      "output_tokens": 2946,
+      "total_tokens": 13388
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Virtual Memory",
+      "Paging",
+      "Copy-on-Write",
+      "Processes",
+      "fork"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה. יש להניח כי גודל דף הוא 4KB (4096 בתים) וכי מערכת ההפעלה מממשת Copy-on-Write (CoW) עבור דפים במרחב הזיכרון של תהליכים שנוצרו באמצעות `fork()`. יש להתעלם מדפים המשמשים עבור קוד התוכנית, מחסנית, ערימה, וטבלאות דפים, ולהתמקד אך ורק בדפים המשמשים את המערך הגלובלי `global_buffer`.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\n#define PAGE_SIZE 4096 // Assume 4KB page size\n#define NUM_PAGES 4    // Total 4 pages for the array\n\nchar global_buffer[PAGE_SIZE * NUM_PAGES]; // Global array\n\nint main() {\n    // Initialize the entire buffer with 'A'\n    for (int i = 0; i < PAGE_SIZE * NUM_PAGES; ++i) {\n        global_buffer[i] = 'A';\n    }\n\n    pid_t pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        exit(1);\n    } else if (pid == 0) { // Child process\n        printf(\"Child process (PID: %d):\\n\", getpid());\n        // Child modifies the first page\n        for (int i = 0; i < PAGE_SIZE; ++i) {\n            global_buffer[i] = 'C';\n        }\n        // Child modifies a byte in the third page\n        global_buffer[PAGE_SIZE * 2 + 10] = 'X';\n\n        printf(\"Child reads first byte of first page: %c\\n\", global_buffer[0]);\n        printf(\"Child reads first byte of second page: %c\\n\", global_buffer[PAGE_SIZE]);\n        printf(\"Child reads byte from third page: %c\\n\", global_buffer[PAGE_SIZE * 2 + 10]);\n        printf(\"Child reads first byte of fourth page: %c\\n\", global_buffer[PAGE_SIZE * 3]);\n\n    } else { // Parent process\n        printf(\"Parent process (PID: %d):\\n\", getpid());\n        // Parent modifies the second page\n        for (int i = PAGE_SIZE; i < PAGE_SIZE * 2; ++i) {\n            global_buffer[i] = 'P';\n        }\n        // Parent modifies a byte in the fourth page\n        global_buffer[PAGE_SIZE * 3 + 20] = 'Y';\n\n        wait(NULL); // Wait for child to finish\n\n        printf(\"Parent reads first byte of first page: %c\\n\", global_buffer[0]);\n        printf(\"Parent reads first byte of second page: %c\\n\", global_buffer[PAGE_SIZE]);\n        printf(\"Parent reads byte from third page: %c\\n\", global_buffer[PAGE_SIZE * 2 + 10]);\n        printf(\"Parent reads byte from fourth page: %c\\n\", global_buffer[PAGE_SIZE * 3 + 20]);\n    }\n\n    return 0;\n}"
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "מה יהיה הפלט המדויק של התוכנית?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "כמה דפים פיזיים של זיכרון (עבור המערך `global_buffer` בלבד) יהיו בשימוש על ידי המערכת ברגעים הבאים? נמק.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2.a",
+        "text": "מיד לאחר האתחול של המערך `global_buffer` ולפני קריאה ל-`fork()`.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2.b",
+        "text": "מיד לאחר קריאה ל-`fork()`, ולפני כל שינוי במערך על ידי תהליך הבן או האב.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2.c",
+        "text": "לאחר שתהליך הבן סיים את כל השינויים וההדפסות שלו, ורגע לפני שתהליך האב מתחיל את ההדפסות שלו (כלומר, לאחר `wait(NULL)`).",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הסבר מפורט:\n\n**פתרון ל-1.1: פלט התוכנית**\nהפלט יכלול את ההדפסות של תהליך הבן ולאחר מכן את ההדפסות של תהליך האב, מכיוון שהאב ממתין לבן באמצעות `wait(NULL)`.\nבשל מנגנון Copy-on-Write (CoW), כאשר תהליך (בן או אב) כותב לדף זיכרון ששותף במקור, נוצר עותק פרטי של הדף עבור אותו תהליך. קריאות מאותו דף יחזירו את הערך מהעותק הפרטי שלו (אם קיים) או מהדף המשותף המקורי.\n\n**פלט תהליך הבן:**\n```\nChild process (PID: <PID של הבן>):\nChild reads first byte of first page: C\nChild reads first byte of second page: A\nChild reads byte from third page: X\nChild reads first byte of fourth page: A\n```\n*   `Child reads first byte of first page: C` - תהליך הבן שינה את דף 0 ל-'C', ולכן קריאה ממנו תחזיר 'C'.\n*   `Child reads first byte of second page: A` - תהליך הבן לא שינה את דף 1. הדף נשאר משותף ומכיל את הערך המקורי 'A'.\n*   `Child reads byte from third page: X` - תהליך הבן שינה את דף 2 ל-'X' במיקום מסוים, ולכן קריאה ממנו תחזיר 'X'.\n*   `Child reads first byte of fourth page: A` - תהליך הבן לא שינה את דף 3. הדף נשאר משותף ומכיל את הערך המקורי 'A'.\n\n**פלט תהליך האב (לאחר שהבן סיים):**\n```\nParent process (PID: <PID של האב>):\nParent reads first byte of first page: A\nParent reads first byte of second page: P\nParent reads byte from third page: A\nParent reads byte from fourth page: Y\n```\n*   `Parent reads first byte of first page: A` - תהליך הבן שינה את דף 0, מה שגרם ליצירת עותק עבור הבן. הדף המקורי (של האב) נשאר 'A'.\n*   `Parent reads first byte of second page: P` - תהליך האב שינה את דף 1 ל-'P', ולכן קריאה ממנו תחזיר 'P'.\n*   `Parent reads byte from third page: A` - תהליך הבן שינה את דף 2, מה שגרם ליצירת עותק עבור הבן. הדף המקורי (של האב) נשאר 'A'.\n*   `Parent reads byte from fourth page: Y` - תהליך האב שינה את דף 3 ל-'Y' במיקום מסוים, ולכן קריאה ממנו תחזיר 'Y'.\n\n**פתרון ל-1.2: מספר דפים פיזיים**\n\n**1.2.א: מיד לאחר האתחול של המערך `global_buffer` ולפני קריאה ל-`fork()`**\n*   **מספר דפים פיזיים:** 4\n*   **נימוק:** המערך `global_buffer` מוגדר בגודל של 4 דפים (4 * 4096 בתים). לאחר האתחול בלולאה, כל הדפים של המערך נכתבים בפעם הראשונה, מה שגורם למערכת ההפעלה להקצות להם דפים פיזיים בזיכרון. לכן, 4 דפים פיזיים נכנסים לשימוש.\n\n**1.2.ב: מיד לאחר קריאה ל-`fork()`, ולפני כל שינוי במערך על ידי תהליך הבן או האב**\n*   **מספר דפים פיזיים:** 4\n*   **נימוק:** קריאה ל-`fork()` יוצרת תהליך בן. בשל מנגנון Copy-on-Write (CoW), תהליך הבן מקבל העתק של מרחב הכתובות הוירטואלי של האב, אך בתחילה, דפים פיזיים אינם משוכפלים. במקום זאת, טבלאות הדפים של האב והבן מפנות לאותם דפים פיזיים עם הרשאת קריאה בלבד. שיכפול הדף הפיזי יתרחש רק כאשר אחד התהליכים ינסה לכתוב לדף משותף. מכיוון שעדיין לא בוצעו שינויים, כל 4 הדפים נשארים משותפים.\n\n**1.2.ג: לאחר שתהליך הבן סיים את כל השינויים וההדפסות שלו, ורגע לפני שתהליך האב מתחיל את ההדפסות שלו (כלומר, לאחר `wait(NULL)`)**\n*   **מספר דפים פיזיים:** 8\n*   **נימוק:**\n    *   **דף 0:** הבן משנה את דף 0 (כתיבה ל-`global_buffer[0]` עד `global_buffer[PAGE_SIZE-1]`). מנגנון CoW משכפל את דף 0. כעת יש שני דפים פיזיים עבור דף 0 (אחד לאב, אחד לבן).\n    *   **דף 1:** האב משנה את דף 1 (כתיבה ל-`global_buffer[PAGE_SIZE]` עד `global_buffer[PAGE_SIZE*2-1]`). מנגנון CoW משכפל את דף 1. כעת יש שני דפים פיזיים עבור דף 1.\n    *   **דף 2:** הבן משנה את דף 2 (כתיבה ל-`global_buffer[PAGE_SIZE * 2 + 10]`). מנגנון CoW משכפל את דף 2. כעת יש שני דפים פיזיים עבור דף 2.\n    *   **דף 3:** האב משנה את דף 3 (כתיבה ל-`global_buffer[PAGE_SIZE * 3 + 20]`). מנגנון CoW משכפל את דף 3. כעת יש שני דפים פיזיים עבור דף 3.\n    *   בסה\"כ, כל אחד מ-4 הדפים המקוריים שונה על ידי תהליך כלשהו. לכן, עבור כל אחד מ-4 הדפים הלוגיים, קיימים כעת שני עותקים פיזיים נפרדים בזיכרון (אחד עבור האב ואחד עבור הבן). 4 דפים לוגיים * 2 עותקים = 8 דפים פיזיים בסך הכל."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "File Systems",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 23:28:19",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 670,
+      "total_tokens": 4760
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "File Systems",
+      "Journaling",
+      "Consistency"
+    ],
+    "content": {
+      "text": "במערכת קבצים מתג'ורנלת (Journaling File System) מסוג `data=ordered`, תהליך כותב 4KB של נתונים לקובץ קיים ולאחר מכן מבצע `fsync()` על ה-file descriptor של הקובץ. גודל בלוק במערכת הקבצים הוא 4KB. מהו המספר המינימלי של פעולות כתיבה לדיסק (disk writes) הנדרשות כדי להבטיח שהשינויים יהיו עמידים (durable) לאחר ה-`fsync()`, בהנחה שהקובץ אינו חדש ואין צורך להקצות בלוקים חדשים לנתונים, אך יש צורך לעדכן את גודל הקובץ ב-inode?",
+      "code_snippet": null,
+      "options": [
+        "א. 1",
+        "ב. 2",
+        "ג. 3",
+        "ד. 4",
+        "ה. 5"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "במערכת קבצים מתג'ורנלת מסוג `data=ordered`, הנתונים נכתבים למיקומם הסופי בדיסק *לפני* שהמטא-דאטה (כמו ה-inode המעודכן) נכתבת ליומן (journal). קריאה ל-`fsync()` במצב זה מבטיחה עמידות (durability) של הנתונים והמטא-דאטה. רצף הפעולות המינימלי הוא:\n1. כתיבת בלוק הנתונים (4KB) למיקומו הסופי בדיסק. (פעולת כתיבה אחת)\n2. כתיבת המטא-דאטה המעודכנת (ה-inode עם הגודל החדש) ליומן. (פעולת כתיבה אחת ליומן)\n3. כתיבת בלוק ה-commit ליומן, המסמן את סיום הטרנזקציה. (פעולת כתיבה אחת ליומן)\nסה\"כ שלוש פעולות כתיבה מינימליות לדיסק מבטיחות שאם תתרחש קריסה, הנתונים יהיו על הדיסק, וה-inode המעודכן יוחזר באמצעות ה-replay של היומן במהלך ההתאוששות. לכן התשובה הנכונה היא ג'."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "CPU Scheduling",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 00:03:09",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2314,
+      "output_tokens": 515,
+      "total_tokens": 4073
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "CPU Scheduling",
+      "FCFS"
+    ],
+    "content": {
+      "text": "הסבירו את אלגוריתם תזמון המעבד First-Come, First-Served (FCFS). מהו החיסרון המרכזי שלו, ומדוע הוא נחשב לפשוט ליישום?",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "אלגוריתם FCFS (First-Come, First-Served) הוא אלגוריתם תזמון מעבד פשוט שבו תהליכים מבוצעים לפי סדר הגעתם לתור המוכנים. התהליך שמגיע ראשון מבוצע ראשון, ולאחר מכן התהליך שהגיע שני, וכן הלאה, עד שכל תהליך מסיים את זמן הריצה שלו.\n\nהחיסרון המרכזי של FCFS הוא 'אפקט השיירה' (Convoy Effect). אם תהליך ארוך מגיע ראשון, כל התהליכים הקצרים יותר שמגיעים אחריו יצטרכו להמתין עד שהתהליך הארוך יסיים את ריצתו. זה יכול להוביל לזמני המתנה וזמני מחזור ממוצעים גבוהים מאוד עבור התהליכים הקצרים, ובכך ליעילות נמוכה של המערכת.\n\nהאלגוריתם נחשב לפשוט ליישום מכיוון שהוא דורש רק תור FIFO (First-In, First-Out) פשוט. אין צורך בלוגיקה מורכבת לקביעת עדיפויות, חישוב זמני ריצה שנותרו, או הקצאת פרוסות זמן. התהליך המגיע לתור פשוט מתווסף לסופו, והתהליך שבראש התור מקבל את המעבד."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

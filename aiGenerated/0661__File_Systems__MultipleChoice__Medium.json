@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "File Systems",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 23:27:33",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1032,
+      "output_tokens": 531,
+      "total_tokens": 3020
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "File Systems",
+      "Hard Links",
+      "Inodes"
+    ],
+    "content": {
+      "text": "במערכת קבצים מסוג VSFS, נניח שקובץ קיים ויש לו שני קישורים קשיחים (hard links) המפנים אליו. מה יקרה לנתוני הקובץ ול-inode שלו כאשר אחד משני הקישורים הקשיחים הללו יימחק?",
+      "code_snippet": null,
+      "options": [
+        "א. נתוני הקובץ יימחקו מיד, וה-inode יסומן כפנוי.",
+        "ב. ה-inode של הקובץ יימחק מיד, ונתוני הקובץ יהפכו לבלתי נגישים.",
+        "ג. מונה הקישורים (link count) ב-inode יופחת באחד. נתוני הקובץ וה-inode יימחקו רק כאשר מונה הקישורים יגיע לאפס.",
+        "ד. הקובץ כולו, כולל הנתונים וה-inode, יישאר זמין באופן מלא, ללא כל שינוי, מכיוון שהקישור הקשיח השני עדיין קיים."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג. כאשר קישור קשיח נמחק, ערך מונה הקישורים (link count) ב-inode של הקובץ מופחת באחד. הקובץ (הן הנתונים והן ה-inode) יישאר קיים ונגיש כל עוד מונה הקישורים גדול מאפס. רק כאשר מונה הקישורים מגיע לאפס, מערכת הקבצים תשחרר את ה-inode ואת בלוקי הנתונים שלו. במקרה זה, מכיוון שקיים קישור קשיח נוסף, מונה הקישורים ירד ל-1 ולא יגיע לאפס, ולכן הקובץ יישאר קיים ונגיש דרך הקישור הקשיח הנותר."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

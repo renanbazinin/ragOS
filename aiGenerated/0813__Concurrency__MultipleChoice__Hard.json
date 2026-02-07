@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 00:34:33",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 2265,
+      "total_tokens": 22490
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Concurrency",
+      "Synchronization",
+      "Deadlock",
+      "Condition Variables"
+    ],
+    "content": {
+      "text": "נתון קטע קוד המממש תבנית \"יצרן-צרכן\" (Producer-Consumer). היצרן (ה-main thread) מוסיף פריטים לתור משותף, מסמן לצרכן, ולאחר מכן ממתין שכל הפריטים יעובדו ושהוא עצמו יצהיר שסיים להוסיף פריטים. הצרכן מעבד פריטים מהתור. הצרכן מסמן ליצרן שכל הפריטים עובדו רק אם היצרן כבר הצהיר שסיים להוסיף. רק לאחר יציאה מלולאת ההמתנה הראשונה, היצרן אמור להצהיר על סיום הוספת פריטים ולסמן לצרכן. בהתחשב בארגון זה של הקוד, איזו טענה נכונה?",
+      "code_snippet": "```c\n#include <queue>\n#include <pthread.h>\n\nstd::queue<int> shared_queue;\npthread_mutex_t mutex;\npthread_cond_t producer_wait_cond; // היצרן ממתין כאן לסיום עיבוד כל הפריטים והצהרה על סיום הוספה\npthread_cond_t consumer_wait_cond; // הצרכן ממתין כאן לפריטים\n\nint items_added = 0; // סך הפריטים שהיצרן הוסיף\nint items_processed = 0; // סך הפריטים שהצרכן עיבד\nbool producer_done_adding = false; // דגל המציין שהיצרן סיים להוסיף פריטים\n\nvoid* consumer_thread_func(void* arg) {\n    pthread_mutex_lock(&mutex);\n    while (true) {\n        // הצרכן ממתין אם התור ריק והיצרן עדיין עשוי להוסיף פריטים\n        while (shared_queue.empty() && !producer_done_adding) {\n            pthread_cond_wait(&consumer_wait_cond, &mutex);\n        }\n\n        // תנאי יציאה לצרכן: התור ריק והיצרן סיים להוסיף פריטים\n        if (shared_queue.empty() && producer_done_adding) {\n            pthread_mutex_unlock(&mutex);\n            return NULL; // הצרכן יוצא\n        }\n\n        // עיבוד פריט\n        shared_queue.pop();\n        items_processed++;\n\n        // הצרכן מסמן ליצרן רק אם כל הפריטים עובדו *וגם* היצרן סיים להוסיף.\n        // זו נקודת הכשל: אם items_processed == items_added מתקיים לפני ש-producer_done_adding הופך ל-true,\n        // הסימון ליצרן יוחמץ. היצרן עלול להיתקע בהמתנה.\n        if (items_processed == items_added && producer_done_adding) {\n            pthread_cond_signal(&producer_wait_cond);\n        }\n    }\n}\n\n/*\n// קטע קוד לדוגמה של ה-main thread (היצרן)\nint main() {\n    pthread_mutex_init(&mutex, NULL);\n    pthread_cond_init(&producer_wait_cond, NULL);\n    pthread_cond_init(&consumer_wait_cond, NULL);\n\n    pthread_t consumer_tid;\n    pthread_create(&consumer_tid, NULL, consumer_thread_func, NULL);\n\n    // שלב 1: היצרן מוסיף פריטים\n    pthread_mutex_lock(&mutex);\n    for (int i = 0; i < 5; ++i) { \n        shared_queue.push(i);\n        items_added++;\n    }\n    pthread_cond_signal(&consumer_wait_cond); // מעיר את הצרכן שיש פריטים\n    pthread_mutex_unlock(&mutex);\n\n    // שלב 2: היצרן ממתין שכל הפריטים יעובדו *ושהוא עצמו יסמן שסיים להוסיף*.\n    // זהו תנאי המתנה שיוביל לדדלוק.\n    pthread_mutex_lock(&mutex);\n    while (items_processed < items_added || !producer_done_adding) {\n        pthread_cond_wait(&producer_wait_cond, &mutex);\n    }\n    pthread_mutex_unlock(&mutex);\n\n    // שלב 3: רק לאחר שסיים להמתין, היצרן מסמן שהוא סיים להוסיף פריטים ונותן לצרכן הזדמנות לסיים.\n    // שלב זה לעולם לא יגיע אם היצרן נתקע בשלב 2.\n    pthread_mutex_lock(&mutex);\n    producer_done_adding = true;\n    pthread_cond_signal(&consumer_wait_cond); // כדי להעיר את הצרכן לבדוק תנאי יציאה\n    pthread_mutex_unlock(&mutex);\n\n    // std::cout << \"Main: All items processed and producer is done.\" << std::endl;\n\n    pthread_join(consumer_tid, NULL);\n    pthread_mutex_destroy(&mutex);\n    pthread_cond_destroy(&producer_wait_cond);\n    pthread_cond_destroy(&consumer_wait_cond);\n    return 0;\n}\n```",
+      "options": [
+        "א. הקוד נכון ויתפקד כמצופה ללא בעיות.",
+        "ב. הקוד עלול לגרום למצב של Race Condition אך לא ל-Deadlock.",
+        "ג. הקוד עלול לגרום ל-Deadlock של היצרן (ה-main thread) בלבד.",
+        "ד. הקוד עלול לגרום ל-Deadlock של הצרכן (ה-consumer thread) בלבד.",
+        "ה. הקוד עלול לגרום ל-Deadlock של שני התהליכים (היצרן והצרכן)."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ה",
+      "explanation": "היצרן (ה-main thread) ממתין בתנאי `while (items_processed < items_added || !producer_done_adding)`. היצרן יקרא ל-`pthread_cond_wait(&producer_wait_cond, &mutex)` אם תנאי זה מתקיים.\nהצרכן מסמן ל-`producer_wait_cond` רק אם `items_processed == items_added` וגם `producer_done_adding` שניהם נכונים.\nהצרכן ממתין בתנאי `while (shared_queue.empty() && !producer_done_adding)` ויקרא ל-`pthread_cond_wait(&consumer_wait_cond, &mutex)` אם תנאי זה מתקיים.\n\nנתאר תרחיש לדדלוק:\n1.  היצרן מוסיף `N` פריטים לתור (`items_added = N`).\n2.  היצרן משחרר את המנעול ומסמן ל-`consumer_wait_cond` (כדי להעיר את הצרכן).\n3.  הצרכן מתעורר ומעבד את כל `N` הפריטים. כעת `items_processed = N`.\n    בשלב זה, `items_processed == items_added` נכון, אך `producer_done_adding` עדיין `false` (היצרן טרם הגיע לשלב שבו הוא מגדיר דגל זה).\n    לכן, התנאי `if (items_processed == items_added && producer_done_adding)` בצרכן הוא `false`, והצרכן *אינו* מסמן ל-`producer_wait_cond`.\n4.  הצרכן ממשיך את הלולאה. כעת `shared_queue` ריק, ו-`producer_done_adding` הוא `false`.\n    הצרכן יקרא ל-`pthread_cond_wait(&consumer_wait_cond, &mutex)` וייחסם.\n5.  היצרן מגיע ללולאת ההמתנה שלו: `while (items_processed < items_added || !producer_done_adding)`.\n    בשלב זה: `items_processed = N`, `items_added = N`, ו-`producer_done_adding = false`.\n    לכן, התנאי הוא `(N < N || !false)` שזה `(false || true)`, כלומר `true`.\n    היצרן יקרא ל-`pthread_cond_wait(&producer_wait_cond, &mutex)` וייחסם.\n\nכעת, גם היצרן וגם הצרכן חסומים. היצרן ממתין לסיגנל על `producer_wait_cond` שיישלח רק אם `producer_done_adding` יהיה `true`, אך היצרן עצמו חסום לפני שהוא יכול להגדיר את `producer_done_adding` ל-`true`. הצרכן חסום וממתין לסיגנל על `consumer_wait_cond` שיישלח על ידי היצרן, אך היצרן חסום. זהו מצב של דדלוק הדדי (deadlock)."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

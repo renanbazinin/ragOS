@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "File Systems",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 23:46:27",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2680,
+      "output_tokens": 1853,
+      "total_tokens": 9107
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "File Systems",
+      "Inodes",
+      "Disk Allocation"
+    ],
+    "content": {
+      "text": "נתונה מערכת קבצים פשוטה המממשת את מבנה ה-inode הבא:\n```c\n#define N_DIRECT 10 // מספר מצביעים ישירים\n#define BLOCK_SIZE 4096 // גודל בלוק בבתים\n// מספר בלוקים שניתן להפנות אליהם מבלוק עקיף יחיד\n#define BLOCKS_PER_INDIRECT (BLOCK_SIZE / sizeof(int)) \n\ntypedef struct {\n    int is_used; // 1 אם ה-inode בשימוש, 0 אחרת\n    int type;    // 0 עבור קובץ, 1 עבור תיקיה\n    int size;    // גודל הקובץ בבתים\n    int direct_blocks[N_DIRECT]; // מצביעים לבלוקי נתונים ישירים\n    int indirect_block; // מצביע לבלוק נתונים המכיל מערך של מספרי בלוקים\n} inode_t;\n\n// מערך ה-inodes הגלובלי\ninode_t inodes[100]; \n\n// מערך המדמה את בלוקי הנתונים בדיסק. \n// בפועל, בלוקים אלה מכילים נתונים, אך לצורך שאלה זו, \n// בלוקים עקיפים מכילים מספרי בלוקים. כאשר בלוק הוא בלוק עקיף (indirect block),\n// data_blocks_content[block_num][idx] יכיל את מספר הבלוק הפיזי הבא.\nint data_blocks_content[1000][BLOCK_SIZE / sizeof(int)]; // מדמה את תוכן הבלוקים\n```\n\nכתבו את הפונקציה `get_data_block_num` אשר מקבלת מספר inode ומספר בלוק לוגי בתוך הקובץ (logical_block_index), ומחזירה את מספר הבלוק הפיזי בדיסק המתאים לבלוק הלוגי הנתון.\nיש להניח שה-inode הנתון `inode_num` תמיד בשימוש ותמיד מייצג קובץ.\nאם ה-logical_block_index חורג מהגודל המותר עבור הקובץ, הפונקציה צריכה להחזיר -1.",
+      "code_snippet": "int get_data_block_num(int inode_num, int logical_block_index) {\n    // השלימו את הפונקציה כאן\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפונקציה `get_data_block_num` מקבלת מספר inode ומספר בלוק לוגי בתוך הקובץ. המטרה היא למצוא את מספר הבלוק הפיזי המתאים.\n\nראשית, אנו מאחזרים את מבנה ה-inode המתאים ממערך ה-`inodes` הגלובלי. מכיוון שהונח שה-inode תמיד בשימוש ומייצג קובץ, אין צורך בבדיקות נוספות.\n\nשנית, אנו מבצעים בדיקת תקינות כדי לוודא שמספר הבלוק הלוגי אינו חורג מגודל הקובץ. גודל הקובץ נתון בבתים (`inode.size`), ולכן אנו מחשבים את מספר הבלוקים הכולל שהקובץ תופס על ידי חלוקה בגודל הבלוק (`BLOCK_SIZE`) תוך עיגול למעלה (באמצעות `+ BLOCK_SIZE - 1`). אם ה-`logical_block_index` קטן מ-0 או גדול או שווה למספר הבלוקים הכולל, זהו אינדקס לא חוקי, והפונקציה מחזירה -1.\n\nלאחר מכן, אנו בודקים אם הבלוק הלוגי נמצא בטווח המצביעים הישירים (`N_DIRECT`). אם כן, אנו פשוט מחזירים את מספר הבלוק המאוחסן במערך `direct_blocks` של ה-inode.\n\nאם הבלוק הלוגי אינו בטווח המצביעים הישירים, אנו בודקים אם הוא נמצא בטווח המצביעים העקיפים. אנו מחשבים את האינדקס בתוך הבלוק העקיף על ידי הפחתת `N_DIRECT` מה-`logical_block_index`. אם אינדקס זה חוקי (כלומר, קטן מ-`BLOCKS_PER_INDIRECT`), אנו ניגשים לבלוק העקיף (שמספרו מאוחסן ב-`inode.indirect_block`) ומשם מאחזרים את מספר הבלוק הפיזי מהמערך `data_blocks_content` באותו אינדקס. מספר בלוק פיזי זה מוחזר.\n\nאם ה-`logical_block_index` חורג גם מהטווח הישיר וגם מהטווח העקיף (מצב שאמור להיות מכוסה כבר על ידי בדיקת הגודל הראשונית), הפונקציה תחזיר -1.\n\n```c\n#define N_DIRECT 10 // מספר מצביעים ישירים\n#define BLOCK_SIZE 4096 // גודל בלוק בבתים\n#define BLOCKS_PER_INDIRECT (BLOCK_SIZE / sizeof(int)) \n\ntypedef struct {\n    int is_used; \n    int type;    \n    int size;    \n    int direct_blocks[N_DIRECT]; \n    int indirect_block; \n} inode_t;\n\ninode_t inodes[100]; \nint data_blocks_content[1000][BLOCK_SIZE / sizeof(int)]; \n\nint get_data_block_num(int inode_num, int logical_block_index) {\n    inode_t current_inode = inodes[inode_num];\n\n    // חישוב מספר הבלוקים הכולל שהקובץ תופס\n    int total_blocks_in_file = (current_inode.size + BLOCK_SIZE - 1) / BLOCK_SIZE;\n\n    // בדיקה אם האינדקס הלוגי חורג מגודל הקובץ או שלילי\n    if (logical_block_index < 0 || logical_block_index >= total_blocks_in_file) {\n        return -1; // אינדקס בלוק לא חוקי\n    }\n\n    // בדיקה אם הבלוק נמצא במצביעים הישירים\n    if (logical_block_index < N_DIRECT) {\n        return current_inode.direct_blocks[logical_block_index];\n    }\n\n    // בדיקה אם הבלוק נמצא במצביע העקיף היחיד\n    // הונח ש-indirect_block מצביע לבלוק חוקי אם הוא נדרש\n    int indirect_offset = logical_block_index - N_DIRECT;\n    if (indirect_offset < BLOCKS_PER_INDIRECT) {\n        return data_blocks_content[current_inode.indirect_block][indirect_offset];\n    }\n\n    // מצב זה אמור להיות מכוסה ע\"י בדיקת ה-total_blocks_in_file,\n    // אך מוחזר -1 למען בטיחות במקרה של אי-התאמה בנתונים.\n    return -1;\n}\n```",
+      "difficulty_estimation": "Medium"
+    }
+  }
+}

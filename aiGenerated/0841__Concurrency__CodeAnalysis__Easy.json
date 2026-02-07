@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 00:45:39",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5571,
+      "output_tokens": 841,
+      "total_tokens": 9767
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Concurrency",
+      "Race Conditions",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה המשתמשת בחוטים (threads) לקידום מונה משותף `counter`. כל חוט מבצע מספר קבוע של קידומים. קרא את הקוד וענה על השאלה. מהו הערך המינימלי האפשרי של המונה `counter` שיודפס בסיום ריצת התוכנית? הסבר בקצרה מדוע.",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n\n#define NUM_THREADS 2\n#define INCREMENTS_PER_THREAD 5\n\nint counter = 0;\n\nvoid* thread_func(void* arg) {\n    for (int i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n        counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, thread_func, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הערך המינימלי האפשרי הוא `INCREMENTS_PER_THREAD` (כלומר 5). מצב זה יכול להתרחש כתוצאה מתנאי מירוץ (race condition) על המשתנה המשותף `counter`. פעולת הקידום `counter++` אינה אטומית ומורכבת משלושה שלבים: קריאת הערך הנוכחי, הגדלתו, וכתיבת הערך החדש. לדוגמה, אם שני החוטים מריצים את הפעולה כמעט במקביל:\n1. חוט 1 קורא את `counter` (נניח 0).\n2. חוט 2 קורא גם הוא את `counter` (גם הוא קורא 0).\n3. חוט 1 מגדיל את הערך שקרא (0+1=1) וכותב אותו חזרה ל-`counter` (כעת `counter`=1).\n4. חוט 2 מגדיל את הערך שקרא (0+1=1) וכותב אותו חזרה ל-`counter` (כעת `counter` עדיין 1, הקידום של חוט 1 \"נדרס\").\n\nאם תרחיש זה של \"דריסה\" חוזר על עצמו באופן עקבי עבור כל פעולת קידום, כך שכל זוג פעולות קידום משני חוטים למעשה נראית כמו קידום אחד בלבד, אז בסיום הריצה, המונה יכיל רק את מספר הקידומים שבוצעו על ידי חוט אחד בלבד, כלומר `INCREMENTS_PER_THREAD`."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "CPU Scheduling",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 00:28:13",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4397,
+      "output_tokens": 1897,
+      "total_tokens": 12435
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "CPU Scheduling",
+      "Processes",
+      "System Calls",
+      "Priorities"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה, המריצה מספר תהליכי בן המבצעים עבודה עתירת מעבד (CPU-bound) וקובעים לעצמם ערכי nice שונים. יש להניח שהתוכנית רצה על מערכת לינוקס עם מעבד יחיד (Single CPU) המשתמש באלגוריתם תזמון CFS (Completely Fair Scheduler), אשר מתחשב באופן משמעותי בערכי nice של תהליכים. פלט התוכנית אינו מבוּפר (unbuffered), וכל קריאות המערכת מצליחות כצפוי.\n\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n#include <sys/types.h>\n#include <errno.h>\n#include <sys/resource.h> // For setpriority() and getpriority()\n\n#define NUM_CHILDREN 3\n#define WORK_ITERATIONS 1000000000LL // Use LL for long long literal\n\nvoid child_work(int child_id, int nice_val) {\n    printf(\"Child %d (PID: %d, nice: %d) starting work...\\n\", child_id, getpid(), nice_val);\n    long long sum = 0;\n    for (long long i = 0; i < WORK_ITERATIONS; ++i) {\n        sum += i; // Simple CPU-bound operation\n    }\n    // To prevent compiler optimizing sum away if not used\n    volatile long long dummy_sum = sum; \n    (void)dummy_sum; // Suppress unused variable warning\n\n    printf(\"Child %d (PID: %d, nice: %d) finished work.\\n\", child_id, getpid(), nice_val);\n    exit(0);\n}\n\nint main() {\n    setbuf(stdout, NULL); // Unbuffered output\n\n    int nice_values[NUM_CHILDREN] = {0, 10, -5}; // Desired nice values\n    pid_t pids[NUM_CHILDREN];\n    int i;\n\n    printf(\"Parent (PID: %d) starting.\\n\", getpid());\n\n    for (i = 0; i < NUM_CHILDREN; ++i) {\n        pids[i] = fork();\n\n        if (pids[i] < 0) {\n            perror(\"fork failed\");\n            exit(1);\n        } else if (pids[i] == 0) { // Child process\n            int ret = setpriority(PRIO_PROCESS, 0, nice_values[i]); // 0 means current process\n            if (ret == -1) {\n                // If setpriority fails, it usually means permissions. For exam, assume success.\n                perror(\"setpriority failed\"); \n            }\n            child_work(i, nice_values[i]); // Pass the set nice value\n        }\n    }\n\n    // Parent waits for all children to finish\n    for (i = 0; i < NUM_CHILDREN; ++i) {\n        wait(NULL);\n    }\n\n    printf(\"Parent (PID: %d) finished.\\n\", getpid());\n    return 0;\n}\n```\n\n**שאלה:**\nתארו את הפלט הסביר ביותר של התוכנית. הסבירו מדוע פלט זה מתקבל, וכיצד אלגוריתם התזמון CFS משתמש בערכי ה-`nice` כדי לקבוע את סדר וקצב ריצת התהליכים. התייחסו במיוחד לסדר סיום העבודה של תהליכי הבן.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפלט הסביר ביותר של התוכנית יראה בערך כך (ערכי ה-PID יהיו שונים בכל ריצה):\n```\nParent (PID: XXXX) starting.\nChild 0 (PID: YYYY, nice: 0) starting work...\nChild 1 (PID: ZZZZ, nice: 10) starting work...\nChild 2 (PID: AAAA, nice: -5) starting work...\nChild 2 (PID: AAAA, nice: -5) finished work.\nChild 0 (PID: YYYY, nice: 0) finished work.\nChild 1 (PID: ZZZZ, nice: 10) finished work.\nParent (PID: XXXX) finished.\n```\n\n**הסבר:**\nאלגוריתם התזמון CFS (Completely Fair Scheduler) בלינוקס שואף להעניק לכל תהליך חלק \"הוגן\" מזמן המעבד. הוא עושה זאת על ידי מעקב אחר \"זמן הריצה הווירטואלי\" (vruntime) של כל תהליך. תהליכים בעלי vruntime נמוך יותר מקבלים עדיפות בריצה.\n\nערכי ה-`nice` משפיעים על האופן שבו ה-vruntime של תהליך מתקדם. ערך `nice` נמוך (כלומר, עדיפות גבוהה יותר) גורם ל-vruntime של התהליך להתקדם לאט יותר, מה שאומר שהוא יקבל יותר זמן מעבד יחסית לתהליכים עם ערכי `nice` גבוהים יותר. לעומת זאת, ערך `nice` גבוה (עדיפות נמוכה יותר) גורם ל-vruntime להתקדם מהר יותר, והתהליך יקבל פחות זמן מעבד.\n\nבתוכנית הנתונה:\n*   **תהליך בן 0** מקבל `nice = 0` (ערך ברירת מחדל). ה-vruntime שלו יתקדם בקצב רגיל.\n*   **תהליך בן 1** מקבל `nice = 10` (עדיפות נמוכה). ה-vruntime שלו יתקדם מהר יותר, ולכן הוא יקבל פחות זמן מעבד.\n*   **תהליך בן 2** מקבל `nice = -5` (עדיפות גבוהה). ה-vruntime שלו יתקדם לאט יותר, ולכן הוא יקבל יותר זמן מעבד.\n\nמכיוון שהתהליכים כולם CPU-bound ומבצעים עבודה זהה (אותו מספר איטרציות בלולאה), סדר סיום העבודה שלהם ייקבע ישירות על ידי העדיפות שקיבלו מהמתזמן:\n1.  **תהליך בן 2 (`nice = -5`)** יסיים ראשון, מכיוון שיש לו את העדיפות הגבוהה ביותר ויקבל את מרבית זמן המעבד.\n2.  **תהליך בן 0 (`nice = 0`)** יסיים שני, מכיוון שיש לו עדיפות בינונית.\n3.  **תהליך בן 1 (`nice = 10`)** יסיים אחרון, מכיוון שיש לו את העדיפות הנמוכה ביותר ויקבל את מעט זמן המעבד מבין השלושה.\n\nהודעות ה\"starting work\" עשויות להופיע בסדר שונה, בהתאם לסדר שבו מערכת ההפעלה מתזמנת את יצירת התהליכים והגדרת ה-`nice` שלהם, אך סדר הודעות ה\"finished work\" יהיה עקבי כפי שתואר לעיל עקב השפעת ה-`nice` על הקצאת זמן המעבד."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

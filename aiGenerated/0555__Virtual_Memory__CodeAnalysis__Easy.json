@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 22:40:20",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2806,
+      "output_tokens": 1379,
+      "total_tokens": 6386
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Virtual Memory"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C הבאה:\n```c\n#include <stdio.h>\n#include <stdlib.h>\n\n#define ARRAY_SIZE (1024 * 1024 * 100) // 100 MB of integers\n\nint main() {\n    int* large_array = (int*)malloc(ARRAY_SIZE * sizeof(int));\n\n    if (large_array == NULL) {\n        perror(\"malloc failed\");\n        return 1;\n    }\n\n    printf(\"Memory allocated (virtually).\\n\");\n\n    // Access various elements in the array\n    large_array[0] = 10;\n    large_array[ARRAY_SIZE / 2] = 20;\n    large_array[ARRAY_SIZE - 1] = 30;\n\n    printf(\"Elements accessed.\\n\");\n\n    free(large_array);\n    return 0;\n}\n```\nבהתבסס על הקוד לעיל, תאר בקצרה מה קורה במונחים של זיכרון וירטואלי ופיזי כאשר התוכנית מופעלת. התייחס במיוחד לשלבי הקצאת הזיכרון (malloc) וגישת הזיכרון (השמת ערכים לאיברים במערך).",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n\n#define ARRAY_SIZE (1024 * 1024 * 100) // 100 MB of integers\n\nint main() {\n    int* large_array = (int*)malloc(ARRAY_SIZE * sizeof(int));\n\n    if (large_array == NULL) {\n        perror(\"malloc failed\");\n        return 1;\n    }\n\n    printf(\"Memory allocated (virtually).\\n\");\n\n    // Access various elements in the array\n    large_array[0] = 10;\n    large_array[ARRAY_SIZE / 2] = 20;\n    large_array[ARRAY_SIZE - 1] = 30;\n\n    printf(\"Elements accessed.\\n\");\n\n    free(large_array);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": false,
+      "correct_option": null,
+      "explanation": "הפתרון:\nכאשר התוכנית מופעלת:\n1.  **קריאה ל-`malloc`**: הפונקציה `malloc` מקצה בלוק של זיכרון וירטואלי בגודל המבוקש (100MB * sizeof(int)) למרחב הכתובות של התהליך. בשלב זה, מערכת ההפעלה אינה מקצה בהכרח זיכרון פיזי בפועל. היא פשוט מעדכנת את טבלת הדפים של התהליך כך שהכתובות הווירטואליות הללו מסומנות כזמינות, אך ללא מיפוי לכתובות פיזיות. זהו תהליך \"הקצאה עצלה\" (lazy allocation).\n2.  **גישה לאיברים במערך (`large_array[0] = 10;` וכו')**: כאשר התוכנית ניגשת לראשונה לכתובת וירטואלית בתוך הבלוק שהוקצה על ידי `malloc` (לדוגמה, `large_array[0]`), נוצר \"כשל דף\" (page fault). מערכת ההפעלה מזהה שכשל דף התרחש עבור הכתובת הווירטואלית הזו.\n    *   בתגובה לכשל הדף, מערכת ההפעלה מקצה דף זיכרון פיזי (בדרך כלל 4KB) וממפה אותו לכתובת הווירטואלית של הדף הרלוונטי בטבלת הדפים של התהליך.\n    *   הפקודה `large_array[0] = 10;` תגרום לכשל דף עבור הדף הראשון של המערך (אם אינו כבר בזיכרון הפיזי).\n    *   הפקודה `large_array[ARRAY_SIZE / 2] = 20;` תגרום לכשל דף עבור הדף המכיל את אמצע המערך (אם דף זה לא נגיש כבר).\n    *   הפקודה `large_array[ARRAY_SIZE - 1] = 30;` תגרום לכשל דף עבור הדף האחרון של המערך (אם דף זה לא נגיש כבר).\n    *   חשוב לציין שרק הדפים המכילים את הכתובות אליהן ניגשים בפועל יוקצו בזיכרון פיזי. שאר הדפים ב-100MB שהוקצו וירטואלית יישארו לא ממופים לזיכרון פיזי עד שיגשו אליהם.\n3.  **קריאה ל-`free`**: הפונקציה `free` משחררת את הזיכרון הווירטואלי שהוקצה. מערכת ההפעלה מסירה את המיפויים מדפי הזיכרון הפיזיים שהיו בשימוש ומסמנת את הכתובות הווירטואליות כלא זמינות עבור התהליך. הזיכרון הפיזי שהיה בשימוש חוזר למאגר הזיכרון הפנוי של מערכת ההפעלה."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

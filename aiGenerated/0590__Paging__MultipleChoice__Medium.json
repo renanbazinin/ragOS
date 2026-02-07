@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Paging",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 22:53:37",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 909,
+      "output_tokens": 444,
+      "total_tokens": 2458
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Paging",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "מהי מטרתו העיקרית של ה-Valid/Invalid bit (סיבית תקינות/אי-תקינות) בערך בטבלת דפים (Page Table Entry)?",
+      "code_snippet": null,
+      "options": [
+        "א. לציין אם הדף שונה מאז שהועמס לזיכרון הפיזי.",
+        "ב. לציין אם הדף נמצא כרגע בזיכרון הפיזי או על הדיסק.",
+        "ג. לציין את רמת ההרשאה לדף (קריאה, כתיבה, הרצה).",
+        "ד. לציין אם הדף משותף למספר תהליכים.",
+        "ה. לציין את מספר המסגרת הפיזית (Frame Number) שבה נמצא הדף."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ה-Valid/Invalid bit מציין האם הדף המקביל לערך בטבלת הדפים נמצא כרגע בזיכרון הפיזי (Valid) או לא (Invalid). כאשר הסיבית היא Invalid, ניסיון גישה לדף יגרום ל-Page Fault, שידרוש מהמערכת לטעון את הדף מהדיסק לזיכרון הפיזי. אפשרות א' מתארת את ה-Dirty bit, אפשרות ג' מתארת את סיביות ההגנה, ואפשרות ה' היא חלקו העיקרי של ה-PTE כאשר הדף תקף."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

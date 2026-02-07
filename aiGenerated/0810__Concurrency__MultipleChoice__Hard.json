@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 00:32:25",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 1426,
+      "total_tokens": 6688
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Concurrency",
+      "Synchronization",
+      "Condition Variables",
+      "Starvation"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא המשתמש ב-pthreads לצורך סנכרון בין מספר תהליכים. תהליכי `incrementer` מגדילים מונה משותף `shared_counter` עד לערך `MAX_VAL`. תהליך `watcher` ממתין שהמונה יגיע ל-`MAX_VAL`, מאפס אותו, ומאותת לתהליכי ה-`incrementer` להמשיך. מהי התוצאה הסבירה ביותר בשימוש ב-`pthread_cond_signal(&cond_empty)` במקום `pthread_cond_broadcast(&cond_empty)` בתוך ה-`watcher` thread?",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h>\n\n#define MAX_VAL 5\n\nint shared_counter = 0;\npthread_mutex_t mtx;\npthread_cond_t cond_full;   // Condition for counter reaching MAX_VAL\npthread_cond_t cond_empty;  // Condition for counter being reset\n\n// Thread type 1: Increments shared_counter\nvoid* incrementer(void* arg) {\n    for (int i = 0; i < 3; ++i) { // Each incrementer tries 3 times\n        pthread_mutex_lock(&mtx);\n        while (shared_counter == MAX_VAL) { // Wait if counter is full\n            pthread_cond_wait(&cond_empty, &mtx);\n        }\n        shared_counter++;\n        printf(\"Incrementer: shared_counter = %d\\n\", shared_counter);\n        if (shared_counter == MAX_VAL) { // If counter is full, signal the watcher\n            pthread_cond_signal(&cond_full);\n        }\n        pthread_mutex_unlock(&mtx);\n        // Simulate some work outside mutex\n        usleep(50000);\n    }\n    return NULL;\n}\n\n// Thread type 2: Watches for counter to be full, then resets it\nvoid* watcher(void* arg) {\n    for (int i = 0; i < 2; ++i) { // Watcher resets twice\n        pthread_mutex_lock(&mtx);\n        while (shared_counter < MAX_VAL) { // Wait until counter is full\n            pthread_cond_wait(&cond_full, &mtx);\n        }\n        printf(\"Watcher: Resetting shared_counter from %d to 0\\n\", shared_counter);\n        shared_counter = 0;\n        // This is the critical line for the question:\n        pthread_cond_signal(&cond_empty); // Signalling only one waiting incrementer\n        pthread_mutex_unlock(&mtx);\n        // Simulate some work outside mutex\n        usleep(100000);\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t inc_threads[3]; // 3 incrementer threads\n    pthread_t w_thread;       // 1 watcher thread\n\n    pthread_mutex_init(&mtx, NULL);\n    pthread_cond_init(&cond_full, NULL);\n    pthread_cond_init(&cond_empty, NULL);\n\n    for (int i = 0; i < 3; ++i) {\n        pthread_create(&inc_threads[i], NULL, incrementer, NULL);\n    }\n    pthread_create(&w_thread, NULL, watcher, NULL);\n\n    for (int i = 0; i < 3; ++i) {\n        pthread_join(inc_threads[i], NULL);\n    }\n    pthread_join(w_thread, NULL);\n\n    pthread_mutex_destroy(&mtx);\n    pthread_cond_destroy(&cond_full);\n    pthread_cond_destroy(&cond_empty);\n\n    return 0;\n}",
+      "options": [
+        "א. התוכנית תיתקע ב-Deadlock באופן ודאי.",
+        "ב. התוכנית תעבוד באופן תקין, אך תהיה פחות יעילה באופן משמעותי.",
+        "ג. ייתכן מצב של Starvation (הרעבה) עבור חלק מתהליכי ה-incrementer, אשר ימתינו ללא הגבלת זמן.",
+        "ד. ה-watcher thread יבצע את פעולתו יותר מפעם אחת עבור כל פעם שהמונה מגיע ל-MAX_VAL.",
+        "ה. אף אחת מהתשובות אינה נכונה."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "התשובה הנכונה היא ג'. כאשר ה-`watcher` מאפס את `shared_counter` ומאותת באמצעות `pthread_cond_signal(&cond_empty)`, רק אחד מתהליכי ה-`incrementer` הרבים שעשויים להמתין על `cond_empty` יתעורר. תהליך זה יתפוס את המנעול וימשיך להגדיל את המונה. שאר תהליכי ה-`incrementer` יישארו בהמתנה, למרות שהתנאי שלהם (shared_counter == MAX_VAL) כבר אינו מתקיים (כי המונה אופס). מכיוון שרק ה-`watcher` מאותת על `cond_empty`, ואם הוא יאותת רק לאחד, ייתכן שתהליכים אחרים לעולם לא יתעוררו, מה שמוביל למצב של Starvation עבורם. שימוש ב-`pthread_cond_broadcast` היה מעיר את כל התהליכים הממתינים ומאפשר להם להתחרות על המנעול."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

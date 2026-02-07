@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 00:29:49",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1024,
+      "output_tokens": 346,
+      "total_tokens": 2216
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Concurrency",
+      "Synchronization",
+      "Mutual Exclusion"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של שימוש במנעול (mutex) בתכנות מקבילי?",
+      "code_snippet": null,
+      "options": [
+        "א. למנוע מצב של קיפאון (deadlock) בכל מקרה.",
+        "ב. להבטיח שרק חוט אחד ייגש למשאב משותף בקטע קריטי בכל רגע נתון.",
+        "ג. לשפר את ביצועי התוכנית על ידי הפחתת זמן המתנה של חוטים.",
+        "ד. לאפשר לחוטים שונים לשתף מידע ביעילות ללא צורך בסנכרון."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב'. מנעול (mutex) משמש להבטחת מניעה הדדית (mutual exclusion), כלומר, להבטיח שרק חוט אחד יוכל לגשת לקטע קריטי המשתמש במשאב משותף בכל רגע נתון, ובכך למנוע מצבי מרוץ (race conditions)."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

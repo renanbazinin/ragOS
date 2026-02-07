@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 00:37:37",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1930,
+      "output_tokens": 1688,
+      "total_tokens": 8951
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "Open",
+    "topic": [
+      "Concurrency",
+      "Synchronization",
+      "Semaphores"
+    ],
+    "content": {
+      "text": "סמפור ספירה (counting semaphore) הוא אובייקט סנכרון המאפשר שליטה בגישה למשאב משותף על ידי מספר מוגבל של תהליכונים. בהינתן המבנה הבא והפונקציות `semaphore_init`, `semaphore_wait`, `semaphore_signal` ו-`semaphore_destroy`, השלם את מימוש הסמפור הסופר, תוך שימוש במנעולים (mutexes) ומשתני תנאי (condition variables) בלבד.\nפעולת `semaphore_wait()` (או P) מקטינה את מונה הסמפור. אם המונה הופך שלילי, התהליכון הקורא נחסם עד שמונה הסמפור יגדל מספיק.\nפעולת `semaphore_signal()` (או V) מגדילה את מונה הסמפור. אם יש תהליכונים חסומים הממתינים על הסמפור, אחד מהם משוחרר.\nיש להניח כי `pthread_mutex_t` ו-`pthread_cond_t` זמינים לשימוש. השלם את המימוש ע\"י כתיבת הקוד של הפעולות `semaphore_init`, `semaphore_wait`, `semaphore_signal` ו-`semaphore_destroy`.",
+      "code_snippet": "#include <pthread.h>\n#include <stdlib.h>\n\ntypedef struct {\n    int count;\n    pthread_mutex_t mutex;\n    pthread_cond_t cond;\n} Semaphore;\n\nvoid semaphore_init(Semaphore *sem, int initial_count) {\n    // Implement initialization\n}\n\nvoid semaphore_wait(Semaphore *sem) {\n    // Implement P operation\n}\n\nvoid semaphore_signal(Semaphore *sem) {\n    // Implement V operation\n}\n\nvoid semaphore_destroy(Semaphore *sem) {\n    // Implement destruction\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "מימוש סמפור ספירה באמצעות מנעול ומשתנה תנאי:\n\n```c\n#include <pthread.h>\n#include <stdlib.h>\n\ntypedef struct {\n    int count;\n    pthread_mutex_t mutex;\n    pthread_cond_t cond;\n} Semaphore;\n\nvoid semaphore_init(Semaphore *sem, int initial_count) {\n    sem->count = initial_count;\n    pthread_mutex_init(&sem->mutex, NULL);\n    pthread_cond_init(&sem->cond, NULL);\n}\n\nvoid semaphore_wait(Semaphore *sem) {\n    pthread_mutex_lock(&sem->mutex);\n    sem->count--;\n    while (sem->count < 0) {\n        pthread_cond_wait(&sem->cond, &sem->mutex);\n    }\n    pthread_mutex_unlock(&sem->mutex);\n}\n\nvoid semaphore_signal(Semaphore *sem) {\n    pthread_mutex_lock(&sem->mutex);\n    sem->count++;\n    if (sem->count <= 0) {\n        pthread_cond_signal(&sem->cond);\n    }\n    pthread_mutex_unlock(&sem->mutex);\n}\n\nvoid semaphore_destroy(Semaphore *sem) {\n    pthread_mutex_destroy(&sem->mutex);\n    pthread_cond_destroy(&sem->cond);\n}\n```\n\n**הסבר:**\n\nבפונקציה `semaphore_init`:\n- מאתחלים את `count` לערך `initial_count` שנקבע בעת יצירת הסמפור.\n- מאתחלים את המוטקס (`sem->mutex`) באמצעות `pthread_mutex_init`.\n- מאתחלים את משתנה התנאי (`sem->cond`) באמצעות `pthread_cond_init`.\n\nבפונקציה `semaphore_wait` (פעולת P):\n- נועלים את המוטקס (`pthread_mutex_lock`) כדי להגן על הגישה למונה ולמשתנה התנאי.\n- מקטינים את `count` באחד. אם `count` הופך שלילי, זה מצביע על כך שאין מספיק משאבים זמינים ויש תהליכון שצריך להמתין.\n- כל עוד `count` שלילי, קוראים ל-`pthread_cond_wait` על משתנה התנאי. `pthread_cond_wait` משחררת באופן אטומי את המוטקס וגורמת לחוט להמתין. כאשר החוט מתעורר, היא רוכשת מחדש את המוטקס. שימוש בלולאת `while` הכרחי כדי להתמודד עם התעוררות כוזבת (spurious wakeups) ולוודא שהתנאי אכן מתקיים לפני היציאה מההמתנה.\n- משחררים את המוטקס (`pthread_mutex_unlock`) לאחר שהחוט יצא מההמתנה והתקדם.\n\nבפונקציה `semaphore_signal` (פעולת V):\n- נועלים את המוטקס (`pthread_mutex_lock`) כדי להגן על הגישה למונה ולמשתנה התנאי.\n- מגדילים את `count` באחד. פעולה זו משחררת למעשה משאב או מאפשרת לתהליכון נוסף להמשיך.\n- אם `count` קטן או שווה לאפס לאחר ההגדלה (כלומר, לפני ההגדלה היו תהליכונים חסומים או ש-`count` היה 0), יש להעיר חוט אחד חסום (אם קיים) באמצעות `pthread_cond_signal`. `pthread_cond_signal` מעירה לכל היותר חוט אחד מבין אלה הממתינים על משתנה התנאי. זה מבטיח שאחד מהתהליכונים הממתינים יתעורר וינסה לרכוש מחדש את המוטקס.\n- משחררים את המוטקס (`pthread_mutex_unlock`).\n\nבפונקציה `semaphore_destroy`:\n- משמידים את המוטקס באמצעות `pthread_mutex_destroy`.\n- משמידים את משתנה התנאי באמצעות `pthread_cond_destroy`.\n\n**דגשים:**\n- המשתנה `count` יכול להיות שלילי. ערך חיובי של `count` מציין את מספר המשאבים הזמינים. ערך שלילי של `count` מציין את מספר התהליכונים הממתינים על הסמפור.\n- השימוש בלולאת `while` ב-`semaphore_wait` הוא קריטי כדי להבטיח נכונות במקרה של התעוררות כוזבת או כאשר מספר תהליכונים מתעוררים אך רק אחד יכול להמשיך."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

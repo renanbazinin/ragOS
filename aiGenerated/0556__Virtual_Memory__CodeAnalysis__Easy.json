@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 22:40:35",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2806,
+      "output_tokens": 923,
+      "total_tokens": 6075
+    }
+  },
+  "question": {
+    "id": 100,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Virtual Memory",
+      "Demand Paging",
+      "Page Faults"
+    ],
+    "content": {
+      "text": "נתונה פיסת הקוד הבאה בשפת C. המערכת משתמשת בזיכרון וירטואלי עם דפדוף לפי דרישה (demand paging).\nתאר מה מתרחש ברמת הזיכרון הפיזי (RAM) כאשר השורה `arr[0] = 10;` מבוצעת בפעם הראשונה, בהנחה שזו הגישה הראשונה לכל חלק של המערך `arr`.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n\nint main() {\n    int *arr = (int *)malloc(1024 * 1024 * sizeof(int)); // Allocate 4MB\n    if (arr == NULL) {\n        perror(\"malloc failed\");\n        return 1;\n    }\n\n    printf(\"Array allocated at virtual address: %p\\n\", (void*)arr);\n\n    // Access an element for the first time\n    arr[0] = 10; // Line of interest\n    printf(\"Value at arr[0]: %d\\n\", arr[0]);\n\n    free(arr);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": 10,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "כאשר מתבצעת הקריאה ל-`malloc`, מערכת ההפעלה מקצה בלוק רציף של זיכרון *וירטואלי* עבור התוכנית. עם זאת, זיכרון *פיזי* אינו מוקצה בדרך כלל בשלב זה במערכות המשתמשות בדפדוף לפי דרישה. במקום זאת, מערכת ההפעלה רק מעדכנת את טבלת הדפים (page table) כדי לסמן את הדפים הווירטואליים הללו כתקפים אך עדיין לא נוכחים בזיכרון הפיזי.\nכאשר השורה `arr[0] = 10;` מבוצעת בפעם הראשונה, המעבד מנסה לגשת לכתובת הווירטואלית המתאימה ל-`arr[0]`. יחידת ניהול הזיכרון (MMU) מתייעצת עם טבלת הדפים. מכיוון שהדף המכיל את `arr[0]` מסומן כלא נוכח (או לא חוקי), מתרחשת 'תקלת דף' (page fault). מטפל תקלת הדף של מערכת ההפעלה נכנס לפעולה:\n1. הוא מוצא מסגרת דף פיזית פנויה (או מפנה דף קיים אם הזיכרון מלא).\n2. הוא ממפה את הדף הווירטואלי המכיל את `arr[0]` למסגרת הדף הפיזית שהוקצתה זה עתה.\n3. הוא מעדכן את הרשומה בטבלת הדפים עבור הדף הווירטואלי הזה כדי לשקף את הכתובת הפיזית החדשה שלו ולסמן אותו כנוכח.\n4. פקודת `arr[0] = 10;` מבוצעת מחדש. הפעם, ה-MMU מוצא את המיפוי התקף, והערך `10` נכתב בהצלחה למיקום הזיכרון הפיזי.\nתהליך זה מבטיח שזיכרון פיזי נצרך רק כאשר הוא נחוץ בפועל, ובכך מייעל את השימוש בזיכרון."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

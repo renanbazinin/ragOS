@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Paging",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 23:12:22",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2724,
+      "output_tokens": 1078,
+      "total_tokens": 7659
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Paging",
+      "Memory Management",
+      "Virtual Memory"
+    ],
+    "content": {
+      "text": "נתונה מערכת הפעלה המשתמשת בזיכרון וירטואלי עם מנגנון Paging. גודל דף הוא 4KB. נניח שקיימת טבלת דפים ברמה אחת, כפי שמיוצגת בקוד ה-C הבא.\nבהינתן הכתובת הווירטואלית `0x00002345`, מהי הכתובת הפיזית המתאימה?\nיש להתייחס לטבלת הדפים כפי שהיא מוגדרת בקוד.",
+      "code_snippet": "#include <stdint.h>\n\n// גודל דף הוא 4KB (2^12 בתים)\n#define PAGE_SIZE_BYTES 4096\n#define PAGE_OFFSET_BITS 12\n\n// טבלת דפים מפושטת: אינדקס המערך הוא מספר הדף הווירטואלי (VPN),\n// והערך באותו אינדקס הוא מספר המסגרת הפיזית (PFN).\nuint32_t page_table[5] = {\n    0x0000A, // page_table[0] maps to PFN 0xA\n    0x0000C, // page_table[1] maps to PFN 0xC\n    0x0000B, // page_table[2] maps to PFN 0xB\n    0x0000D, // page_table[3] maps to PFN 0xD\n    0x0000E  // page_table[4] maps to PFN 0xE\n};",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": 10,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "גודל דף הוא 4KB, שזה 2^12 בתים. לכן, 12 הביטים הפחות משמעותיים (0-11) של הכתובת הווירטואלית מייצגים את ההיסט בתוך הדף (Page Offset). שאר הביטים (12-31) מייצגים את מספר הדף הווירטואלי (Virtual Page Number - VPN).\n\nהכתובת הווירטואלית הנתונה היא `0x00002345`.\n1.  **חישוב Virtual Page Number (VPN)**:\n    נחלק את הכתובת הווירטואלית בגודל הדף, או ניקח את הביטים 12-31.\n    `VPN = 0x00002345 / 0x1000 = 0x00002` (או `0x00002345 >> 12`).\n\n2.  **חישוב Page Offset (PO)**:\n    ניקח את שארית החלוקה של הכתובת הווירטואלית בגודל הדף, או ניקח את הביטים 0-11.\n    `PO = 0x00002345 % 0x1000 = 0x345` (או `0x00002345 & 0xFFF`).\n\n3.  **איתור Physical Frame Number (PFN)**:\n    נשתמש ב-VPN (שהוא 2) כדי לחפש בטבלת הדפים.\n    לפי הקוד, `page_table[2]` מכיל `0x0000B`. לכן, `PFN = 0x0000B`.\n\n4.  **חישוב הכתובת הפיזית (Physical Address - PA)**:\n    נשלב את ה-PFN עם ה-PO.\n    `PA = (PFN << 12) | PO`\n    `PA = (0x0000B << 12) | 0x345`\n    `PA = 0xB000 | 0x345`\n    `PA = 0xB345`\n\nהכתובת הפיזית המתאימה היא `0xB345`."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "CPU Scheduling",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 00:28:49",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4397,
+      "output_tokens": 2484,
+      "total_tokens": 13351
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "CPU Scheduling",
+      "Concurrency",
+      "Processes",
+      "System Calls"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה:\n\nהניחו את ההנחות הבאות לגבי סביבת הריצה והתזמון:\n1.  **מעבד יחיד**: המערכת כוללת מעבד יחיד.\n2.  **אלגוריתם תזמון**: Round Robin (RR).\n3.  **קוואנטום זמן**: קוואנטום הזמן (Q) הוא 2 יחידות זמן.\n4.  **עלות פעולות**: \n    *   כל קריאה ל-`printf(\"...\")` צורכת בדיוק יחידת זמן אחת. `fflush(stdout)` מיידית וזניחה.\n    *   קריאות מערכת כמו `fork()`, `wait()`, `exit()` צורכות זמן זניח.\n    *   החלפת הקשר (Context Switch) צורכת זמן זניח.\n5.  **`usleep`**: קריאה ל-`usleep(1000 * 100)` גורמת לתהליך להיחסם למשך 100 יחידות זמן. לאחר מכן הוא חוזר לתור המוכנים (ready queue).\n6.  **סדר תהליכים ראשוני**: התהליך הראשי (P0) מתחיל. לאחר שתי קריאות ה-`fork` הראשוניות, תור המוכנים מכיל את P0, P1, P2 בסדר זה.\n7.  **תור המוכנים**: תהליכים חדשים שמוכנים להרצה מתווספים לסוף תור המוכנים. תהליך שסיים את הקוואנטום שלו או נחסם מועבר לסוף תור המוכנים (אם הוא עדיין מוכן).\n\nציירו את סדר ההרצה של התהליכים וכתבו את הפלט המלא והמדויק של התוכנית. הסבירו שלב אחר שלב כיצד הגעתם לפלט זה, תוך התייחסות למצב תור המוכנים בכל נקודת החלטת תזמון.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\n// Function for CPU-intensive child\nvoid child_cpu_intensive(int id) {\n    for (int i = 1; i <= 5; ++i) {\n        printf(\"P%d-%d \", id, i);\n        fflush(stdout); // Ensures immediate output\n    }\n    exit(0);\n}\n\n// Function for mixed CPU/IO child\nvoid child_mixed(int id) {\n    printf(\"P%d-A \", id);\n    fflush(stdout);\n    usleep(1000 * 100); // Simulate I/O or block for 100 time units\n    printf(\"P%d-B \", id);\n    fflush(stdout);\n    exit(0);\n}\n\nint main() {\n    pid_t pid1, pid2;\n\n    printf(\"Parent Start \");\n    fflush(stdout);\n\n    pid1 = fork();\n    if (pid1 == 0) { // Child 1\n        child_cpu_intensive(1);\n    }\n\n    pid2 = fork();\n    if (pid2 == 0) { // Child 2\n        child_mixed(2);\n    }\n\n    // Parent waits for children to finish\n    wait(NULL);\n    wait(NULL);\n\n    printf(\"Parent End\\n\");\n    fflush(stdout);\n\n    return 0;\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "נבצע מעקב מפורט אחר מצב תור המוכנים (Ready Queue - RQ) והפלט של התוכנית:\n\n**מצב התחלתי (זמן 0):**\n*   P0 (התהליך הראשי) מתחיל. הוא מדפיס \"Parent Start \". (צורך יחידת זמן 1).\n*   P0 מבצע `fork()` ליצירת P1. P1 נוסף ל-RQ.\n*   P0 מבצע `fork()` ליצירת P2. P2 נוסף ל-RQ.\n*   **RQ**: [P0, P1, P2]\n*   **פלט**: \"Parent Start \"\n\n**זמן 1 (P0 מתחיל ריצה):**\n*   P0 מוקצה למעבד. הוא רץ למשך הקוואנטום שלו (2 יחידות זמן).\n*   P0 מבצע `wait(NULL)` (צורך זמן זניח). P0 נחסם כיוון שילדיו עדיין לא סיימו.\n*   **RQ**: [P1, P2]\n*   **Blocked Queue (BQ)**: [P0 (ממתין לילדים)]\n*   **פלט**: \"Parent Start \"\n\n**זמן 3 (P1 מתחיל ריצה):**\n*   P1 מוקצה למעבד. הוא רץ למשך הקוואנטום שלו (2 יחידות זמן).\n*   P1 מדפיס \"P1-1 \" (יחידת זמן 1).\n*   P1 מדפיס \"P1-2 \" (יחידת זמן 1).\n*   הקוואנטום של P1 מסתיים. P1 מועבר לסוף ה-RQ.\n*   **RQ**: [P2, P1]\n*   **BQ**: [P0]\n*   **פלט**: \"Parent Start P1-1 P1-2 \"\n\n**זמן 5 (P2 מתחיל ריצה):**\n*   P2 מוקצה למעבד. הוא רץ למשך הקוואנטום שלו (2 יחידות זמן).\n*   P2 מדפיס \"P2-A \" (יחידת זמן 1).\n*   P2 מבצע `usleep(1000 * 100)`. P2 נחסם למשך 100 יחידות זמן (עד זמן 5 + 100 = זמן 105).\n*   **RQ**: [P1]\n*   **BQ**: [P0, P2 (ישן עד זמן 105)]\n*   **פלט**: \"Parent Start P1-1 P1-2 P2-A \"\n\n**זמן 6 (P1 מתחיל ריצה):**\n*   P1 מוקצה למעבד. הוא רץ למשך הקוואנטום שלו (2 יחידות זמן).\n*   P1 מדפיס \"P1-3 \" (יחידת זמן 1).\n*   P1 מדפיס \"P1-4 \" (יחידת זמן 1).\n*   הקוואנטום של P1 מסתיים. P1 מועבר לסוף ה-RQ.\n*   **RQ**: [P1]\n*   **BQ**: [P0, P2 (ישן עד זמן 105)]\n*   **פלט**: \"Parent Start P1-1 P1-2 P2-A P1-3 P1-4 \"\n\n**זמן 8 (P1 מתחיל ריצה):**\n*   P1 מוקצה למעבד. הוא רץ (נותרה לו יחידת הדפסה אחת).\n*   P1 מדפיס \"P1-5 \" (יחידת זמן 1).\n*   P1 מסיים את הלולאה שלו ומבצע `exit(0)`. P1 מסיים.\n*   P0 מקבל הודעה ש-P1 סיים, אך עדיין ממתין ל-P2. P0 נשאר חסום.\n*   **RQ**: [] (אין תהליכים מוכנים)\n*   **BQ**: [P0, P2 (ישן עד זמן 105)]\n*   **פלט**: \"Parent Start P1-1 P1-2 P2-A P1-3 P1-4 P1-5 \"\n\n**זמן 9 עד זמן 105:**\n*   המעבד נותר סרק (Idle) כיוון שאין תהליכים מוכנים.\n*   בזמן 105: P2 מסיים את ה-`usleep` שלו. P2 עובר למצב מוכן ונוסף ל-RQ.\n*   **RQ**: [P2]\n*   **BQ**: [P0]\n\n**זמן 105 (P2 מתחיל ריצה):**\n*   P2 מוקצה למעבד. הוא רץ (נותרה לו יחידת הדפסה אחת).\n*   P2 מדפיס \"P2-B \" (יחידת זמן 1).\n*   P2 מסיים ומבצע `exit(0)`. P2 מסיים.\n*   P0 מקבל הודעה ש-P2 סיים. כיוון ש-P0 המתין לשני ילדיו וכעת שניהם סיימו, P0 משתחרר מהחסימה ונוסף ל-RQ.\n*   **RQ**: [P0]\n*   **BQ**: []\n*   **פלט**: \"Parent Start P1-1 P1-2 P2-A P1-3 P1-4 P1-5 P2-B \"\n\n**זמן 106 (P0 מתחיל ריצה):**\n*   P0 מוקצה למעבד. הוא רץ (נותרה לו יחידת הדפסה אחת).\n*   P0 מדפיס \"Parent End\\n\" (יחידת זמן 1).\n*   P0 מסיים את פעולתו ומבצע `return 0`. P0 מסיים.\n*   **RQ**: []\n*   **BQ**: []\n*   **פלט סופי**: \"Parent Start P1-1 P1-2 P2-A P1-3 P1-4 P1-5 P2-B Parent End\\n\""
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

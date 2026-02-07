@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 00:44:15",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4697,
+      "output_tokens": 2410,
+      "total_tokens": 14208
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Concurrency",
+      "Synchronization",
+      "Reader-Writer Lock",
+      "Mutex",
+      "Condition Variables",
+      "Fairness"
+    ],
+    "content": {
+      "text": "ממשו מנעול קוראים-כותבים (Reader-Writer Lock) הוגן (Fair). מנעול זה צריך לקיים את התכונות הבאות:\n1.  מספר קוראים רשאים לגשת למשאב בו-זמנית.\n2.  רק כותב אחד רשאי לגשת למשאב בכל רגע נתון.\n3.  קוראים וכותבים אינם רשאים לגשת למשאב בו-זמנית.\n4.  **הגינות**:\n    *   אם כותב ממתין לתפוס את המנעול, אין לאפשר לקוראים חדשים להיכנס למצב קריאה.\n    *   כותבים ממתינים צריכים להיכנס לפי סדר הגעתם (FIFO).\n    *   קוראים ממתינים יורשו להיכנס רק כאשר אין כותבים ממתינים או כותבים פעילים.",
+      "code_snippet": "/* מבנה הנתונים של מנעול קוראים-כותבים הוגן */\ntypedef struct {\n    pthread_mutex_t lock;\n    pthread_cond_t readers_cv;\n    pthread_cond_t writers_cv;\n    int readers_active;     // מספר הקוראים הפעילים כרגע\n    int writers_active;     // 0 או 1 (רק כותב אחד בו-זמנית)\n    int writers_waiting;    // מספר הכותבים הממתינים לתפוס את המנעול\n    long writer_ticket_counter; // מונה גלובלי להקצאת 'כרטיסים' לכותבים\n    long writer_serving_ticket; // מספר 'הכרטיס' של הכותב הבא בתור לשרת\n} FairRWLock;\n\n/* אתחול המנעול */\nvoid init(FairRWLock *rwl) {\n    pthread_mutex_init(&rwl->lock, NULL);\n    pthread_cond_init(&rwl->readers_cv, NULL);\n    pthread_cond_init(&rwl->writers_cv, NULL);\n    rwl->readers_active = 0;\n    rwl->writers_active = 0;\n    rwl->writers_waiting = 0;\n    rwl->writer_ticket_counter = 0;\n    rwl->writer_serving_ticket = 0;\n}\n\n/* ניסיון לתפוס את המנעול לקריאה */\nvoid read_lock(FairRWLock *rwl) {\n    pthread_mutex_lock(&rwl->lock);\n    // קורא ממתין אם יש כותב פעיל או כותבים שממתינים (עדיפות לכותבים)\n    while (rwl->writers_active > 0 || rwl->writers_waiting > 0) {\n        pthread_cond_wait(&rwl->readers_cv, &rwl->lock);\n    }\n    rwl->readers_active++;\n    pthread_mutex_unlock(&rwl->lock);\n}\n\n/* שחרור המנעול מקריאה */\nvoid read_unlock(FairRWLock *rwl) {\n    pthread_mutex_lock(&rwl->lock);\n    rwl->readers_active--;\n    // אם זה הקורא האחרון וקיימים כותבים ממתינים, יש לאותת לכותבים\n    if (rwl->readers_active == 0 && rwl->writers_waiting > 0) {\n        pthread_cond_signal(&rwl->writers_cv);\n    }\n    pthread_mutex_unlock(&rwl->lock);\n}\n\n/* ניסיון לתפוס את המנעול לכתיבה */\nvoid write_lock(FairRWLock *rwl) {\n    pthread_mutex_lock(&rwl->lock);\n    long my_ticket = rwl->writer_ticket_counter++; // מקבל 'כרטיס' לפי סדר הגעה\n    rwl->writers_waiting++; // מגדיל את מונה הכותבים הממתינים\n    // כותב ממתין אם יש קוראים פעילים, כותב פעיל, או אם זה לא תורו (FIFO)\n    while (rwl->readers_active > 0 || rwl->writers_active > 0 || my_ticket != rwl->writer_serving_ticket) {\n        pthread_cond_wait(&rwl->writers_cv, &rwl->lock);\n    }\n    rwl->writers_waiting--; // סיים להמתין, עכשיו הוא פעיל\n    rwl->writers_active = 1;\n    pthread_mutex_unlock(&rwl->lock);\n}\n\n/* שחרור המנעול מכתיבה */\nvoid write_unlock(FairRWLock *rwl) {\n    pthread_mutex_lock(&rwl->lock);\n    rwl->writers_active = 0;\n    rwl->writer_serving_ticket++; // מקדם את התור לכותב הבא\n    // אם קיימים כותבים ממתינים, יש לאותת לכותב הבא בתור\n    if (rwl->writers_waiting > 0) {\n        pthread_cond_signal(&rwl->writers_cv);\n    } \n    // אחרת, אם אין כותבים ממתינים, יש לאותת לכל הקוראים הממתינים\n    else {\n        pthread_cond_broadcast(&rwl->readers_cv);\n    }\n    pthread_mutex_unlock(&rwl->lock);\n}\n\n/* השמדת המנעול */\nvoid destroy(FairRWLock *rwl) {\n    pthread_mutex_destroy(&rwl->lock);\n    pthread_cond_destroy(&rwl->readers_cv);\n    pthread_cond_destroy(&rwl->writers_cv);\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון דורש שימוש ב-mutex אחד לשמירה על שלמות הנתונים המשותפים של המנעול, ושני Condition Variables: אחד לקוראים (readers_cv) ואחד לכותבים (writers_cv).\n\nכדי להבטיח את עקרון ה-FIFO עבור כותבים ואת העדיפות שלהם על פני קוראים חדשים, נשתמש בשני מונים נוספים עבור הכותבים:\n*   `writer_ticket_counter`: מונה גלובלי המוקצה לכל כותב שמגיע ומבקש את המנעול, ומבטיח את סדר ההגעה.\n*   `writer_serving_ticket`: מונה גלובלי המצביע על הכותב הבא בתור שמותר לו להיכנס.\n\n**מנגנון הגינות ו-FIFO:**\n*   כאשר כותב מגיע (`write_lock`), הוא מקבל 'כרטיס' (ticket) ייחודי (`my_ticket`) מהמונה `writer_ticket_counter` ומגדיל את המונה `writers_waiting`. הוא ממתין על `writers_cv` אם יש קוראים פעילים (`readers_active > 0`), כותב פעיל (`writers_active > 0`), או אם זה לא תורו (כלומר, `my_ticket` שונה מ-`writer_serving_ticket`).\n*   כאשר קורא מגיע (`read_lock`), הוא ממתין על `readers_cv` אם יש כותב פעיל (`writers_active > 0`) או אם יש כותבים ממתינים (`writers_waiting > 0`). תנאי זה מבטיח שקוראים חדשים לא יתחילו לקרוא אם יש כותב שממתין, ובכך נותן עדיפות לכותבים. \n*   כאשר כותב מסיים (`write_unlock`), הוא מאפס את `writers_active`, מגדיל את `writer_serving_ticket` כדי לאפשר לכותב הבא בתור להיכנס. אם יש כותבים ממתינים (`writers_waiting > 0`), הוא מאותת לאחד מהם (`pthread_cond_signal`) כדי שיבדוק את תנאי הכניסה שלו. אם אין כותבים ממתינים, הוא מאותת לכל הקוראים הממתינים (`pthread_cond_broadcast`) כדי שיוכלו לנסות להיכנס.\n*   כאשר קורא מסיים (`read_unlock`), הוא מקטין את `readers_active`. אם הוא הקורא האחרון (`readers_active == 0`) וקיימים כותבים שממתינים (`writers_waiting > 0`), הוא מאותת לכותב הבא בתור (`pthread_cond_signal`).\n\n**מצבי המתנה (Conditions for Waiting):**\n*   **`read_lock`**: קורא ממתין על `readers_cv` אם יש כותב פעיל (`writers_active > 0`) או כותבים ממתינים (`writers_waiting > 0`).\n*   **`write_lock`**: כותב ממתין על `writers_cv` אם יש קוראים פעילים (`readers_active > 0`), כותב פעיל (`writers_active > 0`), או אם זה לא תורו (`my_ticket != rwl->writer_serving_ticket`).\n\n**מצבי שחרור (Signaling):**\n*   **`read_unlock`**: אם זה הקורא האחרון וקיימים כותבים ממתינים, מאותת לכותב הבא בתור (`pthread_cond_signal` על `writers_cv`).\n*   **`write_unlock`**: מגדיל את `writer_serving_ticket`. אם קיימים כותבים ממתינים, מאותת לכותב הבא בתור (`pthread_cond_signal` על `writers_cv`). אחרת, מאותת לכל הקוראים הממתינים (`pthread_cond_broadcast` על `readers_cv`)."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

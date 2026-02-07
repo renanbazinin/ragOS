@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 22:47:32",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3618,
+      "output_tokens": 2604,
+      "total_tokens": 12201
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Virtual Memory",
+      "Memory Management",
+      "Copy-on-Write",
+      "Processes",
+      "mmap",
+      "fork"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המשתמשת בפונקציות `mmap` ו-`fork` ליצירת תהליכים וניהול זיכרון. נתחו את קטע הקוד הבא והסבירו מה יהיו הפלטים המודפסים על ידי תהליך האב ועל ידי תהליך הבן, ובאיזה סדר. התייחסו באופן מפורט למנגנון הזיכרון הווירטואלי, ובפרט למנגנון Copy-on-Write (CoW), והשפעת ה-flags ששימשו בפונקציית `mmap` על התנהגות התוכנית. הסבירו גם מדוע השינויים שכל תהליך מבצע אינם משפיעים על האחר.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <sys/mman.h>\n#include <unistd.h>\n#include <string.h>\n#include <sys/wait.h>\n\n#define MMAP_SIZE 4096 // One page size\n\nint main() {\n    char *shared_mem;\n    pid_t pid;\n\n    // 1. Map a private, anonymous memory region\n    shared_mem = mmap(NULL, MMAP_SIZE, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);\n    if (shared_mem == MAP_FAILED) {\n        perror(\"mmap failed\");\n        return 1;\n    }\n\n    printf(\"Parent: Mapped memory at %p\\n\", shared_mem);\n\n    // 2. Parent writes initial data\n    strcpy(shared_mem, \"Hello from Parent (initial)\");\n    printf(\"Parent: Initial content: '%s'\\n\", shared_mem);\n\n    pid = fork();\n\n    if (pid == -1) {\n        perror(\"fork failed\");\n        munmap(shared_mem, MMAP_SIZE);\n        return 1;\n    } else if (pid == 0) { // Child process\n        sleep(1); // Ensure parent potentially modifies first if scheduler allows\n        printf(\"Child: Before modification, content: '%s'\\n\", shared_mem);\n        strcpy(shared_mem, \"Hello from Child (modified)\");\n        printf(\"Child: After modification, content: '%s'\\n\", shared_mem);\n        _exit(0); // Use _exit to avoid flushing parent's buffers\n    } else { // Parent process\n        // 3. Parent modifies after fork\n        strcpy(shared_mem + 10, \"PARENT_MOD\"); // Modify a part of the string\n        printf(\"Parent: After child forked and parent modified, content: '%s'\\n\", shared_mem);\n        wait(NULL); // Wait for child to finish\n        printf(\"Parent: After child finished, final content: '%s'\\n\", shared_mem);\n    }\n\n    munmap(shared_mem, MMAP_SIZE);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": 25,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "התוכנית מדגימה את התנהגות זיכרון וירטואלי במערכת הפעלה מודרנית, תוך שימוש ב-`mmap` וב-`fork` עם מנגנון Copy-on-Write (CoW).\n\n**ניתוח שלבי התוכנית והפלטים:**\n\n1.  **`mmap` עם `MAP_PRIVATE | MAP_ANONYMOUS`**: תהליך האב ממפה אזור זיכרון פרטי (private) ואנונימי בגודל עמוד זיכרון אחד (4096 בתים). `MAP_PRIVATE` מציין שהשינויים שיבוצעו לאזור זיכרון זה לא יהיו גלויים לתהליכים אחרים. `MAP_ANONYMOUS` מציין שהזיכרון אינו מגובה בקובץ כלשהו, אלא נוצר על ידי מערכת ההפעלה.\n    *   **פלט ראשון (אב):** `Parent: Mapped memory at 0x...` (כתובת הזיכרון הווירטואלי שהוקצתה). \n    *   **פלט שני (אב):** `Parent: Initial content: 'Hello from Parent (initial)'`\n\n2.  **`strcpy` ראשוני באב**: תהליך האב כותב את המחרוזת \"Hello from Parent (initial)\" לאזור הזיכרון הממופה. בשלב זה, קיים עמוד פיזי יחיד (נניח P1) המכיל את המחרוזת, ותהליך האב מצביע עליו בטבלת הדפים שלו.\n\n3.  **`fork()`**: תהליך האב יוצר תהליך בן. בשלב זה, תהליך הבן מקבל עותק של מרחב הכתובות הווירטואלי של האב. עם זאת, מכיוון שהזיכרון מופה כ-`MAP_PRIVATE`, מערכת ההפעלה לא מעתיקה באופן מיידי את כל העמודים הפיזיים. במקום זאת, היא משתמשת במנגנון **Copy-on-Write (CoW)**. גם האב וגם הבן מצביעים לאותו עמוד פיזי (P1), אך בטבלאות הדפים שלהם העמוד מסומן כ'קריאה בלבד' (read-only).\n\n4.  **שינוי באב לאחר `fork`**: תהליך האב ממשיך ומשנה חלק מהמחרוזת על ידי `strcpy(shared_mem + 10, \"PARENT_MOD\")`. מכיוון שהעמוד P1 מסומן כ'קריאה בלבד' עבור האב, ניסיון הכתיבה מפעיל **page fault**. מערכת ההפעלה יוצרת עמוד פיזי חדש (נניח P2), מעתיקה אליו את התוכן הנוכחי של P1, מעדכנת את טבלת הדפים של האב כך שתצביע על P2 (כעת עם הרשאות קריאה-כתיבה), ומאפשרת לאב להמשיך בכתיבה. כעת P2 מכיל את המחרוזת \"Hello from PARENT_MOD (initial)\". העמוד P1 נשאר ללא שינוי וממשיך להיות משותף (CoW) עם הבן.\n    *   **פלט שלישי (אב):** `Parent: After child forked and parent modified, content: 'Hello from PARENT_MOD (initial)'`\n\n5.  **קריאה בבן לפני שינוי**: תהליך הבן מבצע `sleep(1)` (כדי לאפשר לאב לכתוב לפניו) ואז מדפיס את תוכן הזיכרון. מכיוון שהבן עדיין מצביע על P1 (דרך CoW) ו-P1 מכיל את התוכן המקורי שכתב האב לפני ה-`fork`, הבן יראה את התוכן הראשוני.\n    *   **פלט ראשון (בן):** `Child: Before modification, content: 'Hello from Parent (initial)'`\n\n6.  **שינוי בבן**: תהליך הבן מנסה לכתוב `strcpy(shared_mem, \"Hello from Child (modified)\")`. בדומה לאב, גם כאן מתרחש **page fault** מכיוון שהבן מנסה לכתוב לעמוד P1 המסומן כ'קריאה בלבד' עבורו. מערכת ההפעלה יוצרת עמוד פיזי חדש (נניח P3), מעתיקה אליו את התוכן הנוכחי של P1, מעדכנת את טבלת הדפים של הבן כך שתצביע על P3 (כעת עם הרשאות קריאה-כתיבה), ומאפשרת לבן להמשיך בכתיבה. כעת P3 מכיל את המחרוזת \"Hello from Child (modified)\".\n    *   **פלט שני (בן):** `Child: After modification, content: 'Hello from Child (modified)'`\n\n7.  **סיום הבן וסיום האב**: הבן מסיים את פעולתו (`_exit(0)`). האב ממתין לבן (`wait(NULL)`) ומדפיס שוב את תוכן הזיכרון שלו. הזיכרון של האב עדיין מצביע על P2, ולכן יראה את השינויים שביצע בעצמו.\n    *   **פלט רביעי (אב):** `Parent: After child finished, final content: 'Hello from PARENT_MOD (initial)'`\n\n**סדר הפלטים המשוער (בהתאם ל-`sleep(1)`):**\n1.  `Parent: Mapped memory at 0x...`\n2.  `Parent: Initial content: 'Hello from Parent (initial)'`\n3.  `Parent: After child forked and parent modified, content: 'Hello from PARENT_MOD (initial)'`\n4.  `Child: Before modification, content: 'Hello from Parent (initial)'`\n5.  `Child: After modification, content: 'Hello from Child (modified)'`\n6.  `Parent: After child finished, final content: 'Hello from PARENT_MOD (initial)'`\n\n**מדוע השינויים אינם משפיעים על האחר:**\nמנגנון ה-Copy-on-Write (CoW) בשילוב עם `MAP_PRIVATE` מבטיח שכל תהליך מקבל עותק פרטי משלו של עמוד זיכרון ברגע שהוא מנסה לכתוב אליו. לפני הכתיבה הראשונה, שני התהליכים חולקים את אותו עמוד פיזי וירטואלי (P1). ברגע שאחד מהם מבצע כתיבה (בין אם האב ל-P2 או הבן ל-P3), מערכת ההפעלה משכפלת את העמוד הפיזי, מעדכנת את טבלת הדפים של התהליך הכותב כך שיצביע על העותק החדש, ומאפשרת את הכתיבה. התהליך השני ממשיך להצביע על העמוד המקורי (או על עותק פרטי משלו אם הוא גם כתב). כתוצאה מכך, שינויים שבוצעו על ידי תהליך אחד אינם נראים או משפיעים על תהליך אחר, למרות שהם התחילו עם אותה כתובת וירטואלית ואותו תוכן."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

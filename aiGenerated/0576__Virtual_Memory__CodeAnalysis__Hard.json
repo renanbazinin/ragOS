@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 22:51:30",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3618,
+      "output_tokens": 2237,
+      "total_tokens": 10050
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Virtual Memory",
+      "Paging",
+      "TLB",
+      "Cache Locality",
+      "Performance"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המבצעת אתחול של מערך דו-ממדי גדול. התוכנית מממשת שתי פונקציות לאתחול המערך בדרכים שונות:\n1. `init_row_major`: מאתחלת את המערך לפי שורות (גישה עוקבת בזיכרון).\n2. `init_col_major`: מאתחלת את המערך לפי עמודות (גישה לא עוקבת בזיכרון).\n\nהקוד הבא מייצג את הפונקציות הללו:\n\n```c\n#define N 2048\nchar large_array[N][N];\n\nvoid init_row_major() {\n    for (int i = 0; i < N; i++) {\n        for (int j = 0; j < N; j++) {\n            large_array[i][j] = (char)(i + j);\n        }\n    }\n}\n\nvoid init_col_major() {\n    for (int j = 0; j < N; j++) {\n        for (int i = 0; i < N; i++) {\n            large_array[i][j] = (char)(i + j);\n        }\n    }\n}\n```\n\nבהנחה שגודל דף זיכרון הוא 4KB, ושהמערך `large_array` גדול מספיק כדי לחרוג מגודלי ה-cache השונים (L1, L2, L3) של המעבד, וכן כדי לדרוש מספר רב של דפי זיכרון ורשומות TLB:\n\nא. איזו פונקציה, מבין `init_row_major` ו-`init_col_major`, צפויה להיות מהירה באופן משמעותי יותר? נמקו את תשובתכם בפירוט, תוך התייחסות למנגנוני זיכרון וירטואלי (כגון TLB, Page Faults) ולמנגנוני Cache של המעבד.",
+      "code_snippet": "#define N 2048\nchar large_array[N][N];\n\nvoid init_row_major() {\n    for (int i = 0; i < N; i++) {\n        for (int j = 0; j < N; j++) {\n            large_array[i][j] = (char)(i + j);\n        }\n    }\n}\n\nvoid init_col_major() {\n    for (int j = 0; j < N; j++) {\n        for (int i = 0; i < N; i++) {\n            large_array[i][j] = (char)(i + j);\n        }\n    }\n}\n",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": 25,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפונקציה `init_row_major` צפויה להיות מהירה באופן משמעותי יותר מ-`init_col_major`.\n\nההסבר טמון באופן הגישה לזיכרון והשפעותיו על מנגנוני הזיכרון הווירטואלי (Paging, TLB) ועל זיכרון המטמון (Cache) של המעבד:\n\n**1. `init_row_major` (גישה לפי שורות):**\n   *   **עקרון לוקליות המרחב (Spatial Locality):** מערכי C מאוחסנים בזיכרון בשורה-אחר-שורה (row-major order). כאשר אנו ניגשים ל-`large_array[i][j]`, הגישה הבאה ל-`large_array[i][j+1]` נמצאת מיד אחרי הכתובת הנוכחית בזיכרון פיזי. גישה זו היא עוקבת ובעלת לוקליות מרחבית גבוהה.\n   *   **Page Faults:** כאשר מתרחש Page Fault עבור `large_array[i][j]`, דף הזיכרון המכיל את הכתובת הזו נטען לזיכרון פיזי. מכיוון שהגישה היא עוקבת, הגישות הבאות לאלמנטים כמו `large_array[i][j+1]`, `large_array[i][j+2]` וכו', צפויות להיות באותו דף זיכרון שכבר נטען. זה מוביל למספר נמוך יחסית של Page Faults.\n   *   **TLB (Translation Lookaside Buffer):** ה-TLB הוא מטמון לתרגומי כתובות וירטואליות לפיזיות. כאשר מתרחש TLB Miss, יש צורך לגשת לטבלאות הדפים בזיכרון הראשי. בגישה לפי שורות, לאחר שדף מסוים טופל והרשומה שלו נכנסה ל-TLB, גישות רבות נוספות בתוך אותו דף יגרמו ל-TLB Hit. זה מפחית משמעותית את מספר ה-TLB Misses ואת הצורך בגישה לטבלאות הדפים.\n   *   **Cache:** כאשר נטען אלמנט לזיכרון המטמון (Cache), נטענת יחידה גדולה יותר הנקראת Cache Line. בגישה לפי שורות, האלמנטים הבאים בזיכרון (כגון `large_array[i][j+1]`, `large_array[i][j+2]`) נמצאים באותה Cache Line או ב-Cache Lines סמוכות. זה מוביל לניצול יעיל של המטמון (Cache Hits רבים) ומפחית את הצורך בטעינות מהזיכרון הראשי.\n\n**2. `init_col_major` (גישה לפי עמודות):**\n   *   **עקרון לוקליות המרחב (Spatial Locality):** בגישה זו, לאחר הגישה ל-`large_array[i][j]`, הגישה הבאה היא ל-`large_array[i+1][j]`. בזיכרון, אלמנט זה נמצא במרחק של N בתים (או N כפול גודל טיפוס הנתונים) מהאלמנט הקודם. זוהי גישה לא עוקבת ובעלת לוקליות מרחבית נמוכה מאוד.\n   *   **Page Faults:** כל גישה ל-`large_array[i+1][j]` (כאשר `i` משתנה) צפויה לקפוץ לדף זיכרון שונה (או לפחות לכתובת רחוקה בתוך דף). בהינתן ש-`N` גדול (2048), קפיצה של 2048 בתים (לדוגמה, אם `char` הוא 1 בית) או יותר, ככל הנראה תעבור לדף זיכרון חדש עבור כל איטרציה של הלולאה הפנימית. זה יוביל למספר עצום של Page Faults, מכיוון שכל גישה לאלמנט חדש בעמודה עלולה לדרוש טעינת דף חדש לזיכרון הפיזי, מה שגורם להשהיה משמעותית.\n   *   **TLB (Translation Lookaside Buffer):** עקב הקפיצות התכופות בין דפי זיכרון שונים, ה-TLB יסבול ממספר רב של TLB Misses. כל גישה לאלמנט `large_array[i][j]` כאשר `i` משתנה, תדרוש תרגום כתובת לדף זיכרון חדש, וככל הנראה הרשומה לדף זה לא תהיה ב-TLB. זה יחייב גישה לטבלאות הדפים שוב ושוב, מה שמאט את התהליך באופן דרמטי.\n   *   **Cache:** בגישה לפי עמודות, הנתונים הנטענים ל-Cache Line אינם מנוצלים ביעילות. לאחר טעינת `large_array[i][j]` ל-Cache Line, הגישה הבאה ל-`large_array[i+1][j]` תהיה בכתובת רחוקה מאוד, וסביר להניח שהיא לא תהיה באותה Cache Line. זה מוביל ל-Cache Misses רבים ול-Cache Thrashing (החלפה תכופה של Cache Lines), מה שמחייב טעינה חוזרת ונשנית של נתונים מהזיכרון הראשי.\n\nלסיכום, `init_row_major` מנצלת ביעילות את עקרון לוקליות המרחב, ומביאה למספר נמוך של Page Faults, TLB Misses ו-Cache Misses, מה שהופך אותה למהירה בהרבה. לעומתה, `init_col_major` סובלת מביצועים ירודים עקב הפרה של לוקליות המרחב, מה שגורם למספרים גבוהים של Page Faults, TLB Misses ו-Cache Misses."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

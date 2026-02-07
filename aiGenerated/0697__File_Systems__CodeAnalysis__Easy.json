@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "File Systems",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 23:42:57",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2852,
+      "output_tokens": 1326,
+      "total_tokens": 7278
+    }
+  },
+  "question": {
+    "id": 100,
+    "type": "CodeAnalysis",
+    "topic": [
+      "File Systems",
+      "System Calls",
+      "File I/O"
+    ],
+    "content": {
+      "text": "נתונה תוכנית ה-C הבאה המבצעת פעולות על קובץ. מה יהיה הפלט של התוכנית לפלט הסטנדרטי (stdout)?",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <fcntl.h>\n#include <string.h>\n\nint main() {\n    int fd;\n    char buffer[10]; // Buffer for 9 chars + null terminator\n    char *filename = \"test_file.txt\";\n    ssize_t bytes_read; // To store the return value of read\n\n    // Open file, create if not exists, truncate if exists, read/write permissions\n    fd = open(filename, O_CREAT | O_TRUNC | O_RDWR, 0644);\n    if (fd == -1) {\n        perror(\"open\");\n        exit(EXIT_FAILURE);\n    }\n\n    // Write \"HELLO\"\n    write(fd, \"HELLO\", 5); \n\n    // Seek to offset 2 from the beginning\n    lseek(fd, 2, SEEK_SET);\n\n    // Write \"WORLD\"\n    write(fd, \"WORLD\", 5);\n\n    // Seek to the beginning for reading\n    lseek(fd, 0, SEEK_SET);\n\n    // Clear buffer before reading to ensure clean output\n    memset(buffer, 0, sizeof(buffer));\n\n    // Read up to 9 bytes into buffer (leaving space for null terminator)\n    bytes_read = read(fd, buffer, sizeof(buffer) - 1); \n    if (bytes_read == -1) {\n        perror(\"read\");\n        close(fd);\n        unlink(filename);\n        exit(EXIT_FAILURE);\n    }\n\n    // Null-terminate the buffer at the exact end of read data\n    buffer[bytes_read] = '\\0';\n\n    printf(\"File content after operations: %s\\n\", buffer);\n\n    close(fd);\n    unlink(filename); // Clean up the file\n    return 0;\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "התוכנית פותחת קובץ בשם \"test_file.txt\" ומבצעת עליו מספר פעולות:\n1.  `fd = open(filename, O_CREAT | O_TRUNC | O_RDWR, 0644);`: הקובץ \"test_file.txt\" נוצר (או נמחק תוכנו אם קיים), ונפתח לקריאה וכתיבה. מצביע הקובץ (file offset) מאותחל לאופסט 0.\n2.  `write(fd, \"HELLO\", 5);`: המחרוזת \"HELLO\" נכתבת לקובץ. תוכן הקובץ כעת הוא `HELLO`. מצביע הקובץ מתקדם לאופסט 5.\n3.  `lseek(fd, 2, SEEK_SET);`: מצביע הקובץ מוזז לאופסט 2 מתחילת הקובץ.\n4.  `write(fd, \"WORLD\", 5);`: המחרוזת \"WORLD\" נכתבת החל מאופסט 2. היא דורסת את התווים \"LLO\" שהיו שם. תוכן הקובץ כעת הוא `HEWORLD`. מצביע הקובץ מתקדם לאופסט 2 + 5 = 7.\n5.  `lseek(fd, 0, SEEK_SET);`: מצביע הקובץ מוזז שוב לתחילת הקובץ (אופסט 0).\n6.  `memset(buffer, 0, sizeof(buffer));`: המאגר `buffer` מאופס (ממולא בתווי null).\n7.  `bytes_read = read(fd, buffer, sizeof(buffer) - 1);`: התוכנית מנסה לקרוא עד 9 בתים מהקובץ לתוך המאגר `buffer`. מכיוון שגודל הקובץ הוא 7 בתים בלבד (`HEWORLD`), רק 7 בתים אלה נקראים. המשתנה `bytes_read` יכיל את הערך 7. המאגר `buffer` יכיל כעת את המחרוזת `HEWORLD` ב-7 הבתים הראשונים, ואחריהם תווי null מה-`memset`.\n8.  `buffer[bytes_read] = '\\0';`: שורה זו מבטיחה שהמחרוזת במאגר תהיה מסתיימת ב-null בדיוק במיקום הנכון (לאחר 7 התווים שנקראו). במקרה זה, `buffer[7]` מקבל את התו null, מה שהופך את `buffer` למחרוזת C תקנית `\"HEWORLD\"`.\n9.  `printf(\"File content after operations: %s\\n\", buffer);`: הפלט יהיה המחרוזת שנקראה, `HEWORLD`, ולאחריה ירידת שורה.\n\nלכן, הפלט הסופי של התוכנית הוא:\n`File content after operations: HEWORLD`",
+      "code_snippet": null
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

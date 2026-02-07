@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Paging",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 23:18:49",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3971,
+      "output_tokens": 2806,
+      "total_tokens": 14403
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Paging",
+      "Virtual Memory",
+      "TLB",
+      "Page Faults",
+      "Memory Access Patterns"
+    ],
+    "content": {
+      "text": "נתונה מערכת הפעלה המשתמשת בזיכרון וירטואלי עם מנגנון Paging דו-שכבתי. הפרטים הטכניים של המערכת הם כדלקמן:\n*   מרחב כתובות וירטואלי: 32 סיביות.\n*   גודל דף: 4KB (2^12 בתים).\n*   מבנה טבלאות הדפים:\n    *   אינדקס לטבלת הדפים העליונה (Page Directory Index - PDI): 10 סיביות (מסיביות 31-22).\n    *   אינדקס לטבלת הדפים התחתונה (Page Table Index - PTI): 10 סיביות (מסיביות 21-12).\n    *   היסט בתוך הדף (Page Offset): 12 סיביות (מסיביות 11-0).\n*   TLB (Translation Lookaside Buffer): מכיל 4 כניסות, אסוציאטיבי מלא (fully associative), ומשתמש במדיניות החלפה LRU (Least Recently Used). ה-TLB ריק בתחילת ריצת התוכנית.\n*   זיכרון פיזי: גדול מספיק להכיל את כל הנתונים הנדרשים.\n*   הנחות:\n    *   הקצאת הזיכרון באמצעות `malloc` מחזירה בלוק רציף של כתובות וירטואליות.\n    *   כל דפי המערך `matrix` אינם נמצאים בזיכרון הפיזי בתחילת הריצה (כל גישה ראשונה לדף תגרום ל-Page Fault).\n    *   טבלאות הדפים (Page Directory ו-Page Tables) תמיד נמצאות בזיכרון הפיזי ואינן גורמות ל-Page Faults.\n    *   TLB Miss גורם לחיפוש בטבלאות הדפים. Page Fault מתרחש כאשר דף אינו בזיכרון הפיזי. לאחר Page Fault, הדף נטען לזיכרון הפיזי, ה-PTE המתאים מתעדכן, וה-TLB מתעדכן עם המיפוי החדש.\n\nנתונה התוכנית הבאה:\n\n```c\n#include <stdio.h>\n#include <stdlib.h>\n\n#define ROWS 1024\n#define COLS 1024\n\nint main() {\n    int (*matrix)[COLS] = (int (*)[COLS])malloc(ROWS * COLS * sizeof(int));\n    if (matrix == NULL) {\n        perror(\"malloc failed\");\n        return 1;\n    }\n\n    // Access elements in a specific pattern\n    for (int j = 0; j < COLS; ++j) { // Outer loop iterates through columns\n        for (int i = 0; i < ROWS; ++i) { // Inner loop iterates through rows\n            matrix[i][j] = i + j; // Write access\n        }\n    }\n\n    free(matrix);\n    return 0;\n}\n\n```\n\nחשבו עבור התוכנית הנ\"ל את:\n1.  המספר הכולל של Page Faults שיגרמו במהלך ריצת הלולאות הפנימיות והחיצוניות.\n2.  המספר הכולל של TLB Misses שיגרמו במהלך ריצת הלולאות הפנימיות והחיצוניות.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n\n#define ROWS 1024\n#define COLS 1024\n\nint main() {\n    int (*matrix)[COLS] = (int (*)[COLS])malloc(ROWS * COLS * sizeof(int));\n    if (matrix == NULL) {\n        perror(\"malloc failed\");\n        return 1;\n    }\n\n    // Access elements in a specific pattern\n    for (int j = 0; j < COLS; ++j) { // Outer loop iterates through columns\n        for (int i = 0; i < ROWS; ++i) { // Inner loop iterates through rows\n            matrix[i][j] = i + j; // Write access\n        }\n    }\n\n    free(matrix);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "**ניתוח מבנה הזיכרון והגישה:**\n*   גודל דף: 4KB (2^12 בתים).\n*   גודל `int`: 4 בתים.\n*   מספר `int`-ים בדף: 4096 בתים / 4 בתים/`int` = 1024 `int`-ים.\n*   המערך `matrix` בגודל `1024x1024` `int`-ים, מאוחסן בזיכרון בסדר שורות (row-major).\n*   גודל שורה אחת במערך: `1024 * 4` בתים = 4096 בתים = 1 דף.\n*   מכאן, כל שורה במערך תופסת בדיוק דף אחד בזיכרון הווירטואלי, וכל שורה חדשה מתחילה בדף וירטואלי חדש. בהנחה שכתובת הבסיס של המערך מיושרת לדף, הגישה ל-`matrix[i][j]` תמיד תתייחס לדף הווירטואלי המתאים לשורה `i` (כלומר, דף מספר `i`).\n*   הלולאות ניגשות למערך בסדר עמודות-ראשי (column-major): עבור `j` קבוע, `i` עובר מ-0 עד 1023. כלומר, ניגשים ל-`matrix[0][j]`, `matrix[1][j]`, ..., `matrix[1023][j]` (אשר נמצאים בדפים `P0`, `P1`, ..., `P1023` בהתאמה).\n\n**1. מספר Page Faults כולל:**\n*   כאשר `j=0` (הלולאה החיצונית הראשונה), הלולאה הפנימית ניגשת ל-`matrix[0][0]`, `matrix[1][0]`, ..., `matrix[1023][0]`.\n*   גישה ל-`matrix[0][0]` מתייחסת לדף `P0`. מכיוון שכל הדפים אינם בזיכרון הפיזי בתחילה, גישה זו תגרום ל-Page Fault עבור דף `P0`. הדף ייטען לזיכרון הפיזי.\n*   באופן דומה, גישה ל-`matrix[1][0]` מתייחסת לדף `P1` ותגרום ל-Page Fault. הדף ייטען.\n*   תהליך זה יחזור על עצמו עבור כל `i` מ-0 עד 1023. כל גישה ל-`matrix[i][0]` תגרום ל-Page Fault עבור דף `Pi` (מכיוון שזהו הדף `Pi` הראשון שנפגש בתוכנית).\n*   בסך הכל, עבור `j=0`, ניגשים ל-1024 דפים שונים (`P0` עד `P1023`), וכל אחד מהם גורם ל-Page Fault בגישה הראשונה אליו. לכן, יתרחשו `1024` Page Faults.\n*   לאחר סיום הלולאה הפנימית עבור `j=0`, כל 1024 הדפים של המערך (`P0` עד `P1023`) נמצאים כעת בזיכרון הפיזי.\n*   עבור כל איטרציה עוקבת של הלולאה החיצונית (`j=1` עד `j=1023`), הלולאה הפנימית ניגשת שוב לאותם 1024 דפים (`P0` עד `P1023`). מכיוון שכל הדפים כבר נמצאים בזיכרון הפיזי, לא יתרחשו Page Faults נוספים.\n*   **סה\"כ Page Faults:** 1024.\n\n**2. מספר TLB Misses כולל:**\n*   גודל ה-TLB הוא 4 כניסות, ומדיניות ההחלפה היא LRU.\n*   הלולאה הפנימית ניגשת ל-1024 דפים שונים (`P0`, `P1`, ..., `P1023`) באופן סדרתי.\n*   בכל איטרציה של הלולאה הפנימית (עבור `j` קבוע):\n    *   `i=0`: גישה לדף `P0`. ה-TLB ריק (או מכיל כניסות לא רלוונטיות מהאיטרציה הקודמת של `j`). TLB Miss. `P0` מתווסף ל-TLB.\n    *   `i=1`: גישה לדף `P1`. TLB Miss. `P1` מתווסף ל-TLB.\n    *   `i=2`: גישה לדף `P2`. TLB Miss. `P2` מתווסף ל-TLB.\n    *   `i=3`: גישה לדף `P3`. TLB Miss. `P3` מתווסף ל-TLB. כעת ה-TLB מלא: `{P0, P1, P2, P3}` (בסדר שימוש: `P3` הכי חדש, `P0` הכי ישן).\n    *   `i=4`: גישה לדף `P4`. TLB Miss. ה-TLB מלא, `P0` הוא ה-LRU. `P0` מוחלף ב-`P4`. ה-TLB: `{P1, P2, P3, P4}` (בסדר שימוש: `P4` הכי חדש, `P1` הכי ישן).\n    *   `i=5`: גישה לדף `P5`. TLB Miss. `P1` הוא ה-LRU. `P1` מוחלף ב-`P5`. ה-TLB: `{P2, P3, P4, P5}`.\n*   דפוס זה ממשיך: בכל פעם שניגשים לדף חדש (`Pi`), הוא גורם ל-TLB Miss ומחליף את הדף שהיה הכי פחות בשימוש מבין הדפים שהיו ב-TLB. מכיוון שיש לנו 1024 דפים שונים ואנחנו ניגשים אליהם באופן סדרתי, וגודל ה-TLB הוא רק 4, כל גישה לדף תהיה TLB Miss.\n*   לכן, עבור כל איטרציה של הלולאה הפנימית (1024 גישות), יתרחשו 1024 TLB Misses.\n*   הלולאה החיצונית רצה 1024 פעמים (עבור `j` מ-0 עד 1023).\n*   **סה\"כ TLB Misses:** `1024 (ROWS) * 1024 (COLS) = 1,048,576`."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

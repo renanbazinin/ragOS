@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Paging",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 22:53:18",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 909,
+      "output_tokens": 705,
+      "total_tokens": 3200
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Paging",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "נתונה מערכת זיכרון וירטואלי המשתמשת ב-paging.\nגודל דף (page size) הוא 4KB.\nכתובת וירטואלית נתונה היא `0x0000A123`.\nבטבלת הדפים (page table) של התהליך, עבור מספר הדף הווירטואלי המתאים לכתובת זו, מספר ה-frame הפיזי הוא `0x000F`.\nמהי הכתובת הפיזית המתאימה לכתובת הווירטואלית הנתונה?",
+      "code_snippet": null,
+      "options": [
+        "א. `0x000F123`",
+        "ב. `0x0000F123`",
+        "ג. `0x000A123`",
+        "ד. `0x000F0A123`"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "גודל דף הוא 4KB, כלומר 2^12 בתים. לכן, 12 הביטים הפחות משמעותיים של הכתובת הווירטואלית מייצגים את ה-offset בתוך הדף.\nהכתובת הווירטואלית הנתונה היא `0x0000A123`.\n*   ה-offset הוא 12 הביטים הנמוכים ביותר: `0x123`.\n*   מספר הדף הווירטואלי (VPN) הוא שאר הביטים: `0x0000A`.\nטבלת הדפים מציינת כי עבור מספר הדף הווירטואלי `0x0000A`, מספר ה-frame הפיזי הוא `0x000F`.\nכדי לבנות את הכתובת הפיזית, אנו מחליפים את ה-VPN במספר ה-frame הפיזי ומשאירים את ה-offset ללא שינוי:\nכתובת פיזית = (Frame Number << 12) | Offset\nכתובת פיזית = (`0x000F` << 12) | `0x123`\n`0x000F` מוסט ב-12 ביטים שמאלה הוא `0x000F000`.\n`0x000F000` + `0x123` = `0x000F123`.\nלכן, התשובה הנכונה היא `א`."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

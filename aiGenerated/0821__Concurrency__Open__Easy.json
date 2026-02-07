@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 00:36:33",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1926,
+      "output_tokens": 1101,
+      "total_tokens": 4073
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "Open",
+    "topic": [
+      "Concurrency",
+      "Race Conditions",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "הסבירו מהו מצב מרוץ (Race Condition) בתכנות מקבילי, ותנו דוגמת קוד פשוטה ב-C/C++ המדגימה מצב מרוץ פוטנציאלי כאשר מספר תהליכונים (threads) מנסים לעדכן משתנה משותף ללא סנכרון.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\n// משתנה משותף\nint counter = 0;\n\n// פונקציה שתופעל על ידי כל תהליכון\nvoid* increment_counter(void* arg) {\n    for (int i = 0; i < 100000; i++) {\n        counter++; // קטע קריטי ללא הגנה\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t tid[2];\n\n    // יצירת שני תהליכונים\n    pthread_create(&tid[0], NULL, increment_counter, NULL);\n    pthread_create(&tid[1], NULL, increment_counter, NULL);\n\n    // המתנה לסיום שני התהליכונים\n    pthread_join(tid[0], NULL);\n    pthread_join(tid[1], NULL);\n\n    // הדפסת הערך הסופי של המונה\n    printf(\"Final counter value: %d\\n\", counter);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "מצב מרוץ (Race Condition) מתרחש כאשר מספר תהליכונים ניגשים לנתון משותף בו-זמנית, ולפחות אחד מהם משנה את הנתון, מה שמוביל לתוצאות בלתי צפויות ולא עקביות. התוצאה הסופית תלויה בסדר הספציפי שבו פעולות התהליכונים מתבצעות.\n\nבדוגמת הקוד, הפעולה `counter++` אינה אטומית. היא מורכבת משלושה שלבים ברמת המעבד:\n1. קריאת הערך הנוכחי של `counter` לתוך אוגר.\n2. הגדלת הערך באוגר.\n3. כתיבת הערך המעודכן מהאוגר בחזרה ל-`counter` בזיכרון.\n\nאם שני תהליכונים מבצעים את הפעולה הזו במקביל ללא סנכרון, ייתכן ששלביהם יתערבבו כך שעדכונים מסוימים ילכו לאיבוד. לדוגמה, אם `counter` הוא 0:\n*   תהליכון A קורא את `counter` (ערך 0) לאוגר שלו.\n*   המתזמן מחליף לתהליכון B.\n*   תהליכון B קורא את `counter` (ערך 0) לאוגר שלו.\n*   תהליכון B מגדיל את הערך באוגר שלו ל-1 וכותב אותו בחזרה ל-`counter`. כעת `counter` שווה 1.\n*   המתזמן מחליף בחזרה לתהליכון A.\n*   תהליכון A מגדיל את הערך באוגר שלו (שעדיין מכיל 0) ל-1 וכותב אותו בחזרה ל-`counter`. כעת `counter` שווה 1.\n\nבמקום ש-`counter` יהיה 2 (כפי שהיינו מצפים לאחר שתי הגדלות), הוא נשאר 1, כי ההגדלה של תהליכון B נדרסה על ידי הכתיבה של תהליכון A. מכיוון שכל תהליכון מבצע את הלולאה 100,000 פעמים, הערך הסופי הצפוי הוא 200,000, אך בפועל, ברוב ההרצות, נקבל ערך נמוך יותר עקב מצבי מרוץ. הפתרון הוא להגן על הקטע הקריטי (critical section) באמצעות מנגנוני סנכרון כמו מנעולים (mutexes) כדי להבטיח בלעדיות הדדית (mutual exclusion) כאשר ניגשים למשתנה המשותף."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Paging",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 23:11:31",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2724,
+      "output_tokens": 1170,
+      "total_tokens": 7304
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Paging",
+      "Virtual Memory",
+      "Address Translation"
+    ],
+    "content": {
+      "text": "נתונה מערכת הפעלה המשתמשת בזיכרון וירטואלי עם מנגנון דפדוף (paging).\nגודל דף (page size) וגודל מסגרת פיזית (frame size) הוא 4KB (כלומר, 2 בחזקת 12 בתים).\n\nכתוב פונקציית C בשם `translate_address` אשר מקבלת כתובת וירטואלית (32 סיביות) ומצביע לטבלת דפים חד-מפלסית. הפונקציה צריכה להחזיר את הכתובת הפיזית המתאימה.\nיש להניח שכל הדפים נמצאים בזיכרון הפיזי (כלומר, השדה `present` תמיד 1) ושטבלת הדפים תקינה. אין צורך לטפל ב-page faults.\n\nמבנה טבלת הדפים ומבנה כניסה בטבלה מוגדרים כדלהלן:",
+      "code_snippet": "#include <stdio.h>\n\n#define PAGE_SIZE_BYTES 4096 // 4KB\n#define PAGE_SHIFT 12        // log2(4096)\n#define PAGE_MASK 0xFFF      // Mask for the offset (12 bits)\n\n// Structure for a Page Table Entry (PTE)\ntypedef struct {\n    unsigned int physical_frame_number; // The physical frame number\n    unsigned int present : 1;           // 1 if page is in physical memory, 0 otherwise\n} PageTableEntry;\n\n// Function to implement:\nunsigned int translate_address(unsigned int virtual_address, PageTableEntry* page_table) {\n    // Write your code here to translate the virtual_address to a physical address\n    return 0; // Placeholder\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון דורש מיצוי מספר הדף הווירטואלי (VPN) וההיסט (offset) מהכתובת הווירטואלית.\n1. מספר הדף הווירטואלי מתקבל על ידי הזזת הכתובת הווירטואלית ימינה ב-PAGE_SHIFT (12 סיביות).\n2. ההיסט מתקבל על ידי ביצוע פעולת AND לוגית בין הכתובת הווירטואלית לבין PAGE_MASK (שמייצג את 12 הסיביות הפחות משמעותיות).\n3. לאחר מכן, משתמשים במספר הדף הווירטואלי כאינדקס לטבלת הדפים כדי למצוא את כניסת טבלת הדפים (PTE) המתאימה. מכניסה זו אנו שולפים את מספר המסגרת הפיזית (PFN).\n4. לבסוף, הכתובת הפיזית מורכבת על ידי הזזת מספר המסגרת הפיזית שמאלה ב-PAGE_SHIFT ושילובו עם ההיסט באמצעות פעולת OR לוגית.",
+      "code_snippet": "#include <stdio.h>\n\n#define PAGE_SIZE_BYTES 4096 // 4KB\n#define PAGE_SHIFT 12        // log2(4096)\n#define PAGE_MASK 0xFFF      // Mask for the offset (12 bits)\n\n// Structure for a Page Table Entry (PTE)\ntypedef struct {\n    unsigned int physical_frame_number; // The physical frame number\n    unsigned int present : 1;           // 1 if page is in physical memory, 0 otherwise\n} PageTableEntry;\n\n// Function to implement:\nunsigned int translate_address(unsigned int virtual_address, PageTableEntry* page_table) {\n    // 1. Extract virtual page number (VPN)\n    unsigned int virtual_page_number = virtual_address >> PAGE_SHIFT;\n\n    // 2. Extract offset within the page\n    unsigned int offset = virtual_address & PAGE_MASK;\n\n    // 3. Look up the Page Table Entry (PTE) using the VPN\n    //    We assume page_table is an array of PageTableEntry\n    PageTableEntry pte = page_table[virtual_page_number];\n\n    // 4. Combine the physical frame number (PFN) with the offset to get the physical address\n    unsigned int physical_address = (pte.physical_frame_number << PAGE_SHIFT) | offset;\n\n    return physical_address;\n}"
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

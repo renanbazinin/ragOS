@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "CPU Scheduling",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 00:14:10",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2646,
+      "output_tokens": 926,
+      "total_tokens": 7315
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "CPU Scheduling",
+      "Processes",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה:\nהניחו כי המערכת פועלת על מעבד יחיד (single CPU) ומשתמשת באלגוריתם תזמון מונע (preemptive scheduler) שאינו מבטיח סדר ריצה ספציפי בין תהליכים מוכנים לריצה. כל קריאות המערכת מצליחות.\nכתבו את כל הפלטים האפשריים של התוכנית.",
+      "code_snippet": "#include <stdio.h>\n#include <unistd.h> // For fork\n\nint main() {\n    printf(\"1. Parent starts\\n\");\n    fflush(stdout);\n\n    pid_t pid = fork();\n\n    if (pid == 0) { // Child process\n        printf(\"3. Child executes\\n\");\n        fflush(stdout);\n        printf(\"4. Child finishes\\n\");\n        fflush(stdout);\n    } else if (pid > 0) { // Parent process\n        printf(\"2. Parent continues\\n\");\n        fflush(stdout);\n        printf(\"5. Parent finishes\\n\");\n        fflush(stdout);\n    }\n\n    return 0;\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הסבר:\nהשורה הראשונה \"1. Parent starts\" מודפסת תמיד ראשונה, מכיוון שהיא מתבצעת על ידי תהליך האב לפני קריאת ה-fork. קריאת ה-fflush(stdout) מבטיחה שההדפסה תצא מיד לפלט.\n\nלאחר קריאת ה-fork, נוצרים שני תהליכים: תהליך אב ותהליך בן. שניהם מוכנים לריצה על המעבד. המתזמן המונע יכול לבחור להריץ כל אחד מהם.\n\n*   **תהליך האב** ימשיך להדפיס: \"2. Parent continues\" ולאחר מכן \"5. Parent finishes\".\n*   **תהליך הבן** ימשיך להדפיס: \"3. Child executes\" ולאחר מכן \"4. Child finishes\".\n\nמכיוון שהמתזמן הוא מונע ואינו מבטיח סדר ריצה ספציפי, ישנן שתי אפשרויות עיקריות לסדר ההדפסות של קטעי הקוד לאחר ה-fork, בהתחשב בכך שכל רצף הדפסות בתוך תהליך בודד הוא קצר מאוד וסביר שיתבצע ברצף:\n\n**פלט אפשרי 1: תהליך האב רץ ומסיים את הדפסותיו לפני שהמתזמן מעביר את השליטה לבן.**\n1. Parent starts\n2. Parent continues\n3. Parent finishes\n3. Child executes\n4. Child finishes\n\n**פלט אפשרי 2: תהליך הבן רץ ומסיים את הדפסותיו לפני שהמתזמן מעביר את השליטה לאב.**\n1. Parent starts\n3. Child executes\n4. Child finishes\n2. Parent continues\n5. Parent finishes\n\nבכל אחד מהמקרים, סדר ההדפסות בתוך כל תהליך נשמר (לדוגמה, \"2\" תמיד יבוא לפני \"5\" באב, ו\"3\" תמיד יבוא לפני \"4\" בבן)."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "CPU Scheduling",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 00:03:00",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2314,
+      "output_tokens": 441,
+      "total_tokens": 4164
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "CPU Scheduling",
+      "Scheduling Algorithms",
+      "FCFS"
+    ],
+    "content": {
+      "text": "הסבירו את המטרה העיקרית של תזמון מעבד (CPU scheduling), וציינו יתרון אחד וחיסרון אחד של אלגוריתם התזמון FCFS (First Come First Served).",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "המטרה העיקרית של תזמון מעבד היא לנהל את הקצאת המעבד (CPU) בין התהליכים השונים במערכת ההפעלה, במטרה לייעל את ביצועי המערכת הכוללים. מטרות נפוצות כוללות הגדלת ניצולת המעבד, מזעור זמן התגובה (response time) וזמן ההשלמה (turnaround time), והבטחת הוגנות בהקצאת המשאבים.\n\nיתרון של אלגוריתם FCFS:\n*   פשטות: קל מאוד ליישום והבנה. תהליכים מבוצעים לפי סדר הגעתם לתור.\n\nחיסרון של אלגוריתם FCFS:\n*   אפקט השיירה (Convoy Effect): תהליך ארוך שמגיע מוקדם יכול לגרום לזמני המתנה ארוכים מאוד עבור כל התהליכים הקצרים יותר שמגיעים אחריו, ובכך לפגוע ביעילות ובזמן התגובה הכולל של המערכת."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

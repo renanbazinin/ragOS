@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "File Systems",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 23:44:37",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2852,
+      "output_tokens": 911,
+      "total_tokens": 6071
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "File Systems",
+      "System Calls",
+      "lseek",
+      "write",
+      "File Descriptors"
+    ],
+    "content": {
+      "text": "נתונה תוכנית ה-C הבאה. מה יהיה התוכן הסופי של הקובץ `testfile.txt` לאחר הרצת התוכנית? יש להניח שכל קריאות המערכת מצליחות.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <fcntl.h> // For open flags\n#include <unistd.h> // For open, write, close, lseek\n\nint main() {\n    int fd;\n    char buffer1[] = \"Hello\";\n    char buffer2[] = \"World\";\n\n    // Open file, create if not exists, truncate if exists, read/write mode\n    fd = open(\"testfile.txt\", O_RDWR | O_CREAT | O_TRUNC, 0644);\n    if (fd == -1) {\n        perror(\"open\");\n        return 1;\n    }\n\n    write(fd, buffer1, 5); // Write \"Hello\"\n\n    lseek(fd, 2, SEEK_SET); // Move 2 bytes from the beginning\n\n    write(fd, buffer2, 5); // Write \"World\"\n\n    close(fd);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "התוכנית פותחת את הקובץ 'testfile.txt' במצב קריאה/כתיבה. הדגל O_TRUNC מבטיח שהקובץ יהיה ריק לחלוטין בתחילת התוכנית, וסמן הקובץ (file pointer) ממוקם בתחילתו (אופסט 0).\n\n1.  `write(fd, buffer1, 5);`:\n    התוכנית כותבת את המחרוזת \"Hello\" לקובץ. תוכן הקובץ כרגע: \"Hello\". סמן הקובץ מתקדם למיקום 5.\n\n2.  `lseek(fd, 2, SEEK_SET);`:\n    התוכנית מזיזה את סמן הקובץ למיקום 2 מהתחלה (SEEK_SET). סמן הקובץ נמצא כעת במיקום 2.\n\n3.  `write(fd, buffer2, 5);`:\n    התוכנית כותבת את המחרוזת \"World\" החל מהמיקום הנוכחי של סמן הקובץ, שהוא 2.\n    התוכן המקורי \"Hello\" יראה כך: H e l l o\n    הכתיבה של \"World\" מתחילה במיקום 2, ותחליף את התווים הקיימים:\n    מיקום: 0 1 2 3 4 5 6\n    תוכן:   H e W o r l d\n    (התווים 'l', 'l', 'o' מ-'Hello' מוחלפים על ידי 'W', 'o', 'r' מ-'World', והתווים 'l', 'd' נוספים אחרי ה-'o').\n    התוכן הסופי של הקובץ יהיה \"HeWorld\". סמן הקובץ מתקדם למיקום 2 + 5 = 7.\n\n4.  `close(fd);`:\n    הקובץ נסגר והתוכן \"HeWorld\" נשמר."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "File Systems",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 23:28:57",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 859,
+      "total_tokens": 6594
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "File Systems",
+      "Hard Links",
+      "File Lifecycle"
+    ],
+    "content": {
+      "text": "נתונה סדרת הפעולות הבאה על מערכת קבצים דמוית יוניקס:\n1.  נוצר קובץ בשם `file_A.txt`.\n2.  נוצר קישור קשיח (hard link) בשם `file_B.txt` ל-`file_A.txt`.\n3.  `file_A.txt` נפתח לכתיבה (O_RDWR).\n4.  `file_A.txt` נמחק באמצעות `unlink`.\n5.  נתונים נכתבים לתיאור הקובץ הפתוח (file descriptor) שנוצר בשלב 3.\n6.  תיאור הקובץ נסגר.\n\nאיזו מהטענות הבאות נכונה לגבי מצב הקובץ והנתונים שלו לאחר סיום כל הפעולות?",
+      "code_snippet": null,
+      "options": [
+        "א. הנתונים שנכתבו בשלב 5 אבדו, ו-`file_B.txt` יכיל את התוכן המקורי של `file_A.txt` (לפני שלב 5).",
+        "ב. הנתונים שנכתבו בשלב 5 נשמרו, ו-`file_B.txt` יכיל את הנתונים החדשים.",
+        "ג. הנתונים שנכתבו בשלב 5 אבדו, ו-`file_B.txt` לא קיים יותר.",
+        "ד. הנתונים שנכתבו בשלב 5 נשמרו, אך הם אינם נגישים דרך `file_B.txt` מכיוון שהקובץ המקורי נמחק.",
+        "ה. לא ניתן לכתוב נתונים לקובץ לאחר שהוא נמחק, גם אם תיאור הקובץ פתוח."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "במערכת קבצים דמוית יוניקס, קישור קשיח (hard link) הוא שם נוסף לאותו קובץ (אותו inode). כאשר `file_B.txt` נוצר כקישור קשיח ל-`file_A.txt`, שניהם מצביעים על אותו inode, ומונה הקישורים (link count) של ה-inode עולה ל-2. כאשר `file_A.txt` נמחק באמצעות `unlink`, רק כניסת התיקייה (directory entry) עבור `file_A.txt` מוסרת, ומונה הקישורים של ה-inode יורד ל-1. מכיוון שמונה הקישורים עדיין גדול מ-0 (בגלל `file_B.txt`), ה-inode ובלוקי הנתונים שלו אינם משוחררים. בנוסף, כל עוד קיים תיאור קובץ (file descriptor) פתוח המצביע על ה-inode, הקובץ \"חי\" וניתן לכתוב או לקרוא ממנו. לכן, כאשר נכתבים נתונים לתיאור הקובץ בשלב 5, הנתונים נכתבים לבלוקים המשויכים ל-inode המשותף. לאחר סגירת תיאור הקובץ, הנתונים החדשים נשארים ב-inode ונגישים דרך `file_B.txt`."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

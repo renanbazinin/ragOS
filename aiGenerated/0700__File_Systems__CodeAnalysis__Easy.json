@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "File Systems",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 23:43:39",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2852,
+      "output_tokens": 801,
+      "total_tokens": 5945
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "CodeAnalysis",
+    "topic": [
+      "File Systems",
+      "System Calls",
+      "File I/O"
+    ],
+    "content": {
+      "text": "נתונה תוכנית ה-C הבאה המבצעת פעולות קבצים בסיסיות. נתחו את הקוד וציינו מה יהיה הפלט המודפס למסך בסיום ריצת התוכנית.",
+      "code_snippet": "#include <stdio.h>\n#include <fcntl.h> // For open flags\n#include <unistd.h> // For read, write, close, lseek\n\nint main() {\n    int fd;\n    char buffer[20];\n    const char *data1 = \"Hello\";\n    const char *data2 = \"World\";\n\n    // Open a file named \"test.txt\" for writing, create if not exists, truncate if exists\n    fd = open(\"test.txt\", O_WRONLY | O_CREAT | O_TRUNC, 0644);\n    if (fd == -1) {\n        perror(\"open\");\n        return 1;\n    }\n\n    // Write \"Hello\"\n    write(fd, data1, 5);\n\n    // Write \"World\"\n    write(fd, data2, 5);\n\n    // Close the file\n    close(fd);\n\n    // Reopen the file for reading\n    fd = open(\"test.txt\", O_RDONLY);\n    if (fd == -1) {\n        perror(\"open\");\n        return 1;\n    }\n\n    // Read 10 bytes from the file\n    read(fd, buffer, 10);\n    buffer[10] = '\\0'; // Null-terminate for printing\n\n    printf(\"Content read: %s\\n\", buffer);\n\n    close(fd);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "התוכנית פותחת את הקובץ 'test.txt' במצב כתיבה עם מחיקת תוכן קיים (O_TRUNC). לאחר מכן היא כותבת את המחרוזת 'Hello' (5 בתים) ואחריה מיד את המחרוזת 'World' (5 בתים). סך הכל נכתבו 10 בתים והקובץ יכיל את הטקסט 'HelloWorld'.\nלאחר מכן, הקובץ נסגר ונפתח מחדש במצב קריאה בלבד. פתיחה מחדש של קובץ מאפסת את מצביע הקובץ לתחילת הקובץ (offset 0).\nקריאה של 10 בתים מהקובץ תקרא את כל התוכן 'HelloWorld'. המחרוזת מוכנסת למאגר `buffer` ולאחר מכן מודפסת למסך באמצעות `printf`. שימו לב שהתו `\\n` בסוף ה-`printf` גורם לירידת שורה.\nלכן, הפלט יהיה:\nContent read: HelloWorld",
+      "code_snippet": null
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

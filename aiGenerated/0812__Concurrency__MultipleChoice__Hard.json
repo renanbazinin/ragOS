@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 00:33:09",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 1141,
+      "total_tokens": 5764
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Concurrency",
+      "Synchronization",
+      "Race Conditions"
+    ],
+    "content": {
+      "text": "נתונה פיסת קוד בשפת C המשתמשת ב-pthreads. מספר תהליכונים (threads) מנסים להגדיל מונה משותף (`shared_counter`) באופן חוזר.\n\n```c\n#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n\n#define NUM_THREADS 4\n#define INCREMENTS_PER_THREAD 100000\n\nint shared_counter = 0;\npthread_mutex_t mutex;\n\nvoid* incrementer_thread(void* arg) {\n    for (int i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n        int current_value;\n        pthread_mutex_lock(&mutex);\n        current_value = shared_counter;\n        pthread_mutex_unlock(&mutex);\n\n        // נקודת מעבר הקשר אפשרית (context switch point)\n\n        pthread_mutex_lock(&mutex);\n        shared_counter = current_value + 1;\n        pthread_mutex_unlock(&mutex);\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n    pthread_mutex_init(&mutex, NULL);\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, incrementer_thread, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final counter value: %d\\n\", shared_counter);\n    pthread_mutex_destroy(&mutex);\n    return 0;\n}\n```\nמה יהיה הערך הסופי של `shared_counter` כשהתוכנית תסיים את ריצתה?",
+      "code_snippet": null,
+      "options": [
+        "א. בדיוק 400000 (ארבע מאות אלף).",
+        "ב. פחות מ-400000 אך גדול מ-0.",
+        "ג. בדיוק 0 (אפס) עקב deadlock.",
+        "ד. ערך שאינו ניתן לחיזוי מראש עקב התנהגות בלתי מוגדרת (Undefined Behavior)."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ההסבר: הקוד מכיל תנאי מרוץ (race condition) עקב שימוש שגוי במנגנון המנעול (mutex). פעולת ההגדלה של המונה (`shared_counter++`) אינה אטומית ומורכבת משלושה שלבים: קריאת הערך הנוכחי, הגדלת הערך, וכתיבת הערך החדש. בקוד הנתון, המנעול נתפס ומשוחרר בין שלב הקריאה לשלב הכתיבה:\n1.  `pthread_mutex_lock(&mutex);`\n2.  `current_value = shared_counter;` (קריאת הערך)\n3.  `pthread_mutex_unlock(&mutex);` (שחרור המנעול)\n\nלאחר שחרור המנעול, תהליכון אחר יכול להיכנס לקטע קריטי, לקרוא את אותו `shared_counter` (שעדיין לא עודכן על ידי התהליכון הראשון), להגדיל אותו ולכתוב אותו בחזרה. כאשר התהליכון הראשון ימשיך את פעולתו:\n4.  `pthread_mutex_lock(&mutex);`\n5.  `shared_counter = current_value + 1;` (כתיבת הערך, כאשר `current_value` מבוסס על ערך \"ישן\" של `shared_counter`)\n6.  `pthread_mutex_unlock(&mutex);`\n\nבמקרה כזה, הגדלה אחת לפחות אבדה. מכיוון שתנאי מרוץ זה יתרחש לעיתים קרובות, הערך הסופי של `shared_counter` יהיה בהכרח נמוך מהערך המצופה (`NUM_THREADS * INCREMENTS_PER_THREAD = 4 * 100000 = 400000`), אך לא אפס (המונה כן יוגדל חלקית). אין כאן deadlock כי המנעולים משוחררים תמיד. לכן, התשובה הנכונה היא ב'."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

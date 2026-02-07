@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "CPU Scheduling",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 00:15:39",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2646,
+      "output_tokens": 1061,
+      "total_tokens": 7847
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "CodeAnalysis",
+    "topic": [
+      "CPU Scheduling",
+      "Processes",
+      "System Calls"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה. הניחו שיש מעבד יחיד ואלגוריתם התזמון הוא FCFS (First-Come, First-Served). כמו כן, הניחו שכל קריאות המערכת מצליחות, ושתהליך המריץ קטע קוד אינו נקטע עד לסיום קטע זה או עד שהוא נחסם (לדוגמה, בקריאה ל-waitpid).",
+      "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\nvoid worker(char c, int count) {\n    for (int i = 0; i < count; ++i) {\n        printf(\"%c\", c);\n        fflush(stdout); // Ensure immediate output\n    }\n}\n\nint main() {\n    setbuf(stdout, NULL); // Disable stdout buffering\n\n    pid_t pid1, pid2;\n\n    printf(\"Start\\n\");\n\n    pid1 = fork();\n    if (pid1 == 0) { // Child process 1\n        worker('A', 3);\n        return 0;\n    }\n\n    pid2 = fork();\n    if (pid2 == 0) { // Child process 2\n        worker('B', 3);\n        return 0;\n    }\n\n    // Parent process\n    worker('C', 3);\n\n    waitpid(pid1, NULL, 0);\n    waitpid(pid2, NULL, 0);\n\n    printf(\"\\nEnd\\n\");\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "7.1",
+        "text": "כתבו את הפלט המדויק של התוכנית.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "התהליך הראשי (main) מתחיל ומדפיס 'Start\\n'.\nלאחר מכן, התהליך הראשי מבצע שתי קריאות fork(). קריאה אחת יוצרת את תהליך הבן A, והשנייה יוצרת את תהליך הבן B. שני תהליכי הבן מתווספים לתור המוכנים (Ready Queue).\nמכיוון שאלגוריתם התזמון הוא FCFS, והתהליך הראשי עדיין רץ ולא נחסם, הוא ממשיך לבצע את עבודתו עד לסיום הקטע הנוכחי. הוא קורא לפונקציה `worker('C', 3)` ומדפיס 'CCC'.\nלאחר מכן, התהליך הראשי מגיע לקריאות ל-`waitpid` ונחסם בהמתנה לסיום תהליכי הבן שלו.\nכעת, המעבד פנוי, והמערכת בוחרת את התהליך הבא מתור המוכנים לפי סדר הגעתו. נניח שתהליך A הגיע ראשון לתור המוכנים (מכיוון שקריאת ה-fork שלו קדמה לקריאת ה-fork של B). תהליך A רץ, קורא לפונקציה `worker('A', 3)` ומדפיס 'AAA'.\nתהליך A מסיים את ריצתו ויוצא.\nלאחר מכן, המערכת בוחרת את תהליך B. תהליך B רץ, קורא לפונקציה `worker('B', 3)` ומדפיס 'BBB'.\nתהליך B מסיים את ריצתו ויוצא.\nעם סיום שני תהליכי הבן, התהליך הראשי (main), שהיה חסום ב-`waitpid`, הופך למוכן שוב. הוא נבחר לרוץ וממשיך את ביצועו, מדפיס '\\nEnd\\n' ויוצא.\n\nלכן, הפלט הסופי יהיה:\nStart\nCCC\nAAA\nBBB\nEnd"
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

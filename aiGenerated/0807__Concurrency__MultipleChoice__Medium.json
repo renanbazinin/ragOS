@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 00:30:59",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 939,
+      "output_tokens": 416,
+      "total_tokens": 2318
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Concurrency",
+      "Mutexes",
+      "Deadlocks"
+    ],
+    "content": {
+      "text": "שימוש במנעול (mutex) לבדו מבטיח שלא יתרחשו מצבי קיפאון (deadlocks) במערכת.\nנכון / לא נכון",
+      "code_snippet": null,
+      "options": [
+        "נכון",
+        "לא נכון"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "לא נכון",
+      "explanation": "לא נכון. מנעול (mutex) נועד להבטיח בלעדיות לגישה למשאב משותף ובכך למנוע תנאי מרוץ (race conditions) בתוך קטע קריטי. עם זאת, הוא אינו מונע מצבי קיפאון (deadlocks) בפני עצמו. למשל, אם שני תהליכים דורשים שני משאבים שונים (A ו-B), כאשר תהליך 1 מחזיק את A ומנסה לנעול את B, ותהליך 2 מחזיק את B ומנסה לנעול את A, ייווצר מצב קיפאון. מנעולים הם תנאי הכרחי למניעת תנאי מרוץ, אך לא מספיקים למניעת קיפאון, אשר דורש אסטרטגיות נוספות כמו סדר נעילה קבוע, זיהוי ושחזור, או מניעת אחד מארבעת התנאים של הולד (Hold and Wait, No Preemption, Mutual Exclusion, Circular Wait)."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

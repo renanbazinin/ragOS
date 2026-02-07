@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Paging",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 22:53:28",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 909,
+      "output_tokens": 661,
+      "total_tokens": 2771
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Paging",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "במערכת הפעלה המשתמשת בזיכרון וירטואלי מבוסס Paging, נתון כי מרחב הכתובות הווירטואלי הוא בגודל 32 ביט, גודל עמוד (page size) הוא 4KB, וכל רשומה בטבלת העמודים (PTE) דורשת 4 בתים. בהנחה שמדובר בטבלת עמודים יחידה (single-level page table), כמה רשומות תהיה בטבלה ומה יהיה גודלה המרבי?",
+      "code_snippet": null,
+      "options": [
+        "א. 2^12 רשומות, גודל 16KB",
+        "ב. 2^20 רשומות, גודל 4MB",
+        "ג. 2^32 רשומות, גודל 16GB",
+        "ד. 2^10 רשומות, גודל 4KB"
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "מרחב הכתובות הווירטואלי הוא 2^32 בתים. גודל עמוד הוא 4KB, שזה 4 * 1024 בתים, או 2^2 * 2^10 = 2^12 בתים.\nמספר העמודים הווירטואליים הכולל הוא מרחב הכתובות הווירטואלי חלקי גודל עמוד: 2^32 / 2^12 = 2^(32-12) = 2^20 עמודים.\nמכיוון שכל עמוד וירטואלי דורש רשומה אחת בטבלת העמודים, טבלת העמודים תכיל 2^20 רשומות.\nגודל כל רשומה בטבלת העמודים (PTE) הוא 4 בתים.\nלכן, הגודל המרבי של טבלת העמודים יהיה מספר הרשומות כפול גודל רשומה: 2^20 רשומות * 4 בתים/רשומה = 2^20 * 2^2 בתים = 2^22 בתים.\n2^22 בתים שווה ל-4 מגה-בייט (4MB)."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

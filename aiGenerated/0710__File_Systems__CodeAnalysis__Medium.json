@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "File Systems",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 23:47:37",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2680,
+      "output_tokens": 2180,
+      "total_tokens": 10931
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "CodeAnalysis",
+    "topic": [
+      "File Systems",
+      "System Calls",
+      "I/O",
+      "lseek",
+      "unlink"
+    ],
+    "content": {
+      "text": "נתונה תוכנית ה-C הבאה המבצעת פעולות על מערכת קבצים. יש לנתח את הקוד ולציין מה יהיה הפלט המודפס למסך, וכן מה יהיה תוכן הקובץ test_file.txt לאחר סיום ריצת התוכנית (או האם הקובץ ימחק).",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <fcntl.h>\n#include <string.h>\n\nint main() {\n    int fd;\n    char buffer[20];\n    const char *filename = \"test_file.txt\";\n    const char *data1 = \"Hello\";\n    const char *data2 = \"World\";\n\n    // 1. Create and open the file\n    fd = open(filename, O_CREAT | O_RDWR | O_TRUNC, 0644);\n    if (fd == -1) {\n        perror(\"open\");\n        return 1;\n    }\n    printf(\"1. File '%s' opened with fd %d\\n\", filename, fd);\n\n    // 2. Write \"Hello\"\n    write(fd, data1, strlen(data1));\n    printf(\"2. Wrote '%s'. Current offset: %ld\\n\", data1, lseek(fd, 0, SEEK_CUR));\n\n    // 3. Seek to offset 10\n    lseek(fd, 10, SEEK_SET);\n    printf(\"3. Seeked to offset 10. Current offset: %ld\\n\", lseek(fd, 0, SEEK_CUR));\n\n    // 4. Write \"World\"\n    write(fd, data2, strlen(data2));\n    printf(\"4. Wrote '%s'. Current offset: %ld\\n\", data2, lseek(fd, 0, SEEK_CUR));\n\n    // 5. Unlink the file\n    unlink(filename);\n    printf(\"5. Unlinked file '%s'.\\n\", filename);\n\n    // 6. Seek back to beginning\n    lseek(fd, 0, SEEK_SET);\n    printf(\"6. Seeked to beginning. Current offset: %ld\\n\", lseek(fd, 0, SEEK_CUR));\n\n    // 7. Read content\n    memset(buffer, 0, sizeof(buffer)); // Clear buffer\n    ssize_t bytes_read = read(fd, buffer, sizeof(buffer) - 1);\n    buffer[bytes_read] = '\\0'; // Null-terminate\n    printf(\"7. Read %zd bytes: '%s'\\n\", bytes_read, buffer);\n\n    // 8. Close the file descriptor\n    close(fd);\n    printf(\"8. File descriptor %d closed.\\n\", fd);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון מתאר את הפלט של התוכנית ואת מצב מערכת הקבצים לאחר סיום הריצה.\n\n**ניתוח שלבי התוכנית:**\n1.  **פתיחת הקובץ:** הפעולה `open` יוצרת או פותחת את הקובץ `test_file.txt` עם הרשאות קריאה וכתיבה. דגל `O_TRUNC` גורם לכך שאם הקובץ כבר קיים, תוכנו נמחק וגודלו מתאפס. ה-file descriptor `fd` יקבל ערך (לרוב 3, כיוון ש-0, 1, 2 תפוסים ע\"י stdin, stdout, stderr). פלט: `1. File 'test_file.txt' opened with fd 3`.\n2.  **כתיבת \"Hello\":** הפעולה `write` כותבת את המחרוזת \"Hello\" (5 בתים) לקובץ. מצביע הקובץ (file offset) מתקדם למיקום 5. גודל הקובץ מתעדכן ל-5 בתים. פלט: `2. Wrote 'Hello'. Current offset: 5`.\n3.  **מעבר למיקום 10:** הפעולה `lseek` מזיזה את מצביע הקובץ למיקום 10 (SEEK_SET פירושו מראשית הקובץ). שימו לב שפעולה זו אינה משנה את גודל הקובץ עדיין. פלט: `3. Seeked to offset 10. Current offset: 10`.\n4.  **כתיבת \"World\":** הפעולה `write` כותבת את המחרוזת \"World\" (5 בתים) החל ממיקום 10. מכיוון שהמצביע היה במיקום 10 וגודל הקובץ היה 5, נוצר \"חור\" (hole) בין מיקום 5 למיקום 10. חור זה מתמלא באפסים (null bytes, `\\0`). לכן, תוכן הקובץ יהיה \"Hello\" ואחריו 5 אפסים, ואז \"World\". מצביע הקובץ מתקדם למיקום 15 (10 + 5). גודל הקובץ מתעדכן ל-15 בתים. פלט: `4. Wrote 'World'. Current offset: 15`.\n5.  **מחיקת הקישור (unlink):** הפעולה `unlink` מסירה את הקישור לשם הקובץ `test_file.txt` מהספרייה. עם זאת, הקובץ עצמו (ה-inode והבלוקים שלו) לא נמחק באופן מיידי מכיוון שעדיין קיים לו file descriptor פתוח (`fd`). הקובץ יימחק פיזית רק כאשר כל ה-file descriptors הפתוחים אליו ייסגרו. פלט: `5. Unlinked file 'test_file.txt'.`\n6.  **מעבר לתחילת הקובץ:** הפעולה `lseek` מזיזה את מצביע הקובץ חזרה למיקום 0. פלט: `6. Seeked to beginning. Current offset: 0`.\n7.  **קריאת תוכן:** הפעולה `read` קוראת 15 בתים מתחילת הקובץ לתוך המאגר `buffer`. למרות שהקובץ נמחק (שמו הוסר), ה-file descriptor `fd` עדיין תקף ומאפשר גישה לתוכן הקובץ. התוכן שייקרא לתוך `buffer` הוא \"Hello\" ואחריו 5 אפסים, ואז \"World\". כלומר, `buffer` יכיל: `{'H', 'e', 'l', 'l', 'o', '\\0', '\\0', '\\0', '\\0', '\\0', 'W', 'o', 'r', 'l', 'd', '\\0', ...}` (התו האחרון הוא ה-NULL שנוסף ידנית). שימו לב ש-`printf` עם פורמט `%s` מפסיקה להדפיס כאשר היא נתקלת בתו ה-NULL הראשון. לכן, הפלט המודפס עבור שורה זו יהיה רק `Hello`. פלט: `7. Read 15 bytes: 'Hello'`.\n8.  **סגירת הקובץ:** הפעולה `close` סוגרת את ה-file descriptor `fd`. כעת, מכיוון שזהו ה-file descriptor הפתוח האחרון לקובץ ששמו נמחק, הקובץ (ה-inode והבלוקים שלו) נמחק באופן סופי ממערכת הקבצים. פלט: `8. File descriptor 3 closed.`\n\n**פלט התוכנית המלא:**\n```\n1. File 'test_file.txt' opened with fd 3\n2. Wrote 'Hello'. Current offset: 5\n3. Seeked to offset 10. Current offset: 10\n4. Wrote 'World'. Current offset: 15\n5. Unlinked file 'test_file.txt'.\n6. Seeked to beginning. Current offset: 0\n7. Read 15 bytes: 'Hello'\n8. File descriptor 3 closed.\n```\n\n**תוכן הקובץ `test_file.txt` לאחר סיום ריצת התוכנית:**\nהקובץ `test_file.txt` לא יתקיים במערכת הקבצים לאחר סיום ריצת התוכנית. הוא נמחק עקב קריאת `unlink` וסגירת ה-file descriptor האחרון (`close(fd)`), מה שמשחרר את ה-inode והבלוקים שלו.",
+      "code_snippet": null
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

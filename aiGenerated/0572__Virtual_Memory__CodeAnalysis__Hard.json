@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 22:48:40",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3618,
+      "output_tokens": 3066,
+      "total_tokens": 11656
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Virtual Memory",
+      "Copy-on-Write",
+      "Page Faults",
+      "fork()"
+    ],
+    "content": {
+      "text": "נתון קטע קוד ב-C המשתמש במערך גלובלי גדול. הקוד מבצע אתחול של המערך בתהליך האב, ולאחר מכן מבצע `fork()`. גם תהליך האב וגם תהליך הבן ניגשים ומשנים חלקים שונים של המערך.\n\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n#include <string.h>\n\n#define PAGE_SIZE 4096 // גודל עמוד זיכרון: 4KB\n#define ARRAY_SIZE (PAGE_SIZE * 10) // גודל המערך: 10 עמודים\n\nint global_array[ARRAY_SIZE / sizeof(int)]; // מערך גלובלי של מספרים שלמים\n\nint main() {\n    // אתחול המערך בתהליך האב\n    for (int i = 0; i < ARRAY_SIZE / sizeof(int); ++i) {\n        global_array[i] = i;\n    }\n\n    pid_t pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        return 1;\n    } else if (pid == 0) { // תהליך הבן\n        printf(\"Child process (PID: %d) modifying memory...\\n\", getpid());\n        // הבן משנה את חציו הראשון של המערך\n        for (int i = 0; i < (ARRAY_SIZE / sizeof(int)) / 2; ++i) {\n            global_array[i] = -i;\n        }\n        printf(\"Child finished modifications.\\n\");\n    } else { // תהליך האב\n        printf(\"Parent process (PID: %d) modifying memory...\\n\", getpid());\n        // האב משנה את חציו השני של המערך\n        for (int i = (ARRAY_SIZE / sizeof(int)) / 2; i < ARRAY_SIZE / sizeof(int); ++i) {\n            global_array[i] = i * 2;\n        }\n        printf(\"Parent finished modifications.\\n\");\n        wait(NULL); // המתן לבן שיסיים\n        printf(\"Child exited. Parent exiting.\\n\");\n    }\n\n    return 0;\n}\n```\n\nבהתבסס על הקוד לעיל ובהנחה שמערכת ההפעלה משתמשת במנגנון זיכרון וירטואלי עם Copy-on-Write (CoW) עבור `fork()`:\n\n1.  כמה עמודי זיכרון פיזיים (physical pages) יוקצו בסך הכל עבור המערך `global_array` על ידי שני התהליכים (האב והבן) לאחר ששניהם סיימו את פעולות השינוי שלהם?\n2.  כמה Page Faults (page faults) יתרחשו בסך הכל כתוצאה מגישה ושינוי המערך `global_array` על ידי שני התהליכים? (התייחסו רק ל-page faults שנובעים מגישה ראשונית לדפים או מ-CoW).\n\nנניח שגודל `int` הוא 4 בתים, ושהמערך `global_array` מתחיל בכתובת המיושרת לגבול עמוד זיכרון.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n#include <string.h>\n\n#define PAGE_SIZE 4096 // גודל עמוד זיכרון: 4KB\n#define ARRAY_SIZE (PAGE_SIZE * 10) // גודל המערך: 10 עמודים\n\nint global_array[ARRAY_SIZE / sizeof(int)]; // מערך גלובלי של מספרים שלמים\n\nint main() {\n    // אתחול המערך בתהליך האב\n    for (int i = 0; i < ARRAY_SIZE / sizeof(int); ++i) {\n        global_array[i] = i;\n    }\n\n    pid_t pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        return 1;\n    } else if (pid == 0) { // תהליך הבן\n        printf(\"Child process (PID: %d) modifying memory...\\n\", getpid());\n        // הבן משנה את חציו הראשון של המערך\n        for (int i = 0; i < (ARRAY_SIZE / sizeof(int)) / 2; ++i) {\n            global_array[i] = -i;\n        }\n        printf(\"Child finished modifications.\\n\");\n    }\n\n    else { // תהליך האב\n        printf(\"Parent process (PID: %d) modifying memory...\\n\", getpid());\n        // האב משנה את חציו השני של המערך\n        for (int i = (ARRAY_SIZE / sizeof(int)) / 2; i < ARRAY_SIZE / sizeof(int); ++i) {\n            global_array[i] = i * 2;\n        }\n        printf(\"Parent finished modifications.\\n\");\n        wait(NULL); // המתן לבן שיסיים\n        printf(\"Child exited. Parent exiting.\\n\");\n    }\n\n    return 0;\n}\n",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "**הסבר מפורט:**\n\n1.  **אתחול המערך בתהליך האב:**\n    *   הלולאה הראשונה בתהליך האב מאתחלת את כל 10 העמודים של המערך `global_array`.\n    *   כאשר תהליך האב ניגש לראשונה לכל עמוד זיכרון (וירטואלי) בתוך המערך, מתרחש Page Fault. מערכת ההפעלה מקצה עמוד זיכרון פיזי עבור העמוד הוירטואלי הזה, מאתחלת אותו (בדרך כלל מאפסת אותו אם לא הוקצה קודם לכן, ואז התהליך כותב לתוכו), ומעדכנת את טבלת הדפים של האב.\n    *   **מספר עמודים פיזיים שהוקצו בשלב זה:** 10 עמודים.\n    *   **מספר Page Faults בשלב זה:** 10 (אלו Page Faults ראשוניים של גישה).\n\n2.  **קריאה ל-`fork()`:**\n    *   כאשר `fork()` נקרא, תהליך הבן מקבל עותק של מרחב הכתובות הוירטואלי של האב.\n    *   בזכות מנגנון Copy-on-Write (CoW), עמודי הזיכרון הפיזיים שבהם נמצא המערך `global_array` **משותפים** בין האב לבן. טבלאות הדפים של האב והבן מצביעות לאותם עמודים פיזיים, אך הם מסומנים כ\"קריאה בלבד\" (read-only). בשלב זה, **לא מוקצים עמודי זיכרון פיזיים חדשים**.\n    *   **מספר עמודים פיזיים שהוקצו בשלב זה (נוספים):** 0.\n    *   **מספר Page Faults בשלב זה:** 0 (ה-fork עצמו לא גורם ל-page faults על נתוני המשתמש בשל CoW).\n\n3.  **שינוי המערך על ידי תהליך הבן:**\n    *   תהליך הבן משנה את חציו הראשון של המערך (`global_array[0]` עד `global_array[ARRAY_SIZE / (2 * sizeof(int)) - 1]`).\n    *   חצי המערך הזה משתרע על פני 5 עמודים פיזיים (כי `ARRAY_SIZE / 2` בתים חולקו ב-`PAGE_SIZE` בתים לעמוד).\n    *   בכל פעם שהבן מנסה לכתוב לעמוד זיכרון (וירטואלי) שעדיין משותף עם האב ומסומן כ-read-only, מתרחש Page Fault מסוג CoW.\n    *   מערכת ההפעלה מיירטת את ה-Page Fault, מקצה עמוד זיכרון פיזי **חדש** עבור הבן, מעתיקה אליו את התוכן המקורי של העמוד המשותף, מעדכנת את טבלת הדפים של הבן כך שתצביע לעמוד הפיזי החדש, ומסמנת אותו כ-writable עבור הבן. העמוד הפיזי המקורי נשאר עבור האב.\n    *   **מספר עמודים פיזיים שהוקצו בשלב זה (נוספים):** 5 עמודים (אחד עבור כל עמוד בחצי הראשון של המערך).\n    *   **מספר Page Faults בשלב זה:** 5 (אלו CoW Page Faults).\n\n4.  **שינוי המערך על ידי תהליך האב:**\n    *   תהליך האב משנה את חציו השני של המערך (`global_array[ARRAY_SIZE / (2 * sizeof(int))]` עד `global_array[ARRAY_SIZE / sizeof(int) - 1]`).\n    *   גם חצי המערך הזה משתרע על פני 5 עמודים פיזיים.\n    *   בדומה לבן, בכל פעם שהאב מנסה לכתוב לעמוד זיכרון (וירטואלי) שעדיין משותף עם הבן ומסומן כ-read-only, מתרחש Page Fault מסוג CoW.\n    *   מערכת ההפעלה מקצה עמוד זיכרון פיזי **חדש** עבור האב, מעתיקה אליו את התוכן המקורי, מעדכנת את טבלת הדפים של האב, ומסמנת אותו כ-writable. העמוד הפיזי המקורי (שעדיין יכול להיות משותף עם הבן אם הבן לא שינה אותו, אבל במקרה זה הבן שינה את החצי השני אז העמוד המקורי נשאר לאב) נשאר עבור הבן (אם רלוונטי) או משוחרר אם אין לו יותר מצביעים. במקרה זה, העמודים בחצי השני לא שונו על ידי הבן, אז הם עדיין מצביעים לאותם עמודים פיזיים שהאב יצר בהתחלה. לכן, עבור כל אחד מ-5 העמודים הללו, האב יגרום ל-CoW page fault, ויקבל עותק חדש.\n    *   **מספר עמודים פיזיים שהוקצו בשלב זה (נוספים):** 5 עמודים (אחד עבור כל עמוד בחצי השני של המערך).\n    *   **מספר Page Faults בשלב זה:** 5 (אלו CoW Page Faults).\n\n**סיכום:**\n\n*   **סה\"כ עמודי זיכרון פיזיים:**\n    *   10 עמודים מהאתחול הראשוני על ידי האב.\n    *   5 עמודים נוספים עבור הבן (עבור חציו הראשון).\n    *   5 עמודים נוספים עבור האב (עבור חציו השני).\n    *   סה\"כ = 10 + 5 + 5 = **20 עמודי זיכרון פיזיים**.\n    *   בסיום, לכל אחד מהתהליכים (האב והבן) יהיה עותק משלו של המערך `global_array` בזיכרון הפיזי, כאשר כל עותק תופס 10 עמודים.\n\n*   **סה\"כ Page Faults:**\n    *   10 Page Faults במהלך אתחול המערך על ידי האב.\n    *   5 Page Faults מסוג CoW בעת שינוי הבן.\n    *   5 Page Faults מסוג CoW בעת שינוי האב.\n    *   סה\"כ = 10 + 5 + 5 = **20 Page Faults**."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

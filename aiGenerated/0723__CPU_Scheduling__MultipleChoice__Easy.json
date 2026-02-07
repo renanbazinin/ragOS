@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "CPU Scheduling",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 23:54:20",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1126,
+      "output_tokens": 401,
+      "total_tokens": 2201
+    }
+  },
+  "question": {
+    "id": 6,
+    "type": "MultipleChoice",
+    "topic": [
+      "CPU Scheduling"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של תזמון מעבד (CPU Scheduling) במערכת הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. למנוע מצבי קיפאון (deadlocks) בין תהליכים.",
+        "ב. לקבוע איזה תהליך יקבל את המעבד ומתי.",
+        "ג. לנהל את הזיכרון הווירטואלי של המערכת.",
+        "ד. לסנכרן גישה למשאבים משותפים בין חוטי חישוב (threads).",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב'. תזמון מעבד הוא מנגנון במערכת ההפעלה האחראי לבחור איזה תהליך (או חוט חישוב) מבין אלה המוכנים לריצה יוקצה למעבד, ומתי. מטרותיו כוללות מקסום ניצול המעבד, מזעור זמן תגובה, ומקסום תפוקה. האפשרויות האחרות מתייחסות לנושאים אחרים במערכות הפעלה כמו מניעת קיפאון, ניהול זיכרון וסנכרון."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

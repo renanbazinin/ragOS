@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Paging",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 23:12:51",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2724,
+      "output_tokens": 1044,
+      "total_tokens": 5656
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Paging",
+      "Virtual Memory"
+    ],
+    "content": {
+      "text": "נתונה פונקציית C הבאה שמטרתה לנתח כתובת וירטואלית בהינתן גודל עמוד.\n\n```c\n#include <stdio.h>\n\nvoid analyze_virtual_address(unsigned int virtual_address, unsigned int page_size) {\n    unsigned int page_number = virtual_address / page_size;\n    unsigned int offset = virtual_address % page_size;\n\n    printf(\"מספר עמוד וירטואלי (VPN): %u\\n\", page_number);\n    printf(\"היסט בתוך העמוד (Offset): %u\\n\", offset);\n}\n\nint main() {\n    analyze_virtual_address(2050, 4096);\n    return 0;\n}\n```\n\nמה יהיה הפלט של התוכנית כאשר היא מורצת? הסבר את המשמעות של כל רכיב בפלט בהקשר של זיכרון וירטואלי ו-Paging.",
+      "code_snippet": "#include <stdio.h>\n\nvoid analyze_virtual_address(unsigned int virtual_address, unsigned int page_size) {\n    unsigned int page_number = virtual_address / page_size;\n    unsigned int offset = virtual_address % page_size;\n\n    printf(\"מספר עמוד וירטואלי (VPN): %u\\n\", page_number);\n    printf(\"היסט בתוך העמוד (Offset): %u\\n\", offset);\n}\n\nint main() {\n    analyze_virtual_address(2050, 4096);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפלט של התוכנית יהיה:\n```\nמספר עמוד וירטואלי (VPN): 0\nהיסט בתוך העמוד (Offset): 2050\n```\n\n**הסבר:**\nבמערכות הפעלה המשתמשות ב-Paging לניהול זיכרון וירטואלי, כתובת וירטואלית מחולקת לשני חלקים עיקריים:\n1.  **מספר עמוד וירטואלי (Virtual Page Number - VPN)**: חלק זה מזהה את העמוד הוירטואלי שאליו מתייחסת הכתובת. הוא משמש כאינדקס לטבלת העמודים (Page Table) כדי למצוא את העמוד הפיזי המתאים.\n2.  **היסט בתוך העמוד (Offset)**: חלק זה מציין את המיקום הספציפי בתוך העמוד (הוירטואלי והפיזי) שאליו מתייחסת הכתובת.\n\nהפונקציה `analyze_virtual_address` מבצעת את החישובים הבאים:\n*   `page_number = virtual_address / page_size;`\n    כאשר `virtual_address` היא 2050 ו-`page_size` היא 4096:\n    `2050 / 4096 = 0` (חילוק של מספרים שלמים).\n    זה אומר שהכתובת 2050 נמצאת בעמוד הוירטואלי הראשון (עמוד מספר 0).\n*   `offset = virtual_address % page_size;`\n    כאשר `virtual_address` היא 2050 ו-`page_size` היא 4096:\n    `2050 % 4096 = 2050`.\n    זה אומר שהכתובת 2050 נמצאת בהיסט 2050 בתים מתחילת העמוד הוירטואלי.\n\nלכן, הכתובת הוירטואלית 2050, בגודל עמוד של 4096 בתים, מתורגמת לעמוד וירטואלי מספר 0, בהיסט 2050 בתוך עמוד זה."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

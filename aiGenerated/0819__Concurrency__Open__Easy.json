@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 00:36:14",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1926,
+      "output_tokens": 1332,
+      "total_tokens": 5394
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "Open",
+    "topic": [
+      "Concurrency",
+      "Race Conditions",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "מהו תנאי מרוץ (Race Condition) בהקשר של תכנות מקבילי (Concurrency)? הסבר מדוע הוא מהווה בעיה והצע פתרון פשוט למניעתו, תוך התייחסות לדוגמת הקוד הבאה:",
+      "code_snippet": "```c\n#include <stdio.h>\n#include <pthread.h>\n\nint shared_counter = 0; // משתנה משותף\n\nvoid* increment_function(void* arg) {\n    for (int i = 0; i < 100000; i++) {\n        shared_counter++; // פעולה על המשתנה המשותף\n    }\n    return NULL;\n}\n\n// קוד main ליצירת מספר תהליכונים שיקראו ל-increment_function\n// ...\n```",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "### הסבר תנאי מרוץ (Race Condition):\nתנאי מרוץ מתרחש במערכת מקבילית (Multi-threaded או Multi-process) כאשר מספר תהליכונים/תהליכים ניגשים ומשנים נתונים משותפים במקביל, והתוצאה הסופית תלויה בסדר הלא-דטרמיניסטי של ביצוע הפעולות. במילים אחרות, מי מגיע ראשון, ואיך הפעולות שלהם משתלבות.\n\n### מדוע זו בעיה:\nפעולות כמו `shared_counter++` אינן אטומיות (Atomic) ברמת המעבד. הן מתורגמות בדרך כלל לשלוש הוראות מכונה:\n1.  קרא את הערך של `shared_counter` לרג'יסטר.\n2.  הגדל את הערך ברג'יסטר ב-1.\n3.  כתוב את הערך מהרג'יסטר חזרה ל-`shared_counter`.\n\nאם שני תהליכונים מבצעים את הפעולה הזו במקביל, ייתכן שתהליכון אחד יקרא את הערך, ותהליכון שני יקרא *את אותו ערך* לפני שהראשון יספיק לכתוב את הערך המוגדל חזרה. במקרה כזה, שתי הגדלות יתורגמו בפועל להגדלה אחת בלבד, וערכים ילכו לאיבוד. זה מוביל לתוצאות שגויות ובלתי צפויות. לדוגמה, אם `shared_counter` הוא 0, תהליכון A קורא 0, תהליכון B קורא 0, תהליכון A מגדיל ל-1 וכותב 1, ותהליכון B מגדיל ל-1 וכותב 1. במקום 2, המונה נשאר על 1.\n\n### פתרון פשוט למניעה:\nהדרך הנפוצה והפשוטה ביותר למנוע תנאי מרוץ היא באמצעות מנגנוני סנכרון כמו מנעולים (Mutexes). מנעול מבטיח שרק תהליכון אחד יוכל להיכנס לקטע קריטי (Critical Section) - קטע קוד שבו ניגשים לנתונים משותפים - בכל רגע נתון.\n\n#### דוגמת קוד עם Mutex (פתרון):\n```c\n#include <stdio.h>\n#include <pthread.h>\n\nint shared_counter = 0;\npthread_mutex_t counter_mutex; // מנעול להגנת המונה המשותף\n\nvoid* increment_function_safe(void* arg) {\n    for (int i = 0; i < 100000; i++) {\n        pthread_mutex_lock(&counter_mutex);   // נעל את המנעול לפני הגישה לקטע הקריטי\n        shared_counter++;                     // קטע קריטי - פעולה על המשתנה המשותף\n        pthread_mutex_unlock(&counter_mutex); // שחרר את המנעול לאחר סיום הגישה\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t tid1, tid2;\n    pthread_mutex_init(&counter_mutex, NULL); // אתחול המנעול\n\n    pthread_create(&tid1, NULL, increment_function_safe, NULL);\n    pthread_create(&tid2, NULL, increment_function_safe, NULL);\n\n    pthread_join(tid1, NULL);\n    pthread_join(tid2, NULL);\n\n    printf(\"Final counter value: %d\\n\", shared_counter); // צפוי להיות 200000\n\n    pthread_mutex_destroy(&counter_mutex); // השמדת המנעול\n    return 0;\n}\n```\nהוספת `pthread_mutex_lock` ו-`pthread_mutex_unlock` מבטיחה בלעדיות (Mutual Exclusion) בקטע הקריטי, ובכך מונעת את תנאי המרוץ ומבטיחה שהמונה יגיע לערך הנכון (במקרה זה, 200000 אם שני תהליכונים רצים 100000 פעמים כל אחד)."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

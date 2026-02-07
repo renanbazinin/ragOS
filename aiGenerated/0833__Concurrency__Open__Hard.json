@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 00:40:44",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4697,
+      "output_tokens": 2549,
+      "total_tokens": 14020
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Concurrency",
+      "Synchronization",
+      "Threads",
+      "Resource Management",
+      "Priority"
+    ],
+    "content": {
+      "text": "עליכם לממש אובייקט סנכרון בשם `ResourcePool` המנהל מאגר של `N` משאבים זהים. במערכת קיימים שני סוגי חוטים: חוטים בעלי עדיפות גבוהה (High-Priority) וחוטים בעלי עדיפות נמוכה (Low-Priority).\n\nהאובייקט `ResourcePool` צריך לספק את הפעולות הבאות:\n- `acquire_resource(PriorityType priority)`: חוט קורא לפעולה זו כדי לרכוש משאב. `PriorityType` יכול להיות `HIGH_PRIORITY` או `LOW_PRIORITY`.\n- `release_resource()`: חוט קורא לפעולה זו כדי לשחרר משאב שברשותו.\n\nיש לממש את האובייקט והפעולות תוך הקפדה על הכללים הבאים:\n1.  ישנם `N` משאבים זהים זמינים במאגר.\n2.  חוט בעל עדיפות גבוהה שמבקש לרכוש משאב יקבל אותו באופן מיידי אם יש משאב זמין.\n3.  חוט בעל עדיפות גבוהה שמבקש לרכוש משאב כאשר אין משאבים זמינים, ימתין עד שיתפנה משאב.\n4.  חוט בעל עדיפות נמוכה שמבקש לרכוש משאב יקבל אותו באופן מיידי רק אם יש משאב זמין ואין חוטים בעלי עדיפות גבוהה שממתינים למשאב.\n5.  חוט בעל עדיפות נמוכה שמבקש לרכוש משאב כאשר אין משאבים זמינים, או כאשר יש חוטים בעלי עדיפות גבוהה שממתינים, ימתין.\n6.  כאשר משאב משוחרר, יש לתת עדיפות לחוטים בעלי עדיפות גבוהה שממתינים. רק אם אין חוטים בעלי עדיפות גבוהה שממתינים, יש לתת משאב לאחד מהחוטים בעלי עדיפות נמוכה שממתינים.\n\nיש להשתמש בפרימיטיבים סנכרון סטנדרטיים (mutexes, semaphores, condition variables) ולמנוע מצב של Deadlock או Starvation (לחוטים בעלי עדיפות גבוהה). יש לדאוג שהמימוש יהיה נכון ובטוח מבחינת תחרותיות.",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n\ntypedef enum {\n    LOW_PRIORITY,\n    HIGH_PRIORITY\n} PriorityType;\n\ntypedef struct {\n    int N; // Total number of resources\n    int available_resources;\n\n    pthread_mutex_t lock;\n    pthread_cond_t high_priority_cond;\n    pthread_cond_t low_priority_cond;\n\n    int high_priority_waiting; // Count of high-priority threads waiting\n    int low_priority_waiting;  // Count of low-priority threads waiting\n\n} ResourcePool;\n\nvoid init_resource_pool(ResourcePool* pool, int N) {\n    pool->N = N;\n    pool->available_resources = N;\n    pthread_mutex_init(&pool->lock, NULL);\n    pthread_cond_init(&pool->high_priority_cond, NULL);\n    pthread_cond_init(&pool->low_priority_cond, NULL);\n    pool->high_priority_waiting = 0;\n    pool->low_priority_waiting = 0;\n}\n\nvoid destroy_resource_pool(ResourcePool* pool) {\n    pthread_mutex_destroy(&pool->lock);\n    pthread_cond_destroy(&pool->high_priority_cond);\n    pthread_cond_destroy(&pool->low_priority_cond);\n}\n\nvoid acquire_resource(ResourcePool* pool, PriorityType priority) {\n    pthread_mutex_lock(&pool->lock);\n\n    if (priority == HIGH_PRIORITY) {\n        pool->high_priority_waiting++;\n        while (pool->available_resources == 0) {\n            pthread_cond_wait(&pool->high_priority_cond, &pool->lock);\n        }\n        pool->high_priority_waiting--;\n        pool->available_resources--;\n    } else { // LOW_PRIORITY\n        pool->low_priority_waiting++;\n        while (pool->available_resources == 0 || pool->high_priority_waiting > 0) {\n            pthread_cond_wait(&pool->low_priority_cond, &pool->lock);\n        }\n        pool->low_priority_waiting--;\n        pool->available_resources--;\n    }\n\n    pthread_mutex_unlock(&pool->lock);\n}\n\nvoid release_resource(ResourcePool* pool) {\n    pthread_mutex_lock(&pool->lock);\n\n    pool->available_resources++;\n\n    if (pool->high_priority_waiting > 0) {\n        pthread_cond_signal(&pool->high_priority_cond);\n    } else if (pool->low_priority_waiting > 0) {\n        pthread_cond_signal(&pool->low_priority_cond);\n    }\n\n    pthread_mutex_unlock(&pool->lock);\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "לשם מימוש `ResourcePool` נשתמש ב-mutex יחיד (`lock`) כדי להגן על המשתנים המשותפים: `available_resources` (מספר המשאבים הזמינים), `high_priority_waiting` (מספר החוטים בעלי עדיפות גבוהה הממתינים), ו-`low_priority_waiting` (מספר החוטים בעלי עדיפות נמוכה הממתינים).\n\nבנוסף, נשתמש בשני משתני תנאי (condition variables):\n- `high_priority_cond`: עבור חוטים בעלי עדיפות גבוהה הממתינים למשאב.\n- `low_priority_cond`: עבור חוטים בעלי עדיפות נמוכה הממתינים למשאב.\n\n**פונקציית `acquire_resource(PriorityType priority)`:**\n1.  החוט נועל את ה-mutex.\n2.  אם החוט הוא בעל עדיפות גבוהה (`HIGH_PRIORITY`):\n    *   הוא מגדיל את המונה `high_priority_waiting`.\n    *   החוט נכנס ללולאת המתנה (`while`) כל עוד אין משאבים זמינים (`available_resources == 0`). בתוך הלולאה, הוא קורא ל-`pthread_cond_wait` על `high_priority_cond`, מה שמשחרר את ה-mutex ומכניס את החוט למצב שינה. כשהוא מתעורר, הוא נועל מחדש את ה-mutex ובודק שוב את התנאי.\n    *   לאחר יציאה מהלולאה (כלומר, משאב זמין), הוא מקטין את `high_priority_waiting` ומקטין את `available_resources` (כי הוא לקח משאב).\n3.  אם החוט הוא בעל עדיפות נמוכה (`LOW_PRIORITY`):\n    *   הוא מגדיל את המונה `low_priority_waiting`.\n    *   החוט נכנס ללולאת המתנה (`while`) כל עוד אין משאבים זמינים (`available_resources == 0`) **או** שיש חוטים בעלי עדיפות גבוהה שממתינים (`high_priority_waiting > 0`). בתוך הלולאה, הוא קורא ל-`pthread_cond_wait` על `low_priority_cond`.\n    *   לאחר יציאה מהלולאה, הוא מקטין את `low_priority_waiting` ומקטין את `available_resources`.\n4.  בסיום, החוט משחרר את ה-mutex.\n\n**פונקציית `release_resource()`:**\n1.  החוט נועל את ה-mutex.\n2.  הוא מגדיל את `available_resources` (כי משאב שוחרר).\n3.  הוא בודק אם יש חוטים בעלי עדיפות גבוהה שממתינים (`high_priority_waiting > 0`). אם כן, הוא קורא ל-`pthread_cond_signal` על `high_priority_cond` כדי להעיר אחד מהם. העדפה זו מבטיחה שחוטים בעלי עדיפות גבוהה יקבלו משאב קודם.\n4.  אם אין חוטים בעלי עדיפות גבוהה שממתינים, הוא בודק אם יש חוטים בעלי עדיפות נמוכה שממתינים (`low_priority_waiting > 0`). אם כן, הוא קורא ל-`pthread_cond_signal` על `low_priority_cond` כדי להעיר אחד מהם.\n5.  בסיום, החוט משחרר את ה-mutex.\n\n**מניעת Deadlock ו-Starvation:**\n-   השימוש ב-mutex יחיד ובסדר קבוע של נעילה ושחרור (תמיד נועלים לפני גישה למשתנים משותפים ומשחררים אחרי) מונע Deadlock הנובע מסדר נעילה שונה.\n-   חוטים בעלי עדיפות גבוהה לא יסבלו מ-Starvation מכיוון שתמיד תינתן להם עדיפות ברכישת משאב זמין, וחוטים בעלי עדיפות נמוכה לא יוכלו לרכוש משאב אם חוט בעל עדיפות גבוהה ממתין. כאשר משאב משוחרר, ה-`signal` יועבר קודם כל לחוט בעל עדיפות גבוהה אם כזה ממתין. חוטים בעלי עדיפות נמוכה עשויים להמתין זמן רב אם יש זרם קבוע של חוטים בעלי עדיפות גבוהה, אך זהו מאפיין מובנה של מערכות מבוססות עדיפויות ואינו נחשב ל-Starvation קלאסי במובן של חוסר יכולת לקבל משאב כשהוא זמין ואין מתחרים בעדיפות גבוהה יותר."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

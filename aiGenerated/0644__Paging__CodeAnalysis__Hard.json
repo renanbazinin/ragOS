@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Paging",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 23:21:41",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3971,
+      "output_tokens": 3411,
+      "total_tokens": 16153
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Paging",
+      "Memory Management",
+      "TLB",
+      "Page Faults"
+    ],
+    "content": {
+      "text": "נתונה מערכת הפעלה המשתמשת בזיכרון וירטואלי עם מנגנון Paging דו-שכבתי. הפרטים הטכניים של המערכת הם כדלקמן:\n-   כתובות וירטואליות: 32 סיביות.\n-   גודל עמוד (Page Size): 4KB (4096 בתים).\n-   טבלת עמודים דו-שכבתית: 10 סיביות למצביע לטבלת עמודים ברמה הראשונה (Page Directory), 10 סיביות למצביע לטבלת עמודים ברמה השנייה (Page Table), ו-12 סיביות לאופסט בתוך העמוד. (כלומר, מבנה כתובת וירטואלית: P1[10] | P2[10] | Offset[12]).\n-   חיץ תרגום כתובות (TLB): מכיל 4 רשומות (entries), והוא אסוציאטיבי מלא (fully associative) עם מנגנון החלפה LRU (Least Recently Used).\n-   מצב התחלתי: ה-TLB ריק לחלוטין. כל עמודי הזיכרון של המערך 'data' נמצאים על הדיסק (לא בזיכרון פיזי, כלומר סיבית ה-Valid ב-PTE שלהם היא 0).\n\nקוד ה-C הבא מופעל על מערכת זו. המערך `data` מיושר לגבול עמוד (page-aligned) וכתובתו הווירטואלית מתחילה ב-0 לצורך פשטות הניתוח.\n\nיש לחשב את המספר הכולל של החטאות TLB (TLB misses) ואת המספר הכולל של תקלות עמוד (page faults) שיתרחשו במהלך כל ריצת הפונקציה `complex_access_pattern`.\n\nהנחות:\n-   כל גישה לזיכרון (קריאה או כתיבה) דורשת תרגום כתובת. אם הכתובת נמצאת ב-TLB, זהו TLB hit. אחרת, זהו TLB miss.\n-   במקרה של TLB miss, מתבצעת הליכה בטבלת העמודים (page table walk) כדי למצוא את ה-PTE המתאים. אם סיבית ה-Valid ב-PTE היא 0, מתרחשת תקלת עמוד (page fault). לאחר מכן, העמוד נטען לזיכרון הפיזי, ה-PTE מתעדכן, והרשומה מוכנסת ל-TLB. (יש לזכור כי במקרה של תקלת עמוד, גם לאחר טעינת העמוד, הרשומה עדיין צריכה להיכנס ל-TLB).\n-   אם סיבית ה-Valid ב-PTE היא 1 (העמוד נמצא בזיכרון פיזי), הרשומה מוכנסת ל-TLB (אם אין מקום, מופעל מנגנון LRU), ואין תקלת עמוד.\n-   כל פעולה על המערך `data` (כלומר, כל השמה בתוך הלולאות) נחשבת לגישה אחת לזיכרון לצורך חישוב TLB misses ו-page faults.\n",
+      "code_snippet": "#include <stdio.h>\n\n#define PAGE_SIZE_BYTES 4096\n#define INT_PER_PAGE (PAGE_SIZE_BYTES / sizeof(int)) // 1024 integers per page\n#define NUM_PAGES_IN_ARRAY 256 // Total 256 pages for the array (1MB)\n#define ARRAY_SIZE (NUM_PAGES_IN_ARRAY * INT_PER_PAGE) // 256 * 1024 = 262144 integers\n\nint data[ARRAY_SIZE]; // Assume this array starts at a page-aligned virtual address\n                       // For simplicity, assume its base virtual address is 0.\n\nvoid complex_access_pattern() {\n    // Phase 1: Access the first element of every 4th page\n    // Pages accessed: 0, 4, 8, ..., 252 (total 64 distinct pages)\n    for (int i = 0; i < NUM_PAGES_IN_ARRAY; i += 4) {\n        data[i * INT_PER_PAGE] = i; // Access to page 'i'\n    }\n\n    // Phase 2: Access the first element of every 2nd page (starting from page 0)\n    // Pages accessed: 0, 2, 4, 6, 8, ..., 254 (total 128 distinct pages)\n    for (int i = 0; i < NUM_PAGES_IN_ARRAY; i += 2) {\n        data[i * INT_PER_PAGE] = i; // Access to page 'i'\n    }\n\n    // Phase 3: Access the first element of every page\n    // Pages accessed: 0, 1, 2, 3, 4, ..., 255 (total 256 distinct pages)\n    for (int i = 0; i < NUM_PAGES_IN_ARRAY; ++i) {\n        data[i * INT_PER_PAGE] = i; // Access to page 'i'\n    }\n}\n\nint main() {\n    complex_access_pattern();\n    return 0;\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "ניתוח הפתרון:\n\nנתונים:\n-   גודל עמוד: 4KB (2^12 בתים).\n-   TLB: מכיל 4 רשומות, אסוציאטיבי מלא, מנגנון החלפה LRU.\n-   המערך `data` מכיל 256 עמודים (0 עד 255).\n-   TLB ריק בתחילת הפונקציה `complex_access_pattern`.\n-   כל עמודי המערך `data` אינם בזיכרון פיזי בתחילה (Valid bit = 0).\n\nנחשב את החטאות ה-TLB ואת תקלות העמוד עבור כל שלב בנפרד:\n\n**שלב 1: `for (int i = 0; i < NUM_PAGES_IN_ARRAY; i += 4)`**\n-   גישות לעמודים: 0, 4, 8, 12, ..., 252.\n-   מספר גישות כולל: `256 / 4 = 64` גישות.\n-   כל גישה היא לעמוד שלא נגיש אליו קודם בשלב זה (או בכלל, מכיוון שה-TLB היה ריק והעמודים לא היו בזיכרון פיזי). לכן, כל גישה תגרום להחטאת TLB.\n-   **TLB Misses**: 64 (כל 64 הגישות הן החטאות TLB).\n-   **Page Faults**: 64 (כל העמודים האלה נגישים בפעם הראשונה, ולכן יגרמו לתקלת עמוד ולטעינה לזיכרון פיזי).\n-   מצב TLB בסיום שלב 1: ה-TLB יכיל את 4 העמודים האחרונים שנגישו אליהם: 252, 248, 244, 240 (בסדר LRU: 252 הוא ה-MRU, 240 הוא ה-LRU).\n\n**שלב 2: `for (int i = 0; i < NUM_PAGES_IN_ARRAY; i += 2)`**\n-   גישות לעמודים: 0, 2, 4, 6, 8, ..., 254.\n-   מספר גישות כולל: `256 / 2 = 128` גישות.\n-   ננתח את הגישות ל-TLB:\n    -   ה-TLB מכיל את העמודים {252, 248, 244, 240} מסוף שלב 1. אף אחד מהעמודים הראשונים שנגישים אליהם בשלב 2 (0, 2, 4, 6, 8...) לא נמצא ב-TLB. למעשה, מאחר שאנו ניגשים ל-128 עמודים שונים, וגודל ה-TLB הוא 4 בלבד, כל גישה תגרום להחטאת TLB. גם עמודים שנגישו אליהם בשלב 1 (כגון 0, 4, 8) לא יהיו ב-TLB כי הם כבר נפלטו. לדוגמה:\n        -   גישה לעמוד 0: החטאה. 240 (LRU) נפלט. TLB: {0, 252, 248, 244}.\n        -   גישה לעמוד 2: החטאה. 244 (LRU) נפלט. TLB: {2, 0, 252, 248}.\n        -   גישה לעמוד 4: החטאה. 248 (LRU) נפלט. TLB: {4, 2, 0, 252}.\n        -   גישה לעמוד 6: החטאה. 252 (LRU) נפלט. TLB: {6, 4, 2, 0}.\n        -   גישה לעמוד 8: החטאה. 0 (LRU) נפלט. TLB: {8, 6, 4, 2}.\n    -   כל 128 הגישות הן החטאות TLB.\n-   **TLB Misses**: 128.\n-   **Page Faults**: נבדוק אילו עמודים נגישים לראשונה:\n    -   עמודים שנגישו אליהם בשלב 1: 0, 4, 8, ..., 252 (64 עמודים). אלה כבר בזיכרון פיזי, ולא יגרמו לתקלת עמוד נוספת.\n    -   עמודים חדשים שנגישים אליהם לראשונה בשלב 2: 2, 6, 10, ..., 254 (64 עמודים). אלה יגרמו לתקלות עמוד.\n    -   סה\"כ תקלות עמוד בשלב 2: 64.\n-   מצב TLB בסיום שלב 2: יכיל את 4 העמודים האחרונים שנגישו אליהם: 254, 252, 250, 248 (בסדר LRU).\n\n**שלב 3: `for (int i = 0; i < NUM_PAGES_IN_ARRAY; ++i)`**\n-   גישות לעמודים: 0, 1, 2, 3, 4, ..., 255.\n-   מספר גישות כולל: 256 גישות.\n-   ננתח את הגישות ל-TLB:\n    -   ה-TLB מכיל את העמודים {254, 252, 250, 248} מסוף שלב 2. הגישה הראשונה לעמוד 0 תהיה החטאה. הגישה לעמוד 1 תהיה החטאה. וכן הלאה. מכיוון שאנו ניגשים לעמודים ברצף (0, 1, 2, 3, 4, ...), וגודל ה-TLB הוא 4, כל גישה החל מהגישה הרביעית תפלוט את העמוד שהוכנס לפני 4 גישות (על פי LRU). לדוגמה:\n        -   נגישה לעמוד 0: החטאה (248 נפלט). TLB={0, 254, 252, 250}.\n        -   נגישה לעמוד 1: החטאה (250 נפלט). TLB={1, 0, 254, 252}.\n        -   נגישה לעמוד 2: החטאה (252 נפלט). TLB={2, 1, 0, 254}.\n        -   נגישה לעמוד 3: החטאה (254 נפלט). TLB={3, 2, 1, 0}.\n        -   נגישה לעמוד 4: החטאה (0 נפלט). TLB={4, 3, 2, 1}.\n    -   כל 256 הגישות הן החטאות TLB.\n-   **TLB Misses**: 256.\n-   **Page Faults**: נבדוק אילו עמודים נגישים לראשונה:\n    -   עמודים שנגישו אליהם בשלבים קודמים (0, 2, 4, ..., 254) כבר בזיכרון פיזי.\n    -   עמודים חדשים שנגישים אליהם לראשונה בשלב 3: 1, 3, 5, ..., 255 (128 עמודים). אלה יגרמו לתקלות עמוד.\n    -   סה\"כ תקלות עמוד בשלב 3: 128.\n\n**סיכום כולל:**\n-   **סה\"כ TLB Misses**: 64 (שלב 1) + 128 (שלב 2) + 256 (שלב 3) = **448**\n-   **סה\"כ Page Faults**: 64 (שלב 1) + 64 (שלב 2) + 128 (שלב 3) = **256** (כל 256 העמודים של המערך נטענו לזיכרון פיזי בסופו של דבר, מה שצפוי).\n"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

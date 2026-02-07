@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "File Systems",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 23:25:47",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1088,
+      "output_tokens": 390,
+      "total_tokens": 2421
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "File Systems"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של מערכת קבצים (File System)?",
+      "code_snippet": null,
+      "options": [
+        "א. לאפשר לתהליכים שונים לשתף זיכרון פיזי ביניהם.",
+        "ב. לספק ממשק לניהול קבצים ותיקיות, כולל אחסון, אחזור וארגון נתונים בדיסק.",
+        "ג. לתזמן את סדר הפעולות של המעבד בין תהליכים רצים.",
+        "ד. לתרגם כתובות לוגיות לכתובות פיזיות בזיכרון הראשי.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "המטרה העיקרית של מערכת קבצים היא לספק דרך מאורגנת ויעילה לאחסן, לאחזר ולנהל נתונים בדיסק, תוך הצגתם למשתמש ולתוכניות בצורה של קבצים ותיקיות. שאר האפשרויות מתארות תפקידים של רכיבי מערכת הפעלה אחרים (כמו ניהול זיכרון או תזמון מעבד)."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

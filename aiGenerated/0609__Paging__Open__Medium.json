@@ -1,0 +1,73 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Paging",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 23:00:01",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2072,
+      "output_tokens": 1305,
+      "total_tokens": 5753
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Paging",
+      "Virtual Memory",
+      "Memory Management",
+      "Multi-level Paging"
+    ],
+    "content": {
+      "text": "נתונה מערכת עם זיכרון וירטואלי של 2GB, גודל דף של 4KB, וזיכרון פיזי של 256MB. המערכת משתמשת בטבלת דפים דו-רמתית (Two-Level Paging). כל כניסה בטבלת הדפים (PTE) מכילה מספר מסגרת פיזית (PFN), ביט Valid, ביט Dirty וביט Accessed. גודל כל טבלת דפים (רמה 1 או רמה 2) הוא דף יחיד.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "מהם הגדלים של ה-VPN וה-PFN? (בביטים)\nVPN: ________ ביטים\nPFN: ________ ביטים",
+        "code_snippet": null,
+        "options": null,
+        "solution": {
+          "is_present_in_file": true,
+          "correct_option": null,
+          "explanation": "1. זיכרון וירטואלי 2GB = 2^31 בתים, לכן כתובת וירטואלית היא 31 ביטים.\n   גודל דף 4KB = 2^12 בתים, לכן ההיסט (offset) הוא 12 ביטים.\n   VPN = 31 - 12 = 19 ביטים.\n2. זיכרון פיזי 256MB = 2^28 בתים, לכן כתובת פיזית היא 28 ביטים.\n   ההיסט זהה – 12 ביטים.\n   PFN = 28 - 12 = 16 ביטים."
+        }
+      },
+      {
+        "id": "10.2",
+        "text": "כמה ביטים מוקצים לכל אינדקס בטבלת הדפים ברמה הראשונה (P1) וברמה השנייה (P2)?\nP1: ________ ביטים\nP2: ________ ביטים",
+        "code_snippet": null,
+        "options": null,
+        "solution": {
+          "is_present_in_file": true,
+          "correct_option": null,
+          "explanation": "1. גודל PTE: PFN (16 ביטים) + 3 ביטים (Valid, Dirty, Accessed) = 19 ביטים. כדי ליישר לבית הקרוב (או למילה), מעגלים ל-32 ביטים, כלומר 4 בתים לכל PTE.\n2. מספר כניסות לדף: גודל דף / גודל PTE = 4KB / 4 בתים = 1024 כניסות. כדי לאנדקס 1024 כניסות, נדרשים 10 ביטים (2^10 = 1024).\n3. ה-VPN הוא 19 ביטים (מסעיף קודם). אם P1 משתמש ב-10 ביטים, אז P2 ישתמש ב-19 - 10 = 9 ביטים.\n   P1: 10 ביטים.\n   P2: 9 ביטים."
+        }
+      },
+      {
+        "id": "10.3",
+        "text": "מהו הגודל הכולל (בבתים) של טבלאות הדפים הנדרשות עבור תהליך המשתמש במלוא מרחב הכתובות הוירטואלי שלו?\nגודל כולל: ________ בתים",
+        "code_snippet": null,
+        "options": null,
+        "solution": {
+          "is_present_in_file": true,
+          "correct_option": null,
+          "explanation": "1. טבלת דפים ברמה 1 (L1) תופסת דף יחיד, כלומר 4KB.\n2. תהליך המשתמש במלוא מרחב הכתובות הוירטואלי שלו, פירושו שכל כניסה בטבלת L1 מפנה לטבלת L2. מכיוון שטבלת L1 מכילה 1024 כניסות (לפי סעיף קודם), יהיו 1024 טבלאות L2.\n3. כל טבלת L2 תופסת דף יחיד, כלומר 4KB.\n4. סך הזיכרון עבור טבלאות L2 = 1024 * 4KB = 4096KB.\n5. סך הזיכרון הכולל עבור כל טבלאות הדפים = זיכרון L1 + זיכרון L2 = 4KB + 4096KB = 4100KB.\n6. המרה לבתים: 4100KB = 4100 * 1024 בתים = 4,198,400 בתים."
+        }
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": null
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

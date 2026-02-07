@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "File Systems",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 23:27:22",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1032,
+      "output_tokens": 486,
+      "total_tokens": 3398
+    }
+  },
+  "question": {
+    "id": 2,
+    "type": "MultipleChoice",
+    "topic": [
+      "File Systems",
+      "Inodes",
+      "Hard Links"
+    ],
+    "content": {
+      "text": "במערכת קבצים המשתמשת ב-inodes, מה מתרחש כאשר קובץ בעל מספר קישורים קשיחים (hard links) נמחק באמצעות פקודת `rm` על אחד מהקישורים הללו?",
+      "code_snippet": null,
+      "options": [
+        "א. הקובץ נמחק באופן מיידי וה-inode שלו משוחרר.",
+        "ב. ה-inode של הקובץ משוחרר רק כאשר כל הקישורים הקשיחים אליו נמחקים.",
+        "ג. רק הקישור הקשיח הספציפי נמחק, אך הקובץ נשאר נגיש דרך קישוריו האחרים, ללא שינוי במונה הקישורים (link count).",
+        "ד. הקובץ נשאר נגיש דרך קישוריו האחרים, ומונה הקישורים ב-inode שלו קטן ב-1."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ד",
+      "explanation": "כאשר קישור קשיח נמחק (למשל, באמצעות פקודת `rm`), ערך מונה הקישורים (link count) ב-inode המתאים לקובץ מופחת באחד. הקובץ עצמו וה-inode שלו ימשיכו להתקיים ולהיות נגישים כל עוד מונה הקישורים גדול מאפס. רק כאשר מונה הקישורים מגיע לאפס, ה-inode ובלוקי הנתונים המשויכים אליו משוחררים ומוחזרים למערכת. לכן, הקובץ נשאר נגיש דרך קישוריו האחרים ומונה הקישורים קטן ב-1."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

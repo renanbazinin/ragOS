@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Paging",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 22:53:48",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 909,
+      "output_tokens": 521,
+      "total_tokens": 3116
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Paging"
+    ],
+    "content": {
+      "text": "במערכת הפעלה המשתמשת במנגנון Paging, איזה מידע *עיקרי* נשמר ב-Page Table Entry (PTE) עבור דף (page) שקיים בזיכרון הפיזי?",
+      "code_snippet": null,
+      "options": [
+        "א. הכתובת הפיזית המלאה של תחילת הדף בזיכרון.",
+        "ב. מספר המסגרת (Frame Number) בזיכרון הפיזי, יחד עם ביטים לבקרה (כגון Valid/Invalid, Dirty, Accessed).",
+        "ג. הכתובת הווירטואלית של תחילת הדף.",
+        "ד. גודל הדף בבתים וזמן הטעינה שלו לזיכרון."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "הסבר: Page Table Entry (PTE) מכיל את מספר המסגרת (Frame Number) בזיכרון הפיזי שאליה ממופה הדף הווירטואלי. בנוסף, הוא מכיל ביטי בקרה חשובים כמו:\n*   Valid/Invalid bit: מציין אם הדף נמצא בזיכרון הפיזי או על הדיסק.\n*   Dirty bit: מציין אם הדף השתנה מאז נטען לזיכרון.\n*   Accessed bit: מציין אם הדף שימש לאחרונה.\nביטים אלו חיוניים לניהול זיכרון, במיוחד עבור אלגוריתמי החלפת דפים (Page Replacement Algorithms). הכתובת הפיזית המלאה נוצרת על ידי שילוב מספר המסגרת עם ה-offset מתוך הכתובת הווירטואלית, ולכן המספר המלא אינו נשמר ישירות ב-PTE."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

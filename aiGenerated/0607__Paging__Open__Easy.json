@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Paging",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 22:59:16",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4788,
+      "output_tokens": 744,
+      "total_tokens": 7356
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "Open",
+    "topic": [
+      "Paging",
+      "Virtual Memory",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "נתונה מערכת המשתמשת בזיכרון וירטואלי עם מנגנון Paging. גודל דף במערכת הוא 4KB.\nתהליך מסוים מנסה לגשת לכתובת וירטואלית 0x12345.\nידוע כי הדף הוירטואלי המתאים לכתובת זו ממופה למסגרת פיזית (PFN) מספר 0xABC.\nמהי הכתובת הפיזית אליה יגשת התהליך? פרטו את החישוב.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הסבר:\n1.  **גודל ההיסט (Offset):** גודל הדף הוא 4KB, שזה 4096 בתים. כדי לייצג 4096 כתובות בתוך דף, נדרשים 12 ביטים (2^12 = 4096). לכן, 12 הביטים הפחות משמעותיים של הכתובת הוירטואלית מהווים את ההיסט בתוך הדף.\n2.  **פירוק הכתובת הוירטואלית:** הכתובת הוירטואלית הנתונה היא 0x12345.\n    *   ההיסט (Offset) הוא 12 הביטים הימניים: 0x345.\n    *   מספר הדף הוירטואלי (Virtual Page Number - VPN) הוא הביטים הנותרים משמאל: 0x12.\n3.  **חישוב הכתובת הפיזית:** הכתובת הפיזית מורכבת מצירוף של מספר המסגרת הפיזית (Page Frame Number - PFN) וההיסט.\n    *   מספר המסגרת הפיזית הנתון (PFN) הוא 0xABC.\n    *   הכתובת הפיזית המתקבלת היא PFN משולב עם ההיסט. במילים אחרות, PFN מוזז שמאלה במספר ביטים השווה לגודל ההיסט (12 ביטים), ואז מוסיפים לו את ההיסט.\n    *   כתובת פיזית = (PFN << גודל היסט) | היסט\n    *   כתובת פיזית = (0xABC << 12) | 0x345\n    *   כתובת פיזית = 0xABC000 + 0x345 = 0xABC345\n\n**הכתובת הפיזית אליה יגשת התהליך היא 0xABC345.**"
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

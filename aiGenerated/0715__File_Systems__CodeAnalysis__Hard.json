@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "File Systems",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 23:50:08",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3062,
+      "output_tokens": 2434,
+      "total_tokens": 12153
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "CodeAnalysis",
+    "topic": [
+      "File Systems",
+      "Hard Links",
+      "System Calls",
+      "Inode Management"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C הבאה המבצעת פעולות שונות על קבצים וקישורים קשיחים (hard links). נתחו את הקוד וציינו מה יהיה הפלט המדויק של התוכנית. הסבירו כל שורת פלט בפירוט, תוך התייחסות למצב הקובץ (מספר הקישורים הקשיחים אליו, גודלו ותוכנו הפנימי) לאחר כל פעולת מערכת משמעותית.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <fcntl.h>\n#include <sys/stat.h>\n#include <string.h>\n\nint main() {\n    const char* file_name = \"data.txt\";\n    const char* link_name = \"link_to_data.txt\";\n    int fd;\n    struct stat sb;\n\n    // 1. Create file and write initial content\n    fd = open(file_name, O_CREAT | O_WRONLY | O_TRUNC, 0644);\n    if (fd == -1) { perror(\"open\"); return 1; }\n    write(fd, \"Original\", 8);\n    close(fd);\n\n    // 2. Create a hard link\n    if (link(file_name, link_name) == -1) { perror(\"link\"); return 1; }\n\n    // 3. Open the original file name again, then unlink it\n    fd = open(file_name, O_WRONLY | O_APPEND);\n    if (fd == -1) { perror(\"open again\"); return 1; }\n    \n    if (unlink(file_name) == -1) { perror(\"unlink original\"); return 1; }\n\n    // 4. Write more content through the open file descriptor\n    write(fd, \" Appended\", 9);\n\n    // 5. Check status of the link name before closing the fd\n    if (stat(link_name, &sb) == -1) { perror(\"stat link_name (before close)\"); return 1; }\n    printf(\"A: Inode: %ld, Links: %ld, Size: %lld\\n\", (long)sb.st_ino, (long)sb.st_nlink, (long long)sb.st_size);\n\n    // 6. Close the file descriptor\n    close(fd);\n\n    // 7. Check status of the link name after closing the fd\n    if (stat(link_name, &sb) == -1) { perror(\"stat link_name (after close)\"); return 1; }\n    printf(\"B: Inode: %ld, Links: %ld, Size: %lld\\n\", (long)sb.st_ino, (long)sb.st_nlink, (long long)sb.st_size);\n\n    // 8. Unlink the hard link\n    if (unlink(link_name) == -1) { perror(\"unlink link\"); return 1; }\n\n    // 9. Try to stat the link name one last time\n    if (stat(link_name, &sb) == -1) {\n        printf(\"C: %s does not exist.\\n\", link_name);\n    } else {\n        printf(\"C: Error: %s still exists.\\n\", link_name);\n    }\n\n    return 0;\n}"
+    },
+    "sub_questions": null,
+    "points": 20,
+    "solution": {
+      "is_present_in_file": false,
+      "correct_option": null,
+      "explanation": "הפלט המדויק של התוכנית יהיה (מספר ה-Inode יהיה תלוי במערכת): \n```\nA: Inode: <inode_number>, Links: 1, Size: 17\nB: Inode: <inode_number>, Links: 1, Size: 17\nC: link_to_data.txt does not exist.\n```\n\nלהלן פירוט הפעולות וההסבר:\n\n**שלב 1: יצירת קובץ וכתיבה אליו (`open`, `write`, `close`)**\n- התוכנית יוצרת קובץ בשם `data.txt` עם הרשאות 0644. נכתב לתוכו התוכן \"Original\" (8 בתים).\n- לאחר ה-`close(fd)`, ה-inode של הקובץ `data.txt` קיים במערכת הקבצים. יש לו קישור קשיח אחד (link count = 1) ושמו `data.txt` מצביע אליו. גודלו 8 בתים.\n\n**שלב 2: יצירת קישור קשיח (`link`)**\n- נוצר קישור קשיח בשם `link_to_data.txt` המצביע לאותו inode כמו `data.txt`. \n- כעת, ל-inode יש 2 קישורים קשיחים (link count = 2). גם `data.txt` וגם `link_to_data.txt` הם שמות חוקיים לאותו קובץ בדיוק. גודל הקובץ נשאר 8 בתים והתוכן \"Original\".\n\n**שלב 3: פתיחת הקובץ המקורי ומחיקתו (`open`, `unlink`)**\n- הקובץ `data.txt` נפתח שוב (`fd` חדש) במצב הוספה (`O_APPEND`). פעולה זו יוצרת התייחסות נוספת ל-inode בקרנל (לא משפיע על ה-link count).\n- מיד לאחר מכן, `unlink(file_name)` מבוצע. פעולה זו מסירה את הערך `data.txt` מספריית הקבצים. כתוצאה מכך, ה-link count של ה-inode יורד ל-1 (כי `link_to_data.txt` עדיין קיים). \n- חשוב לציין שה-inode עצמו *אינו נמחק* בשלב זה, מכיוון ש:\n    1. ה-link count עדיין אינו 0 (הוא 1, בגלל `link_to_data.txt`).\n    2. קיים file descriptor פתוח (ה-`fd` החדש) שמחזיק התייחסות ל-inode.\n- לכן, הקובץ עדיין נגיש דרך `link_to_data.txt` ודרך ה-`fd` הפתוח.\n\n**שלב 4: כתיבה נוספת דרך ה-file descriptor הפתוח (`write`)**\n- נכתב התוכן \" Appended\" (9 בתים) דרך ה-`fd` הפתוח (שנפתח עם `O_APPEND`).\n- תוכן הקובץ הופך ל-\"Original Appended\". גודל הקובץ גדל ל-8 + 9 = 17 בתים. \n- שימו לב: הכתיבה מתבצעת בהצלחה למרות ששמו המקורי של הקובץ (`data.txt`) נמחק, כי ה-file descriptor עדיין מצביע ל-inode התקין.\n\n**שלב 5: בדיקת מצב הקישור הקשיח לפני סגירת ה-fd (`stat`)**\n- `stat(link_name)` מבוצע על `link_to_data.txt`. \n- **פלט A**: \n    - `Inode`: יהיה מספר ה-inode המקורי (זהה לאורך כל הריצה). \n    - `Links`: יהיה 1, מכיוון ש-`data.txt` נמחק ב-`unlink` בשלב 3.\n    - `Size`: יהיה 17, מכיוון שהתוכן \" Appended\" נכתב בשלב 4.\n\n**שלב 6: סגירת ה-file descriptor (`close`)**\n- `close(fd)` מבוצע. פעולה זו משחררת את התייחסות ה-kernel ל-inode דרך ה-file descriptor. \n- ה-link count של ה-inode נשאר 1. ה-inode עדיין לא נמחק כי ה-link count אינו 0.\n\n**שלב 7: בדיקת מצב הקישור הקשיח לאחר סגירת ה-fd (`stat`)**\n- `stat(link_name)` מבוצע שוב. \n- **פלט B**: \n    - `Inode`: יהיה אותו מספר inode. \n    - `Links`: יהיה 1 (לא השתנה מ-`close`).\n    - `Size`: יהיה 17 (לא השתנה מ-`close`).\n\n**שלב 8: מחיקת הקישור הקשיח (`unlink`)**\n- `unlink(link_name)` מבוצע. פעולה זו מסירה את הערך `link_to_data.txt` מספריית הקבצים. \n- כעת, ה-link count של ה-inode יורד ל-0. מכיוון שאין יותר קישורים קשיחים ל-inode ואין יותר file descriptors פתוחים המצביעים אליו (ה-`fd` נסגר בשלב 6), ה-inode נמחק סופית ממערכת הקבצים.\n\n**שלב 9: ניסיון אחרון לבדוק את מצב הקישור הקשיח (`stat`)**\n- `stat(link_name)` מבוצע שוב. מכיוון שה-inode נמחק בשלב 8, הקובץ `link_to_data.txt` כבר אינו קיים במערכת הקבצים. \n- `stat` יחזיר -1 ויציג הודעת שגיאה (כמו \"No such file or directory\").\n- **פלט C**: התוכנית תדפיס: `C: link_to_data.txt does not exist.`"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

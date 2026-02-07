@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 00:31:59",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 1102,
+      "total_tokens": 13425
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Concurrency",
+      "Synchronization",
+      "Condition Variables"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא המשתמש במשתנה תנאי (condition variable) לתיאום בין תהליך יצרן (producer) לתהליך צרכן (consumer). מהי הבעיה העיקרית שיכולה להתרחש בתוכנית זו?",
+      "code_snippet": "#include <iostream>\n#include <thread>\n#include <mutex>\n#include <condition_variable>\n#include <chrono>\n\nstd::mutex m;\nstd::condition_variable cv;\nbool data_available = false; // דגל המציין שהנתונים מוכנים\nint shared_data = 0;\n\nvoid producer_thread() {\n    std::this_thread::sleep_for(std::chrono::milliseconds(100)); // מדמה עבודה כלשהי\n    {\n        std::lock_guard<std::mutex> lk(m);\n        shared_data = 42;\n        data_available = true; // הנתונים מוכנים\n        std::cout << \"Producer: Flag set to true, data = \" << shared_data << std::endl;\n    } // המנעול משוחרר כאן\n    cv.notify_one(); // שליחת איתות לאחר שחרור המנעול\n    std::cout << \"Producer: Notified.\" << std::endl;\n}\n\nvoid consumer_thread() {\n    std::this_thread::sleep_for(std::chrono::milliseconds(10)); // מדמה עבודה קצרה\n    std::unique_lock<std::mutex> lk(m); // תפוס מנעול\n\n    // *נקודה קריטית*: בדיקת flag ללא לולאה או פרדיקט\n    if (!data_available) { \n        std::cout << \"Consumer: Data not available, waiting...\" << std::endl;\n        cv.wait(lk); // המתנה ללא לולאה/פרדיקט\n    }\n    std::cout << \"Consumer: Consumed data: \" << shared_data << std::endl;\n}\n\n// הערה: פונקציית main לא הוצגה אך היא תיצור ותריץ את שני התהליכים.",
+      "options": [
+        "א. התוכנית עלולה להיכנס למצב של Deadlock.",
+        "ב. תהליך הצרכן עלול להחמיץ איתות (missed signal) מהיצרן ולהמתין ללא סוף.",
+        "ג. תהליך הצרכן עלול להתעורר באופן שקרי (spurious wakeup) ולצרוך נתונים לא תקינים או לא מעודכנים.",
+        "ד. תהליך הצרכן עלול לצרוך את הנתונים לפני שהיצרן סיים להכין אותם (race condition על הנתונים).",
+        "ה. אין בעיה בקוד, והתוכנית תמיד תעבוד כראוי."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "הבעיה העיקרית בקוד היא שתהליך הצרכן משתמש ב-`cv.wait(lk)` ללא לולאה (או פרדיקט) כדי לבדוק מחדש את התנאי (`data_available`). משתני תנאי עלולים לגרום להתעוררויות שקריות (spurious wakeups), כלומר, תהליך הצרכן עשוי להתעורר מ-`wait` גם אם לא נשלח איתות (`notify_one`/`notify_all`) או אם התנאי עדיין לא מתקיים. במקרה כזה, הצרכן ימשיך לבצע את פעולת הצריכה (`std::cout << \"Consumer: Consumed data: \" << shared_data << std::endl;`) כאשר `data_available` עדיין שקר ו-`shared_data` מכיל ערך ברירת מחדל (0) או ערך שגוי אחר, במקום 42. הפתרון הנכון הוא להשתמש בלולאת `while` סביב ה-`wait` (לדוגמה: `while (!data_available) { cv.wait(lk); }`) או בגרסת ה-`wait` שמקבלת פרדיקט (`cv.wait(lk, []{ return data_available; });`)."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

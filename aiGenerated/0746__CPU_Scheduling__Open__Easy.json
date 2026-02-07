@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "CPU Scheduling",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 00:01:59",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2314,
+      "output_tokens": 531,
+      "total_tokens": 4738
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "CPU Scheduling",
+      "Round Robin"
+    ],
+    "content": {
+      "text": "הסבירו את עקרון הפעולה של אלגוריתם תזמון Round Robin (RR). ציינו יתרון וחיסרון אחד של אלגוריתם זה, והסבירו בקצרה כל אחד מהם.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "אלגוריתם Round Robin הוא אלגוריתם תזמון פרמפטיבי (preemptive) שנועד להבטיח הוגנות בין תהליכים. כל תהליך מקבל יחידת זמן קבועה לביצוע (quantum). כאשר הקוואנטום של תהליך מסתיים, אם התהליך עדיין לא סיים את ריצתו, הוא מועבר לסוף תור התהליכים המוכנים (ready queue) והמעבד עובר לתהליך הבא בתור. תהליך שסיים את ריצתו לפני תום הקוואנטום משחרר את המעבד ויוצא מתור התהליכים.\n\nיתרון: הוגנות (Fairness) - כל תהליך מקבל הזדמנות שווה לרוץ ואין תהליך שסובל מרעב (starvation). הוא מתאים למערכות אינטראקטיביות שבהן חשוב שכל המשתמשים יקבלו זמן תגובה סביר.\n\nחיסרון: תקורה (Overhead) - עם כל החלפת קונטקסט (context switch) נדרש זמן לעבודה ניהולית של מערכת ההפעלה (שמירת מצב תהליך נוכחי וטעינת מצב תהליך חדש). אם הקוואנטום קצר מדי, התקורה של החלפות הקונטקסט עלולה להיות משמעותית ולפגוע בביצועים הכוללים של המערכת."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Paging",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 22:52:03",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1024,
+      "output_tokens": 314,
+      "total_tokens": 2378
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Paging",
+      "Memory Management",
+      "Virtual Memory"
+    ],
+    "content": {
+      "text": "מה מכילה טבלת דפים (Page Table)?",
+      "code_snippet": null,
+      "options": [
+        "א. רשימה של תהליכים פעילים במערכת.",
+        "ב. מיפוי מכתובות וירטואליות לכתובות פיזיות.",
+        "ג. נתונים על קבצים המאוחסנים בדיסק.",
+        "ד. מידע על התקני קלט/פלט מחוברים.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב. כפי שנלמד, טבלת דפים (Page Table) היא מבנה נתונים המשמש את מערכת ההפעלה לתרגום כתובות וירטואליות לכתובות פיזיות בזיכרון, ברמת הדפים (pages)."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

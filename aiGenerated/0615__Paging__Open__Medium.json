@@ -1,0 +1,84 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Paging",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 23:01:46",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2072,
+      "output_tokens": 1504,
+      "total_tokens": 6430
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Memory Management",
+      "Paging",
+      "Virtual Memory",
+      "Two-Level Paging"
+    ],
+    "content": {
+      "text": "נתונה מערכת המשתמשת בטבלת דפים דו-שכבתית (Two-Level Page Table) לניהול זיכרון וירטואלי.\n*   גודל מרחב הכתובות הוירטואלי (Virtual Address Space) הוא 4GB.\n*   גודל דף הוא 4KB.\n*   גודל הזיכרון הפיזי (Physical Memory) הוא 1GB.\n*   כל כניסה בטבלת דפים (PTE) היא בגודל 4 בתים.\n\nענה על השאלות הבאות:",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "מהם גודלי החלקים (בביטים) של הכתובת הוירטואלית עבור VPN1, VPN2 וההיסט (Offset)?\nVPN1: _______ ביטים, VPN2: _______ ביטים, Offset: _______ ביטים.",
+        "code_snippet": null,
+        "options": null,
+        "solution": {
+          "is_present_in_file": true,
+          "correct_option": null,
+          "explanation": "1. גודל מרחב כתובות וירטואלי 4GB = 2^32 בתים, לכן כתובת וירטואלית היא באורך 32 ביטים.\nגודל דף 4KB = 2^12 בתים, לכן ההיסט (Offset) הוא באורך 12 ביטים.\nמספר הביטים עבור ה-VPN הכולל הוא 32 - 12 = 20 ביטים.\nגודל כל כניסה בטבלת דפים (PTE) הוא 4 בתים.\nמספר הכניסות בכל טבלת דפים (שתופסת דף בודד) הוא גודל דף / גודל PTE = 4KB / 4 בתים = 4096 / 4 = 1024 כניסות.\nכדי לאנדקס 1024 כניסות, נדרשים log2(1024) = 10 ביטים.\nמכיוון שמדובר בטבלה דו-שכבתית, אנו מחלקים את 20 ביטי ה-VPN לשני חלקים שווים (כדי למקסם את מספר הכניסות בכל רמה): VPN1 = 10 ביטים, VPN2 = 10 ביטים.\nתשובה: VPN1: 10 ביטים, VPN2: 10 ביטים, Offset: 12 ביטים."
+        }
+      },
+      {
+        "id": "10.2",
+        "text": "מהו הגודל המרבי של טבלת הדפים מהרמה הראשונה (First-Level Page Table) בבתים?\nגודל טבלה: _______ בתים.",
+        "code_snippet": null,
+        "options": null,
+        "solution": {
+          "is_present_in_file": true,
+          "correct_option": null,
+          "explanation": "2. טבלת הדפים מהרמה הראשונה מכילה 2^VPN1 כניסות. VPN1 הוא 10 ביטים, לכן 2^10 = 1024 כניסות.\nגודל כל כניסה הוא 4 בתים.\nתשובה: 1024 כניסות * 4 בתים/כניסה = 4096 בתים (או 4KB)."
+        }
+      },
+      {
+        "id": "10.3",
+        "text": "מהו המספר המרבי של טבלאות דפים מהרמה השנייה (Second-Level Page Tables) שתהליך בודד יכול להחזיק?\nמספר טבלאות: _______",
+        "code_snippet": null,
+        "options": null,
+        "solution": {
+          "is_present_in_file": true,
+          "correct_option": null,
+          "explanation": "3. כל כניסה בטבלת הדפים מהרמה הראשונה יכולה להצביע על טבלת דפים מהרמה השנייה.\nמכיוון שיש 1024 כניסות בטבלת הדפים מהרמה הראשונה, תהליך יכול להחזיק לכל היותר 1024 טבלאות דפים מהרמה השנייה.\nתשובה: 1024 טבלאות."
+        }
+      },
+      {
+        "id": "10.4",
+        "text": "מהו שטח הזיכרון הפיזי המינימלי שתופסות טבלאות הדפים של תהליך (בהנחה שממופה לפחות דף וירטואלי אחד)?\nשטח זיכרון: _______ בתים.",
+        "code_snippet": null,
+        "options": null,
+        "solution": {
+          "is_present_in_file": true,
+          "correct_option": null,
+          "explanation": "4. כדי שתהליך ירוץ, הוא חייב להחזיק לפחות טבלת דפים אחת מהרמה הראשונה. טבלה זו תופסת דף אחד (4KB).\nכדי למפות לפחות דף וירטואלי אחד, חייבת להיות כניסה אחת תקפה בטבלת הדפים מהרמה הראשונה, המצביעה על טבלת דפים מהרמה השנייה.\nלכן, נדרשת גם לפחות טבלת דפים אחת מהרמה השנייה, אשר תופסת גם היא דף אחד (4KB).\nתשובה: דף אחד (רמה 1) + דף אחד (רמה 2) = 4KB + 4KB = 8KB."
+        }
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": null
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

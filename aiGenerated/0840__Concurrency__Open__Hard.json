@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 00:45:21",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4697,
+      "output_tokens": 1766,
+      "total_tokens": 10309
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Concurrency",
+      "Synchronization",
+      "Mutexes",
+      "Fairness",
+      "Threads",
+      "Condition Variables"
+    ],
+    "content": {
+      "text": "במערכות הפעלה, מנעולי הדדיות (mutexes) משמשים להגנה על משאבים משותפים מפני גישה במקביל. עם זאת, מימוש סטנדרטי של mutex (כמו `pthread_mutex_t`) אינו מבטיח הוגנות; כלומר, אין ערובה שחוט שממתין למנעול זמן רב יותר יקבל אותו לפני חוטים אחרים שהגיעו מאוחר יותר. מצב זה עלול להוביל להרעבה (starvation) של חוטים מסוימים.\n\nמטרת שאלה זו היא לממש מנעול הדדי הוגן (`FairMutex`) המבטיח שחוטים ירכשו את המנעול בסדר שבו ביקשו אותו (FIFO - ראשון נכנס, ראשון יוצא). יש להתעלם מבעיות של מספרים שלמים (overflow) או טיפול בשגיאות.\n\nממשו את המבנה `FairMutex` ואת הפעולות `init`, `destroy`, `lock`, ו-`unlock` בהתאם לדרישות ההוגנות. ניתן להשתמש ב-`pthread_mutex_t` וב-`pthread_cond_t`.",
+      "code_snippet": "typedef struct __FairMutex {\n    // השלימו את המבנה\n} FairMutex;\n\nvoid fair_mutex_init(FairMutex *fm);\nvoid fair_mutex_destroy(FairMutex *fm);\nvoid fair_mutex_lock(FairMutex *fm);\nvoid fair_mutex_unlock(FairMutex *fm);",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "לשם מימוש מנעול הוגן, נשתמש בגישת ה\"כרטיסים\" (tickets). כל חוט שמבקש לרכוש את המנעול מקבל מספר כרטיס ייחודי, והחוטים רוכשים את המנעול לפי הסדר העולה של מספרי הכרטיסים שלהם. נשתמש בשני מונים: `next_ticket` שיקצה את הכרטיס הבא לחוט שמבקש את המנעול, ו-`current_serving_ticket` שיציין איזה כרטיס תורו להיכנס למקטע הקריטי.\n\nהמבנה `FairMutex` יכלול:\n*   `pthread_mutex_t guard_mutex`: מנעול פנימי שיגן על הגישה למונים (`next_ticket`, `current_serving_ticket`) ולמשתנה התנאי. זהו מנעול קצר-טווח שנועד להבטיח אטומיות בגישה למשתני המצב של המנעול ההוגן עצמו.\n*   `pthread_cond_t cond_var`: משתנה תנאי שעליו ימתינו חוטים שתורם עדיין לא הגיע.\n*   `int next_ticket`: מונה עולה שמקצה כרטיסים לחוטים המבקשים את המנעול.\n*   `int current_serving_ticket`: מונה עולה שמציין את מספר הכרטיס של החוט שתורו להיכנס למקטע הקריטי או של החוט שמחזיק כרגע את המנעול.\n\n**פעולת `fair_mutex_init`:**\nמאתחלת את המנעולים והמונים לערכי ההתחלה שלהם.\n\n**פעולת `fair_mutex_destroy`:**\nמשחררת את המשאבים של המנעולים והמשתנים התנאיים.\n\n**פעולת `fair_mutex_lock`:**\n1.  החוט רוכש את ה-`guard_mutex` כדי לגשת בבטחה למשתני המצב של המנעול ההוגן.\n2.  הוא מקבל כרטיס ייחודי על ידי העתקת הערך הנוכחי של `next_ticket` והגדלתו (`my_ticket = fm->next_ticket++;`).\n3.  החוט נכנס ללולאת המתנה: כל עוד מספר הכרטיס שלו (`my_ticket`) אינו שווה ל-`current_serving_ticket`, הוא ממתין על `cond_var`. המתנה זו משחררת אוטומטית את `guard_mutex` ומחזירה אותו כשהחוט מתעורר.\n4.  כאשר `my_ticket == fm->current_serving_ticket`, החוט יודע שתורו הגיע, והוא \"רוכש\" את המנעול ההוגן. הוא יוצא מלולאת ההמתנה.\n5.  החוט משחרר את ה-`guard_mutex` וממשיך בביצוע המקטע הקריטי.\n\n**פעולת `fair_mutex_unlock`:**\n1.  החוט רוכש את ה-`guard_mutex`.\n2.  הוא מגדיל את `current_serving_ticket` ב-1. פעולה זו למעשה מעבירה את ה\"תור\" לחוט הבא בתור.\n3.  הוא מאותת לחוט אחד שממתין על `cond_var` (`pthread_cond_signal`). חוט זה (אם קיים) יתעורר, יבדוק את התנאי (`my_ticket == fm->current_serving_ticket`), יגלה שתורו הגיע, וירכוש את המנעול.\n4.  החוט משחרר את ה-`guard_mutex`.\n\n```c\n#include <pthread.h>\n#include <stdlib.h> // For malloc/free\n\ntypedef struct __FairMutex {\n    pthread_mutex_t guard_mutex;\n    pthread_cond_t  cond_var;\n    int             next_ticket;\n    int             current_serving_ticket;\n} FairMutex;\n\nvoid fair_mutex_init(FairMutex *fm) {\n    pthread_mutex_init(&fm->guard_mutex, NULL);\n    pthread_cond_init(&fm->cond_var, NULL);\n    fm->next_ticket = 0;\n    fm->current_serving_ticket = 0;\n}\n\nvoid fair_mutex_destroy(FairMutex *fm) {\n    pthread_mutex_destroy(&fm->guard_mutex);\n    pthread_cond_destroy(&fm->cond_var);\n}\n\nvoid fair_mutex_lock(FairMutex *fm) {\n    pthread_mutex_lock(&fm->guard_mutex);\n    int my_ticket = fm->next_ticket++;\n    while (my_ticket != fm->current_serving_ticket) {\n        pthread_cond_wait(&fm->cond_var, &fm->guard_mutex);\n    }\n    pthread_mutex_unlock(&fm->guard_mutex);\n}\n\nvoid fair_mutex_unlock(FairMutex *fm) {\n    pthread_mutex_lock(&fm->guard_mutex);\n    fm->current_serving_ticket++;\n    pthread_cond_signal(&fm->cond_var); // Signal one waiting thread\n    pthread_mutex_unlock(&fm->guard_mutex);\n}\n```",
+      "difficulty_estimation": "Hard"
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 00:29:35",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1024,
+      "output_tokens": 370,
+      "total_tokens": 2477
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Concurrency",
+      "Synchronization",
+      "Mutex"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של שימוש במנעול (mutex) בתכנות מקבילי?",
+      "code_snippet": null,
+      "options": [
+        "א. למנוע מצבי מרוץ (race conditions) על ידי הבטחת גישה בלעדית למשאב משותף.",
+        "ב. לאפשר לחוטים שונים לרוץ בו זמנית על מעבדים שונים.",
+        "ג. להגדיל את מהירות הביצוע הכוללת של התוכנית.",
+        "ד. לנהל את זיכרון המערכת בין חוטים שונים.",
+        "ה. לאפשר תקשורת ישירה בין תהליכים נפרדים."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "א'. מנעול (mutex) משמש להגנה על קטעים קריטיים בקוד, על ידי הבטחת שרק חוט אחד יוכל לגשת למשאב משותף מסוים (כמו משתנה גלובלי או קובץ) בכל רגע נתון. זה מונע מצבי מרוץ ותוצאות בלתי צפויות."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

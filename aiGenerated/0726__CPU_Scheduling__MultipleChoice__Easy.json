@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "CPU Scheduling",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 23:54:43",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1126,
+      "output_tokens": 359,
+      "total_tokens": 2587
+    }
+  },
+  "question": {
+    "id": 6,
+    "type": "MultipleChoice",
+    "topic": [
+      "CPU Scheduling"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של תזמון מעבד (CPU Scheduling) במערכת הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. להבטיח שכל התהליכים יקבלו את אותו זמן מעבד.",
+        "ב. למנוע מצב של קיפאון (deadlock) בין תהליכים.",
+        "ג. למקסם את ניצול המעבד ולספק זמני תגובה הולמים למשתמשים.",
+        "ד. לאפשר תקשורת בין תהליכים שונים.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג'. המטרה העיקרית של תזמון מעבד היא למקסם את ניצול המעבד על ידי שמירה על תור העבודה מלא ככל האפשר, ובו זמנית לספק זמני תגובה מהירים למשתמשים עבור יישומים אינטראקטיביים, ובסך הכל לייעל את ביצועי המערכת."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

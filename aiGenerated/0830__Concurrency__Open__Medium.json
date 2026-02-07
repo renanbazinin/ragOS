@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 00:39:29",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1930,
+      "output_tokens": 1696,
+      "total_tokens": 7780
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "Open",
+    "topic": [
+      "Concurrency",
+      "Synchronization",
+      "Semaphores",
+      "Producer-Consumer"
+    ],
+    "content": {
+      "text": "בעיית היצרן-צרכן היא בעיית סנכרון קלאסית במערכות הפעלה. בבעיה זו, ישנם תהליכים (או ת'רדים) יצרנים אשר מייצרים פריטים ומכניסים אותם לחוצץ משותף, ותהליכים צרכנים אשר מוציאים פריטים מהחוצץ וצורכים אותם. החuצץ הוא בעל גודל קבוע. נתון קוד C/C++ חלקי המגדיר את המבנים הדרושים לפתרון בעיית היצרן-צרכן באמצעות סמפורים ו-mutex. השלם את פונקציות ה-`producer` וה-`consumer` כך שיטפלו בסנכרון הגישה לחוצץ באופן נכון, ימנעו תנאי מרוץ, קיפאון ורעב. הסבר בקצרה את תפקידו של כל סמפור ו-mutex בפתרון.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <pthread.h>\n#include <semaphore.h>\n\n#define BUFFER_SIZE 10\n\ntypedef struct {\n    int buffer[BUFFER_SIZE];\n    int in; // next empty slot\n    int out; // first full slot\n    sem_t full; // counts number of full slots\n    sem_t empty; // counts number of empty slots\n    pthread_mutex_t mutex; // protects access to buffer, in, out\n} SharedBuffer;\n\nSharedBuffer shared_buffer;\n\nvoid init_shared_buffer() {\n    shared_buffer.in = 0;\n    shared_buffer.out = 0;\n    sem_init(&shared_buffer.full, 0, 0); // Initially 0 full slots\n    sem_init(&shared_buffer.empty, 0, BUFFER_SIZE); // Initially BUFFER_SIZE empty slots\n    pthread_mutex_init(&shared_buffer.mutex, NULL);\n}\n\nvoid *producer(void *arg) {\n    int item;\n    while (1) {\n        // Produce an item\n        item = rand() % 100; // Example: produce a random number\n\n        // TODO: Add synchronization logic here to put item into buffer\n        // ...\n\n        printf(\"Producer produced: %d\\n\", item);\n        // sleep(1); // Simulate work\n    }\n    return NULL;\n}\n\nvoid *consumer(void *arg) {\n    int item;\n    while (1) {\n        // TODO: Add synchronization logic here to get item from buffer\n        // ...\n\n        printf(\"Consumer consumed: %d\\n\", item);\n        // sleep(1); // Simulate work\n    }\n    return NULL;\n}\n",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "פתרון בעיית היצרן-צרכן באמצעות סמפורים ו-mutex:\n\n**השלמת פונקציית `producer`:**\n```c\nvoid *producer(void *arg) {\n    int item;\n    while (1) {\n        item = rand() % 100; // Produce an item\n\n        sem_wait(&shared_buffer.empty); // המתן למקום ריק בחוצץ\n        pthread_mutex_lock(&shared_buffer.mutex); // נעל את ה-mutex לגישה לחוצץ\n\n        shared_buffer.buffer[shared_buffer.in] = item;\n        shared_buffer.in = (shared_buffer.in + 1) % BUFFER_SIZE;\n\n        pthread_mutex_unlock(&shared_buffer.mutex); // שחרר את ה-mutex\n        sem_post(&shared_buffer.full); // סמן שמקום התמלא בחוצץ\n\n        printf(\"Producer produced: %d\\n\", item);\n        // sleep(1);\n    }\n    return NULL;\n}\n```\n\n**השלמת פונקציית `consumer`:**\n```c\nvoid *consumer(void *arg) {\n    int item;\n    while (1) {\n        sem_wait(&shared_buffer.full); // המתן לפריט מלא בחוצץ\n        pthread_mutex_lock(&shared_buffer.mutex); // נעל את ה-mutex לגישה לחוצץ\n\n        item = shared_buffer.buffer[shared_buffer.out];\n        shared_buffer.out = (shared_buffer.out + 1) % BUFFER_SIZE;\n\n        pthread_mutex_unlock(&shared_buffer.mutex); // שחרר את ה-mutex\n        sem_post(&shared_buffer.empty); // סמן שמקום התפנה בחוצץ\n\n        printf(\"Consumer consumed: %d\\n\", item);\n        // sleep(1);\n    }\n    return NULL;\n}\n```\n\n**הסבר על תפקיד אובייקטי הסנכרון:**\n\n*   **`sem_t empty`**: סמפור זה (אתחל ל-`BUFFER_SIZE`) סופר את מספר המקומות הריקים הזמינים בחוצץ. היצרן מבצע `sem_wait` עליו לפני הכנסת פריט כדי לוודא שיש מקום פנוי. אם אין מקום פנוי, היצרן ייחסם. הצרכן מבצע `sem_post` עליו לאחר הוצאת פריט כדי לסמן שמקום התפנה וכעת הוא זמין ליצרן.\n\n*   **`sem_t full`**: סמפור זה (אתחל ל-0) סופר את מספר הפריטים המלאים הקיימים בחוצץ. הצרכן מבצע `sem_wait` עליו לפני הוצאת פריט כדי לוודא שיש פריט לצרוך. אם אין פריטים, הצרכן ייחסם. היצרן מבצע `sem_post` עליו לאחר הכנסת פריט כדי לסמן שפריט נוסף וכעת הוא זמין לצרכן.\n\n*   **`pthread_mutex_t mutex`**: ה-mutex (אתחל ל-unlocked) משמש להגנה על הקטע הקריטי, כלומר הגישה המשותפת למערך `buffer` ולמשתנים `in` ו-`out`. הוא מבטיח שרק תהליך אחד (יצרן או צרכן) יוכל לגשת ולשנות את הנתונים המשותפים בו-זמנית. זה מונע תנאי מרוץ (race conditions) ודואג לעדכון עקבי של מצב החוצץ."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

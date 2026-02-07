@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "CPU Scheduling",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 23:55:53",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1200,
+      "output_tokens": 583,
+      "total_tokens": 3156
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "CPU Scheduling",
+      "Priority Scheduling",
+      "Starvation"
+    ],
+    "content": {
+      "text": "נתונה מערכת הפעלה המשתמשת באלגוריתם תזמון מבוסס עדיפויות עם דחיקה (preemptive priority scheduling). כאשר תהליך חדש מגיע למערכת, אם העדיפות שלו גבוהה יותר מהתהליך הרץ כעת, הוא דוחק אותו ומתחיל לרוץ מיד. אם עדיפותו נמוכה או שווה, הוא מתווסף לתור ההמתנה בהתאם לעדיפותו. בהינתן שקיימת זרימה קבועה של תהליכים בעלי עדיפות גבוהה שמגיעים למערכת, איזו טענה נכונה בהכרח?",
+      "code_snippet": null,
+      "options": [
+        "א. זמן התגובה של תהליכים בעלי עדיפות גבוהה הוא תמיד אופטימלי.",
+        "ב. תהליכים בעלי עדיפות נמוכה עלולים לסבול מהרעבה (starvation).",
+        "ג. האלגוריתם מבטיח שזמן המחזור הממוצע של כל התהליכים יהיה המינימלי האפשרי.",
+        "ד. האלגוריתם מבטיח הוגנות (fairness) מוחלטת בין כל התהליכים.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "באופן מובנה, אלגוריתם תזמון מבוסס עדיפויות ללא מנגנון 'הזדקנות' (aging) עלול לגרום להרעבה. אם תהליכים בעלי עדיפות גבוהה ממשיכים להגיע למערכת באופן עקבי, הם ידחקו שוב ושוב את התהליכים בעלי העדיפות הנמוכה יותר, ובכך ימנעו מהם מלקבל זמן מעבד. לכן, תהליכים בעלי עדיפות נמוכה עלולים לעולם לא לרוץ ולסבול מהרעבה."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 00:41:52",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4697,
+      "output_tokens": 2797,
+      "total_tokens": 12316
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Concurrency",
+      "Synchronization",
+      "Cache",
+      "LRU",
+      "Mutex"
+    ],
+    "content": {
+      "text": "עליכם לממש מטמון (cache) מוגבל בגודל בעל קיבולת קבועה `C`, התומך בפעולות הבאות באופן בטוח לחוטים (thread-safe): `put(key, value)`, `get(key)`. המטמון צריך להשתמש במדיניות פינוי LRU (Least Recently Used) כאשר הקיבולת מלאה, וגם לעדכן את סדר ה-LRU בכל גישה (גם בקריאה).\nשימו לב לדרישות הבאות:\n1.  **Thread-Safety**: כל הפעולות חייבות להיות בטוחות לחוטים.\n2.  **LRU Eviction**: כאשר `put` נקרא והמטמון מלא, יש לפנות את הפריט שהיה בשימוש אחרון (LRU) לפני הוספת הפריט החדש.\n3.  **LRU Update**: כל גישה לפריט (באמצעות `get` או `put`) צריכה לעדכן את מיקומו ברשימת ה-LRU כך שיהפוך לפריט שהיה בשימוש אחרון ביותר (MRU - Most Recently Used).\n4.  **No Deadlocks/Starvation**: המימוש חייב להיות חופשי מקיפאון (deadlock) ומהרעבה (starvation).\n\nממשו את המבנה `LRUCache` ואת הפעולות `put` ו-`get` תוך שימוש באובייקטי סנכרון מתאימים (כגון mutexes, condition variables). אין צורך לממש את `key` ו-`value` אלא להניח שהם טיפוסים גנריים או פשוט `int`.",
+      "code_snippet": "#include <iostream>\n#include <list>\n#include <unordered_map>\n#include <mutex>\n\ntemplate <typename Key, typename Value>\nclass LRUCache {\nprivate:\n    int capacity;\n    std::list<std::pair<Key, Value>> lru_list; // Stores (key, value) pairs, front is MRU, back is LRU\n    std::unordered_map<Key, typename std::list<std::pair<Key, Value>>::iterator> cache_map; // Maps key to iterator in lru_list\n\n    // Synchronization primitives\n    std::mutex mtx;\n\n    // Helper to move an item to the front (MRU)\n    // Assumes mtx is already locked\n    void touch(typename std::list<std::pair<Key, Value>>::iterator it) {\n        // Implementation for touch\n    }\n\npublic:\n    LRUCache(int cap) : capacity(cap) {\n        if (capacity <= 0) {\n            this->capacity = 1; // Default to 1 for safety\n        }\n    }\n\n    // Returns true if key found, false otherwise. If found, value is copied to 'out_value'.\n    bool get(const Key& key, Value& out_value) {\n        // TODO: Implement thread-safe get\n        return false;\n    }\n\n    void put(const Key& key, const Value& value) {\n        // TODO: Implement thread-safe put\n    }\n};",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון מתבסס על הגנה על כל המבנים הפנימיים של המטמון (רשימת ה-LRU והמפה) באמצעות mutex יחיד. מכיוון שגם פעולת `get` וגם פעולת `put` משנות את סדר ה-LRU (על ידי העברת פריט לראש הרשימה), שתיהן דורשות גישה בלעדית למבנים אלו, ולכן mutex יחיד מספק את הרמה הנדרשת של סנכרון.\n\n**הסבר למימוש:**\n\n*   **מבנה הנתונים (private members):**\n    *   `capacity`: גודל המטמון המקסימלי.\n    *   `lru_list`: `std::list` המכילה זוגות (key, value). חזית הרשימה (front) מייצגת את הפריט שהיה בשימוש אחרון ביותר (MRU), וקצה הרשימה (back) מייצג את הפריט שהיה בשימוש פחות מכל (LRU).\n    *   `cache_map`: `std::unordered_map` הממפה מפתח (key) לאיטרטור בתוך `lru_list`. זה מאפשר גישה מהירה O(1) לפריט ברשימה לפי מפתח, וכן עדכון מהיר של מיקומו ברשימה.\n    *   `mtx`: `std::mutex` המשמש להגנה על `lru_list` ו-`cache_map` מפני תנאי מירוץ.\n    *   `touch(iterator it)`: פונקציית עזר (פרטית) המקבלת איטרטור לפריט ברשימת ה-LRU ומעבירה אותו לחזית הרשימה (MRU). פונקציה זו מניחה שה-mutex כבר ננעל.\n\n*   **פעולת `get(const Key& key, Value& out_value)`:**\n    1.  ננעל את ה-mutex באמצעות `std::lock_guard` כדי להבטיח גישה בטוחה למבני הנתונים המשותפים.\n    2.  נחפש את המפתח במפת ה-`cache_map`.\n    3.  אם המפתח לא נמצא (`it == cache_map.end()`), נשחרר את ה-mutex (באופן אוטומטי על ידי `lock_guard`) ונחזיר `false`.\n    4.  אם המפתח נמצא: נעדכן את ה-LRU על ידי קריאה ל-`touch(it->second)` כדי להעביר את הפריט לחזית הרשימה. לאחר מכן, נעתיק את ערך הפריט ל-`out_value`. נשחרר את ה-mutex ונחזיר `true`.\n\n*   **פעולת `put(const Key& key, const Value& value)`:**\n    1.  ננעל את ה-mutex באמצעות `std::lock_guard`.\n    2.  נחפש את המפתח במפת ה-`cache_map`.\n    3.  אם המפתח כבר קיים (`it != cache_map.end()`):\n        *   נעדכן את הערך של הפריט הקיים ברשימה (`it->second->second = value`).\n        *   נעדכן את ה-LRU על ידי קריאה ל-`touch(it->second)`.\n        *   נשחרר את ה-mutex.\n    4.  אם המפתח אינו קיים:\n        *   נבדוק אם המטמון מלא (`cache_map.size() >= capacity`).\n        *   אם המטמון מלא, נפנה את פריט ה-LRU: נוציא את הפריט האחרון מ-`lru_list` ונמחק את המפתח המתאים מ-`cache_map`.\n        *   נוסיף את הפריט החדש לחזית רשימת ה-`lru_list` (`push_front`).\n        *   נוסיף את המפתח החדש ואת האיטרטור לפריט החדש ב-`lru_list` ל-`cache_map`.\n        *   נשחרר את ה-mutex.\n\n**מניעת Deadlocks ו-Starvation:**\n*   **Deadlocks**: נמנעים מ-deadlocks מכיוון שמשתמשים רק ב-mutex יחיד, והוא ננעל ומשוחרר באופן עקבי בתוך כל פעולה. אין סדר נעילה מורכב שיכול להוביל למבוי סתום.\n*   **Starvation**: אין מנגנון המתנה מורכב שעלול להרעיב חוטים מסוימים. חוטים פשוט מנסים לנעול את ה-mutex; ברגע שהם מצליחים, הם מבצעים את פעולתם ומשחררים אותו. אין עדיפויות או תורים מיוחדים שיכולים לגרום לחוט מסוים להמתין ללא הגבלת זמן.\n\n```c++\n#include <iostream>\n#include <list>\n#include <unordered_map>\n#include <mutex>\n#include <string> // For example usage in tests\n#include <utility> // For std::pair\n\ntemplate <typename Key, typename Value>\nclass LRUCache {\nprivate:\n    int capacity;\n    std::list<std::pair<Key, Value>> lru_list; // Stores (key, value) pairs, front is MRU, back is LRU\n    std::unordered_map<Key, typename std::list<std::pair<Key, Value>>::iterator> cache_map; // Maps key to iterator in lru_list\n\n    std::mutex mtx; // Mutex to protect access to lru_list and cache_map\n\n    // Helper to move an item to the front (MRU)\n    // Assumes mtx is already locked\n    void touch(typename std::list<std::pair<Key, Value>>::iterator it) {\n        lru_list.splice(lru_list.begin(), lru_list, it);\n    }\n\npublic:\n    LRUCache(int cap) : capacity(cap) {\n        if (capacity <= 0) {\n            this->capacity = 1; // Default to 1 for safety\n        }\n    }\n\n    // Returns true if key found, false otherwise. If found, value is copied to 'out_value'.\n    bool get(const Key& key, Value& out_value) {\n        std::lock_guard<std::mutex> lock(mtx); // Acquire mutex\n\n        auto it = cache_map.find(key);\n        if (it == cache_map.end()) {\n            return false; // Key not found\n        }\n\n        // Key found, update LRU status and return value\n        touch(it->second); // Move to front (MRU)\n        out_value = it->second->second; // Copy the value\n        return true;\n    }\n\n    void put(const Key& key, const Value& value) {\n        std::lock_guard<std::mutex> lock(mtx); // Acquire mutex\n\n        auto it = cache_map.find(key);\n        if (it != cache_map.end()) {\n            // Key already exists, update value and LRU status\n            it->second->second = value; // Update value\n            touch(it->second); // Move to front (MRU)\n        } else {\n            // Key does not exist\n            if (cache_map.size() >= capacity) {\n                // Cache is full, evict LRU item (from back of list)\n                Key lru_key = lru_list.back().first;\n                lru_list.pop_back();\n                cache_map.erase(lru_key);\n            }\n            // Add new item to front of list and map\n            lru_list.push_front({key, value});\n            cache_map[key] = lru_list.begin();\n        }\n    }\n};\n```",
+      "difficulty_estimation": "Hard"
+    }
+  }
+}

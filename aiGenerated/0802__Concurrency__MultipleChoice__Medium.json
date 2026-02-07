@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 00:30:10",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 939,
+      "output_tokens": 373,
+      "total_tokens": 2693
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Concurrency",
+      "Synchronization",
+      "Race Conditions"
+    ],
+    "content": {
+      "text": "אם כל הגישה למשתנה גלובלי משותף (shared global variable) מוגנת על ידי אותו mutex, אז מובטח שלא תתרחש race condition על משתנה זה.",
+      "code_snippet": null,
+      "options": [
+        "נכון",
+        "לא נכון"
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "נכון",
+      "explanation": "נכון. race condition מתרחשת כאשר מספר תהליכים או תהליכונים ניגשים למשאב משותף בו-זמנית, ולפחות אחד מהם מבצע שינוי, כאשר סדר הגישה משפיע על התוצאה הסופית. אם כל הגישות למשתנה ספציפי מוגנות על ידי אותו mutex, אז רק תהליך או תהליכון אחד יכול לגשת למשתנה בכל רגע נתון (כי ה-mutex יאפשר כניסה רק לתהליך אחד בכל פעם), ובכך נמנעת race condition על אותו משתנה. חשוב לציין שזה לא מבטיח שהתוכנית כולה תהיה נכונה, או שאין race conditions על משתנים אחרים, אלא רק על המשתנה המדובר."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

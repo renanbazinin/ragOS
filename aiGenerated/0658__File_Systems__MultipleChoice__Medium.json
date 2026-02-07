@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "File Systems",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 23:26:54",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1032,
+      "output_tokens": 504,
+      "total_tokens": 2287
+    }
+  },
+  "question": {
+    "id": 6,
+    "type": "MultipleChoice",
+    "topic": [
+      "File Systems",
+      "Disk Management",
+      "Fragmentation"
+    ],
+    "content": {
+      "text": "מהי החיסרון העיקרי של שימוש בגודל בלוק גדול יותר במערכת קבצים (לדוגמה, 16KB במקום 4KB)?",
+      "code_snippet": null,
+      "options": [
+        "א. הגדלת ה-internal fragmentation (פיצול פנימי).",
+        "ב. הגדלת ה-external fragmentation (פיצול חיצוני).",
+        "ג. מורכבות רבה יותר בניהול מפתחות (inodes) לקבצים.",
+        "ד. האטה בגישת דיסק עבור קבצים גדולים."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "א. כאשר גודל הבלוק במערכת קבצים גדול יותר, קבצים שגודלם אינו כפולה מדויקת של גודל הבלוק יגרמו לבזבוז שטח בבלוק האחרון שלהם. שטח לא מנוצל זה בתוך בלוק שהוקצה לקובץ נקרא internal fragmentation. בעוד שגודל בלוק גדול יכול להפחית את מספר פעולות ה-I/O הנדרשות לקריאה/כתיבה של קבצים גדולים, החיסרון העיקרי הוא בזבוז שטח דיסק עקב פיצול פנימי, במיוחד אם יש הרבה קבצים קטנים. פיצול חיצוני קשור לפיזור של שטחים פנויים קטנים ולא ישירות לגודל הבלוק. ניהול מפתחות (inodes) לא מושפע ישירות מגודל הבלוק. גישת דיסק עבור קבצים גדולים לרוב תהיה מהירה יותר עם בלוקים גדולים יותר עקב פחות פעולות I/O."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "CPU Scheduling",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 00:02:07",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2314,
+      "output_tokens": 427,
+      "total_tokens": 3749
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "CPU Scheduling",
+      "Scheduling Algorithms",
+      "FCFS"
+    ],
+    "content": {
+      "text": "הסבירו בקצרה את אלגוריתם תזמון המעבד First-Come, First-Served (FCFS). ציינו יתרון וחיסרון אחד של אלגוריתם זה.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "אלגוריתם FCFS (First-Come, First-Served) הוא אלגוריתם תזמון מעבד לא-פולשני (non-preemptive) שבו התהליכים מבוצעים לפי סדר הגעתם לתור המוכנים. התהליך הראשון שמגיע לתור המוכנים הוא הראשון שמקבל את המעבד, והוא ממשיך לרוץ עד לסיום פעולתו או עד שהוא נכנס למצב המתנה (למשל, עבור קלט/פלט).\n\nיתרון: פשוט מאוד ליישום והבנה. הוא נחשב הוגן במובן שתהליכים מקבלים את המעבד לפי סדר הגעתם.\n\nחיסרון: עלול לסבול מ'אפקט השיירה' (convoy effect) – תהליך ארוך אחד יכול לגרום לתהליכים קצרים רבים להמתין זמן רב, מה שמוביל לזמן המתנה ממוצע גבוה וזמן מחזור (turnaround time) ממוצע גבוה עבור המערכת כולה."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

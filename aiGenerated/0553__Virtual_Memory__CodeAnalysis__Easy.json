@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 22:39:47",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2806,
+      "output_tokens": 1349,
+      "total_tokens": 7525
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Virtual Memory",
+      "Paging",
+      "Cache",
+      "Locality of Reference"
+    ],
+    "content": {
+      "text": "נתונה המערכת הבאה המשתמשת בזיכרון וירטואלי. גודל דף זיכרון הוא 4KB. נתון קטע קוד בשפת C המאתחל מטריצה דו-ממדית בגודל גדול מספיק כך שתחרוג מגודל דף בודד. \n\nאיזה מקטע קוד מבין השניים הבאים צפוי להיות בעל ביצועים טובים יותר מבחינת גישה לזיכרון (לדוגמה, פחות Page Faults או יותר Cache Hits), ומדוע?",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n\n#define N 1024 // לדוגמה, N*N * sizeof(int) = 1024*1024*4 בתים = 4MB\n\nint matrix[N][N];\n\nvoid initialize_row_major() {\n    for (int i = 0; i < N; i++) {\n        for (int j = 0; j < N; j++) {\n            matrix[i][j] = i * N + j;\n        }\n    }\n}\n\nvoid initialize_column_major() {\n    for (int j = 0; j < N; j++) { // לולאה חיצונית לעמודות\n        for (int i = 0; i < N; i++) { // לולאה פנימית לשורות\n            matrix[i][j] = i * N + j;\n        }\n    }\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "מקטע הקוד `initialize_row_major` צפוי להיות בעל ביצועים טובים יותר.\n\n**הסבר:**\nבשפת C, מטריצות דו-ממדיות מאוחסנות בזיכרון בצורה רציפה, שורה אחר שורה (row-major order). כלומר, האלמנטים `matrix[i][0]`, `matrix[i][1]`, ..., `matrix[i][N-1]` מאוחסנים בכתובות זיכרון סמוכות פיזית, ולאחר מכן מגיעה השורה הבאה `matrix[i+1][0]`, וכו'.\n\n**ניתוח `initialize_row_major`:**\nלולאות הקינון במקטע זה (הלולאה החיצונית עבור `i` והפנימית עבור `j`) ניגשות לאלמנטים בסדר שבו הם מאוחסנים פיזית בזיכרון: `matrix[0][0]`, `matrix[0][1]`, ..., `matrix[0][N-1]`, ולאחר מכן `matrix[1][0]`, וכן הלאה. גישה זו מנצלת היטב את עקרון המיקום המרחבי (spatial locality). כאשר מערכת ההפעלה טוענת דף זיכרון לזיכרון הפיזי (במקרה של Page Fault), היא טוענת בלוק שלם של נתונים (4KB בדוגמה זו). מכיוון שכל שורה של המטריצה בגודל 1024 * 4 בתים = 4096 בתים (4KB) מתאימה בדיוק לגודל דף זיכרון אחד, הגישה הרציפה לכל אלמנטים השורה תגרום למספר מינימלי של Page Faults (בערך Page Fault אחד לכל שורה). בנוסף, זה מנצל ביעילות את Cache Lines של המעבד, כאשר בלוק של נתונים נטען מהזיכרון הראשי ל-cache בבת אחת.\n\n**ניתוח `initialize_column_major`:**\nבמקטע קוד זה, הלולאה החיצונית היא עבור `j` (עמודות) והפנימית עבור `i` (שורות). המשמעות היא שהגישה לאלמנטים היא בסדר: `matrix[0][0]`, `matrix[1][0]`, ..., `matrix[N-1][0]`, ולאחר מכן `matrix[0][1]`, וכן הלאה. כאשר אנו ניגשים מ-`matrix[i][j]` ל-`matrix[i+1][j]`, אנו למעשה מדלגים על `N-1` אלמנטים (כל השאר של שורה `i` ועוד `j` אלמנטים של שורה `i+1`) בזיכרון הפיזי. המרחק בין `matrix[i][j]` ל-`matrix[i+1][j]` הוא `N * sizeof(int)` בתים, שזה בדוגמה שלנו 4096 בתים (4KB), כלומר בדיוק גודל של דף זיכרון. לכן, כל גישה לאלמנט הבא באותה עמודה (`matrix[i+1][j]`) עלולה לגרום ל-Page Fault חדש, מכיוון שהאלמנט נמצא בדף זיכרון שונה לגמרי. זה מוביל לניצול גרוע של המיקום המרחבי, למספר רב מאוד של Page Faults (בערך Page Fault אחד לכל אלמנט, כלומר N*N Page Faults במקרה הגרוע), ולביצועים ירודים משמעותית."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

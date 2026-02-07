@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 22:40:59",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2806,
+      "output_tokens": 2070,
+      "total_tokens": 8021
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Virtual Memory",
+      "Page Faults",
+      "Locality of Reference"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא בשפת C. הקוד מבצע שתי גישות שונות למערך גדול המוקצה דינמית. הניחו כי גודל דף זיכרון הוא 4KB (4096 בתים) וכי זיכרון המטמון (cache) קטן בהרבה מגודל המערך, כך שאין לו השפעה משמעותית על מספר ה-page faults, וכי המערך מאותחל לאפס ולא נטען לזיכרון פיזי לפני הגישות.\n\n```c\n#include <stdio.h>\n#include <stdlib.h>\n\n#define ARRAY_SIZE (1024 * 1024 * 10) // 10MB array (10 * 1024 * 1024 bytes)\n#define PAGE_SIZE 4096              // Standard page size (4KB)\n\nint main() {\n    int* arr = (int*)malloc(ARRAY_SIZE * sizeof(int));\n    if (arr == NULL) {\n        perror(\"malloc failed\");\n        return 1;\n    }\n\n    // Access 1: Sequential access\n    printf(\"Accessing array sequentially...\\n\");\n    for (int i = 0; i < ARRAY_SIZE; i++) {\n        arr[i] = i; // Write operation\n    }\n\n    // Access 2: Strided access, jumping across pages\n    printf(\"Accessing array with large stride...\\n\");\n    for (int i = 0; i < ARRAY_SIZE; i += (PAGE_SIZE / sizeof(int))) {\n        arr[i] = i; // Write operation\n    }\n\n    free(arr);\n    return 0;\n}\n```\n\nבהתבסס על קטע הקוד וההנחות:\nא. תארו בקצרה מהו 'page fault' בהקשר של זיכרון וירטואלי.\nב. הסבירו איזה מבין שני הלולאות (Access 1 או Access 2) צפויה לייצר יותר 'page faults', ומדוע. נמקו את תשובתכם תוך התייחסות לעקרון 'locality of reference'.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n\n#define ARRAY_SIZE (1024 * 1024 * 10) // 10MB array (10 * 1024 * 1024 bytes)\n#define PAGE_SIZE 4096              // Standard page size (4KB)\n\nint main() {\n    int* arr = (int*)malloc(ARRAY_SIZE * sizeof(int));\n    if (arr == NULL) {\n        perror(\"malloc failed\");\n        return 1;\n    }\n\n    // Access 1: Sequential access\n    printf(\"Accessing array sequentially...\\n\");\n    for (int i = 0; i < ARRAY_SIZE; i++) {\n        arr[i] = i; // Write operation\n    }\n\n    // Access 2: Strided access, jumping across pages\n    printf(\"Accessing array with large stride...\\n\");\n    for (int i = 0; i < ARRAY_SIZE; i += (PAGE_SIZE / sizeof(int))) {\n        arr[i] = i; // Write operation\n    }\n\n    free(arr);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "א. **מהו 'page fault'?**\n'Page fault' (כשל דף) מתרחש כאשר תוכנית מנסה לגשת לכתובת זיכרון וירטואלית שאינה נמצאת כרגע בזיכרון הפיזי (RAM), אלא מאוחסנת בזיכרון משני (לרוב דיסק). כאשר מתרחש page fault, מערכת ההפעלה נכנסת לפעולה: היא עוצרת את ביצוע התוכנית, מאתרת את הדף הנדרש בזיכרון המשני, טוענת אותו לזיכרון פיזי פנוי (או מפנה דף קיים אם אין מקום), מעדכנת את טבלת הדפים, ומחדשת את ביצוע התוכנית מהנקודה שבה הפסיקה. זהו מנגנון חיוני בזיכרון וירטואלי המאפשר לתוכניות להשתמש בזיכרון גדול יותר ממה שזמין פיזית.\n\nב. **השוואת page faults עבור Access 1 לעומת Access 2**\nהלולאה `Access 2` (גישה עם קפיצות גדולות) צפויה לייצר באופן משמעותי יותר page faults מאשר הלולאה `Access 1` (גישה רציפה).\n\n**הסבר:**\n*   **Access 1 (גישה רציפה):** בלולאה זו, הגישה למערך היא סדרתית (arr[0], arr[1], arr[2]...). נניח שכל איבר `int` הוא בגודל 4 בתים. גודל דף הוא 4096 בתים, כלומר דף יכול להכיל 4096 / 4 = 1024 איברי `int`. כאשר מתרחשת גישה לכתובת וירטואלית כלשהי בתוך דף, ודף זה אינו נמצא בזיכרון הפיזי, יתרחש page fault. מערכת ההפעלה תטען את הדף כולו לזיכרון הפיזי. מכיוון שהגישות הבאות (ל-arr[i+1], arr[i+2] וכו') הן לכתובות סמוכות, סביר להניח שהן ייפלו בתוך אותו דף שזה עתה נטען. זהו ביטוי לעקרון ה**לוקליות המרחבית (Spatial Locality)** – אם ניגשנו לפריט זיכרון מסוים, סביר להניח שניגש בקרוב לפריטים סמוכים אליו. לכן, לאחר ה-page fault הראשון לדף מסוים, רוב הגישות הבאות לאותו דף לא יגרמו ל-page fault נוסף, עד שנעבור לדף הבא במערך. מספר ה-page faults יהיה נמוך יחסית, בקירוב שווה למספר הדפים הכולל שהמערך תופס (ARRAY_SIZE * sizeof(int) / PAGE_SIZE).\n\n*   **Access 2 (גישה עם קפיצות גדולות):** בלולאה זו, הגישה למערך היא בקפיצות גדולות (arr[0], arr[PAGE_SIZE/sizeof(int)], arr[2*PAGE_SIZE/sizeof(int)]...). מכיוון ש-`PAGE_SIZE / sizeof(int)` שווה ל-1024, כל גישה כזו קופצת למעשה לתחילתו של דף זיכרון וירטואלי חדש. כלומר, כמעט כל גישה למערך תהיה לכתובת שנמצאת בדף שונה מזה של הגישה הקודמת. גם אם הדף הקודם נטען, הגישה הבאה היא לדף אחר לגמרי. זה מפר באופן מובהק את עקרון הלוקליות המרחבית, שכן הגישות אינן סמוכות זו לזו בזיכרון הפיזי. כתוצאה מכך, סביר שכל גישה בלולאה זו תגרום ל-page fault, שכן כל גישה מנסה לגשת לכתובת בדף שונה, שכנראה אינו נמצא בזיכרון הפיזי. מספר ה-page faults יהיה גבוה בהרבה, בקירוב שווה למספר האיטרציות בלולאה (ARRAY_SIZE / (PAGE_SIZE / sizeof(int))), שהוא למעשה מספר הדפים הכולל במערך.\n\nלסיכום, `Access 1` מנצלת היטב את הלוקליות המרחבית ומייצרת מעט page faults יחסית, בעוד `Access 2` מפרה אותה וגורמת למספר רב של page faults, מה שיוביל לביצועים איטיים יותר עקב הגישה התכופה לדיסק."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

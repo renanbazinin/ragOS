@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "File Systems",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 23:30:48",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3477,
+      "output_tokens": 426,
+      "total_tokens": 5350
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "File Systems"
+    ],
+    "content": {
+      "text": "מהו inode במערכת קבצים, ואיזה מידע הוא מאחסן בדרך כלל?",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "Inode (index node) הוא מבנה נתונים במערכת קבצים בסגנון יוניקס, המתאר אובייקט במערכת הקבצים כגון קובץ או תיקייה. כל inode מאחסן את התכונות ומיקומי בלוקי הדיסק של נתוני אובייקט מערכת קבצים.\n\nמידע טיפוסי המאוחסן ב-inode כולל:\n*   סוג הקובץ (קובץ רגיל, תיקייה, קישור סימבולי, קובץ התקן וכו').\n*   הרשאות (קריאה, כתיבה, הרצה לבעלים, קבוצה, אחרים).\n*   מזהה בעלים (UID).\n*   מזהה קבוצה (GID).\n*   גודל הקובץ בבתים.\n*   חותמות זמן (גישה אחרונה, שינוי אחרון, שינוי inode אחרון).\n*   מונה קישורים (מספר הקישורים הקשיחים המצביעים ל-inode זה).\n*   מצביעים לבלוקי הנתונים בדיסק המכילים את התוכן בפועל של הקובץ."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

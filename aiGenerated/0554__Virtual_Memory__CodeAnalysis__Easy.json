@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 22:40:04",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2806,
+      "output_tokens": 1029,
+      "total_tokens": 6573
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Virtual Memory",
+      "Paging",
+      "Page Faults"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C הבאה. הניחו שגודל הזיכרון הפיזי (RAM) במערכת קטן בהרבה מגודל המערך large_array, וכי גודל דף זיכרון הוא 4KB (קילו-בייט).\n\n```c\n#include <stdio.h>\n#include <stdlib.h>\n\n#define GB (1024 * 1024 * 1024LL) // Using LL for long long literal\n#define ARRAY_SIZE (2 * GB) // 2GB array\n\nint main() {\n    char *large_array = (char *)malloc(ARRAY_SIZE);\n    if (large_array == NULL) {\n        perror(\"malloc failed\");\n        return 1;\n    }\n\n    // Access the array sequentially\n    for (long long i = 0; i < ARRAY_SIZE; i++) {\n        large_array[i] = (char)(i % 256);\n    }\n\n    printf(\"Array access complete.\\n\");\n    free(large_array);\n    return 0;\n}\n```\n\n**שאלה:**\nכמה page faults (כשלים בדף) צפויים להתרחש בקירוב במהלך ביצוע הלולאה בתוכנית זו? הסבירו בקצרה מדוע.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "**כמות Page Faults צפויה:** כ-524,288 page faults.\n\n**הסבר:**\nהתוכנית מקצה זיכרון וירטואלי בגודל 2GB עבור המערך `large_array`. חשוב לציין שהקצאת זיכרון וירטואלי באמצעות `malloc` אינה גורמת ל-page faults באופן מיידי; ה-page faults מתרחשים כאשר התוכנית מנסה לגשת לראשונה לכתובת וירטואלית הנמצאת בדף זיכרון שאינו טעון כרגע בזיכרון הפיזי (RAM).\n\nבלולאה, התוכנית עוברת על כל בייט במערך באופן סדרתי, החל מהכתובת הראשונה ועד האחרונה. מכיוון שגודל המערך (2GB) גדול בהרבה מהזיכרון הפיזי הזמין, ומכיוון שהגישה היא לכל בייט בסדר עוקב, כל פעם שהתוכנית תגיע לבייט שנמצא בדף זיכרון וירטואלי שטרם נטען לזיכרון הפיזי, יתרחש page fault.\n\nמספר הדפים הכולל של המערך הוא:\n`גודל המערך / גודל דף זיכרון = 2GB / 4KB`\n`2 * 1024 * 1024 * 1024 בייטים / 4096 בייטים לדף = 524,288 דפים.`\n\nמכיוון שהגישה היא סדרתית, כל דף במערך ייגש לראשונה בדיוק פעם אחת (בהנחה שאין דפים שנטענים מראש או נפלטים ונטענים מחדש באופן מיידי לפני הגישה הבאה לאותו דף). לכן, צפוי שיתרחשו כ-524,288 page faults. לאחר שדף נטען לזיכרון הפיזי, גישות עתידיות לאותו דף לא יגרמו ל-page fault, עד שאותו דף ייפלט מהזיכרון הפיזי (אם יתרחשו החלפות דפים), אך מאחר והגישה היא סדרתית ועל מערך גדול מאד, כל דף נחשב כגישה ראשונה לדף חדש."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

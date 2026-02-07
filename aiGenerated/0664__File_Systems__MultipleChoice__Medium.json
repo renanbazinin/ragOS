@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "File Systems",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 23:28:01",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1032,
+      "output_tokens": 476,
+      "total_tokens": 3029
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "File Systems",
+      "Links",
+      "Inodes"
+    ],
+    "content": {
+      "text": "במערכת קבצים מסוג Unix-like (כמו VSFS מההרצאות), מהי ההגדרה הנכונה ביותר של קישור קשיח (Hard Link)?",
+      "code_snippet": null,
+      "options": [
+        "א. קישור קשיח הוא קובץ חדש בעל מספר inode משלו, המכיל את הנתיב לקובץ המקורי.",
+        "ב. קישור קשיח יוצר כניסה חדשה בספרייה (directory entry) המצביעה על ה-inode הקיים של הקובץ המקורי.",
+        "ג. קישור קשיח יכול להצביע על קובץ או ספרייה הנמצאים במערכות קבצים שונות.",
+        "ד. מחיקת הקובץ המקורי לאחר יצירת קישור קשיח אליו תגרום למחיקת כל הקישורים הקשיחים הקשורים אליו."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב. קישור קשיח (Hard Link) הוא למעשה כניסה נוספת בספרייה (directory entry) המצביעה על אותו מספר inode כמו הקובץ המקורי. הוא אינו יוצר inode חדש, אלא רק מגדיל את מונה הקישורים (link count) של ה-inode הקיים. כל עוד link count גדול מאפס, הנתונים של הקובץ נשמרים בדיסק. קישורים קשיחים אינם יכולים להצביע על ספריות (ברוב המערכות המודרניות) ואינם יכולים לחצות גבולות של מערכות קבצים שונות."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

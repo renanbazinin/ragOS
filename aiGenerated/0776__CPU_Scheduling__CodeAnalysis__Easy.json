@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "CPU Scheduling",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 00:17:01",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2646,
+      "output_tokens": 1368,
+      "total_tokens": 6954
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "CodeAnalysis",
+    "topic": [
+      "CPU Scheduling",
+      "Processes",
+      "System Calls"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה. התוכנית יוצרת מספר תהליכי בן המדמים עבודה על ידי הדפסת הודעות. נתון שהמערכת משתמשת באלגוריתם תזמון FCFS (First-Come, First-Served) ושיש מעבד יחיד. יש להניח שכל קריאות המערכת מצליחות באופן מיידי ושתהליכי הבן נכנסים לתור ה-Ready לפי סדר יצירתם. מה יהיה פלט התוכנית?",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\n// פונקציה שמדמה עבודת תהליך בן\nvoid child_work(int id, int burst_time) {\n    for (int i = 0; i < burst_time; ++i) {\n        printf(\"Process %d - burst %d\\n\", id, i + 1);\n    }\n    exit(0);\n}\n\nint main() {\n    pid_t pids[3]; // מערך לשמירת מזהי תהליכי הבן\n    int burst_times[] = {3, 2, 4}; // זמני ריצה (burst times) עבור תהליכים 1, 2, 3 בהתאמה\n\n    printf(\"Parent process started (PID: %d)\\n\", getpid());\n\n    // יצירת שלושה תהליכי בן\n    for (int i = 0; i < 3; ++i) {\n        pids[i] = fork();\n        if (pids[i] == -1) {\n            perror(\"fork failed\");\n            exit(1);\n        } else if (pids[i] == 0) {\n            // קוד שמבוצע על ידי תהליך הבן\n            child_work(i + 1, burst_times[i]); // תהליך 1, 2, 3\n        }\n    }\n\n    // התהליך האב ממתין לסיום כל תהליכי הבן\n    for (int i = 0; i < 3; ++i) {\n        wait(NULL);\n    }\n\n    printf(\"Parent process finished\\n\");\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון:\nהפלט הצפוי של התוכנית יהיה (ה-PID של התהליך האב ישתנה בין הרצות):\n```\nParent process started (PID: <pid_של_התהליך_האב>)\nProcess 1 - burst 1\nProcess 1 - burst 2\nProcess 1 - burst 3\nProcess 2 - burst 1\nProcess 2 - burst 2\nProcess 3 - burst 1\nProcess 3 - burst 2\nProcess 3 - burst 3\nProcess 3 - burst 4\nParent process finished\n```\nהסבר:\nהתוכנית יוצרת שלושה תהליכי בן בסדר עוקב באמצעות לולאת `for`. תהליך בן 1 נוצר ראשון, אחריו תהליך בן 2, ואז תהליך בן 3.\nבהתאם לנתון, אלגוריתם התזמון הוא FCFS (First-Come, First-Served), וכי תהליכי הבן נכנסים לתור ה-Ready לפי סדר יצירתם. מכיוון שיש מעבד יחיד, כל תהליך יקבל את המעבד ויבצע את כל עבודתו (burst שלו) ברציפות, עד לסיומו, לפני שהמעבד יעבור לתהליך הבא בתור.\n\n1.  **תהליך בן 1 (id=1)** נוצר ראשון עם זמן ריצה של 3 יחידות (הדפסות). הוא ירוץ במלואו וידפיס את 3 ההודעות שלו: \"Process 1 - burst 1\", \"Process 1 - burst 2\", \"Process 1 - burst 3\".\n2.  **תהליך בן 2 (id=2)** נוצר שני עם זמן ריצה של 2 יחידות. הוא ירוץ במלואו לאחר שתהליך 1 סיים, וידפיס את 2 ההודעות שלו: \"Process 2 - burst 1\", \"Process 2 - burst 2\".\n3.  **תהליך בן 3 (id=3)** נוצר שלישי עם זמן ריצה של 4 יחידות. הוא ירוץ במלואו לאחר שתהליך 2 סיים, וידפיס את 4 ההודעות שלו: \"Process 3 - burst 1\", \"Process 3 - burst 2\", \"Process 3 - burst 3\", \"Process 3 - burst 4\".\n\nלאחר שכל תהליכי הבן סיימו את ריצתם, התהליך האב, שהמתין להם באמצעות `wait(NULL)`, ימשיך את ריצתו וידפיס את ההודעה הסופית שלו: \"Parent process finished\". ההודעה הראשונית של האב \"Parent process started (PID: <pid>)\" תודפס מיד עם תחילת ריצת התוכנית."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

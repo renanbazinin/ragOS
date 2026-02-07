@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Paging",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 22:52:42",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 909,
+      "output_tokens": 508,
+      "total_tokens": 2961
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Paging",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "במערכת הפעלה המשתמשת ב-Paging, כתובת וירטואלית היא באורך 32 ביטים וגודל עמוד (page size) הוא 4KB.\nמהו מספר הביטים המוקדש למספר העמוד (page number) ומהו מספר הביטים המוקדש לקיזוז בתוך העמוד (page offset)?",
+      "code_snippet": null,
+      "options": [
+        "א. מספר עמוד: 12 ביטים, קיזוז: 20 ביטים.",
+        "ב. מספר עמוד: 20 ביטים, קיזוז: 12 ביטים.",
+        "ג. מספר עמוד: 10 ביטים, קיזוז: 22 ביטים.",
+        "ד. מספר עמוד: 22 ביטים, קיזוז: 10 ביטים."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "גודל העמוד הוא 4KB. מכיוון ש-1KB = 2^10 בתים, ו-4KB = 4 * 1024 בתים = 2^2 * 2^10 בתים = 2^12 בתים. לכן, כדי לייצג כל כתובת בתוך עמוד בגודל 4KB, נדרשים 12 ביטים עבור הקיזוז (offset).\nהכתובת הווירטואלית היא באורך 32 ביטים. אם 12 ביטים מוקדשים לקיזוז, אז מספר הביטים הנותרים למספר העמוד הוא: 32 - 12 = 20 ביטים.\nלכן, מספר העמוד הוא 20 ביטים והקיזוז הוא 12 ביטים."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}
