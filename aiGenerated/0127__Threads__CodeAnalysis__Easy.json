@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 18:46:49",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2248,
+      "output_tokens": 538,
+      "total_tokens": 6262
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Threads",
+      "Concurrency",
+      "Race Conditions"
+    ],
+    "content": {
+      "text": "לפניכם קטע קוד בשפת C המשתמש בספריית pthreads. מהם הערכים האפשריים שיכולים להיות מודפסים ע\"י פקודת ה-printf בסיום ריצת התוכנית?",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\nint counter = 0;\n\nvoid* thread_func(void* arg) {\n    int temp = counter;\n    counter = temp + 1;\n    return NULL;\n}\n\nint main() {\n    pthread_t t1, t2;\n    pthread_create(&t1, NULL, thread_func, NULL);\n    pthread_create(&t2, NULL, thread_func, NULL);\n    pthread_join(t1, NULL);\n    pthread_join(t2, NULL);\n    printf(\"%d\", counter);\n    return 0;\n}",
+      "options": [
+        "0",
+        "1",
+        "2",
+        "1 או 2"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "1 או 2",
+      "explanation": "הקוד יוצר שני חוטים (threads) הניגשים לאותו משתנה גלובלי (counter) ללא שימוש במנגנוני סנכרון כמו Mutex. במצב שבו החוטים רצים אחד אחרי השני באופן מלא, הערך הסופי יהיה 2. אולם, ייתכן מצב של Race Condition שבו שני החוטים קוראים את הערך ההתחלתי 0 לתוך המשתנה המקומי temp, שניהם מחשבים temp + 1 = 1, ושניהם כותבים את הערך 1 חזרה למשתנה הגלובלי. במקרה כזה, אחת מההגדלות תאבד והפלט יהיה 1."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

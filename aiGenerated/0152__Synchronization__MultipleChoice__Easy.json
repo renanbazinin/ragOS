@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 18:54:46",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1187,
+      "output_tokens": 450,
+      "total_tokens": 2245
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Synchronization",
+      "Critical Section"
+    ],
+    "content": {
+      "text": "מהו \"קטע קריטי\" (Critical Section) בהקשר של סנכרון בין תהליכים או חוטים (threads)?",
+      "code_snippet": null,
+      "options": [
+        "א. קטע קוד שזמן הריצה שלו ארוך במיוחד ועלול לעכב את המערכת.",
+        "ב. קטע קוד שבו מתבצעת גישה למשאב משותף ונדרש להבטיח שרק חוט אחד יבצע אותו בכל רגע נתון.",
+        "ג. קטע קוד בתוך ליבת מערכת ההפעלה (kernel) שלא ניתן להפסיק את ריצתו על ידי פסיקה.",
+        "ד. פונקציה שניתן לקרוא לה רק מתוך תהליך יחיד במהלך כל חיי התוכנית.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב'. קטע קריטי הוא קטע בתוכנית שבו מתבצעת גישה למשאבים משותפים (כגון משתנים גלובליים, מבני נתונים או קבצים). כדי למנוע מצבי מרוץ (race conditions), יש להשתמש במנגנוני סנכרון שיבטיחו מניעה הדדית (mutual exclusion), כך שרק חוט אחד יוכל לשהות בקטע הקריטי בכל זמן נתון."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

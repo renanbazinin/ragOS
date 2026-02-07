@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 18:46:05",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2248,
+      "output_tokens": 470,
+      "total_tokens": 5652
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Threads",
+      "Shared Memory"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא בשפת C המשתמש בספריית pthreads. מה יהיה הפלט של התוכנית בהנחה שכל הקריאות למערכת מצליחות?",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\nint x = 10;\n\nvoid* thread_func(void* arg) {\n    x += 5;\n    return NULL;\n}\n\nint main() {\n    pthread_t t;\n    pthread_create(&t, NULL, thread_func, NULL);\n    pthread_join(t, NULL);\n    printf(\"%d\", x);\n    return 0;\n}",
+      "options": [
+        "5",
+        "10",
+        "15",
+        "0"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "15",
+      "explanation": "התוכנית מגדירה משתנה גלובלי x המאותחל ל-10. חוטים (threads) באותו תהליך חולקים את אותו מרחב כתובות, ולכן לחוט החדש שנוצר יש גישה ישירה למשתנה x. הפונקציה thread_func מוסיפה 5 לערך של x. הפונקציה pthread_join גורמת לחוט הראשי (main) להמתין עד שהחוט החדש יסיים את פעולתו לפני שהוא ממשיך לשורת ההדפסה. לכן, בזמן הקריאה ל-printf, הערך של x כבר עודכן ל-15."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

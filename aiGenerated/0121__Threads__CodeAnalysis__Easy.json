@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 18:45:20",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2248,
+      "output_tokens": 686,
+      "total_tokens": 5034
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Threads",
+      "Concurrency",
+      "Race Condition"
+    ],
+    "content": {
+      "text": "לפניכם קוד בשפת C המשתמש בספריית pthreads. נניח שכל הקריאות למערכת מצליחות והתוכנית רצה על מערכת עם מעבד מרובה ליבות. מה ניתן לומר על הפלט של התוכנית?",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n\nint count = 0;\n\nvoid* task(void* arg) {\n    for (int i = 0; i < 1000; i++) {\n        count++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t t1, t2;\n    pthread_create(&t1, NULL, task, NULL);\n    pthread_create(&t2, NULL, task, NULL);\n    pthread_join(t1, NULL);\n    pthread_join(t2, NULL);\n    printf(\"%d\", count);\n    return 0;\n}",
+      "options": [
+        "הפלט יהיה תמיד 1000.",
+        "הפלט יהיה תמיד 2000.",
+        "הפלט יהיה בטווח [2, 2000] ולא ניתן לחיזוי מראש.",
+        "התוכנית לא תעבור קומפילציה כי count הוא משתנה גלובלי."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "הפלט יהיה בטווח [2, 2000] ולא ניתן לחיזוי מראש.",
+      "explanation": "הקוד מדגים מצב מרוץ (Race Condition). הפעולה ++count אינה פעולה אטומית (Atomic Operation) ברמת שפת המכונה; היא מורכבת משלושה שלבים: קריאת הערך מהזיכרון לרגיסטר, הוספת 1, וכתיבת הערך חזרה לזיכרון. מכיוון ששני החוטים (Threads) ניגשים לאותו משתנה גלובלי ומשנים אותו ללא מנגנון סנכרון (כמו Mutex), חוט אחד עלול לקרוא ערך ישן בזמן שהחוט השני מעדכן אותו, ובכך 'לדרוס' את העדכון של החוט השני. לכן, התוצאה הסופית אינה דטרמיניסטית ויכולה להיות כל ערך בין 2 ל-2000 (במקרים קיצוניים של תזמון)."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

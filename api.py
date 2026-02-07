@@ -395,6 +395,9 @@ async def all_exam_questions(
     if shuffle:
         random.shuffle(all_questions)
 
+    total_available = len(all_questions)
+    exams_set = set(q.get("_source_exam", "") for q in all_questions)
+
     if limit:
         all_questions = all_questions[:limit]
 
@@ -421,6 +424,9 @@ async def all_exam_questions(
         "questions": all_questions,
         "total": len(all_questions),
         "stats": {
+            "total_available": total_available,
+            "returned": len(all_questions),
+            "exams_count": len(exams_set - {""}),
             "types": type_counts,
             "difficulties": diff_counts,
             "topics": dict(sorted(topic_counts.items(), key=lambda x: -x[1])),

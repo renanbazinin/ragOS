@@ -1,0 +1,57 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 19:01:07",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4129,
+      "output_tokens": 1321,
+      "total_tokens": 10898
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Semaphores",
+      "Barriers",
+      "Race Conditions"
+    ],
+    "content": {
+      "text": "לפניכם קוד המממש מחסום (Barrier) עבור N חוטים (כאשר N > 1). המטרה היא להבטיח שכל N החוטים יסיימו את 'שלב א' (הקריאה ל-do_work_A) לפני שמישהו מהם יתחיל את 'שלב ב' (הקריאה ל-do_work_B). הקוד משתמש בטכניקה הנקראת Chained Signaling בתוך Turnstile כדי לאפשר לחוטים לעבור את המחסום בזה אחר זה. הניחו שכל קריאות המערכת מצליחות וכי do_work_A ו-do_work_B אינן כוללות סנכרון פנימי.",
+      "code_snippet": "sem_t mutex;     // initialized to 1\nsem_t turnstile; // initialized to 0\nint count = 0;\n\nvoid barrier() {\n    // Arrival\n    sem_wait(&mutex);\n    count++;\n    if (count == N) {\n        sem_post(&turnstile);\n    }\n    sem_post(&mutex);\n\n    // The Turnstile\n    sem_wait(&turnstile);\n    sem_post(&turnstile);\n}\n\nvoid* worker(void* arg) {\n    while(1) {\n        do_work_A();\n        barrier();\n        do_work_B();\n        // Point X\n    }\n    return NULL;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "הסבירו מדוע באיטרציה הראשונה של הלולאה, המחסום ימלא את תפקידו וכל החוטים ימתינו זה לזה.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "האם המחסום הנתון הוא Reusable? כלומר, האם מובטח סנכרון תקין גם באיטרציה השנייה והלאה? אם כן - הסבירו מדוע. אם לא - תארו תרחיש (תזמון) שבו חוט מסוים מתחיל את 'שלב ב' של האיטרציה השנייה לפני שחוט אחר סיים את 'שלב א' של אותה איטרציה.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.3",
+        "text": "מהו הערך של הסמפור turnstile כאשר חוט כלשהו נמצא ב-'Point X' באיטרציה הראשונה? כיצד ניתן לתקן את הפונקציה barrier כך שתהיה בטוחה לשימוש חוזר (Reusable) מבלי להשתמש בסמפורים נוספים?",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "10.1: באיטרציה הראשונה, turnstile מאותחל ל-0. N-1 החוטים הראשונים שיגיעו ל-barrier יגדילו את count אך לא ייכנסו ל-if, ולכן ייחסמו ב-sem_wait בשורה 13. החוט ה-N שיגיע יגדיל את count ל-N, יבצע sem_post ל-turnstile בשורה 9, וישחרר את החוט הראשון. החוט שישתחרר יבצע מיד sem_post בשורה 14 וישחרר את הבא בתור, וכך הלאה (שרשרת). לכן כולם יעברו רק אחרי שהאחרון הגיע.\n\n10.2: המחסום אינו Reusable. הבעיה היא שערך הסמפור turnstile נשאר 1 לאחר שהחוט האחרון עובר (הוא מבצע post בשורה 14 שאיש לא צורך). תרחיש שבירה: חוט T1 מסיים את barrier באיטרציה 1, מסיים את do_work_B במהירות, חוזר לתחילת הלולאה, מסיים את do_work_A של איטרציה 2 ומגיע שוב ל-barrier. מכיוון ש-turnstile הוא 1, T1 יבצע sem_wait ויעבור מיד לשלב ב' של איטרציה 2, למרות שחוטים אחרים אולי עדיין תקועים בשלב ב' של איטרציה 1 או בתחילת איטרציה 2.\n\n10.3: ערך הסמפור turnstile בנקודה X הוא 1. כדי לתקן את המחסום ולהופכו ל-Reusable, יש להוסיף שלב שני (Two-phase barrier) שבו נועלים את ה-turnstile בחזרה. בשיטה זו, לאחר שכל החוטים עברו את ה-turnstile הראשון, הם צריכים להמתין ב-turnstile שני שייפתח רק כאשר כולם סיימו לעבור את הראשון, והחוט האחרון שיעבור את השני יאפס את ה-count וינעל את ה-turnstile (יבצע wait מבלי לבצע post)."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

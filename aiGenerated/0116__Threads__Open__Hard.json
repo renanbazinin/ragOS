@@ -1,0 +1,57 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 18:43:37",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4085,
+      "output_tokens": 1485,
+      "total_tokens": 7423
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Threads",
+      "Process Management",
+      "Synchronization",
+      "Deadlock"
+    ],
+    "content": {
+      "text": "במערכות הפעלה מודרניות, השילוב בין יצירת תהליכים (fork) לבין שימוש בחוטים (threads) עשוי להוביל למצבים מורכבים ובעייתיים. לפניכם קוד C המדגים סיטואציה כזו. הניחו כי כל הקריאות למערכת מצליחות וכי התזמון מתבצע בדיוק כפי שמתואר בהערות (sleep).",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\npthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;\n\nvoid* thread_A(void* arg) {\n    pthread_mutex_lock(&lock);\n    printf(\"Thread A: Locked mutex, performing long task...\\n\");\n    sleep(10); \n    pthread_mutex_unlock(&lock);\n    return NULL;\n}\n\nvoid* thread_B(void* arg) {\n    sleep(1); // הבטחה שחוט א' יתפוס את המנעול קודם\n    printf(\"Thread B: Forking now...\\n\");\n    pid_t pid = fork();\n    \n    if (pid == 0) {\n        // תהליך הבן\n        printf(\"Child process: Attempting to lock mutex...\\n\");\n        pthread_mutex_lock(&lock);\n        printf(\"Child process: Success! Locked!\\n\");\n        pthread_mutex_unlock(&lock);\n    } else {\n        // תהליך האב\n        wait(NULL);\n        printf(\"Parent process: Child finished.\\n\");\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t t1, t2;\n    pthread_create(&t1, NULL, thread_A, NULL);\n    pthread_create(&t2, NULL, thread_B, NULL);\n    pthread_join(t1, NULL);\n    pthread_join(t2, NULL);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "האם תהליך הבן יצליח להדפיס את השורה \"Child process: Success! Locked!\"? נמקו את תשובתכם תוך התייחסות למה שקורה לחוטים (Threads) ולמבני הנתונים בזיכרון בזמן ביצוע fork().",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "כיצד מנגנון ה-Copy-on-Write (COW) משפיע על מצב המנעול (mutex) בזיכרון של תהליך הבן ברגע ה-fork?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.3",
+        "text": "הציעו פתרון המשתמש בפונקציה pthread_atfork. הסבירו מה תפקידן של שלוש פונקציות ה-callback (prepare, parent, child) וכיצד הן מונעות את הבעיה שהתגלתה בסעיף 10.1.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "10.1: לא, תהליך הבן ייכנס למצב של Deadlock (קיפאון). כאשר מתבצע fork() בתהליך מרובה חוטים, רק החוט שקרא ל-fork() משוכפל בתהליך הבן. כל שאר החוטים (במקרה זה Thread A) אינם קיימים בבן. מכיוון ש-Thread A החזיק במנעול בזמן ה-fork, המנעול מועתק לבן כשהוא במצב 'תפוס' (Locked). מכיוון ש-Thread A לא קיים בבן כדי לשחרר את המנעול, החוט היחיד בבן ימתין לנצח.\n\n10.2: מנגנון ה-COW מבטיח שכל מרחב הכתובות, כולל מצב המנעול בזיכרון, יועתק לוגית לבן. בזיכרון הפיזי, עד שלא יבוצע שינוי, הבן והאב חולקים את אותם דפים. לכן, ביט ה-lock בתוך מבנה הנתונים של ה-mutex יועתק כשהוא דלוק (1). העובדה שמדובר בעותק נפרד (בסופו של דבר) לא עוזרת כאן, כי המצב הפנימי של האובייקט מעיד על כך שהוא תפוס על ידי ישות שאינה קיימת בבן.\n\n10.3: הפונקציה pthread_atfork מאפשרת לרשום פונקציות שירוצו בנקודות זמן קריטיות סביב ה-fork:\n1. prepare: רצה באב לפני ה-fork. עליה לנעול את המנעול (pthread_mutex_lock) כדי להבטיח מצב עקבי.\n2. parent: רצה באב אחרי ה-fork. עליה לשחרר את המנעול (pthread_mutex_unlock).\n3. child: רצה בבן אחרי ה-fork. עליה לשחרר את המנעול או לאתחל אותו מחדש. \nבצורה זו, מובטח שבזמן השכפול המנעול מוחזק ע\"י החוט המבצע, ולכן בבן הוא 'ישתחרר' בצורה מסודרת ע\"י פונקציית ה-child."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

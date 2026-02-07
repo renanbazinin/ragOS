@@ -1,0 +1,59 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 18:51:27",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2248,
+      "output_tokens": 1105,
+      "total_tokens": 6243
+    }
+  },
+  "question": [
+    {
+      "id": 10,
+      "type": "CodeAnalysis",
+      "topic": [
+        "Threads",
+        "Concurrency",
+        "Race Conditions",
+        "Memory Management"
+      ],
+      "content": {
+        "text": "עיינו בקוד ה-C הבא המשתמש ב-POSIX Threads. התוכנית רצה על מערכת מרובת ליבות. הניחו שכל קריאות המערכת מצליחות ושספריית הסטנדרט מוגדרת ללא Buffering (כלומר printf מדפיס מיד).",
+        "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n\nint g = 0;\n\nvoid* task(void* arg) {\n    int val = *(int*)arg;\n    g = g + 1;\n    printf(\"%d \", val);\n    return NULL;\n}\n\nint main() {\n    pthread_t t[3];\n    for (int i = 0; i < 3; i++) {\n        pthread_create(&t[i], NULL, task, &i);\n    }\n    for (int i = 0; i < 3; i++) {\n        pthread_join(t[i], NULL);\n    }\n    printf(\"! %d\", g);\n    return 0;\n}",
+        "options": null
+      },
+      "sub_questions": [
+        {
+          "id": "10.1",
+          "text": "מהם הערכים האפשריים שיכולים להיות מודפסים עבור המשתנה val על ידי כל אחד מהחוטים? הסבירו האם הערך 3 יכול להופיע בפלט.",
+          "code_snippet": null,
+          "options": null
+        },
+        {
+          "id": "10.2",
+          "text": "מהו הטווח האפשרי של ערכים עבור המשתנה g בהדפסה האחרונה (אחרי הסימן '!')? נמקו.",
+          "code_snippet": null,
+          "options": null
+        },
+        {
+          "id": "10.3",
+          "text": "כיצד ניתן לשנות את שורת הקריאה ל-pthread_create ואת השורה הראשונה בפונקציה task כך שכל חוט ידפיס בוודאות ערך ייחודי (0, 1, 2) ללא שימוש במנגנוני סנכרון (כגון Mutex)?",
+          "code_snippet": null,
+          "options": null
+        }
+      ],
+      "points": 25,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": null,
+        "explanation": "1. הערכים האפשריים עבור val הם {0, 1, 2, 3}. הסיבה לכך היא שכל החוטים מקבלים את הכתובת של אותו משתנה מקומי i מהמחסנית של main. כיוון שאין סנכרון, חוט עשוי לקרוא את הערך של i רק לאחר שהחוט הראשי כבר קידם אותו בלולאה. הערך 3 אפשרי בהחלט: אם חוט מסוים מתחיל לבצע את הפונקציה task רק לאחר שהלולאה הראשונה ב-main הסתיימה, הוא יקרא את הערך הנוכחי של i בכתובת שקיבל, שהוא 3 (ערך היציאה מהלולאה).\n\n2. הטווח עבור g הוא [1, 3]. הפעולה g = g + 1 אינה אטומית (מורכבת מקריאה, הוספה וכתיבה). במערכת מרובת ליבות, ייתכן שכל שלושת החוטים יקראו את הערך 0 בו-זמנית, יוסיפו 1 ויכתבו כולם 1 חזרה לזיכרון (Race Condition). במקרה האופטימלי שבו אין התנגשות, כל חוט יקדם את g בתורו והתוצאה תהיה 3.\n\n3. כדי להבטיח שכל חוט יקבל עותק ייחודי של הערך i ללא תלות בשינויים העתידיים של המשתנה ב-main, ניתן להעביר את הערך עצמו באמצעות Casting לטיפוס void* (בהנחה שגודל מצביע מאפשר זאת): \nב-main: pthread_create(&t[i], NULL, task, (void*)(long)i);\nב-task: int val = (int)(long)arg;"
+      },
+      "difficulty_estimation": "Hard"
+    }
+  ]
+}

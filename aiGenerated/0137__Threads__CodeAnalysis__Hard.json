@@ -1,0 +1,57 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 18:50:24",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2248,
+      "output_tokens": 1155,
+      "total_tokens": 6758
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Threads",
+      "Race Conditions",
+      "Pthreads",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "לפניכם קוד בשפת C המשתמש בספריית pthreads. הניחו כי כל קריאות המערכת מצליחות, כי התוכנית רצה על מערכת עם מעבד יחיד (Single Core), וכי ה-Scheduler יכול להחליף בין חוטים בכל רגע (Preemptive).",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h>\n\nint global_counter = 0;\n\nvoid* thread_func(void* arg) {\n    int* id_ptr = (int*)arg;\n    int my_id = *id_ptr;\n    int temp = global_counter;\n    usleep(10); // Force potential context switch\n    global_counter = temp + my_id;\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[3];\n    int i;\n    for (i = 0; i < 3; i++) {\n        pthread_create(&threads[i], NULL, thread_func, &i);\n    }\n    for (int j = 0; j < 3; j++) {\n        pthread_join(threads[j], NULL);\n    }\n    printf(\"%d\\n\", global_counter);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "מהו הטווח (מינימום ומקסימום) של הערכים האפשריים שיודפסו על ידי התוכנית? נמקו והדגימו תרחיש קצר עבור כל קצה.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "נניח שנוסיף מנעול (Mutex) סביב הקטע הקריטי בתוך thread_func (שורות 10-12). האם הפלט יהיה בהכרח 3 (0+1+2)? הסבירו.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.3",
+        "text": "הציעו דרך לתקן את הקריאה ל-pthread_create ואת הגישה בתוך thread_func כך שכל חוט יקבל בוודאות את ערך ה-i המקורי שלו (0, 1, או 2) ללא שימוש בהקצאת זיכרון דינמי (malloc).",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1. מקסימום: 9. המשתנה i ב-main משותף לכל החוטים דרך הכתובת שלו. עד שהחוטים מספיקים לקרוא את הערך בשורה 9, הלולאה ב-main עשויה להסתיים וערכו של i יהיה 3. אם כל חוט קרא 3 וביצע את העדכון באופן סדרתי (ללא דריסת ערכים), נקבל 3+3+3=9. מינימום: 0. ייתכן שחוט אחד קרא i=0 ושמר temp=0. בזמן שהוא ב-usleep, חוטים אחרים רצו ועדכנו את global_counter לערך כלשהו (למשל 6). כשהחוט הראשון מתעורר, הוא מבצע 0+0 וכותב 0 לתוך global_counter, ובכך דורס את העדכונים האחרים.\n2. לא. המנעול יפתור את ה-Race Condition על global_counter (העדכונים יהיו אטומיים), אך הוא לא פותר את הבעיה שכל החוטים ניגשים לאותה כתובת זיכרון (&i). עדיין ייתכן שכל החוטים יקראו את הערך 3 מהכתובת המשותפת, ולכן הפלט יהיה 9 (אך לא תהיה דריסת זיכרון באמצע).\n3. ניתן להעביר את הערך של i ישירות כארגומנט (Casting) במקום את הכתובת שלו. ב-main: pthread_create(&threads[i], NULL, thread_func, (void*)(long)i); ובפונקציית החוט: int my_id = (int)(long)arg;"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

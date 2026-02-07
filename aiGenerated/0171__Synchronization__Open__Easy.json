@@ -1,0 +1,50 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 18:56:17",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3682,
+      "output_tokens": 712,
+      "total_tokens": 6079
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Synchronization",
+      "Mutex",
+      "Race Condition"
+    ],
+    "content": {
+      "text": "נתונים שני חוטים (Threads) המריצים את הפונקציה `increment_counter` במקביל. המשתנה `counter` הוא משתנה גלובלי המאותחל ל-0. הנח כי אין אופטימיזציות של הקומפיילר וכי הפעולות מבוצעות בדיוק כפי שהן כתובות.",
+      "code_snippet": "int counter = 0;\n\nvoid* increment_counter(void* arg) {\n    for (int i = 0; i < 100; i++) {\n        int temp = counter;\n        temp = temp + 1;\n        counter = temp;\n    }\n    return NULL;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "מהו השם של התופעה שעלולה לגרום לכך שהערך הסופי של המשתנה `counter` יהיה נמוך מ-200?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "הציעו פתרון המשתמש ב-Mutex (מנעול) על מנת להבטיח שהערך הסופי של `counter` יהיה תמיד 200. יש לכתוב את קטע הקוד הרלוונטי.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": 10,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.1: התופעה נקראת 'מרוץ תהליכים' (Race Condition). היא מתרחשת כאשר מספר חוטים ניגשים למשאב משותף (במקרה זה המשתנה counter) ומבצעים עליו פעולות של קריאה וכתיבה ללא סנכרון, כך שהתוצאה הסופית תלויה בסדר התזמון של החוטים.\n\n1.2: כדי לפתור זאת, יש להשתמש ב-Mutex שיבטיח שרק חוט אחד נמצא ב'קטע הקריטי' (Critical Section) בכל זמן נתון. \nקוד מוצע:\n\npthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;\n\nvoid* increment_counter(void* arg) {\n    for (int i = 0; i < 100; i++) {\n        pthread_mutex_lock(&lock);\n        int temp = counter;\n        temp = temp + 1;\n        counter = temp;\n        pthread_mutex_unlock(&lock);\n    }\n    return NULL;\n}"
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

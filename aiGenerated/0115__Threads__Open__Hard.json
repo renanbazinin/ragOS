@@ -1,0 +1,57 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 18:43:16",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4085,
+      "output_tokens": 1337,
+      "total_tokens": 8416
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Threads",
+      "Synchronization",
+      "Read-Write Locks",
+      "Starvation"
+    ],
+    "content": {
+      "text": "לפניך מימוש חלקי בשפת C למנגנון Read-Write Lock המשתמש ב-Mutex וב-Condition Variable. המטרה היא לאפשר למספר קוראים (Readers) לגשת למשאב בו-זמנית, אך לאפשר לכותב (Writer) אחד בלבד גישה בלעדית.\nענה על הסעיפים הבאים תוך פירוט והסבר.",
+      "code_snippet": "typedef struct {\n    int readers;\n    int writer_active;\n    pthread_mutex_t lock;\n    pthread_cond_t cond;\n} rwlock_t;\n\nvoid read_lock(rwlock_t *rw) {\n    pthread_mutex_lock(&rw->lock);\n    while (rw->writer_active)\n        pthread_cond_wait(&rw->cond, &rw->lock);\n    rw->readers++;\n    pthread_mutex_unlock(&rw->lock);\n}\n\nvoid read_unlock(rwlock_t *rw) {\n    pthread_mutex_lock(&rw->lock);\n    rw->readers--;\n    if (rw->readers == 0)\n        pthread_cond_broadcast(&rw->cond);\n    pthread_mutex_unlock(&rw->lock);\n}\n\nvoid write_lock(rwlock_t *rw) {\n    pthread_mutex_lock(&rw->lock);\n    while (rw->writer_active || rw->readers > 0)\n        pthread_cond_wait(&rw->cond, &rw->lock);\n    rw->writer_active = 1;\n    pthread_mutex_unlock(&rw->lock);\n}\n\nvoid write_unlock(rwlock_t *rw) {\n    pthread_mutex_lock(&rw->lock);\n    rw->writer_active = 0;\n    pthread_cond_broadcast(&rw->cond);\n    pthread_mutex_unlock(&rw->lock);\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "האם המימוש הנתון סובל מבעיית הרעבה (Starvation)? אם כן, איזה סוג תהליכונים (קוראים או כותבים) עלול לסבול מהרעבה ובאילו תנאים?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "מדוע נעשה שימוש בלולאת while סביב הקריאה ל-pthread_cond_wait ולא בפקודת if? הסבר מה עלול לקרות אם נחליף את ה-while ב-if.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.3",
+        "text": "נניח שהמערכת פועלת במודל תהליכונים Many-to-One (כלומר, כל תהליכוני המשתמש ממופים לתהליכון קרנל יחיד). תהליכון קורא מחזיק ב-lock ומבצע קריאת מערכת חוסמת (Blocking I/O) כגון read() מדיסק. כיצד הדבר ישפיע על תהליכון כותב הממתין ב-write_lock?",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.1: כן, המימוש סובל מהרעבת כותבים (Writer Starvation). ב-read_lock, קורא חדש נחסם רק אם יש כותב פעיל (writer_active). אם יש קוראים פעילים וכותב ממתין ב-write_lock, קוראים חדשים שיגיעו יצליחו להעלות את rw->readers ולהיכנס למשאב, כי writer_active עדיין 0. אם זרם הקוראים הוא רציף, מספר הקוראים לעולם לא ירד ל-0, והכותב ימתין לנצח.\n\n1.2: השימוש ב-while הכרחי בגלל שתי סיבות: א. Spurious Wakeups - תהליכון עלול להתעורר מה-Condition Variable גם ללא שליחת סיגנל מפורש. ב. Mesa Semantics - ברגע שתהליכון מתעורר ומנסה לנעול את המוטקס מחדש, תהליכון אחר עלול 'להשתחל' ולשנות את התנאי (למשל, כותב אחר תפס את המשאב). לכן, יש לבדוק את התנאי שוב מיד עם החזרה מההמתנה.\n\n1.3: במודל Many-to-One, הקרנל אינו מודע לקיום תהליכוני המשתמש ורואה רק את תהליך ה-LWP היחיד. כאשר תהליכון משתמש מבצע קריאת מערכת חוסמת, כל התהליך (על כל תהליכוניו) נחסם ע\"י הקרנל. לכן, הכותב הממתין לא יוכל לקבל זמן מעבד אפילו אם הקורא סיים את פעולת ה-I/O, עד שהקרנל לא יחזיר את התהליך כולו למצב Ready."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

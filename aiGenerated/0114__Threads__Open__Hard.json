@@ -1,0 +1,56 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 18:42:49",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4085,
+      "output_tokens": 1326,
+      "total_tokens": 8024
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Threads",
+      "Process Management",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "לפניך קטע קוד בשפת C המשתמש בספריית pthreads. התוכנית מבצעת יצירת חוט (thread) ולאחר מכן מבצעת fork(). הנח כי כל הקריאות למערכת מצליחות וכי התזמון מתבצע בדיוק כפי שמתואר בהערות (ה-sleep מבטיח סדר פעולות מסוים).",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\npthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;\nint shared_data = 0;\n\nvoid* thread_work(void* arg) {\n    pthread_mutex_lock(&lock);\n    shared_data++;\n    sleep(5); // מחזיק את המנעול לזמן ממושך\n    pthread_mutex_unlock(&lock);\n    return NULL;\n}\n\nint main() {\n    pthread_t t1;\n    pthread_create(&t1, NULL, thread_work, NULL);\n    \n    sleep(1); // מבטיח ש-t1 יספיק לנעול את המוטקס\n\n    if (fork() == 0) {\n        // תהליך הבן\n        printf(\"Child process started...\\n\");\n        pthread_mutex_lock(&lock);\n        printf(\"Child: shared_data = %d\\n\", shared_data);\n        pthread_mutex_unlock(&lock);\n        return 0;\n    }\n\n    wait(NULL);\n    pthread_join(t1, NULL);\n    printf(\"Parent finished.\\n\");\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "האם תהליך הבן יצליח להדפיס את השורה \"Child: shared_data = 1\"? נמק את תשובתך תוך התייחסות למצב החוטים והמנעולים לאחר פעולת ה-fork().",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "כיצד ניתן להשתמש בפונקציה pthread_atfork() כדי לפתור את הבעיה שנוצרה? הסבר מה תפקיד כל אחד משלושת ה-handlers (prepare, parent, child).",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.3",
+        "text": "נניח והמערכת הייתה משתמשת במודל Many-to-One (User-Level Threads) עבור ספריית ה-pthreads. כיצד הקריאה ל-sleep(5) בתוך thread_work הייתה משפיעה על ביצוע ה-fork() ב-main? הסבר.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "10.1: לא, תהליך הבן ייכנס למצב של Deadlock. כאשר מתבצע fork() בתהליך מרובה חוטים, רק החוט שקרא ל-fork() משוכפל לתהליך הבן. עם זאת, כל מצב הזיכרון (כולל המוטקסים) מועתק כפי שהוא. מכיוון שחוט t1 נעל את המוטקס לפני ה-fork, המוטקס בבן מועתק כשהוא במצב 'נעול'. מאחר וחוט t1 לא קיים בתהליך הבן, אין מי שישחרר את המנעול, והקריאה ל-pthread_mutex_lock בבן תחסום לעד.\n\n10.2: הפונקציה pthread_atfork(prepare, parent, child) מאפשרת לרשום פונקציות טיפול שיופעלו סביב ה-fork:\n- prepare: מופעלת בתהליך האב לפני ה-fork. שם ננעל את כל המוטקסים הרלוונטיים.\n- parent: מופעלת בתהליך האב לאחר ה-fork. שם נשחרר את המוטקסים.\n- child: מופעלת בתהליך הבן לאחר ה-fork. שם נשחרר את המוטקסים בתוך הכתובת של הבן (כך שהם יהיו פתוחים לשימוש בבן).\n\n10.3: במודל Many-to-One, כל החוטים של תהליך מסוים ממופים לחוט קרנל יחיד. אם חוט משתמש מבצע קריאת מערכת חוסמת (כמו sleep), הקרנל חוסם את כל תהליך המשתמש. לכן, thread_work יגרום לכל תהליך האב להיחסם ל-5 שניות, וה-main לא יגיע לקריאה ל-fork עד ש-t1 יסיים את ה-sleep וישחרר את המנעול. במקרה כזה, הבעיה מהסעיף הראשון לא תתרחש כי המנעול יהיה משוחרר בזמן ה-fork."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

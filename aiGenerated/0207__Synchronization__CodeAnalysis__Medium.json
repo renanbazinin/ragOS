@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 19:00:24",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3136,
+      "output_tokens": 825,
+      "total_tokens": 6331
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Semaphores",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה המשתמשת בסמפורים (Semaphores) לסנכרון בין שני תהליכונים. הניחו שכל הקריאות ל-pthread_create ו-sem_init מצליחות. מה יהיה הפלט של התוכנית?",
+      "code_snippet": "sem_t sem1, sem2;\nint counter = 0;\n\nvoid* threadA(void* arg) {\n    for (int i = 0; i < 5; i++) {\n        sem_wait(&sem1);\n        counter++;\n        printf(\"A%d \", counter);\n        sem_post(&sem2);\n    }\n    return NULL;\n}\n\nvoid* threadB(void* arg) {\n    for (int i = 0; i < 5; i++) {\n        sem_wait(&sem2);\n        counter++;\n        printf(\"B%d \", counter);\n        sem_post(&sem1);\n    }\n    return NULL;\n}\n\nint main() {\n    sem_init(&sem1, 0, 1);\n    sem_init(&sem2, 0, 0);\n    pthread_t t1, t2;\n    pthread_create(&t1, NULL, threadA, NULL);\n    pthread_create(&t2, NULL, threadB, NULL);\n    pthread_join(t1, NULL);\n    pthread_join(t2, NULL);\n    return 0;\n}",
+      "options": [
+        "א. A1 B2 A3 B4 A5 B6 A7 B8 A9 B10",
+        "ב. A1 A2 A3 A4 A5 B1 B2 B3 B4 B5",
+        "ג. התוכנית תבצע הדפסה אחת ותיכנס למבוי סתום (Deadlock).",
+        "ד. B1 A2 B3 A4 B5 A6 B7 A8 B9 A10",
+        "ה. הפלט אינו דטרמיניסטי ותלוי בסדר הרצת התהליכונים על ידי המעבד."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "הסמפור sem1 מאותחל ל-1, מה שמאפשר לתהליכון A להיכנס לקטע הקריטי ראשון. הסמפור sem2 מאותחל ל-0, ולכן תהליכון B ייחסם בשורה sem_wait(&sem2) עד ש-A יבצע post ל-sem2. לאחר ש-A מעלה את המונה ל-1 ומדפיס 'A1 ', הוא מבצע post ל-sem2 שמשחרר את תהליכון B. כעת B מעלה את המונה ל-2, מדפיס 'B2 ' ומשחרר את A חזרה על ידי post ל-sem1. המבנה הזה יוצר סדר ריצה דטרמיניסטי שבו התהליכונים רצים לסירוגין, ולכן המונה גדל ב-1 בכל הדפסה והאותיות מתחלפות."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

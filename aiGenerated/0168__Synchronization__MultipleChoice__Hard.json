@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 18:55:43",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 968,
+      "output_tokens": 817,
+      "total_tokens": 3473
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "Synchronization",
+      "Condition Variables",
+      "Race Conditions",
+      "Lost Wakeup"
+    ],
+    "content": {
+      "text": "נתון הקוד הבא המממש סנכרון פשוט בין שני תהליכונים (Threads). תהליכון א' ממתין שמשתנה גלובלי בשם ready יהפוך ל-1, ותהליכון ב' מעדכן את ערכו. המשתנים m (מסוג pthread_mutex_t) ו-c (מסוג pthread_cond_t) אותחלו כראוי. איזה מהמשפטים הבאים מתאר בצורה המדויקת ביותר את הבעיה הפוטנציאלית בקוד?",
+      "code_snippet": "// Global variables\nint ready = 0;\npthread_mutex_t m;\npthread_cond_t c;\n\n// Thread A:\npthread_mutex_lock(&m);\nwhile (ready == 0) {\n    pthread_cond_wait(&c, &m);\n}\npthread_mutex_unlock(&m);\n\n// Thread B:\nready = 1;\npthread_cond_signal(&c);",
+      "options": [
+        "א. הקוד תקין לחלוטין; ביצוע pthread_cond_signal ללא נעילת המנעול הוא מותר ותקין תמיד.",
+        "ב. תיתכן בעיית 'Lost Wakeup': תהליכון א' עלול לבדוק את התנאי, למצוא שהוא 0, אך לפני שיקרא ל-wait, תהליכון ב' יעדכן את המשתנה וישלח סיגנל שייאבד.",
+        "ג. הקוד יגרום בהכרח ל-Deadlock כיוון שתהליכון ב' לא משחרר מנעול שלא נעל.",
+        "ד. תהליכון א' עלול להיכנס ללולאה אינסופית בגלל Spurious Wakeup גם אם ready שונה ל-1.",
+        "ה. תהליכון ב' יקרוס (Segmentation Fault) בזמן הקריאה ל-pthread_cond_signal כי המנעול m אינו מוחזק על ידו."
+      ]
+    },
+    "sub_questions": null,
+    "points": 10,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "הבעיה היא היעדר סנכרון על המשתנה המשותף ready בתהליכון ב'. תרחיש אפשרי: תהליכון א' נועל את המנעול, בודק את ready ורואה שהוא 0. לפני ש-א' קורא ל-pthread_cond_wait (שמשחרר את המנעול אטומית), מתבצע context switch. תהליכון ב' מעדכן את ready ל-1 ושולח סיגנל. כיוון שאין אף תהליכון שממתין כרגע על c, הסיגנל הולך לאיבוד. כש-א' חוזר לפעול, הוא קורא ל-wait ונרדם לנצח, למרות ש-ready כבר 1. לכן חובה לעדכן את המשתנה ולשלוח את הסיגנל תחת הגנת המנעול."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 18:44:44",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4085,
+      "output_tokens": 1224,
+      "total_tokens": 8105
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "Open",
+    "topic": [
+      "Threads",
+      "Process Management",
+      "Synchronization",
+      "Deadlock"
+    ],
+    "content": {
+      "text": "נתון קוד בשפת C המשתמש בספריית pthreads. התוכנית מדגימה אינטראקציה בין חוטים (threads) לבין יצירת תהליך חדש באמצעות fork. עליכם לנתח את התנהגות המערכת ולענות על השאלות הבאות. הניחו כי כל הקריאות למערכת מצליחות וכי התזמון מתבצע בדיוק כפי שמתואר ב-sleep.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\nint counter = 0;\npthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;\n\nvoid* thread_func(void* arg) {\n    pthread_mutex_lock(&lock);\n    counter++;\n    sleep(10); // מדמה עבודה ממושכת תחת נעילה\n    pthread_mutex_unlock(&lock);\n    return NULL;\n}\n\nint main() {\n    pthread_t t1;\n    pthread_create(&t1, NULL, thread_func, NULL);\n    sleep(1); // מבטיח שהחוט t1 התחיל ונעל את המוטקס\n\n    int pid = fork();\n    if (pid == 0) {\n        // תהליך הבן\n        printf(\"Child: Attempting to lock...\\n\");\n        pthread_mutex_lock(&lock);\n        printf(\"Child: Counter is %d\\n\", counter);\n        pthread_mutex_unlock(&lock);\n        return 0;\n    } else {\n        // תהליך האב\n        wait(NULL);\n        printf(\"Parent: Finished\\n\");\n    }\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "7.1",
+        "text": "האם תהליך הבן ידפיס את השורה \"Child: Counter is 1\"? נמקו את תשובתכם תוך התייחסות למצב ה-Mutex ולמבנה התהליך בבן.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "7.2",
+        "text": "מה יקרה לתהליך האב במקרה זה? האם הוא יגיע להדפסה \"Parent: Finished\"?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "7.3",
+        "text": "כיצד שימוש בפונקציה pthread_atfork יכול לפתור את הבעיה? הסבירו את תפקיד שלושת ה-callbacks שהיא מקבלת.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "7.1: לא, תהליך הבן לא ידפיס את השורה. ב-POSIX, כאשר תהליך המכיל מספר חוטים מבצע fork, רק החוט שקרא ל-fork משוכפל לתהליך הבן. החוט thread_func שביצע את הנעילה אינו קיים בבן. עם זאת, ה-fork מעתיק את כל מרחב הכתובות כפי שהוא, כולל את מצב ה-Mutex. מכיוון שהמוטקס היה נעול באב ברגע ה-fork, הוא מועתק כשהוא במצב 'נעול' לבן. כיוון שהחוט היחיד שיכול לשחרר את הנעילה (thread_func) לא קיים בבן, הבן ייכנס למצב של Deadlock בניסיון לנעול את המוטקס.\n\n7.2: תהליך האב לא יסיים את ריצתו. האב קורא ל-wait(NULL) וממתין לסיום תהליך הבן. מכיוון שתהליך הבן תקוע ב-Deadlock ולעולם לא יסתיים, האב יישאר במצב המתנה (Blocked) לנצח.\n\n7.3: הפונקציה pthread_atfork מאפשרת לרשום handlers שירוצו בנקודות זמן קריטיות סביב ה-fork: \n1. prepare: רץ באב לפני ה-fork. שם ננעל את כל המוטקסים כדי להבטיח מצב עקבי.\n2. parent: רץ באב מיד אחרי ה-fork. שם נשחרר את המוטקסים.\n3. child: רץ בבן מיד אחרי ה-fork. שם נשחרר (re-initialize/unlock) את המוטקסים כדי שהבן יתחיל עם מוטקסים פתוחים ויוכל להשתמש בהם."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 18:57:08",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1598,
+      "output_tokens": 897,
+      "total_tokens": 3759
+    }
+  },
+  "question": [
+    {
+      "id": 10,
+      "type": "Open",
+      "topic": [
+        "Synchronization",
+        "Semaphores",
+        "Deadlocks"
+      ],
+      "content": {
+        "text": "נתונים שלושה חוטים (Threads) המבצעים לולאה אינסופית. המטרה היא להשתמש בסמפורים כדי לסנכרן ביניהם כך שהפלט יהיה תמיד ברצף ABCABC... (כלומר, A תמיד מודפס לפני B, ו-B תמיד לפני C). לפניכם קטעי הקוד של החוטים:",
+        "code_snippet": "// Thread A\nwhile(1) {\n    sem_wait(&s1);\n    printf(\"A\");\n    sem_post(&s2);\n}\n\n// Thread B\nwhile(1) {\n    sem_wait(&s2);\n    printf(\"B\");\n    sem_post(&s3);\n}\n\n// Thread C\nwhile(1) {\n    sem_wait(&s3);\n    printf(\"C\");\n    sem_post(&s1);\n}",
+        "options": null
+      },
+      "sub_questions": [
+        {
+          "id": "10.1",
+          "text": "מהם ערכי האתחול הנדרשים עבור הסמפורים s1, s2, s3 כדי להבטיח שההדפסה הראשונה תהיה 'A' והסדר יישמר לאורך זמן?",
+          "code_snippet": null,
+          "options": null
+        },
+        {
+          "id": "10.2",
+          "text": "מה יקרה אם נאתחל את כל הסמפורים לערך 0? הסבירו בקצרה.",
+          "code_snippet": null,
+          "options": null
+        },
+        {
+          "id": "10.3",
+          "text": "נניח ואתחלנו את s1=1, s2=1, s3=1. האם הסדר ABC מובטח? אם לא, תנו דוגמה לפלט אפשרי אחר.",
+          "code_snippet": null,
+          "options": null
+        }
+      ],
+      "points": 15,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": null,
+        "explanation": "10.1. ערכי האתחול הנדרשים הם s1=1, s2=0, s3=0. אתחול s1 ל-1 מאפשר לחוט A להתחיל מיד. מכיוון ש-s2 ו-s3 הם 0, חוטים B ו-C ייחסמו ב-wait עד שחוט A יבצע post ל-s2, וחוט B יבצע post ל-s3 בהתאמה.\n\n10.2. אם כל הסמפורים יאותחלו ל-0, יתרחש מצב של Deadlock (קיפאון). כל אחד משלושת החוטים ינסה לבצע sem_wait על סמפור שערכו 0 וייחסם, ולא יהיה אף חוט שיבצע sem_post כדי לשחרר אותם.\n\n10.3. לא, הסדר אינו מובטח. אם כל הסמפורים מאותחלים ל-1, כל אחד מהחוטים יכול לעבור את ה-wait הראשון שלו ללא תלות באחרים. במצב כזה קיימת תחרות (Race Condition) על סדר ההדפסה שתלוי בתזמון של מערכת ההפעלה. פלט אפשרי אחר יכול להיות למשל BACBAC או CBA..."
+      },
+      "difficulty_estimation": "Medium"
+    }
+  ]
+}

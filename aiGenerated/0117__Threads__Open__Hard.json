@@ -1,0 +1,57 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 18:43:55",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4085,
+      "output_tokens": 1243,
+      "total_tokens": 7113
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Threads",
+      "Synchronization",
+      "Process Management",
+      "Deadlock"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא בשפת C המשתמש בספריית pthreads ובפקודת המערכת fork. הנח כי התוכנית רצה על מערכת Linux מודרנית וכי כל הקריאות למערכת (pthread_create, fork) מצליחות. ענה על הסעיפים הבאים תוך פירוט ונימוק מלא.",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\npthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;\nint counter = 100;\n\nvoid* thread_work(void* arg) {\n    pthread_mutex_lock(&lock);\n    counter += 50;\n    sleep(20); // Hold the lock for a long time\n    pthread_mutex_unlock(&lock);\n    return NULL;\n}\n\nint main() {\n    pthread_t t1;\n    pthread_create(&t1, NULL, thread_work, NULL);\n    \n    sleep(2); // Ensure thread_work starts and acquires the lock\n    \n    pid_t pid = fork();\n    if (pid == 0) {\n        // Child process\n        printf(\"Child: Attempting to lock...\\n\");\n        pthread_mutex_lock(&lock);\n        counter += 10;\n        printf(\"Child counter: %d\\n\", counter);\n        pthread_mutex_unlock(&lock);\n    } else {\n        // Parent process\n        wait(NULL);\n        printf(\"Parent counter: %d\\n\", counter);\n    }\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "כמה תהליכים וכמה חוטים (threads) סה\"כ יהיו קיימים במערכת מיד לאחר ביצוע שורת ה-fork? פרט כמה בכל תהליך.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "האם תהליך הבן יצליח להדפיס את השורה \"Child counter: ...\"? הסבר את המנגנון הגורם לכך/מונע זאת.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.3",
+        "text": "נניח שהורדנו את השורה (pthread_mutex_lock(&lock)) ואת ה-unlock מתהליך הבן. מה יהיה הפלט של תהליך האב ומה יהיה הפלט של תהליך הבן? התייחס למנגנון ה-Copy-on-Write.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.1: לאחר ה-fork יהיו 2 תהליכים. בתהליך האב יהיו 2 חוטים (החוט הראשי והחוט t1 שנוצר). בתהליך הבן יהיה חוט אחד בלבד. זאת מכיוון שעל פי תקן POSIX, כאשר תהליך מרובה חוטים מבצע fork, רק החוט שקרא ל-fork משוכפל לתהליך הבן. שאר החוטים אינם קיימים בבן.\n\n1.2: לא, תהליך הבן לא ידפיס את השורה. הוא ייכנס למצב של Deadlock. הסיבה היא שה-mutex משוכפל כחלק ממרחב הזיכרון של התהליך. מכיוון שבאב החוט t1 החזיק בנעילה בזמן ה-fork, ה-mutex משוכפל לבן כשהוא במצב 'נעול'. אולם, החוט שהחזיק בנעילה (t1) לא קיים בתהליך הבן, ולכן אין אף חוט שיכול לשחרר את הנעילה. החוט היחיד בבן ימתין לנצח ב-pthread_mutex_lock.\n\n1.3: אם נסיר את הנעילה בבן, הבן ידפיס: 'Child counter: 160' (הוא יורש את ה-counter מהאב אחרי ש-t1 כבר הוסיף 50, ואז מוסיף 10 משלו). האב ידפיס: 'Parent counter: 150'. למרות שהמשתנה גלובלי, fork יוצר מרחב כתובות נפרד. בתחילה שני התהליכים מצביעים לאותם דפים פיזיים (Copy-on-Write), אך ברגע שהבן מבצע כתיבה (counter += 10), נוצר עותק פרטי של הדף עבורו, ולכן השינוי בבן לא משפיע על האב."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

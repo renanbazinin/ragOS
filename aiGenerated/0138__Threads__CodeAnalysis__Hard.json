@@ -1,0 +1,58 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 18:50:45",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2248,
+      "output_tokens": 972,
+      "total_tokens": 5457
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Threads",
+      "Concurrency",
+      "Synchronization",
+      "Race Conditions",
+      "Pthreads"
+    ],
+    "content": {
+      "text": "לפניך קוד בשפת C המשתמש בספריית Pthreads. הנח כי כל הקריאות למערכת מצליחות וכי התוכנית רצה על מערכת מרובת ליבות. ענה על הסעיפים הבאים:",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n\nint counter = 0;\n\nvoid* thread_func(void* arg) {\n    int val = *((int*)arg);\n    for (int i = 0; i < 100; i++) {\n        counter++;\n    }\n    printf(\"%d \", val);\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[5];\n    for (int i = 0; i < 5; i++) {\n        pthread_create(&threads[i], NULL, thread_func, &i);\n    }\n    for (int i = 0; i < 5; i++) {\n        pthread_join(threads[i], NULL);\n    }\n    printf(\"\\nCounter: %d\\n\", counter);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "זהה שתי בעיות סנכרון/לוגיקה בקוד לעיל הקשורות לעבודה עם חוטים.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "מהו הטווח האפשרי של הערך המודפס עבור המשתנה counter? הסבר בקצרה את הגבול התחתון.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.3",
+        "text": "האם ייתכן שהפלט של התוכנית יכלול את הספרה 5? אם כן, הסבר באילו תנאים. אם לא, הסבר מדוע.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": 25,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1. הבעיות הן: א) Race Condition על המשתנה הגלובלי counter כיוון שפעולת ה-increment אינה אטומית. ב) Data Race על המשתנה i - כל החוטים מקבלים מצביע לאותה כתובת זיכרון שערכה משתנה על ידי ה-main thread בזמן שהם מנסים לקרוא ממנה.\n2. הטווח הוא [100, 500]. הגבול התחתון הוא 100: זה קורה למשל אם חוט אחד קורא את הערך 0, מושהה, ובינתיים שאר החוטים מסיימים את עבודתם ומעדכנים את counter ל-400. כאשר החוט הראשון חוזר לפעול, הוא מחזיק בערך המקומי שקרא (0), מקדם אותו וכותב חזרה לזיכרון, ובכך דורס את כל העדכונים הקודמים.\n3. כן, ייתכן שהערך 5 יודפס. הלולאה ב-main רצה מ-0 עד 4. בסיום האיטרציה האחרונה, i מקודם ל-5 והתנאי i < 5 נכשל. אם חוט שנוצר באיטרציה כלשהי ניגש לכתובת arg (שהיא הכתובת של i) רק לאחר שה-main thread סיים את הלולאה, הוא יקרא את הערך 5 וידפיס אותו."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}
