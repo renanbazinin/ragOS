@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 22:31:03",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1615,
+      "output_tokens": 416,
+      "total_tokens": 3147
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Virtual Memory",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "מהם שני היתרונות העיקריים של שימוש בזיכרון וירטואלי (Virtual Memory) במערכת הפעלה? הסבר בקצרה כל אחד מהיתרונות.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1. **הפרדה והגנה (Isolation and Protection)**: זיכרון וירטואלי מספק לכל תהליך מרחב כתובות פרטי משלו, מבודד ממרחבי הכתובות של תהליכים אחרים. זה מונע מתהליך אחד לגשת בטעות או בזדון לזיכרון של תהליך אחר, ובכך מגביר את יציבות ואבטחת המערכת.\n2. **שימוש יעיל בזיכרון פיזי (Efficient Use of Physical Memory)**: בעזרת זיכרון וירטואלי, ניתן לטעון לזיכרון הפיזי רק את החלקים הנחוצים (דפים) מתהליך מסוים. זה מאפשר להריץ תוכניות גדולות יותר מהזיכרון הפיזי הזמין, ומאפשר ריבוי משימות על ידי שיתוף יעיל של הזיכרון הפיזי בין מספר תהליכים. בנוסף, הוא מאפשר שיתוף קוד ונתונים בין תהליכים שונים."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

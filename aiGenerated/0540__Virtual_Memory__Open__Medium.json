@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 22:32:02",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1964,
+      "output_tokens": 522,
+      "total_tokens": 3557
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Virtual Memory",
+      "Paging",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "נתונה מערכת עם זיכרון וירטואלי של 2GB, גודל דף של 8KB, וזיכרון פיזי של 16GB. נתון שגודל רשומת טבלת דפים (PTE) הוא 4 בתים.\nמהם הגדלים של ה-VPN, ה-PFN, וכמה זיכרון פיזי תתפוס טבלת דפים (לינארית) של תהליך, במינימום?\nגודל VPN: ________ גודל PFN: ________ גודל טבלה: ________",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "כתובת וירטואלית היא 31 ביטים (זיכרון וירטואלי 2GB = 2^31 בתים). גודל דף הוא 8KB (2^13 בתים), לכן ההיסט הוא 13 ביטים. נשאר VPN = 31 - 13 = 18 ביטים.\nכתובת פיזית היא 34 ביטים (זיכרון פיזי 16GB = 2^34 בתים). ההיסט זהה – 13 ביטים. נשאר PFN = 34 - 13 = 21 ביטים.\nלכל תהליך יש 2^18 דפים בזיכרון הוירטואלי. כל רשומת טבלת דפים (PTE) היא בגודל 4 בתים. לכן, טבלת הדפים הלינארית כולה תתפוס 2^18 * 4 בתים = 262,144 * 4 בתים = 1,048,576 בתים = 1MB."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

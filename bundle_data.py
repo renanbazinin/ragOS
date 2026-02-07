@@ -43,6 +43,7 @@ for filepath in sorted(glob.glob(os.path.join(AI_DIR, "*.json"))):
                     "_requested_type": meta.get("requested_type", ""),
                     "_requested_difficulty": meta.get("requested_difficulty", ""),
                     "_generated_at": meta.get("generated_at", ""),
+                    "_subject": meta.get("subject", ""),
                 })
     except (json.JSONDecodeError, IOError) as e:
         print(f"  SKIP {fname}: {e}")

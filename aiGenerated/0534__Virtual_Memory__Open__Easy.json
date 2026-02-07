@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 22:30:44",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1615,
+      "output_tokens": 364,
+      "total_tokens": 3198
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Virtual Memory"
+    ],
+    "content": {
+      "text": "הסבירו במילים שלכם מהו זיכרון וירטואלי (Virtual Memory) וציינו יתרון מרכזי אחד שהוא מספק למערכת ההפעלה.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "זיכרון וירטואלי הוא טכניקת ניהול זיכרון המאפשרת למערכת ההפעלה להעניק לכל תהליך אשליה של מרחב זיכרון גדול ורציף משלו, ללא תלות בכמות הזיכרון הפיזי הזמין. בפועל, המערכת ממפה כתובות וירטואליות לכתובות פיזיות ב-RAM, ואם הנתונים אינם ב-RAM, היא טוענת אותם מהדיסק.\nיתרון מרכזי: מאפשר הפעלה של תוכניות גדולות יותר מהזיכרון הפיזי הזמין, ומאפשר למספר רב יותר של תהליכים לרוץ במקביל, גם אם סך דרישות הזיכרון שלהם עולה על גודל הזיכרון הפיזי."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}
