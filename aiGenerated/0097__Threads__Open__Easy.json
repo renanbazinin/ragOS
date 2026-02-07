@@ -1,0 +1,50 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 18:38:19",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3183,
+      "output_tokens": 709,
+      "total_tokens": 4826
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Threads",
+      "User-level threads",
+      "Kernel-level threads"
+    ],
+    "content": {
+      "text": "במערכת הפעלה מסוימת, תהליך מכיל שלושה חוטים (threads). אחד החוטים מבצע קריאת מערכת חוסמת (blocking system call) לקלט מהמקלדת, כפי שמתואר בקטע הקוד הבא. הסבירו מה יקרה לשני החוטים האחרים באותו תהליך בשני המקרים המפורטים מטה:",
+      "code_snippet": "void* thread_work(void* arg) {\n    char buffer[1024];\n    // הקריאה הבאה חוסמת את החוט עד לקבלת קלט\n    read(STDIN_FILENO, buffer, sizeof(buffer));\n    printf(\"Input received!\\n\");\n    return NULL;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "החוטים ממומשים כחוטים ברמת המשתמש (User-level threads) במודל Many-to-One.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "החוטים ממומשים כחוטים ברמת הגרעין (Kernel-level threads) במודל One-to-One.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": 10,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "10.1. במודל Many-to-One (User-level threads), מערכת ההפעלה (הגרעין) אינה מודעת לקיומם של החוטים ורואה רק תהליך אחד. כאשר חוט אחד מבצע קריאת מערכת חוסמת, הגרעין מעביר את כל התהליך למצב 'ממתין' (Waiting/Blocked). כתוצאה מכך, כל שאר החוטים בתהליך ייחסמו ולא יוכלו להמשיך בביצועם עד שהקריאה תסתיים.\n\n10.2. במודל One-to-One (Kernel-level threads), כל חוט משתמש ממופה לחוט נפרד בתוך הגרעין. במקרה זה, הגרעין מנהל את התזמון של כל חוט בנפרד. לכן, אם חוט אחד נחסם בגלל קריאת מערכת, הגרעין יכול להמשיך לתזמן ולהריץ את שני החוטים האחרים של אותו תהליך ללא הפרעה."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

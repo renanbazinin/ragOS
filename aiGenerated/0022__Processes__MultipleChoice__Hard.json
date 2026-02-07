@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 18:13:46",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 968,
+      "output_tokens": 718,
+      "total_tokens": 6226
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "Processes",
+      "fork",
+      "Address Space",
+      "wait"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא בשפת C. מה יהיה סכום כל המספרים שיודפסו למסך (Standard Output) בהנחה שכל הקריאות ל-fork ו-wait מצליחות ואין בעיות זיכרון?",
+      "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\nint main() {\n    int x = 2;\n    if (fork() == 0) {\n        x = x * 2;\n        if (fork() == 0) {\n            x = x + 1;\n            printf(\"%d\\n\", x);\n        } else {\n            wait(NULL);\n            x = x - 1;\n            printf(\"%d\\n\", x);\n        }\n    } else {\n        wait(NULL);\n        x = x + 2;\n        printf(\"%d\\n\", x);\n    }\n    return 0;\n}",
+      "options": [
+        "12",
+        "10",
+        "14",
+        "9",
+        "התוצאה אינה דטרמיניסטית ותלויה בסדר התזמון של המעבד"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "12",
+      "explanation": "במערכת הפעלה, פקודת fork יוצרת תהליך בן עם מרחב כתובות נפרד המהווה העתק של תהליך האב. ננתח את זרימת התוכנית: 1. תהליך האב המקורי (P) מתחיל עם x=2. 2. P יוצר את C1. בתוך C1, המשתנה x מוכפל ב-2 (x=4). 3. C1 יוצר את GC (הנכד). בתוך GC, המשתנה x (שהועתק מ-C1 כ-4) גדל ב-1 (x=5) ומודפס המספר 5. 4. C1 ממתין לסיום GC, ואז מחסיר 1 מה-x שלו (4-1=3) ומדפיס 3. 5. P ממתין לסיום C1, ואז מוסיף 2 ל-x שלו (2+2=4) ומדפיס 4. סכום כל ההדפסות: 5+3+4=12. כיוון שמרחבי הכתובות מופרדים (Copy-on-Write), השינויים ב-x בכל תהליך אינם משפיעים על האחרים."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

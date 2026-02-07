@@ -1,0 +1,35 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 18:16:39",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5185,
+      "output_tokens": 639,
+      "total_tokens": 8973
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Processes"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא בשפת C. בהנחה שכל הקריאות למערכת מצליחות, כמה תהליכים סה\"כ ירוצו במהלך ביצוע התוכנית (כולל תהליך האב המקורי)? יש לפרט את שלבי היצירה של התהליכים.",
+      "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n\nint main() {\n    fork();\n    if (fork() == 0) {\n        fork();\n    }\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "שלבי יצירת התהליכים הם כדלקמן:\n1. בתחילה קיים תהליך אחד (נסמנו P1).\n2. לאחר ביצוע ה-fork() הראשון בשורה 5, נוצר תהליך בן (P2). כעת ישנם 2 תהליכים במערכת.\n3. בשורה 6, שני התהליכים (P1 ו-P2) מבצעים את הקריאה fork() בתוך תנאי ה-if:\n   - P1 יוצר תהליך בן חדש (P3). עבור P3 הפונקציה מחזירה 0, ולכן הוא נכנס לבלוק ה-if.\n   - P2 יוצר תהליך בן חדש (P4). עבור P4 הפונקציה מחזירה 0, ולכן הוא נכנס לבלוק ה-if.\n   - עבור P1 ו-P2, הפונקציה מחזירה ערך שונה מ-0 (ה-PID של הבנים שלהם), ולכן הם אינם נכנסים לבלוק ה-if.\n4. בתוך בלוק ה-if (שורה 7), התהליכים P3 ו-P4 מבצעים fork() נוסף:\n   - P3 יוצר תהליך בן חדש (P5).\n   - P4 יוצר תהליך בן חדש (P6).\n5. לסיכום, התהליכים שהורצו הם: P1 (המקורי), P2 (נוצר ב-fork הראשון), P3 ו-P4 (נוצרו ב-fork השני), P5 ו-P6 (נוצרו ב-fork השלישי).\nסה\"כ: 6 תהליכים."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

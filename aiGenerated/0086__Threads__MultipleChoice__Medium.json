@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 18:34:35",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1815,
+      "output_tokens": 765,
+      "total_tokens": 3833
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Threads",
+      "Concurrency",
+      "Pthreads",
+      "Race Conditions"
+    ],
+    "content": {
+      "text": "לפניך קוד בשפת C המשתמש בספריית pthreads ליצירת 5 חוטים (threads). מה מהבאים מתאר נכונה את ההתנהגות הצפויה של התוכנית בעת הרצתה?",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n\nvoid* thread_func(void* arg) {\n    int val = *(int*)arg;\n    printf(\"%d \", val);\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[5];\n    for (int i = 0; i < 5; i++) {\n        pthread_create(&threads[i], NULL, thread_func, &i);\n    }\n    for (int i = 0; i < 5; i++) {\n        pthread_join(threads[i], NULL);\n    }\n    return 0;\n}",
+      "options": [
+        "א. התוכנית תדפיס תמיד את המספרים 0 1 2 3 4 בסדר זה בדיוק.",
+        "ב. התוכנית תדפיס תמיד את המספרים 0 עד 4, אך בסדר שאינו ידוע מראש (פרמוטציה של המספרים).",
+        "ג. ייתכן שחלק מהמספרים יודפסו יותר מפעם אחת, חלק לא יודפסו כלל, וייתכן אף שהמספר 5 יודפס.",
+        "ד. התוכנית תגרום לשגיאת גישה לזיכרון (Segmentation Fault) כיוון שהמשתנה i הוא מקומי לפונקציית main.",
+        "ה. התוכנית לא תעבור קומפילציה כיוון שלא ניתן להעביר את הכתובת של i כארגומנט מסוג void*."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "הבעיה בקוד היא מרוץ תהליכים (Race Condition) על המשתנה i. כל חמשת החוטים מקבלים את אותה הכתובת בזיכרון (הכתובת של המשתנה i ב-stack של main). מכיוון שחוט ה-main ממשיך לקדם את i בלולאה בזמן שהחוטים החדשים נוצרים ומתחילים לרוץ, ייתכן שחוט מסוים יקרא את הערך של i רק אחרי שהוא כבר קודם מספר פעמים על ידי ה-main. לכן, ייתכן ששני חוטים יקראו את אותו ערך, או שחוט יקרא את הערך 5 (תנאי העצירה של הלולאה) לפני שהתוכנית תסתיים. הפלט אינו דטרמיניסטי ותלוי בתזמון המעבד."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

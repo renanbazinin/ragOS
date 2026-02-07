@@ -1,0 +1,62 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 18:19:41",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3826,
+      "output_tokens": 1324,
+      "total_tokens": 7592
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Processes",
+      "Fork",
+      "Process Tree"
+    ],
+    "content": {
+      "text": "נתון הקוד הבא בשפת C. הניחו כי כל קריאות המערכת מצליחות, וכי הפלט מודפס לטרמינל ללא השהיות (buffering) משמעותיות שמשנות את סדר הלוגיקה (פרט לסדר הסטנדרטי של תזמון תהליכים).",
+      "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n#include <sys/wait.h>\n#include <stdlib.h>\n\nint main() {\n    int i;\n    for (i = 0; i < 3; i++) {\n        if (fork() == 0) {\n            if (i % 2 == 0) {\n                fork();\n                printf(\"A\\n\");\n            } else {\n                printf(\"B\\n\");\n                exit(0);\n            }\n        }\n    }\n    while(wait(NULL) > 0);\n    printf(\"C\\n\");\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "כמה פעמים יודפס התו 'A' במהלך ריצת התוכנית? פרטו את החישוב.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "כמה פעמים יודפס התו 'B' במהלך ריצת התוכנית? פרטו את החישוב.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.3",
+        "text": "כמה פעמים יודפס התו 'C' במהלך ריצת התוכנית? פרטו את החישוב.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.4",
+        "text": "מהו מספר התהליכים הכולל שנוצרו במערכת (כולל תהליך האב המקורי)?",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": 25,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "ננתח את הלולאה לפי איטרציות:\n1. איטרציה i=0:\n- תהליך האב (P) יוצר בן (C1).\n- C1 נכנס לתנאי (i%2 == 0), מבצע fork נוסף ויוצר את C1a.\n- גם C1 וגם C1a מדפיסים 'A' וממשיכים לאיטרציה הבאה (i=1).\n- סה\"כ הדפסות 'A': 2.\n- תהליכים פעילים שממשיכים ל-i=1: P, C1, C1a.\n\n2. איטרציה i=1:\n- כל אחד מהתהליכים הפעילים (P, C1, C1a) מבצע fork.\n- נוצרים 3 בנים חדשים. עבורם i=1, לכן i%2 != 0.\n- כל אחד מ-3 הבנים הללו מדפיס 'B' ומבצע exit(0).\n- סה\"כ הדפסות 'B': 3.\n- תהליכים פעילים שממשיכים ל-i=2: P, C1, C1a.\n\n3. איטרציה i=2:\n- כל אחד מהתהליכים הפעילים (P, C1, C1a) מבצע fork.\n- נוצרים 3 בנים חדשים (C2, C3, C4). עבורם i=2, לכן i%2 == 0.\n- כל אחד מהם (C2, C3, C4) מבצע fork נוסף (יוצרים את C2a, C3a, C4a).\n- כל ה-6 הללו (הבנים והנכדים של איטרציה זו) מדפיסים 'A'.\n- סה\"כ הדפסות 'A' באיטרציה זו: 6.\n- תהליכים פעילים שמסיימים את הלולאה: P, C1, C1a, C2, C2a, C3, C3a, C4, C4a (סה\"כ 9 תהליכים).\n\n4. סיום (הדפסת 'C'):\n- כל תהליך שמסיים את הלולאה ומגיע לשורת ה-wait מדפיס 'C' פעם אחת לאחר שכל בניו הסתיימו.\n- ישנם 9 תהליכים כאלו.\n\nסיכום:\n- כמות 'A': 2 (מאיטרציה 0) + 6 (מאיטרציה 2) = 8.\n- כמות 'B': 3 (מאיטרציה 1).\n- כמות 'C': 9.\n- סה\"כ תהליכים: תהליך מקורי (1) + בנים מאיטרציה 0 (2) + בנים מאיטרציה 1 (3) + בנים מאיטרציה 2 (6) = 12."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

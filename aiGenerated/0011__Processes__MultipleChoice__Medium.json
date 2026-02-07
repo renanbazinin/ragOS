@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 18:10:11",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1022,
+      "output_tokens": 551,
+      "total_tokens": 3181
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Processes",
+      "System Calls"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא בשפת C. נניח שכל קריאות המערכת מצליחות. מה נכון לומר לגבי ה-PID (Process Identifier) ומרחב הכתובות (Address Space) של התהליך המריץ את התוכנית \"ls\", בהשוואה לתהליך הבן שנוצר על ידי קריאת ה-fork המופיעה בקוד?",
+      "code_snippet": "pid_t pid = fork();\nif (pid == 0) {\n    char *args[] = {\"ls\", \"-l\", NULL};\n    execvp(args[0], args);\n    exit(0);\n} else {\n    wait(NULL);\n}",
+      "options": [
+        "א. ה-PID משתנה ומרחב הכתובות משתנה.",
+        "ב. ה-PID נשאר זהה ומרחב הכתובות נשאר זהה.",
+        "ג. ה-PID משתנה אך מרחב הכתובות נשאר זהה.",
+        "ד. ה-PID נשאר זהה אך מרחב הכתובות מוחלף בתוכנית החדשה.",
+        "ה. לא ניתן לדעת, הדבר תלוי במתזמן (Scheduler)."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ד. ה-PID נשאר זהה אך מרחב הכתובות מוחלף בתוכנית החדשה.",
+      "explanation": "הקריאה למשפחת פונקציות exec (כמו execvp) מחליפה את מרחב הכתובות של התהליך הנוכחי (קוד, נתונים, מחסנית) בתוכנית חדשה. עם זאת, התהליך עצמו נשאר אותו תהליך במערכת ההפעלה, ולכן הוא שומר על ה-PID המקורי שלו שניתן לו בעת ה-fork."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

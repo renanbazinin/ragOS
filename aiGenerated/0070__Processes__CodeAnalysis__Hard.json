@@ -1,0 +1,57 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 18:31:06",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3664,
+      "output_tokens": 1397,
+      "total_tokens": 7173
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Processes",
+      "System Calls",
+      "Fork Logic",
+      "Process Tree"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה בשפת C. הניחו כי כל קריאות המערכת מצליחות, וכי מזהה התהליך (PID) של התהליך המריץ את main הוא 1000. כל תהליך חדש שנוצר במערכת מקבל PID הגדול ב-1 מה-PID האחרון שניתן. הניחו כי אין תהליכים אחרים שנוצרים במערכת בזמן הריצה. ענו על הסעיפים הבאים.",
+      "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n#include <sys/wait.h>\n#include <stdlib.h>\n\nint main() {\n    int x = 5;\n    pid_t p1, p2;\n\n    p1 = fork();\n    if (p1 > 0) {\n        // Parent block\n        x += 2;\n        if (fork() == 0) {\n            x *= 2;\n            printf(\"Node A: x=%d, PID=%d, PPID=%d\\n\", x, getpid(), getppid());\n            exit(0);\n        }\n        wait(NULL);\n    } else if (p1 == 0) {\n        // Child block\n        x -= 2;\n        p2 = fork();\n        if (p2 > 0) {\n            wait(NULL);\n            x += 10;\n        } else {\n            x += 5;\n            printf(\"Node B: x=%d, PID=%d, PPID=%d\\n\", x, getpid(), getppid());\n            exit(0);\n        }\n        printf(\"Node C: x=%d, PID=%d, PPID=%d\\n\", x, getpid(), getppid());\n        exit(0);\n    }\n\n    wait(NULL);\n    printf(\"Node D: x=%d, PID=%d\\n\", x, getpid());\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "101.1",
+        "text": "ציירו את עץ התהליכים שנוצר במהלך ריצת התוכנית. עבור כל תהליך בעץ ציינו את ה-PID שלו ואת ה-PPID שלו.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "101.2",
+        "text": "מהו הפלט המלא של התוכנית? במידה וישנם מספר פלטים אפשריים בשל חוסר דטרמיניזם בתזמון, ציינו את כולם או הסבירו את סדר ההדפסה.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "101.3",
+        "text": "כמה פעמים תודפס המילה \"Node\" בסך הכל?",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "ניתוח זרימת התוכנית:\n1. תהליך 1000 (P1000) מבצע fork ראשון. נוצר תהליך 1001.\n2. P1000 (הורה): x הופך ל-7. הוא מבצע fork נוסף ויוצר את 1002. \n   - תהליך 1002 (בן של 1000): x הופך ל-14 (7*2). מדפיס 'Node A: x=14, PID=1002, PPID=1000' ויוצא.\n   - P1000 מחכה ל-1002, ואז מחכה ל-1001 (בסוף), ומדפיס 'Node D: x=7, PID=1000'.\n3. תהליך 1001 (בן של 1000): x הופך ל-3. הוא מבצע fork ויוצר את 1003.\n   - תהליך 1003 (בן של 1001): x הופך ל-8 (3+5). מדפיס 'Node B: x=8, PID=1003, PPID=1001' ויוצא.\n   - תהליך 1001 מחכה ל-1003, מעדכן את x ל-13 (3+10), מדפיס 'Node C: x=13, PID=1001, PPID=1000' ויוצא.\n\nסדר הדפסה אפשרי:\nהסדר בין Node A לבין Node B/C תלוי במתזמן, אך Node D תמיד יהיה אחרון עבור P1000. Node C חייב לבוא אחרי Node B. Node A חייב לבוא לפני Node D.\nפלט לדוגמה:\nNode B: x=8, PID=1003, PPID=1001\nNode C: x=13, PID=1001, PPID=1000\nNode A: x=14, PID=1002, PPID=1000\nNode D: x=7, PID=1000\n\nסה\"כ הדפסות של Node: 4 פעמים."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

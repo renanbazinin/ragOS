@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 18:24:03",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2103,
+      "output_tokens": 471,
+      "total_tokens": 3673
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Processes",
+      "System Calls"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה. מה יהיה הפלט של התוכנית? (הנח שכל קריאות המערכת מצליחות, ואין חשיבות לסדר ההדפסה בין התהליכים השונים).",
+      "code_snippet": "int main() {\n    int x = 10;\n    if (fork() == 0) {\n        x += 5;\n    } else {\n        x -= 5;\n    }\n    printf(\"%d \", x);\n    return 0;\n}",
+      "options": [
+        "א. 15 5",
+        "ב. 15",
+        "ג. 5",
+        "ד. 10 10",
+        "ה. 15 10"
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "קריאת המערכת fork() יוצרת תהליך בן חדש המהווה העתק של תהליך האב. בתהליך הבן, הערך המוחזר מ-fork() הוא 0, ולכן הוא נכנס לבלוק ה-if ומעדכן את x ל-15. בתהליך האב, הערך המוחזר הוא ה-PID של הבן (גדול מ-0), ולכן הוא נכנס לבלוק ה-else ומעדכן את x ל-5. כיוון שלכל תהליך מרחב זיכרון נפרד, כל אחד מהם מדפיס את הערך המקומי שלו, ומתקבלים שני המספרים 15 ו-5."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

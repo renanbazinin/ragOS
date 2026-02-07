@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 18:25:25",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2103,
+      "output_tokens": 599,
+      "total_tokens": 5594
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Processes",
+      "System Calls"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה. כמה פעמים יודפס המחרוזת \"OS\" במהלך הרצת התוכנית? הניחו שכל קריאות המערכת מצליחות.",
+      "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n\nint main() {\n    fork();\n    if (fork() == 0) {\n        fork();\n    }\n    printf(\"OS\\n\");\n    return 0;\n}",
+      "options": [
+        "א. 2",
+        "ב. 4",
+        "ג. 5",
+        "ד. 6",
+        "ה. 8"
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ד",
+      "explanation": "נבצע מעקב אחר יצירת התהליכים:\n1. התהליך המקורי (P1) מבצע את ה-fork הראשון. נוצר תהליך בן (P2). כעת יש 2 תהליכים.\n2. שני התהליכים (P1, P2) מגיעים לשורת ה-if ומבצעים fork נוסף:\n   - P1 יוצר את P3. ב-P1 ה-fork מחזיר PID חיובי (דילוג על ה-if). ב-P3 ה-fork מחזיר 0 (כניסה ל-if).\n   - P2 יוצר את P4. ב-P2 ה-fork מחזיר PID חיובי (דילוג על ה-if). ב-P4 ה-fork מחזיר 0 (כניסה ל-if).\n3. התהליכים שנכנסו ל-if (הם P3 ו-P4) מבצעים fork שלישי:\n   - P3 יוצר את P5.\n   - P4 יוצר את P6.\n4. כל התהליכים שנוצרו ולא הסתיימו מגיעים לשורת ההדפסה. התהליכים הם: P1, P2, P3, P4, P5, P6. סה\"כ 6 תהליכים, ולכן המחרוזת תודפס 6 פעמים."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

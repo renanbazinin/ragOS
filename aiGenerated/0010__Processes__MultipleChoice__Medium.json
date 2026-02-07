@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 18:09:57",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1022,
+      "output_tokens": 539,
+      "total_tokens": 2424
+    }
+  },
+  "question": [
+    {
+      "id": 10,
+      "type": "MultipleChoice",
+      "topic": [
+        "Processes",
+        "System Calls",
+        "Memory Management"
+      ],
+      "content": {
+        "text": "נתון קטע הקוד הבא בשפת C. מהו הפלט הצפוי של התוכנית בהנחה שכל קריאות המערכת מצליחות?",
+        "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\nint main() {\n    int x = 10;\n    if (fork() == 0) {\n        x += 5;\n        printf(\"%d \", x);\n    } else {\n        wait(NULL);\n        x -= 3;\n        printf(\"%d \", x);\n    }\n    return 0;\n}",
+        "options": [
+          "א. 15 12",
+          "ב. 15 7",
+          "ג. 7 15",
+          "ד. 12 15",
+          "ה. הפלט אינו קבוע ותלוי בתזמון המעבד."
+        ]
+      },
+      "sub_questions": null,
+      "points": 10,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": "ב. 15 7",
+        "explanation": "לאחר קריאת המערכת fork, נוצר תהליך בן המקבל עותק נפרד של מרחב הכתובות של האב, כולל המשתנה x. בתהליך הבן (שבו fork מחזיר 0), הערך של x הופך ל-15 והוא מודפס. בתהליך האב, נעשה שימוש ב-wait(NULL) שממתין לסיום הבן. לאחר מכן האב מחסיר 3 מהערך המקורי של x (שהיה 10 במרחב הכתובות שלו) ומדפיס 7. מכיוון שהאב מחכה לבן, הפלט תמיד יהיה 15 ולאחר מכן 7."
+      },
+      "difficulty_estimation": "Medium"
+    }
+  ]
+}

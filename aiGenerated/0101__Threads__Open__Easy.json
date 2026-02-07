@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 18:39:12",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3183,
+      "output_tokens": 581,
+      "total_tokens": 4720
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "Open",
+    "topic": [
+      "Threads",
+      "Concurrency",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "לפניכם קטע קוד בשפת C המשתמש בספריית pthreads. מה יהיה הפלט המודפס למסך בסיום ריצת התוכנית? הסבירו את תשובתכם תוך התייחסות לאופן שבו חוטים (threads) חולקים זיכרון.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\nint shared_val = 100;\n\nvoid* thread_work(void* arg) {\n    shared_val += 50;\n    return NULL;\n}\n\nint main() {\n    pthread_t t1, t2;\n\n    pthread_create(&t1, NULL, thread_work, NULL);\n    pthread_join(t1, NULL);\n\n    pthread_create(&t2, NULL, thread_work, NULL);\n    pthread_join(t2, NULL);\n\n    printf(\"%d\\n\", shared_val);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": 10,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפלט יהיה 200. ההסבר לכך טמון בעובדה שחוטים (Threads) השייכים לאותו תהליך חולקים את אותו מרחב כתובות (Address Space), ובפרט את מקטע הנתונים הגלובליים. המשתנה shared_val הוא גלובלי, ולכן כל שינוי שמבצע חוט אחד נראה באופן מיידי לחוטים האחרים. בתוכנית זו: 1. הערך ההתחלתי הוא 100. 2. החוט הראשון (t1) מוסיף 50, והערך הופך ל-150. 3. הפונקציה pthread_join מבטיחה שהחוט הראשון יסיים לפני שהחוט השני יתחיל. 4. החוט השני (t2) מוסיף 50 נוספים לערך הקיים (150), ולכן התוצאה הסופית היא 200."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

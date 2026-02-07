@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 18:33:15",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1815,
+      "output_tokens": 836,
+      "total_tokens": 4327
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Threads",
+      "Concurrency",
+      "Race Conditions"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה בשפת C המשתמשת בספריית pthreads. התוכנית יוצרת 10 חוטים (threads), כאשר כל חוט מבצע לולאה המקדמת משתנה גלובלי משותף counter ב-1, כמיליון פעמים. בסיום ריצת כל החוטים, התוכנית מדפיסה את ערכו של counter. מה ניתן לומר על פלט התוכנית?",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n\nint counter = 0;\n\nvoid* thread_func(void* arg) {\n    for (int i = 0; i < 1000000; i++) {\n        counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[10];\n    for (int i = 0; i < 10; i++) {\n        pthread_create(&threads[i], NULL, thread_func, NULL);\n    }\n    for (int i = 0; i < 10; i++) {\n        pthread_join(threads[i], NULL);\n    }\n    printf(\"%d\\n\", counter);\n    return 0;\n}",
+      "options": [
+        "א. התוכנית תמיד תדפיס 10,000,000.",
+        "ב. התוכנית תדפיס ערך קטן מ-10,000,000 או שווה לו, בשל היעדר סנכרון (Race Condition).",
+        "ג. התוכנית תגרום לשגיאת הרצה (Segmentation Fault) כיוון שחוטים שונים ניגשים לאותו זיכרון בו-זמנית.",
+        "ד. התוכנית תמיד תדפיס 1,000,000 כי המשתנה counter הוא מקומי לכל חוט (Thread Local Storage).",
+        "ה. התוכנית לא תתקמפל כי לא ניתן להשתמש במשתנה גלובלי משותף בתוך פונקציית חוט ללא מילת המפתח volatile."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "הפעולה ++counter ברמת שפת C אינה פעולה אטומית (Atomic Operation). ברמת האסמבלי, היא מורכבת בדרך כלל משלוש פקודות: קריאת הערך מהזיכרון לרגיסטר, הוספת 1 לרגיסטר, וכתיבת הערך חזרה לזיכרון. ללא שימוש במנגנוני סנכרון כמו Mutex, ייתכן מצב שבו שני חוטים קוראים את אותו הערך לפני שאחד מהם הספיק לעדכן אותו (Context Switch ביניהם), מה שמוביל לאובדן עדכונים ולערך סופי נמוך מהצפוי (Race Condition). תיאורטית הערך יכול להיות 10,000,000 אם לא התרחש שום מירוץ, אך במערכת מרובת ליבות זה כמעט בלתי אפשרי."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

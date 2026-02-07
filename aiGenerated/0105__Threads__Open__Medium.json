@@ -1,0 +1,57 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 18:40:14",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2766,
+      "output_tokens": 1047,
+      "total_tokens": 5520
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "Open",
+    "topic": [
+      "Threads",
+      "Concurrency",
+      "Race Conditions",
+      "Memory Layout"
+    ],
+    "content": {
+      "text": "לפניכם קוד בשפת C המשתמש בחוטים (Threads). הניחו שהקוד רץ על מערכת מרובת ליבות וכי אין מנגנוני סנכרון נוספים מעבר למה שמופיע בקוד.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\nint counter = 0;\n\nvoid* worker(void* arg) {\n    int* local_ptr = (int*)arg;\n    for (int i = 0; i < 100; i++) {\n        counter++;\n        (*local_ptr)++;\n    }\n    return NULL;\n}\n\nint main() {\n    int shared_val = 0;\n    pthread_t t1, t2;\n    pthread_create(&t1, NULL, worker, &shared_val);\n    pthread_create(&t2, NULL, worker, &shared_val);\n    pthread_join(t1, NULL);\n    pthread_join(t2, NULL);\n    printf(\"counter: %d, shared_val: %d\\n\", counter, shared_val);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "7.1",
+        "text": "מהם הערכים המינימליים והמקסימליים האפשריים שיוצגו עבור counter ו-shared_val בסיום התוכנית? הסבירו בקצרה מדוע.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "7.2",
+        "text": "הסבירו את ההבדל במיקום בזיכרון בין counter ל-shared_val. האם הבדל זה משנה את רגישות המשתנה shared_val למצבי מרוץ (Race Conditions)?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "7.3",
+        "text": "כיצד שימוש ב-pthread_mutex_t יכול לפתור את הבעיה? הציגו את השינוי הנדרש בקוד ה-worker בלבד (הניחו כי המיוטקס כבר אותחל גלובלית בשם lock).",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": 15,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "7.1. המקסימום עבור שניהם הוא 200 (במקרה של ריצה סדרתית או תזמון מושלם). המינימום הוא 2 (במקרה של Race Condition שבו כל חוט קורא את הערך 0, מקדם ל-1 וכותב, ואז התהליך חוזר על עצמו כך שכל חוט דורס את עבודת השני פרט לפעם אחת). הערכים נובעים מכך שפעולת הקידום אינה אטומית (Load, Increment, Store).\n\n7.2. המשתנה counter הוא גלובלי ולכן נמצא ב-Data Segment. המשתנה shared_val הוכרז ב-main ולכן נמצא על המחסנית (Stack) של חוט ה-main. למרות זאת, כיוון שכתובתו הועברה כארגומנט לחוטים האחרים, לכולם יש גישה לאותו מרחב זיכרון. לכן, shared_val חשוף ל-Race Condition בדיוק כמו counter.\n\n7.3. יש לנעול את המיוטקס לפני הגישה למשתנים המשותפים ולשחרר אחרי:\nvoid* worker(void* arg) {\n    int* local_ptr = (int*)arg;\n    for (int i = 0; i < 100; i++) {\n        pthread_mutex_lock(&lock);\n        counter++;\n        (*local_ptr)++;\n        pthread_mutex_unlock(&lock);\n    }\n    return NULL;\n}"
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

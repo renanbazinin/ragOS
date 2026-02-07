@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 18:09:28",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 965,
+      "output_tokens": 384,
+      "total_tokens": 2020
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Processes",
+      "System Calls"
+    ],
+    "content": {
+      "text": "מה קורה כאשר תהליך קורא לקריאת המערכת fork() במערכת הפעלה מסוג Unix/Linux?",
+      "code_snippet": null,
+      "options": [
+        "א. נוצר תהליך חדש (תהליך בן) שהוא עותק כמעט זהה של תהליך האב.",
+        "ב. התהליך הנוכחי נעצר ומתחלף בקוד של תוכנית חדשה לגמרי.",
+        "ג. נוצר חוט (Thread) חדש בתוך אותו מרחב כתובות של התהליך הקיים.",
+        "ד. המערכת מבצעת מעבר למצב המתנה (Waiting) עד לסיום כל תהליכי הרקע."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "קריאת המערכת fork() יוצרת תהליך חדש על ידי שכפול התהליך הקורא. התהליך החדש (הבן) מקבל עותק של מרחב הכתובות, משתנים וקובצי הקלט/פלט של האב, אך הוא פועל כתהליך נפרד עם מזהה תהליך (PID) ייחודי."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 18:35:19",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1815,
+      "output_tokens": 798,
+      "total_tokens": 5880
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Threads",
+      "Concurrency",
+      "Race Conditions"
+    ],
+    "content": {
+      "text": "לפניכם קוד בשפת C המשתמש בספריית pthreads. מה ניתן לומר על הפלט של התוכנית בהנחה שהקומפילציה והרצת התהליכונים הצליחו?",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n\nvoid* task(void* arg) {\n    int* val = (int*)arg;\n    for (int i = 0; i < 100; i++) {\n        (*val)++;\n    }\n    return NULL;\n}\n\nint main() {\n    int shared_val = 0;\n    pthread_t threads[10];\n    for (int i = 0; i < 10; i++) {\n        pthread_create(&threads[i], NULL, task, &shared_val);\n    }\n    for (int i = 0; i < 10; i++) {\n        pthread_join(threads[i], NULL);\n    }\n    printf(\"%d\", shared_val);\n    return 0;\n}",
+      "options": [
+        "א. הפלט יהיה תמיד 1000.",
+        "ב. הפלט עשוי להיות קטן מ-1000 עקב מרוץ תהליכונים (Race Condition).",
+        "ג. התוכנית תגרום לשגיאת פילוח (Segmentation Fault) בשל גישה מקבילית של תהליכונים שונים לאותו משתנה מקומי.",
+        "ד. הפלט יהיה תמיד 100, כיוון שכל תהליכון מבצע בדיוק 100 איטרציות ודורס את תוצאות קודמיו.",
+        "ה. הקוד לא יעבור קומפילציה כיוון שהפונקציה pthread_create דורשת העברת משתנה גלובלי בלבד כארגומנט."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "הפעולה ++(*val) אינה אטומית. היא מורכבת משלושה שלבים ברמת המכונה: טעינת הערך מהזיכרון לרגיסטר, קידום הערך ברגיסטר, וכתיבת הערך המעודכן חזרה לזיכרון. כאשר מספר תהליכונים ניגשים לאותו משתנה ללא סנכרון (כמו Mutex), תהליכון אחד עלול לקרוא ערך 'ישן' בזמן שתהליכון אחר מעדכן אותו, ובכך לגרום לאובדן עדכונים (Race Condition). לכן, התוצאה הסופית עשויה להיות נמוכה מ-1000. שימוש בכתובת של משתנה מקומי מתוך main הוא תקין במקרה זה כי main ממתינה לסיום התהליכונים בעזרת pthread_join לפני שהיא מסיימת את ריצתה ומפנה את המחסנית."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

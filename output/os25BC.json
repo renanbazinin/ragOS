@@ -1,0 +1,240 @@
+{
+  "metadata": {
+    "course_name": "Operating Systems",
+    "year": "2025",
+    "semester": "Semester B",
+    "moed": "Moed C",
+    "exam_date": "04.09.2025",
+    "source_file": "os25BC.pdf"
+  },
+  "questions": [
+    {
+      "id": 1,
+      "type": "MultipleChoice",
+      "topic": [
+        "Scheduling",
+        "CPU Scheduling",
+        "Concurrency"
+      ],
+      "content": {
+        "text": "נתונה מערכת עם אלגוריתם תזמון מבוסס RR מלבד ההבדל הבא: משימה חדשה מתחילה לרוץ מיד כשנוצרה. משימה שסיימה את הקוונטה שלה עדיין חוזרת לסוף התור, ויש להניח שלא נוצרות 2 משימות חדשות בו-זמנית.\nבנוסף, נתון שלא ניתן לעצור משימה במהלך הקוונטה הראשונה שלה. כלומר, משימה תסיים את הקוונטה הראשונה שלה גם אם מגיעה משימה חדשה, כאשר המשימה החדשה תתחיל מיד בסיום הקוונטה הנוכחית. בכל מקרה אחר, המשימה החדשה תתחיל לרוץ מיד כשנוצרה.\nאיזו טענה בהכרח נכונה?",
+        "code_snippet": null,
+        "options": [
+          "א. זמן התגובה של האלגוריתם הוא אופטימלי.",
+          "ב. זמן המחזור של האלגוריתם תמיד עדיף או שווה לזה של RR סטנדרטי.",
+          "ג. לכל 1<N, אם מספר המשימות בתור בכל רגע נתון הוא לא יותר מ-N, לא תיתכן הרעבה.",
+          "ד. לכל 1<N, אם מספר המשימות בתור בכל רגע נתון הוא לא יותר מ-N, בהכרח תתרחש הרעבה.",
+          "ה. כל התשובות האחרות אינן נכונות."
+        ]
+      },
+      "sub_questions": null,
+      "points": 5,
+      "solution": {
+        "is_present_in_file": false,
+        "correct_option": null,
+        "explanation": null
+      },
+      "difficulty_estimation": "Medium"
+    },
+    {
+      "id": 2,
+      "type": "MultipleChoice",
+      "topic": [
+        "Memory Management",
+        "Paging",
+        "Virtual Memory"
+      ],
+      "content": {
+        "text": "נתונה מערכת עם טבלת דפים היררכית בה כל רשומה (PTE) מכילה 3 ביטים של סטטוס. כתובת פיזית מורכבת מהיסט 13 ביטים ומספר מסגרת של 23 ביטים.\nבמערכת זו רצים 2 תהליכים A,B, וידוע שטבלת הדפים של תהליך A היא בגודל 4 מסגרות בדיוק.\nמהו מרחב הכתובות של תהליך B?",
+        "code_snippet": null,
+        "options": [
+          "א. 8KB",
+          "ב. 8MB",
+          "ג. 64MB",
+          "ד. אין מספיק נתונים כדי לחשב את התשובה.",
+          "ה. כל התשובות האחרות אינן נכונות."
+        ]
+      },
+      "sub_questions": null,
+      "points": 5,
+      "solution": {
+        "is_present_in_file": false,
+        "correct_option": null,
+        "explanation": null
+      },
+      "difficulty_estimation": "Medium"
+    },
+    {
+      "id": 3,
+      "type": "CodeAnalysis",
+      "topic": [
+        "Processes",
+        "IPC",
+        "System Calls",
+        "Concurrency"
+      ],
+      "content": {
+        "text": "נתונה התוכנית הבאה:\nהריצו את התוכנית, והתהליך שנוצר קיבל את מזהה התהליך 42.\nיש להניח שכל קריאות המערכת שיכולות להצליח הצליחו, לא נוצרים תהליכים בקטעי קוד אחרים במערכת, וכל תהליך מקבל מזהה הגדול ב-1 מהתהליך שנוצר לפניו.\nתזכורת: כל הדפסה לפלט הסטנדרטי מתבצעת מיד, ללא חוצץ (buffer) הדפסה או המתנה לירידת שורה.",
+        "code_snippet": "1 void foo(int p_read [2], int p_write[2]) {\n2   unsigned int num;\n3   int ret;\n4   close(p_read[1]);\n5   close(p_write[0]);\n6\n7   while (1) {\n8     ret = read(p_read [0], &num, sizeof(int));\n9     if (ret == 0)\n10      exit(0);\n11    printf(\"%d \", num);\n12    if (num == 1)\n13      exit(0);\n14    usleep(50 * 1000); // sleep for 50*1000ms\n15    num = (num%2 == 0) ? num/2 : num*3+1;\n16    write(p_write [1], &num, sizeof(int));\n17  }\n18}\n19\n20 int main() {\n21  int pipe1[2], pipe2[2];\n22  const int NUM = 3;\n23  pipe (pipe1);\n24  pipe(pipe2);\n25  if (!fork())\n26    foo(pipe1, pipe2);\n27  if (!fork())\n28    foo(pipe2, pipe1);\n29  write(pipe1[1], &NUM, sizeof(int));\n30  // while (wait(NULL) > 0); // commented out!\n31  exit(0);\n32}"
+      },
+      "sub_questions": [
+        {
+          "id": "3.1",
+          "text": "כתבו את כל הפלטים האפשריים של התוכנית.\nיש להסביר כל פלט באופן מפורט.\nמספר פלטים אפשריים:\nפירוט הפלטים ונימוק:",
+          "code_snippet": null,
+          "options": null
+        },
+        {
+          "id": "3.2",
+          "text": "איזו תופעה תתרחש אם נוציא את שורה 30 מהערה? יש לפרט את התופעה במלואה ולהסביר מדוע השינוי גורם לה. שימו לב: שינוי זה הוא לקוד הנתון בלבד, ללא שינויים המתוארים בסעיפים אחרים.\nהתופעה:\nנימוק:",
+          "code_snippet": null,
+          "options": null
+        },
+        {
+          "id": "3.3",
+          "text": "אם נכניס את שורה 14 להערה, האם עלול להיווצר מרוץ (race condition)? שימו לב: שינוי זה הוא לקוד הנתון בלבד, ללא שינויים המתוארים בסעיפים אחרים.\nמצב מרוץ: יתכן / לא יתכן\nנימוק:",
+          "code_snippet": null,
+          "options": null
+        }
+      ],
+      "points": null,
+      "solution": {
+        "is_present_in_file": false,
+        "correct_option": null,
+        "explanation": null
+      },
+      "difficulty_estimation": "Hard"
+    },
+    {
+      "id": 4,
+      "type": "CodeAnalysis",
+      "topic": [
+        "Synchronization",
+        "Atomic Operations",
+        "Mutexes",
+        "Concurrency"
+      ],
+      "content": {
+        "text": "במנעול TTAS הנלמד בשיעור מימשנו את הפעולות lock, unlock בלבד. לעומת זאת, במנעול המובנה של לינוקס זמינות גם הפעולות trylock, timedlock. בשאלה זו יש לממש מנעול TTAS התומך גם בפעולות trylock,timedlock. יש לשמור על כל התכונות של מנעול TTAS כפי שנלמד (מניעה הדדית, חופש מקיפאון, הוגנות, ביצועים). פעולות אלו צריכות להחזיר 0 בהצלחה (תפיסת המנעול), או מספר אחר בכישלון / timeout. לצורך המימוש ניתן להשתמש בפעולה האטומית TAS בלבד. אין להשתמש באובייקטי סנכרון או פקודות מכונה אטומיות אחרות. יש להימנע מ-spinning ע\"י שימוש נכון בקריאה ()pthread_yield עבור המימוש של הפעולה timedlock ניתן להשתמש בפונקציה ()time אשר מחזירה מספר (int) הולך וגדל המייצג את הזמן הנוכחי. הפרמטר לפעולה הוא הזמן עד אליו יש לנסות לתפוס את המנעול. שימו לב: פתרון אשר אינו שומר על כל התכונות של מנעול TTAS (כולל הביצועים) אינו עומד בדרישות, ולא יקבל ניקוד.\nתיאור הפתרון:\nהגדרת מבנה המנעול (יש לציין ערכי אתחול בהערה):",
+        "code_snippet": null
+      },
+      "sub_questions": [
+        {
+          "id": "4.1",
+          "text": "Implement the TTASLock functions.",
+          "code_snippet": "typedef struct {\n} TTASLock;\n\nvoid lock(TTASLock *lock) {\n}\nint trylock (TTASLock *lock) {\n}\nint timedlock (TTASLock *lock, int limit) {\n}\nvoid unlock(TTASLock *lock) {\n}",
+          "options": null
+        },
+        {
+          "id": "4.2",
+          "text": "נתון קטע הקוד הבא למימוש מנעול ל-N חוטים. הפרמטר me מייצג מזהה ייחודי לכל חוט (בין 0 ל-1-N):",
+          "code_snippet": "typedef struct {\nint turn;\nint busy;\n} FlakyLock;\nvoid init(FlakyLock *lock) {\nlock->busy = 0;\n}\nvoid lock(FlakyLock *lock, int me) {\ndo {\ndo {\nlock->turn = me;\n} while (lock->busy);\nlock->busy = 1;\n} while (lock->turn != me);\n}\nvoid unlock (FlakyLock *lock) {\nlock->busy = 0;\n}",
+          "options": null
+        },
+        {
+          "id": "4.2.1",
+          "text": "האם המנעול מקיים מניעה הדדית:?",
+          "code_snippet": null,
+          "options": [
+            "כן",
+            "לא"
+          ]
+        },
+        {
+          "id": "4.2.2",
+          "text": "האם המנעול מקיים חופש מקיפאון?",
+          "code_snippet": null,
+          "options": [
+            "כן",
+            "לא"
+          ]
+        },
+        {
+          "id": "4.2.3",
+          "text": "האם המנעול מקיים הוגנות?",
+          "code_snippet": null,
+          "options": [
+            "כן",
+            "לא"
+          ]
+        }
+      ],
+      "points": 15,
+      "solution": {
+        "is_present_in_file": false,
+        "correct_option": null,
+        "explanation": null
+      },
+      "difficulty_estimation": "Hard"
+    },
+    {
+      "id": 5,
+      "type": "Open",
+      "topic": [
+        "File Systems",
+        "I/O",
+        "Disk Scheduling"
+      ],
+      "content": {
+        "text": "נתון דיסק קשיח עם הנתונים הבאים: מהירות סיבוב: RPM 10,000. גודל מצביע: 4 בתים, גודל סקטור: 1024 בתים, גודל בלוק: 4KB. 8 משטחים (4 platters דו-צדדיים). צפיפות הסקטורים בכל רצועה היא בהתאם ל-2 אזורים: A, B. בכל אזור יש 500 רצועות. באזור A יש 4000 סקטורים לרצועה, באזור B יש 2000 סקטורים לרצועה. זמן ה-seek הממוצע הוא 8ms, ובין 2 רצועות סמוכות הוא 2ms. נתון שיפור track skew: בקריאת סקטורים עוקבים ברצועות סמוכות אין המתנה לסיבוב. על גבי כל הדיסק הנתון קיימת מערכת קבצים VSFS, עם סופר-בלוק בבלוק 0 ושאר מערכת הקבצים מבלוק 1 והלאה. סדר האזורים במערכת הקבצים הוא הסטנדרטי, כפי שנלמד בשיעור. כל הבלוקים של הדיסק בשימוש ע\"י מערכת הקבצים. כמו-כן נתון שגודל inode הוא 512 בתים, וכל inode מכיל 6 מצביעים ישירים, 3 מצביעים עקיפים, ו-2 מצביעים עקיפים כפולים. יש לפרט ולנמק את הפעולות והחישובים בכל סעיף.",
+        "code_snippet": null
+      },
+      "sub_questions": [
+        {
+          "id": "5.1",
+          "text": "לגבי כל אחד מהנתונים הבאים, ציינו האם ניתן לדעת את הערך המקסימלי שלו. אם כן, יש לפרט מה הערך המקסימלי, אחרת יש לפרט מה הנתון החסר כדי לדעת אותו.",
+          "code_snippet": null,
+          "options": null
+        },
+        {
+          "id": "5.1.1",
+          "text": "בלוק ה-inode הראשון:",
+          "code_snippet": null,
+          "options": null
+        },
+        {
+          "id": "5.1.2",
+          "text": "בלוק ה-data הראשון:",
+          "code_snippet": null,
+          "options": null
+        },
+        {
+          "id": "5.1.3",
+          "text": "בלוקה-inode bitmap הראשון:",
+          "code_snippet": null,
+          "options": null
+        },
+        {
+          "id": "5.1.4",
+          "text": "בלוקה-data bitmap הראשון:",
+          "code_snippet": null,
+          "options": null
+        },
+        {
+          "id": "5.2",
+          "text": "במערכת הנתונה קיים קובץ בגודל 20MB. מה הזמן המינימלי הנדרש לקריאת כל הקובץ? ניתן להניח כל תרחיש שיביא לזמן המינימלי, אך נתון שהקובץ כבר נפתח ומלבד לכך אף cache אינו מכיל מידע רלוונטי לביצוע הפעולה. יש לפרט את הפעולה באופן מלא, כולל כל הבלוקים שניגשים אליהם לקריאה ולכתיבה.\nזמן מינימלי:\nנימוק:",
+          "code_snippet": null,
+          "options": null
+        },
+        {
+          "id": "5.3",
+          "text": "בסעיף זה (בלבד), שודרגה מערכת הקבצים כך שתעבוד עם metadata journaling. בשיעור נלמד שכאשר משתמשים ב-metadata journaling, אם פעולה דורשת כתיבת נתונים לבלוק DATA קיים, יש צורך לשכפל את הבלוק עם השינויים ולא לעדכן את הבלוק הקיים, על-מנת להמשיך להתמודד עם קריסות באופן תקין. מספר סטודנטים התווכחו לגבי הצורך לשכפל את בלוק ה-DATA עבור פעולות מסוימות במערכת זו: - סטודנט א' טוען: כאשר מוסיפים נתונים אל סוף קובץ קיים, ניתן לכתוב את הנתונים בשלב כתיבת ה-DATA כרגיל מבלי לשכפל את הבלוק (אפילו אם הבלוק האחרון של הקובץ לא מנוצל במלואו לפני הפעולה). - סטודנט ב' טוען: סטודנט א' צודק רק עבור פעולות בהן הכתיבה לא מוסיפה בלוק DATA חדש אל הקובץ. - סטודנט ג' טוען: סטודנט א' צודק, אך הטענה נכונה לכל כתיבה המוסיפה נתונים אל קובץ קיים, לאו דווקא בסופו. - סטודנט ד' טוען: הסטודנטים האחרים טועים, כדי להתמודד עם קריסות יש לשכפל את בלוק ה-DATA עם השינויים בכל טרנזקציה הכוללת כתיבה לבלוק DATA קיים. מי מהסטודנטים צודק? יש לבחור בטענה הנכונה ביותר, ולהסביר בבירור מדוע הטענה נכונה והאחרות שגויות.\nסטודנט א' / סטודנט ב' / סטודנט ג' / סטודנט ד'\nנימוק:",
+          "code_snippet": null,
+          "options": [
+            "סטודנט א'",
+            "סטודנט ב'",
+            "סטודנט ג'",
+            "סטודנט ד'"
+          ]
+        }
+      ],
+      "points": null,
+      "solution": {
+        "is_present_in_file": false,
+        "correct_option": null,
+        "explanation": null
+      },
+      "difficulty_estimation": "Hard"
+    }
+  ]
+}

@@ -1,0 +1,256 @@
+{
+  "metadata": {
+    "course_name": "Operating Systems",
+    "year": "2025",
+    "semester": "Semester B",
+    "moed": "Moed A",
+    "exam_date": "15.07.2025",
+    "source_file": "os25BA.pdf"
+  },
+  "questions": [
+    {
+      "id": 1,
+      "type": "MultipleChoice",
+      "topic": [
+        "Scheduling",
+        "Processes",
+        "CPU Scheduling"
+      ],
+      "content": {
+        "text": "נתונה מערכת עם אלגוריתם תזמון מבוסס RR מלבד ההבדל הבא: משימה חדשה מתחילה לרוץ מיד כשנוצרה. משימה שסיימה את הקוונטה שלה עדיין חוזרת לסוף התור, ויש להניח שלא נוצרות 2 משימות חדשות בו-זמנית.\nאיזו טענה בהכרח נכונה?",
+        "code_snippet": null,
+        "options": [
+          "א. זמן התגובה של האלגוריתם הוא אופטימלי.",
+          "ב. זמן המחזור של האלגוריתם תמיד עדיף או שווה לזה של RR סטנדרטי.",
+          "ג. לכל 1<N, אם מספר המשימות בתור בכל רגע נתון הוא לא יותר מ-N, לא תיתכן הרעבה.",
+          "ד. לכל 1<N, אם מספר המשימות בתור בכל רגע נתון הוא לא יותר מ-N, בהכרח תתרחש הרעבה.",
+          "ה. כל התשובות האחרות אינן נכונות."
+        ]
+      },
+      "sub_questions": null,
+      "points": 5,
+      "solution": {
+        "is_present_in_file": false,
+        "correct_option": null,
+        "explanation": null
+      },
+      "difficulty_estimation": "Medium"
+    },
+    {
+      "id": 2,
+      "type": "MultipleChoice",
+      "topic": [
+        "File Systems",
+        "I/O"
+      ],
+      "content": {
+        "text": "נתון שרת עם 6 דיסקים קשיחים בעלי נתונים זהים, בגודל 2TB כל אחד.\nאיזה מהמנגנונים הבאים יאפשר להתמודד עם קלקול של דיסק אחד לפחות? מבין אלו, יש לבחור את המנגנון המספק את שטח האחסון המקסימלי.",
+        "code_snippet": null,
+        "options": [
+          "א. RAID-0",
+          "ב. 2 של mirroring level עם RAID-1.",
+          "ג. 3 של mirroring level עם RAID-1",
+          "ד. RAID-5.",
+          "ה. כל התשובות האחרות אינן נכונות."
+        ]
+      },
+      "sub_questions": null,
+      "points": 5,
+      "solution": {
+        "is_present_in_file": false,
+        "correct_option": null,
+        "explanation": null
+      },
+      "difficulty_estimation": "Medium"
+    },
+    {
+      "id": 3,
+      "type": "MultipleChoice",
+      "topic": [
+        "System Calls",
+        "Memory Management",
+        "Processes"
+      ],
+      "content": {
+        "text": "איזו מהטענות הבאות נכונה לגבי מודול גרעין:",
+        "code_snippet": null,
+        "options": [
+          "א. המודול רץ עם מרחב זיכרון משלו ונפרד מה-kernel space.",
+          "ב. אין בעיה לגשת ישירות לזיכרון ב-user space באופן חופשי.",
+          "ג. ניתן לבצע קריאות מערכת כרגיל כי הן רצות ב-kernel mode.",
+          "ד. לאחר שנטען, לא ניתן להסיר מודול גרעין מבלי להפעיל מחדש את המערכת.",
+          "ה. כל התשובות האחרות אינן נכונות."
+        ]
+      },
+      "sub_questions": null,
+      "points": 5,
+      "solution": {
+        "is_present_in_file": false,
+        "correct_option": null,
+        "explanation": null
+      },
+      "difficulty_estimation": "Medium"
+    },
+    {
+      "id": 4,
+      "type": "MultipleChoice",
+      "topic": [
+        "Synchronization",
+        "Threads",
+        "Concurrency",
+        "Mutexes"
+      ],
+      "content": {
+        "text": "נתונה מערכת עם N חוטים המשתמשת במנעול מסוג ticket lock, וידוע שבנקודת זמן מסוימת בריצה הערך הנוכחי של turn הוא X.\nמה הערך המקסימלי האפשרי של ticket באותה נקודת זמן?",
+        "code_snippet": null,
+        "options": [
+          "א. X",
+          "ב. X+1",
+          "ג. X+N-1",
+          "ד. X+N",
+          "ה. כל התשובות האחרות אינן נכונות."
+        ]
+      },
+      "sub_questions": null,
+      "points": 5,
+      "solution": {
+        "is_present_in_file": false,
+        "correct_option": null,
+        "explanation": null
+      },
+      "difficulty_estimation": "Medium"
+    },
+    {
+      "id": 5,
+      "type": "MultipleChoice",
+      "topic": [
+        "Processes",
+        "System Calls",
+        "Memory Management"
+      ],
+      "content": {
+        "text": "נתונה מערכת בה רץ תהליך משתמש יחיד שקורא ל-fork בלולאה. לאחר יצירת 100 תהליכים (כולל התהליך הראשי), הקריאות ל-fork נכשלות ולא נוצרים עוד תהליכים.\nאיזו טענה בהכרח נכונה?",
+        "code_snippet": null,
+        "options": [
+          "א. הגענו לניצול מקסימלי של זיכרון המשתמש ולכן לא ניתן ליצור עוד תהליכים.",
+          "ב. הגענו לניצול מקסימלי של זיכרון הקרנל ולכן לא ניתן ליצור עוד תהליכים.",
+          "ג. אם נעצור את התהליך הראשי, נוכל להריץ בהצלחה כל תוכנית אחרת במקומו.",
+          "ד. אם נחכה פרק זמן מסוים, נוכל ליצור תהליכים חדשים (הקריאות ל-fork שוב יצליחו).",
+          "ה. כל התשובות האחרות אינן נכונות."
+        ]
+      },
+      "sub_questions": null,
+      "points": 5,
+      "solution": {
+        "is_present_in_file": false,
+        "correct_option": null,
+        "explanation": null
+      },
+      "difficulty_estimation": "Medium"
+    },
+    {
+      "id": 6,
+      "type": "Open",
+      "topic": [
+        "Memory Management",
+        "Virtual Memory",
+        "Paging"
+      ],
+      "content": {
+        "text": "נתונה מערכת בה כתובת וירטואלית מורכבת מהחלקים הבאים: היסט של 10 ביטים, PDI0 של 4 ביטים, PDI1 של 8 ביטים, ו-PTI של 8 ביטים.\nכל כניסה בטבלת הדפים (PTE) מכילה מספר מסגרת, 4 ביטים של סטטוס ו-4 ביטים של ריפוד. נתון שהגודל של PTE ו-PDE זהה, וכל טבלה/חלק מאוחסנים בדף אחד.\nיש לפרט ולנמק את החישובים בכל סעיף.",
+        "code_snippet": null,
+        "options": null
+      },
+      "sub_questions": [
+        {
+          "id": "6.1",
+          "text": "כמה זיכרון פיזי יכול להיתפס בעקבות הרצת תהליך יחיד, במקרה המקסימלי?\nכמות זיכרון מקסימלית:\nנימוק:",
+          "code_snippet": null,
+          "options": null
+        },
+        {
+          "id": "6.2",
+          "text": "מה גודל הזיכרון הפיזי המקסימלי במערכת?\nזיכרון פיזי מקסימלי:\nנימוק:",
+          "code_snippet": null,
+          "options": null
+        },
+        {
+          "id": "6.3",
+          "text": "נתון שבמערכת זו זמין הזיכרון הפיזי המקסימלי.\nמה המספר המינימלי של תהליכים שיש להריץ, כך שהזיכרון הפיזי כולו יהיה תפוס?\nניתן להגדיר תהליכים כרצונכם. יש להניח שלא נעשה שימוש ב-swapping, ואין לקרנל שימוש בזיכרון נוסף מלבד זה הנדרש עבור התהליכים שהוגדרו.\nמספר תהליכים מינימלי:\nנימוק:",
+          "code_snippet": null,
+          "options": null
+        }
+      ],
+      "points": null,
+      "solution": {
+        "is_present_in_file": false,
+        "correct_option": null,
+        "explanation": null
+      },
+      "difficulty_estimation": "Hard"
+    },
+    {
+      "id": 7,
+      "type": "CodeAnalysis",
+      "topic": [
+        "Synchronization",
+        "Threads",
+        "Concurrency",
+        "Mutexes",
+        "Semaphores"
+      ],
+      "content": {
+        "text": "נתונה מערכת מרובת חוטים המנהלת N משאבים אקסקלוסיביים, כלומר שמותר לגשת רק לאחד מהמשאבים בכל רגע נתון (אך ניתן לגשת לאותו משאב ע\"י מספר חוטים במקביל).\nהמשאבים ממוספרים 1-N...0. חוט אשר מעוניין לגשת למשאב 1 קורא לפעולה (enter(i לפני הגישה למשאב, ולפעולה (exit(i לאחר סיום השימוש במשאב. הקריאה (enter(i צריכה לחסום את החוט הקורא עד אשר הוא רשאי לגשת למשאב 1 (ואז הקריאה חוזרת).\nבשאלה זו יש לכתוב אובייקט סנכרון עבור מערכת זו (מימוש לפעולות enter, exit) כך שחוטים שונים יוכלו לקרוא לפעולות אלו במקביל והמערכת תעבוד באופן תקין:\n- מניעה הדדית: בכל רגע נתון, לא נעשית גישה ליותר ממשאב אחד.\n- חופש מקיפאון: אם חוט מנסה לגשת למשאב 1 ואין חוט הניגש למשאב שונה מ-1, החוט יצליח לגשת אל i.\nלצורך המימוש ניתן להשתמש במנעולים ומשתני תנאי בלבד. אין להשתמש בפקודות מכונה אטומיות או אובייקטי סנכרון אחרים. יש להימנע מ-spinning על-ידי שימוש נכון במשתני תנאי.\nשימו לב: פתרון המאפשר רק לחוט אחד לגשת למשאב כלשהו בכל רגע נתון אינו עומד בדרישות, ולא יקבל ניקוד.\nתיאור הפתרון:\nמשתנים גלובליים (יש לציין ערכי אתחול בהערה):",
+        "code_snippet": "#define N ??\n// number of resources\nvoid enter(int i) {\n}\nvoid exit(int i) {\n}"
+      },
+      "sub_questions": null,
+      "points": 25,
+      "solution": {
+        "is_present_in_file": false,
+        "correct_option": null,
+        "explanation": null
+      },
+      "difficulty_estimation": "Hard"
+    },
+    {
+      "id": 8,
+      "type": "Open",
+      "topic": [
+        "File Systems",
+        "I/O"
+      ],
+      "content": {
+        "text": "נתונה מערכת קבצים VSFS ללא מספרי inode וללא inode table, ובהתאם גם ללא inode bitmap. במקום זאת, כל רשומה של תיקייה מכילה את ה-inode עצמו במקום מספר ה-inode.\nכלומר, הנתונים של כל תיקייה הם טבלה שכל רשומה אינה מכילה מספר inode אלא את מבנה ה-inode של קובץ המוכל בתוך אותה תיקייה, בנוסף לשאר הפרטים המוכלים בכל רשומה של תיקייה (שם הקובץ).\nאת ה-inode של תיקיית השורש מחזיקים בתוך ה-superblock.",
+        "code_snippet": null,
+        "options": null
+      },
+      "sub_questions": [
+        {
+          "id": "8.1",
+          "text": "סטודנט טוען שבמערכת זו לא ניתן לייצר hard link נוסף לקובץ קיים. האם טענת הסטודנט נכונה?\nהסטודנט צודק / הסטודנט טועה נימוק:",
+          "code_snippet": null,
+          "options": null
+        },
+        {
+          "id": "8.2",
+          "text": "סטודנט טוען שבמערכת זו לא ניתן לייצר symbolic link לקובץ קיים. האם טענת הסטודנט נכונה?\nהסטודנט צודק / הסטודנט טועה נימוק:",
+          "code_snippet": null,
+          "options": null
+        },
+        {
+          "id": "8.3",
+          "text": "נתון שגודל בלוק הוא 1KB, גודל inode הוא 256B, וכל inode מכיל 8 מצביעים ישירים, 4 מצביעים עקיפים, 2 מצביעים עקיפים כפולים, ומצביע עקיף משולש אחד. גודל מצביע הוא 4B.\nמשתמש ביצע פעולה כתיבה המוסיפה 4KB אל הקובץ: home/os/exam/25ba/\nידוע שקובץ זה הוא בגודל 1030KB, ונתון שאף cache אינו מכיל מידע רלוונטי לביצוע הפעולה.\nמה המספר המינימלי של בלוקים שנדרש לקרוא מהם כדי להשלים את הפעולה?\nיש לתאר את כל הבלוקים שנדרש לקרוא ולכתוב במקרה זה לפי סדר הגישה אליהם, ולנמק כל גישה. ניתן להניח כל תרחיש שיוביל למספר המינימלי, כל עוד הוא עומד בנתונים ובמגבלות שצוינו.\nיש לפרט בקצרה ובבירור מדוע תרחיש זה הוא המינימלי.\nמספר בלוקים לקריאה:\nנימוק:",
+          "code_snippet": null,
+          "options": null
+        }
+      ],
+      "points": null,
+      "solution": {
+        "is_present_in_file": false,
+        "correct_option": null,
+        "explanation": null
+      },
+      "difficulty_estimation": "Hard"
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 18:12:41",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 968,
+      "output_tokens": 582,
+      "total_tokens": 4590
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "Processes",
+      "fork",
+      "exec",
+      "Process Image"
+    ],
+    "content": {
+      "text": "נתון קוד ה-C הבא. בהנחה שכל הקריאות למערכת מצליחות וכל הקבצים קיימים, מה יהיה הפלט של התוכנית?",
+      "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\nint main() {\n    printf(\"1\\n\");\n    if (fork() == 0) {\n        printf(\"2\\n\");\n        execlp(\"/bin/echo\", \"echo\", \"3\", NULL);\n        printf(\"4\\n\");\n    } else {\n        wait(NULL);\n        printf(\"5\\n\");\n    }\n    return 0;\n}",
+      "options": [
+        "1, 2, 3, 4, 5",
+        "1, 2, 3, 5",
+        "1, 2, 4, 5",
+        "1, 3, 2, 5",
+        "הקוד יגרום לשגיאת זמן ריצה (Runtime Error)"
+      ]
+    },
+    "sub_questions": null,
+    "points": 10,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "1, 2, 3, 5",
+      "explanation": "התהליך הראשי מתחיל ומדפיס '1'. לאחר מכן מתבצע fork. בתהליך הבן, מודפס '2' ואז מתבצעת הקריאה ל-execlp. פקודה זו מחליפה את תמונת הזיכרון של התהליך הנוכחי בתוכנית החדשה (echo). לכן, הקוד שמופיע לאחר ה-exec (הדפסת '4') לעולם לא יתבצע אם ה-exec הצליח. התוכנית echo מדפיסה '3' ומסתיימת. תהליך האב ממתין לסיום הבן באמצעות wait, ורק לאחר מכן מדפיס '5'. לכן הפלט יהיה 1, 2, 3, 5."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

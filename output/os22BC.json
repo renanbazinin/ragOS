@@ -1,0 +1,84 @@
+{
+  "metadata": {
+    "course_name": "Operating Systems",
+    "year": "2022",
+    "semester": "Semester B",
+    "moed": "Moed C",
+    "exam_date": "18.08.2022",
+    "source_file": "os22BC.pdf"
+  },
+  "questions": [
+    {
+      "id": 1,
+      "type": "Open",
+      "topic": [
+        "Virtual Memory",
+        "Paging",
+        "Memory Management",
+        "TLB",
+        "System Calls"
+      ],
+      "content": {
+        "text": "נתונה מערכת עם מנגנון חדש של זיכרון וירטואלי המתבסס על דפדוף והחלפה, אך מספק לתהליכים זיכרון וירטואלי לא מוגבל. כלומר, לכל תהליך מספר אינסופי של דפים זמינים והתהליך יכול לפנות לכל כתובת (כל מס' טבעי). הזיכרון הפיזי במערכת עדיין סופי, אך ניתן להניח שזמין נפח לא מוגבל של זיכרון משני (דיסק קשיח).\nתארו בכלליות מימוש של תהליך תרגום עבור מערכת זו, המקבל כקלט מספר דף ומחזיר כפלט מספר מסגרת, ופרטו את כל השינויים הנדרשים במערכת עבורו.\nכלומר, יש לתאר את אלגוריתם התרגום עם כל השינויים הנדרשים: בקוד ומבני הנתונים של מערכת ההפעלה, ברכיבי החומרה, וכו' (כמו טבלת הדפים, page fault, שימוש ב-TLB).\nשימו לב: גודל הקלט אינו מוגבל (כמות הדפים אינסופית) וניתן להניח שהוא רצף ביטים (מערך ביטים וגודלו). ניתן לשנות את אופן הפעולה של רכיבי חומרה אך לא את המבנה הבסיסי שלהם (לדוגמה, ניתן לשנות את גודל הרשומה או אופן החיפוש ב-TLB, אך לא את כמות הזיכרון הכללת בו או הגדרת רכיב חדש לחלוטין).",
+        "code_snippet": null,
+        "options": null
+      },
+      "sub_questions": null,
+      "points": null,
+      "solution": {
+        "is_present_in_file": false,
+        "correct_option": null,
+        "explanation": null
+      },
+      "difficulty_estimation": "Hard"
+    },
+    {
+      "id": 2,
+      "type": "CodeAnalysis",
+      "topic": [
+        "Processes",
+        "System Calls",
+        "I/O",
+        "Concurrency"
+      ],
+      "content": {
+        "text": "באופן כללי, כל תוכנית shell מבצעת לולאה בסגנון הבא (פסאודו-קוד):\nבשאלה זו יש לממש את execute_cmd עם תמיכה בהרצה ברקע (&) וגם redirection (<>) של הקלט והפלט הסטנדרטי (אין תמיכה ב-redirection של stderr). להלן הארגומנטים שהפונקציה מקבלת:\nprog_name – שם התוכנית שהמשתמש מבקש להריץ.\nprog_args – מערך הארגומנטים לתוכנית. ניתן להניח שתא 0 מכיל את שם התוכנית והתא האחרון מכיל NULL, ואין במערך סימנים או ערכים של redirection או הרצה ברקע.\nin_file / out_file – שמות קבצים עבור redirection. אם לא התבצע redirection, יתכן שיסופק אחד מהם, שניהם, או אף אחד מהם.\nrun_bg – בוליאני שמציין הרצה ברקע או לא. ניתן להתעלם מזומבים.",
+        "code_snippet": "while (1) // SHELL main loop\n{\nprintf(\"==> \");\nparse_cmd(...);\nexecute_cmd(...);\n}\nvoid execute_cmd(char* prog_name, char** prog_args,\nchar* in_file, char* out_file, int run_bg) {",
+        "options": null
+      },
+      "sub_questions": null,
+      "points": null,
+      "solution": {
+        "is_present_in_file": false,
+        "correct_option": null,
+        "explanation": null
+      },
+      "difficulty_estimation": "Medium"
+    },
+    {
+      "id": 3,
+      "type": "CodeAnalysis",
+      "topic": [
+        "Synchronization",
+        "Mutexes",
+        "Semaphores",
+        "Atomic Operations",
+        "Concurrency",
+        "Threads"
+      ],
+      "content": {
+        "text": "מנעול N-Lock הוא מנעול המאפשר ל-N חוטים להיכנס בו-זמנית לקטע הקריטי. מנעול זה נדרש לקיים:\n- מניעה הדדית – יש לכל היותר N חוטים בקטע הקריטי בו-זמנית.\n- חופש מקיפאון – אם חוטים מנסים לתפוס את המנעול ויש פחות מ-N חוטים בקטע הקריטי, חוט כלשהו יצליח לתפוס לקטע הקריטי בזמן סופי.\n- הוגנות – יהיה סדר כלשהו של כניסה.\nניתן לממש מנעול N-Lock באמצעות סמפור מותאם ל-N.\nבשאלה זו יש לממש מנעול N-Lock ללא שימוש בפעולות אטומיות או אובייקטי סנכרון, מלבד 2 הפעולות האטומיות:\nint fetchAndAdd(int *ptr)\nint fetchAndSub(int *ptr)",
+        "code_snippet": "typedef struct {\n} NLock;\n\nvoid init(NLock *lock) {\n}\n\nvoid destroy(NLock *lock) {\n}\n\nvoid lock(NLock *lock) {\n}\n\nvoid unlock (NLock *lock) {\n}",
+        "options": null
+      },
+      "sub_questions": null,
+      "points": null,
+      "solution": {
+        "is_present_in_file": false,
+        "correct_option": null,
+        "explanation": null
+      },
+      "difficulty_estimation": "Hard"
+    }
+  ]
+}

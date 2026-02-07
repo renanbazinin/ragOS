@@ -1,0 +1,58 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 18:28:19",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3664,
+      "output_tokens": 1361,
+      "total_tokens": 7447
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Processes",
+      "fork",
+      "wait",
+      "Memory Isolation",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה בשפת C. הניחו שכל קריאות המערכת מצליחות, ושאין תהליכים נוספים במערכת מלבד אלו שנוצרים על ידי התוכנית. הניחו כי המערכת אינה משתמשת בחוצצים (buffers) עבור הפלט.",
+      "code_snippet": "1  #include <stdio.h>\n2  #include <unistd.h>\n3  #include <sys/wait.h>\n4  #include <stdlib.h>\n5\n6  int main() {\n7    int x = 1;\n8    pid_t p;\n9    for (int i = 0; i < 2; i++) {\n10     p = fork();\n11     if (p == 0) {\n12       x += 2;\n13       if (i == 1) {\n14         if (fork() == 0) {\n15           x *= 2;\n16           printf(\"C: %d\\n\", x);\n17           exit(0);\n18         }\n19         wait(NULL);\n20       }\n21       printf(\"B: %d\\n\", x);\n22       exit(0);\n23     } else {\n24       x += 1;\n25     }\n26   }\n27   while(wait(NULL) > 0);\n28   printf(\"A: %d\\n\", x);\n29   return 0;\n30 }",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "כמה תהליכים נוצרו סה\"כ במהלך ריצת התוכנית (כולל התהליך הראשי)? הסבירו את תשובתכם בעזרת תיאור עץ התהליכים.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "ציינו את כל שורות הפלט של התוכנית. האם סדר ההדפסה של השורות קבוע? אם כן - מהו? אם לא - אילו אילוצים קיימים על סדר ההדפסה?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.3",
+        "text": "נניח שמוחקים את שורה 27 מהקוד (לולאת ה-wait). האם במצב זה ייתכן שהשורה \"A: 3\" תודפס לפני השורה \"B: 4\"? נמקו.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "10.1: נוצרו 4 תהליכים סה\"כ. התהליך הראשי (P0) מתחיל עם x=1. באיטרציה i=0 הוא יוצר את P1. באיטרציה i=1 הוא יוצר את P2. תהליך P2, כיוון שהוא בבן של האיטרציה השנייה (i=1), יוצר את P3 (נכד של P0).\n\n10.2: שורות הפלט הן: \"B: 3\", \"C: 8\", \"B: 4\", \"A: 3\".\nהסבר הערכים:\n- P1 (נוצר ב-i=0): יורש x=1, מבצע x+=2 ומדפיס \"B: 3\".\n- P0 (אחרי i=0): מבצע x+=1, כעת x=2.\n- P2 (נוצר ב-i=1): יורש x=2, מבצע x+=2, כעת x=4. כיוון ש-i=1, יוצר את P3.\n- P3 (נוצר בתוך P2): יורש x=4, מבצע x*=2, מדפיס \"C: 8\".\n- P2 מחכה ל-P3 (שורה 19) ואז מדפיס \"B: 4\".\n- P0 (אחרי i=1): מבצע x+=1, כעת x=3. מחכה לכל בניו (שורה 27) ומדפיס \"A: 3\".\nאילוצי סדר: \"C: 8\" חייב להופיע לפני \"B: 4\" בגלל ה-wait בשורה 19. \"A: 3\" חייב להופיע אחרון בגלל ה-wait בשורה 27. \"B: 3\" יכול להופיע בכל מקום לפני \"A: 3\".\n\n10.3: כן. אם נסיר את שורה 27, התהליך הראשי (P0) לא יחכה לסיום בניו (P1, P2). לאחר סיום הלולאה הוא יגיע מיד לשורה 28. ייתכן מצב שבו P0 יסיים את הריצה וידפיס \"A: 3\" בזמן ש-P2 עדיין ממתין ל-P3 או טרם הגיע לשורת ההדפסה שלו (מרוץ תהליכים)."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 18:14:03",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 968,
+      "output_tokens": 669,
+      "total_tokens": 3750
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "Processes",
+      "Fork",
+      "Memory Space",
+      "Wait"
+    ],
+    "content": {
+      "text": "מה יהיה הפלט של הקוד הבא בשפת C, בהנחה שכל הקריאות למערכת מצליחות ושסדר ההדפסה נקבע על פי ה-wait (כלומר, תהליך אב תמיד ידפיס אחרי שתהליך הבן שלו סיים)?",
+      "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\nint main() {\n    int val = 5;\n    if (fork() == 0) {\n        val += 10;\n        if (fork() == 0) {\n            val *= 2;\n            printf(\"%d \", val);\n        } else {\n            wait(NULL);\n            val -= 5;\n            printf(\"%d \", val);\n        }\n    } else {\n        wait(NULL);\n        val += 1;\n        printf(\"%d \", val);\n    }\n    return 0;\n}",
+      "options": [
+        "א. 30 10 6",
+        "ב. 30 25 6",
+        "ג. 15 10 6",
+        "ד. 30 10 16",
+        "ה. אף אחת מהתשובות אינה נכונה."
+      ]
+    },
+    "sub_questions": null,
+    "points": 10,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "בתהליך המקורי (P1) המשתנה val שווה 5. לאחר ה-fork הראשון, נוצר תהליך בן (P2) שמקבל עותק של val עם הערך 5. P2 מעדכן את val שלו ל-15 (5+10). לאחר מכן P2 מבצע fork נוסף ויוצר את P3. P3 מקבל עותק של val מ-P2, כלומר 15, מכפיל ב-2 ומדפיס 30. P2 ממתין ל-P3, לאחר מכן מחסיר 5 מה-val שלו (שהיה 15) ומדפיס 10. לבסוף, P1 שהמתין ל-P2, מעדכן את ה-val המקורי שלו (5) ב-1 ומדפיס 6. כיוון שכל תהליך פועל במרחב כתובות נפרד, השינויים במשתנה val אינם משותפים בין התהליכים."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

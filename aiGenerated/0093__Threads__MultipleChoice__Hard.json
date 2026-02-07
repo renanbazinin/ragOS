@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 18:36:56",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 968,
+      "output_tokens": 760,
+      "total_tokens": 5039
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "Threads",
+      "Process Management",
+      "fork",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתון תהליך מרובה חוטים (Multi-threaded process) המשתמש ב-Mutex גלובלי לצורך סנכרון. אחד מהחוטים (שאינו חוט ה-Main) מבצע קריאה לפונקציה fork() כפי שמתואר בקוד מטה. נניח כי בזמן הקריאה ל-fork(), חוט אחר בתהליך האב (שאינו החוט הקורא ל-fork) מחזיק במנעול ה-lock. מה יקרה בנקודה המסומנת ב-Line X בתוך תהליך הבן?",
+      "code_snippet": "void* thread_func(void* arg) {\n    if (fork() == 0) {\n        // Child process\n        pthread_mutex_lock(&lock); // Line X\n        printf(\"Child acquired lock\\n\");\n        pthread_mutex_unlock(&lock);\n        exit(0);\n    }\n    return NULL;\n}",
+      "options": [
+        "א. תהליך הבן יצליח לתפוס את המנעול מכיוון שכל המנעולים משתחררים אוטומטית בעת fork().",
+        "ב. תהליך הבן יכיל את כל החוטים שהיו באב, ולכן החוט שהחזיק במנעול באב ישחרר אותו גם בבן.",
+        "ג. תהליך הבן ייתקע בקיפאון (Deadlock) ב-Line X, שכן המנעול מועתק במצב 'תפוס' אך החוט שאמור לשחרר אותו אינו קיים בבן.",
+        "ד. תהליך הבן יקרוס (Segmentation Fault) בגישה למנעול שנתפס על ידי חוט שכבר לא קיים.",
+        "ה. מערכת ההפעלה תזהה את המצב ותעביר את הבעלות על המנעול לחוט היחיד שקיים בבן."
+      ]
+    },
+    "sub_questions": null,
+    "points": 10,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "לפי תקן POSIX, כאשר תהליך מרובה חוטים מבצע fork(), רק החוט שקרא ל-fork() משוכפל בתהליך הבן. שאר החוטים של האב אינם קיימים בבן. עם זאת, מצב הזיכרון (כולל מצב ה-Mutexes) מועתק כפי שהוא (Copy-on-Write). אם חוט אחר באב החזיק במנעול בזמן ה-fork, המנעול יופיע כתפוס בזיכרון של הבן. מכיוון שהחוט שהחזיק במנעול לא קיים בבן כדי לשחרר אותו, כל ניסיון של החוט היחיד בבן לתפוס את המנעול יוביל ל-Deadlock."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

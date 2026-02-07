@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 18:33:00",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1127,
+      "output_tokens": 371,
+      "total_tokens": 1952
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "Threads",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "איזה מהמשאבים הבאים **אינו** משותף בין חוטי חישוב (threads) השייכים לאותו תהליך?",
+      "code_snippet": null,
+      "options": [
+        "א. משתנים גלובליים (Global variables)",
+        "ב. זיכרון הערימה (Heap memory)",
+        "ג. קוד התוכנית (Code segment)",
+        "ד. המחסנית (Stack)",
+        "ה. כל התשובות האחרות משותפות בין חוטי החישוב"
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ד",
+      "explanation": "לכל חוט חישוב (thread) יש מחסנית (Stack) פרטית משלו וסט רגיסטרים משלו (כולל Program Counter), זאת על מנת לאפשר לכל חוט לנהל את זרימת הפונקציות והמשתנים המקומיים שלו באופן עצמאי. לעומת זאת, חוטי חישוב באותו תהליך חולקים את מרחב הכתובות הכולל את קטע הקוד, הנתונים הגלובליים והערימה."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

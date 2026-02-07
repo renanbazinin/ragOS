@@ -1,0 +1,50 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 18:38:32",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3183,
+      "output_tokens": 752,
+      "total_tokens": 5321
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Threads",
+      "Concurrency",
+      "Race Conditions"
+    ],
+    "content": {
+      "text": "לפניכם קטע קוד בשפת C המשתמש בספריית pthreads. התוכנית יוצרת שני חוטים (threads) המריצים את הפונקציה `increment` שמקדמת משתנה גלובלי משותף.",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n\nint counter = 0;\n\nvoid* increment(void* arg) {\n    for (int i = 0; i < 100; i++) {\n        counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t t1, t2;\n    pthread_create(&t1, NULL, increment, NULL);\n    pthread_create(&t2, NULL, increment, NULL);\n    pthread_join(t1, NULL);\n    pthread_join(t2, NULL);\n    printf(\"%d\\n\", counter);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "מהו הערך המקסימלי האפשרי שיודפס על ידי התוכנית? נמקו בקצרה.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "האם ייתכן שהתוכנית תדפיס ערך הנמוך מ-200? אם כן, הסבירו באיזה מצב זה עלול לקרות. אם לא, הסבירו מדוע.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": 15,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "10.1. הערך המקסימלי הוא 200. כל אחד משני החוטים מבצע 100 איטרציות שבהן הוא מקדם את המשתנה הגלובלי counter. במקרה שבו אין חפיפה בין הפעולות (למשל ריצה סדרתית מלאה של חוט אחד ואז השני), כל הקידומים יישמרו.\n10.2. כן, ייתכן ערך נמוך מ-200 בשל מצב מרוץ (Race Condition). הפעולה ++counter אינה אטומית (היא מורכבת מקריאת הערך מהזיכרון, הוספת 1 ברגיסטר, וכתיבה חזרה לזיכרון). אם שני חוטים קוראים את הערך בו-זמנית (למשל 50), שניהם יקדמו אותו ל-51 ויכתבו את אותה התוצאה לזיכרון, מה שיוביל לאובדן של אחד הקידומים."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

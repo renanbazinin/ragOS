@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 18:25:42",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2231,
+      "output_tokens": 668,
+      "total_tokens": 5191
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Processes",
+      "System Calls"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה בשפת C. מה יהיה הפלט של התוכנית? הניחו שכל קריאות המערכת מצליחות, וכי הפלט מודפס ברצף ללא רווחים או ירידות שורה.",
+      "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\nint main() {\n    int x = 0;\n    for (int i = 0; i < 3; i++) {\n        if (fork() == 0) {\n            x++;\n        } else {\n            x--;\n            wait(NULL);\n            break;\n        }\n    }\n    printf(\"%d\", x);\n    return 0;\n}",
+      "options": [
+        "א. 3210",
+        "ב. 310-1",
+        "ג. -1013",
+        "ד. 0",
+        "ה. אף אחת מהתשובות אינה נכונה"
+      ]
+    },
+    "sub_questions": null,
+    "points": 10,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "נעקוב אחר יצירת התהליכים: התהליך הראשי (P0) מתחיל עם x=0. באיטרציה הראשונה (i=0) הוא יוצר בן (P1). P0 מבצע x-- (הופך ל-1-) ומחכה ל-P1. P1 מבצע x++ (הופך ל-1) וממשיך לאיטרציה הבאה. באיטרציה i=1, P1 יוצר בן (P2). P1 מבצע x-- (הופך ל-0) ומחכה ל-P2. P2 מבצע x++ (הופך ל-2) וממשיך לאיטרציה הבאה. באיטרציה i=2, P2 יוצר בן (P3). P2 מבצע x-- (הופך ל-1) ומחכה ל-P3. P3 מבצע x++ (הופך ל-3) ומסיים את הלולאה. P3 הוא הראשון שמגיע להדפסה ומדפיס 3. לאחר מכן P2 מסיים את ה-wait ומדפיס 1. לאחר מכן P1 מסיים את ה-wait ומדפיס 0. לבסוף P0 מסיים את ה-wait ומדפיס 1-. לכן הפלט הוא 310-1."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

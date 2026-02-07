@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 18:36:31",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 968,
+      "output_tokens": 903,
+      "total_tokens": 3274
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Threads",
+      "Memory Management",
+      "Pthreads",
+      "Stack vs Heap"
+    ],
+    "content": {
+      "text": "שקלו את קטע הקוד הבא הכתוב בשפת C והמשתמש בספריית pthreads. נניח שהקריאה ל-pthread_create מצליחה והמערכת היא מערכת Linux סטנדרטית. מהי הקביעה המדויקת ביותר לגבי הרצת התוכנית?",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h>\n\nvoid* task(void* arg) {\n    int* p = (int*)arg;\n    sleep(1);\n    printf(\"%d\\n\", *p);\n    return NULL;\n}\n\nvoid start_work() {\n    pthread_t t;\n    int local_val = 42;\n    pthread_create(&t, NULL, task, &local_val);\n    // No pthread_join here\n}\n\nint main() {\n    start_work();\n    sleep(2);\n    return 0;\n}",
+      "options": [
+        "א. יודפס תמיד הערך 42, מכיוון שחוטים חולקים את אותו מרחב כתובות והזיכרון נשאר תקף כל עוד התהליך רץ.",
+        "ב. תתרחש בהכרח שגיאת Segmentation Fault מיד עם הניסיון לגשת למשתנה p, כיוון שלכל חוט יש מחסנית נפרדת וגישה למחסנית של חוט אחר חסומה על ידי ה-MMU.",
+        "ג. התנהגות התוכנית אינה מוגדרת (Undefined Behavior). ייתכן שיודפס 42, ייתכן שיודפס ערך זבל, וייתכן שתתרחש שגיאת זיכרון.",
+        "ד. התוכנית לא תעבור קומפילציה כיוון שלא ניתן להעביר כתובת של משתנה מקומי (Local Variable) כארגומנט לפונקציית החוט.",
+        "ה. התוכנית תסתיים מיד לאחר הקריאה ל-start_work מבלי להדפיס דבר, כיוון שסיום הפונקציה שיוצרת את החוט גורר את סיום החוט עצמו."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "הסבר: למרות שכל החוטים בתהליך חולקים את אותו מרחב כתובות וירטואלי, לכל חוט יש מחסנית (Stack) פרטית משלו. המשתנה local_val מוקצה על המחסנית של החוט הראשי בזמן ביצוע הפונקציה start_work. ברגע שפונקציה זו מסתיימת, מסגרת המחסנית (Stack Frame) שלה משתחררת וניתן להשתמש בה לקריאות עתידיות. החוט החדש מנסה לגשת לכתובת הזיכרון הזו (Dangling Pointer) לאחר שהפונקציה שיצרה אותו כבר חזרה. כיוון שהתהליך עדיין רץ (בגלל ה-sleep ב-main), הגישה לזיכרון לא תמיד תגרום ל-Segfault (כי הדף בזיכרון עדיין שייך לתהליך), אך התוכן בכתובת זו עלול להשתנות או להיות לא תקף, מה שמוביל להתנהגות לא מוגדרת."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

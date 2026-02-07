@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 18:09:20",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 965,
+      "output_tokens": 322,
+      "total_tokens": 2216
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "Processes",
+      "System Calls"
+    ],
+    "content": {
+      "text": "מהו הערך המוחזר מהקריאה למערכת fork() בתהליך האב (parent process), בהנחה שהפעולה הצליחה?",
+      "code_snippet": null,
+      "options": [
+        "א. 0",
+        "ב. ה-PID (מזהה התהליך) של תהליך הבן שנוצר",
+        "ג. ה-PID של תהליך האב עצמו",
+        "ד. ערך בוליאני true (1)",
+        "ה. הקריאה אינה מחזירה ערך בתהליך האב"
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "לאחר קריאה מוצלחת ל-fork(), המערכת מחזירה את ה-PID של הבן החדש לתהליך האב, ומחזירה 0 לתהליך הבן. ערך שלילי מוחזר רק במקרה של שגיאה."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

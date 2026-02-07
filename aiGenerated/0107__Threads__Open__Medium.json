@@ -1,0 +1,52 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 18:40:52",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2766,
+      "output_tokens": 955,
+      "total_tokens": 6325
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Threads",
+      "User-level threads",
+      "Kernel-level threads",
+      "Concurrency",
+      "Race Conditions"
+    ],
+    "content": {
+      "text": "השאלה הבאה עוסקת בניהול חוטים (threads) במערכות הפעלה ובבעיות סנכרון הנובעות מריצה מקבילית.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "נניח תהליך המשתמש בחוטים ברמת המשתמש (User-level threads) במודל Many-to-One. אחד החוטים מבצע קריאת מערכת חוסמת (blocking system call) לקלט מהמקלדת. הסבירו מה יקרה לשאר החוטים באותו תהליך ומדוע. האם המצב היה שונה אילו המערכת הייתה משתמשת בחוטים ברמת הגרעין (Kernel-level threads) במודל One-to-One?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "נתון קטע הקוד הבא המורץ על ידי שני חוטים (Thread A ו-Thread B) החולקים את אותו מרחב כתובות. המשתנה counter הוא גלובלי ומאותחל ל-0. מהו הערך המינימלי האפשרי של counter לאחר ששני החוטים מסיימים את ריצתם? הסבירו בקצרה כיצד ניתן להגיע לערך זה.",
+        "code_snippet": "void* increment(void* arg) {\n    for (int i = 0; i < 100; i++) {\n        int temp = counter;\n        counter = temp + 1;\n    }\n    return NULL;\n}",
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "10.1: במודל Many-to-One (חוטים ברמת המשתמש), הגרעין אינו מכיר את החוטים הבודדים ומתייחס לכל התהליך כיחידת תזמון אחת. לכן, כאשר חוט אחד מבצע קריאת מערכת חוסמת, כל התהליך נכנס למצב 'חסום' (Blocked), וכל שאר החוטים בתהליך לא יוכלו לרוץ עד שהקריאה תסתיים. במודל One-to-One (חוטים ברמת הגרעין), כל חוט ממופה לישות תזמון עצמאית בגרעין, ולכן חסימה של חוט אחד אינה מונעת מהגרעין להמשיך לתזמן חוטים אחרים של אותו תהליך.\n\n10.2: הערך המינימלי הוא 2. הסבר: מצב זה קורה עקב Race Condition. נניח שחוט א' קורא את counter=0 לתוך temp ומופסק מיד. חוט ב' רץ 99 פעמים ומסיים (counter=99). כעת חוט א' חוזר, מבצע counter = 0 + 1 ומעדכן את counter ל-1. כעת חוט ב' מתחיל את האיטרציה ה-100 שלו, קורא counter=1 לתוך ה-temp שלו ומופסק. חוט א' ממשיך ורץ את כל 99 האיטרציות הנותרות שלו ומסיים (נניח שעדכן את counter ל-100). לבסוף, חוט ב' חוזר לביצוע האיטרציה האחרונה שלו, מבצע counter = 1 + 1 ודורס את הערך ל-2."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

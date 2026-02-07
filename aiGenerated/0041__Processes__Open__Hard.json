@@ -1,0 +1,58 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 18:19:18",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3826,
+      "output_tokens": 1389,
+      "total_tokens": 8846
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Processes",
+      "Fork",
+      "Short-circuit evaluation",
+      "Process Tree",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתון קוד ה-C הבא המשתמש בקריאות מערכת לניהול תהליכים. הניחו שכל הקריאות ל-fork מצליחות, שהמערכת אינה מוגבלת במשאבים, ושאין אופטימיזציות קומפילציה המשנות את לוגיקת הקריאות. ענו על הסעיפים הבאים תוך פירוט מלא של עץ התהליכים והלוגיקה.",
+      "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n#include <sys/wait.h>\n#include <sys/types.h>\n\nint main() {\n    pid_t pid;\n    if (fork() == 0) {\n        // Child block\n        if (fork() || fork()) {\n            fork();\n        }\n    } else {\n        // Parent block\n        wait(NULL);\n        printf(\"Parent Done\\n\");\n    }\n    printf(\"Process %d exiting\\n\", getpid());\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "כמה תהליכים נוצרים בסך הכל במהלך הרצת התוכנית (כולל התהליך המקורי)? פרטו את שלבי היצירה.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "כמה פעמים תודפס המחרוזת 'Process %d exiting' (כאשר %d הוא ה-PID) וכמה פעמים תודפס המחרוזת 'Parent Done'?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.3",
+        "text": "האם מובטח שההדפסה 'Parent Done' תהיה האחרונה שתופיע על המסך? נמקו את תשובתכם על בסיס מנגנון ה-wait.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": 20,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "10.1: ניתוח עץ התהליכים:\n- התהליך המקורי (P0) מבצע fork ראשון. נוצר P1 (הבן של P0).\n- P0 נכנס לבלוק ה-else ומבצע wait.\n- P1 נכנס לבלוק ה-if הראשון ומבצע fork (השני בתוכנית). נוצר P2 (הבן של P1).\n- בתוך ה-if הפנימי (fork() || fork()):\n  א. עבור P1: ה-fork מחזיר ערך חיובי (ה-PID של P2), ולכן בשל short-circuit evaluation של אופרטור ה-OR (||), ה-fork השני בביטוי לא מתבצע. P1 נכנס לתוך ה-if ומבצע fork נוסף (יצירת P4).\n  ב. עבור P2: ה-fork מחזיר 0, ולכן הוא חייב לבצע את החלק השני של ה-OR. הוא מבצע fork (השלישי בתוכנית) ויוצר את P3. עבור P2, תוצאת ה-OR היא אמת (0 || PID_P3), ולכן הוא נכנס לתוך ה-if ומבצע fork נוסף (יצירת P5).\n  ג. עבור P3: הוא נוצר מה-fork השני בביטוי ה-OR. הוא מקבל 0. תוצאת ה-OR עבורו היא (0 || 0) כלומר שקר, ולכן הוא לא נכנס לתוך ה-if.\nסך התהליכים: P0, P1, P2, P3, P4, P5 - סה\"כ 6 תהליכים.\n\n10.2: \n- המחרוזת 'Process %d exiting' מודפסת על ידי כל תהליך שמסיים את הריצה שלו מחוץ למבנה ה-if/else. מכיוון שיש 6 תהליכים וכולם מגיעים לשורה זו, היא תודפס 6 פעמים.\n- המחרוזת 'Parent Done' מודפסת רק בבלוק ה-else של ה-fork הראשון. רק תהליך P0 (האב המקורי) נכנס לבלוק זה, ולכן היא תודפס פעם אחת בלבד.\n\n10.3: \nלא, זה לא מובטח. הקריאה wait(NULL) ב-P0 גורמת לו להמתין לסיום של *אחד* מילדיו הישירים. ל-P0 יש רק ילד ישיר אחד והוא P1. ברגע ש-P1 מסיים (exit), P0 משתחרר מה-wait וממשיך להדפסה. עם זאת, P1 עצמו לא קורא ל-wait עבור הילדים שלו (P2, P4). לכן, ייתכן ש-P1 יסיים את ריצתו והדפסתו בזמן שילדיו (ונכדיו P3, P5) עדיין רצים. במצב כזה, P0 ידפיס 'Parent Done' ו-'Process P0 exiting' בזמן שתהליכים אחרים עדיין פעילים ברקע (תהליכים אלו יהפכו ליתומים - orphans)."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 18:34:04",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1815,
+      "output_tokens": 773,
+      "total_tokens": 4513
+    }
+  },
+  "question": [
+    {
+      "id": 1,
+      "type": "MultipleChoice",
+      "topic": [
+        "Threads",
+        "Concurrency",
+        "Memory Management"
+      ],
+      "content": {
+        "text": "נתונה תוכנית C המשתמשת בספריית pthreads ליצירת 5 חוטים (threads). המטרה היא שכל חוט ידפיס את המספר הסידורי שלו (0 עד 4). מה מהבאים מתאר נכונה את התנהגות התוכנית?",
+        "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n\nvoid* thread_func(void* arg) {\n    int val = *((int*)arg);\n    printf(\"%d \", val);\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[5];\n    for (int i = 0; i < 5; i++) {\n        pthread_create(&threads[i], NULL, thread_func, &i);\n    }\n    for (int i = 0; i < 5; i++) {\n        pthread_join(threads[i], NULL);\n    }\n    return 0;\n}",
+        "options": [
+          "א. התוכנית תמיד תדפיס את המספרים 0 עד 4 בסדר עולה (0 1 2 3 4).",
+          "ב. התוכנית תמיד תדפיס את המספרים 0 עד 4, אך הסדר עשוי להשתנות בהתאם לתזמון.",
+          "ג. התוכנית עלולה להדפיס מספרים שאינם בטווח 0-5 עקב גישה לזיכרון שאינו מאותחל.",
+          "ד. התוכנית עלולה להדפיס את אותו מספר מספר פעמים (למשל 5 5 5 5 5), כיוון שכל החוטים ניגשים לאותה כתובת זיכרון שערכה משתנה בחוט הראשי.",
+          "ה. התוכנית לא תתקמפל כי לא ניתן להעביר מצביע למשתנה מקומי (i) כארגומנט לחוט."
+        ]
+      },
+      "sub_questions": null,
+      "points": 5,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": "ד",
+        "explanation": "הבעיה בתוכנית היא Race Condition על המשתנה i. הפונקציה pthread_create מקבלת מצביע לכתובת הזיכרון של i. כיוון שהחוט הראשי ממשיך לרוץ ולעדכן את i בלולאה, וכל החוטים שנוצרו ניגשים לאותה כתובת זיכרון, ייתכן שעד שחוט מסוים יתחיל לרוץ ויבצע את ה-dereference למצביע, הערך של i כבר השתנה ע\"י החוט הראשי (למשל ל-5 בסיום הלולאה). לכן, ייתכן שיוצגו ערכים כפולים או ערכים שאינם תואמים את הציפייה המקורית."
+      },
+      "difficulty_estimation": "Medium"
+    }
+  ]
+}

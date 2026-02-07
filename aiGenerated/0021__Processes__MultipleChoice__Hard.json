@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 18:13:14",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 968,
+      "output_tokens": 698,
+      "total_tokens": 3435
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "Processes",
+      "fork",
+      "Zombie Processes",
+      "Orphan Processes"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא בשפת C. נניח שכל הקריאות ל-fork מצליחות, ושהמערכת משתמשת בתהליך ה-init (PID 1) כמאמץ ברירת מחדל לתהליכים יתומים. מה יהיה מצב התהליכים במערכת כעבור 5 שניות מתחילת ריצת התוכנית?",
+      "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n#include <sys/types.h>\n#include <stdlib.h>\n\nint main() {\n    pid_t pid = fork();\n    if (pid == 0) {\n        // Child process\n        if (fork() > 0) {\n            // Child creates a Grandchild and exits immediately\n            _exit(0);\n        }\n        // Grandchild process continues\n        sleep(100);\n    } else {\n        // Parent process\n        // Parent does not call wait() yet\n        sleep(100);\n    }\n    return 0;\n}",
+      "options": [
+        "א. התהליך הנכד (Grandchild) יהיה במצב Zombie והתהליך הבן (Child) יהיה במצב Running.",
+        "ב. התהליך הבן (Child) יהיה במצב Zombie והתהליך הנכד (Grandchild) יאומץ על ידי ה-init (או reaper process).",
+        "ג. התהליך הבן (Child) ינוקה מהמערכת באופן מיידי כי הוא קרא ל-_exit, והנכד ימשיך לרוץ תחת האב המקורי.",
+        "ד. כל התהליכים יסיימו את ריצתם כיוון שהבן (שהוא ההורה של הנכד) סיים את ריצתו."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "לאחר ה-fork הראשון נוצר תהליך הבן. הבן מבצע fork נוסף ויוצר את הנכד, ואז קורא מיד ל-_exit ומסיים. מכיוון שהאב המקורי עדיין רץ (ב-sleep) ולא קרא ל-wait(), הבן הופך ל-Zombie (תהליך שסיים אך רשומתו נשארת בטבלת התהליכים). הנכד הופך ליתום (Orphan) כי אביו (הבן) מת, ולכן הוא מאומץ על ידי ה-init process."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

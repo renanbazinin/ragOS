@@ -1,0 +1,57 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 18:42:02",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2766,
+      "output_tokens": 971,
+      "total_tokens": 4608
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "Open",
+    "topic": [
+      "Threads",
+      "User-level threads",
+      "Kernel-level threads",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "סטודנט פיתח דפדפן אינטרנט פשוט המשתמש בספריית חוטים (threads) ברמת המשתמש (User-level threads) במימוש של Many-to-One (כלומר, כל חוטי המשתמש ממופים לחוט ליבה יחיד).",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "7.1",
+        "text": "מה יקרה כאשר אחד החוטים בדפדפן מבצע קריאת מערכת חוסמת (Blocking system call), כמו למשל קריאת נתונים מהרשת? הסבירו את ההשפעה על שאר החוטים בתהליך.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "7.2",
+        "text": "כיצד המעבר למודל של חוטי ליבה (Kernel-level threads) במודל One-to-One עשוי לשפר את ביצועי הדפדפן במקרה של פעולות קלט/פלט (I/O)?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "7.3",
+        "text": "נתון קטע הקוד הבא המשתמש ב-POSIX Threads. מה יהיה הפלט של התוכנית? הסבירו בקצרה את הקשר למרחב הכתובות של חוטים.",
+        "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\nint global_val = 20;\n\nvoid* increment_func(void* arg) {\n    global_val += 10;\n    return NULL;\n}\n\nint main() {\n    pthread_t t1;\n    pthread_create(&t1, NULL, increment_func, NULL);\n    pthread_join(t1, NULL);\n    printf(\"Final value: %d\\n\", global_val);\n    return 0;\n}",
+        "options": null
+      }
+    ],
+    "points": 20,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "7.1: במודל Many-to-One, מערכת ההפעלה רואה רק את תהליך הליבה היחיד. כאשר חוט משתמש מבצע קריאת מערכת חוסמת, הליבה מעבירה את כל התהליך למצב המתנה (Waiting/Blocked). כתוצאה מכך, כל שאר החוטים באותו תהליך ייחסמו ולא יוכלו לרוץ, גם אם הם מוכנים לביצוע פעולות חישוב.\n\n7.2: במודל One-to-One, כל חוט משתמש ממופה לחוט ליבה נפרד. אם חוט אחד מבצע קריאת מערכת חוסמת, הליבה חוסמת רק את חוט הליבה הספציפי הזה. המתזמן (Scheduler) של מערכת ההפעלה יכול להמשיך להריץ חוטים אחרים של אותו תהליך על מעבדים פנויים, מה שמאפשר מקביליות אמיתית ושיפור ביצועים.\n\n7.3: הפלט יהיה: Final value: 30. הסיבה היא שחוטים (Threads) בתוך אותו תהליך חולקים את אותו מרחב כתובות, ובפרט הם חולקים את סגמנט הנתונים (Data segment) שבו נמצאים משתנים גלובליים. לכן, השינוי שביצע חוט t1 במשתנה global_val נראה מיד לחוט הראשי (main thread) לאחר סיום הריצה (pthread_join)."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

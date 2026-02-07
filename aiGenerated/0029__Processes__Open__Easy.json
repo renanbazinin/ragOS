@@ -1,0 +1,49 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 18:16:00",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5185,
+      "output_tokens": 736,
+      "total_tokens": 8474
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Processes",
+      "fork"
+    ],
+    "content": {
+      "text": "לפניך קטע קוד בשפת C המשתמש בקריאת המערכת fork(). הנח שכל הקריאות ל-fork() מצליחות ושאין שגיאות בזמן הריצה.",
+      "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n\nint main() {\n    fork();\n    if (fork() == 0) {\n        fork();\n    }\n    printf(\"Done\\n\");\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "כמה תהליכים סך הכל ייווצרו במהלך ריצת התוכנית (כולל התהליך הראשי)?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "כמה פעמים תודפס המחרוזת \"Done\" למסך? נמק את תשובתך.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.1: סך הכל ייווצרו 6 תהליכים.\nניתוח שלבי היצירה:\n1. ה-fork() הראשון מפצל את התהליך המקורי (P) לשני תהליכים: P ו-C1.\n2. ה-fork() השני מתבצע על ידי שני התהליכים הקיימים (P ו-C1). P יוצר את C2, ו-C1 יוצר את C3. כעת ישנם 4 תהליכים במערכת.\n3. התנאי (fork() == 0) מתקיים רק עבור הילדים שנוצרו ב-fork השני (C2 ו-C3). לכן רק הם נכנסים לתוך בלוק ה-if.\n4. בתוך ה-if, התהליך C2 מבצע fork() ויוצר את C4. התהליך C3 מבצע fork() ויוצר את C5.\n5. סך התהליכים: P, C1, C2, C3, C4, C5 - סה\"כ 6 תהליכים.\n\n1.2: המחרוזת תודפס 6 פעמים.\nהסבר: כל תהליך שנוצר במהלך ריצת התוכנית ממשיך בביצוע הקוד עד סוף פונקציית ה-main. מכיוון שפקודת ה-printf נמצאת מחוץ לבלוק ה-if (אחריו), כל אחד מ-6 התהליכים שנוצרו יגיע לשורה זו וידפיס את המחרוזת פעם אחת."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

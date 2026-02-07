@@ -1,0 +1,50 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 18:23:25",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3826,
+      "output_tokens": 1117,
+      "total_tokens": 13775
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Processes",
+      "Signals",
+      "Fork"
+    ],
+    "content": {
+      "text": "לפניכם קוד בשפת C המשתמש בקריאות מערכת לניהול תהליכים וסיגנלים. הניחו שכל הקריאות למערכת מצליחות, שאין עומס חריג על המערכת, וכי פקודת sleep אכן גורמת לתהליך להמתין כנדרש. שימו לב כי סיגנלים עשויים לקטוע קריאות מערכת חוסמות (כמו sleep).",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n#include <signal.h>\n\nint g_var = 1;\n\nvoid signal_handler(int sig) {\n    if (sig == SIGUSR1) g_var += 3;\n    else if (sig == SIGCHLD) g_var *= 2;\n}\n\nint main() {\n    signal(SIGUSR1, signal_handler);\n    signal(SIGCHLD, signal_handler);\n\n    pid_t p = fork();\n    if (p == 0) { // Child process\n        g_var += 5;\n        if (fork() == 0) { // Grandchild process\n            g_var += 10;\n            kill(getppid(), SIGUSR1);\n            exit(0);\n        }\n        wait(NULL);\n        printf(\"C: %d\\n\", g_var);\n        exit(0);\n    }\n\n    sleep(5);\n    printf(\"P: %d\\n\", g_var);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "מה יהיה הפלט של התוכנית? יש לכתוב את השורות בסדר הופעתן.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "הסבירו בפירוט את השתלשלות האירועים: מדוע כל ערך הודפס כפי שהודפס? התייחסו למרחבי הכתובות, לטיפול בסיגנלים ולסנכרון בין התהליכים.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": 15,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הסבר השלבים:\n1. תהליך האב מתחיל עם g_var = 1 ורושם מטפלים לסיגנלים SIGUSR1 ו-SIGCHLD.\n2. האב מבצע fork. נוצר בן (C) עם עותק נפרד של g_var = 1.\n3. הבן מעדכן את g_var שלו ל-6 (1+5).\n4. הבן מבצע fork. נוצר נכד (GC) עם עותק נפרד של g_var = 6.\n5. הנכד מעדכן את g_var שלו ל-16 (6+10) ושולח סיגנל SIGUSR1 לאביו (הבן) באמצעות kill(getppid(), ...).\n6. הבן מקבל את הסיגנל SIGUSR1. המטפל שלו רץ ומעדכן את g_var של הבן ל-9 (6+3).\n7. הנכד מסיים (exit). סיום הנכד שולח סיגנל SIGCHLD לאביו (הבן).\n8. הבן מקבל SIGCHLD. המטפל שלו רץ ומכפיל את g_var שלו: 9 * 2 = 18.\n9. הבן משלים את ה-wait, מדפיס 'C: 18' ומסיים.\n10. סיום הבן שולח סיגנל SIGCHLD לאב.\n11. האב, שהיה ב-sleep, מתעורר עקב קבלת הסיגנל. המטפל של האב רץ ומכפיל את g_var שלו: 1 * 2 = 2.\n12. האב ממשיך להדפסה ומדפיס 'P: 2'.\n\nהפלט הצפוי:\nC: 18\nP: 2"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

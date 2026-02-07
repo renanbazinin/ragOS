@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 18:33:32",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1815,
+      "output_tokens": 897,
+      "total_tokens": 4526
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Threads",
+      "Concurrency",
+      "Memory Layout"
+    ],
+    "content": {
+      "text": "נתון הקוד הבא בשפת C, המריץ שני חוטים (threads) המבצעים את אותה הפונקציה. בהנחה שהמערכת מריצה את החוטים במקביל על מעבד מרובה ליבות וללא סנכרון חיצוני, איזו מהטענות הבאות היא הנכונה ביותר לגבי תוצאת ההרצה?",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n\nint shared_var = 0;\n\nvoid* increment_task(void* arg) {\n    static int func_static = 0;\n    for (int i = 0; i < 100; i++) {\n        shared_var++;\n        func_static++;\n    }\n    return (void*)(long)func_static;\n}\n\nint main() {\n    pthread_t t1, t2;\n    void *res1, *res2;\n    pthread_create(&t1, NULL, increment_task, NULL);\n    pthread_create(&t2, NULL, increment_task, NULL);\n    pthread_join(t1, &res1);\n    pthread_join(t2, &res2);\n    printf(\"%d, %ld, %ld\\n\", shared_var, (long)res1, (long)res2);\n    return 0;\n}",
+      "options": [
+        "א. הערך של shared_var יהיה בדיוק 200, וערכי ההחזר res1 ו-res2 יהיו 100 ו-200 (בסדר כלשהו).",
+        "ב. הערך של shared_var עשוי להיות קטן מ-200 עקב Race Condition, אך המשתנה func_static הוא מקומי לכל חוט ולכן ערכי ההחזר יהיו תמיד 100.",
+        "ג. המשתנה func_static משותף לשני החוטים, ולכן גם shared_var וגם ערכי ההחזר res1 ו-res2 עשויים להיות מושפעים מ-Race Condition.",
+        "ד. הקוד יגרום לשגיאת הרצה (Runtime Error) כיוון ששני חוטים מנסים לגשת למשתנה static בו-זמנית.",
+        "ה. המשתנה func_static מאותחל מחדש ל-0 בכל פעם שחוט חדש מתחיל את הפונקציה, לכן התוצאה הסופית של shared_var תהיה 200."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "במשתני static המוגדרים בתוך פונקציה, בדומה למשתנים גלובליים, קיים רק עותק אחד בזיכרון המשותף לכל החוטים באותו תהליך (הם מאוחסנים ב-Data Segment). מכיוון ששני החוטים מקדמים את shared_var ואת func_static ללא מנגנון סנכרון (כמו Mutex), שניהם חשופים לבעיית מרוץ (Race Condition). לכן, לא ניתן להבטיח ש-shared_var יגיע ל-200, וערכי ההחזר (שמייצגים את מצב func_static ברגע סיום החוט) אינם מובטחים להיות 100 או 200."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

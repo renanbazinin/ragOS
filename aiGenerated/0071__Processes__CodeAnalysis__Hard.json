@@ -1,0 +1,57 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 18:31:33",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3664,
+      "output_tokens": 988,
+      "total_tokens": 8209
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Processes",
+      "System Calls",
+      "Buffering",
+      "Fork"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה בשפת C. הניחו שכל קריאות המערכת מצליחות, ושכל תהליך שנוצר מסיים את ריצתו כראוי.\nתזכורת: פונקציית printf משתמשת בחוצץ (buffer) עבור הפלט הסטנדרטי. במידה ואין תו ירידת שורה (\\n), החוצץ מועבר בשלמותו לתהליכי בנים בעת ביצוע fork ומתרוקן רק בסיום התהליך או בעת קריאה ל-fflush.",
+      "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n#include <sys/wait.h>\n#include <stdlib.h>\n\nint main() {\n    printf(\"Start\");\n    if (fork() || fork()) {\n        if (!fork()) {\n            printf(\"1\");\n            exit(0);\n        }\n    } else {\n        printf(\"2\");\n    }\n    while(wait(NULL) > 0);\n    printf(\"End\");\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "כמה תהליכים סה\"כ נוצרו במהלך ריצת התוכנית (כולל התהליך הראשי)?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "רשמו פלט אפשרי אחד של התוכנית והסבירו כיצד מנגנון ה-buffering משפיע על הופעת המילה \"Start\" בפלט.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.3",
+        "text": "כיצד ישתנה מספר הפעמים שהמילה \"Start\" מופיעה בפלט אם נוסיף n\\ לאחר המילה \"Start\" בשורה 7?",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.1: נוצרו 5 תהליכים סה\"כ. תהליך האב P0 יוצר את P1 ב-fork הראשון. P0 נכנס ל-if (בגלל short-circuit). P1 ממשיך ל-fork השני ויוצר את P2. P1 נכנס ל-if ו-P2 נכנס ל-else. בתוך ה-if, תהליך P0 יוצר את P3 ותהליך P1 יוצר את P4.\n\n1.2: פלט אפשרי: Start1Start1Start2EndStartEndStartEnd (הסדר בין התהליכים יכול להשתנות). הסבר: המילה Start נכנסת ל-buffer של P0. כיוון שאין n\\, היא לא מודפסת מיד. כל תהליך שנוצר ב-fork יורש את תוכן ה-buffer. לכן, כל אחד מ-5 התהליכים מחזיק ב-Start ב-buffer שלו ומדפיס אותו בסיום או בתוספת לפלט אחר. P3 ו-P4 מדפיסים Start1, תהליך P2 מדפיס Start2End, ותהליכים P0 ו-P1 מדפיסים StartEnd.\n\n1.3: אם נוסיף n\\, ה-buffer יתרוקן מיד בשורה 7. לכן המילה Start תודפס פעם אחת בלבד על ידי P0 לפני ה-fork הראשון, והבנים יירשו buffer ריק. המילה Start תופיע פעם אחת בלבד בכל הפלט."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

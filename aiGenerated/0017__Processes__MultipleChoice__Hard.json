@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 18:11:57",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 968,
+      "output_tokens": 771,
+      "total_tokens": 5376
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "Processes",
+      "fork",
+      "wait",
+      "Copy-on-Write"
+    ],
+    "content": {
+      "text": "נתון קוד ה-C הבא. בהנחה שכל הקריאות ל-fork() מצליחות ושהמערכת מדפיסה את הפלט למסך, מהם הערכים שיודפסו על ידי כל התהליכים שנוצרו (בסדר כלשהו)?",
+      "code_snippet": "int main() {\n    int x = 0;\n    for (int i = 0; i < 3; i++) {\n        if (fork() == 0) {\n            x++;\n        } else {\n            x--;\n            wait(NULL);\n            break;\n        }\n    }\n    printf(\"%d \", x);\n    return 0;\n}",
+      "options": [
+        "-1 0 1 3",
+        "0 1 2 3",
+        "-1 -1 -1 3",
+        "-1 0 1 2",
+        "אף אחת מהתשובות אינה נכונה"
+      ]
+    },
+    "sub_questions": null,
+    "points": 10,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "-1 0 1 3",
+      "explanation": "הקוד מבצע לולאה שבה בכל שלב נוצר תהליך ילד חדש. האב (התהליך שקיבל ערך חיובי מ-fork) מחסיר 1 מהמשתנה המקומי x שלו, ממתין לסיום הילד שלו (wait), ויוצא מהלולאה (break). הילד (שקיבל 0 מ-fork) מוסיף 1 ל-x שלו וממשיך לאיטרציה הבאה של הלולאה.\n1. תהליך מקורי P0 (עם x=0): ב-i=0 יוצר את P1. ב-P0 ה-x הופך ל-1-, הוא עוצר ומדפיס 1-.\n2. תהליך P1 (הילד של P0, התחיל עם x=1): ב-i=1 יוצר את P2. ב-P1 ה-x הופך ל-0 (פחות 1), הוא עוצר ומדפיס 0.\n3. תהליך P2 (הילד של P1, התחיל עם x=2): ב-i=2 יוצר את P3. ב-P2 ה-x הופך ל-1 (פחות 1), הוא עוצר ומדפיס 1.\n4. תהליך P3 (הילד של P2, התחיל עם x=3): מסיים את הלולאה (i=3) ומדפיס 3.\nהערכים המודפסים הם 1-, 0, 1, 3. בשל ה-wait, הסדר יהיה הפוך (3, 1, 0, 1-) אך השאלה ביקשה את הערכים בסדר כלשהו."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

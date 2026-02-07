@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 18:35:58",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 968,
+      "output_tokens": 640,
+      "total_tokens": 4471
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "Threads",
+      "Processes",
+      "Synchronization",
+      "fork"
+    ],
+    "content": {
+      "text": "נתון תהליך המריץ שני חוטים (Threads) של POSIX. חוט א' נועל Mutex גלובלי ומתחיל בביצוע חישוב ארוך. בזמן שחוט א' מחזיק בנעילה, חוט ב' מבצע קריאה למערכת (system call) מסוג fork(). איזו מהטענות הבאות מתארת נכונה את מצב התהליך הבן שנוצר?",
+      "code_snippet": null,
+      "options": [
+        "א. בתהליך הבן ייווצרו שני חוטים המקבילים לחוטים בתהליך האב, וחוט א' בבן ימשיך להחזיק ב-Mutex.",
+        "ב. בתהליך הבן יהיה קיים רק חוט אחד (העתק של חוט ב'), וה-Mutex יופיע במצב 'נעול' ללא חוט שיכול לשחרר אותו.",
+        "ג. מערכת ההפעלה מזהה שה-Mutex נעול על ידי חוט שלא הועתק לבן, ולכן היא משחררת את ה-Mutex באופן אוטומטי בתהליך הבן.",
+        "ד. הקריאה ל-fork() תחסום את חוט ב' עד שחוט א' ישחרר את ה-Mutex, כדי למנוע חוסר עקביות בזיכרון.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": 10,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "לפי תקן POSIX, כאשר תהליך מרובה חוטים מבצע fork(), רק החוט שקרא ל-fork() מועתק לתהליך הבן. שאר החוטים אינם קיימים בבן. עם זאת, מרחב הכתובות מועתק כפי שהוא (במנגנון Copy-on-Write), כולל מצבם של אובייקטי סנכרון בזיכרון. לכן, אם Mutex היה נעול באב על ידי חוט שלא הועתק לבן, הוא יישאר נעול בבן לנצח (מצב של Deadlock פוטנציאלי), שכן החוט האחראי לשחרורו אינו קיים בבן."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 18:32:53",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1127,
+      "output_tokens": 314,
+      "total_tokens": 1937
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Threads",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "כאשר מספר חוטים (threads) רצים בתוך אותו תהליך (process), מה מהבאים משותף לכל החוטים?",
+      "code_snippet": null,
+      "options": [
+        "א. המחסנית (Stack) הפרטית של כל חוט.",
+        "ב. ערימת הזיכרון (Heap) והמשתנים הגלובליים.",
+        "ג. אוגרי המעבד (Registers).",
+        "ד. מונה התוכנית (Program Counter)."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "בתוך תהליך, כל החוטים חולקים את אותו מרחב כתובות, הכולל את ה-Heap והמשתנים הגלובליים. לעומת זאת, לכל חוט יש Stack, Registers ו-Program Counter משלו כדי לאפשר הרצה עצמאית של קוד."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

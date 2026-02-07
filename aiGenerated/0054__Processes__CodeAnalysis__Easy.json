@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 18:24:52",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2103,
+      "output_tokens": 513,
+      "total_tokens": 6517
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Processes",
+      "System Calls"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה בשפת C. כמה פעמים תודפס המילה 'OS' במהלך ריצת התוכנית?\nהניחו כי כל קריאות המערכת מצליחות, וכי כל הדפסה מתבצעת מיד ללא חוצץ (buffer).",
+      "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n\nint main() {\n    for (int i = 0; i < 2; i++) {\n        fork();\n        printf(\"OS\\n\");\n    }\n    return 0;\n}",
+      "options": [
+        "א. 2",
+        "ב. 4",
+        "ג. 6",
+        "ד. 8",
+        "ה. 16"
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "באיטרציה הראשונה של הלולאה (i=0), מתבצעת קריאת fork אחת שיוצרת תהליך בן. בשלב זה ישנם 2 תהליכים (האב המקורי והבן החדש), וכל אחד מהם מדפיס את המילה 'OS' פעם אחת (סה\"כ 2 הדפסות). באיטרציה השנייה (i=1), כל אחד משני התהליכים הקיימים מבצע fork בעצמו, מה שיוצר 2 תהליכים נוספים (סה\"כ 4 תהליכים רצים כעת). כל ארבעת התהליכים הללו מבצעים את פקודת ההדפסה של האיטרציה השנייה (סה\"כ 4 הדפסות נוספות). לכן, סך כל הפעמים שהמילה תודפס הוא 2 + 4 = 6."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

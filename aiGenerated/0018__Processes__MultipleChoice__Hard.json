@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 18:12:18",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 968,
+      "output_tokens": 649,
+      "total_tokens": 4628
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "Processes",
+      "fork",
+      "waitpid",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "בהנחה שכל הקריאות למערכת (fork, waitpid) מצליחות, מה יהיה הפלט של קוד ה-C הבא?",
+      "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n#include <sys/wait.h>\n#include <stdlib.h>\n\nint main() {\n    int x = 10;\n    pid_t pid = fork();\n    if (pid == 0) {\n        x += 5;\n        pid_t pid2 = fork();\n        if (pid2 == 0) {\n            x += 5;\n            exit(x);\n        }\n        int status;\n        waitpid(pid2, &status, 0);\n        if (WIFEXITED(status)) {\n            x += WEXITSTATUS(status);\n        }\n        printf(\"%d\", x);\n    } else {\n        wait(NULL);\n    }\n    return 0;\n}",
+      "options": [
+        "א. 15",
+        "ב. 20",
+        "ג. 30",
+        "ד. 35",
+        "ה. 40"
+      ]
+    },
+    "sub_questions": null,
+    "points": 10,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ד",
+      "explanation": "הסבר: 1. האב המקורי יוצר תהליך בן (C1). לכל אחד מהם מרחב זיכרון נפרד. 2. בתוך C1, המשתנה x מעודכן ל-15. 3. C1 יוצר תהליך נכד (G1). ל-G1 עותק נפרד של הזיכרון שבו x הוא 15. 4. G1 מעדכן את x ל-20 ומסיים עם exit(20). 5. C1 ממתין ל-G1 ובעזרת המאקרו WEXITSTATUS שולף את קוד החזרה (20). 6. C1 מוסיף את הערך שחזר (20) ל-x המקומי שלו (15), ולכן x ב-C1 הופך ל-35. 7. C1 מדפיס את הערך 35. האב המקורי רק מבצע wait ולכן לא מדפיס דבר."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

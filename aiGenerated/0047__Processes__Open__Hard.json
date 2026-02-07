@@ -1,0 +1,57 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 18:22:29",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3826,
+      "output_tokens": 1055,
+      "total_tokens": 10520
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Processes",
+      "Fork",
+      "Wait",
+      "Orphan Processes"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא בשפת C. הנח שכל קריאות המערכת מצליחות, שהתהליכים רצים על מעבד יחיד, ושהפלט של הפונקציה printf נכתב ל-stdout בצורה אטומית (כלומר, לא ייתכן ערבוב תווים בתוך מחרוזת אחת מהדפסות שונות). ענה על הסעיפים הבאים:",
+      "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\nint main() {\n    for (int i = 0; i < 2; i++) {\n        pid_t pid = fork();\n        if (pid == 0) {\n            printf(\"C%d \", i);\n            if (i == 0) {\n                if (fork() == 0) {\n                    printf(\"G \");\n                    return 0;\n                }\n                printf(\"G \");\n            }\n            return 0;\n        } else {\n            printf(\"P%d \", i);\n            wait(NULL);\n        }\n    }\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "כמה תהליכים נוצרו סך הכל במהלך ריצת התוכנית (כולל התהליך המקורי)? פרטו אילו תהליכים נוצרו ובאיזה שלב.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "שרטטו את עץ התהליכים (Process Tree) שנוצר במהלך הריצה.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.3",
+        "text": "האם ייתכן שיתקבל הפלט הבא: 'P0 C0 G P1 C1 G '? נמקו את תשובתכם תוך התייחסות למנגנון ה-wait ולתהליכים יתומים (orphans).",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": 20,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1. נוצרו סה\"כ 4 תהליכים: התהליך המקורי (P), הבן הראשון (C0) שנוצר ב-i=0, הבן השני (C1) שנוצר ב-i=1, והנכד (G) שנוצר על ידי C0.\n2. עץ התהליכים: P הוא השורש. ל-P יש שני בנים ישירים: C0 ו-C1. ל-C0 יש בן אחד: G. חשוב לציין ש-C1 נוצר רק לאחר ש-C0 הסתיים, כיוון ש-P מבצע wait(NULL) בכל איטרציה ומחכה לסיום הבן הנוכחי לפני המעבר לאיטרציה הבאה.\n3. כן, הפלט ייתכן. הסבר: באיטרציה i=0, האב P יוצר את C0 ומחכה לו. C0 מדפיס 'C0', יוצר את G, ומדפיס 'G'. ברגע ש-C0 מסיים (return 0), האב P משתחרר מה-wait וממשיך לאיטרציה i=1. ב-i=1, האב מדפיס 'P1' ויוצר את C1 שמדפיס 'C1'. התהליך G הוא נכד של P ובן של C0. מכיוון ש-C0 לא ביצע wait(NULL) עבור G, התהליך G הופך ליתום (Orphan) וממשיך לרוץ במקביל לאב P. לכן, ה-'G' השני (שהודפס על ידי הנכד) יכול להופיע בכל שלב לאחר ה-fork בתוך C0, ובפרט בסוף הפלט לאחר ש-P ו-C1 כבר סיימו את פעולתם."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 18:41:35",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2766,
+      "output_tokens": 889,
+      "total_tokens": 5527
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "Open",
+    "topic": [
+      "Threads",
+      "Concurrency",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "לפניך קוד בשפת C המשתמש בספריית pthreads. מטרת התוכנית היא ליצור 5 חוטים (threads), כאשר כל חוט מקבל את המזהה שלו (מספר בין 0 ל-4) ומדפיס אותו.",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n\n#define NUM_THREADS 5\n\nvoid* thread_func(void* arg) {\n    int id = *((int*)arg);\n    printf(\"Thread ID: %d\\n\", id);\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n    for (int i = 0; i < NUM_THREADS; i++) {\n        pthread_create(&threads[i], NULL, thread_func, &i);\n    }\n    for (int i = 0; i < NUM_THREADS; i++) {\n        pthread_join(threads[i], NULL);\n    }\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "7.1",
+        "text": "הסבר מדוע הקוד לעיל אינו תקין ועלול להדפיס פלט שאינו מכיל את כל המספרים 0 עד 4 (למשל, הדפסה של המספר 5 מספר פעמים).",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "7.2",
+        "text": "הצע שתי דרכים שונות לתיקון הבעיה: אחת המשתמשת בהקצאה דינמית (malloc) ואחת המשתמשת בהעברת ערך ישירות דרך המצביע (Casting), מבלי להשתמש במנגנוני סנכרון כמו Mutex.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": 15,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "7.1: הבעיה היא Race Condition על המשתנה i. כל החוטים מקבלים מצביע לאותה כתובת זיכרון (&i) הנמצאת במחסנית (stack) של פונקציית ה-main. מכיוון שהחוטים רצים במקביל ללולאת ה-for ב-main, ייתכן שעד שחוט מסוים ניגש לזיכרון כדי לקרוא את הערך, הלולאה כבר התקדמה והערך של i השתנה (או אפילו הגיע ל-5, התנאי לעצירת הלולאה).\n\n7.2: דרך א': הקצאה דינמית - בתוך הלולאה נקצה זיכרון עם malloc עבור כל מספר, נשמור בו את i ונעביר את המצביע ל-malloc. החוט יבצע free בסיום. דרך ב': העברת ערך ב-Casting - נמיר את הערך של i לטיפוס void* ונשלח אותו כארגומנט (למשל pthread_create(..., (void*)(long)i)). בתוך החוט נבצע המרה הפוכה מ-void* חזרה ל-int. בצורה זו כל חוט מקבל עותק של הערך בתוך ה-argument pointer עצמו ולא מצביע לכתובת משותפת."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

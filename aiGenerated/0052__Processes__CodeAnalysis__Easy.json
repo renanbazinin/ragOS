@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 18:24:16",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2103,
+      "output_tokens": 461,
+      "total_tokens": 4036
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Processes",
+      "System Calls"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה. כמה פעמים תודפס המחרוזת \"OS\" למסך? הניחו שכל קריאות המערכת מצליחות וכי הפלט מרוקן (flushed) מיד לאחר ההדפסה.",
+      "code_snippet": "int main() {\n    for (int i = 0; i < 2; i++) {\n        fork();\n    }\n    printf(\"OS\\n\");\n    return 0;\n}",
+      "options": [
+        "א. 2",
+        "ב. 3",
+        "ג. 4",
+        "ד. 6",
+        "ה. 8"
+      ]
+    },
+    "sub_questions": null,
+    "points": 10,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "התוכנית מבצעת לולאה בת שתי איטרציות. בתחילה קיים תהליך אחד. באיטרציה הראשונה (i=0), התהליך מבצע fork ונוצר תהליך בן, כך שישנם 2 תהליכים. באיטרציה השנייה (i=1), כל אחד משני התהליכים הקיימים מבצע fork בעצמו, מה שיוצר שני תהליכים חדשים נוספים. סה\"כ בסיום הלולאה קיימים 4 תהליכים (2^2). כל אחד מארבעת התהליכים הללו ממשיך לשורת ההדפסה ומדפיס \"OS\" פעם אחת, ולכן המחרוזת תודפס 4 פעמים."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

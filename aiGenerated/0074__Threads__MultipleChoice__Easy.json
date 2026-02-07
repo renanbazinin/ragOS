@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 18:32:09",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1127,
+      "output_tokens": 334,
+      "total_tokens": 2391
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "Threads",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "איזה מבין המשאבים הבאים משותף לכל החוטים (threads) השייכים לאותו תהליך?",
+      "code_snippet": null,
+      "options": [
+        "א. מחסנית (Stack)",
+        "ב. מונה התוכנית (Program Counter)",
+        "ג. משתנים גלובליים ומרחב הכתובות",
+        "ד. קובץ האוגרים (Register set)"
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "חוטים באותו תהליך חולקים את מרחב הכתובות של התהליך, הכולל את קטע הקוד (Code segment) ואת קטע הנתונים (Data segment) שבו נמצאים המשתנים הגלובליים. לעומת זאת, לכל חוט יש הקשר הרצה (execution context) ייחודי הכולל מחסנית משלו, מונה תוכנית משלו וסט אוגרים משלו."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

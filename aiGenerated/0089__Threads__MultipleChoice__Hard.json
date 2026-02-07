@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 18:35:34",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 968,
+      "output_tokens": 732,
+      "total_tokens": 3249
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "Threads",
+      "Race Conditions",
+      "Pthreads",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "נתון קוד ה-C הבא המשתמש בספריית pthreads. מה ניתן לומר על פלט התוכנית בסיום ריצתה?",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n\nint global_val = 0;\n\nvoid* thread_func(void* arg) {\n    int thread_id = *(int*)arg;\n    global_val += thread_id;\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[3];\n    for (int i = 1; i <= 3; i++) {\n        pthread_create(&threads[i-1], NULL, thread_func, &i);\n    }\n    for (int i = 0; i < 3; i++) {\n        pthread_join(threads[i], NULL);\n    }\n    printf(\"%d\\n\", global_val);\n    return 0;\n}",
+      "options": [
+        "א. הפלט יהיה תמיד 6 (הסכום של 1, 2 ו-3).",
+        "ב. הפלט יהיה תמיד 12 (הערך 4 כפול 3 שרשורים).",
+        "ג. הפלט אינו דטרמיניסטי; הוא עשוי להשתנות בין הרצות שונות עקב גישה לאותה כתובת זיכרון ותחרות על משתנה גלובלי.",
+        "ד. התוכנית תגרום לשגיאת זמן ריצה (Runtime Error) כיוון שלא ניתן לגשת למשתנה מקומי של main מתוך שרשור.",
+        "ה. הפלט יהיה תמיד 0 כיוון שהשינויים בשרשורים מתבצעים על עותק מקומי של global_val."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "התשובה הנכונה היא ג'. קיימות כאן שתי בעיות קריטיות: 1. ה-Main thread מעביר לכל השרשורים מצביע (&i) לאותו מיקום בזיכרון שבו נמצא משתנה הלולאה. כיוון שהלולאה ממשיכה לרוץ במקביל להיווצרות השרשורים, עד שהשרשור יבצע dereference למצביע, הערך של i עשוי להשתנות (למשל ל-4). 2. קיימת תחרות (Race Condition) על המשתנה הגלובלי global_val; פעולת ה-increment (+=) אינה אטומית ברמת ה-CPU, וללא שימוש ב-Mutex, עדכונים של שרשורים שונים עלולים 'לדרוס' זה את זה."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

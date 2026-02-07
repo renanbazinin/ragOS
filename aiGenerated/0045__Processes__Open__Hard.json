@@ -1,0 +1,57 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 18:21:22",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3826,
+      "output_tokens": 1310,
+      "total_tokens": 7176
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "Open",
+    "topic": [
+      "Processes",
+      "Pipes",
+      "Fork",
+      "IPC"
+    ],
+    "content": {
+      "text": "לפניכם קטע קוד בשפת C המשתמש בקריאות מערכת לניהול תהליכים ותקשורת ביניהם. הניחו כי כל קריאות המערכת (fork, pipe, write, read, wait) מצליחות ומתבצעות ללא שגיאות. ענו על הסעיפים הבאים תוך פירוט הנימוקים.",
+      "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\nint main() {\n    int fd[2];\n    pipe(fd);\n    pid_t p1 = fork();\n\n    if (p1 == 0) {\n        // Child 1 (C1)\n        close(fd[0]);\n        pid_t g1 = fork();\n        if (g1 == 0) {\n            // Grandchild (G)\n            int val = 15;\n            write(fd[1], &val, sizeof(val));\n            printf(\"G\");\n            return 0;\n        }\n        wait(NULL);\n        int val = 25;\n        write(fd[1], &val, sizeof(val));\n        printf(\"C1\");\n        close(fd[1]);\n        return 0;\n    } else {\n        // Parent (P)\n        pid_t p2 = fork();\n        if (p2 == 0) {\n            // Child 2 (C2)\n            close(fd[1]);\n            int res, sum = 0;\n            while(read(fd[0], &res, sizeof(res)) > 0) {\n                sum += res;\n            }\n            printf(\"%d\", sum);\n            close(fd[0]);\n            return 0;\n        }\n        close(fd[0]);\n        close(fd[1]);\n        wait(NULL);\n        wait(NULL);\n        printf(\"P\");\n    }\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "101.1",
+        "text": "מה יהיה הפלט המדויק של התוכנית? הסבירו את סדר ההדפסה ואת החישוב שהוביל לתוצאה.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "101.2",
+        "text": "כמה תהליכים נוצרו בסך הכל במהלך הרצת התוכנית (כולל תהליך האב המקורי)?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "101.3",
+        "text": "מה יקרה לפלט התוכנית אם נסיר את השורה (close(fd[1] בתהליך האב (השורה שנמצאת תחת הבלוק של ה-Parent)? נמקו.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": 20,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "101.1: הפלט יהיה GC140P. הסבר: תהליך C1 יוצר את G. תהליך G כותב 15 לצינור, מדפיס G ומסתיים. C1 ממתין ל-G (באמצעות wait), ואז כותב 25 לצינור, מדפיס C1 ומסתיים. תהליך C2 קורא מהצינור בלולאה. הוא יקרא את 15 ואז את 25. הלולאה תסתיים רק כאשר כל קצוות הכתיבה של הצינור ייסגרו. קצוות הכתיבה נמצאים אצל G (נסגר בסיום), C1 (נסגר במפורש ובסיום), והאב P. כיוון ש-P סוגר את fd[1] מיד לאחר ה-fork השני, ברגע ש-C1 מסתיים, אין יותר כותבים פתוחים ו-read יחזיר 0. לכן C2 ידפיס את הסכום 40. האב P ממתין לשני ילדיו ומדפיס P בסוף.\n\n101.2: נוצרו 4 תהליכים: האב המקורי (P), הבן הראשון (C1), הנכד (G), והבן השני (C2).\n\n101.3: אם האב לא יסגור את fd[1], התוכנית תיתקע (Deadlock/Hang). תהליך C2 יישאר חסום בקריאת ה-read בתוך הלולאה, כיוון שקיים עדיין קצה כתיבה פתוח (אצל האב P), ולכן מערכת ההפעלה לא תשלח סיגנל EOF (ערך חזרה 0 מ-read). כתוצאה מכך C2 לא ידפיס את הסכום ולא יסתיים, והאב P ימתין לו לנצח ב-wait."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

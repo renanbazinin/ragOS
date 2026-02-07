@@ -1,0 +1,264 @@
+{
+  "metadata": {
+    "course_name": "Operating Systems",
+    "year": "2022",
+    "semester": "Semester A",
+    "moed": "Moed B",
+    "exam_date": "01.02.2022",
+    "source_file": "os22AB.pdf"
+  },
+  "questions": [
+    {
+      "id": 1,
+      "type": "MultipleChoice",
+      "topic": [
+        "File Systems",
+        "I/O",
+        "Memory Management"
+      ],
+      "content": {
+        "text": "בכונן SSD, נתוני קובץ שנגישים אליו לעיתים רחוקות נשארים באותו מיקום פיזי על הדיסק.",
+        "code_snippet": null,
+        "options": [
+          "נכון",
+          "לא נכון"
+        ]
+      },
+      "sub_questions": null,
+      "points": 5,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": "לא נכון",
+        "explanation": "לא נכון, קובץ שלא משתנה במשך זמן רב נכתב מחדש כדי לחלוק במעטפת הכתיבה עם שאר הבלוקים בדיסק."
+      },
+      "difficulty_estimation": "Easy"
+    },
+    {
+      "id": 2,
+      "type": "MultipleChoice",
+      "topic": [
+        "Scheduling",
+        "CPU Scheduling"
+      ],
+      "content": {
+        "text": "אלגוריתם התזמון SRTF פותר את בעיית ההרעבה של תהליכים.",
+        "code_snippet": null,
+        "options": [
+          "נכון",
+          "לא נכון"
+        ]
+      },
+      "sub_questions": null,
+      "points": 5,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": "לא נכון",
+        "explanation": "לא נכון, תהליך ארוך יורעב אם מגיעים הרבה תהליכים קצרים למערכת. כך שהם כל הזמן מתזמנים לפני והתהליך הארוך לא מספיק לעולם."
+      },
+      "difficulty_estimation": "Easy"
+    },
+    {
+      "id": 3,
+      "type": "MultipleChoice",
+      "topic": [
+        "Threads",
+        "Concurrency"
+      ],
+      "content": {
+        "text": "במערכת עם מעבד יחיד, שימוש בחוטים יכול לשפר את ביצועי התוכנית.",
+        "code_snippet": null,
+        "options": [
+          "נכון",
+          "לא נכון"
+        ]
+      },
+      "sub_questions": null,
+      "points": 5,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": "נכון",
+        "explanation": "נכון, במעבד יחיד לא ניתן להריץ קוד באופן מקבילי באמת, אך שימוש בחוטים מאפשר לשפר את הביצועים במקרה של חסימה – להמשיך להריץ קוד בזמן ביצוע קלט/פלט."
+      },
+      "difficulty_estimation": "Easy"
+    },
+    {
+      "id": 4,
+      "type": "MultipleChoice",
+      "topic": [
+        "Synchronization",
+        "Mutexes",
+        "Concurrency",
+        "Deadlocks"
+      ],
+      "content": {
+        "text": "ברשימה מקושרת hand-over-hand עם מנעולים מוצגים, ייתכן הרעבה.",
+        "code_snippet": null,
+        "options": [
+          "נכון",
+          "לא נכון"
+        ]
+      },
+      "sub_questions": null,
+      "points": 5,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": "נכון",
+        "explanation": "נכון, מאחר שמתקדמים על המנעולים ברשימה המקושרת אחד אחרי השני וכל מנעול הוא הוגן, הרי שכל חוט ממתין רק לחוטים שלפניו. לא ניתן לנעול חוטים אחרים ברשימה בגלל אופן תפיסת המנעול והשימוש במנעולים הוגנים, ולכן לא ייתכן הרעבה."
+      },
+      "difficulty_estimation": "Easy"
+    },
+    {
+      "id": 5,
+      "type": "MultipleChoice",
+      "topic": [
+        "I/O",
+        "System Calls",
+        "Processes"
+      ],
+      "content": {
+        "text": "שימוש ב-DMA מאפשר לתהליכים לקבל יותר זמן מעבד.",
+        "code_snippet": null,
+        "options": [
+          "נכון",
+          "לא נכון"
+        ]
+      },
+      "sub_questions": null,
+      "points": 5,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": "נכון",
+        "explanation": "נכון, ה-DMA הוא התקן שמטפל בהעברת המידע מ/אל התקני קלט/פלט במקום מערכת ההפעלה והמעבד, וכך המעבד פנוי להריץ תהליכים אחרים במשך יותר זמן."
+      },
+      "difficulty_estimation": "Easy"
+    },
+    {
+      "id": 6,
+      "type": "CodeAnalysis",
+      "topic": [
+        "Processes",
+        "IPC",
+        "Signals",
+        "System Calls",
+        "Concurrency"
+      ],
+      "content": {
+        "text": "נתונה התוכנית הבאה:",
+        "code_snippet": "void foo(int p_read[2], int p_write[2]) {\n  unsigned int num;\n  int ret;\n  close(p_read[1]);\n  close(p_write[0]);\n\n  while (1) {\n    ret = read(p_read[0], &num, sizeof(int));\n    if (ret == 0)\n      exit(0);\n    printf(\"%d \", num);\n    if (num == 1)\n      exit(0);\n    usleep(50 * 1000);\n    num = (num%2 == 0) ? num/2 : num*3+1;\n    write(p_write[1], &num, sizeof(int));\n  }\n}\n\nint main() {\n  setbuf(stdout, NULL); // cancel buffering\n  int pipe1[2], pipe2[2];\n  const int NUM = 3;\n  pipe(pipe1);\n  pipe(pipe2);\n  if (!fork()) {\n    foo(pipe1, pipe2);\n  }\n  if (!fork()) {\n    foo(pipe2, pipe1);\n  }\n  write(pipe1[1], &NUM, sizeof(int));\n  // while (wait(NULL) > 0); // commented out!\n  exit(0);\n}",
+        "options": null
+      },
+      "sub_questions": [
+        {
+          "id": "6.1",
+          "text": "ניתן להניח שכל קריאות המערכת מצליחות.\nמה הפלט של התוכנית?",
+          "code_snippet": null,
+          "options": null
+        },
+        {
+          "id": "6.2",
+          "text": "בהנחה שהרצנו את התוכנית מתוך הטרמינל, האם ה-prompt של הטרמינל עשוי להתערבב עם הפלט של התוכנית?",
+          "code_snippet": null,
+          "options": null
+        },
+        {
+          "id": "6.3",
+          "text": "אם נכניס את שורה 14 להערה, האם עלול להיווצר מרוץ (race condition)?",
+          "code_snippet": null,
+          "options": null
+        },
+        {
+          "id": "6.4",
+          "text": "אם נוציא את שורה 30 מהערה, מה תהיה ההשפעה על ריצת התוכנית?",
+          "code_snippet": null,
+          "options": null
+        }
+      ],
+      "points": null,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": null,
+        "explanation": "1. ב-fork() הילד כותב 3 לתוך הפייפ, ההורה. הביצועים קוראים מהפייפ (כל אחד מפעיל אחר לסירוגין), ויוצרים את הפלט\nהבא:\n3 10 5 16 8 4 2 1\n2. כן. הפרומפט של הטרמינל ממתין לתהליך האב בלבד, שמסתיים לפני תהליכי הבנים.\n3. לא נוצר מרוץ, מה שמסוכן הן הפעולה של תהליכי הבנים וגם זה הקריאות והכתיבות אל הפייפ. ההדפסות מתבצעות ללא חוט, וכל התהליך עובד במרחב הזיכרון הפרטי שלו.\n4. התוכנית תיתקע. בגלל שהתהליך האב לא מסתיים ולא סוגר את קצוות הפייפ, בכדי שזה יהיה תקין עם הקריאה ל-wait, צריך שהתהליך האב יסגור את קצוות הפייפ, כפרט את הצדדים הכותבים ולפני ה-wait."
+      },
+      "difficulty_estimation": "Medium"
+    },
+    {
+      "id": 7,
+      "type": "Open",
+      "topic": [
+        "Synchronization",
+        "Threads",
+        "Concurrency",
+        "Atomic Operations",
+        "Semaphores",
+        "Mutexes"
+      ],
+      "content": {
+        "text": "הוא אובייקט סנכרון N-חוטים (N פרמטר אתחול) עם פעולה אחת: checkin, אשר נועדה לסנכרן שלב בביצוע של N החוטים.\nבקריאה לפעולה checkin, כל חוט הקורא לפעולה ממתין עד שכל N החוטים ביצעו קריאה לפעולה. רק כאשר כל N החוטים קראו לפעולה checkin, החוטים יחזרו עבודתם (כולם ימשיכו לפעולה הבאה). במילים אחרות, חוט שקורא ל-checkin הוא (הראשון) משחרר מחסום, וכל שאר החוטים שמגיעים ל-checkin ממתינים. חוט ה-N שמבצע קריאה ל-checkin (האחרון) משחרר מחסום את כל החוטים, שממתינים לבין מהקריאה הבאה.\nשימו לב: הפעולה checkin אינה חד-פעמית. לאחר חזרה מקריאה ל-checkin ניתן לקרוא שוב לפעולה ולחכות שוב – עד אשר כל החוטים גם יקראו שוב ל-checkin, וכן הלאה.\nבשאלת זו ניתן להתעלם מבעיות int והבחון שהייצוג אינו אטומי (אין overflow), וניתן להשתמש ב-spinning.",
+        "code_snippet": null,
+        "options": null
+      },
+      "sub_questions": [
+        {
+          "id": "7.1",
+          "text": "נתונה מערכת עם N חוטים בה לכל חוט יש מזהה i (בין 0 ל-N-1) אשר מועבר כפרמטר לפעולת checkin, ונתון מימוש חלקי ל-Barrier המשתמש במערך בגודל N.\nהשלימו את המימוש ע\"י כתיבת הקוד של הפעולה checkin, ללא שימוש בפעולות אטומיות או אובייקטי סנכרון אחרים. אין להוסיף שדות למבנה או לשנות את הקוד הנתון מלבד היכן שנדרש.",
+          "code_snippet": "typedef struct {\n  int N;\n  int *arr;\n} Barrier;\n\nvoid init(Barrier *bar, int N) {\n  bar->N = N;\n  bar->arr = (int*) calloc(sizeof(int), N);\n}\n\nvoid destroy(Barrier *bar) {\n  free(bar->arr);\n}\n\nvoid checkin(Barrier *bar, int i) {\n\n}",
+          "options": null
+        },
+        {
+          "id": "7.2",
+          "text": "ממשו Barrier עם שימוש באובייקטי סנכרון ופעולות אטומיות שנלמדו, תוך הקפדה על שימוש בזיכרון מינימלי. יש להגדיר את מבנה האובייקט (struct Barrier) ולממש את הפעולות הנתונות.\nשימו לב: בפעולת checkin בסעיף זה לא מתקבל הפרמטר i, לכן המימוש צריך להיות שונה ממסעיף הקודם.",
+          "code_snippet": "typedef struct __barrier {\n\n} Barrier;\n\nvoid init(Barrier *bar, int N) {\n\n}\n\nvoid destroy(Barrier *bar) {\n\n}\n\nvoid checkin(Barrier *bar) {\n\n}",
+          "options": null
+        }
+      ],
+      "points": null,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": null,
+        "explanation": "1. נשתמש במערך בתור בורג לכל חוט, בו נספור כמה פעמים החוט קרא לפעולה checkin.\nובכל קריאה לפעולה החוט קודם את התא שלו ב-1 (הוא היחיד שמקדם את התא ולכן ניתן לקדם באופן בטוח), ואז יעבור על כל המערך כדי להמתין שכל שאר החוטים יכלו לפתוח את אותו ערך – כלומר קראו ל-checkin לפחות אותה כמות של פעמים. אז אפשר להתקדם.\n```c\nvoid checkin(Barrier *bar, int i) {\n  bar->arr[i]++;\n  for (int t = 0; t < bar->N; t++) {\n    while (bar->arr[t] < bar->arr[i]); // wait for t checkin\n  }\n}\n```\n2. נשתמש במונה שיספור כמה פעמים נקרא checkin ע\"י כל החוטים. כל פעם שמגיעים לפעולה של N – זה סימון שכל החוטים קראו ל-checkin (פעם אחת אם N, פעמיים אם 2N וכן הלאה).\nכאשר חוט קורא ל-checkin, הוא יקדם את המונה הגלובלי באופן אטומי (עם F&A ולפי הערך שיתקבל, יחכה עד שיגיע לפעולה הבאה של N – אז נדע שכל החוטים קראו ל-checkin לפחות אותה כמות של פעמים.\n```c\ntypedef struct __Barrier {\n  int N;\n  int checked;\n} Barrier;\n\nvoid init(Barrier *bar, int N) {\n  bar->N = N;\n  bar->checked = 0;\n}\n\nvoid checkin(Barrier *bar) {\n  int val = fetch_and_add(&bar->checked, 1);\n  while ((bar->checked / bar->N) == (val / bar->N));\n}\n\nvoid destroy(Barrier *bar) {\n  // empty\n}\n```"
+      },
+      "difficulty_estimation": "Hard"
+    },
+    {
+      "id": 8,
+      "type": "Open",
+      "topic": [
+        "I/O",
+        "Disk Scheduling",
+        "File Systems"
+      ],
+      "content": {
+        "text": "נתונה מערכת עם workload אקראי של 1MB וסדרתי של 50MB. בנוסף נתונים שלושה דיסקים קשיחים עם הנתונים הבאים:\nRPM: NEXUS 1200, PYLON 5400, PHOTON 5400\nSEEK TIME: NEXUS 10ms, PYLON 50ms, PHOTON 10ms\nTRANSFER RATE: NEXUS 200 MB/s, PYLON 100 MB/s, PHOTON 150 MB/s\nיש לפרט ולנמק את כל החישובים.",
+        "code_snippet": null,
+        "options": null
+      },
+      "sub_questions": [
+        {
+          "id": "8.1",
+          "text": "איזה דיסק קשיח עדיף עבור ה-workload האקראי, ואיזה עדיף עבור הסדרתי?\nעבור האקראי:\nעבור הסדרתי:",
+          "code_snippet": null,
+          "options": null
+        },
+        {
+          "id": "8.2",
+          "text": "עבור ה-workload הסדרתי: מה אחוז הביצועים שנגיע אליו עבור כל אחד מהדיסקים הקשיחים?\nכלומר מה היחס (באחוזים) בין המהירות בפועל לבין המהירות המקסימלית של כל דיסק.\n:NEXUS\n:PYLON\n:PHOTON",
+          "code_snippet": null,
+          "options": null
+        },
+        {
+          "id": "8.3",
+          "text": "לשיפור ביצועים ב-workload באקראי, הוחלט להשתמש במערך RAID-4 של דיסקים קשיחים מסוג PYLON.\nמה המספר המינימלי של דיסקים שנצטרך כדי לשפר את הביצועים על פני שימוש בדיסק אחד ללא RAID? יש לתת תשובה נפרדת לכל תרחיש:\nתרחיש ראשון:\nכמות דיסקים:\nתרחיש שני:\nכמות דיסקים:",
+          "code_snippet": null,
+          "options": null
+        }
+      ],
+      "points": null,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": null,
+        "explanation": "1. RPM 1200 הוא זמן סיבוב 50ms ← זמן המתנה לסיבוב של 25ms.\nRPM של 5400 - זמן המתנה לסיבוב של 5ms.\nזמן המיקום (seek+wait) לכל דיסק הוא:\nNEXUS 35ms\nPYLON 55ms\nPHOTON 15ms\nהזמן ב-ms שלוקח להעביר 1MB לכל דיסק הוא 1000 חלקי קצב ההעברה המקסימלי של הדיסק:\nNEXUS 5ms\nPYLON 10ms\nPHOTON 6.66ms\nבתרחיש האקראי של 1MB, סה\"כ הזמנים לפעולה לכל דיסק:\nNEXUS 40ms\nPYLON 65ms\nPHOTON 21.66ms\nנעדיף את הקצר ביותר שהוא PHOTON.\nבתרחיש הסדרתי של 50MB, סה\"כ הזמנים לפעולה לכל דיסק:\nNEXUS 250ms\nPYLON 500ms\nPHOTON 333ms\nנעדיף את הקצר ביותר שהוא NEXUS.\n2. לפי הנתונים מעלה, זה הקצב שנגיע אליו בתרחיש הסדרתי עבור כל דיסק:\nNEXUS 175 MB/s\nPYLON 90 MB/s\nPHOTON 144 MB/s\nבאחוזים מהקצב המקסימלי נקבל:\nNEXUS 87.5%\nPYLON 90%\nPHOTON 96%\n3. לפי הנתונים מעלה, זה הקצב שנגיע אליו בתרחיש האקראי עבור כל דיסק:\nNEXUS 25 MB/s\nPYLON 15.4 MB/s\nPHOTON 46 MB/s\nכלומר עלינו להגיע לקצב גבוה יותר מ-46MB/s כדי שה-RAID ישפר.\nבתרחיש אקראי של קריאות הביצועים של 4-RAID עם N דיסקים הם N-1)*R) כאשר R קצב ההעברה בתרחיש האקראי, במקרה שלנו 15.4=R ולכן 4=N.\nבתרחיש אקראי של כתיבות הביצועים של 4-RAID הם 2/R ללא תלות בכמות הדיסקים, לכן לא נוכל לשפר את הביצועים על פני אף אחד מהדיסקים הקיימים."
+      },
+      "difficulty_estimation": "Medium"
+    }
+  ]
+}

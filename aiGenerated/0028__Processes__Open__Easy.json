@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 18:15:41",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5185,
+      "output_tokens": 561,
+      "total_tokens": 8140
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Processes",
+      "Memory Management",
+      "Fork"
+    ],
+    "content": {
+      "text": "נתון קוד ה-C הבא המשתמש בקריאת המערכת fork. מה יהיה הפלט של התוכנית (הניחו שכל קריאות המערכת מצליחות)? הסבירו האם השינוי במשתנה x בתהליך הבן משפיע על ערכו בתהליך האב.",
+      "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\nint main() {\n    int x = 10;\n    pid_t pid = fork();\n\n    if (pid == 0) {\n        // תהליך הבן\n        x = x + 5;\n        printf(\"Child: x = %d\\n\", x);\n    } else {\n        // תהליך האב\n        wait(NULL);\n        x = x - 5;\n        printf(\"Parent: x = %d\\n\", x);\n    }\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפלט של התוכנית יהיה:\nChild: x = 15\nParent: x = 5\n\nהסבר: קריאת המערכת fork יוצרת תהליך חדש (בן) המהווה העתק של תהליך האב. למרות שהבן יורש את ערכי המשתנים של האב ברגע הפיצול, לכל תהליך יש מרחב כתובות (Address Space) נפרד ומבודד בזיכרון. לכן, כל שינוי שמבצע תהליך הבן במשתנה x מתבצע בזיכרון הפרטי שלו ואינו משפיע על ערכו של x במרחב הזיכרון של תהליך האב. תהליך האב ממתין לסיום הבן באמצעות wait, ולאחר מכן מדפיס את ערכו של x המקורי (10) פחות 5."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

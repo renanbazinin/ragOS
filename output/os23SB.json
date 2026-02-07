@@ -1,0 +1,261 @@
+{
+  "metadata": {
+    "course_name": "מערכות הפעלה",
+    "year": "2023",
+    "semester": "Summer",
+    "moed": "Moed B",
+    "exam_date": "28.12.2023",
+    "source_file": "os23SB.pdf"
+  },
+  "questions": [
+    {
+      "id": 1,
+      "type": "MultipleChoice",
+      "topic": [
+        "File Systems",
+        "Memory Management"
+      ],
+      "content": {
+        "text": "ב-LFS אין inode bitmap וגם אין inode region, לכן אין מגבלה על כמות ה-inodes במערכת הקבצים.",
+        "code_snippet": null,
+        "options": [
+          "נכון",
+          "לא נכון"
+        ]
+      },
+      "sub_questions": null,
+      "points": 5,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": "לא נכון",
+        "explanation": "לא נכון. כמות ה-inodes ב-LFS מוגבלת בגלל ה-imap."
+      },
+      "difficulty_estimation": "Medium"
+    },
+    {
+      "id": 2,
+      "type": "MultipleChoice",
+      "topic": [
+        "Deadlocks",
+        "Concurrency",
+        "Synchronization"
+      ],
+      "content": {
+        "text": "בכל קוד או מערכת שמקיימים את כל 4 תנאי הקיפאון, בהכרח קיימת ריצה כלשהי שתוביל לקיפאון.",
+        "code_snippet": null,
+        "options": [
+          "נכון",
+          "לא נכון"
+        ]
+      },
+      "sub_questions": null,
+      "points": 5,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": "לא נכון",
+        "explanation": "לא נכון. אם אחד התנאים לא מתקיים אז לא יתכן קיפאון, אך ההיפך לא בהכרח נכון (לדוגמה עם חוט יחיד, או בקטעי קוד שלא יתכן שירוצו במקביל)."
+      },
+      "difficulty_estimation": "Medium"
+    },
+    {
+      "id": 3,
+      "type": "MultipleChoice",
+      "topic": [
+        "I/O",
+        "File Systems",
+        "Disk Scheduling"
+      ],
+      "content": {
+        "text": "בתרחיש של קריאות סדרתיות, הביצועים של 5-RAID (עם כל השדרוגים) זהים לביצועים של 0-RAID.",
+        "code_snippet": null,
+        "options": [
+          "נכון",
+          "לא נכון"
+        ]
+      },
+      "sub_questions": null,
+      "points": 5,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": "נכון",
+        "explanation": "נכון. כפי שנלמד, קריאות סדרתיות ב-5-RAID יכולות לנצל את כל הדיסקים בדומה ל-0-RAID."
+      },
+      "difficulty_estimation": "Medium"
+    },
+    {
+      "id": 4,
+      "type": "MultipleChoice",
+      "topic": [
+        "Processes",
+        "System Calls",
+        "File Systems"
+      ],
+      "content": {
+        "text": "בביצוע ()fork מיד לאחר פתיחת קובץ, סגירת הקובץ אחרי ה-fork בתהליך האב תסגור אותו גם בתהליך הבן.",
+        "code_snippet": null,
+        "options": [
+          "נכון",
+          "לא נכון"
+        ]
+      },
+      "sub_questions": null,
+      "points": 5,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": "לא נכון",
+        "explanation": "לא נכון. סגירת הקובץ רק מוחקת את המצביע אל ה-FD שלו מטבלת הקבצים הפתוחים של תהליך האב, עבור תהליך האב בלבד ואינה משפיעה על תהליך הבן."
+      },
+      "difficulty_estimation": "Medium"
+    },
+    {
+      "id": 5,
+      "type": "MultipleChoice",
+      "topic": [
+        "CPU Scheduling",
+        "Scheduling",
+        "Processes"
+      ],
+      "content": {
+        "text": "באלגוריתם התזמון MLFQ, לא קיים תרחיש שיוביל להרעבה של תהליך.",
+        "code_snippet": null,
+        "options": [
+          "נכון",
+          "לא נכון"
+        ]
+      },
+      "sub_questions": null,
+      "points": 5,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": "נכון",
+        "explanation": "נכון. בגלל priority boost כל תהליך תמיד יקבל זמן ריצה בסופו של דבר."
+      },
+      "difficulty_estimation": "Medium"
+    },
+    {
+      "id": 6,
+      "type": "Open",
+      "topic": [
+        "Memory Management",
+        "Virtual Memory",
+        "Paging"
+      ],
+      "content": {
+        "text": "נתונה מערכת בה אין טבלאות דפים, ובמקום זאת יש ל-MMU (בזיכרון של הרכיב עצמו) טבלת תרגום כתובות אחת ויחידה לכל התהליכים והמסגרות. טבלת מיפוי זו היא טבלה הפוכה: האינדקס לטבלה הוא מספר מסגרת, ותוכן כל תא בטבלה הוא מזהה תהליך, מספר הדף של התהליך – אשר ממופה למסגרת המתאימה לאינדקס של התא, ביטים של סטטוס וריפוד (אם נדרש).",
+        "code_snippet": null,
+        "options": null
+      },
+      "sub_questions": [
+        {
+          "id": "6.1",
+          "text": "לפי מה ניתן לקבוע כמה כניסות צריכות להיות בטבלת המיפוי?",
+          "code_snippet": null,
+          "options": null
+        },
+        {
+          "id": "6.2",
+          "text": "כיצד יתבצע תרגום כתובות במערכת זו? יש לתאר באופן מלא את תהליך התרגום כולו, החל מגישה של תהליך לכתובת הווירטואלית ועד למציאת הכתובת הפיזית המתאימה. ניתן להניח שקיים בטבלה מיפוי עבור הדף אליו ניגש התהליך.",
+          "code_snippet": null,
+          "options": null
+        },
+        {
+          "id": "6.3",
+          "text": "מה היתרון העיקרי של מערכת זו על פני מערכות עם טבלאות דפים סטנדרטיות?",
+          "code_snippet": null,
+          "options": null
+        },
+        {
+          "id": "6.4",
+          "text": "איזו פעולה או מנגנון קיימים במערכות עם טבלאות דפים סטנדרטיות ובלתי אפשרי לממש במערכת עם טבלה זו בלבד, ומדוע?",
+          "code_snippet": null,
+          "options": null
+        }
+      ],
+      "points": null,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": null,
+        "explanation": "6.1: 1. לפי מספר המסגרות בזיכרון הפיזי – לכל מסגרת יש כניסה בטבלה.\n6.2: 2. תהליך ניגש לכתובת וירטואלית, ה-MMU מפרק למספר דף והיסט, ה-MMU מבצע חיפוש בכל טבלת המיפוי כדי לראות אם יש מסגרת המכילה את הדף – אם כן יבוצע מיפוי של הדף למסגרת לפי אינדקס הרשומה, יחד עם ההיסט זו הכתובת הפיזית.\n6.3: 3. מאחר שהחיפוש בטבלת המיפוי מתבצע בחומרה, נוכל לחפש בכל הטבלה בבת אחת ולמצוא את המיפוי מאוד מהר. טבלה הפוכה מקלה מאוד על מימוש אלגוריתמי פינוי כמו אלגוריתם השעון (אין צורך במבנה נתונים נוסף).\n6.4: 4. החלפה (swapping). מאחר שאין טבלת דפים, אין כל נתון לגבי דף של תהליך שאינו ממופה למסגרת, ולכן אין דרך למפות דפים אל הדיסק."
+      },
+      "difficulty_estimation": "Medium"
+    },
+    {
+      "id": 7,
+      "type": "CodeAnalysis",
+      "topic": [
+        "Synchronization",
+        "Semaphores",
+        "Concurrency",
+        "Threads"
+      ],
+      "content": {
+        "text": "להלן פתרון לבעיית יצרן-צרכן, אשר עושה שימוש ב-3 סמפורים (full, empty, mutex) המאותחלים באופן זהה לפתרון שנלמד בהרצאה: שימו לב: הקוד הנתון שונה מזה שנלמד בכיתה. הפתרון משתמש במבנים ופונקציות הבאות: Item – מבנה (struct) המייצג מוצר. produce_item/ consume_item – פונקציות ליצירה וצריכה של מוצר. פונקציות אלו פועלות על מוצר בודד ובטוחות לשימוש במקביל (כל עוד הן מופעלות על מוצרים שונים). remove_item / add_item – פונקציות להוספה והסרה של מוצר (מהמחסן). פונקציות אלו אינן בטוחות לשימוש במקביל.",
+        "code_snippet": "void produce() {\n    Item item = produce_item();\n    sem_wait(&empty);\n    sem_wait(&mutex);\n    add_item(item);\n    sem_post(&full);\n    sem_post(&mutex);\n}\nvoid consume() {\n    sem_wait(&full);\n    sem_wait(&mutex);\n    Item item = remove_item();\n    sem_post(&empty);\n    sem_post(&mutex);\n    consume_item(item);\n}"
+      },
+      "sub_questions": [
+        {
+          "id": "7.1",
+          "text": "האם המימוש הנתון פותר באופן נכון את בעיית יצרן-צרכן? אם כן, יש להוכיח שהפתרון עובד נכון, אחרת יש לתאר את התרחיש הבעייתי ולהסביר אותו.",
+          "code_snippet": null,
+          "options": [
+            "פותר נכון",
+            "לא פותר"
+          ]
+        },
+        {
+          "id": "7.2",
+          "text": "נתונה מערכת מיוחדת בה כל שורת קוד היא אטומית (לא משנה מה מבוצע באותה שורה, מובטח ששורת הקוד כולה מתבצעת באופן אטומי). במערכת זו נתונים 2 משתנים גלובליים x,y המאותחלים ל-0, וסמפור משותף mutex המאותחל ל-1. שני חוטים מריצים במקביל את קטעי הקוד הבאים: פרטו את כל זוגות הערכים האפשריים עבור המשתנים x, y אשר יכולים להתקבל לאחר ש-2 החוטים מסיימים את הריצה שלהם (ניתן להניח שאף חוט אחר לא ניגש למשתנים אלו). לכל זוג ערכים יש לפרט ולהסביר בקצרה את הריצות המובילות אליו.",
+          "code_snippet": "void* thread1 (void*) {\n    x = 2;\n    sem_wait(&mutex);\n    y = y + x;\n    x = 4;\n    sem_post(&mutex);\n}\nvoid* thread2(void*) {\n    x = x + 1;\n    sem_wait(&mutex);\n    y = y - 2;\n    x = x - y;\n    sem_post(&mutex);\n}",
+          "options": null
+        }
+      ],
+      "points": null,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": null,
+        "explanation": "7.1: 1. הפתרון עובד נכון – אין משמעות לסדר שחרור הסמפורים והוא אינו משפיע על נכונות, כל עוד כל הסמפורים שנתפסו משוחררים (ללא עיכוב).\n7.2: 2. נתייחס רק לשורות 2,4,5 של כל חוט. כשחוט מסוים מריץ את שורה 4, הוא בהכרח יריץ את שורה 5 לפני שורה 4 של החוט השני (בגלל המנעול). נקרא לחוט הראשון A ולחוט השני B, יש 8 ריצות אפשריות (לפי חוט ושורה):\n(x=5, y=0) A2 A4 A5 B2 B4 B5\n(x=4, y=0) A2 A4 B2 A5 B4 B5\n(x=3, y=1) A2 B2 A4 A5 B4 B5\n(x=4, y=3) A2 B2 B4 B5 A4 A5\n(x=4, y=0) B2 B4 B5 A2 A4 A5\n(x=4, y=2) B2 B4 A2 B5 A4 A5\n(x=4, y=2) B2 A2 B4 B5 A4 A5\n(x=4, y=0) B2 A2 A4 A5 B4 B5\nסה\"כ 5 זוגות ערכים."
+      },
+      "difficulty_estimation": "Hard"
+    },
+    {
+      "id": 8,
+      "type": "Open",
+      "topic": [
+        "File Systems",
+        "Memory Management"
+      ],
+      "content": {
+        "text": "נתונה מערכת קבצים VSFS עם שדרוג של extents, כך שבכל inode יש extents במקום מצביעים ישירים. מצביעים עקיפים ומצביעים בתוך בלוקים עובדים כרגיל, ללא extents. למערכת הנתונים הבאים: - גודל בלוק הוא 1024B. - גודל מצביע הוא 4B. - גודל inode הוא 64B. - בכל inode יש 4 extents, 1 מצביע עקיף, 1 מצביע עקיף כפול. - כל extent מורכב ממצביע רגיל לבלוק ועוד בית בודד (1B) המייצג כמות בלוקים 1-256. יש לפרט ולנמק את כל החישובים.",
+        "code_snippet": null,
+        "options": null
+      },
+      "sub_questions": [
+        {
+          "id": "8.1",
+          "text": "מה הגודל המקסימלי של קובץ הנתמך במערכת הקבצים הנתונה, וכמה בלוקים של DATA הוא יתפוס? גודל מקסימלי: כמות בלוקים: נימוק:",
+          "code_snippet": null,
+          "options": null
+        },
+        {
+          "id": "8.2",
+          "text": "סטודנט טוען כי אם נשנה את גודל המצביע מ-4B ל-2B, לא נוכל ליצור קובץ בגודל המקסימלי המתאפשר ע\"י המצביעים ב-inode. הסבירו מדוע הסטודנט צודק.",
+          "code_snippet": null,
+          "options": null
+        },
+        {
+          "id": "8.3",
+          "text": "מה גודל הקובץ המקסימלי המתאפשר בפועל, כאשר משנים את גודל המצביע ל-2B (כמפורט בסעיף הקודם)? תנו דוגמה לערכים חוקיים לכל המצביעים השונים ב-inode (כולל extents והתוכן של בלוקים עקיפים) אשר מייצגים קובץ בגודל מקסימלי זה. שימו לב ששינוי גודל המצביע משפיע על כמות המצביעים בבלוק לעומת הסעיף הראשון (שאלה 8.1).",
+          "code_snippet": null,
+          "options": null
+        }
+      ],
+      "points": null,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": null,
+        "explanation": "8.1: 1. בכל בלוק נכנסים 1024/4=256 מצביעים. כל extent יכול להצביע ל-256 בלוקים במקסימום. לכן לפי נתוני ה-inode כל קובץ יכול להכיל: 1024 בלוקים (דרך 4 extents) + 256 בלוקים (דרך מצביע עקיף) + 65536 בלוקים (דרך מצביע עקיף כפול שמצביע ל-256 בלוקים מלאים במצביעים).\nגודל קובץ מקסימלי: 68420608 Bytes (66816 KB)\nכמות בלוקים: 66816\nנימוק: 4 extents * 256 blocks/extent = 1024 data blocks. 1 indirect pointer * (1024B/4B) = 256 data blocks. 1 double indirect pointer * (1024B/4B) * (1024B/4B) = 65536 data blocks. Total data blocks = 1024 + 256 + 65536 = 66816. Max size = 66816 * 1024B = 68420608 Bytes.\n\n8.2: 2. כאשר גודל המצביע הוא 2 בתים, ניתן להצביע למקסימום של 65536 בלוקים של DATA אשר הם פחות מגודל הקובץ המקסימלי לפי המצביעים ב-inode.\n\n8.3: 3. עם העדכון נכנסים 1024/2=512 מצביעים בכל בלוק. מאחר שאנו מוגבלים ל-65536 בלוקים של DATA (כולל מצביעים). כדי להגיע לגודל הקובץ המקסימלי בפועל, נסדר את הערכים במצביעים לפי הסדר. המצביעים ב-inode יהיו:\n1. extent המצביע לבלוק 0 עם גודל 256.\n2. extent המצביע לבלוק 256 עם 256 בלוקים.\n3. extent המצביע לבלוק 512 עם 256 בלוקים.\n4. extent המצביע לבלוק 768 עם 256 בלוקים.\n5. מצביע עקיף יצביע לבלוק 1024 (הבלוק הפנוי הבא). בבלוק זה:\n   . נכנסים מצביעים ל-512 בלוקים נוספים של DATA, כלומר יכיל את הערכיים 1025-1536.\n6. מצביע עקיף כפול יצביע לבלוק 1537 (הבלוק הפנוי הבא), בבלוק זה:\n   ו. נכנסים מצביעים ל-512 בלוקים נוספים של מצביעים אך אין מקום לכולם, ננצל רק ב-125 מצביעים, כלומר יכיל את הערכים 1538-1662\n   ii. בבלוקים העקיפים 1538-1661 (כולם מלבד האחרון) ננצל את כל 512 המצביעים עבור הבלוקים הפנויים הבאים (1663 והלאה עד 65,150, סה\"כ 63,488 בלוקים של DATA).\nעד כה השתמשנו ב-65,151 בלוקים (מה-extents: 1024, מהמצביע העקיף: 1+512, מהמצביע העקיף הכפול: 512*1+125+124). נותר לנו בלוק עקיף 1662 (המצביע ה-125 בבלוק העקיף הכפול), ומבחינת בלוקים זמינים נותרו לנו עוד 385 בלוקים של DATA (עד שנגיע למקסימום של 65536).\n. בבלוק 1662 ננצל 385 מצביעים (מתוך 512) עבור 385 הבלוקים שנותרו – מצביעים אל בלוקים 65,535 65,151 עד\nניצלנו את בלוקים 0-65,535, סה\"כ 65,536 בלוקים בהתאם למקסימום ולא ניתן לנצל עוד בלוקים של DATA.\nגודל מקסימלי: 67081216 Bytes (65409 KB)\nנימוק וערכי מצביעים: Total data blocks = 1024 (from 4 extents) + 512 (from 1 indirect block) + (124 * 512) (from 124 full level-2 indirect blocks) + 385 (from 1 partial level-2 indirect block) = 65409 data blocks. Total metadata blocks = 1 (single indirect) + 1 (double indirect level 1) + 125 (double indirect level 2) = 127 metadata blocks. Total blocks (data + metadata) = 65409 + 127 = 65536 blocks, which is the maximum addressable with 2B pointers. Max size = 65409 * 1024B = 67081216 Bytes."
+      },
+      "difficulty_estimation": "Hard"
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 18:16:09",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5185,
+      "output_tokens": 491,
+      "total_tokens": 6503
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Processes",
+      "fork"
+    ],
+    "content": {
+      "text": "כמה תהליכים ייווצרו בסך הכל (כולל התהליך הראשי) כתוצאה מהרצת הקוד הבא? פרטו את החישוב והסבירו בקצרה כיצד הגעתם לתוצאה.",
+      "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n\nint main() {\n    fork();\n    fork();\n    fork();\n    printf(\"Hello\\n\");\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "בכל קריאה לפקודת fork(), כל תהליך קיים במערכת שמריץ את השורה הזו מתפצל לשני תהליכים: תהליך האב המקורי ותהליך בן חדש. שני התהליכים ממשיכים את הריצה מאותה נקודה בקוד. \nהחישוב הוא כדלקמן:\n1. התחלה: תהליך 1 (הראשי).\n2. לאחר ה-fork הראשון: התהליך הראשי יוצר בן, סה\"כ 2 תהליכים.\n3. לאחר ה-fork השני: כל אחד מ-2 התהליכים הקיימים יוצר בן, סה\"כ 4 תהליכים.\n4. לאחר ה-fork השלישי: כל אחד מ-4 התהליכים הקיימים יוצר בן, סה\"כ 8 תהליכים.\nבאופן כללי, עבור n קריאות עוקבות ל-fork(), מספר התהליכים הכולל יהיה 2 בחזקת n. במקרה זה 2^3 = 8."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

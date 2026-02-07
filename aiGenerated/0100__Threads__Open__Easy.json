@@ -1,0 +1,50 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 18:39:01",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3183,
+      "output_tokens": 722,
+      "total_tokens": 5331
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "Open",
+    "topic": [
+      "Threads",
+      "Concurrency",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "לפניך קטע קוד בשפת C המשתמש בספריית pthreads. התוכנית מגדירה משתנה גלובלי ומבצעת פעולות עדכון מתוך שני חוטים שונים.",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n\nint counter = 0;\n\nvoid* increment_task(void* arg) {\n    for (int i = 0; i < 100; i++) {\n        counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t t1, t2;\n\n    pthread_create(&t1, NULL, increment_task, NULL);\n    pthread_create(&t2, NULL, increment_task, NULL);\n\n    pthread_join(t1, NULL);\n    pthread_join(t2, NULL);\n\n    printf(\"%d\\n\", counter);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "7.1",
+        "text": "בהנחה שהריצה מתבצעת באופן תקין וללא הפרעות של מרוץ תהליכים (race conditions), מה יהיה הפלט המודפס למסך?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "7.2",
+        "text": "הסבר מדוע חוטים (threads) מסוגלים לעדכן את המשתנה counter בצורה כזו, וכיצד התנהגות זו הייתה משתנה אילו היינו משתמשים בתהליכים (processes) ע\"י fork במקום חוטים?",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": 10,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "7.1. הפלט יהיה 200. כל אחד משני החוטים מבצע 100 איטרציות של קידום המשתנה counter ב-1.\n7.2. חוטים (threads) השייכים לאותו תהליך חולקים את אותו מרחב כתובות (Address Space), ולכן משתנים גלובליים (הנמצאים במקטע הנתונים) הם משותפים לכולם. אילו היינו משתמשים ב-fork, היה נוצר תהליך בן עם עותק נפרד של מרחב הכתובות (Copy-on-write). במקרה כזה, קידום המשתנה בתהליך הבן לא היה משפיע על המשתנה בתהליך האב, והאב היה מדפיס 0."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

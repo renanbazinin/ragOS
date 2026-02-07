@@ -1,0 +1,56 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 18:18:11",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3602,
+      "output_tokens": 971,
+      "total_tokens": 5751
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Processes",
+      "System Calls",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "נתון קוד בשפת C המשתמש בקריאות המערכת fork ו-wait. הנח שכל קריאות המערכת מצליחות ומתבצעות ללא שגיאות. ענו על הסעיפים הבאים בהסתמך על הקוד.",
+      "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\nint main() {\n    int x = 10;\n    if (fork() == 0) {\n        x += 5;\n        if (fork() == 0) {\n            x += 5;\n            printf(\"%d\\n\", x);\n        } else {\n            wait(NULL);\n            x -= 2;\n            printf(\"%d\\n\", x);\n        }\n    } else {\n        wait(NULL);\n        printf(\"%d\\n\", x);\n    }\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "כמה תהליכים נוצרו בסך הכל במהלך הרצת התוכנית (כולל תהליך האב המקורי)?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "מה יהיה הפלט של התוכנית? יש לציין את הערכים המודפסים לפי סדר הדפסתם ולהסביר את החישוב עבור כל אחד.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.3",
+        "text": "האם המשתנה x משותף בין התהליכים השונים? הסבירו כיצד מנגנון ה-Copy-on-Write (CoW) בא לידי ביטוי במקרה זה.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.1: נוצרו 3 תהליכים בסך הכל. תהליך האב המקורי (P1), תהליך הבן הראשון (P2) שנוצר ב-fork הראשון, ותהליך הנכד (P3) שנוצר ב-fork השני בתוך הבלוק של הבן.\n\n1.2: הפלט יהיה:\n20\n13\n10\nהסבר: \n- P3 (הנכד): יורש x=15 מ-P2, מוסיף 5 ומדפיס 20.\n- P2 (הבן): מחכה ל-P3 שיסיים, לאחר מכן מחסיר 2 מה-x שלו (שהיה 15) ומדפיס 13.\n- P1 (האב): מחכה ל-P2 שיסיים, מדפיס את ה-x שלו שנשאר 10 ללא שינוי.\nהסדר מובטח עקב קריאות ה-wait.\n\n1.3: לא, המשתנה אינו משותף. כל תהליך מקבל מרחב כתובות וירטואלי נפרד. מנגנון Copy-on-Write גורם לכך שכל עוד התהליכים רק קוראים מהזיכרון, הם חולקים את אותם דפים פיזיים. ברגע שתהליך מבצע כתיבה (כמו x += 5), מערכת ההפעלה יוצרת עותק פיזי נפרד של הדף עבור אותו תהליך, כך שהשינוי אינו משפיע על תהליך האב או תהליכים מקבילים אחרים."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

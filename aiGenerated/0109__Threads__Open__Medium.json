@@ -1,0 +1,57 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 18:41:17",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2766,
+      "output_tokens": 982,
+      "total_tokens": 4660
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Threads",
+      "User-level Threads",
+      "Kernel-level Threads",
+      "Blocking I/O"
+    ],
+    "content": {
+      "text": "שקלו מערכת המריצה תהליך עם שלושה חוטים (Threads) המבצעים את הפעולות המתוארות בקוד הבא. נניח שחוט 2 מבצע קריאה חוסמת (blocking read) מקובץ גדול הנמצא על הדיסק.",
+      "code_snippet": "void* thread_1_work(void* arg) { \n    while(1) { /* Compute intensive math */ } \n}\n\nvoid* thread_2_work(void* arg) { \n    int fd = open(\"large_file.dat\", O_RDONLY);\n    read(fd, buffer, 1000000); // Blocking I/O call\n    close(fd);\n}\n\nvoid* thread_3_work(void* arg) { \n    printf(\"Status: Working...\\n\"); \n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "במידה והספרייה לניהול חוטים ממומשת במודל Many-to-One (User-level threads), האם חוט 1 יוכל להמשיך בחישוביו בזמן שחוט 2 ממתין לנתונים מהדיסק? נמקו.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "במידה והמערכת משתמשת במודל One-to-One (Kernel-level threads), מה יהיה מצבם של חוט 1 וחוט 3 בזמן שחוט 2 חסום?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.3",
+        "text": "ציינו יתרון אחד של מודל Many-to-One על פני מודל One-to-One, למרות המגבלה שהוצגה בסעיפים הקודמים.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": 15,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "10.1: לא, חוט 1 לא יוכל להמשיך לרוץ. במודל Many-to-One, מערכת ההפעלה אינה מודעת לקיום החוטים בתוך התהליך ורואה רק ישות תזמון אחת. כאשר חוט 2 מבצע קריאה חוסמת, הוא מבצע קריאת מערכת (system call) שגורמת לכל התהליך להיכנס למצב Waiting עד לסיום פעולת ה-I/O.\n\n10.2: במודל One-to-One, כל חוט משתמש בישות תזמון נפרדת של הקרנל. לכן, כאשר חוט 2 נחסם על פעולת I/O, רק הוא עובר למצב Waiting. חוט 1 יכול להמשיך לרוץ על המעבד (מצב Running) וחוט 3 יכול להיות מתוזמן להדפסה (מצב Ready/Running).\n\n10.3: יתרון מרכזי של Many-to-One הוא היעילות בניהול החוטים. יצירת חוט, החלפת הקשר (context switch) בין חוטים וסנכרון ביניהם מתבצעים במרחב המשתמש (User-space) ללא צורך במעבר למצב קרנל (trap/kernel mode), מה שהופך את הפעולות הללו למהירות משמעותית בהשוואה לניהול חוטים על ידי הקרנל."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

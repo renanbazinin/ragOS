@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 18:12:58",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 968,
+      "output_tokens": 695,
+      "total_tokens": 3519
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Processes",
+      "fork",
+      "wait",
+      "Zombie Processes",
+      "Orphan Processes"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא בשפת C המורץ על מערכת Linux. נניח שכל הקריאות ל-fork מצליחות, ה-PID של התהליך המקורי הוא 100, וה-PID של תהליך ה-init במערכת הוא 1. מה יודפס על ידי ה-Grandchild (הנכד), ומה יהיה מצבו של תהליך הבן (Child 1) ברגע שה-Grandchild מדפיס את הפלט?",
+      "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n#include <sys/wait.h>\n#include <stdlib.h>\n\nint main() {\n    pid_t pid = fork();\n    if (pid == 0) { // Child 1\n        if (fork() == 0) { // Grandchild\n            sleep(2);\n            printf(\"%d\", getppid());\n            exit(0);\n        }\n        exit(0);\n    }\n    wait(NULL);\n    sleep(5);\n    return 0;\n}",
+      "options": [
+        "א. יודפס 100, ותהליך Child 1 יהיה במצב Zombie.",
+        "ב. יודפס 1, ותהליך Child 1 יהיה במצב Zombie.",
+        "ג. יודפס 1, ותהליך Child 1 לא יהיה קיים במערכת (נוקה).",
+        "ד. יודפס 100, ותהליך Child 1 לא יהיה קיים במערכת (נוקה).",
+        "ה. יודפס ה-PID של ה-Grandchild, ו-Child 1 יהיה במצב Running."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "כאשר Child 1 מבצע exit, הוא הופך ל-Zombie. התהליך המקורי (Parent) קורא ל-wait(NULL), פעולה זו 'אוספת' את הסטטוס של Child 1 ומנקה אותו מטבלת התהליכים (Reaping), לכן הוא אינו קיים יותר במערכת. ה-Grandchild הופך ליתום (Orphan) כיוון שאביו (Child 1) סיים את ריצתו. במערכות Linux, תהליך יתום מאומץ על ידי תהליך ה-init (או subreaper), שכתובתו היא 1. לכן, getppid() יחזיר 1."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

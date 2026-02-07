@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 18:15:23",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5185,
+      "output_tokens": 635,
+      "total_tokens": 7387
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Processes",
+      "fork"
+    ],
+    "content": {
+      "text": "לפניכם קטע קוד בשפת C המשתמש בקריאת המערכת fork(). כמה תהליכים בסך הכל (כולל תהליך האב המקורי) ייווצרו במהלך ריצת התוכנית? הניחו שכל הקריאות ל-fork() מצליחות. יש להסביר את שלבי ההיווצרות.",
+      "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n\nint main() {\n    fork();\n    if (fork() == 0) {\n        fork();\n    }\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "במהלך ריצת התוכנית ייווצרו בסך הכל 6 תהליכים (כולל האב המקורי). להלן הפירוט:\n1. התוכנית מתחילה עם תהליך אחד (P1).\n2. הקריאה הראשונה ל-fork() יוצרת תהליך בן (P2). כעת ישנם 2 תהליכים.\n3. לאחר מכן, שני התהליכים (P1 ו-P2) מגיעים לשורת ה-if ומבצעים fork() נוסף. \n   - P1 יוצר את P3 (עבור P3 הערך המוחזר הוא 0, עבור P1 הערך הוא ה-PID של P3).\n   - P2 יוצר את P4 (עבור P4 הערך המוחזר הוא 0, עבור P2 הערך הוא ה-PID של P4).\n   כעת ישנם 4 תהליכים.\n4. תנאי ה-if בודק האם הערך המוחזר מ-fork הוא 0. תנאי זה מתקיים רק עבור תהליכי הבן החדשים שנוצרו בשלב הקודם (P3 ו-P4).\n5. בתוך בלוק ה-if, שני התהליכים הללו (P3 ו-P4) קוראים ל-fork() פעם שלישית:\n   - P3 יוצר את P5.\n   - P4 יוצר את P6.\n6. סך כל התהליכים במערכת: P1, P2, P3, P4, P5, P6 (סה\"כ 6)."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

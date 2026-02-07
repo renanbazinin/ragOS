@@ -1,0 +1,56 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 18:21:51",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3826,
+      "output_tokens": 1259,
+      "total_tokens": 8674
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Processes",
+      "System Calls",
+      "Memory Isolation"
+    ],
+    "content": {
+      "text": "לפניכם קוד בשפת C המשתמש בקריאות המערכת fork ו-waitpid. עליכם לנתח את פעולת הקוד ולענות על הסעיפים הבאים. הניחו שכל קריאות המערכת מצליחות ושאין השהיות חיצוניות מלבד אלו המשתמעות מהקוד. יש לפרט ולנמק את שלבי החישוב.",
+      "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n#include <sys/wait.h>\n#include <stdlib.h>\n\nint main() {\n    int x = 10;\n    for (int i = 0; i < 2; i++) {\n        pid_t pid = fork();\n        if (pid == 0) {\n            x -= 2;\n            if (fork() == 0) {\n                x += 5;\n                printf(\"A: %d\\n\", x);\n                exit(0);\n            }\n            x++;\n            printf(\"B: %d\\n\", x);\n            exit(0);\n        } else {\n            waitpid(pid, NULL, 0);\n            x /= 2;\n        }\n    }\n    printf(\"C: %d\\n\", x);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "כמה תהליכים נוצרו בסך הכל במהלך הרצת התוכנית (כולל תהליך האב המקורי)?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "מהו הפלט של התוכנית? במידה וסדר ההדפסה אינו דטרמיניסטי, ציינו אילו שורות יכולות להתחלף ביניהן והסבירו מדוע.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.3",
+        "text": "כיצד היה משתנה ערכו של x המודפס בשורה המתחילה באות C, לו היינו מחליפים את השורה x /= 2; בשורה x = x - i;?",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": 20,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "ניתוח הקוד:\n1. סעיף 10.1: האב מבצע לולאה בת 2 איטרציות. בכל איטרציה הוא קורא ל-fork (יצירת ילד) ומחכה לו שיסתיים. כל ילד בתורו קורא ל-fork נוסף (יצירת נכד). \nאיטרציה i=0: אב -> ילד 1 -> נכד 1 (סה\"כ 3 תהליכים עד כה).\nאיטרציה i=1: אב -> ילד 2 -> נכד 2 (עוד 2 תהליכים).\nסה\"כ נוצרו 5 תהליכים.\n\n2. סעיף 10.2: \n- איטרציה i=0: האב מתחיל עם x=10. הילד יורש x=10, מחסיר 2 (x=8). הנכד יורש מהילד x=8, מוסיף 5 ומדפיס A: 13. הילד מוסיף 1 ומדפיס B: 9. האב מחכה לילד ומבצע x=10/2=5.\n- איטרציה i=1: האב כעת עם x=5. הילד השני יורש x=5, מחסיר 2 (x=3). הנכד השני יורש x=3, מוסיף 5 ומדפיס A: 8. הילד השני מוסיף 1 ומדפיס B: 4. האב מחכה לילד ומבצע x=5/2=2 (חלוקת שלמים).\n- סיום: האב מדפיס C: 2.\nסדר ההדפסה: בתוך כל איטרציה, הסדר בין A ל-B אינו דטרמיניסטי כי הילד והנכד רצים במקביל ואין wait ביניהם. אך כל איטרציה חייבת להסתיים לפני שהבאה מתחילה בגלל ה-waitpid של האב. לכן A:13 ו-B:9 יופיעו לפני A:8 ו-B:4.\n\n3. סעיף 10.3: \n- ב-i=0: האב יבצע x = 10 - 0 = 10.\n- ב-i=1: האב יבצע x = 10 - 1 = 9.\nלכן הפלט בשורה C יהיה 9."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

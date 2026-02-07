@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 18:33:47",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1815,
+      "output_tokens": 780,
+      "total_tokens": 4100
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Threads",
+      "Concurrency",
+      "Race Conditions"
+    ],
+    "content": {
+      "text": "בקטע הקוד הבא ב-C, מתכנת מנסה ליצור 5 חוטים (threads) שכל אחד מהם ידפיס את המספר הסידורי שבו הוא נוצר (0 עד 4). מה ניתן לומר על פלט התוכנית?",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n\nvoid* thread_func(void* arg) {\n    int id = *(int*)arg;\n    printf(\"%d \", id);\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[5];\n    for (int i = 0; i < 5; i++) {\n        pthread_create(&threads[i], NULL, thread_func, &i);\n    }\n    for (int i = 0; i < 5; i++) {\n        pthread_join(threads[i], NULL);\n    }\n    return 0;\n}",
+      "options": [
+        "א. התוכנית תמיד תדפיס את המספרים 0, 1, 2, 3, 4 לפי הסדר.",
+        "ב. התוכנית תדפיס את המספרים 0, 1, 2, 3, 4 בסדר כלשהו (פרמוטציה), וכל מספר יופיע בדיוק פעם אחת.",
+        "ג. ייתכן שחלק מהערכים יודפסו מספר פעמים וערכים אחרים לא יודפסו כלל, שכן כל החוטים ניגשים לאותה כתובת זיכרון של המשתנה i.",
+        "ד. התוכנית תמיד תדפיס '5 5 5 5 5' כיוון שהלולאה ב-main מסתיימת תמיד לפני שהחוטים מתחילים לרוץ.",
+        "ה. תתרחש שגיאת הידור (Compilation Error) כי לא ניתן להעביר מצביע למשתנה מקומי i לפונקציית החוט."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "הבעיה בקוד היא העברת הכתובת של המשתנה הלוקאלי i (באמצעות i&) לכל החוטים. כל החוטים מקבלים מצביע לאותו מיקום בזיכרון. כיוון שה-main thread ממשיך לקדם את i בלולאה בזמן שהחוטים נוצרים ומתחילים את ריצתם, נוצר Race Condition: עד שחוט מסוים ניגש לזיכרון כדי לקרוא את הערך של id, הערך של i כבר עשוי להשתנות על ידי ה-main thread. לכן, ייתכן שחוטים שונים יקראו את אותו הערך (למשל, כולם יקראו 5 אם הלולאה הסתיימה מהר), וערכים מסוימים לא יודפסו כלל."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

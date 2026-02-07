@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 18:02:44",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 965,
+      "output_tokens": 414,
+      "total_tokens": 2509
+    }
+  },
+  "question": [
+    {
+      "id": 1,
+      "type": "MultipleChoice",
+      "topic": [
+        "Processes",
+        "Process States"
+      ],
+      "content": {
+        "text": "מה קורה למצב התהליך (Process State) כאשר הוא מבצע קריאת מערכת הממתינה לפעולת קלט/פלט (I/O), כגון קריאה מדיסק או המתנה לקלט מהמקלדת?",
+        "code_snippet": null,
+        "options": [
+          "א. התהליך עובר למצב Ready כדי שיוכל להמשיך לרוץ מיד.",
+          "ב. התהליך נשאר במצב Running ומבצע Busy Waiting עד שהמידע מגיע.",
+          "ג. התהליך עובר למצב Blocked (או Waiting) עד לסיום פעולת הקלט/פלט.",
+          "ד. התהליך מסיים את ריצתו (Terminated) ומערכת ההפעלה מוחקת אותו."
+        ]
+      },
+      "sub_questions": null,
+      "points": 5,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": "ג",
+        "explanation": "כאשר תהליך מבצע פעולת I/O, הוא אינו יכול להמשיך בביצוע פקודות עד שהמידע יהיה זמין. כדי לא לבזבז זמן מעבד יקר, מערכת ההפעלה מעבירה אותו למצב Blocked (חסום) ומקצה את המעבד לתהליך אחר שנמצא במצב Ready. רק לאחר סיום פעולת ה-I/O, התהליך יחזור למצב Ready."
+      },
+      "difficulty_estimation": "Easy"
+    }
+  ]
+}

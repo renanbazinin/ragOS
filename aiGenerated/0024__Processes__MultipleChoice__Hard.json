@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 18:14:38",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 968,
+      "output_tokens": 610,
+      "total_tokens": 6711
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Processes",
+      "System Calls",
+      "File Descriptors"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא המבוצע במערכת הפעלה Unix. נניח שכל קריאות המערכת מצליחות והקובץ test.txt נפתח כקובץ ריק (גודל 0). מה יהיה תוכן הקובץ בסיום ריצת התוכנית?",
+      "code_snippet": "#include <fcntl.h>\n#include <unistd.h>\n#include <sys/wait.h>\n#include <stdlib.h>\n\nint main() {\n    int fd = open(\"test.txt\", O_RDWR | O_CREAT | O_TRUNC, 0644);\n    write(fd, \"OS\", 2);\n    if (fork() == 0) {\n        write(fd, \"IS\", 2);\n        exit(0);\n    } else {\n        wait(NULL);\n        write(fd, \"FUN\", 3);\n    }\n    close(fd);\n    return 0;\n}",
+      "options": [
+        "א. OSISFUN",
+        "ב. OSIS",
+        "ג. OSFUN",
+        "ד. OS"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "לאחר ביצוע קריאת המערכת fork(), תהליך הבן מקבל עותק של טבלת מתארי הקבצים (File Descriptor Table) של האב. עם זאת, מתארי הקבצים בשני התהליכים מצביעים לאותה כניסה בטבלת הקבצים הפתוחים של מערכת ההפעלה (System-wide Open File Table). כניסה זו מנהלת את ה-File Offset עבור הקובץ הפתוח. כיוון שהאופסט משותף, כאשר הבן כותב את המחרוזת 'IS', הוא מקדם את האופסט מ-2 ל-4. כיוון שהאב ממתין לסיום הבן (בעזרת wait), הוא יבצע את הכתיבה של 'FUN' רק לאחר מכן, והיא תתחיל מהאופסט המעודכן (4). לכן התוצאה היא OSISFUN."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}
