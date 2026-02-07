@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 20:27:01",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3648,
+      "output_tokens": 1624,
+      "total_tokens": 8103
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Concurrency",
+      "Threads",
+      "Mutexes",
+      "Race Conditions"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה המשתמשת בחוטים (threads) ובמנגנון mutex. התוכנית מבצעת שתי סדרות של פעולות הגדלה של מונה משותף: אחת ללא הגנת mutex ואחת עם הגנת mutex.\n\nמה יהיה הפלט הצפוי של התוכנית? הסבירו בפירוט את ההבדל בפלט בין שני המקרים (עם ובלי mutex), וכיצד מנגנון ה-mutex פותר את הבעיה הקיימת במקרה הראשון.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <unistd.h>\n\n#define NUM_THREADS 5\n#define ITERATIONS_PER_THREAD 100000\n\nint shared_counter = 0;\npthread_mutex_t counter_mutex;\n\nvoid* increment_with_mutex(void* arg) {\n    for (int i = 0; i < ITERATIONS_PER_THREAD; i++) {\n        pthread_mutex_lock(&counter_mutex);\n        shared_counter++;\n        pthread_mutex_unlock(&counter_mutex);\n    }\n    return NULL;\n}\n\nvoid* increment_without_mutex(void* arg) {\n    for (int i = 0; i < ITERATIONS_PER_THREAD; i++) {\n        shared_counter++; // Race condition here\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n    int i;\n\n    // Initialize mutex\n    pthread_mutex_init(&counter_mutex, NULL);\n\n    printf(\"Starting threads WITHOUT mutex protection...\\n\");\n    shared_counter = 0; // Reset for the first run\n    for (i = 0; i < NUM_THREADS; i++) {\n        pthread_create(&threads[i], NULL, increment_without_mutex, NULL);\n    }\n    for (i = 0; i < NUM_THREADS; i++) {\n        pthread_join(threads[i], NULL);\n    }\n    printf(\"Final counter value WITHOUT mutex: %d\\n\", shared_counter);\n\n    printf(\"\\nStarting threads WITH mutex protection...\\n\");\n    shared_counter = 0; // Reset for the second run\n    for (i = 0; i < NUM_THREADS; i++) {\n        pthread_create(&threads[i], NULL, increment_with_mutex, NULL);\n    }\n    for (i = 0; i < NUM_THREADS; i++) {\n        pthread_join(threads[i], NULL);\n    }\n    printf(\"Final counter value WITH mutex: %d\\n\", shared_counter);\n\n    // Destroy mutex\n    pthread_mutex_destroy(&counter_mutex);\n\n    return 0;\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "פלט צפוי:\nStarting threads WITHOUT mutex protection...\nFinal counter value WITHOUT mutex: [ערך כלשהו, לרוב נמוך מ-500000]\n\nStarting threads WITH mutex protection...\nFinal counter value WITH mutex: 500000\n\nהסבר:\n\n1.  **מקרה ללא הגנת mutex (increment_without_mutex):**\n    במקרה זה, מספר חוטים (NUM_THREADS = 5) מנסים להגדיל מונה משותף (`shared_counter`) בו-זמנית, כאשר כל חוט מבצע ITERATIONS_PER_THREAD = 100,000 איטרציות. סך האיטרציות הצפוי הוא 5 * 100,000 = 500,000.\n    עם זאת, הפעולה `shared_counter++` אינה אטומית. היא מורכבת למעשה משלוש פעולות ברמה נמוכה יותר:\n    א. קריאת הערך הנוכחי של `shared_counter` מהזיכרון.\n    ב. הגדלת הערך ביחידה.\n    ג. כתיבת הערך החדש חזרה לזיכרון.\n    כאשר מספר חוטים מבצעים פעולות אלו במקביל, עלול להיווצר תנאי מרוץ (Race Condition). לדוגמה, שני חוטים עשויים לקרוא את אותו ערך של `shared_counter`, שניהם יגדילו אותו, ושניהם יכתבו את הערך המוגדל חזרה, וכתוצאה מכך הגדלה אחת תאבד. לכן, הערך הסופי של `shared_counter` במקרה זה יהיה כמעט תמיד נמוך מ-500,000, והוא ישתנה בין הרצות שונות של התוכנית.\n\n2.  **מקרה עם הגנת mutex (increment_with_mutex):**\n    במקרה זה, אנו משתמשים במנגנון `pthread_mutex_t` (mutex) כדי להגן על הקטע הקריטי (Critical Section), שהוא הפעולה `shared_counter++`.\n    *   לפני שחוט ניגש להגדיל את `shared_counter`, הוא קורא ל-`pthread_mutex_lock(&counter_mutex)`. קריאה זו מבטיחה שרק חוט אחד יכול להיכנס לקטע הקריטי בכל רגע נתון. אם חוט אחר כבר מחזיק את ה-mutex, החוט הנוכחי ייחסם (ימתין) עד שה-mutex ישוחרר.\n    *   לאחר שהחוט סיים את הפעולה בקטע הקריטי (הגדלת המונה), הוא קורא ל-`pthread_mutex_unlock(&counter_mutex)` כדי לשחרר את ה-mutex, ובכך לאפשר לחוט אחר שחוסם להיכנס.\n    מנגנון זה מבטיח שהפעולה `shared_counter++` תבוצע באופן אטומי מבחינת הגישה למונה המשותף. כל הגדלה מבוצעת במלואה על ידי חוט אחד לפני שחוט אחר יכול לגשת למונה. לכן, הערך הסופי של `shared_counter` במקרה זה יהיה תמיד 500,000 (5 חוטים * 100,000 איטרציות לחוט). ה-mutex פותר ביעילות את תנאי המרוץ על ידי אכיפת הדרה הדדית (Mutual Exclusion)."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

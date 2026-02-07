@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 20:28:15",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3648,
+      "output_tokens": 1536,
+      "total_tokens": 9417
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Mutexes",
+      "Concurrency",
+      "Deadlock",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה המשתמשת ב-pthreads וב-mutexes כדי לגשת למשאבים משותפים. נתח את התוכנית והסבר: א) מהו הפלט הסופי האפשרי של הערכים resource1 ו-resource2? ב) האם קיימת בעיית תחרות (race condition) או קיפאון (deadlock) בתוכנית? אם כן, הסבר מדוע וכיצד היא עלולה להתרחש.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <unistd.h> // For sleep\n\npthread_mutex_t mutex1;\npthread_mutex_t mutex2;\n\nint resource1 = 0;\nint resource2 = 0;\n\nvoid* thread_func1(void* arg) {\n    printf(\"Thread 1: Trying to lock mutex1...\\n\");\n    pthread_mutex_lock(&mutex1);\n    printf(\"Thread 1: Locked mutex1. Trying to lock mutex2...\\n\");\n    sleep(1); // Introduce delay to increase likelihood of deadlock\n    pthread_mutex_lock(&mutex2);\n    printf(\"Thread 1: Locked mutex2. Updating resources...\\n\");\n    resource1++;\n    resource2++;\n    pthread_mutex_unlock(&mutex2);\n    printf(\"Thread 1: Unlocked mutex2.\\n\");\n    pthread_mutex_unlock(&mutex1);\n    printf(\"Thread 1: Unlocked mutex1. Exiting.\\n\");\n    return NULL;\n}\n\nvoid* thread_func2(void* arg) {\n    printf(\"Thread 2: Trying to lock mutex2...\\n\");\n    pthread_mutex_lock(&mutex2);\n    printf(\"Thread 2: Locked mutex2. Trying to lock mutex1...\\n\");\n    sleep(1); // Introduce delay\n    pthread_mutex_lock(&mutex1);\n    printf(\"Thread 2: Locked mutex1. Updating resources...\\n\");\n    resource1--;\n    resource2--;\n    pthread_mutex_unlock(&mutex1);\n    printf(\"Thread 2: Unlocked mutex1.\\n\");\n    pthread_mutex_unlock(&mutex2);\n    printf(\"Thread 2: Unlocked mutex2. Exiting.\\n\");\n    return NULL;\n}\n\nint main() {\n    pthread_t t1, t2;\n\n    pthread_mutex_init(&mutex1, NULL);\n    pthread_mutex_init(&mutex2, NULL);\n\n    pthread_create(&t1, NULL, thread_func1, NULL);\n    pthread_create(&t2, NULL, thread_func2, NULL);\n\n    pthread_join(t1, NULL);\n    pthread_join(t2, NULL);\n\n    pthread_mutex_destroy(&mutex1);\n    pthread_mutex_destroy(&mutex2);\n\n    printf(\"Final resource1 value: %d\\n\", resource1);\n    printf(\"Final resource2 value: %d\\n\", resource2);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "א) הערכים הסופיים של resource1 ו-resource2 יהיו תלויים בשאלה האם התוכנית מסיימת את ריצתה בהצלחה או נכנסת למצב קיפאון (deadlock). במקרה של קיפאון, התהליכונים לא יסיימו את עדכון המשאבים, והערכים עשויים להישאר 0,0 (או הערכים שהיו להם טרם הקיפאון). אם, מסיבה כלשהי, הקיפאון נמנע (למשל, בגלל תזמון ספציפי מאוד של מערכת ההפעלה שגורם לתהליכון אחד לסיים את כל פעולותיו לפני שהשני מתחיל את ניסיונו לנעול), אז resource1 ו-resource2 יסיימו שניהם עם הערך 0. זאת מכיוון שתהליכון אחד מגדיל את שניהם ב-1, והתהליכון השני מקטין את שניהם ב-1, וכך הם מבטלים זה את זה.\n\nב) כן, קיימת בעיית קיפאון (deadlock) קלאסית בתוכנית. הקיפאון עלול להתרחש באופן הבא:\n1. תהליכון 1 (thread_func1) מבצע `pthread_mutex_lock(&mutex1)` ומצליח לנעול את mutex1.\n2. באותו זמן, תהליכון 2 (thread_func2) מבצע `pthread_mutex_lock(&mutex2)` ומצליח לנעול את mutex2.\n3. כעת, תהליכון 1 מנסה לבצע `pthread_mutex_lock(&mutex2)`. הוא ימתין ללא הגבלת זמן מכיוון ש-mutex2 נעול על ידי תהליכון 2.\n4. במקביל, תהליכון 2 מנסה לבצע `pthread_mutex_lock(&mutex1)`. הוא ימתין ללא הגבלת זמן מכיוון ש-mutex1 נעול על ידי תהליכון 1.\nשני התהליכונים ממתינים זה לזה לשחרור המשאב שהם זקוקים לו, וכל אחד מהם מחזיק במשאב שהשני זקוק לו. מצב זה מוביל לקיפאון, והתוכנית תיתקע ולא תסיים את ריצתה. אין כאן בעיית תחרות (race condition) על עדכון המשאבים resource1 ו-resource2 מכיוון ששניהם מוגנים על ידי שני ה-mutexes יחד, כלומר, כל עדכון מתרחש בתוך קטע קריטי המוגן היטב. הבעיה היא שהקטע הקריטי הזה עצמו עלול לא להיות נגיש לעולם עקב הקיפאון."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

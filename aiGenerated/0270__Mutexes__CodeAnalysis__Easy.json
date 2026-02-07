@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 20:24:41",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4189,
+      "output_tokens": 773,
+      "total_tokens": 7221
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Mutexes",
+      "Synchronization",
+      "Concurrency",
+      "Deadlock"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המשתמשת בחוטים (threads) ובמנעול (mutex) כדי להגדיל מונה גלובלי. קראו את הקוד וציינו מה יקרה כאשר התוכנית תרוץ. נמקו את תשובתכם.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <stdlib.h> // For exit\n\n#define NUM_THREADS 5\n#define INCREMENTS_PER_THREAD 100000\n\npthread_mutex_t counter_mutex;\nint counter = 0;\n\nvoid* increment_counter(void* arg) {\n    for (int i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n        pthread_mutex_lock(&counter_mutex);\n        counter++;\n        // Bug: Missing pthread_mutex_unlock(&counter_mutex);\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    pthread_mutex_init(&counter_mutex, NULL);\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        if (pthread_create(&threads[i], NULL, increment_counter, NULL) != 0) {\n            perror(\"Failed to create thread\");\n            exit(EXIT_FAILURE);\n        }\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        if (pthread_join(threads[i], NULL) != 0) {\n            perror(\"Failed to join thread\");\n            exit(EXIT_FAILURE);\n        }\n    }\n\n    pthread_mutex_destroy(&counter_mutex);\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "התוכנית תיכנס למצב של קיפאון (deadlock). הסיבה לכך היא שבפונקציה `increment_counter`, המנעול `counter_mutex` ננעל באמצעות `pthread_mutex_lock` אך לעולם אינו משוחרר באמצעות `pthread_mutex_unlock`. החוט הראשון שמצליח לנעול את המנעול יבצע את כל האיטרציות שלו בלולאה, אך המנעול יישאר נעול. כל חוט אחר שינסה לנעול את המנעול באמצעות `pthread_mutex_lock` ייחסם וימתין ללא הגבלת זמן לשחרור המנעול. כתוצאה מכך, קריאות `pthread_join` בפונקציית `main` לא יחזרו לעולם עבור החוטים החסומים, והתוכנית תיתקע."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

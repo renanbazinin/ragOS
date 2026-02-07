@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Deadlocks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 21:12:56",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 1354,
+      "total_tokens": 10757
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Deadlocks",
+      "Synchronization",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתונה מערכת עם N תהליכים (threads) ו-M מנעולים מסוג `pthread_mutex_t` המאוחסנים במערך `m[M]`. כל תהליך `i` (כאשר `i` נע מ-`0` עד `N-1`) מנסה לרכוש את המנעולים `m[0]` ו-`m[1]`. סדר רכישת המנעולים נקבע כדלקמן:\n\n- אם `i` זוגי, התהליך רוכש קודם את `m[0]` ולאחר מכן את `m[1]`.\n- אם `i` אי-זוגי, התהליך רוכש קודם את `m[1]` ולאחר מכן את `m[0]`.\n\nאיזו מהטענות הבאות נכונה לגבי התרחשות מצב קיפאון (Deadlock) במערכת זו? (הניחו כי M >= 2).",
+      "code_snippet": "pthread_mutex_t m[M]; // M mutexes, M >= 2 assumed\n\nvoid* thread_func(void* arg) {\n    long thread_id = (long)arg;\n\n    if (thread_id % 2 == 0) { // Even threads\n        pthread_mutex_lock(&m[0]);\n        // Simulate some work or context switch\n        // usleep(1);\n        pthread_mutex_lock(&m[1]);\n    } else { // Odd threads\n        pthread_mutex_lock(&m[1]);\n        // Simulate some work or context switch\n        // usleep(1);\n        pthread_mutex_lock(&m[0]);\n    }\n\n    // Critical Section\n    // printf(\"Thread %ld acquired m[0] and m[1]\\n\", thread_id);\n\n    pthread_mutex_unlock(&m[1]); // Unlock in reverse order of acquisition\n    pthread_mutex_unlock(&m[0]);\n    return NULL;\n}",
+      "options": [
+        "א. מצב קיפאון יכול להתרחש רק אם N > M.",
+        "ב. מצב קיפאון יכול להתרחש רק אם M > N.",
+        "ג. מצב קיפאון יכול להתרחש אם N >= 2.",
+        "ד. מצב קיפאון אינו יכול להתרחש כלל בשל אסטרטגיית הרכישה המתחלפת.",
+        "ה. מצב קיפאון יכול להתרחש רק אם N אי-זוגי."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "התשובה הנכונה היא ג'. מצב קיפאון (Deadlock) יכול להתרחש אם N >= 2. ננתח מדוע:\n\nהתנאים ההכרחיים למצב קיפאון הם: הדדיות (Mutual Exclusion), החזקה והמתנה (Hold and Wait), אי-הפקעה (No Preemption), והמתנה מעגלית (Circular Wait).\n\n1.  **הדדיות, החזקה והמתנה, אי-הפקעה:** מנעולי `pthread_mutex_t` מספקים את שלושת התנאים הללו באופן טבעי. תהליכים מחזיקים במנעול אחד וממתינים לאחר, ולא ניתן להפקיע מנעול מתהליך שמחזיק בו.\n2.  **המתנה מעגלית:** זהו התנאי הקריטי כאן. נבחן את תהליך 0 ואת תהליך 1:\n    *   **תהליך 0 (thread_id = 0, זוגי):** מנסה לרכוש את `m[0]` ולאחר מכן את `m[1]`.\n    *   **תהליך 1 (thread_id = 1, אי-זוגי):** מנסה לרכוש את `m[1]` ולאחר מכן את `m[0]`.\n\n    אם קיימים לפחות שני תהליכים (כלומר N >= 2), אז יהיה קיים לפחות תהליך אחד זוגי (לדוגמה, תהליך 0) ולפחות תהליך אחד אי-זוגי (לדוגמה, תהליך 1). נניח שתהליך 0 רוכש את `m[0]` ותהליך 1 רוכש את `m[1]`. כעת, תהליך 0 ממתין ל-`m[1]` (שמוחזק על ידי תהליך 1), ותהליך 1 ממתין ל-`m[0]` (שמוחזק על ידי תהליך 0). זהו מצב של המתנה מעגלית קלאסית (AB-BA deadlock).\n\n    ההנחה ש-M >= 2 מבטיחה ש-`m[0]` ו-`m[1]` הם מנעולים שונים וקיימים.\n\n    לכן, ברגע שישנם לפחות שני תהליכים (N >= 2), תמיד יכול להיווצר תרחיש שבו תהליך זוגי ותהליך אי-זוגי יכנסו למצב המתנה מעגלית. התשובות האחרות שגויות מכיוון שהן מציעות תנאים שאינם הכרחיים או שגויים לגבי התרחשות הקיפאון."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 19:46:38",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 968,
+      "output_tokens": 1028,
+      "total_tokens": 5134
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Synchronization",
+      "Deadlock",
+      "Semaphores",
+      "Producer-Consumer"
+    ],
+    "content": {
+      "text": "נתונה המחלקה הבאה ב-C המממשת חוצץ מעגלי (bounded buffer) באמצעות סמפורים:\n\n```c\n#include <semaphore.h>\n#include <stdio.h>\n\n#define BUFFER_SIZE 5\n\nint buffer[BUFFER_SIZE];\nint in = 0;\n// int out = 0; // Not directly used in produce, omitted for brevity\n\nsem_t mutex;    // Ensures mutual exclusion for buffer access\nsem_t full;     // Counts number of occupied slots\nsem_t empty;    // Counts number of empty slots\n\nvoid init_semaphores() {\n    sem_init(&mutex, 0, 1);\n    sem_init(&full, 0, 0);\n    sem_init(&empty, 0, BUFFER_SIZE);\n}\n\nvoid produce(int item) {\n    // סדר פעולות שגוי שעלול לגרום לבעיה\n    sem_wait(&mutex);   // 1. תפיסת המנעול ראשונה\n    sem_wait(&empty);   // 2. המתנה למקום פנוי (תוך החזקת המנעול)\n\n    // קטע קריטי: הוספת פריט לחוצץ\n    buffer[in] = item;\n    in = (in + 1) % BUFFER_SIZE;\n\n    sem_post(&full);    // 3. איתות שמקום התמלא\n    sem_post(&mutex);   // 4. שחרור המנעול\n}\n\n// void consume() { ... } // Omitted for brevity\n// int main() { ... } // Omitted for brevity\n```\n\nאיזו בעיה עלולה להיווצר כתוצאה מהמימוש הנתון של הפונקציה `produce`?",
+      "code_snippet": null,
+      "options": [
+        "א. תנאי מרוץ (race condition) בגישה לחוצץ.",
+        "ב. קיפאון (deadlock) כאשר החוצץ מלא.",
+        "ג. הרעבה (starvation) של תהליכי הצרכן.",
+        "ד. בזבוז משאבים עקב busy-waiting.",
+        "ה. אף אחת מהתשובות האחרות אינה נכונה."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "הבעיה במימוש הפונקציה `produce` נובעת מסדר פעולות ה-`sem_wait`. תהליך יצרן תופס תחילה את ה-`mutex` באמצעות `sem_wait(&mutex)`. לאחר מכן, הוא מנסה להמתין למקום פנוי בחוצץ באמצעות `sem_wait(&empty)`. אם החוצץ מלא (כלומר `empty` שווה ל-0), תהליך היצרן ייחסם בהמתנה ל-`empty` – אך הוא עדיין מחזיק ב-`mutex`.\n\nתהליך צרכן, על מנת לפנות מקום בחוצץ, צריך לגשת לאזור הקריטי, ולשם כך עליו לתפוס את ה-`mutex`. אולם, ה-`mutex` כבר מוחזק על ידי היצרן החסום. מצב זה מוביל לקיפאון (deadlock): היצרן חסום בהמתנה למקום פנוי (שיכול להשתחרר רק על ידי צרכן), והצרכן חסום בהמתנה ל-`mutex` (המוחזק על ידי היצרן החסום). הפתרון הנכון הוא להמתין למקום פנוי (`sem_wait(&empty)`) *לפני* תפיסת ה-`mutex` (`sem_wait(&mutex)`), כך שה-`mutex` לא יוחזק בזמן המתנה למקום בחוצץ. "
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

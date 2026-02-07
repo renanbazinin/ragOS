@@ -1,0 +1,59 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 20:06:36",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4129,
+      "output_tokens": 2411,
+      "total_tokens": 14311
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Threads",
+      "Concurrency",
+      "Condition Variables",
+      "Mutexes",
+      "Barriers"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה המשתמשת בחוטים (threads) לביצוע משימה הכוללת שני שלבים (Phase A ו-Phase B) באופן מחזורי. כל T החוטים מבצעים N איטרציות.\nהדרישות הן:\n1. חוט אינו יכול להתחיל את Phase B עבור איטרציה מסוימת, אלא אם כן כל T החוטים סיימו את Phase A עבור אותה איטרציה.\n2. בכל רגע נתון, רק חוט אחד יכול להיות ב-Phase B (קטע קריטי).\n\nיש לנתח את הקוד ולענות על השאלות הבאות:",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <unistd.h>\n#include <stdbool.h>\n\n#define T 3 // Number of threads\n#define N 2 // Number of iterations per thread\n\npthread_mutex_t mutex_phaseA;\npthread_cond_t cond_phaseA_done;\nint phaseA_counter = 0;\n\npthread_mutex_t mutex_phaseB;\n\nint global_work_counter = 0;\n\nvoid* thread_func(void* arg) {\n    long thread_id = (long)arg;\n\n    for (int i = 0; i < N; ++i) {\n        printf(\"Thread %ld: Iteration %d, starting Phase A\\n\", thread_id, i);\n        usleep(1000 * (thread_id + 1)); // Simulate work\n\n        pthread_mutex_lock(&mutex_phaseA);\n        phaseA_counter++;\n        printf(\"Thread %ld: Iteration %d, finished Phase A. phaseA_counter = %d\\n\", thread_id, i, phaseA_counter);\n\n        if (phaseA_counter < T) {\n            pthread_cond_wait(&cond_phaseA_done, &mutex_phaseA);\n        } else {\n            // Last thread to finish Phase A, reset counter and broadcast\n            printf(\"Thread %ld: Iteration %d, ALL threads finished Phase A. Broadcasting!\\n\", thread_id, i);\n            phaseA_counter = 0;\n            pthread_cond_broadcast(&cond_phaseA_done);\n        }\n        pthread_mutex_unlock(&mutex_phaseA);\n\n        // Phase B critical section\n        pthread_mutex_lock(&mutex_phaseB);\n        printf(\"Thread %ld: Iteration %d, entering Phase B critical section. global_work_counter = %d\\n\", thread_id, i, global_work_counter);\n        global_work_counter++;\n        usleep(500 * (T - thread_id)); // Simulate work\n        printf(\"Thread %ld: Iteration %d, exiting Phase B critical section. global_work_counter = %d\\n\", thread_id, i, global_work_counter);\n        pthread_mutex_unlock(&mutex_phaseB);\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[T];\n\n    pthread_mutex_init(&mutex_phaseA, NULL);\n    pthread_cond_init(&cond_phaseA_done, NULL);\n    pthread_mutex_init(&mutex_phaseB, NULL);\n\n    for (long i = 0; i < T; ++i) {\n        pthread_create(&threads[i], NULL, thread_func, (void*)i);\n    }\n\n    for (int i = 0; i < T; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final global_work_counter = %d\\n\", global_work_counter);\n\n    pthread_mutex_destroy(&mutex_phaseA);\n    pthread_cond_destroy(&cond_phaseA_done);\n    pthread_mutex_destroy(&mutex_phaseB);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "האם הסנכרון בקוד עונה על הדרישות באופן מלא ונכון? אם לא, זהו את הבעיה(ות) והסבירו מדוע היא(הן) קיימת(ות).",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "מה יהיה הערך הסופי של המשתנה global_work_counter כאשר כל החוטים יסיימו את ריצתם? נמקו את תשובתכם.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.3",
+        "text": "נניח שברצוננו להוסיף קריאה לפונקציה `log_iteration_complete()` בדיוק פעם אחת בכל איטרציה, לאחר שכל החוטים סיימו את Phase A אך לפני שמישהו נכנס ל-Phase B. היכן הייתם מוסיפים את הקריאה הזו, ואיזה סנכרון נוסף (אם בכלל) נדרש כדי להבטיח שהיא תיקרא רק פעם אחת לאיטרציה?",
+        "code_snippet": "void log_iteration_complete() {\n    printf(\"--- Iteration complete for all threads ---\\n\");\n}",
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.1: הסנכרון אינו עונה על הדרישות באופן מלא ונכון, במיוחד עבור תרחיש של שימוש חוזר במחסום (reusable barrier).\nהבעיה העיקרית היא תנאי מרוץ (race condition) כאשר חוטים עוברים למחזור הבא של האיטרציות. כאשר החוט האחרון מגיע ל-Phase A, הוא מאפס את `phaseA_counter` ל-0 ומשדר (`pthread_cond_broadcast`) לכל החוטים הממתינים. כל החוטים הממתינים מתעוררים וממשיכים ל-Phase B.\nעם זאת, החוט האחרון (ששידר) עשוי לסיים את Phase B שלו במהירות, לחזור ללולאת ה-for, ולהתחיל את Phase A עבור האיטרציה הבאה (ולהגדיל את `phaseA_counter` ל-1), וזאת לפני שכל שאר החוטים שהתעוררו הספיקו לצאת מהמחסום של Phase A ולראות ש-`phaseA_counter` אופס. במצב כזה, חוטים אחרים שיגיעו למחסום Phase A באיטרציה הבאה עלולים לראות ערך שגוי של `phaseA_counter` (למשל, 1 במקום 0) או לפספס את ה-broadcast הבא, מה שעלול לגרום לקיפאון (deadlock) או להפרת הדרישה שכל החוטים יסיימו את Phase A לפני שמישהו יתחיל את Phase B עבור אותה איטרציה. כלומר, חוט אחד יכול להתחיל את Phase A של איטרציה `i+1` לפני שכל החוטים סיימו את Phase B של איטרציה `i`.\nמחסום לשימוש חוזר דורש לרוב מנגנון מורכב יותר, כגון שימוש במונה דורות (generation counter) או במחסום כפול (double barrier), כדי לוודא שכל החוטים עזבו את המחסום לפני שהוא מתאפס ומוכן לשימוש חוזר.\n\n1.2: הערך הסופי של `global_work_counter` יהיה T * N.\nההסבר: המשתנה `global_work_counter` מקודם פעם אחת בכל כניסה ל-Phase B. Phase B הוא קטע קריטי המוגן על ידי `mutex_phaseB`, מה שמבטיח שרק חוט אחד יכול לגשת אליו בו-זמנית ושכל הקידומים מתבצעים באופן אטומי ונכון. כל אחד מ-T החוטים מבצע N איטרציות, ובכל איטרציה הוא נכנס ל-Phase B פעם אחת. לפיכך, סך הקידומים יהיה T כפול N. עם T=3 ו-N=2, הערך הסופי יהיה 3 * 2 = 6.\n\n1.3: היינו מוסיפים את הקריאה ל-`log_iteration_complete()` בתוך בלוק ה-`else` (הבלוק שמטפל בחוט האחרון שמגיע ל-Phase A), לפני איפוס המונה `phaseA_counter` ולפני קריאת ה-`pthread_cond_broadcast`.\n\nדוגמה לשינוי הקוד:\n```c\n            if (phaseA_counter < T) {\n                pthread_cond_wait(&cond_phaseA_done, &mutex_phaseA);\n            } else {\n                log_iteration_complete(); // קריאה לפונקציה כאן\n                phaseA_counter = 0;\n                pthread_cond_broadcast(&cond_phaseA_done);\n            }\n```\nאין צורך בסנכרון נוסף עבור `log_iteration_complete()` עצמה. היא נקראת על ידי חוט יחיד (החוט האחרון שמגיע ל-Phase A) כאשר הוא מחזיק את `mutex_phaseA`. זה מבטיח שהפונקציה תיקרא בדיוק פעם אחת בכל איטרציה, ובזמן הנכון (לאחר שכל החוטים סיימו את Phase A ולפני שמישהו נכנס ל-Phase B) ומבלי ליצור תנאי מרוץ נוספים."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

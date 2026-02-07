@@ -1,0 +1,51 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 20:31:19",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4847,
+      "output_tokens": 3603,
+      "total_tokens": 30222
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Mutexes",
+      "Concurrency",
+      "Deadlock",
+      "Linked List"
+    ],
+    "content": {
+      "text": "נתונה רשימה מקושרת מוגנת מנעולים, בה כל צומת מכיל מנעול (mutex) משלו (`node_mutex`), ובנוסף קיים מנעול גלובלי (`head_ptr_mutex`) המגן על המצביע לראש הרשימה (`head`). הרשימה מאותחלת על ידי `init_list()`.\n\nלהלן מימוש חלקי של פונקציות `add_node` ו-`remove_node`. פונקציית `add_node` מוסיפה צומת חדש לסוף הרשימה ומשתמשת במנגנון \"נעילה ידנית\" (hand-over-hand locking) באופן סטנדרטי (כלומר, נועלת צומת נוכחי P ואז את הצומת הבא N, ומשחררת את המנעול של P). פונקציית `remove_node` מנסה להסיר צומת בעל ערך נתון.\n\n```c\n#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n\ntypedef struct Node {\n    int data;\n    struct Node* next;\n    pthread_mutex_t node_mutex; // Mutex protecting this node's data and next pointer\n} Node;\n\nNode* head = NULL;\npthread_mutex_t head_ptr_mutex; // Mutex protecting the global 'head' pointer\n\nvoid init_list() {\n    pthread_mutex_init(&head_ptr_mutex, NULL);\n    head = NULL;\n}\n\nvoid destroy_list() {\n    Node* current = head;\n    while (current != NULL) {\n        Node* temp = current;\n        current = current->next;\n        pthread_mutex_destroy(&temp->node_mutex);\n        free(temp);\n    }\n    pthread_mutex_destroy(&head_ptr_mutex);\n}\n\n// פונקציה להוספת צומת לסוף הרשימה (מימוש סטנדרטי עם hand-over-hand locking)\nvoid add_node(int data) {\n    Node* new_node = (Node*)malloc(sizeof(Node));\n    if (new_node == NULL) {\n        perror(\"malloc failed\");\n        exit(EXIT_FAILURE);\n    }\n    new_node->data = data;\n    new_node->next = NULL;\n    pthread_mutex_init(&new_node->node_mutex, NULL);\n\n    pthread_mutex_lock(&head_ptr_mutex);\n    if (head == NULL) {\n        head = new_node;\n        pthread_mutex_unlock(&head_ptr_mutex);\n    } else {\n        Node* current = head;\n        pthread_mutex_lock(&current->node_mutex); // Lock current (P)\n        pthread_mutex_unlock(&head_ptr_mutex); // Release head_ptr_mutex\n\n        while (current->next != NULL) {\n            Node* next_node = current->next;\n            pthread_mutex_lock(&next_node->node_mutex); // Lock next (N)\n            pthread_mutex_unlock(&current->node_mutex); // Unlock current (P)\n            current = next_node;\n        }\n        // 'current' is now the last node, holding its mutex (P)\n        current->next = new_node; // Modify P->next\n        pthread_mutex_unlock(&current->node_mutex); // Unlock P\n    }\n}\n\n// פונקציה בעייתית להסרת צומת מהרשימה\n// פונקציה זו משתמשת בסדר נעילה לא עקבי שעלול להוביל לקיפאון (deadlock).\nint remove_node(int value) {\n    pthread_mutex_lock(&head_ptr_mutex);\n    Node* current = head;\n    Node* prev = NULL;\n\n    // טיפול במקרה של הסרת צומת הראש\n    if (current != NULL && current->data == value) {\n        pthread_mutex_lock(&current->node_mutex); // נועלים את צומת הראש (N)\n        head = current->next; // משנים את מצביע ה-head\n        pthread_mutex_unlock(&current->node_mutex); // משחררים את N\n        pthread_mutex_destroy(&current->node_mutex);\n        free(current);\n        pthread_mutex_unlock(&head_ptr_mutex);\n        return 1; // הצומת הוסר\n    }\n\n    // משחררים את מנעול ה-head_ptr_mutex כדי לאפשר פעולות אחרות על ה-head\n    // בזמן שאנו עוברים על הרשימה. (לדוגמה, add_node) \n    pthread_mutex_unlock(&head_ptr_mutex);\n\n    // עוברים על הרשימה למצוא את הצומת להסרה\n    // שימו לב: בשלב זה, אין מנעולי צומת נעולים במהלך המעבר עד למציאת הצומת.\n    current = head;\n    while (current != NULL) {\n        if (current->data == value) {\n            // מצאנו את הצומת (N) שיש להסיר. 'prev' הוא קודמו (P).\n            // סדר נעילה לא עקבי שגורם לקיפאון: נועלים את N ואז את P.\n            pthread_mutex_lock(&current->node_mutex); // נועלים את N\n            if (prev != NULL) {\n                pthread_mutex_lock(&prev->node_mutex); // נועלים את P (סדר הפוך!)\n                prev->next = current->next; // משנים את P->next\n                pthread_mutex_unlock(&prev->node_mutex); // משחררים את P\n            }\n            // אם prev הוא NULL, המשמעות היא ש-current הוא ה-head, \n            // אך מקרה זה אמור להיות מטופל כבר למעלה.\n            pthread_mutex_unlock(&current->node_mutex); // משחררים את N\n            pthread_mutex_destroy(&current->node_mutex);\n            free(current);\n            return 1; // הצומת הוסר\n        }\n        prev = current;\n        current = current->next;\n    }\n\n    return 0; // הצומת לא נמצא\n}\n```",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "מה הבעיה במימוש של פונקציית `remove_node`? תארו סיטואציה ספציפית (עם מספר חוטים ופעולות) שבה הבעיה יכולה להתרחש.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "תקנו את פונקציית `remove_node` כך שתעבוד באופן תקין ותמנע קיפאונות, תוך שמירה על רמת מקביליות גבוהה ככל הניתן (כלומר, השתמשו במנעולי צומת היכן שנדרש).",
+        "code_snippet": "int remove_node(int value) {\n    // כתבו את הקוד המתוקן כאן\n}",
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "### פתרון לשאלה 1:\n\n**1.1. הבעיה במימוש פונקציית `remove_node`:**\nהבעיה במימוש פונקציית `remove_node` היא **קיפאון (deadlock)**. הקיפאון יכול להתרחש כתוצאה מסדר נעילה לא עקבי (inconsistent locking order) בין פונקציות המשתמשות באותם מנעולים.\n\n*   **סדר נעילה ב-`add_node` (ובמעבר סטנדרטי):** פונקציית `add_node` (ובאופן כללי, מעבר על הרשימה תוך שימוש במנגנון hand-over-hand locking) נועלת את מנעול הצומת הקודם (P) לפני שהיא נועלת את מנעול הצומת העוקב (N). כלומר, סדר הנעילה הוא **P ואז N**.\n*   **סדר נעילה ב-`remove_node` (הבעייתי):** פונקציית `remove_node`, במקרה של הסרת צומת שאינו ראש הרשימה, מנסה לנעול קודם את מנעול הצומת שיש להסיר (N) ורק לאחר מכן את מנעול קודמו (P). כלומר, סדר הנעילה הוא **N ואז P**.\n\n**תרחיש קיפאון:**\nנניח רשימה מקושרת עם שלושה צמתים: `A -> B -> C`.\n\n1.  **חוט 1** קורא לפונקציה `add_node(D)` (מנסה להוסיף צומת D לסוף הרשימה).\n    *   חוט 1 נועל את `head_ptr_mutex` ומשחרר אותו.\n    *   הוא נועל את המנעול של צומת A: `pthread_mutex_lock(&A->node_mutex);` (P).\n    *   הוא ממשיך למעבר על הרשימה. הוא מנסה לנעול את המנעול של צומת B: `pthread_mutex_lock(&B->node_mutex);` (N).\n    *   **בנקודה זו, חוט 1 מחזיק את `A->node_mutex` ומנסה לרכוש את `B->node_mutex`.**\n2.  **חוט 2** קורא לפונקציה `remove_node(B)` (מנסה להסיר את צומת B).\n    *   חוט 2 נועל את `head_ptr_mutex` ומשחרר אותו.\n    *   הוא עובר על הרשימה (ללא נעילת מנעולי צמתים בשלב זה) עד שהוא מוצא את צומת B (כאשר `prev` מצביע על A ו-`current` מצביע על B).\n    *   חוט 2 נועל את המנעול של צומת B: `pthread_mutex_lock(&B->node_mutex);` (N).\n    *   **בנקודה זו, חוט 2 מחזיק את `B->node_mutex`.**\n    *   חוט 2 מנסה כעת לנעול את המנעול של צומת A (כי הוא צריך את `prev->node_mutex` כדי לעדכן את `A->next`): `pthread_mutex_lock(&A->node_mutex);` (חוט 2 נחסם על ידי חוט 1, שמחזיק את `A->node_mutex`).\n\n**תוצאה:** נוצר קיפאון. חוט 1 ממתין למנעול של B שמוחזק על ידי חוט 2, וחוט 2 ממתין למנעול של A שמוחזק על ידי חוט 1.\n\n**1.2. תיקון פונקציית `remove_node`:**\nכדי לתקן את הבעיה, יש להבטיח סדר נעילה עקבי עבור כל הפעולות ברשימה. הדרך המקובלת היא להשתמש בסדר \"קודם ואז עוקב\" (P ואז N) כאשר שני מנעולים נדרשים בו-זמנית. המימוש המתוקן משתמש ב-hand-over-hand locking גם במהלך המעבר, וכאשר נמצא הצומת להסרה (N), המנעול של קודמו (P) כבר מוחזק, ואז רוכשים את המנעול של N.\n\n```c\nint remove_node(int value) {\n    pthread_mutex_lock(&head_ptr_mutex);\n    Node* current = head;\n    Node* prev = NULL; // prev will not be used in the fixed head case, but for traversal\n\n    // טיפול במקרה של הסרת צומת הראש\n    if (current != NULL && current->data == value) {\n        pthread_mutex_lock(&current->node_mutex); // נועלים את צומת הראש (N)\n        head = current->next; // משנים את מצביע ה-head\n        pthread_mutex_unlock(&current->node_mutex); // משחררים את N\n        pthread_mutex_destroy(&current->node_mutex);\n        free(current);\n        pthread_mutex_unlock(&head_ptr_mutex);\n        return 1; // הצומת הוסר\n    }\n\n    // אם ראש הרשימה אינו הצומת המבוקש, משחררים את מנעול ה-head_ptr_mutex\n    // ומתחילים מעבר עם hand-over-hand locking.\n    pthread_mutex_unlock(&head_ptr_mutex);\n\n    // מתחילים מעבר על הרשימה\n    current = head; \n    if (current == NULL) {\n        return 0; // הרשימה ריקה או הצומת לא נמצא\n    }\n\n    pthread_mutex_lock(&current->node_mutex); // נועלים את הצומת הראשון (P) לצורך התחלת מעבר\n    \n    while (current != NULL) {\n        Node* next_node = current->next; // N\n        \n        // אם next_node הוא הצומת המבוקש להסרה\n        if (next_node != NULL && next_node->data == value) {\n            pthread_mutex_lock(&next_node->node_mutex); // נועלים את N (כאשר P נעול)\n            current->next = next_node->next; // משנים את P->next\n            pthread_mutex_unlock(&next_node->node_mutex); // משחררים את N\n            pthread_mutex_destroy(&next_node->node_mutex);\n            free(next_node);\n            pthread_mutex_unlock(&current->node_mutex); // משחררים את P\n            return 1; // הצומת הוסר\n        }\n\n        // אם לא מצאנו את הצומת, מתקדמים ב-hand-over-hand locking\n        if (next_node != NULL) {\n            pthread_mutex_lock(&next_node->node_mutex); // נועלים את N\n        }\n        pthread_mutex_unlock(&current->node_mutex); // משחררים את P\n        current = next_node;\n    }\n\n    return 0; // הצומת לא נמצא\n}\n```"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

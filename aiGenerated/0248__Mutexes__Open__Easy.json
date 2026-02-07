@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 20:14:20",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2084,
+      "output_tokens": 556,
+      "total_tokens": 3927
+    }
+  },
+  "question": {
+    "id": 100,
+    "type": "Open",
+    "topic": [
+      "Mutexes",
+      "Synchronization",
+      "Race Conditions"
+    ],
+    "content": {
+      "text": "מהו מנעול הדדי (Mutex) ומה מטרתו העיקרית בתכנות מקבילי? הסבר כיצד שימוש במנעול הדדי יכול למנוע תנאי מירוץ (race conditions) כאשר מספר תהליכים או תהליכונים ניגשים למשאב משותף.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "מנעול הדדי (Mutex) הוא אובייקט סנכרון המשמש להבטחת גישה בלעדית למשאב משותף (critical section) בזמן נתון. מטרתו העיקרית היא למנוע תנאי מירוץ (race conditions), מצב שבו תוצאת הפעלת התוכנית תלויה בסדר הלא צפוי שבו תהליכים או תהליכונים ניגשים ומשנים נתונים משותפים.\n\nכאשר תהליך/תהליכון רוצה לגשת למשאב משותף, הוא מנסה לנעול את המוטקס (acquire/lock). אם המוטקס אינו נעול, התהליך/תהליכון נועל אותו ומקבל גישה בלעדית למשאב. אם המוטקס כבר נעול על ידי תהליך/תהליכון אחר, התהליך/תהליכון המנסה לנעול ימתין עד שהמוטקס ישוחרר. לאחר שהתהליך/תהליכון מסיים את השימוש במשאב המשותף, הוא משחרר את המוטקס (release/unlock), ובכך מאפשר לתהליכים/תהליכונים אחרים לגשת למשאב. מנגנון זה מבטיח שבכל רגע נתון, רק תהליך/תהליכון אחד יכול לגשת לאזור הקריטי, ובכך מונע תנאי מירוץ ומשמר את עקביות הנתונים.",
+      "code_snippet": null
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

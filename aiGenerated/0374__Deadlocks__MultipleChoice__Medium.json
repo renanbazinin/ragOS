@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Deadlocks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 21:09:04",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1159,
+      "output_tokens": 578,
+      "total_tokens": 3449
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "Deadlocks",
+      "Synchronization",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "איזו מהטענות הבאות נכונה לגבי תנאי קיפאון ומניעתם?",
+      "code_snippet": null,
+      "options": [
+        "א. מניעת הדדיות (Mutual Exclusion) היא תמיד האסטרטגיה היעילה ביותר למניעת קיפאון.",
+        "ב. אם מונעים מתהליכים להחזיק במשאב אחד תוך כדי המתנה למשאב אחר, קיפאון נמנע בהכרח.",
+        "ג. יכולת הקצאת משאבים מחדש (Preemption) מבטיחה מניעת קיפאון לכל סוגי המשאבים.",
+        "ד. אם גרף הקצאת המשאבים אינו מכיל מעגלים, קיפאון עדיין יכול להתרחש אם ישנם מספר מופעים מאותו סוג משאב."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "קיפאון (deadlock) מתרחש רק כאשר כל ארבעת התנאים ההכרחיים מתקיימים: מניעה הדדית (Mutual Exclusion), החזקה והמתנה (Hold and Wait), אי-פקיעה (No Preemption) והמתנה מעגלית (Circular Wait). מניעת אחד מהתנאים הללו מונעת קיפאון. אפשרות ב' מתארת מניעת החזקה והמתנה, ששוברת את אחד התנאים ההכרחיים ובכך מונעת קיפאון. אפשרות א' אינה נכונה מכיוון שלא תמיד ניתן או רצוי למנוע הדדיות (לדוגמה, במשאבים שאינם ניתנים לשיתוף). אפשרות ג' אינה נכונה מכיוון שלא כל המשאבים ניתנים לפקיעה (למשל, מדפסת באמצע הדפסה). אפשרות ד' אינה נכונה מכיוון שמעגל בגרף הקצאת המשאבים (Resource Allocation Graph) הוא תנאי הכרחי לקיפאון, וללא מעגל לא ייתכן קיפאון."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

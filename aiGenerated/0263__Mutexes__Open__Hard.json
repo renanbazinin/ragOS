@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 20:22:33",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3905,
+      "output_tokens": 2355,
+      "total_tokens": 15040
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Synchronization",
+      "Mutexes",
+      "Threads",
+      "Concurrency",
+      "Fairness",
+      "Reentrancy"
+    ],
+    "content": {
+      "text": "מנעול הדדי (Mutex) הוא כלי סנכרון בסיסי, אך לרוב הוא אינו תומך בכניסה מחדש (reentrancy) ואינו מבטיח הוגנות (fairness) בסדר רכישת המנעול. מנעול נכנס מחדש מאפשר לחוט שכבר רכש את המנעול לרכוש אותו שוב מבלי להיחסם. מנעול הוגן מבטיח שחוטים ירכשו את המנעול בסדר שבו ביקשו אותו (FIFO).\n\nמטרת שאלה זו היא לממש מנעול הדדי בעל שתי התכונות הללו: כניסה מחדש והוגנות, תוך שימוש במנעולים הדדיים בסיסיים (`pthread_mutex_t`) ומשתני תנאי (`pthread_cond_t`) מספריית `pthreads` בלבד.\n\nיש להשלים את מבנה הנתונים `ReentrantFairMutex` ואת מימוש הפונקציות `rf_mutex_init`, `rf_mutex_destroy`, `rf_mutex_lock`, ו-`rf_mutex_unlock`.\n\nהקפידו על:\n1.  **כניסה מחדש**: חוט שכבר מחזיק במנעול יכול לקרוא ל-`rf_mutex_lock` שוב מבלי להיחסם. כל קריאה ל-`lock` חייבת להיות מותאמת בקריאה ל-`unlock` כדי לשחרר את המנעול באופן סופי.\n2.  **הוגנות**: חוטים ירכשו את המנעול בסדר שבו ביקשו אותו (FIFO).\n3.  **מניעה הדדית**: רק חוט אחד יכול להחזיק במנעול באופן בלעדי (למעט כניסות חוזרות של אותו חוט).",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <stdbool.h> // For bool type\n\n#define INVALID_THREAD_ID (pthread_t)0 // Assuming 0 is not a valid thread ID for pthread_self() or can be used as a sentinel\n\ntypedef struct ReentrantFairMutex {\n    pthread_mutex_t lock_mutex;     // מנעול להגנה על מבנה הנתונים הפנימי\n    pthread_cond_t condition;       // משתנה תנאי להמתנה על המנעול\n    pthread_t owner;                // מזהה החוט שמחזיק במנעול\n    bool is_locked;                 // האם המנעול נעול כרגע על ידי חוט כלשהו?\n    int lock_count;                 // כמה פעמים הבעלים הנוכחי רכש את המנעול\n    unsigned long next_ticket;      // המספר הבא שיינתן לחוט שמבקש להיכנס\n    unsigned long served_ticket;    // המספר של החוט הבא שיקבל את המנעול\n} ReentrantFairMutex;\n\nvoid rf_mutex_init(ReentrantFairMutex *m);\nvoid rf_mutex_destroy(ReentrantFairMutex *m);\nvoid rf_mutex_lock(ReentrantFairMutex *m);\nvoid rf_mutex_unlock(ReentrantFairMutex *m);"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "כדי לממש מנעול הדדי נכנס מחדש והוגן, נשתמש בשילוב של מנעול בסיסי (`lock_mutex`) להגנה על המצב הפנימי של המנעול, משתנה תנאי (`condition`) להמתנת חוטים, וכן מנגנון 'כרטיסים' (tickets) להבטחת הוגנות.\n\n**מבנה הנתונים:**\n*   `lock_mutex`: מנעול בסיסי המשמש להגנה על כל הגישה למשתנים הפנימיים של `ReentrantFairMutex`.\n*   `condition`: משתנה תנאי שחוטים ממתינים עליו כאשר המנעול אינו זמין או כאשר הם אינם בתור (לפי מנגנון הכרטיסים).\n*   `owner`: שומר את ה-ID של החוט שמחזיק כרגע במנעול. מאותחל ל-`INVALID_THREAD_ID` כאשר המנעול אינו בשימוש.\n*   `is_locked`: דגל בוליאני המציין אם המנעול נעול כרגע על ידי חוט כלשהו.\n*   `lock_count`: מונה את מספר הפעמים שהחוט הנוכחי המחזיק במנעול רכש אותו. משמש לכניסה מחדש.\n*   `next_ticket`: מונה עולה (מוגן ע\"י `lock_mutex`) הנותן לכל חוט שמבקש את המנעול 'כרטיס' ייחודי.\n*   `served_ticket`: מונה עולה המציין איזה 'כרטיס' כרגע רשאי לרכוש את המנעול.\n\n**מימוש `rf_mutex_init`:**\nמאתחל את כל השדות לערכי ברירת מחדל: המנעול הבסיסי ומשתנה התנאי מאותחלים, `owner` מאופס ל-`INVALID_THREAD_ID`, `is_locked` מוגדר ל-`false`, ו-`lock_count`, `next_ticket`, ו-`served_ticket` מאופסים.\n\n**מימוש `rf_mutex_destroy`:**\nמשחרר את המשאבים של המנעול הבסיסי ומשתנה התנאי.\n\n**מימוש `rf_mutex_lock`:**\n1.  רוכש את `lock_mutex` כדי להגן על המצב הפנימי.\n2.  בודק אם החוט הנוכחי הוא הבעלים של המנעול (עבור כניסה מחדש) באמצעות `is_locked` ו-`owner`.\n    *   אם כן, מקדם את `lock_count` ומשחרר את `lock_mutex`. במקרה זה, החוט כבר מחזיק במנעול, ולכן אינו צריך להמתין.\n    *   אם לא, מקבל 'כרטיס' חדש על ידי קידום `next_ticket`.\n    *   ממתין על `condition` כל עוד: `is_locked` נכון (כלומר, מישהו אחר מחזיק בו) או ה'כרטיס' שלו (`my_ticket`) אינו `served_ticket` (כדי להבטיח הוגנות). תנאי זה מבטיח שהחוט ממתין גם אם המנעול פנוי אך הוא לא הגיע תורו, או אם המנעול תפוס.\n3.  לאחר שהחוט רוכש את המנעול (או ממשיך מכניסה מחדש), הוא מגדיר את `owner` ל-`current_thread`, את `is_locked` ל-`true`, ומאתחל את `lock_count` ל-1 (זו הרכישה הראשונה של המנעול עבור חוט זה).\n4.  משחרר את `lock_mutex`.\n\n**מימוש `rf_mutex_unlock`:**\n1.  רוכש את `lock_mutex` כדי להגן על המצב הפנימי.\n2.  בודק אם החוט הנוכחי הוא אכן הבעלים של המנעול (באמצעות `is_locked` ו-`owner`). אם לא, זו שגיאה, ויש להדפיס הודעה מתאימה.\n3.  מפחית את `lock_count`. כל קריאה ל-`lock` חייבת להיות מותאמת בקריאה ל-`unlock`.\n4.  אם `lock_count` הגיע ל-0, פירושו שהמנעול שוחרר באופן סופי על ידי הבעלים הנוכחי.\n    *   מאפס את `owner` ל-`INVALID_THREAD_ID`.\n    *   מגדיר את `is_locked` ל-`false`.\n    *   מקדם את `served_ticket` כדי לאפשר לחוט הבא בתור לרכוש את המנעול.\n    *   משחרר את כל החוטים הממתינים על `condition` (`pthread_cond_broadcast`) כדי שהחוט בעל ה'כרטיס' התואם יוכל להמשיך. שימוש ב-`broadcast` מבטיח שגם אם חוטים התעוררו מוקדם (spurious wakeup), הם יבדקו שוב את התנאי וימתינו אם אינם בתור, אך החוט הנכון (עם `served_ticket` תואם) יתקדם.\n5.  משחרר את `lock_mutex`.\n\n**הסבר על כניסה מחדש והוגנות:**\n*   **כניסה מחדש**: מתאפשרת על ידי שמירת `owner` ו-`lock_count`. חוט יכול לרכוש את המנעול מספר פעמים כל עוד הוא ה-`owner` הנוכחי, ורק כאשר `lock_count` יורד ל-0 המנעול משוחרר לחוטים אחרים.\n*   **הוגנות**: מושגת באמצעות מנגנון ה'כרטיסים' (`next_ticket` ו-`served_ticket`). כל חוט מקבל מספר עוקב כאשר הוא מנסה לרכוש את המנעול, והוא יכול להמשיך רק כאשר ה-'כרטיס' שלו תואם ל-'כרטיס' ה-`served_ticket` הנוכחי. זה מבטיח סדר FIFO בהשגת המנעול."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

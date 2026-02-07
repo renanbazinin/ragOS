@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Deadlocks",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 21:23:04",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3900,
+      "output_tokens": 1311,
+      "total_tokens": 6834
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Deadlocks",
+      "Synchronization",
+      "Concurrency",
+      "Mutexes"
+    ],
+    "content": {
+      "text": "נתון קוד C הבא המשתמש בספריות `pthread` לניהול תהליכונים ומנעולים. קראו את הקוד וענו על השאלה:\n\nהאם קיפאון (Deadlock) יכול להתרחש בריצת קוד זה? אם כן, הסבירו מדוע וציינו את ארבעת התנאים לקיפאון המתקיימים בקוד. אם לא, הסבירו מדוע.",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h> // For sleep\n\npthread_mutex_t mutex1;\npthread_mutex_t mutex2;\n\nvoid* thread_func1(void* arg) {\n    pthread_mutex_lock(&mutex1);\n    printf(\"Thread 1 acquired mutex1\\n\");\n    sleep(1); // Simulate work\n    pthread_mutex_lock(&mutex2);\n    printf(\"Thread 1 acquired mutex2\\n\");\n    printf(\"Thread 1 doing work with both mutexes\\n\");\n    pthread_mutex_unlock(&mutex2);\n    pthread_mutex_unlock(&mutex1);\n    printf(\"Thread 1 released both mutexes\\n\");\n    return NULL;\n}\n\nvoid* thread_func2(void* arg) {\n    pthread_mutex_lock(&mutex2);\n    printf(\"Thread 2 acquired mutex2\\n\");\n    sleep(1); // Simulate work\n    pthread_mutex_lock(&mutex1);\n    printf(\"Thread 2 acquired mutex1\\n\");\n    printf(\"Thread 2 doing work with both mutexes\\n\");\n    pthread_mutex_unlock(&mutex1);\n    pthread_mutex_unlock(&mutex2);\n    printf(\"Thread 2 released both mutexes\\n\");\n    return NULL;\n}\n\nint main() {\n    pthread_t t1, t2;\n\n    pthread_mutex_init(&mutex1, NULL);\n    pthread_mutex_init(&mutex2, NULL);\n\n    pthread_create(&t1, NULL, thread_func1, NULL);\n    pthread_create(&t2, NULL, thread_func2, NULL);\n\n    pthread_join(t1, NULL);\n    pthread_join(t2, NULL);\n\n    pthread_mutex_destroy(&mutex1);\n    pthread_mutex_destroy(&mutex2);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": false,
+      "correct_option": null,
+      "explanation": "כן, קיפאון (Deadlock) יכול להתרחש בקוד זה.\n\n**הסבר:**\nהקיפאון יתרחש כאשר התהליכון הראשון (Thread 1) יתפוס את `mutex1` והתהליכון השני (Thread 2) יתפוס את `mutex2`. לאחר מכן, Thread 1 ינסה לתפוס את `mutex2` (שכבר תפוס על ידי Thread 2) ו-Thread 2 ינסה לתפוס את `mutex1` (שכבר תפוס על ידי Thread 1). במצב זה, שני התהליכונים ימתינו זה לזה באופן אינסופי, מה שיוביל לקיפאון.\n\n**ארבעת התנאים לקיפאון המתקיימים בקוד הם:**\n1.  **מניעה הדדית (Mutual Exclusion)**: המנעולים `mutex1` ו-`mutex2` הם משאבים בלעדיים. רק חוט אחד יכול לתפוס כל מנעול בכל רגע נתון. אם חוט אחד תופס מנעול, חוט אחר המנסה לתפוס אותו ייחסם.\n2.  **החזקה והמתנה (Hold and Wait)**: כל חוט (למשל, Thread 1) תופס מנעול אחד (לדוגמה, `mutex1`) וממתין לתפוס מנעול נוסף (במקרה זה, `mutex2`) שמוחזק על ידי חוט אחר, מבלי לשחרר את המנעול שכבר ברשותו.\n3.  **אי-נתיקה (No Preemption)**: לא ניתן לקחת מנעול מחוט שתפס אותו בכוח. חוט חייב לשחרר את המנעול מרצונו לאחר שסיים להשתמש בו.\n4.  **המתנה מעגלית (Circular Wait)**: קיים מעגל המתנה. Thread 1 ממתין ל-Thread 2 שישחרר את `mutex2`, ובמקביל, Thread 2 ממתין ל-Thread 1 שישחרר את `mutex1`. מעגל זה יוצר תלות הדדית שאינה ניתנת לשבירה ללא התערבות חיצונית.\n\n**פתרון למניעת קיפאון (לא נדרש בשאלה אך רלוונטי):**\nכדי למנוע קיפאון במקרה זה, ניתן לוודא שכל התהליכונים תופסים את המנעולים באותו סדר עקבי (לדוגמה, תמיד קודם `mutex1` ואז `mutex2`)."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

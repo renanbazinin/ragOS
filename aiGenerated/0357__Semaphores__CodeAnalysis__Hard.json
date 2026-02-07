@@ -1,0 +1,58 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Semaphores",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 21:04:31",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3751,
+      "output_tokens": 2402,
+      "total_tokens": 13813
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Semaphores",
+      "Deadlock",
+      "Concurrency",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתונה תוכנית המשתמשת בשלושה סמפורים: sem_A, sem_B (שניהם סמפורים בינאריים, כלומר מאותחלים ל-1), ו-sem_limit (סמפור סופר המאותחל לערך K). התוכנית מריצה במקביל N חוטים, כאשר חלקם מריצים את הפונקציה thread_func_X וחלקם את הפונקציה thread_func_Y.\n\nשימו לב: פעולות ה-printf וה-usleep הוסרו מהקוד לנוחות הניתוח, אך הן אינן משנות את ההתנהגות הסנכרונית הבסיסית.",
+      "code_snippet": "/* הגדרות ואיתחול סמפורים (בדוגמה זו, נניח שהם גלובליים ומאותחלים): */\n/* sem_t sem_A; sem_init(&sem_A, 0, 1); // סמפור בינארי למשאב A */\n/* sem_t sem_B; sem_init(&sem_B, 0, 1); // סמפור בינארי למשאב B */\n/* sem_t sem_limit; sem_init(&sem_limit, 0, K); // סמפור סופר, מאותחל ל-K */\n\nvoid critical_operation(int thread_id, const char* func_name) {\n    // פעולה קריטית הדורשת את שני המשאבים A ו-B\n    // ... (מבצעת עבודה, אינה משנה את מצב הסמפורים)\n}\n\nvoid *thread_func_X(void *arg) {\n    int id = *(int*)arg;\n    sem_wait(&sem_limit);\n    sem_wait(&sem_A);\n    sem_wait(&sem_B);\n\n    critical_operation(id, \"X\");\n\n    sem_post(&sem_B);\n    sem_post(&sem_A);\n    sem_post(&sem_limit);\n    return NULL;\n}\n\nvoid *thread_func_Y(void *arg) {\n    int id = *(int*)arg;\n    sem_wait(&sem_limit);\n    sem_wait(&sem_B);\n    sem_wait(&sem_A);\n\n    critical_operation(id, \"Y\");\n\n    sem_post(&sem_A);\n    sem_post(&sem_B);\n    sem_post(&sem_limit);\n    return NULL;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "101.1",
+        "text": "האם קיפאון (deadlock) אפשרי במערכת זו? אם כן, תאר תרחיש ספציפי המוביל לקיפאון, בהנחה ש-N=4 (סה\"כ 4 חוטים) ו-K=2 (ערך אתחול של sem_limit).",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "101.2",
+        "text": "כיצד המצב ישתנה אם ערך האתחול של sem_limit יהיה K=1? האם קיפאון עדיין אפשרי? הסבר.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "101.3",
+        "text": "הצע פתרון לבעיית הקיפאון (אם קיימת) על ידי שינוי מינימלי בקוד, והסבר מדוע הפתרון שלך מונע קיפאון. כתוב את הקוד המעודכן עבור הפונקציה ששונתה.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.  **האם קיפאון אפשרי כאשר N=4 ו-K=2?**\n    כן, קיפאון אפשרי במערכת זו.\n    \n    **תרחיש ספציפי לקיפאון:**\n    נניח ששני חוטים, T1 (מריץ את thread_func_X) ו-T2 (מריץ את thread_func_Y), מתחילים לרוץ במקביל.\n    *   **שלב 1:** T1 מבצע `sem_wait(&sem_limit)` ומצליח (sem_limit יורד ל-1).\n    *   **שלב 2:** T2 מבצע `sem_wait(&sem_limit)` ומצליח (sem_limit יורד ל-0). כעת, אף חוט נוסף לא יוכל להיכנס לקטע קריטי זה עד ש-T1 או T2 ישחררו את sem_limit.\n    *   **שלב 3:** T1 מבצע `sem_wait(&sem_A)` ומצליח (sem_A יורד ל-0). T1 מחזיק כעת את משאב A.\n    *   **שלב 4:** T2 מבצע `sem_wait(&sem_B)` ומצליח (sem_B יורד ל-0). T2 מחזיק כעת את משאב B.\n    *   **שלב 5:** T1 מנסה לבצע `sem_wait(&sem_B)`, אך sem_B מוחזק על ידי T2. T1 נחסם וממתין ל-sem_B.\n    *   **שלב 6:** T2 מנסה לבצע `sem_wait(&sem_A)`, אך sem_A מוחזק על ידי T1. T2 נחסם וממתין ל-sem_A.\n    \n    כעת, גם T1 וגם T2 חסומים וממתינים למשאב שמוחזק על ידי החוט השני. נוצר מצב של המתנה מעגלית (circular wait), שהיא אחד מארבעת התנאים ההכרחיים לקיפאון. מכיוון שכל התנאים לקיפאון מתקיימים, המערכת תיכנס לקיפאון.\n\n2.  **כיצד המצב ישתנה אם K=1? האם קיפאון עדיין אפשרי?**\n    אם ערך האתחול של `sem_limit` יהיה `K=1`, קיפאון **אינו** אפשרי.\n    \n    **הסבר:**\n    כאשר `sem_limit` מאותחל ל-1, רק חוט אחד יכול לבצע `sem_wait(&sem_limit)` בהצלחה בכל רגע נתון. המשמעות היא שרק חוט אחד יכול להיכנס לקטע הקוד שבו מתבצעות פעולות `sem_wait` עבור `sem_A` ו-`sem_B`. מכיוון שרק חוט אחד יכול לנסות לרכוש את `sem_A` ו-`sem_B`, לא ייתכן מצב שבו שני חוטים מחזיקים משאבים שונים ומנסים לרכוש את המשאב של השני בו-זמנית. `sem_limit` מתפקד למעשה כ-mutex גלובלי עבור הרכישה של `sem_A` ו-`sem_B`, ומבטיח סדרתיות בגישה אליהם, ובכך מונע את תנאי ההמתנה המעגלית.\n\n3.  **פתרון לבעיית הקיפאון וקוד מעודכן:**\n    הפתרון הנפוץ והפשוט ביותר למניעת קיפאון במקרה זה הוא לכפות סדר רכישה אחיד של המשאבים על כל החוטים. אם כל החוטים רוכשים את המשאבים באותו סדר (לדוגמה, תמיד קודם `sem_A` ואז `sem_B`), תנאי ההמתנה המעגלית נמנע.\n    \n    **קוד מעודכן עבור `thread_func_Y`:**\n    ```c\n    void *thread_func_Y_fixed(void *arg) {\n        int id = *(int*)arg;\n        sem_wait(&sem_limit);\n        // סדר רכישת המשאבים שונה כדי להתאים ל-thread_func_X\n        sem_wait(&sem_A); // רכוש את A קודם\n        sem_wait(&sem_B); // ואז רכוש את B\n\n        critical_operation(id, \"Y\");\n\n        sem_post(&sem_B);\n        sem_post(&sem_A);\n        sem_post(&sem_limit);\n        return NULL;\n    }\n    ```\n    \n    **הסבר מדוע הפתרון מונע קיפאון:**\n    על ידי הקפדה על סדר רכישה עקבי (לדוגמה, תמיד `sem_A` ואז `sem_B`), אנו מבטלים את האפשרות להיווצרות המתנה מעגלית. חוט שרוצה לרכוש את `sem_B` חייב קודם לרכוש את `sem_A`. אם `sem_A` כבר מוחזק על ידי חוט אחר, החוט הנוכחי ייחסם בהמתנה ל-`sem_A` ולא יוכל להחזיק את `sem_B` בו-זמנית. באופן זה, לא ייתכן מצב שבו חוט אחד מחזיק את `sem_A` וממתין ל-`sem_B`, בעוד חוט אחר מחזיק את `sem_B` וממתין ל-`sem_A`. זה מונע את תנאי ההמתנה המעגלית ובכך מונע קיפאון."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 20:26:41",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3648,
+      "output_tokens": 1292,
+      "total_tokens": 9562
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Mutexes",
+      "Concurrency",
+      "Threads",
+      "Race Conditions"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המשתמשת ב-pthreads ובמנעול (mutex) כדי להגן על מונה גלובלי משותף. ענו על השאלות הבאות בהתבסס על הקוד:",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <stdlib.h> // For malloc, free, exit\n\n#define NUM_THREADS 5\n#define INCREMENTS_PER_THREAD 100000\n\nlong long global_counter = 0;\npthread_mutex_t counter_mutex;\n\nvoid* thread_function(void* arg) {\n    int thread_id = *(int*)arg;\n    free(arg); // Free memory allocated for thread_id\n\n    for (int i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n        pthread_mutex_lock(&counter_mutex);\n        global_counter++;\n        pthread_mutex_unlock(&counter_mutex);\n    }\n    printf(\"Thread %d finished its increments.\\n\", thread_id);\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n    int *thread_ids[NUM_THREADS]; // To pass unique IDs to threads\n\n    pthread_mutex_init(&counter_mutex, NULL);\n\n    printf(\"Main thread: Starting %d threads...\\n\", NUM_THREADS);\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        thread_ids[i] = malloc(sizeof(int));\n        if (thread_ids[i] == NULL) {\n            perror(\"Failed to allocate memory for thread ID\");\n            exit(EXIT_FAILURE);\n        }\n        *thread_ids[i] = i + 1;\n        if (pthread_create(&threads[i], NULL, thread_function, (void*)thread_ids[i]) != 0) {\n            perror(\"pthread_create failed\");\n            // Clean up allocated memory before exiting\n            for (int j = 0; j <= i; ++j) {\n                if (thread_ids[j] != NULL) free(thread_ids[j]);\n            }\n            pthread_mutex_destroy(&counter_mutex);\n            return 1;\n        }\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Main thread: All threads finished.\\n\");\n    printf(\"Main thread: Final global_counter value: %lld\\n\", global_counter);\n\n    pthread_mutex_destroy(&counter_mutex);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "7.1",
+        "text": "מהו הערך הסופי המובטח של המונה הגלובלי `global_counter` לאחר סיום ריצת כל התהליכונים? נמקו.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "7.2",
+        "text": "האם סדר הפלט של ההודעות 'Thread X finished its increments.' הוא דטרמיניסטי או לא דטרמיניסטי? נמקו.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1. הערך הסופי המובטח של המונה הגלובלי `global_counter` הוא 500000.\n   נימוק: המנעול `counter_mutex` מגן כראוי על הגישה למשתנה המשותף `global_counter`. כל תהליכון מבצע 100,000 הגדלות (INCREMENTS_PER_THREAD), וישנם 5 תהליכונים (NUM_THREADS). מכיוון שכל הגדלה מבוצעת בתוך קטע קריטי המוגן על ידי המנעול, כל הפעולות אטומיות ומונעות מצבי מרוץ. לכן, המונה יגיע לערך הסופי המדויק של 5 * 100,000 = 500,000.\n\n2. סדר הפלט של ההודעות 'Thread X finished its increments.' הוא לא דטרמיניסטי.\n   נימוק: למרות שהמונה הגלובלי מוגן על ידי מנעול, פעולת ההדפסה (`printf`) עצמה מתבצעת *מחוץ* לקטע הקריטי המוגן על ידי `counter_mutex`. תהליכונים שונים רצים במקביל, ומתזמן מערכת ההפעלה קובע את סדר הביצוע שלהם. לכן, אין ערובה לסדר שבו כל תהליכון יסיים את לולאת ההגדלות וידפיס את ההודעה שלו. סדר ההדפסה יכול להשתנות בין הרצות שונות של התוכנית."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

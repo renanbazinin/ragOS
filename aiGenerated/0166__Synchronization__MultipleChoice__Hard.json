@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 19:48:42",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 968,
+      "output_tokens": 1491,
+      "total_tokens": 11286
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Synchronization",
+      "Concurrency",
+      "Barrier"
+    ],
+    "content": {
+      "text": "נתון קטע קוד ב-C המממש מחסום (barrier) עבור מספר קבוע של תהליכים (NUM_THREADS). המחסום מיועד לאפשר לכל התהליכים להגיע לנקודה מסוימת לפני שכולם ממשיכים יחד. איזו מן הטענות הבאות מתארת נכונה בעיה פוטנציאלית בקוד וכיצד ניתן לפתור אותה באופן נכון?",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h> // For sleep\n\n#define NUM_THREADS 3 // Small number for easier analysis\n\npthread_mutex_t barrier_mutex = PTHREAD_MUTEX_INITIALIZER;\npthread_cond_t barrier_cond = PTHREAD_COND_INITIALIZER;\nint threads_arrived = 0; // Number of threads that have arrived at the barrier\n\nvoid *worker_thread(void *arg) {\n    long id = (long)arg;\n    printf(\"Thread %ld: Started, doing some work...\\n\", id);\n    sleep(1); // Simulate some work\n\n    pthread_mutex_lock(&barrier_mutex);\n    threads_arrived++;\n    printf(\"Thread %ld: Arrived at barrier. threads_arrived = %d\\n\", id, threads_arrived);\n\n    if (threads_arrived < NUM_THREADS) {\n        pthread_cond_wait(&barrier_cond, &barrier_mutex);\n    } else {\n        printf(\"Thread %ld: Last one, broadcasting!\\n\", id);\n        threads_arrived = 0; // Reset for next use\n        pthread_cond_broadcast(&barrier_cond);\n    }\n    pthread_mutex_unlock(&barrier_mutex);\n\n    printf(\"Thread %ld: Passed barrier, continuing...\\n\", id);\n    // Simulate more work after barrier\n    sleep(1);\n    printf(\"Thread %ld: Finished.\\n\", id);\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n    for (long i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, worker_thread, (void *)i);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"All threads finished.\\n\");\n    return 0;\n}",
+      "options": [
+        "א. הקוד עלול לגרום למצב קיפאון (deadlock) מכיוון ש-pthread_cond_broadcast מעיר רק חלק מהתהליכים, ואילו אחרים נשארים בהמתנה. הפתרון הנכון הוא להשתמש ב-pthread_cond_signal במקום pthread_cond_broadcast.",
+        "ב. הקוד עלול לגרום למצב קיפאון (deadlock). כאשר התהליך האחרון מגיע ומאפס את threads_arrived ל-0 לפני שכל התהליכים שהיו בהמתנה הספיקו להתעורר ולעבור את תנאי ה-if, תהליכים שהתעוררו מאוחר יבדקו threads_arrived < NUM_THREADS (שיהיה 0 < NUM_THREADS) ויכנסו שוב להמתנה בלתי מוגבלת. הפתרון הנכון הוא להשתמש במונה דורות (generation counter) או בשני משתני תנאי כדי למנוע מתהליכים להתעורר ולבדוק תנאי של מחזור עתידי.",
+        "ג. הקוד סובל מבעיית תנאי מירוץ (race condition) בגישה למשתנה threads_arrived מכיוון שהוא אינו מוגן על ידי מנעול. הפתרון הוא לעטוף את כל הגישות ל-threads_arrived בקריאות pthread_mutex_lock ו-pthread_mutex_unlock.",
+        "ד. הקוד אינו מכיל בעיות סנכרון והוא יפעל כראוי בכל התרחישים, שכן pthread_cond_broadcast מבטיח שכל התהליכים יתעוררו."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "הבעיה בקוד היא מצב קיפאון (deadlock) פוטנציאלי במחסום. כאשר התהליך האחרון מגיע למחסום, הוא מאפס את threads_arrived ל-0 וקורא ל-pthread_cond_broadcast. pthread_cond_broadcast מעיר את כל התהליכים שממתינים על barrier_cond. תהליכים אלו, לאחר שהתעוררו ותפסו מחדש את המנעול barrier_mutex, בודקים שוב את התנאי `if (threads_arrived < NUM_THREADS)`. מכיוון ש-`threads_arrived` אופס כבר ל-0 על ידי התהליך האחרון, התנאי `0 < NUM_THREADS` יהיה תמיד נכון עבור תהליכים אלו, והם יכנסו שוב ל-`pthread_cond_wait` וימתינו באופן בלתי מוגבל. הם לעולם לא יתעוררו שוב מכיוון שאין תהליכים נוספים שיגיעו למחסום ויקראו ל-`pthread_cond_broadcast` עבור מחזור זה. הפתרון הנפוץ לבעיה זו במחסומים מחזוריים (או במחסומים עם פוטנציאל לשימוש חוזר) הוא שימוש ב\"מונה דורות\" (generation counter) או בשני משתני תנאי. מונה הדורות מבטיח שגם אם תהליך מתעורר מאוחר, הוא לא יבלבל את מחזור המחסום הנוכחי עם מחזור עתידי, אלא ימתין רק אם מונה הדורות שלו אינו תואם למונה הדורות הנוכחי של המחסום."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

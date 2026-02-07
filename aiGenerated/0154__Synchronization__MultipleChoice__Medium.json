@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 19:44:29",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1118,
+      "output_tokens": 759,
+      "total_tokens": 4133
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Synchronization",
+      "Race Condition",
+      "Shared Memory"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא המורץ על ידי N חוטים (threads) במקביל. כל חוט מבצע את הפונקציה `thread_func` פעם אחת. המשתנה `counter` הוא גלובלי ומשותף לכל החוטים. מה תהיה התוצאה הסופית של `counter` לאחר שכל N החוטים סיימו את פעולתם?",
+      "code_snippet": "int counter = 0; // משתנה גלובלי\n\nvoid *thread_func(void *arg) {\n    int temp = counter;\n    temp = temp + 1;\n    counter = temp;\n    return NULL;\n}",
+      "options": [
+        "א. בדיוק N",
+        "ב. בדיוק 0",
+        "ג. ערך כלשהו בין 0 ל-N-1 (כולל)",
+        "ד. ערך כלשהו בין 1 ל-N (כולל), אך לרוב פחות מ-N",
+        "ה. לא ניתן לדעת בוודאות, יכול להיות כל ערך שלם חיובי."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ד",
+      "explanation": "הפעולה `counter++` אינה אטומית. היא מורכבת מקריאה של `counter` (לתוך `temp`), הגדלה של `temp`, וכתיבה בחזרה של `temp` ל-`counter`. כאשר מספר חוטים מבצעים פעולה זו במקביל ללא מנגנון סנכרון (כגון mutex), עלול להיווצר מצב מרוץ (race condition). לדוגמה, חוט אחד קורא את `counter` (נניח 0), אך לפני שהוא מספיק לכתוב בחזרה את הערך המוגדל (1), חוט אחר קורא גם הוא את אותו ערך ישן של `counter` (0). שני החוטים מגדילים את הערך באופן עצמאי ל-1 וכותבים בחזרה, ובכך 'אובדת' אחת ההגדלות – ה-`counter` יעמוד על 1 במקום 2. לכן, התוצאה הסופית של `counter` תהיה לרוב קטנה מ-`N`. במקרה הטוב ביותר (כאשר אין מצב מרוץ כלל, או כאשר N=1), הערך יהיה `N`. במקרה הגרוע ביותר, כאשר N גדול, ובהינתן מצבי מרוץ רבים, הערך יהיה נמוך משמעותית מ-`N`, אך לא יכול להיות פחות מ-1 (אם N גדול או שווה ל-1). לכן, הטווח הנכון הוא בין 1 ל-`N` (כולל), אך בפועל (במערכת מרובת חוטים) לרוב יהיה פחות מ-`N`."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

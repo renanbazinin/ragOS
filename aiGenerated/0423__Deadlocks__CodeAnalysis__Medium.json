@@ -1,0 +1,75 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Deadlocks",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 21:26:48",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2852,
+      "output_tokens": 2171,
+      "total_tokens": 7054
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Deadlocks",
+      "Synchronization",
+      "Concurrency",
+      "Mutexes"
+    ],
+    "content": {
+      "text": "נתון קטע קוד המדמה תרחיש שבו שני חוטים (threads) מנסים לגשת למשאבים משותפים המוגנים על ידי מנעולים (mutexes). עיין בקוד וענה על השאלות הבאות:",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h> // For usleep\n\npthread_mutex_t mutexA;\npthread_mutex_t mutexB;\n\nvoid *thread_func1(void *arg) {\n    printf(\"Thread 1: Trying to acquire mutexA...\\n\");\n    pthread_mutex_lock(&mutexA);\n    printf(\"Thread 1: Acquired mutexA. Trying to acquire mutexB...\\n\");\n    // Simulate some work or context switch\n    usleep(100000); // 100ms\n    pthread_mutex_lock(&mutexB);\n    printf(\"Thread 1: Acquired mutexB. Performing work...\\n\");\n    // Critical section\n    printf(\"Thread 1: Releasing mutexB...\\n\");\n    pthread_mutex_unlock(&mutexB);\n    printf(\"Thread 1: Releasing mutexA...\\n\");\n    pthread_mutex_unlock(&mutexA);\n    printf(\"Thread 1: Exiting.\\n\");\n    return NULL;\n}\n\nvoid *thread_func2(void *arg) {\n    printf(\"Thread 2: Trying to acquire mutexB...\\n\");\n    pthread_mutex_lock(&mutexB);\n    printf(\"Thread 2: Acquired mutexB. Trying to acquire mutexA...\\n\");\n    // Simulate some work or context switch\n    usleep(100000); // 100ms\n    pthread_mutex_lock(&mutexA);\n    printf(\"Thread 2: Acquired mutexA. Performing work...\\n\");\n    // Critical section\n    printf(\"Thread 2: Releasing mutexA...\\n\");\n    pthread_mutex_unlock(&mutexA);\n    printf(\"Thread 2: Releasing mutexB...\\n\");\n    pthread_mutex_unlock(&mutexB);\n    printf(\"Thread 2: Exiting.\\n\");\n    return NULL;\n}\n\nint main() {\n    pthread_t tid1, tid2;\n\n    pthread_mutex_init(&mutexA, NULL);\n    pthread_mutex_init(&mutexB, NULL);\n\n    printf(\"Main: Creating Thread 1...\\n\");\n    pthread_create(&tid1, NULL, thread_func1, NULL);\n    printf(\"Main: Creating Thread 2...\\n\");\n    pthread_create(&tid2, NULL, thread_func2, NULL);\n\n    pthread_join(tid1, NULL);\n    pthread_join(tid2, NULL);\n\n    pthread_mutex_destroy(&mutexA);\n    pthread_mutex_destroy(&mutexB);\n\n    printf(\"Main: All threads finished. Exiting.\\n\");\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "a",
+        "text": "האם קטע הקוד הנתון עלול להוביל למצב של קיפאון (deadlock)? נמק.",
+        "code_snippet": null,
+        "options": [
+          "כן",
+          "לא"
+        ],
+        "solution": {
+          "is_present_in_file": true,
+          "correct_option": "כן",
+          "explanation": "כן, קטע הקוד עלול להוביל למצב של קיפאון (deadlock). זהו תרחיש קלאסי של המתנה מעגלית (circular wait), אחד מארבעת התנאים ההכרחיים לקיפאון. חוט 1 מנסה לרכוש את mutexA ואז את mutexB. חוט 2 מנסה לרכוש את mutexB ואז את mutexA. סדר רכישת המנעולים השונה בין החוטים יוצר פוטנציאל לקיפאון."
+        }
+      },
+      {
+        "id": "b",
+        "text": "אם כן, תאר סדר אירועים אפשרי שיוביל לקיפאון.",
+        "code_snippet": null,
+        "options": null,
+        "solution": {
+          "is_present_in_file": true,
+          "correct_option": null,
+          "explanation": "סדר אירועים אפשרי שיוביל לקיפאון:\n1.  חוט 1 מתחיל לרוץ ורוכש בהצלחה את mutexA.\n2.  מתבצעת החלפת הקשר (context switch) לחוט 2.\n3.  חוט 2 מתחיל לרוץ ורוכש בהצלחה את mutexB.\n4.  חוט 2 מנסה לרכוש את mutexA, אך הוא כרגע מוחזק על ידי חוט 1, ולכן חוט 2 נחסם וממתין.\n5.  מתבצעת החלפת הקשר לחוט 1.\n6.  חוט 1 מנסה לרכוש את mutexB, אך הוא כרגע מוחזק על ידי חוט 2, ולכן חוט 1 נחסם וממתין.\nבשלב זה, שני החוטים חסומים באופן הדדי: חוט 1 ממתין ל-mutexB שמוחזק על ידי חוט 2, וחוט 2 ממתין ל-mutexA שמוחזק על ידי חוט 1. אף אחד מהם לא יכול להמשיך, והמערכת נכנסת לקיפאון."
+        }
+      },
+      {
+        "id": "c",
+        "text": "הצע שינוי מינימלי בקוד כדי למנוע קיפאון, והסבר מדוע השינוי מונע אותו.",
+        "code_snippet": null,
+        "options": null,
+        "solution": {
+          "is_present_in_file": true,
+          "correct_option": null,
+          "explanation": "כדי למנוע קיפאון, יש להבטיח שכל החוטים ירכשו את המנעולים באותו סדר עקבי. שינוי מינימלי יהיה לשנות את סדר רכישת המנעולים באחת מהפונקציות, לדוגמה ב-`thread_func2`, כך שהיא תנסה לרכוש את `mutexA` לפני `mutexB`.\n\n**השינוי המוצע ב-`thread_func2`:**\n```c\nvoid *thread_func2(void *arg) {\n    printf(\"Thread 2: Trying to acquire mutexA...\\n\"); // שינוי סדר\n    pthread_mutex_lock(&mutexA); // שינוי סדר\n    printf(\"Thread 2: Acquired mutexA. Trying to acquire mutexB...\\n\");\n    usleep(100000); // 100ms\n    pthread_mutex_lock(&mutexB);\n    printf(\"Thread 2: Acquired mutexB. Performing work...\\n\");\n    // Critical section\n    printf(\"Thread 2: Releasing mutexB...\\n\");\n    pthread_mutex_unlock(&mutexB);\n    printf(\"Thread 2: Releasing mutexA...\\n\");\n    pthread_mutex_unlock(&mutexA);\n    printf(\"Thread 2: Exiting.\\n\");\n    return NULL;\n}\n```\n\n**הסבר:**\nעל ידי אכיפת סדר רכישה עקבי (לדוגמה, תמיד `mutexA` ואז `mutexB`) עבור כל החוטים, אנו מונעים את תנאי ה'המתנה מעגלית'. אם חוט 1 רוכש את `mutexA` וממתין ל-`mutexB`, וחוט 2 מנסה גם הוא לרכוש את `mutexA` (לפני `mutexB`), חוט 2 יחסם על `mutexA` ולא ירכוש את `mutexB`. בדרך זו, לעולם לא ייווצר מצב שבו חוט 1 מחזיק את `mutexA` וממתין ל-`mutexB` בעוד חוט 2 מחזיק את `mutexB` וממתין ל-`mutexA`. תמיד רק חוט אחד יוכל להחזיק ב-`mutexA` בבת אחת, ובכך נשבר המעגל של התלות ההדדית."
+        }
+      }
+    ],
+    "points": 15,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": null
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

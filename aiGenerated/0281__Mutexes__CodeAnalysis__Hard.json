@@ -1,0 +1,50 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 20:29:34",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4847,
+      "output_tokens": 2656,
+      "total_tokens": 19339
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Mutexes",
+      "Synchronization",
+      "Concurrency",
+      "Deadlock"
+    ],
+    "content": {
+      "text": "נתונה מערכת מטמון פשוטה בגודל קבוע CACHE_SIZE, המאפשרת אחסון ועדכון של פריטים לפי מפתח-ערך. המערכת משתמשת בשני סוגי מנעולים: מנעול גלובלי cache_mutex להגנה על מבנה המטמון הכללי וחיפוש תאים פנויים/קיימים, ומנעול item_mutex לכל פריט במטמון להגנה על הנתונים הפנימיים שלו (מפתח וערך).\nלהלן מימוש חלקי של המערכת:",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <pthread.h>\n#include <unistd.h> // For sleep, if needed for demonstration\n\n#define CACHE_SIZE 5\n\ntypedef struct CacheEntry {\n    int key;\n    int value;\n    pthread_mutex_t item_mutex; // Protects 'value' and 'key' of this specific entry\n    int in_use; // 0 if empty, 1 if in use\n} CacheEntry;\n\nCacheEntry cache[CACHE_SIZE];\npthread_mutex_t cache_mutex = PTHREAD_MUTEX_INITIALIZER; // Protects global cache structure (e.g., 'in_use' flags, finding empty slots)\n\nvoid cache_init() {\n    for (int i = 0; i < CACHE_SIZE; ++i) {\n        cache[i].key = -1;\n        cache[i].value = -1;\n        pthread_mutex_init(&cache[i].item_mutex, NULL);\n        cache[i].in_use = 0;\n    }\n}\n\n// Function to add or update an item in the cache\nvoid cache_put(int key, int value) {\n    pthread_mutex_lock(&cache_mutex); // Lock global cache structure\n\n    int found_idx = -1;\n    for (int i = 0; i < CACHE_SIZE; ++i) {\n        if (cache[i].in_use && cache[i].key == key) {\n            found_idx = i;\n            break;\n        }\n    }\n\n    if (found_idx != -1) {\n        // Item exists, update its value.\n        pthread_mutex_lock(&cache[found_idx].item_mutex); // Lock item\n        cache[found_idx].value = value;\n        pthread_mutex_unlock(&cache[found_idx].item_mutex); // Unlock item\n        pthread_mutex_unlock(&cache_mutex); // Unlock global cache\n        return;\n    }\n\n    // Item does not exist, find an empty slot\n    int empty_idx = -1;\n    for (int i = 0; i < CACHE_SIZE; ++i) {\n        if (!cache[i].in_use) {\n            empty_idx = i;\n            break;\n        }\n    }\n\n    if (empty_idx != -1) {\n        // Found an empty slot\n        pthread_mutex_lock(&cache[empty_idx].item_mutex); // Lock new item slot\n        cache[empty_idx].key = key;\n        cache[empty_idx].value = value;\n        cache[empty_idx].in_use = 1;\n        pthread_mutex_unlock(&cache[empty_idx].item_mutex); // Unlock new item slot\n        pthread_mutex_unlock(&cache_mutex); // Unlock global cache\n        return;\n    }\n\n    // Cache is full. For simplicity, we don't handle eviction here.\n    // In a real scenario, an eviction policy would be applied.\n    pthread_mutex_unlock(&cache_mutex); // Unlock global cache\n    printf(\"Cache is full, cannot add key %d\\n\", key);\n}\n\n// Function to clear all items in the cache\nvoid cache_clear_and_reset() {\n    printf(\"Clearing cache...\\n\");\n    for (int i = 0; i < CACHE_SIZE; ++i) {\n        pthread_mutex_lock(&cache[i].item_mutex); // Acquire item mutex\n        // Simulate some cleanup work for the item\n        usleep(10000); // Simulate work that takes time\n        pthread_mutex_lock(&cache_mutex); // Acquire global cache mutex (PROBLEM HERE)\n        \n        cache[i].key = -1;\n        cache[i].value = -1;\n        cache[i].in_use = 0;\n        \n        pthread_mutex_unlock(&cache_mutex); // Release global cache mutex\n        pthread_mutex_unlock(&cache[i].item_mutex); // Release item mutex\n    }\n    printf(\"Cache cleared.\\n\");\n}"
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "הקוד הנ\"ל מכיל בעיה קריטית של סנכרון. תארו איזו בעיה קיימת בקוד וכיצד היא יכולה להתרחש (ציינו ריצה לדוגמה עם מספר חוטים).",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "תקנו את הקוד כך שיעבוד באופן תקין. יש להציג את הפונקציה המתוקנת בלבד (cache_clear_and_reset).",
+        "code_snippet": "void cache_clear_and_reset() {\n\n}",
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "10.1: הבעיה בקוד היא קיפאון (Deadlock). הקיפאון יכול להתרחש כאשר חוט אחד מנסה לעדכן פריט קיים במטמון באמצעות cache_put, וחוט אחר מנסה לנקות ולאפס את המטמון באמצעות cache_clear_and_reset.\nפונקציית cache_put רוכשת את המנעולים בסדר: cache_mutex ואז item_mutex (עבור הפריט הספציפי). פונקציית cache_clear_and_reset, לעומת זאת, מנסה לרכוש את המנעולים בסדר הפוך: item_mutex (עבור כל פריט בתורו) ואז cache_mutex. סדר רכישת מנעולים שונה זה, במקביל לגישה למשאבים משותפים, יכול להוביל לקיפאון.\n\nריצה לדוגמה:\nנניח ש-key=1 נמצא ב-cache[0].\n\nחוט 1 (מבצע cache_put(1, 100)):\n1. רוכש את cache_mutex (pthread_mutex_lock(&cache_mutex);)\n2. מוצא את key=1 ב-cache[0].\n3. מנסה לרכוש את cache[0].item_mutex (pthread_mutex_lock(&cache[0].item_mutex);)\n   (בשלב זה, חוט 1 מחזיק ב-cache_mutex וממתין ל-cache[0].item_mutex).\n\nחוט 2 (מבצע cache_clear_and_reset()):\n1. נכנס ללולאה עבור i=0.\n2. רוכש את cache[0].item_mutex (pthread_mutex_lock(&cache[0].item_mutex);)\n   (בשלב זה, חוט 2 מחזיק ב-cache[0].item_mutex וממשיך).\n3. מבצע usleep(10000);\n4. מנסה לרכוש את cache_mutex (pthread_mutex_lock(&cache_mutex);)\n   (בשלב זה, חוט 2 מחזיק ב-cache[0].item_mutex וממתין ל-cache_mutex).\n\nתוצאה: חוט 1 מחזיק ב-cache_mutex וממתין ל-cache[0].item_mutex, בעוד שחוט 2 מחזיק ב-cache[0].item_mutex וממתין ל-cache_mutex. שני החוטים חסומים זה לזה במעגל המתנה, מה שגורם לקיפאון.\n\n10.2: כדי לתקן את הקיפאון, יש להבטיח שכל החוטים רוכשים את המנעולים באותו סדר עקבי. מכיוון ש-cache_put רוכש את cache_mutex ואז item_mutex, יש לשנות את cache_clear_and_reset כך שתפעל באותו סדר. הדרך הנכונה היא לרכוש את cache_mutex פעם אחת בתחילת cache_clear_and_reset, ולשחרר אותו בסוף. בתוך הלולאה, יש לרכוש את item_mutex עבור כל פריט.\n\n```c\nvoid cache_clear_and_reset() {\n    printf(\"Clearing cache...\\n\");\n    pthread_mutex_lock(&cache_mutex); // Acquire global cache mutex ONCE at the beginning\n\n    for (int i = 0; i < CACHE_SIZE; ++i) {\n        pthread_mutex_lock(&cache[i].item_mutex); // Acquire item mutex\n        \n        // Cleanup work for the item\n        cache[i].key = -1;\n        cache[i].value = -1;\n        cache[i].in_use = 0;\n        \n        pthread_mutex_unlock(&cache[i].item_mutex); // Release item mutex\n    }\n    \n    pthread_mutex_unlock(&cache_mutex); // Release global cache mutex ONCE at the end\n    printf(\"Cache cleared.\\n\");\n}\n```\n\nהסבר לתיקון:\nעל ידי רכישת cache_mutex פעם אחת בתחילת הפונקציה cache_clear_and_reset ושחרורו בסוף, אנו מבטיחים שכל גישה לנתוני המטמון הגלובליים (כמו מערך ה-cache עצמו והסטטוס in_use של הפריטים) תהיה מוגנת, וכן שסדר רכישת המנעולים יהיה עקבי: תמיד cache_mutex ואז item_mutex. בדרך זו, לא יכול להיווצר מצב שבו חוט אחד מחכה ל-item_mutex בעודו מחזיק ב-cache_mutex, וחוט אחר מחכה ל-cache_mutex בעודו מחזיק ב-item_mutex. התיקון מבטל את התלות המעגלית ומסיר את פוטנציאל הקיפאון. (ה-usleep הוסר מהקוד המתוקן כי הוא נועד רק לסימולציה של עבודה בהקשר של הבעיה המקורית)."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

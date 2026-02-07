@@ -1,0 +1,50 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Deadlocks",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 21:28:01",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3900,
+      "output_tokens": 3468,
+      "total_tokens": 16751
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Deadlocks",
+      "Synchronization",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "במערכת הפעלה נתונה, קיימים N משאבים מסוג יחיד, המסומנים כ- `R_0, R_1, ..., R_{N-1}`. כל משאב מוגן על ידי מנעול `pthread_mutex_t` משלו. חוטים במערכת צריכים לרכוש בו-זמנית שני משאבים ספציפיים, `R_i` ו- `R_j` (כאשר `i` שונה מ- `j`), לבצע עליהם פעולה כלשהי, ולאחר מכן לשחרר אותם. נתון המימוש הראשוני הבא לפונקציות רכישה ושחרור:\n\n",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h> // For usleep\n\n#define N_RESOURCES 5 // לדוגמה, מספר המשאבים במערכת\n\npthread_mutex_t resource_mutexes[N_RESOURCES];\n\nvoid init_resources() {\n    for (int k = 0; k < N_RESOURCES; ++k) {\n        pthread_mutex_init(&resource_mutexes[k], NULL);\n    }\n}\n\nvoid destroy_resources() {\n    for (int k = 0; k < N_RESOURCES; ++k) {\n        pthread_mutex_destroy(&resource_mutexes[k]);\n    }\n}\n\n// פונקציית רכישה ראשונית\nvoid acquire_two_resources_initial(int id1, int id2) {\n    if (id1 == id2 || id1 < 0 || id1 >= N_RESOURCES || id2 < 0 || id2 >= N_RESOURCES) {\n        fprintf(stderr, \"Invalid resource IDs: %d, %d\\n\", id1, id2);\n        exit(1);\n    }\n    printf(\"Thread %lu attempting to acquire R%d then R%d\\n\", pthread_self(), id1, id2);\n    pthread_mutex_lock(&resource_mutexes[id1]);\n    printf(\"Thread %lu acquired R%d, attempting R%d\\n\", pthread_self(), id1, id2);\n    pthread_mutex_lock(&resource_mutexes[id2]);\n    printf(\"Thread %lu acquired R%d and R%d\\n\", pthread_self(), id1, id2);\n}\n\n// פונקציית שחרור ראשונית\nvoid release_two_resources_initial(int id1, int id2) {\n    printf(\"Thread %lu releasing R%d and R%d\\n\", pthread_self(), id1, id2);\n    pthread_mutex_unlock(&resource_mutexes[id2]);\n    pthread_mutex_unlock(&resource_mutexes[id1]);\n}\n\n// פונקציית עבודה לדוגמה\nvoid* thread_func_initial(void* arg) {\n    int* ids = (int*)arg;\n    int r1 = ids[0];\n    int r2 = ids[1];\n\n    acquire_two_resources_initial(r1, r2);\n    // Simulate work\n    usleep(100);\n    release_two_resources_initial(r1, r2);\n    return NULL;\n}\n\n// פונקציית main לדוגמה להדגמת קיפאון\n// int main() {\n//     init_resources();\n//     pthread_t t1, t2;\n//     int ids1[] = {0, 1}; // Thread 1 wants R0, then R1\n//     int ids2[] = {1, 0}; // Thread 2 wants R1, then R0\n//\n//     pthread_create(&t1, NULL, thread_func_initial, (void*)ids1);\n//     pthread_create(&t2, NULL, thread_func_initial, (void*)ids2);\n//\n//     pthread_join(t1, NULL);\n//     pthread_join(t2, NULL);\n//\n//     destroy_resources();\n//     return 0;\n// }\n",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "8.1",
+        "text": "האם המימוש הראשוני של `acquire_two_resources_initial` יכול להוביל לקיפאון (deadlock)? אם כן, תאר תרחיש ספציפי שבו קיפאון כזה יתרחש, והסבר מדוע.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.2",
+        "text": "שנה את המימוש של הפונקציות `acquire_two_resources` ו- `release_two_resources` כך שימנעו קיפאון באופן מוחלט, תוך שמירה על העיקרון שחוט תמיד ינסה לרכוש את `id1` *לפני* `id2`. המימוש החדש צריך להיות יעיל ככל האפשר ולא לכלול מנעול גלובלי יחיד שמסרסל את כל הבקשות. השתמש בפעולות סנכרון סטנדרטיות בלבד (כגון `pthread_mutex_t` ופונקציותיה, כולל `trylock`).",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "8.1: כן, המימוש הראשוני יכול להוביל לקיפאון.\n\n**תרחיש לקיפאון:**\nנניח שני חוטים, חוט A וחוט B, ושני משאבים `R_0` ו- `R_1`.\n1.  **חוט A** קורא ל- `acquire_two_resources_initial(0, 1)`:\n    *   חוט A נועל את `resource_mutexes[0]`.\n    *   חוט A מנסה לנעול את `resource_mutexes[1]`.\n2.  **במקביל, חוט B** קורא ל- `acquire_two_resources_initial(1, 0)`:\n    *   חוט B נועל את `resource_mutexes[1]`.\n    *   חוט B מנסה לנעול את `resource_mutexes[0]`.\n\n**הסבר:**\nבנקודה זו:\n*   חוט A מחזיק במנעול של `R_0` וממתין למנעול של `R_1`.\n*   חוט B מחזיק במנעול של `R_1` וממתין למנעול של `R_0`.\n\nזהו מצב של **קיפאון (deadlock)** מכיוון שמתקיימים כל ארבעת התנאים של קיפאון:\n1.  **מניעה הדדית (Mutual Exclusion):** כל משאב מוגן על ידי מנעול, כך שרק חוט אחד יכול להחזיק בו זמנית.\n2.  **החזק והמתן (Hold and Wait):** כל חוט מחזיק במשאב אחד (A מחזיק ב-`R_0`, B מחזיק ב-`R_1`) וממתין למשאב נוסף (A ממתין ל-`R_1`, B ממתין ל-`R_0`).\n3.  **אין שלילה מוקדמת (No Preemption):** לא ניתן לכפות על חוט לשחרר משאב שהוא מחזיק בו.\n4.  **המתנה מעגלית (Circular Wait):** חוט A ממתין למשאב שחוט B מחזיק, וחוט B ממתין למשאב שחוט A מחזיק, ויוצר מעגל המתנה.\n\n8.2: כדי למנוע קיפאון תוך שמירה על סדר הרכישה `id1` ואז `id2`, נשתמש בגישת ה- `trylock` עם מנגנון גיבוי (back-off). הרעיון הוא לנסות לרכוש את המנעולים בסדר הנדרש. אם הרכישה השנייה נכשלת (כי המשאב כבר תפוס), החוט ישחרר את המשאב הראשון שתפס, ימתין זמן קצר (כדי למנוע רעב מיידי ולתת לחוטים אחרים סיכוי), וינסה שוב. זה מפר את תנאי ה-\"החזק והמתן\" ובכך מונע קיפאון.\n\n```c\n#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h> // For usleep\n\n#define N_RESOURCES 5\n#define RETRY_DELAY_US 1000 // 1 מ\"ש\n\npthread_mutex_t resource_mutexes[N_RESOURCES];\n\nvoid init_resources() {\n    for (int k = 0; k < N_RESOURCES; ++k) {\n        pthread_mutex_init(&resource_mutexes[k], NULL);\n    }\n}\n\nvoid destroy_resources() {\n    for (int k = 0; k < N_RESOURCES; ++k) {\n        pthread_mutex_destroy(&resource_mutexes[k]);\n    }\n}\n\n// פונקציית רכישה מתוקנת ללא קיפאון\nvoid acquire_two_resources(int id1, int id2) {\n    if (id1 == id2 || id1 < 0 || id1 >= N_RESOURCES || id2 < 0 || id2 >= N_RESOURCES) {\n        fprintf(stderr, \"Invalid resource IDs: %d, %d\\n\", id1, id2);\n        exit(1);\n    }\n\n    while (1) { // ננסה לרכוש עד שנצליח\n        printf(\"Thread %lu attempting to acquire R%d then R%d\\n\", pthread_self(), id1, id2);\n\n        // ננסה לנעול את המשאב הראשון\n        pthread_mutex_lock(&resource_mutexes[id1]);\n        printf(\"Thread %lu acquired R%d, attempting R%d\\n\", pthread_self(), id1, id2);\n\n        // ננסה לנעול את המשאב השני\n        if (pthread_mutex_trylock(&resource_mutexes[id2]) == 0) {\n            // הצלחנו לנעול את שניהם\n            printf(\"Thread %lu acquired R%d and R%d\\n\", pthread_self(), id1, id2);\n            return;\n        } else {\n            // לא הצלחנו לנעול את המשאב השני, נשחרר את הראשון וננסה שוב\n            printf(\"Thread %lu failed to acquire R%d, releasing R%d and retrying...\\n\", pthread_self(), id2, id1);\n            pthread_mutex_unlock(&resource_mutexes[id1]);\n            usleep(RETRY_DELAY_US + (rand() % 1000)); // השהיה עם רנדומיזציה למניעת רעב\n        }\n    }\n}\n\n// פונקציית שחרור מתוקנת\nvoid release_two_resources(int id1, int id2) {\n    printf(\"Thread %lu releasing R%d and R%d\\n\", pthread_self(), id1, id2);\n    pthread_mutex_unlock(&resource_mutexes[id2]);\n    pthread_mutex_unlock(&resource_mutexes[id1]);\n}\n\n// פונקציית עבודה לדוגמה עם המימוש המתוקן\nvoid* thread_func_fixed(void* arg) {\n    int* ids = (int*)arg;\n    int r1 = ids[0];\n    int r2 = ids[1];\n\n    acquire_two_resources(r1, r2);\n    // Simulate work\n    usleep(100);\n    release_two_resources(r1, r2);\n    return NULL;\n}\n\n// פונקציית main לדוגמה להדגמת פעולה ללא קיפאון\n// int main() {\n//     init_resources();\n//     pthread_t t1, t2;\n//     int ids1[] = {0, 1}; // Thread 1 wants R0, then R1\n//     int ids2[] = {1, 0}; // Thread 2 wants R1, then R0\n//\n//     pthread_create(&t1, NULL, thread_func_fixed, (void*)ids1);\n//     pthread_create(&t2, NULL, thread_func_fixed, (void*)ids2);\n//\n//     pthread_join(t1, NULL);\n//     pthread_join(t2, NULL);\n//\n//     destroy_resources();\n//     return 0;\n// }\n```\n\n**הסבר לפתרון:**\nהפתרון מונע קיפאון על ידי שבירת תנאי ה-\"החזק והמתן\". כאשר חוט מצליח לרכוש את המשאב הראשון (`id1`) אך נכשל ברכישת המשאב השני (`id2`) באמצעות `pthread_mutex_trylock`, הוא אינו ממתין לנצח כשהוא מחזיק במשאב הראשון. במקום זאת, הוא משחרר את המשאב הראשון (`id1`), ממתין זמן קצר (עם תוספת רנדומית כדי למנוע תזמון חוזר שיוביל לרעב), ורק אז מנסה שוב את כל תהליך הרכישה. פעולה זו מבטיחה שחוט לעולם לא יחזיק במשאב אחד ויחסום חוט אחר, בזמן שהוא עצמו ממתין למשאב שחוט אחר מחזיק. בסופו של דבר, אחד החוטים יצליח לרכוש את שני המשאבים, והמערכת תתקדם."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

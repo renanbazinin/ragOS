@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Deadlocks",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 21:28:27",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3900,
+      "output_tokens": 2246,
+      "total_tokens": 9953
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Deadlocks",
+      "Synchronization",
+      "Resource Ordering"
+    ],
+    "content": {
+      "text": "מערכת מורכבת מ-N משאבים גנריים, כאשר כל משאב מוגן על ידי מנעול `pthread_mutex_t` משלו. חוטים במערכת צריכים לבצע פעולות הדורשות גישה בו-זמנית לשני משאבים שונים. לדוגמה, חוט עשוי להזדקק למשאבים `R_i` ו-`R_j` (כאשר `i != j`).\n\nכתוב פונקציה בשם `acquire_two_resources` שתקבל שני אינדקסים של משאבים (`idx1`, `idx2`) ומערך של מצביעים למנעולים (`mutexes`). הפונקציה צריכה לנעול את שני המנעולים המתאימים למשאבים אלו באופן בטוח, כלומר, למנוע קיפאון (deadlock) בכל מקרה.\n\n**דרישות:**\n1.  הפונקציה חייבת למנוע קיפאון.\n2.  הפונקציה צריכה להיות יעילה ככל האפשר.\n3.  אין להשתמש בפעולות אטומיות או אובייקטי סנכרון נוספים מעבר ל-`pthread_mutex_t` ופונקציות הנעילה/שחרור הרגילות שלהן (`pthread_mutex_lock`, `pthread_mutex_unlock`).\n\n**שקול את תרחיש הקיפאון הבא:**\nחוט T1 מנסה לנעול את משאב `R_A` ואז את `R_B`.\nחוט T2 מנסה לנעול את משאב `R_B` ואז את `R_A`.\nאם T1 נועל את `R_A` ו-T2 נועל את `R_B` בו-זמנית, שניהם יחכו זה לזה בנצח.\n\n**קוד התחלתי (להשלמה):**",
+      "code_snippet": "```c\n#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n\n// Assume 'num_resources' and 'resource_mutexes' are globally available\n// for simplicity, or passed as part of a context struct.\n// For this question, assume mutexes is an array of pthread_mutex_t pointers.\n\n// Function to initialize N mutexes (not part of the solution, just context)\nvoid init_resource_mutexes(pthread_mutex_t* mutexes[], int N) {\n    for (int i = 0; i < N; ++i) {\n        mutexes[i] = (pthread_mutex_t*) malloc(sizeof(pthread_mutex_t));\n        if (mutexes[i] == NULL) {\n            perror(\"malloc failed\");\n            exit(EXIT_FAILURE);\n        }\n        pthread_mutex_init(mutexes[i], NULL);\n    }\n}\n\n// Function to destroy N mutexes (not part of the solution, just context)\nvoid destroy_resource_mutexes(pthread_mutex_t* mutexes[], int N) {\n    for (int i = 0; i < N; ++i) {\n        pthread_mutex_destroy(mutexes[i]);\n        free(mutexes[i]);\n    }\n}\n\n// TODO: Implement this function to acquire two resources safely\nvoid acquire_two_resources(int idx1, int idx2, pthread_mutex_t* mutexes[]) {\n    // Your implementation here\n}\n\n// TODO: Implement this function to release two resources\nvoid release_two_resources(int idx1, int idx2, pthread_mutex_t* mutexes[]) {\n    // Your implementation here\n}\n```",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הסבר לקיפאון בגישה נאיבית:\nגישה נאיבית, שבה חוטים נועלים את המשאבים בסדר שבו הם ניתנים (לדוגמה, `pthread_mutex_lock(mutexes[idx1]); pthread_mutex_lock(mutexes[idx2]);`), עלולה להוביל לקיפאון (deadlock). נניח שחוט T1 מנסה לנעול את משאב R_A ואז את R_B, וחוט T2 מנסה לנעול את משאב R_B ואז את R_A. אם T1 מצליח לנעול את R_A ו-T2 מצליח לנעול את R_B בו-זמנית, אזי T1 ימתין ל-R_B שמוחזק על ידי T2, ו-T2 ימתין ל-R_A שמוחזק על ידי T1. נוצרת שרשרת המתנה מעגלית, והחוטים יישארו במצב קיפאון.\n\nפתרון למניעת קיפאון:\nכדי למנוע קיפאון בתרחיש של רכישת משאבים מרובים, אנו חייבים למנוע את התנאי של \"המתנה מעגלית\" (Circular Wait). הדרך הנפוצה והיעילה ביותר לעשות זאת היא להטיל סדר גלובלי (total order) על המשאבים. כלומר, חוטים חייבים תמיד לרכוש את המשאבים לפי סדר קבוע מראש.\n\nבמקרה שלנו, מכיוון שלכל משאב יש אינדקס מספרי ייחודי, נוכל להשתמש באינדקסים אלה כדי להגדיר את הסדר. הפתרון הוא תמיד לנעול את המנעול של המשאב בעל האינדקס הקטן יותר ראשון, ולאחר מכן לנעול את המנעול של המשאב בעל האינדקס הגדול יותר.\n\nפירוט המימוש:\n1.  **קביעת סדר רכישה:** לפני ביצוע פעולות הנעילה, אנו קובעים מי מהאינדקסים `idx1` ו-`idx2` הוא הקטן ומי הגדול. נגדיר `first_idx` להיות `min(idx1, idx2)` ו-`second_idx` להיות `max(idx1, idx2)`.\n2.  **נעילה לפי סדר:** אנו קוראים ל-`pthread_mutex_lock` עבור `mutexes[first_idx]` ולאחר מכן עבור `mutexes[second_idx]`.\n3.  **שחרור:** בעת שחרור המנעולים, מומלץ לשחרר בסדר הפוך מסדר הנעילה (כלומר, קודם את `second_idx` ואז את `first_idx`), אף על פי שסדר השחרור פחות קריטי למניעת קיפאון.\n\nעל ידי הקפדה על סדר רכישה אחיד זה, מובטח שלא תיווצר שרשרת המתנה מעגלית. אם חוט T1 צריך את R_A ו-R_B, וחוט T2 צריך את R_B ו-R_A, שניהם ינסו קודם לנעול את `min(A,B)` ולאחר מכן את `max(A,B)`. החוט שיצליח לנעול את `min(A,B)` ראשון ימשיך לנעול את `max(A,B)`, ואילו החוט השני ימתין בסבלנות עד ש-`min(A,B)` ישוחרר. אין מצב שבו כל חוט מחזיק במשאב שנדרש על ידי האחר וממתין למשאב המוחזק על ידי האחר, ובכך נמנע קיפאון.\n\n```c\nvoid acquire_two_resources(int idx1, int idx2, pthread_mutex_t* mutexes[]) {\n    // For this problem, we assume idx1 and idx2 are distinct and valid indices.\n    // If idx1 == idx2, locking the same non-recursive mutex twice would cause a deadlock.\n    \n    // Impose an order to prevent deadlock: always lock the smaller index first.\n    int first_idx = (idx1 < idx2) ? idx1 : idx2;\n    int second_idx = (idx1 > idx2) ? idx1 : idx2;\n\n    pthread_mutex_lock(mutexes[first_idx]);\n    pthread_mutex_lock(mutexes[second_idx]);\n}\n\nvoid release_two_resources(int idx1, int idx2, pthread_mutex_t* mutexes[]) {\n    // It's good practice to unlock in the reverse order of locking,\n    // or at least consistently. Here, locking order was first_idx then second_idx.\n    // So, unlock second_idx then first_idx.\n    int first_idx = (idx1 < idx2) ? idx1 : idx2;\n    int second_idx = (idx1 > idx2) ? idx1 : idx2;\n\n    pthread_mutex_unlock(mutexes[second_idx]);\n    pthread_mutex_unlock(mutexes[first_idx]);\n}\n```"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

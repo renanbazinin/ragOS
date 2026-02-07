@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 19:49:58",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3682,
+      "output_tokens": 1096,
+      "total_tokens": 6610
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Synchronization",
+      "Race Condition",
+      "Mutex",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא בשפת C המשתמש בספריית pthreads. הקוד יוצר שני תהליכונים (threads) שכל אחד מהם מגדיל משתנה גלובלי משותף `counter` 100,000 פעמים.\n\nמהו הערך הסופי ה *צפוי* של המונה `counter` לאחר ששני התהליכונים יסיימו את ריצתם? האם ערך זה מובטח תמיד? אם לא, הסבר מדוע וכיצד ניתן לתקן את הבעיה כדי להבטיח שהמונה יגיע לערך הצפוי בכל הרצה, תוך שימוש במנגנון סנכרון מתאים.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\nint counter = 0;\n\nvoid *increment(void *arg) {\n    for (int i = 0; i < 100000; i++) {\n        counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t tid1, tid2;\n    pthread_create(&tid1, NULL, increment, NULL);\n    pthread_create(&tid2, NULL, increment, NULL);\n    pthread_join(tid1, NULL);\n    pthread_join(tid2, NULL);\n    printf(\"Final counter: %d\\n\", counter);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הערך הסופי הצפוי של המונה `counter` הוא 200,000 (100,000 מכל תהליכון).\n\nערך זה אינו מובטח תמיד. הבעיה היא תנאי מרוץ (race condition). הפעולה `counter++` אינה פעולה אטומית. היא מורכבת משלוש פעולות בסיסיות: קריאת ערך המונה לתוך רגיסטר, הגדלת הרגיסטר באחד, וכתיבת הערך המעודכן חזרה לזיכרון. כאשר שני תהליכונים מנסים לבצע פעולה זו במקביל, ייתכן תזמון שבו תהליכון אחד קורא את ערך המונה, ואז מופסק לפני שהוא מספיק לכתוב את הערך המעודכן. בזמן זה, התהליכון השני קורא את אותו ערך ישן, מגדיל אותו וכותב אותו בחזרה. התוצאה היא שעדכון אחד אובד, ולכן הערך הסופי יהיה נמוך מ-200,000.\n\nכדי לתקן את הבעיה ולהבטיח שהמונה יגיע לערך הנכון, יש להגן על הגישה למשתנה `counter` באמצעות מנגנון סנכרון, כגון mutex. ה-mutex מבטיח שרק תהליכון אחד יוכל להיכנס לקטע הקריטי (הקוד שמשנה את המונה) בכל רגע נתון. הנה קטע הקוד המתוקן:\n\n```c\n#include <stdio.h>\n#include <pthread.h>\n\nint counter = 0;\npthread_mutex_t mutex; // Declare a mutex\n\nvoid *increment(void *arg) {\n    for (int i = 0; i < 100000; i++) {\n        pthread_mutex_lock(&mutex);   // Lock the mutex before accessing counter\n        counter++;\n        pthread_mutex_unlock(&mutex); // Unlock the mutex after accessing counter\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t tid1, tid2;\n    pthread_mutex_init(&mutex, NULL); // Initialize the mutex\n\n    pthread_create(&tid1, NULL, increment, NULL);\n    pthread_create(&tid2, NULL, increment, NULL);\n\n    pthread_join(tid1, NULL);\n    pthread_join(tid2, NULL);\n\n    printf(\"Final counter: %d\\n\", counter);\n\n    pthread_mutex_destroy(&mutex); // Destroy the mutex\n    return 0;\n}\n```"
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

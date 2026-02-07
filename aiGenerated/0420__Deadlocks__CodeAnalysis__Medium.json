@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Deadlocks",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 21:25:51",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2852,
+      "output_tokens": 1504,
+      "total_tokens": 6391
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Deadlocks",
+      "Concurrency",
+      "Mutexes",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא המשתמש במנעולים (mutexes) ובחוטים (threads) לגישה למשאבים משותפים:\n\nהאם קיים סיכון לקיפאון (deadlock) בתוכנית זו? אם כן, הסבר מדוע וכיצד הוא יכול להתרחש.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <unistd.h> // For sleep\n\npthread_mutex_t mutexA;\npthread_mutex_t mutexB;\n\nvoid *thread_func1(void *arg) {\n    printf(\"Thread 1: Attempting to lock Mutex A...\\n\");\n    pthread_mutex_lock(&mutexA);\n    printf(\"Thread 1: Mutex A locked. Attempting to lock Mutex B...\\n\");\n    sleep(1); // Introduce a delay to increase likelihood of deadlock\n    pthread_mutex_lock(&mutexB);\n    printf(\"Thread 1: Mutex B locked. Critical section for Thread 1.\\n\");\n\n    // Do some work\n    printf(\"Thread 1: Releasing Mutex B.\\n\");\n    pthread_mutex_unlock(&mutexB);\n    printf(\"Thread 1: Releasing Mutex A.\\n\");\n    pthread_mutex_unlock(&mutexA);\n    printf(\"Thread 1: Exiting.\\n\");\n    return NULL;\n}\n\nvoid *thread_func2(void *arg) {\n    printf(\"Thread 2: Attempting to lock Mutex B...\\n\");\n    pthread_mutex_lock(&mutexB);\n    printf(\"Thread 2: Mutex B locked. Attempting to lock Mutex A...\\n\");\n    sleep(1); // Introduce a delay\n    pthread_mutex_lock(&mutexA);\n    printf(\"Thread 2: Mutex A locked. Critical section for Thread 2.\\n\");\n\n    // Do some work\n    printf(\"Thread 2: Releasing Mutex A.\\n\");\n    pthread_mutex_unlock(&mutexA);\n    printf(\"Thread 2: Releasing Mutex B.\\n\");\n    pthread_mutex_unlock(&mutexB);\n    printf(\"Thread 2: Exiting.\\n\");\n    return NULL;\n}\n\nint main() {\n    pthread_t tid1, tid2;\n\n    pthread_mutex_init(&mutexA, NULL);\n    pthread_mutex_init(&mutexB, NULL);\n\n    pthread_create(&tid1, NULL, thread_func1, NULL);\n    pthread_create(&tid2, NULL, thread_func2, NULL);\n\n    pthread_join(tid1, NULL);\n    pthread_join(tid2, NULL);\n\n    pthread_mutex_destroy(&mutexA);\n    pthread_mutex_destroy(&mutexB);\n\n    printf(\"Main: All threads finished.\\n\");\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "כן, קיים סיכון לקיפאון (deadlock) בתוכנית זו. קיפאון יכול להתרחש כאשר מתקיימים בו זמנית ארבעה תנאים הכרחיים:\n\n1.  **מניעה הדדית (Mutual Exclusion):** מתקיימת. המנעולים `mutexA` ו-`mutexB` מבטיחים שרק חוט אחד יכול להחזיק כל משאב (מנעול) בכל רגע נתון. אם חוט אחד מחזיק מנעול, חוט אחר המנסה לתפוס אותו ייחסם.\n\n2.  **החזקה והמתנה (Hold and Wait):** מתקיימת. כל חוט תופס מנעול אחד (לדוגמה, `thread_func1` תופס את `mutexA`, ו-`thread_func2` תופס את `mutexB`) וממתין למנעול השני תוך כדי החזקת המנעול הראשון. הם לא משחררים את המשאב שהם כבר מחזיקים.\n\n3.  **אי-הפקעה (No Preemption):** מתקיימת. לא ניתן להפקיע מנעול מחוט שמחזיק בו; חוט חייב לשחרר אותו מרצונו לאחר שסיים להשתמש בו. מערכת ההפעלה אינה יכולה לקחת מנעול מחוט בכוח.\n\n4.  **המתנה מעגלית (Circular Wait):** מתקיימת. חוט 1 (`thread_func1`) מנסה לתפוס את `mutexA` ולאחר מכן את `mutexB`. חוט 2 (`thread_func2`) מנסה לתפוס את `mutexB` ולאחר מכן את `mutexA`. אם חוט 1 תופס את `mutexA` (שורת קוד 11) ומיד לאחר מכן חוט 2 תופס את `mutexB` (שורת קוד 27), אז:\n    *   חוט 1 ימתין ל-`mutexB` שמוחזק על ידי חוט 2 (שורת קוד 14).\n    *   חוט 2 ימתין ל-`mutexA` שמוחזק על ידי חוט 1 (שורת קוד 30).\n    מצב זה יוצר מעגל המתנה שבו כל חוט ממתין למשאב שמוחזק על ידי חוט אחר במעגל, מה שמוביל לקיפאון.\n\nהשימוש בפונקציית `sleep(1)` בתוך כל חוט מגדיל את הסיכוי לכך ששני החוטים יתפסו את המנעולים שלהם (אחד כל אחד) לפני שהם ינסו לתפוס את המנעול השני, ובכך יגיעו למצב של המתנה מעגלית וקיפאון."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

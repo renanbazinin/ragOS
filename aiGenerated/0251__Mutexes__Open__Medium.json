@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 20:15:29",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2046,
+      "output_tokens": 1161,
+      "total_tokens": 8002
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "Open",
+    "topic": [
+      "Mutexes",
+      "Deadlocks",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתחו את קטע הקוד הבא ב-C++. האם יתכן קיפאון (deadlock) בתוכנית? אם כן, הסבירו מדוע וכיצד ניתן למנוע אותו. אם לא, הסבירו מדוע קיפאון אינו אפשרי.",
+      "code_snippet": "#include <iostream>\n#include <thread>\n#include <mutex>\n#include <chrono>\n\nstd::mutex mutexA;\nstd::mutex mutexB;\n\nint shared_data_A = 0;\nint shared_data_B = 0;\n\nvoid thread_func1() {\n    std::cout << \"Thread 1: Trying to lock mutexA\" << std::endl;\n    mutexA.lock();\n    std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Simulate work\n    std::cout << \"Thread 1: Locked mutexA, trying to lock mutexB\" << std::endl;\n    mutexB.lock();\n    \n    // Critical section\n    shared_data_A++;\n    shared_data_B++;\n    std::cout << \"Thread 1: Acquired both locks. Data A: \" << shared_data_A << \", Data B: \" << shared_data_B << std::endl;\n\n    mutexB.unlock();\n    mutexA.unlock();\n    std::cout << \"Thread 1: Released both locks\" << std::endl;\n}\n\nvoid thread_func2() {\n    std::cout << \"Thread 2: Trying to lock mutexB\" << std::endl;\n    mutexB.lock();\n    std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Simulate work\n    std::cout << \"Thread 2: Locked mutexB, trying to lock mutexA\" << std::endl;\n    mutexA.lock();\n\n    // Critical section\n    shared_data_A++;\n    shared_data_B++;\n    std::cout << \"Thread 2: Acquired both locks. Data A: \" << shared_data_A << \", Data B: \" << shared_data_B << std::endl;\n\n    mutexA.unlock();\n    mutexB.unlock();\n    std::cout << \"Thread 2: Released both locks\" << std::endl;\n}\n\nint main() {\n    std::thread t1(thread_func1);\n    std::thread t2(thread_func2);\n\n    t1.join();\n    t2.join();\n\n    std::cout << \"Final Data A: \" << shared_data_A << \", Final Data B: \" << shared_data_B << std::endl;\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "כן, יתכן קיפאון.\n\nהסבר:\nהקיפאון מתרחש עקב תנאי 'המתנה מעגלית' (Circular Wait) ו'החזקה והמתנה' (Hold and Wait). חוט 1 (thread_func1) מנסה לנעול את mutexA ולאחר מכן את mutexB. חוט 2 (thread_func2) מנסה לנעול את mutexB ולאחר מכן את mutexA.\nתרחיש קיפאון אפשרי הוא שחוט 1 נועל את mutexA וחוט 2 נועל את mutexB. לאחר מכן, חוט 1 מנסה לנעול את mutexB אך נחסם (מכיוון שחוט 2 מחזיק בו), וחוט 2 מנסה לנעול את mutexA אך נחסם (מכיוון שחוט 1 מחזיק בו). שני החוטים חסומים באופן הדדי, כאשר כל אחד מהם מחזיק משאב שהשני דורש, ואינם יכולים להתקדם. זהו קיפאון קלאסי.\n\nפתרון למניעת קיפאון:\nהדרך הנפוצה והיעילה ביותר למנוע קיפאון במצב זה היא להבטיח שכל החוטים ירכשו את המנעולים (mutexes) באותו סדר קבוע. לדוגמה, יש לשנות את thread_func2 כך שגם הוא ירכוש את mutexA לפני mutexB. כלומר, סדר רכישת המנעולים יהיה תמיד mutexA ולאחר מכן mutexB. זה מבטיח שלא ייווצר מצב של המתנה מעגלית."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

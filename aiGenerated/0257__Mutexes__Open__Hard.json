@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 20:18:08",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3905,
+      "output_tokens": 1735,
+      "total_tokens": 11265
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Synchronization",
+      "Mutexes",
+      "Fairness",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "ממשו מנעול הוגן (Fair Mutex) באמצעות mutexים רגילים (pthread_mutex_t) ומשתני תנאי (pthread_cond_t). מנעול הוגן מבטיח שחוטים ירכשו את המנעול לפי הסדר שבו ביקשו אותו (FIFO - First-In, First-Out). כלומר, אם חוט A מבקש את המנעול ואחריו חוט B מבקש אותו, חוט A חייב לרכוש ולשחרר את המנעול לפני שחוט B יוכל לרכוש אותו, גם אם חוט A נדחה (preempted) מיד לאחר בקשתו וחוט B מנסה לרכוש את המנעול.\n\nיש להגדיר את מבנה הנתונים עבור המנעול ההוגן ולממש את הפעולות הבאות: `fair_mutex_init`, `fair_mutex_destroy`, `fair_mutex_lock`, ו-`fair_mutex_unlock`.",
+      "code_snippet": "/* Headers you might need:\n#include <pthread.h>\n#include <stdbool.h>\n#include <stdlib.h>\n*/\n\n\ntypedef struct {\n    // Please define the internal state here\n} fair_mutex_t;\n\nvoid fair_mutex_init(fair_mutex_t *m);\nvoid fair_mutex_destroy(fair_mutex_t *m);\nvoid fair_mutex_lock(fair_mutex_t *m);\nvoid fair_mutex_unlock(fair_mutex_t *m);"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "כדי לממש מנעול הוגן בשיטת FIFO, נשתמש במנגנון 'כרטיסים' (tickets). כל חוט המבקש את המנעול מקבל מספר כרטיס ייחודי, והחוטים רוכשים את המנעול לפי הסדר העולה של מספרי הכרטיסים שלהם. נשתמש ב-mutex פנימי (`internal_lock`) כדי להגן על מצב המנעול (מספרי הכרטיסים) ובמשתנה תנאי (`cond`) כדי להשהות חוטים שממתינים לתורם.\n\nמבנה הנתונים `fair_mutex_t` יכלול:\n*   `internal_lock`: mutex רגיל להגנה על השדות הפנימיים של המנעול ההוגן.\n*   `cond`: משתנה תנאי שעליו חוטים ימתינו כאשר אינם בתורם.\n*   `next_ticket`: מונה עולה שמחלק מספרי כרטיסים ייחודיים לכל חוט שמבקש את המנעול.\n*   `serving_ticket`: מונה עולה המציין את מספר הכרטיס של החוט שמותר לו כעת לרכוש את המנעול.\n\n**פעולת `fair_mutex_lock`:**\n1.  החוט רוכש את `internal_lock` כדי לגשת בבטחה לשדות הפנימיים של המנעול ההוגן.\n2.  הוא מקבל מספר כרטיס (`my_ticket`) מתוך `next_ticket` ומקדם את `next_ticket` עבור החוט הבא.\n3.  החוט נכנס ללולאת המתנה: כל עוד `my_ticket` שלו אינו שווה ל-`serving_ticket`, הוא ממתין על משתנה התנאי `cond`. בזמן ההמתנה, `pthread_cond_wait` משחרר את `internal_lock` באופן אטומי ומחזיר אותו עם ההתעוררות.\n4.  כאשר `my_ticket == serving_ticket`, זהו תורו של החוט לרכוש את המנעול. הוא יוצא מהלולאה.\n5.  החוט משחרר את `internal_lock`.\n\n**פעולת `fair_mutex_unlock`:**\n1.  החוט רוכש את `internal_lock`.\n2.  הוא מקדם את `serving_ticket` כדי לאפשר לחוט הבא בתור (בעל הכרטיס הבא) לרכוש את המנעול.\n3.  החוט קורא ל-`pthread_cond_broadcast` כדי להעיר את כל החוטים הממתינים על `cond`. מתוך החוטים שהתעוררו, רק זה ש-`my_ticket` שלו תואם את `serving_ticket` החדש ימשיך.\n4.  החוט משחרר את `internal_lock`.\n\nמימוש זה מבטיח הוגנות FIFO מכיוון שחוטים יכולים לרכוש את המנעול רק כאשר מספר הכרטיס שלהם תואם ל-`serving_ticket`, ו-`serving_ticket` מקודם באופן סדרתי.\n\n```c\n#include <pthread.h>\n#include <stdbool.h>\n#include <stdlib.h>\n\ntypedef struct {\n    pthread_mutex_t internal_lock;      // מגן על המצב הפנימי של המנעול\n    pthread_cond_t  cond;               // משתנה תנאי לחוטים הממתינים\n    int             next_ticket;        // הכרטיס הבא שיחולק\n    int             serving_ticket;     // הכרטיס הנוכחי בתור\n} fair_mutex_t;\n\nvoid fair_mutex_init(fair_mutex_t *m) {\n    pthread_mutex_init(&m->internal_lock, NULL);\n    pthread_cond_init(&m->cond, NULL);\n    m->next_ticket = 0;\n    m->serving_ticket = 0;\n}\n\nvoid fair_mutex_destroy(fair_mutex_t *m) {\n    pthread_mutex_destroy(&m->internal_lock);\n    pthread_cond_destroy(&m->cond);\n}\n\nvoid fair_mutex_lock(fair_mutex_t *m) {\n    pthread_mutex_lock(&m->internal_lock);\n    int my_ticket = m->next_ticket++; // קבל כרטיס וקדם את המונה\n    while (my_ticket != m->serving_ticket) {\n        pthread_cond_wait(&m->cond, &m->internal_lock);\n    }\n    // עכשיו זה התור שלי, אני מחזיק במנעול באופן מרומז\n    pthread_mutex_unlock(&m->internal_lock);\n}\n\nvoid fair_mutex_unlock(fair_mutex_t *m) {\n    pthread_mutex_lock(&m->internal_lock);\n    m->serving_ticket++; // קדם את הכרטיס הבא בתור\n    pthread_cond_broadcast(&m->cond); // העיר את כל החוטים הממתינים לבדוק את תורם\n    pthread_mutex_unlock(&m->internal_lock);\n}\n```\n",
+      "difficulty_estimation": "Hard"
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 20:11:58",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 970,
+      "output_tokens": 999,
+      "total_tokens": 4160
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Mutexes",
+      "Synchronization",
+      "Deadlock",
+      "Pthreads"
+    ],
+    "content": {
+      "text": "נתבונן בקטע הקוד הבא ב-C, בו תהליך יחיד מבצע קריאה לפונקציה `funcA`, אשר רוכשת מנעול (mutex) ולאחר מכן קוראת לפונקציה `funcB`. `funcB` מנסה לרכוש את אותו המנעול שכבר נרכש על ידי `funcA` באותו התהליך. בהנחה שהמנעול `my_mutex` מאותחל כ-`PTHREAD_MUTEX_NORMAL` (ברירת המחדל), מה תהיה התוצאה הסבירה ביותר?",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n\npthread_mutex_t my_mutex; // Global mutex\n\nvoid funcB() {\n    printf(\"funcB: Attempting to acquire mutex...\\n\");\n    pthread_mutex_lock(&my_mutex);\n    printf(\"funcB: Mutex acquired.\\n\");\n    // Critical section for funcB\n    pthread_mutex_unlock(&my_mutex);\n    printf(\"funcB: Mutex released.\\n\");\n}\n\nvoid funcA() {\n    printf(\"funcA: Attempting to acquire mutex...\\n\");\n    pthread_mutex_lock(&my_mutex);\n    printf(\"funcA: Mutex acquired.\\n\");\n    // Call funcB, which tries to acquire the same mutex\n    funcB();\n    printf(\"funcA: After funcB call.\\n\");\n    pthread_mutex_unlock(&my_mutex);\n    printf(\"funcA: Mutex released.\\n\");\n}\n\n// In main, assume a single thread calls funcA() after mutex initialization:\n// pthread_mutex_init(&my_mutex, NULL); // Initializes as PTHREAD_MUTEX_NORMAL\n// funcA();",
+      "options": [
+        "א. התוכנית תרוץ בהצלחה, שכן מנעול רגיל מאפשר רכישה חוזרת על ידי אותו תהליך.",
+        "ב. התוכנית תיכנס למצב של קיפאון (deadlock) כאשר `funcB` תנסה לרכוש את המנעול, מכיוון שהמנעול כבר מוחזק על ידי אותו תהליך ולא ניתן לרכוש אותו שוב.",
+        "ג. `pthread_mutex_lock` בתוך `funcB` תחזיר שגיאה ותוציא את התוכנית מריצה.",
+        "ד. המערכת תזהה שמדובר באותו תהליך ותאפשר ל-`funcB` לרכוש את המנעול באופן מיידי ללא חסימה."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "הסבר: מנעול מסוג `PTHREAD_MUTEX_NORMAL` אינו מאפשר רכישה חוזרת (reentrant) על ידי אותו התהליך. כאשר `funcA` רוכשת את `my_mutex`, היא הופכת לבעלים של המנעול. כאשר `funcA` קוראת ל-`funcB`, ו-`funcB` מנסה לרכוש את אותו המנעול באמצעות `pthread_mutex_lock`, המנעול כבר מוחזק על ידי אותו תהליך. מכיוון שהמנעול אינו רב-כניסתי (non-recursive), הקריאה ל-`pthread_mutex_lock` בתוך `funcB` תגרום לתהליך לחכות לעצמו לשחרר את המנעול, מה שמוביל למצב של קיפאון (deadlock). כדי למנוע זאת, ניתן להשתמש במנעול מסוג `PTHREAD_MUTEX_RECURSIVE` אשר מאפשר לתהליך לרכוש את אותו המנעול מספר פעמים."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

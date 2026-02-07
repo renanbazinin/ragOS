@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 20:17:35",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2046,
+      "output_tokens": 1837,
+      "total_tokens": 6031
+    }
+  },
+  "question": {
+    "id": 100,
+    "type": "Open",
+    "topic": [
+      "Mutexes",
+      "Deadlocks",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתונה מערכת עם שני משאבים משותפים, resource1 ו-resource2, המוגנים על ידי שני מנעולים (mutexes), mutex1 ו-mutex2, בהתאמה. קיימים שני תהליכונים (threads), threadA ו-threadB, המבצעים פעולות הדורשות גישה לשני המשאבים. הקוד הבא מציג את לוגיקת הגישה של כל אחד מהתהליכונים.\n\nא. האם קיים סיכון לקיפאון (deadlock) במערכת זו? נמקו והסבירו את התרחיש המוביל לקיפאון, אם קיים.\nב. אם קיים, הציעו פתרון לקוד המונע קיפאון, והסבירו מדוע הפתרון שלכם עובד.",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h> // For sleep\n\npthread_mutex_t mutex1 = PTHREAD_MUTEX_INITIALIZER;\npthread_mutex_t mutex2 = PTHREAD_MUTEX_INITIALIZER;\n\nvoid* threadA_func(void* arg) {\n    printf(\"Thread A: Trying to lock mutex1...\\n\");\n    pthread_mutex_lock(&mutex1);\n    printf(\"Thread A: Locked mutex1. Trying to lock mutex2...\\n\");\n    sleep(1); // Simulate work\n    pthread_mutex_lock(&mutex2);\n    printf(\"Thread A: Locked mutex2. Accessing resources.\\n\");\n    // Access resource1 and resource2\n    pthread_mutex_unlock(&mutex2);\n    pthread_mutex_unlock(&mutex1);\n    printf(\"Thread A: Unlocked mutexes.\\n\");\n    return NULL;\n}\n\nvoid* threadB_func(void* arg) {\n    printf(\"Thread B: Trying to lock mutex2...\\n\");\n    pthread_mutex_lock(&mutex2);\n    printf(\"Thread B: Locked mutex2. Trying to lock mutex1...\\n\");\n    sleep(1); // Simulate work\n    pthread_mutex_lock(&mutex1);\n    printf(\"Thread B: Locked mutex1. Accessing resources.\\n\");\n    // Access resource1 and resource2\n    pthread_mutex_unlock(&mutex1);\n    pthread_mutex_unlock(&mutex2);\n    printf(\"Thread B: Unlocked mutexes.\\n\");\n    return NULL;\n}\n\n// Example main function to run these threads:\n/*\nint main() {\n    pthread_t tidA, tidB;\n\n    pthread_create(&tidA, NULL, threadA_func, NULL);\n    pthread_create(&tidB, NULL, threadB_func, NULL);\n\n    pthread_join(tidA, NULL);\n    pthread_join(tidB, NULL);\n\n    pthread_mutex_destroy(&mutex1);\n    pthread_mutex_destroy(&mutex2);\n\n    return 0;\n}\n*/",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "א. כן, קיים סיכון לקיפאון (deadlock) במערכת זו. תרחיש אפשרי לקיפאון הוא כדלקמן:\n1.  **תהליכון A** מבצע `pthread_mutex_lock(&mutex1)` ומצליח לנעול את `mutex1`.\n2.  במקביל, **תהליכון B** מבצע `pthread_mutex_lock(&mutex2)` ומצליח לנעול את `mutex2`.\n3.  כעת, **תהליכון A** ממשיך ומנסה לבצע `pthread_mutex_lock(&mutex2)`. מכיוון ש-`mutex2` נעול על ידי תהליכון B, תהליכון A נחסם וממתין לשחרורו.\n4.  במקביל, **תהליכון B** ממשיך ומנסה לבצע `pthread_mutex_lock(&mutex1)`. מכיוון ש-`mutex1` נעול על ידי תהליכון A, תהליכון B נחסם וממתין לשחרורו.\nבשלב זה, שני התהליכונים חסומים וממתינים זה לזה לשחרור המשאב שהשני מחזיק, וכתוצאה מכך אף אחד מהם לא יכול להתקדם. זהו מצב של קיפאון, הנובע מהפרת תנאי ה\"המתנה המעגלית\" (Circular Wait) בשילוב עם שלושת התנאים האחרים לקיפאון (Mutual Exclusion, Hold and Wait, No Preemption).\n\nב. כדי למנוע קיפאון במצב זה, יש לוודא שכל התהליכונים רוכשים את המנעולים באותו סדר קבוע. זה מפר את תנאי ה\"המתנה המעגלית\".\nפתרון אפשרי הוא ששני התהליכונים ינסו לנעול תמיד את `mutex1` ואז את `mutex2`. הנה דוגמה לקוד מתוקן עבור `threadB_func` (יש לוודא שגם `threadA_func` שומר על אותו סדר):\n\n```c\nvoid* threadB_func(void* arg) {\n    printf(\"Thread B: Trying to lock mutex1...\\n\");\n    pthread_mutex_lock(&mutex1); // סדר הנעילה שונה ל-mutex1 קודם\n    printf(\"Thread B: Locked mutex1. Trying to lock mutex2...\\n\");\n    sleep(1); // Simulate work\n    pthread_mutex_lock(&mutex2);\n    printf(\"Thread B: Locked mutex2. Accessing resources.\\n\");\n    // Access resource1 and resource2\n    pthread_mutex_unlock(&mutex2);\n    pthread_mutex_unlock(&mutex1);\n    printf(\"Thread B: Unlocked mutexes.\\n\");\n    return NULL;\n}\n```\n\n**הסבר הפתרון:**\nעל ידי אכיפת סדר קבוע לרכישת המנעולים (לדוגמה, תמיד `mutex1` ואז `mutex2`), אנו מבטלים את האפשרות למצב של \"המתנה מעגלית\". אם תהליכון A רוכש את `mutex1` ותהליכון B גם מנסה לרכוש את `mutex1`, רק אחד מהם יצליח. השני ימתין עד ש-`mutex1` ישוחרר. לאחר מכן, התהליכון שרכש את `mutex1` ימשיך לרכוש את `mutex2`. אם `mutex2` פנוי, הוא ירכוש אותו ויבצע את עבודתו. אם `mutex2` תפוס (על ידי תהליכון אחר שכבר סיים את `mutex1` ורכש את `mutex2`), הוא ימתין. בכל מקרה, לא ייווצר מצב שבו A מחזיק ב-X וממתין ל-Y, ובמקביל B מחזיק ב-Y וממתין ל-X, מכיוון שכל התהליכונים מנסים לרכוש את המנעולים באותו סדר היררכי. גישה זו מבטיחה שאין שרשרת המתנה מעגלית, ובכך מונעת קיפאון."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

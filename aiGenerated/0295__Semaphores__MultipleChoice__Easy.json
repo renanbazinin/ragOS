@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Semaphores",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 20:35:55",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 917,
+      "output_tokens": 350,
+      "total_tokens": 2431
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Semaphores",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של שימוש בסמפור בינארי (binary semaphore) במערכת הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. לספור את מספר המשאבים הזמינים במערכת.",
+        "ב. להבטיח גישה בלעדית (mutual exclusion) לקטע קריטי (critical section).",
+        "ג. לתזמן את ביצוע התהליכים (process scheduling).",
+        "ד. לנהל את הקצאת הזיכרון הפיזי (physical memory allocation)."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "סמפור בינארי (המכונה לעיתים גם mutex) משמש בעיקר להבטחת גישה בלעדית לקטע קריטי. מטרתו היא לוודא שרק תהליך אחד יבצע את הקטע הקריטי בכל רגע נתון, ובכך למנוע תנאי מרוץ (race conditions) ולשמור על עקביות הנתונים המשותפים."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

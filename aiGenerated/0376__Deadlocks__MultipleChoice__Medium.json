@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Deadlocks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 21:09:40",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1159,
+      "output_tokens": 520,
+      "total_tokens": 5768
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Deadlocks",
+      "Deadlock Avoidance",
+      "Banker's Algorithm"
+    ],
+    "content": {
+      "text": "איזה מתנאי הקיפאון הבאים נמנע באופן ישיר על ידי שימוש באלגוריתם בנקאי (Banker's Algorithm)?",
+      "code_snippet": null,
+      "options": [
+        "א. מניעה הדדית (Mutual Exclusion)",
+        "ב. החזק והמתן (Hold and Wait)",
+        "ג. אי-הפקעה (No Preemption)",
+        "ד. המתנה מעגלית (Circular Wait)",
+        "ה. אלגוריתם הבנקאי אינו מפר אף אחד מתנאי הקיפאון באופן ישיר, אלא מונע קיפאון על ידי הבטחת מצב בטוח."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ה",
+      "explanation": "אלגוריתם הבנקאי הוא דוגמה לאסטרטגיית מניעת קיפאון (Deadlock Avoidance). אסטרטגיות מניעה (Avoidance) אינן מפרות אף אחד מארבעת תנאי הקיפאון (מניעה הדדית, החזק והמתן, אי-הפקעה, המתנה מעגלית) באופן ישיר. במקום זאת, הן דורשות מידע מוקדם על דרישות המשאבים של תהליכים ומקצות משאבים באופן דינמי רק אם המערכת נשארת במצב בטוח (safe state). מצב בטוח מבטיח שקיימת סדרה כלשהי של הקצאות משאבים המאפשרת לכל התהליכים לסיים את ביצועם מבלי להיכנס לקיפאון. לכן, האלגוריתם מונע קיפאון על ידי הבטחת מצב בטוח, ולא על ידי הפרת תנאי ספציפי."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

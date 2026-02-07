@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 20:16:50",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2046,
+      "output_tokens": 1721,
+      "total_tokens": 6341
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "Open",
+    "topic": [
+      "Mutexes",
+      "Synchronization",
+      "Deadlocks",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C++ המשתמשת בשני mutex-ים (mtx1, mtx2) לגישה למשאבים משותפים. קיימים שני תהליכונים (threads) שמנסים לגשת למשאבים אלו. נתח את הקוד הנתון, הסבר מדוע הוא עלול לגרום לקיפאון (deadlock), והצע פתרון לבעיה זו על ידי שינוי מינימלי בקוד, תוך הסבר מדרונותיו של הפתרון.",
+      "code_snippet": "```c++\n#include <iostream>\n#include <thread>\n#include <mutex>\n#include <chrono> // For std::chrono::milliseconds\n\nstd::mutex mtx1;\nstd::mutex mtx2;\n\nvoid thread_func_1() {\n    mtx1.lock();\n    std::cout << \"Thread 1 acquired mtx1\" << std::endl;\n    std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Simulate work\n    mtx2.lock();\n    std::cout << \"Thread 1 acquired mtx2\" << std::endl;\n    // Access shared resources\n    mtx2.unlock();\n    mtx1.unlock();\n    std::cout << \"Thread 1 released mtx1 and mtx2\" << std::endl;\n}\n\nvoid thread_func_2() {\n    mtx2.lock();\n    std::cout << \"Thread 2 acquired mtx2\" << std::endl;\n    std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Simulate work\n    mtx1.lock();\n    std::cout << \"Thread 2 acquired mtx1\" << std::endl;\n    // Access shared resources\n    mtx1.unlock();\n    mtx2.unlock();\n    std::cout << \"Thread 2 released mtx1 and mtx2\" << std::endl;\n}\n\nint main() {\n    std::thread t1(thread_func_1);\n    std::thread t2(thread_func_2);\n\n    t1.join();\n    t2.join();\n\n    std::cout << \"Main finished\" << std::endl;\n    return 0;\n}\n```",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": 15,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הקוד הנתון עלול לגרום לקיפאון (deadlock) מכיוון שמתקיימים בו ארבעת התנאים לקיפאון:\n1.  **Mutual Exclusion (מניעה הדדית):** Mutex-ים מטבעם אוכפים מניעה הדדית – רק חוט אחד יכול להחזיק ב-mutex מסוים בכל רגע נתון.\n2.  **Hold and Wait (החזק והמתן):** כל אחד מהתהליכונים מחזיק ב-mutex אחד (T1 מחזיק ב-mtx1, T2 מחזיק ב-mtx2) וממתין לרכישת ה-mutex השני.\n3.  **No Preemption (אי-השתלטות):** לא ניתן לקחת mutex מחוט שמחזיק בו בכוח.\n4.  **Circular Wait (המתנה מעגלית):** T1 ממתין ל-mtx2 שמוחזק על ידי T2, ו-T2 ממתין ל-mtx1 שמוחזק על ידי T1. זהו מעגל המתנה.\n\n**תרחיש לדוגמה לקיפאון:**\n1.  T1 רוכש את `mtx1`.\n2.  T2 רוכש את `mtx2`.\n3.  T1 מנסה לרכוש את `mtx2` ונחסם, כי `mtx2` מוחזק על ידי T2.\n4.  T2 מנסה לרכוש את `mtx1` ונחסם, כי `mtx1` מוחזק על ידי T1.\nשני התהליכונים חסומים זה לזה ולא יוכלו להתקדם, מה שמוביל לקיפאון.\n\n**פתרון מוצע:**\nהפתרון הנפוץ והפשוט ביותר לבעיה זו הוא לוודא שכל התהליכונים רוכשים את ה-mutex-ים באותו סדר. על ידי אכיפת סדר רכישה עקבי (לדוגמה, תמיד `mtx1` ואז `mtx2`), אנו מבטלים את תנאי ה'המתנה מעגלית'.\n\n**שינוי קוד מוצע (שינוי בפונקציה `thread_func_2` בלבד):**\nיש לשנות את הפונקציה `thread_func_2` כך שתבצע את רכישת ה-mutex-ים באותו סדר כמו `thread_func_1`.\nהקוד המתוקן עבור `thread_func_2` ייראה כך:\n```c++\nvoid thread_func_2() {\n    mtx1.lock(); // רכוש mtx1 קודם, כמו ב-thread_func_1\n    std::cout << \"Thread 2 acquired mtx1\" << std::endl;\n    std::this_thread::sleep_for(std::chrono::milliseconds(100));\n    mtx2.lock(); // לאחר מכן רכוש mtx2\n    std::cout << \"Thread 2 acquired mtx2\" << std::endl;\n    // Access shared resources\n    mtx2.unlock();\n    mtx1.unlock();\n    std::cout << \"Thread 2 released mtx1 and mtx2\" << std::endl;\n}\n```\n\n**הסבר על הפתרון:**\nבפתרון זה, שני התהליכונים מנסים לרכוש את `mtx1` קודם, ורק לאחר מכן את `mtx2`. אם T1 רוכש את `mtx1`, אז T2 ייחסם בניסיון לרכוש את `mtx1` עד ש-T1 ישחרר אותו. T1 ימשיך לרכוש את `mtx2`, יבצע את עבודתו וישחרר את שני ה-mutex-ים. רק לאחר ש-T1 ישחרר את `mtx1`, T2 יוכל לרכוש אותו, ולאחר מכן את `mtx2`, ולהמשיך בעבודתו. מצב של המתנה מעגלית נמנע מכיוון שלא יתכן מצב שבו T1 מחכה ל-mtx2 שמוחזק על ידי T2, ובו זמנית T2 מחכה ל-mtx1 שמוחזק על ידי T1 – שניהם תמיד ינסו לרכוש את `mtx1` ראשון, מה ששובר את המעגל."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

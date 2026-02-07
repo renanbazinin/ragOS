@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 19:47:29",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 968,
+      "output_tokens": 1117,
+      "total_tokens": 7777
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Synchronization",
+      "Condition Variables",
+      "Starvation",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתונה תבנית קוד C/C++ לניהול מאגר משאבים משותף. כל תהליך יכול לבקש כמות משתנה של משאבים מהמאגר. אם אין מספיק משאבים זמינים, התהליך ממתין על משתנה התנאי `cond`. כאשר תהליך משחרר משאבים למאגר, הוא צריך להודיע לתהליכים הממתינים.\n\nאיזו קריאה לפונקציית הודעה (notification) יש לבצע בתוך `release_items` כדי למנוע קיפאון (starvation) או חוסר יעילות משמעותי במערכת, בהתחשב בכך שייתכנו תהליכים רבים הממתינים למספרים שונים של משאבים?",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <unistd.h> // For usleep\n\nconst int MAX_ITEMS = 10;\nint available_items = MAX_ITEMS;\npthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;\npthread_cond_t cond = PTHREAD_COND_INITIALIZER;\n\nvoid acquire_items(int num_to_acquire, int thread_id) {\n    pthread_mutex_lock(&mtx);\n    // printf(\"Thread %d requesting %d items. Available: %d\\n\", thread_id, num_to_acquire, available_items);\n    while (available_items < num_to_acquire) {\n        pthread_cond_wait(&cond, &mtx);\n    }\n    available_items -= num_to_acquire;\n    // printf(\"Thread %d acquired %d items. Available: %d\\n\", thread_id, num_to_acquire, available_items);\n    pthread_mutex_unlock(&mtx);\n    // Simulate work outside critical section\n    usleep(100000); // 100 ms\n}\n\nvoid release_items(int num_to_release, int thread_id) {\n    pthread_mutex_lock(&mtx);\n    available_items += num_to_release;\n    // printf(\"Thread %d released %d items. Available: %d\\n\", thread_id, num_to_release, available_items);\n    // איזו קריאה יש לבצע כאן כדי להודיע לתהליכים ממתינים?\n    // א. pthread_cond_signal(&cond);\n    // ב. pthread_cond_broadcast(&cond);\n    // ג. אין צורך בקריאה כלשהי.\n    // ד. כל התשובות האחרות אינן נכונות.\n    pthread_mutex_unlock(&mtx);\n}",
+      "options": [
+        "א. pthread_cond_signal(&cond);",
+        "ב. pthread_cond_broadcast(&cond);",
+        "ג. אין צורך בקריאה כלשהי.",
+        "ד. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "במקרה זה, יש להשתמש ב-`pthread_cond_broadcast(&cond);`. הסיבה לכך היא שתהליכים שונים עשויים להמתין לכמויות שונות של משאבים. כאשר משאבים משוחררים, ייתכן שיותר מתהליך אחד יוכל כעת להמשיך, או שהתהליך היחיד שהתעורר על ידי `pthread_cond_signal` לא יוכל להמשיך (כי עדיין אין מספיק משאבים עבורו, בעוד שתהליך אחר שזקוק לפחות משאבים כן היה יכול). שימוש ב-`pthread_cond_signal` במצב כזה עלול להוביל לקיפאון (starvation) של תהליכים שיכולים היו להמשיך, או לחוסר יעילות משמעותי עקב התעוררויות שווא (spurious wakeups) שאינן מקדמות את המערכת. `pthread_cond_broadcast` מבטיח שכל התהליכים הממתינים יבדקו מחדש את תנאיהם, ומאפשר לכל התהליכים שיכולים להמשיך לעשות זאת, ובכך מונע קיפאון ומבטיח יעילות רבה יותר."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

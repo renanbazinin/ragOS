@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Semaphores",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 20:40:06",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 970,
+      "output_tokens": 1093,
+      "total_tokens": 6602
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Semaphores",
+      "Concurrency",
+      "Deadlock",
+      "Resource Allocation"
+    ],
+    "content": {
+      "text": "נתונה מערכת עם N משאבים זהים. M תהליכים (processes) רצים במקביל, וכל אחד מהם זקוק ל-K משאבים כדי לבצע את עבודתו. המשאבים מנוהלים באמצעות סמפור מונה `resources` המאותחל ל-N. קטע הקוד הבא מתאר את לוגיקת רכישת ושחרור המשאבים עבור כל תהליך:",
+      "code_snippet": "semaphore resources = N; // N total resources\n\nvoid process_func() {\n    // Acquire K resources\n    for (int i = 0; i < K; i++) {\n        wait(resources);\n    }\n\n    // Critical section: Use K resources\n    // ... perform work ...\n\n    // Release K resources\n    for (int i = 0; i < K; i++) {\n        signal(resources);\n    }\n}",
+      "options": [
+        "א. הפתרון מבטיח מניעת קיפאון (deadlock-free).",
+        "ב. הפתרון מבטיח מניעת הרעבה (starvation-free).",
+        "ג. הפתרון עשוי להוביל לקיפאון (deadlock) בתנאים מסוימים.",
+        "ד. הפתרון מבטיח הדדית בלעדיות (mutual exclusion) על כל K המשאבים.",
+        "ה. אף אחת מהטענות האחרות אינה נכונה בהכרח."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "התשובה הנכונה היא ג'.\n\nהסבר:\nכאשר K > 1 ורכישת המשאבים מתבצעת באופן סדרתי (wait() K פעמים), נוצר סיכון לקיפאון (deadlock). דמיינו תרחיש שבו N=2 משאבים, M=2 תהליכים, וכל תהליך זקוק ל-K=2 משאבים. \n1. תהליך P1 מבצע wait(resources) פעם אחת. ערך הסמפור יורד ל-1.\n2. תהליך P2 מבצע wait(resources) פעם אחת. ערך הסמפור יורד ל-0.\n3. כעת, P1 מנסה לבצע wait(resources) בפעם השנייה, אך ערך הסמפור הוא 0, ולכן P1 נחסם.\n4. P2 מנסה לבצע wait(resources) בפעם השנייה, אך ערך הסמפור הוא 0, ולכן P2 נחסם גם הוא.\n\nבמצב זה, P1 מחזיק במשאב אחד וממתין למשאב נוסף ש-P2 עשוי להחזיק בו, ו-P2 מחזיק במשאב אחד וממתין למשאב נוסף ש-P1 עשוי להחזיק בו. זוהי דוגמה קלאסית לקיפאון מעגלי (circular wait), שהיא אחד מארבעת התנאים ההכרחיים לקיפאון. לכן, הפתרון עשוי להוביל לקיפאון בתנאים מסוימים.\n\n- א. הפתרון אינו מבטיח מניעת קיפאון, כפי שהודגם לעיל.\n- ב. קיפאון מוביל בהכרח להרעבה, ולכן אם קיפאון אפשרי, הפתרון אינו מבטיח מניעת הרעבה.\n- ד. הסמפור `resources` הוא סמפור מונה המגביל את המספר הכולל של משאבים בשימוש ל-N. הוא אינו מבטיח הדדית בלעדיות על *סט של K משאבים* עבור תהליך בודד, במובן שרק תהליך אחד יכול להחזיק K משאבים בכל רגע נתון. לדוגמה, אם N=4 ו-K=2, שני תהליכים יכולים להחזיק 2 משאבים כל אחד בו-זמנית. לכן, טענה זו אינה נכונה.\n- ה. מכיוון שטענה ג' נכונה, טענה ה' אינה נכונה."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 20:00:02",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3136,
+      "output_tokens": 1787,
+      "total_tokens": 8269
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Threads",
+      "Race Conditions",
+      "Mutexes"
+    ],
+    "content": {
+      "text": "נתונה תוכנית ה-C הבאה המשתמשת בתהליכונים (threads):\nהתוכנית יוצרת שני תהליכונים, כאשר כל אחד מהם מגדיל מונה גלובלי (counter) 100,000 פעמים. קראו את הקוד וענו על השאלות הבאות:\n\n```c\n#include <stdio.h>\n#include <pthread.h>\n\nint counter = 0;\n\nvoid* increment_counter(void* arg) {\n    for (int i = 0; i < 100000; ++i) {\n        counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t tid1, tid2;\n\n    pthread_create(&tid1, NULL, increment_counter, NULL);\n    pthread_create(&tid2, NULL, increment_counter, NULL);\n\n    pthread_join(tid1, NULL);\n    pthread_join(tid2, NULL);\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    return 0;\n}\n```\n\n1. מהו הערך הסופי ה_צפוי_ של המשתנה `counter` לאחר ששני התהליכונים סיימו את פעולתם? נמק.\n2. האם הערך ה_מודפס_ בפועל יהיה תמיד זהה לערך הצפוי? אם לא, הסבר מדוע ומהי הבעיה המרכזית כאן.\n3. שנה את הקוד הנתון כך שיבטיח שהערך המודפס יהיה תמיד נכון (כלומר, שווה לערך הצפוי). הצג את הקוד המתוקן והסבר את השינויים שביצעת.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1. **ערך צפוי:** כל תהליכון מגדיל את המונה 100,000 פעמים. מכיוון שיש שני תהליכונים, סך כל ההגדלות הוא 2 * 100,000 = 200,000. לכן, הערך הצפוי של `counter` הוא 200,000.\n2. **ערך מודפס בפועל והבעיה:** הערך המודפס בפועל _לא_ יהיה תמיד זהה לערך הצפוי. הבעיה המרכזית כאן היא **תנאי מירוץ (Race Condition)**. הפעולה `counter++` אינה אטומית. היא מורכבת משלוש פעולות ברמה נמוכה יותר:\n    *   קריאת הערך הנוכחי של `counter` לתוך אוגר.\n    *   הגדלת הערך באוגר באחד.\n    *   כתיבת הערך המעודכן מהאוגר חזרה לזיכרון של `counter`.\n    כאשר שני תהליכונים מנסים לבצע את הפעולה הזו בו-זמנית, ייתכן ששניהם יקראו את אותו ערך של `counter` לפני שאחד מהם הספיק לכתוב את הערך המעודכן בחזרה. לדוגמה, אם `counter` הוא 100:\n    *   תהליכון A קורא 100.\n    *   תהליכון B קורא 100.\n    *   תהליכון A מגדיל ל-101 וכותב 101.\n    *   תהליכון B מגדיל ל-101 (מתוך הערך שקרא קודם) וכותב 101.\n    במקרה זה, למרות שבוצעו שתי הגדלות, המונה גדל רק באחד. כתוצאה מכך, הערך הסופי יהיה נמוך מ-200,000.\n3. **קוד מתוקן עם מנגנוני סנכרון:**\n    כדי לפתור את תנאי המירוץ ולהבטיח שהגידול של `counter` יהיה אטומי, נשתמש במנעול (mutex) מסוג `pthread_mutex_t`.\n    הקוד המתוקן:\n    ```c\n    #include <stdio.h>\n    #include <pthread.h>\n\n    int counter = 0;\n    pthread_mutex_t mutex; // הצהרה על מנעול\n\n    void* increment_counter(void* arg) {\n        for (int i = 0; i < 100000; ++i) {\n            pthread_mutex_lock(&mutex);   // נעל את המנעול לפני גישה למשתנה המשותף\n            counter++;\n            pthread_mutex_unlock(&mutex); // שחרר את המנעול לאחר הגישה\n        }\n        return NULL;\n    }\n\n    int main() {\n        pthread_t tid1, tid2;\n\n        pthread_mutex_init(&mutex, NULL); // אתחל את המנעול\n\n        pthread_create(&tid1, NULL, increment_counter, NULL);\n        pthread_create(&tid2, NULL, increment_counter, NULL);\n\n        pthread_join(tid1, NULL);\n        pthread_join(tid2, NULL);\n\n        printf(\"Final counter value: %d\\n\", counter);\n\n        pthread_mutex_destroy(&mutex); // שחרר משאבי מנעול\n        return 0;\n    }\n    ```\n    **הסבר לשינויים:**\n    *   **`pthread_mutex_t mutex;`**: הוספנו הצהרה על משתנה מטיפוס `pthread_mutex_t` שישמש כמנעול.\n    *   **`pthread_mutex_init(&mutex, NULL);`**: בתוך פונקציית `main`, אתחלנו את המנעול לפני יצירת התהליכונים.\n    *   **`pthread_mutex_lock(&mutex);`**: לפני הפעולה `counter++` בקטע הקריטי (critical section) בתוך `increment_counter`, קראנו לפונקציה זו כדי לנעול את המנעול. רק תהליכון אחד יכול להחזיק במנעול בכל רגע נתון.\n    *   **`pthread_mutex_unlock(&mutex);`**: מיד לאחר הפעולה `counter++`, שחררנו את המנעול. זה מאפשר לתהליכונים אחרים לנסות לנעול אותו.\n    *   **`pthread_mutex_destroy(&mutex);`**: בסיום התוכנית, לאחר ששני התהליכונים סיימו והצטרפו חזרה ל-`main`, שחררנו את משאבי המנעול.\n    שינויים אלה מבטיחים שרק תהליכון אחד יגדיל את `counter` בכל רגע נתון, ובכך מונעים את תנאי המירוץ ומבטיחים שהערך הסופי יהיה 200,000."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

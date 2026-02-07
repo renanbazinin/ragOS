@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 20:28:34",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3648,
+      "output_tokens": 1269,
+      "total_tokens": 7847
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Mutexes",
+      "Concurrency",
+      "Race Conditions",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה, המשתמשת ב-pthreads וב-mutex כדי להגדיל מונה משותף על ידי מספר תהליכונים. נתחו את התוכנית וענו על השאלה.\n\nמהו הערך הסופי האפשרי של המשתנה הגלובלי `counter` לאחר שכל התהליכונים סיימו את ריצתם? נמקו את תשובתכם והסבירו מדוע התוכנית עלולה להפיק תוצאה שונה מהצפוי.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\n#define NUM_THREADS 5\n#define ITERATIONS_PER_THREAD 100000\n\nint counter = 0;\npthread_mutex_t mutex;\n\nvoid* thread_func(void* arg) {\n    for (int i = 0; i < ITERATIONS_PER_THREAD; ++i) {\n        pthread_mutex_lock(&mutex);\n        // CRITICAL SECTION START\n        int temp = counter;\n        pthread_mutex_unlock(&mutex); // ERROR: Unlocking too early!\n        temp++;\n        counter = temp; // This write is NOT protected\n        // CRITICAL SECTION END (should extend to here)\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n    pthread_mutex_init(&mutex, NULL);\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, thread_func, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    pthread_mutex_destroy(&mutex);\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הערך הסופי הצפוי של המונה, לו ה-mutex היה בשימוש נכון, הוא 500,000 (5 תהליכונים * 100,000 איטרציות כל אחד). עם זאת, עקב מיקום שגוי של קריאת ה-`pthread_mutex_unlock()`, מתקיים תנאי מרוץ (race condition).\n\nהקטע הקריטי, הכולל קריאת ערך ה-`counter` לתוך משתנה מקומי (`temp`), הגדלתו, וכתיבתו בחזרה ל-`counter` הגלובלי, אינו מוגן במלואו. ספציפית, השורה `counter = temp;` מתבצעת *לאחר* שה-mutex כבר שוחרר. משמעות הדבר היא שמספר תהליכונים יכולים לקרוא את אותו ערך של `counter` לתוך המשתנה המקומי שלהם `temp`, להגדיל אותו, ולאחר מכן לכתוב אותו בחזרה ל-`counter` הגלובלי, ובכך לדרוס את העדכונים של תהליכונים אחרים.\n\nלדוגמה, אם `counter` הוא 0:\n1. תהליכון A נועל את ה-mutex, קורא `temp = 0`, ומשחרר את ה-mutex.\n2. תהליכון B נועל את ה-mutex, קורא `temp = 0` (כי תהליכון A עדיין לא כתב בחזרה ל-`counter`), ומשחרר את ה-mutex.\n3. תהליכון A מגדיל את `temp` ל-1, וכותב `counter = 1`.\n4. תהליכון B מגדיל את `temp` ל-1, וכותב `counter = 1`.\n\nבסוף תהליך זה, שתי פעולות הגדלה הביאו לכך שהמונה בערך 1 במקום 2.\n\nלכן, הערך הסופי של `counter` יהיה **קטן מ-500,000**, והוא אינו דטרמיניסטי ותלוי בתיאום התהליכונים על ידי מערכת ההפעלה.\n\nכדי לתקן את הבעיה, יש להזיז את שחרור ה-mutex לסוף הקטע הקריטי, כך שכל פעולת הקריאה-שינוי-כתיבה תהיה מוגנת:\n```c\nvoid* thread_func(void* arg) {\n    for (int i = 0; i < ITERATIONS_PER_THREAD; ++i) {\n        pthread_mutex_lock(&mutex);\n        // CRITICAL SECTION START\n        counter++; // Atomic increment (read-modify-write protected)\n        // CRITICAL SECTION END\n        pthread_mutex_unlock(&mutex);\n    }\n    return NULL;\n}\n```"
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

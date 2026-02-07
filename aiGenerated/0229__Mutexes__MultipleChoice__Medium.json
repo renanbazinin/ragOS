@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 20:09:06",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 961,
+      "output_tokens": 322,
+      "total_tokens": 2281
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Synchronization",
+      "Mutexes",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "האם מותר לחוט אחד לנעול מנעול (mutex) וחוט אחר לפתוח אותו?",
+      "code_snippet": null,
+      "options": [
+        "נכון",
+        "לא נכון"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "לא נכון",
+      "explanation": "לא נכון. מנעולים סטנדרטיים (כמו `pthread_mutex_t` ב-Pthreads או `std::mutex` ב-C++) מניחים בעלות (ownership): רק החוט שנועל את המנעול רשאי לפתוח אותו. ניסיון לפתוח מנעול מחוט אחר יוביל בדרך כלל להתנהגות בלתי מוגדרת (undefined behavior) או לשגיאת זמן ריצה (runtime error), כתלות במימוש הספציפי של מערכת ההפעלה או הספרייה. תכונה זו נועדה למנוע מצבי מירוץ (race conditions) ושימוש שגוי במשאבים מוגנים."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

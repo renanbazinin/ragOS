@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Semaphores",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 20:57:24",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3853,
+      "output_tokens": 832,
+      "total_tokens": 6093
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Semaphores",
+      "Synchronization",
+      "Threads",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המשתמשת בסמפור בינארי (binary semaphore) כדי להגן על קטע קריטי. שני תהליכונים (threads) מריצים את אותה פונקציה, שבה כל אחד מהם מגדיל מונה משותף 5 פעמים. מה יהיה הערך הסופי של המונה המשותף `counter` לאחר ששני התהליכונים יסיימו את ריצתם?",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <semaphore.h>\n\n#define NUM_THREADS 2\n#define INCREMENTS_PER_THREAD 5\n\nint counter = 0;\nsem_t binary_semaphore;\n\nvoid* thread_func(void* arg) {\n    for (int i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n        sem_wait(&binary_semaphore); // Acquire lock\n        counter++;                   // Critical section\n        sem_post(&binary_semaphore); // Release lock\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    // Initialize binary semaphore to 1 (binary semaphore acting as a mutex)\n    sem_init(&binary_semaphore, 0, 1);\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, thread_func, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    sem_destroy(&binary_semaphore);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון:\nהתוכנית יוצרת שני תהליכונים, כאשר כל אחד מהם מבצע 5 הגדלות למונה המשותף `counter`. הסמפור הבינארי `binary_semaphore` מאותחל לערך 1, מה שאומר שהוא פועל כמו מנעול (mutex) ומבטיח שרק תהליכון אחד יכול להיכנס לקטע הקריטי (הגדלת המונה) בכל רגע נתון.\nכל קריאה ל-`sem_wait` משיגה את המנעול, וכל קריאה ל-`sem_post` משחררת אותו. כיוון שהגישה ל-`counter` מוגנת כהלכה על ידי הסמפור, כל פעולת הגדלה היא אטומית ומובטח שלא יתרחשו תנאי מרוץ (race conditions) שישנו את סדר הפעולות או יגרמו לאיבוד עדכונים.\nסה\"כ מספר ההגדלות שיבוצעו הוא: מספר התהליכונים * מספר ההגדלות לכל תהליכון = 2 * 5 = 10.\nלכן, הערך הסופי של `counter` יהיה 10."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 20:10:14",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 970,
+      "output_tokens": 1072,
+      "total_tokens": 5153
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Mutexes",
+      "Synchronization",
+      "Deadlock"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא ב-C/C++. המנעול `m` מאותחל כברירת מחדל (כלומר, מסוג `PTHREAD_MUTEX_NORMAL`). איזו טענה מתארת נכונה את מה שיקרה כאשר תהליך בודד יקרא לפונקציה `func_b` מתוך `main`?",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n\npthread_mutex_t m; // Global mutex, default type (PTHREAD_MUTEX_NORMAL)\nint shared_data = 0;\n\nvoid func_a() {\n    printf(\"func_a: Attempting to lock mutex...\\n\");\n    pthread_mutex_lock(&m); // Attempt to lock\n    printf(\"func_a: Mutex locked. shared_data = %d\\n\", ++shared_data);\n    pthread_mutex_unlock(&m);\n    printf(\"func_a: Mutex unlocked.\\n\");\n}\n\nvoid func_b() {\n    printf(\"func_b: Attempting to lock mutex...\\n\");\n    pthread_mutex_lock(&m); // First lock\n    printf(\"func_b: Mutex locked. shared_data = %d. Calling func_a...\\n\", ++shared_data);\n    func_a(); // func_a will attempt to lock 'm' again\n    printf(\"func_b: Returned from func_a. shared_data = %d. Unlocking mutex...\\n\", shared_data);\n    pthread_mutex_unlock(&m); // First unlock\n    printf(\"func_b: Mutex unlocked.\\n\");\n}\n\nint main() {\n    pthread_mutex_init(&m, NULL); // Initializes 'm' as PTHREAD_MUTEX_NORMAL\n    printf(\"Main: Calling func_b...\\n\");\n    func_b();\n    printf(\"Main: func_b returned.\\n\");\n    pthread_mutex_destroy(&m);\n    return 0;\n}",
+      "options": [
+        "א. התוכנית תרוץ בהצלחה ותדפיס \"func_b: Mutex unlocked.\" פעמיים.",
+        "ב. התוכנית תרוץ בהצלחה ותדפיס \"func_a: Mutex locked...\" ולאחר מכן \"func_b: Mutex unlocked.\" פעם אחת.",
+        "ג. התוכנית תיכנס למצב של קיפאון (deadlock) כאשר `func_a` תנסה לתפוס את המנעול `m` בפעם השנייה.",
+        "ד. התוכנית תרוץ בהצלחה אך `shared_data` יודפס עם ערך שגוי עקב תנאי מירוץ.",
+        "ה. התוכנית תקרוס (segmentation fault) כאשר `func_a` תנסה לתפוס את המנעול `m` בפעם השנייה."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג. התוכנית תיכנס למצב של קיפאון (deadlock) כאשר `func_a` תנסה לתפוס את המנעול `m` בפעם השנייה.",
+      "explanation": "כאשר מנעול מסוג `PTHREAD_MUTEX_NORMAL` (הוא ברירת המחדל כאשר `NULL` מועבר ל-`pthread_mutex_init`) נתפס על ידי תהליך, ובהמשך אותו תהליך מנסה לתפוס את אותו מנעול שוב לפני ששחרר אותו, התהליך ייכנס למצב של קיפאון (deadlock). במקרה זה, `func_b` תופסת את המנעול `m`, ולאחר מכן קוראת ל-`func_a`. בתוך `func_a`, הפונקציה מנסה לתפוס שוב את המנעול `m` שכבר מוחזק על ידי אותו תהליך, מה שגורם לקיפאון. כדי לאפשר תפיסה חוזרת של מנעול על ידי אותו תהליך, יש לאתחל את המנעול כ-`PTHREAD_MUTEX_RECURSIVE`."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

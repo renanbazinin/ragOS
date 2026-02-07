@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Semaphores",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 20:46:44",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2630,
+      "output_tokens": 1961,
+      "total_tokens": 8973
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "Open",
+    "topic": [
+      "Synchronization",
+      "Semaphores",
+      "Producer-Consumer"
+    ],
+    "content": {
+      "text": "נתונה מערכת עם חוצץ מעגלי בגודל BUFFER_SIZE (לדוגמה, 10 תאים) שבו מפיקים (Producers) מוסיפים נתונים וצרכנים (Consumers) מסירים נתונים. המטרה היא לממש את הפעולות enqueue (הוספת נתון לחוצץ) ו-dequeue (הסרת נתון מהחוצץ) תוך שימוש בסמפורים בלבד, על מנת להבטיח את הדרישות הבאות:\n1.  גישה הדדית בלעדית (mutual exclusion) לחוצץ עצמו (כלומר, רק תהליך אחד יכול לגשת לחוצץ בכל רגע נתון).\n2.  מפיק ימתין אם החוצץ מלא (כל תאי החוצץ תפוסים).\n3.  צרכן ימתין אם החוצץ ריק (אין נתונים בחוצץ).\n\nא. הגדירו את הסמפורים הנדרשים (שם, סוג – בינארי/מונה – וערך אתחול).\nב. כתבו את קוד ה-C/C++ עבור פונקציות enqueue ו-dequeue המממשות את הדרישות הנ\"ל. יש לכלול את הגדרות הסמפורים ופונקציית אתחול בסיסית.\nג. הסבירו בקצרה מדוע כל סמפור נחוץ ומה תפקידו.",
+      "code_snippet": "#include <semaphore.h>\n#include <stdio.h>\n#include <stdlib.h>\n\n#define BUFFER_SIZE 10\n\n// Shared buffer and indices\nint buffer[BUFFER_SIZE];\nint in = 0;  // Next write position\nint out = 0; // Next read position\n\n// Semaphores\nsem_t mutex;    // For mutual exclusion to buffer\nsem_t empty;    // Counts empty slots\nsem_t full;     // Counts full slots\n\n// Initialization function for semaphores and buffer state\nvoid init_buffer_sync() {\n    sem_init(&mutex, 0, 1);             // Binary semaphore, initialized to 1\n    sem_init(&empty, 0, BUFFER_SIZE);   // Counting semaphore, initialized to BUFFER_SIZE\n    sem_init(&full, 0, 0);              // Counting semaphore, initialized to 0\n}\n\n// Producer function to add an item to the buffer\nvoid enqueue(int item) {\n    sem_wait(&empty); // Wait if buffer is full\n    sem_wait(&mutex); // Acquire lock for buffer access\n\n    // Critical section: Add item to buffer\n    buffer[in] = item;\n    in = (in + 1) % BUFFER_SIZE;\n    // printf(\"Producer added: %d\\n\", item); // Optional print for debugging\n\n    sem_post(&mutex); // Release lock\n    sem_post(&full);  // Signal that a slot is now full\n}\n\n// Consumer function to remove an item from the buffer\nint dequeue() {\n    int item;\n    sem_wait(&full);  // Wait if buffer is empty\n    sem_wait(&mutex); // Acquire lock for buffer access\n\n    // Critical section: Remove item from buffer\n    item = buffer[out];\n    out = (out + 1) % BUFFER_SIZE;\n    // printf(\"Consumer removed: %d\\n\", item); // Optional print for debugging\n\n    sem_post(&mutex); // Release lock\n    sem_post(&empty); // Signal that a slot is now empty\n    return item;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "א. הגדרת סמפורים וערכי אתחול:\nנדרשים שלושה סמפורים:\n1.  mutex: סמפור בינארי (או מנעול).\n    *   תפקיד: להבטיח גישה הדדית בלעדית לחוצץ המשותף (המשתנים buffer, in, out). רק תהליך אחד (מפיק או צרכן) יכול לגשת לחוצץ ולשנות את מצבו בכל רגע נתון.\n    *   ערך אתחול: 1 (כלומר, החוצץ פנוי לגישה).\n2.  empty: סמפור מונה.\n    *   תפקיד: לספור את מספר התאים הריקים בחוצץ. מפיקים מבצעים sem_wait עליו כדי להמתין לתא פנוי, וצרכנים מבצעים sem_post עליו לאחר פינוי תא.\n    *   ערך אתחול: BUFFER_SIZE (מספר התאים הכולל בחוצץ, שכולם ריקים בהתחלה).\n3.  full: סמפור מונה.\n    *   תפקיד: לספור את מספר התאים המלאים בחוצץ. צרכנים מבצעים sem_wait עליו כדי להמתין לתא מלא, ומפיקים מבצעים sem_post עליו לאחר מילוי תא.\n    *   ערך אתחול: 0 (בהתחלה אין תאים מלאים).\n\nב. קוד C/C++ לפונקציות enqueue ו-dequeue:\nהקוד המלא עבור הגדרות הסמפורים, פונקציית האתחול init_buffer_sync, ופונקציות enqueue ו-dequeue כלול בשדה code_snippet של השאלה עצמה.\n\nג. הסבר על נחיצות ותפקיד כל סמפור:\n*   mutex: חיוני למניעת תנאי מרוץ (race conditions) בעת גישה למשתנים המשותפים (buffer, in, out). ללא mutex, שני מפיקים (או שני צרכנים, או מפיק וצרכן) עלולים לנסות לשנות את אותם אינדקסים או תאי חוצץ בו-זמנית, מה שיוביל לשגיאות ולחוסר עקביות בנתונים. הוא מבטיח שרק תהליך אחד נמצא ב\"אזור קריטי\" של גישה לחוצץ בכל רגע נתון.\n*   empty: סמפור זה מונע ממפיקים להוסיף נתונים לחוצץ כשהוא מלא. כאשר מפיק מנסה להוסיף פריט, הוא מוריד את ערך empty. אם empty מגיע ל-0, פירושו שהחוצץ מלא, והמפיק ייחסם עד שצרכן יפנה מקום (יעלה את ערך empty).\n*   full: סמפור זה מונע מצרכנים לנסות להסיר נתונים מחוצץ כשהוא ריק. כאשר צרכן מנסה להסיר פריט, הוא מוריד את ערך full. אם full מגיע ל-0, פירושו שהחוצץ ריק, והצרכן ייחסם עד שמפיק יוסיף פריט (יעלה את ערך full).\n\nהסדר של פעולות ה-sem_wait ו-sem_post הוא קריטי. לדוגמה, אם ב-enqueue נבצע sem_wait(&mutex) לפני sem_wait(&empty), וכל תאי החוצץ יהיו מלאים, המפיק יקבל את המנעול mutex ואז ייחסם בניסיון להוריד את empty. אם באותו זמן צרכן ינסה לגשת לחוצץ כדי לפנות מקום, הוא יצטרך את mutex אך הוא יהיה נעול על ידי המפיק החסום, מה שיוביל למצב של קיפאון (deadlock). לכן, יש להמתין לתנאי המשאב (empty או full) לפני קבלת המנעול לגישה קריטית."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

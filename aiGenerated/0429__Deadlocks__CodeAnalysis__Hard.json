@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Deadlocks",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 21:30:12",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3900,
+      "output_tokens": 2358,
+      "total_tokens": 11300
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Deadlocks",
+      "Resource Allocation",
+      "Synchronization",
+      "Atomic Operations"
+    ],
+    "content": {
+      "text": "מנהל משאבים חסין קיפאון\n\nבמערכת קיימים R משאבים שונים, הממוספרים מ-0 עד R-1. כל משאב מיוצג על ידי משתנה שלם (int) בזיכרון, כאשר 0 מציין שהמשאב פנוי ו-1 מציין שהוא תפוס. מספר רב של חוטים (threads) מתחרים על תפיסת קבוצות של משאבים. כל חוט מעוניין לתפוס קבוצה ספציפית של M משאבים. נדרש לממש פונקציות לתפיסה ולשחרור של קבוצת משאבים באופן שימנע קיפאון (deadlock).\n\nלרשותכם עומדת פקודת חומרה אטומית אחת בלבד: test_and_set. פקודה זו מקבלת מצביע למשתנה שלם, קובעת את ערכו ל-1, ומחזירה את ערכו הקודם באופן אטומי. אם הערך הקודם היה 0, המנעול נתפס בהצלחה. אם היה 1, המנעול כבר היה תפוס.\n\nהבהרה: תיאור הפעולה הוא קוד C לצורך הסבר בלבד. פעולת המעבד מבצעת זאת באופן אטומי ולא בכמה פעולות. אין להשתמש באובייקטי סנכרון או פעולות מעבד אטומיות אחרות מלבד test_and_set.\n\nממשו את הפונקציות acquire_resources_deadlock_safe ו-release_resources תחת ההנחות הבאות:\n1. המשאבים הגלובליים resources מוגדרים ומאותחלים ל-0.\n2. מערך ה-resource_ids המועבר לפונקציית acquire_resources_deadlock_safe ממוין כבר בסדר עולה של מזהי המשאבים.\n3. יש לדאוג למניעת קיפאון (deadlock) וחופש מקיפאון (livelock) ככל הניתן (אך busy-waiting מותר).",
+      "code_snippet": "#include <stdbool.h>\n#include <stdlib.h>\n\n#define MAX_RESOURCES 100 // Example maximum number of resources\nint resources[MAX_RESOURCES]; // Global array of resource states (0: unlocked, 1: locked)\n\n// Atomic hardware instruction (for explanation only)\nint test_and_set(int *lock_ptr) {\n    int old_val = *lock_ptr;\n    *lock_ptr = 1;\n    return old_val;\n}\n\n// Function to initialize resources (e.g., in main)\nvoid init_resources(int num_resources) {\n    for (int i = 0; i < num_resources; ++i) {\n        resources[i] = 0;\n    }\n}\n\n// Implement these two functions:\nvoid acquire_resources_deadlock_safe(int *resource_ids, int count) {\n    // Your implementation here\n}\n\nvoid release_resources(int *resource_ids, int count) {\n    // Your implementation here\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון מבוסס על שתי אסטרטגיות למניעת קיפאון: סדר תפיסת משאבים (Resource Ordering) וגישת 'תפוס הכל או לא כלום' (Acquire All or Nothing).\n\n1.  **סדר תפיסת משאבים (Resource Ordering):** כדי למנוע המתנה מעגלית (Circular Wait), אשר היא אחד מארבעת התנאים ההכרחיים לקיפאון, אנו דורשים מכל החוטים לתפוס את המשאבים בסדר עולה של מזהיהם. ההנחה בשאלה היא שמערך ה-`resource_ids` כבר ממוין, מה שמפשט את המימוש. אם המערך לא היה ממוין, היה צורך למיין אותו בתחילת הפונקציה `acquire_resources_deadlock_safe`.\n\n2.  **'תפוס הכל או לא כלום' (Acquire All or Nothing):** כדי למנוע את תנאי 'החזק והמתן' (Hold and Wait), חוט שמנסה לתפוס קבוצת משאבים חייב להצליח לתפוס את כולם. אם בשלב כלשהו הוא נתקל במשאב תפוס, הוא משחרר את כל המשאבים שתפס עד לאותה נקודה ומתחיל מחדש את ניסיון התפיסה. זה מבטיח שחוט לעולם לא יחזיק במשאב אחד וימתין לאחר, ובכך מונע קיפאון.\n\n**מימוש `acquire_resources_deadlock_safe`:**\nהפונקציה נכנסת ללולאה אינסופית (while true) המייצגת ניסיונות חוזרים ונשנים לתפוס את המשאבים. בתוך הלולאה, היא עוברת על המשאבים לפי הסדר הממוין. עבור כל משאב, היא מנסה לתפוס אותו באמצעות `test_and_set`. אם ה-`test_and_set` מחזיר 0, המשאב נתפס בהצלחה והחוט ממשיך למשאב הבא. אם הוא מחזיר 1 (כלומר המשאב כבר תפוס), החוט מבין שהוא לא יכול להשלים את התפיסה הנוכחית. במקרה זה, הוא משחרר את כל המשאבים שתפס בהצלחה בניסיון הנוכחי (באמצעות לולאה פנימית) ושובר את הלולאה הפנימית כדי להתחיל ניסיון תפיסה חדש מההתחלה.\nלאחר יציאה מהלולאה הפנימית (או אם כל המשאבים נתפסו), נבדק דגל `acquired_all`. אם הוא `true`, כל המשאבים נתפסו בהצלחה והפונקציה מסתיימת. אחרת, הלולאה החיצונית ממשיכה לניסיון תפיסה נוסף.\n\n**מימוש `release_resources`:**\nפונקציה זו פשוט עוברת על כל המשאבים ברשימה ומשחררת אותם על ידי הגדרת ערכם ל-0. פעולה זו בטוחה מכיוון שהחוט הוא הבעלים הבלעדי של המשאבים שהוא משחרר, ולכן אין צורך בפעולה אטומית לשחרור (אך שימוש ב-CAS להגדרת 0 היה גם אפשרי).\n\n**חופש מקיפאון (Livelock):** הפתרון משתמש ב-busy-waiting. במקרים של עומס גבוה, מספר חוטים עלולים לנסות לתפוס משאבים, להיתקל במשאב תפוס, לשחרר ולנסות שוב במהירות, מה שעלול להוביל לבזבוז משאבי מעבד. כדי למזער livelock, ניתן להוסיף השהיה קצרה (למשל, `sched_yield()` או `usleep()`) לפני כל ניסיון חוזר לתפיסת משאבים, אך זה לא נדרש במימוש הבסיסי למניעת קיפאון.\n\n```c\n#include <stdbool.h>\n#include <stdlib.h>\n// For sched_yield() or usleep() if adding backoff\n// #include <sched.h>\n// #include <unistd.h>\n\n#define MAX_RESOURCES 100 \nint resources[MAX_RESOURCES]; \n\n// Atomic hardware instruction (for explanation only)\nint test_and_set(int *lock_ptr) {\n    int old_val = *lock_ptr;\n    *lock_ptr = 1;\n    return old_val;\n}\n\nvoid init_resources(int num_resources) {\n    for (int i = 0; i < num_resources; ++i) {\n        resources[i] = 0;\n    }\n}\n\nvoid acquire_resources_deadlock_safe(int *resource_ids, int count) {\n    while (true) {\n        bool acquired_all = true;\n        for (int i = 0; i < count; ++i) {\n            int res_id = resource_ids[i];\n            if (test_and_set(&resources[res_id]) == 1) {\n                // Failed to acquire this resource.\n                // Must release all resources acquired so far in this attempt\n                // and retry.\n                acquired_all = false;\n                for (int j = 0; j < i; ++j) {\n                    resources[resource_ids[j]] = 0; // Release (safe as owner)\n                }\n                // Optional: Add a short delay (e.g., sched_yield() or usleep()) before retrying to reduce busy-waiting\n                // sched_yield(); // Yield CPU to other threads\n                break; // Break from inner loop, retry outer loop\n            }\n        }\n        if (acquired_all) {\n            break; // Successfully acquired all resources\n        }\n    }\n}\n\nvoid release_resources(int *resource_ids, int count) {\n    for (int i = 0; i < count; ++i) {\n        resources[resource_ids[i]] = 0; // Release (safe as owner)\n    }\n}\n```"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

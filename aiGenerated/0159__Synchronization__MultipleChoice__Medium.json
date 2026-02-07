@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 19:46:08",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1118,
+      "output_tokens": 586,
+      "total_tokens": 3543
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "Synchronization",
+      "Mutexes",
+      "Deadlock"
+    ],
+    "content": {
+      "text": "איזו מהטענות הבאות מתארת נכונה התנהגות של mutex סטנדרטי (non-recursive) בסביבת ריבוי חוטים?",
+      "code_snippet": null,
+      "options": [
+        "א. חוט יכול לנעול mutex פעמיים ברצף (ללא שחרור ביניהם) בהצלחה.",
+        "ב. אם חוט מנסה לנעול mutex שכבר נעול על ידו, הפעולה תגרום ל-deadlock (קיפאון).",
+        "ג. mutex יכול לשמש להגנה על מספר משאבים שונים בו זמנית, כל עוד הם בתוך אותו critical section.",
+        "ד. שחרור mutex שלא ננעל על ידי החוט הנוכחי, או שכבר שוחרר, הוא פעולה חוקית ובטוחה."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "mutex סטנדרטי (non-recursive) מיועד להיות נעול רק פעם אחת על ידי חוט מסוים. אם חוט מנסה לנעול mutex שכבר נעול על ידו, הוא ימתין לשחרורו. מכיוון שהחוט עצמו הוא זה שמחזיק את המנעול, הוא לעולם לא ישחרר אותו בזמן שהוא ממתין לנעילה, מה שמוביל ל-deadlock. זוהי תכונה בסיסית של mutexים למניעת נעילה חוזרת (re-entrancy) אלא אם כן הם מוגדרים במפורש כ-recursive mutex. אפשרות א' שגויה מכיוון שזו בדיוק הסיבה ל-deadlock. אפשרות ג' נכונה מבחינת שימוש ב-mutex, אך היא אינה מתארת את 'התנהגות ה-mutex' אלא את אופן יישומו. אפשרות ד' שגויה, שכן ניסיון לשחרר mutex שלא ננעל על ידי החוט הקורא או שכבר שוחרר, מוביל בדרך כלל לשגיאה או התנהגות בלתי מוגדרת."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

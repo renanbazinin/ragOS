@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Semaphores",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 20:45:12",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2630,
+      "output_tokens": 2327,
+      "total_tokens": 11557
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "Open",
+    "topic": [
+      "Synchronization",
+      "Semaphores",
+      "Producer-Consumer"
+    ],
+    "content": {
+      "text": "נתון מאגר (buffer) מעגלי בגודל N המשותף למספר תהליכי יצרן (Producers) ותהליכי צרכן (Consumers). תהליכי היצרן מוסיפים פריטים למאגר, ותהליכי הצרכן מוציאים פריטים מהמאגר. בנוסף, קיים תהליך לוגר (Logger) יחיד. תהליך הלוגר צריך לרשום ללוג אך ורק פריטים שכבר הוצאו מהמאגר על ידי תהליך צרכן. עליו להמתין אם אין פריטים שהוצאו וטרם נרשמו ללוג.\n\nיש לממש את הפעולות `produce_item`, `consume_item` ו-`log_item` באמצעות סמפורים (semaphores) ומנעולי הדדיות (mutexes) בלבד, כך שהסנכרון בין התהליכים יתבצע בצורה נכונה. יש להניח שפעולות הוספה/הוצאה למאגר ורישום ללוג (שאינן קשורות לסנכרון) כבר ממומשות ואינן דורשות קוד. ציינו גם את הגדרת המשתנים הגלובליים הנדרשים ואת אתחולם.",
+      "code_snippet": "typedef int item_type; // Placeholder for actual item type\n\n#define N 10 // Buffer size\n\nitem_type buffer[N];\nint head = 0;\nint tail = 0;\n\n// Declare semaphores and mutex here\nsem_t empty_slots;\nsem_t full_slots;\nsem_t consumed_for_logging;\npthread_mutex_t buffer_mutex;\n\n// Function to initialize synchronization primitives\nvoid init_sync_primitives() {\n    sem_init(&empty_slots, 0, N);\n    sem_init(&full_slots, 0, 0);\n    sem_init(&consumed_for_logging, 0, 0);\n    pthread_mutex_init(&buffer_mutex, NULL);\n}\n\n// Function to destroy synchronization primitives (for completeness, not required by question)\nvoid destroy_sync_primitives() {\n    sem_destroy(&empty_slots);\n    sem_destroy(&full_slots);\n    sem_destroy(&consumed_for_logging);\n    pthread_mutex_destroy(&buffer_mutex);\n}\n\nvoid produce_item(item_type item_to_produce) {\n    // Implement producer logic here\n}\n\nitem_type consume_item() {\n    // Implement consumer logic here\n    return 0; // Placeholder return\n}\n\nvoid log_item() {\n    // Implement logger logic here\n}"
+    },
+    "sub_questions": null,
+    "points": 15,
+    "solution": {
+      "is_present_in_file": false,
+      "correct_option": null,
+      "explanation": "הפתרון הנכון כולל שימוש בשלושה סמפורים ובמנעול הדדי אחד:\n\n1.  `empty_slots`: סמפור זה סופר את מספר המקומות הפנויים במאגר. הוא מאותחל ל-N (גודל המאגר) ומנוהל על ידי היצרנים (מבצעים `sem_wait`) והצרכנים (מבצעים `sem_post`).\n2.  `full_slots`: סמפור זה סופר את מספר הפריטים המלאים במאגר. הוא מאותחל ל-0 ומנוהל על ידי היצרנים (מבצעים `sem_post`) והצרכנים (מבצעים `sem_wait`).\n3.  `consumed_for_logging`: סמפור זה סופר את מספר הפריטים שצרכנים הוציאו מהמאגר וטרם נרשמו ללוג. הוא מאותחל ל-0 ומנוהל על ידי הצרכנים (מבצעים `sem_post` לאחר הוצאת פריט) ועל ידי תהליך הלוגר (מבצע `sem_wait`).\n4.  `buffer_mutex`: מנעול הדדי זה משמש להגנה על הגישה למאגר המשותף (הכנסה/הוצאה של פריטים ועדכון מונים `head`, `tail`) כדי למנוע מצבי מירוץ.\n\nהקוד המלא עבור הפעולות הוא כדלקמן:\n\n```c\n#include <semaphore.h>\n#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n\ntypedef int item_type; // Placeholder for actual item type\n\n#define N 10 // Buffer size\n\nitem_type buffer[N];\nint head = 0; // Index for consumer\nint tail = 0; // Index for producer\n\n// Declare semaphores and mutex here\nsem_t empty_slots;\nsem_t full_slots;\nsem_t consumed_for_logging;\npthread_mutex_t buffer_mutex;\n\n// Function to initialize synchronization primitives\nvoid init_sync_primitives() {\n    sem_init(&empty_slots, 0, N); // N empty slots initially\n    sem_init(&full_slots, 0, 0); // 0 full slots initially\n    sem_init(&consumed_for_logging, 0, 0); // 0 consumed items for logging initially\n    pthread_mutex_init(&buffer_mutex, NULL);\n}\n\n// Function to destroy synchronization primitives (for completeness)\nvoid destroy_sync_primitives() {\n    sem_destroy(&empty_slots);\n    sem_destroy(&full_slots);\n    sem_destroy(&consumed_for_logging);\n    pthread_mutex_destroy(&buffer_mutex);\n}\n\nvoid produce_item(item_type item_to_produce) {\n    sem_wait(&empty_slots); // Wait for an empty slot\n\n    pthread_mutex_lock(&buffer_mutex); // Protect buffer access\n    buffer[tail] = item_to_produce;\n    tail = (tail + 1) % N;\n    pthread_mutex_unlock(&buffer_mutex);\n\n    sem_post(&full_slots); // Signal that a slot is full\n}\n\nitem_type consume_item() {\n    item_type consumed_item;\n\n    sem_wait(&full_slots); // Wait for a full slot\n\n    pthread_mutex_lock(&buffer_mutex); // Protect buffer access\n    consumed_item = buffer[head];\n    head = (head + 1) % N;\n    pthread_mutex_unlock(&buffer_mutex);\n\n    sem_post(&empty_slots); // Signal that a slot is empty\n    sem_post(&consumed_for_logging); // Signal that an item has been consumed and is ready for logging\n\n    return consumed_item; // Return the consumed item (conceptually)\n}\n\nvoid log_item() {\n    sem_wait(&consumed_for_logging); // Wait for an item to be consumed and ready for logging\n\n    // Conceptual logging operation (e.g., printf, write to file)\n    // For this problem, we just need to ensure the timing is correct.\n    // printf(\"Logger: An item was consumed and logged.\\n\");\n}\n```\n\n**הסבר:**\n\n*   **תהליך היצרן (`produce_item`):** לפני הוספת פריט, היצרן ממתין (באמצעות `sem_wait(&empty_slots)`) לוודא שיש מקום פנוי במאגר. לאחר מכן, הוא נועל את ה-`buffer_mutex` כדי לגשת למאגר בבטחה, מוסיף את הפריט, משחרר את המנעול, ומסמן (באמצעות `sem_post(&full_slots)`) שיש כעת פריט נוסף במאגר.\n\n*   **תהליך הצרכן (`consume_item`):** לפני הוצאת פריט, הצרכן ממתין (באמצעות `sem_wait(&full_slots)`) לוודא שיש פריט זמין במאגר. לאחר מכן, הוא נועל את ה-`buffer_mutex` כדי לגשת למאגר בבטחה, מוציא את הפריט, משחרר את המנעול, ומסמן (באמצעות `sem_post(&empty_slots)`) שמקום התפנה במאגר. הדבר החשוב כאן הוא שהצרכן גם מסמן (באמצעות `sem_post(&consumed_for_logging)`) פריט נוסף זמין לרישום ללוג, וזאת *לאחר* שהפריט יצא מהמאגר והמנעול שוחרר, כדי לאפשר ללוגר לפעול באופן בלתי תלוי בגישה למאגר.\n\n*   **תהליך הלוגר (`log_item`):** הלוגר ממתין (באמצעות `sem_wait(&consumed_for_logging)`) עד שפריט יוצא מהמאגר על ידי צרכן. רק כאשר יש פריט שהוצא וטרם נרשם, הסמפור מאפשר לו להמשיך ולבצע את פעולת הרישום ללוג. אין צורך במנעול הדדי בלוגר עצמו מכיוון שהוא התהליך היחיד שאמור לבצע את פעולת הרישום ללוג, ואין לו גישה ישירה למאגר המשותף."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

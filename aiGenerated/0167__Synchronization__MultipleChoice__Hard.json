@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 19:49:09",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 968,
+      "output_tokens": 1144,
+      "total_tokens": 7042
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Synchronization",
+      "Concurrency",
+      "Condition Variables",
+      "Race Conditions"
+    ],
+    "content": {
+      "text": "נתון קטע קוד C++ המייצג חלק ממימוש צרכן בתבנית מפיק-צרכן באמצעות `std::mutex` ו-`std::condition_variable`. הצֶרְכָן ממתין לפריטים בחוצץ משותף. איזו בעיה פוטנציאלית חמורה קיימת במימוש זה של פונקציית הצרכן?",
+      "code_snippet": "#include <mutex>\n#include <condition_variable>\n#include <queue>\n\nstd::mutex mtx;\nstd::condition_variable cv;\nstd::queue<int> buffer; // Assume this is shared and populated by a producer\n\nvoid consumer_func() {\n    std::unique_lock<std::mutex> lock(mtx);\n    if (buffer.empty()) {\n        cv.wait(lock);\n    }\n    // Assume after this point, the consumer attempts to process an item.\n}",
+      "options": [
+        "א. הקוד עלול לגרום ל-deadlock אם הצרכן מתעורר לפני שיש פריטים בחוצץ.",
+        "ב. הקוד סובל מבעיה של \"התעוררות אבודה\" (missed wakeup), שבה הצרכן עלול להמתין ללא הגבלת זמן למרות שיש פריטים בחוצץ.",
+        "ג. הקוד עלול לגרום ל-starvation של המפיק, מכיוון שהצרכן לא משחרר את המנעול בזמן.",
+        "ד. הקוד עלול לגרום ל-race condition על המשתנה `buffer.empty()`, מכיוון שהוא לא מוגן כראוי.",
+        "ה. אין בעיה פוטנציאלית חמורה בקוד, והוא נכון מבחינה לוגית עבור תרחיש בסיסי."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "התשובה הנכונה היא ב'. הבעיה העיקרית כאן היא \"התעוררות אבודה\" (missed wakeup). אם התנאי `buffer.empty()` מתקיים, הצרכן נכנס לבלוק ה-`if`. בין הבדיקה `buffer.empty()` לבין הקריאה ל-`cv.wait(lock)`, ייתכן שהמפיק יוסיף פריט לחוצץ ויקרא ל-`cv.notify_one()`. במקרה כזה, ה-`notify_one` \"נאבד\" מכיוון שהצרכן עדיין לא נכנס למצב המתנה. לאחר מכן, הצרכן יקרא ל-`cv.wait(lock)` וייכנס למצב המתנה, אך לא יקבל את ההתראה שכבר נשלחה, ועלול להמתין ללא הגבלת זמן למרות שיש פריט בחוצץ. הפתרון הנכון הוא לבדוק את התנאי בלולאת `while` (כלומר, `while (buffer.empty()) { cv.wait(lock); }`) או להשתמש בגרסת ה-`wait` שמקבלת פרדיקט (למשל, `cv.wait(lock, []{ return !buffer.empty(); });`), כדי להתמודד גם עם \"התעוררויות שווא\" (spurious wakeups) וגם עם בעיית ה-\"התעוררות אבודה\".\n\nניתוח תשובות אחרות:\nא. deadlock: לא סביר שזה יגרום ל-deadlock באופן ישיר מהקוד הזה. ה-`cv.wait` משחרר את המנעול באופן אטומי לפני הכניסה למצב המתנה, כך שתהליכים אחרים (כמו המפיק) יכולים לתפוס את המנעול. הבעיה כאן היא לא חסימה הדדית.\nג. starvation של המפיק: הצרכן משחרר את המנעול לפני ה-`wait`, כך שהמפיק יכול לתפוס את המנעול ולהוסיף פריטים. הבעיה היא יותר שהצרכן לא יתעורר, לא שהמפיק לא יוכל לייצר.\nד. race condition על `buffer.empty()`: הבדיקה `buffer.empty()` מתבצעת בתוך קטע קריטי (לאחר תפיסת המנעול `lock(mtx)`), כך שאין race condition על הבדיקה עצמה. ה-race condition הוא על ה-timing של ה-`notify_one` ביחס ל-`wait`."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

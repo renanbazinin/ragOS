@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 20:13:15",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2084,
+      "output_tokens": 881,
+      "total_tokens": 5824
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "Open",
+    "topic": [
+      "Mutexes",
+      "Synchronization",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "הסבירו את מטרתו של mutex בתכנות מקבילי. ספקו דוגמת קוד פשוטה ב-C/C++ המדגימה כיצד להשתמש ב-mutex כדי להגן על משתנה גלובלי משותף מפני תנאי מירוץ (race conditions).",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "מטרתו העיקרית של mutex (קיצור של Mutual Exclusion) היא להבטיח שרק תהליך או תהליכון אחד יגש לקטע קוד קריטי (critical section) או למשאב משותף בזמן נתון. זה מונע תנאי מירוץ (race conditions) ומוודא עקביות נתונים בסביבה מקבילית. כאשר תהליכון רוצה לגשת למשאב מוגן, הוא מנסה 'לנעול' את ה-mutex (באמצעות `mtx.lock()`). אם ה-mutex פנוי, הוא ננעל והתהליכון ממשיך. אם ה-mutex כבר נעול על ידי תהליכון אחר, התהליכון המבקש ממתין עד שה-mutex ישוחרר. לאחר סיום השימוש במשאב, התהליכון 'משחרר' את ה-mutex (באמצעות `mtx.unlock()`).\n\nדוגמת קוד המדגימה שימוש ב-mutex להגנה על משתנה גלובלי משותף:\n```cpp\n#include <iostream>\n#include <thread>\n#include <mutex>\n\n// משתנה גלובלי משותף\nint shared_counter = 0;\n\n// Mutex להגנה על shared_counter\nstd::mutex mtx;\n\nvoid increment_counter() {\n    for (int i = 0; i < 100000; ++i) {\n        mtx.lock(); // נעל את ה-mutex\n        shared_counter++; // קטע קריטי\n        mtx.unlock(); // שחרר את ה-mutex\n    }\n}\n\nint main() {\n    // צור מספר תהליכונים\n    std::thread t1(increment_counter);\n    std::thread t2(increment_counter);\n\n    // המתן לסיום התהליכונים\n    t1.join();\n    t2.join();\n\n    // הדפס את הערך הסופי\n    std::cout << \"Final counter value: \" << shared_counter << std::endl;\n\n    return 0;\n}\n```\nבדוגמה זו, שני תהליכונים `t1` ו-`t2` מנסים להגדיל משתנה גלובלי `shared_counter` במקביל. ללא ה-mutex, קיימת סבירות גבוהה לתנאי מירוץ ולערך סופי שגוי של `shared_counter`. השימוש ב-`mtx.lock()` ו-`mtx.unlock()` מבטיח שרק תהליכון אחד יגדיל את המונה בכל רגע נתון, ובכך מונע תנאי מירוץ ומבטיח שהערך הסופי יהיה נכון (200,000 במקרה זה)."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

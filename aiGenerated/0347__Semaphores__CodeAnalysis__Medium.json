@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Semaphores",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 20:59:01",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2864,
+      "output_tokens": 1170,
+      "total_tokens": 5643
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Semaphores",
+      "Concurrency",
+      "Threads",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה, המשתמשת בסמפור (semaphore) לצורך סנכרון בין תהליכונים (threads).\nהתוכנית יוצרת מספר תהליכונים, כאשר כל תהליכון מבצע מספר מסוים של פעולות הגדלה על משתנה גלובלי משותף `counter`.\n\nמה יהיה הערך הסופי של המשתנה `counter` לאחר שכל התהליכונים יסיימו את ריצתם? הסבירו את תשובתכם.",
+      "code_snippet": "#include <pthread.h>\n#include <semaphore.h>\n#include <stdio.h>\n#include <stdlib.h>\n\n#define NUM_THREADS 3\n#define INCREMENTS_PER_THREAD 100000\n\nint counter = 0;\nsem_t mutex;\n\nvoid* thread_function(void* arg) {\n    for (int i = 0; i < INCREMENTS_PER_THREAD; i++) {\n        sem_wait(&mutex); // Acquire lock\n        counter++;        // Critical section\n        sem_post(&mutex); // Release lock\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    // Initialize semaphore for mutual exclusion (value = 1)\n    if (sem_init(&mutex, 0, 1) != 0) {\n        perror(\"sem_init failed\");\n        exit(EXIT_FAILURE);\n    }\n\n    // Create threads\n    for (int i = 0; i < NUM_THREADS; i++) {\n        if (pthread_create(&threads[i], NULL, thread_function, NULL) != 0) {\n            perror(\"pthread_create failed\");\n            exit(EXIT_FAILURE);\n        }\n    }\n\n    // Join threads\n    for (int i = 0; i < NUM_THREADS; i++) {\n        if (pthread_join(threads[i], NULL) != 0) {\n            perror(\"pthread_join failed\");\n            exit(EXIT_FAILURE);\n        }\n    }\n\n    // Destroy semaphore\n    sem_destroy(&mutex);\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הערך הסופי של המשתנה `counter` יהיה 300000.\n\nהסבר:\nהתוכנית יוצרת 3 תהליכונים (`NUM_THREADS = 3`), וכל תהליכון מגדיל את המשתנה הגלובלי `counter` מספר קבוע של פעמים (`INCREMENTS_PER_THREAD = 100000`). בסך הכל, צפויות להתבצע 3 * 100000 = 300000 פעולות הגדלה.\n\nהסמפור `mutex` מאותחל לערך 1 (`sem_init(&mutex, 0, 1)`), מה שהופך אותו לסמפור בינארי (מנעול). לפני כל פעולת הגדלה של `counter`, כל תהליכון קורא ל-`sem_wait(&mutex)` כדי לנסות לרכוש את המנעול. אם המנעול זמין (ערך הסמפור הוא 1), התהליכון רוכש אותו (ערך הסמפור יורד ל-0) ונכנס לקטע הקריטי. אם המנעול אינו זמין (ערך הסמפור הוא 0), התהליכון נחסם עד שהמנעול ישוחרר.\n\nלאחר הגדלת `counter`, התהליכון קורא ל-`sem_post(&mutex)` כדי לשחרר את המנעול (ערך הסמפור עולה ל-1). מנגנון זה מבטיח שבכל רגע נתון, רק תהליכון אחד יכול לגשת ולשנות את המשתנה `counter`. הדבר מונע מצב מרוץ (race condition) ומבטיח שכל פעולות ההגדלה יתבצעו כהלכה, ושהערך הסופי של `counter` ישקף את סך כל ההגדלות שבוצעו על ידי כל התהליכונים.\n\nלכן, הערך הסופי יהיה בדיוק סכום ההגדלות: 3 * 100000 = 300000."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

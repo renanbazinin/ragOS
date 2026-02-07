@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Deadlocks",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 21:16:43",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3559,
+      "output_tokens": 1742,
+      "total_tokens": 10617
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Deadlocks",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתונה מערכת עם שני תהליכים (P1, P2) ושני משאבים (R1, R2). כל משאב מיוצג על ידי סמפור בינארי (mutex). התהליכים מנסים לגשת למשאבים בסדר הבא:\n\nP1:\nlock(R1);\nlock(R2);\n// קטע קריטי\nunlock(R2);\nunlock(R1);\n\nP2:\nlock(R2);\nlock(R1);\n// קטע קריטי\nunlock(R1);\nunlock(R2);\n\nא. האם קיים תרחיש שבו יכול להיווצר קיפאון (deadlock) במערכת זו? הסבר בפירוט מדוע, תוך התייחסות לארבעת התנאים ההכרחיים לקיום קיפאון.\nב. אם כן, הצע פתרון למניעת קיפאון עבור המקרה המתואר, תוך שינוי מינימלי בקוד, והסבר כיצד הפתרון שלך מונע את הקיפאון.",
+      "code_snippet": "typedef void Semaphore;\n\n// Assume lock(Semaphore* s) and unlock(Semaphore* s) are defined\n// and implement standard binary semaphore (mutex) operations.\n\nvoid process_P1(Semaphore* R1, Semaphore* R2) {\n    lock(R1);\n    lock(R2);\n    // critical section for P1\n    // ...\n    unlock(R2);\n    unlock(R1);\n}\n\nvoid process_P2(Semaphore* R1, Semaphore* R2) {\n    lock(R2);\n    lock(R1);\n    // critical section for P2\n    // ...\n    unlock(R1);\n    unlock(R2);\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "א. כן, קיים תרחיש שבו יכול להיווצר קיפאון (deadlock) במערכת זו.\n\nתרחיש לדוגמה:\n1. תהליך P1 מבצע `lock(R1)` ותופס את משאב R1.\n2. תהליך P2 מבצע `lock(R2)` ותופס את משאב R2.\n3. P1 מנסה לבצע `lock(R2)` אך R2 תפוס על ידי P2, ולכן P1 נחסם וממתין ל-R2.\n4. P2 מנסה לבצע `lock(R1)` אך R1 תפוס על ידי P1, ולכן P2 נחסם וממתין ל-R1.\n\nבנקודה זו, P1 מחזיק ב-R1 וממתין ל-R2, בעוד P2 מחזיק ב-R2 וממתין ל-R1. נוצר מעגל המתנה הדדי, והתהליכים נמצאים בקיפאון.\n\nהתנאים ההכרחיים לקיום קיפאון מתקיימים:\n*   **מניעה הדדית (Mutual Exclusion):** הסמפורים הבינאריים מבטיחים שרק תהליך אחד יכול להחזיק במשאב R1 או R2 בכל רגע נתון.\n*   **החזק והמתן (Hold and Wait):** כל תהליך מחזיק במשאב אחד (P1 ב-R1, P2 ב-R2) וממתין למשאב נוסף (P1 ל-R2, P2 ל-R1).\n*   **אי-הפקעה (No Preemption):** לא ניתן להפקיע משאב מתהליך המחזיק בו; רק התהליך עצמו יכול לשחרר אותו.\n*   **המתנה מעגלית (Circular Wait):** P1 ממתין למשאב R2 המוחזק על ידי P2, ו-P2 ממתין למשאב R1 המוחזק על ידי P1. נוצר מעגל המתנה.\n\nב. כדי למנוע קיפאון, ניתן ליישם את אסטרטגיית **סדר משאבים (Resource Ordering)**, המונעת את התנאי של המתנה מעגלית.\nנחליט על סדר גלובלי עבור המשאבים, למשל: R1 < R2.\nכל התהליכים חייבים לבקש משאבים לפי סדר עולה זה.\n\nהשינוי המינימלי בקוד יהיה בתהליך P2, כך שיבקש את R1 לפני R2, בדומה ל-P1:\n\n```c\n// Process P1 (no change)\nvoid process_P1(Semaphore* R1, Semaphore* R2) {\n    lock(R1);\n    lock(R2);\n    // critical section for P1\n    // ...\n    unlock(R2);\n    unlock(R1);\n}\n\n// Process P2 (modified)\nvoid process_P2(Semaphore* R1, Semaphore* R2) {\n    lock(R1); // Changed from lock(R2)\n    lock(R2); // Changed from lock(R1)\n    // critical section for P2\n    // ...\n    unlock(R2);\n    unlock(R1);\n}\n```\n\n**הסבר כיצד הפתרון מונע קיפאון:**\nעל ידי אכיפת סדר בקשת משאבים, אנו מונעים היווצרות של המתנה מעגלית.\nכעת, שני התהליכים (P1 ו-P2) מנסים לתפוס קודם את R1, ורק לאחר מכן את R2.\n*   אם P1 מצליח לתפוס את R1, אז P2 ייחסם כאשר ינסה לתפוס את R1. P1 יוכל להמשיך, לתפוס את R2, לבצע את הקטע הקריטי ולשחרר את R2 ואז את R1. לאחר ש-R1 ישוחרר, P2 יוכל לתפוס אותו ולהמשיך.\n*   אם P2 מצליח לתפוס את R1, אז P1 ייחסם כאשר ינסה לתפוס את R1. P2 יוכל להמשיך, לתפוס את R2, לבצע את הקטע הקריטי ולשחרר את R2 ואז את R1. לאחר ש-R1 ישוחרר, P1 יוכל לתפוס אותו ולהמשיך.\n\nבשני המקרים, לא יכול להיווצר מצב שבו P1 מחכה ל-R2 שמוחזק על ידי P2, ובו זמנית P2 מחכה ל-R1 שמוחזק על ידי P1, מכיוון ששניהם תמיד ינסו לתפוס את R1 קודם. תהליך אחד ישיג את R1 וימשיך, בעוד השני ימתין בסבלנות לשחרורו, ובכך נמנעת המתנה מעגלית."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

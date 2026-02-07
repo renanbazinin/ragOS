@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 20:26:16",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3648,
+      "output_tokens": 2398,
+      "total_tokens": 10607
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Mutexes",
+      "Concurrency",
+      "Deadlock",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה המשתמשת בתהליכונים (threads) ובמנעולים (mutexes) לצורך סנכרון גישה למשאבים משותפים. נתח את הקוד וענה על השאלות הבאות:\n\nהאם התוכנית תרוץ עד לסיומה בהצלחה? אם לא, תאר את התקלה שתתרחש והסבר מדוע היא מתרחשת. במידה ותיארת תקלה, הצע שינוי מינימלי בקוד למניעתה, והסבר כיצד השינוי מונע את התקלה. מהם הערכים הסופיים של shared_resource1 ו-shared_resource2 במידה והתוכנית תרוץ בהצלחה (לאחר התיקון)?",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <unistd.h> // For usleep\n\nint shared_resource1 = 0;\nint shared_resource2 = 0;\n\npthread_mutex_t mutex1 = PTHREAD_MUTEX_INITIALIZER;\npthread_mutex_t mutex2 = PTHREAD_MUTEX_INITIALIZER;\n\nvoid* thread_func_A(void* arg) {\n    printf(\"Thread A: Attempting to lock mutex1...\\n\");\n    pthread_mutex_lock(&mutex1);\n    printf(\"Thread A: Locked mutex1. Sleeping...\\n\");\n    usleep(100); // Simulate work or context switch\n    printf(\"Thread A: Attempting to lock mutex2...\\n\");\n    pthread_mutex_lock(&mutex2);\n    printf(\"Thread A: Locked mutex2. Modifying resources...\\n\");\n\n    shared_resource1 += 10;\n    shared_resource2 += 20;\n\n    printf(\"Thread A: Unlocking mutex2...\\n\");\n    pthread_mutex_unlock(&mutex2);\n    printf(\"Thread A: Unlocking mutex1...\\n\");\n    pthread_mutex_unlock(&mutex1);\n    printf(\"Thread A: Finished.\\n\");\n    return NULL;\n}\n\nvoid* thread_func_B(void* arg) {\n    printf(\"Thread B: Attempting to lock mutex2...\\n\");\n    pthread_mutex_lock(&mutex2);\n    printf(\"Thread B: Locked mutex2. Sleeping...\\n\");\n    usleep(100); // Simulate work or context switch\n    printf(\"Thread B: Attempting to lock mutex1...\\n\");\n    pthread_mutex_lock(&mutex1);\n    printf(\"Thread B: Locked mutex1. Modifying resources...\\n\");\n\n    shared_resource1 += 5;\n    shared_resource2 += 15;\n\n    printf(\"Thread B: Unlocking mutex1...\\n\");\n    pthread_mutex_unlock(&mutex1);\n    printf(\"Thread B: Unlocking mutex2...\\n\");\n    pthread_mutex_unlock(&mutex2);\n    printf(\"Thread B: Finished.\\n\");\n    return NULL;\n}\n\nint main() {\n    pthread_t tid[2];\n\n    printf(\"Main: Creating thread A...\\n\");\n    pthread_create(&tid[0], NULL, thread_func_A, NULL);\n    printf(\"Main: Creating thread B...\\n\");\n    pthread_create(&tid[1], NULL, thread_func_B, NULL);\n\n    pthread_join(tid[0], NULL);\n    pthread_join(tid[1], NULL);\n\n    printf(\"Main: Final values: shared_resource1 = %d, shared_resource2 = %d\\n\", shared_resource1, shared_resource2);\n\n    pthread_mutex_destroy(&mutex1);\n    pthread_mutex_destroy(&mutex2);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "התוכנית לא תרוץ עד לסיומה בהצלחה. סביר מאוד שתתרחש תקלת \"קיפאון\" (Deadlock).\n\n**הסבר לתקלה:**\nקיפאון מתרחש כאשר שני תהליכונים (או יותר) מחזיקים במשאבים שונים וכל אחד מהם ממתין למשאב המוחזק על ידי האחר, כך שאף אחד מהם לא יכול להמשיך. במקרה זה:\n1.  **תהליכון A** מנסה לנעול את `mutex1` ואז את `mutex2`.\n2.  **תהליכון B** מנסה לנעול את `mutex2` ואז את `mutex1`.\n\nבעקבות קריאות ה-`usleep` שמדמות עבודת עיבוד או החלפת קונטקסט, ייתכן תרחיש כזה:\n*   תהליכון A מצליח לנעול את `mutex1`.\n*   מערכת ההפעלה מבצעת החלפת קונטקסט לתהליכון B.\n*   תהליכון B מצליח לנעול את `mutex2`.\n*   כעת, תהליכון A, שמחזיק ב-`mutex1`, מנסה לנעול את `mutex2` אך הוא כבר נעול על ידי תהליכון B. תהליכון A נכנס למצב המתנה.\n*   באותו זמן, תהליכון B, שמחזיק ב-`mutex2`, מנסה לנעול את `mutex1` אך הוא כבר נעול על ידי תהליכון A. תהליכון B נכנס גם הוא למצב המתנה.\n\nשני התהליכונים ממתינים זה לזה לשחרר את המנעול שהם צריכים, וכך הם נכנסים למצב של קיפאון ולא יכולים להמשיך את ריצתם. התוכנית תיתקע ולא תגיע לשורות ההדפסה הסופיות ב-`main`.\n\n**שינוי מינימלי למניעת הקיפאון:**\nכדי למנוע קיפאון, יש לוודא שכל התהליכונים מנסים לנעול את המשאבים באותו סדר. אם כל התהליכונים מנסים לנעול את `mutex1` ואז את `mutex2` (או להפך), לא ייווצר מצב בו תהליכון אחד מחזיק ב-`mutex1` ומחכה ל-`mutex2` בעוד שהשני מחזיק ב-`mutex2` ומחכה ל-`mutex1`.\n\nנשנה את הפונקציה `thread_func_B` כך שתנעל את המנעולים באותו סדר כמו `thread_func_A`:\n\n```c\nvoid* thread_func_B(void* arg) {\n    printf(\"Thread B: Attempting to lock mutex1...\\n\"); // Changed order\n    pthread_mutex_lock(&mutex1); // Changed order\n    printf(\"Thread B: Locked mutex1. Sleeping...\\n\");\n    usleep(100); // Simulate work or context switch\n    printf(\"Thread B: Attempting to lock mutex2...\\n\"); // Changed order\n    pthread_mutex_lock(&mutex2); // Changed order\n    printf(\"Thread B: Locked mutex2. Modifying resources...\\n\");\n\n    shared_resource1 += 5;\n    shared_resource2 += 15;\n\n    printf(\"Thread B: Unlocking mutex2...\\n\");\n    pthread_mutex_unlock(&mutex2);\n    printf(\"Thread B: Unlocking mutex1...\\n\");\n    pthread_mutex_unlock(&mutex1);\n    printf(\"Thread B: Finished.\\n\");\n    return NULL;\n}\n```\n\n**הסבר כיצד השינוי מונע את התקלה:**\nלאחר השינוי, שני התהליכונים (A ו-B) מנסים לנעול את `mutex1` ואז את `mutex2`. אם תהליכון A נועל את `mutex1`, תהליכון B ימתין עד ש-`mutex1` ישוחרר. לאחר ש-`mutex1` ישוחרר, תהליכון אחר (או A או B) יצליח לנעול אותו, ולאחר מכן ינסה לנעול את `mutex2`. מכיוון ששני המנעולים נרכשים באותו סדר, לא ייווצר מצב מעגלי של המתנה הדדית. תהליכון אחד יסיים את הקטע הקריטי שלו וישחרר את המנעולים, מה שיאפשר לתהליכון השני להמשיך.\n\n**ערכים סופיים לאחר התיקון:**\nלאחר התיקון, התוכנית תרוץ בהצלחה. כל תהליכון יבצע את פעולותיו פעם אחת בתוך קטע קריטי המוגן על ידי שני המנעולים.\n*   `shared_resource1` יוגדל ב-10 (על ידי A) וב-5 (על ידי B). סה\"כ: `0 + 10 + 5 = 15`.\n*   `shared_resource2` יוגדל ב-20 (על ידי A) וב-15 (על ידי B). סה\"כ: `0 + 20 + 15 = 35`.\n\nהערכים הסופיים יהיו: `shared_resource1 = 15`, `shared_resource2 = 35`."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

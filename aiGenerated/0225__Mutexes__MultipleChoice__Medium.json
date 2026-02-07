@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 20:08:25",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 961,
+      "output_tokens": 625,
+      "total_tokens": 4040
+    }
+  },
+  "question": {
+    "id": 6,
+    "type": "MultipleChoice",
+    "topic": [
+      "Synchronization",
+      "Mutexes",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "בהינתן מנעול (mutex) מסוג PTHREAD_MUTEX_NORMAL (לא רקורסיבי) שחוט (thread) מסוים כבר מחזיק בו. מה תהיה התוצאה אם אותו חוט ינסה לבצע שוב קריאה ל-`pthread_mutex_lock()` על מנעול זה?",
+      "code_snippet": "pthread_mutex_t m;\n// assume m is initialized as PTHREAD_MUTEX_NORMAL\n// ...\npthread_mutex_lock(&m); // First acquisition\n// ... some critical section work ...\npthread_mutex_lock(&m); // Second acquisition by the same thread",
+      "options": [
+        "הקריאה השנייה ל-`pthread_mutex_lock()` תחזיר שגיאה (לדוגמה, EDEADLK אם המנעול מסוג PTHREAD_MUTEX_ERRORCHECK).",
+        "החוט יחסם באופן מיידי וייכנס למצב של קיפאון (deadlock).",
+        "הקריאה השנייה תצליח, והחוט ירכוש את המנעול שוב מבלי להיחסם.",
+        "המערכת תבצע שחרור אוטומטי של המנעול ולאחר מכן רכישה מחדש."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "התשובה הנכונה היא ב'. כאשר חוט מנסה לרכוש מנעול מסוג `PTHREAD_MUTEX_NORMAL` (שאינו רקורסיבי) שכבר נמצא ברשותו, הקריאה ל-`pthread_mutex_lock()` תגרום לחוט להיחסם. מכיוון שהחוט עצמו מחזיק במנעול, הוא לעולם לא יוכל לשחרר אותו כדי לאפשר לעצמו להמשיך, וכך נוצר מצב של קיפאון (deadlock). סוג המנעול `PTHREAD_MUTEX_ERRORCHECK` היה מחזיר שגיאה (EDEADLK) במצב כזה, אך `PTHREAD_MUTEX_NORMAL` אינו מבצע בדיקה זו ומוביל לחסימה וקיפאון. מנעול מסוג `PTHREAD_MUTEX_RECURSIVE` מאפשר רכישות מרובות על ידי אותו חוט."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Deadlocks",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 21:24:18",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3900,
+      "output_tokens": 1399,
+      "total_tokens": 7744
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Deadlocks",
+      "Synchronization",
+      "Concurrency",
+      "Mutexes"
+    ],
+    "content": {
+      "text": "השאלה עוסקת בקיפאון (Deadlock). נתון קטע הקוד הבא המשתמש בשני מנעולים (mutexes) ושני תהליכונים (threads).\n\nאנא נתח את הקוד וענה על השאלה הבאה: האם קיפאון יכול להתרחש בקטע קוד זה? אם כן, הסבר מדוע וכיצד הוא מתרחש. אם לא, הסבר מדוע לא.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <unistd.h> // For sleep\n\npthread_mutex_t mutex1;\npthread_mutex_t mutex2;\n\nvoid* thread_func1(void* arg) {\n    pthread_mutex_lock(&mutex1);\n    printf(\"Thread 1 acquired mutex1\\n\");\n    sleep(1); // Simulate work or context switch\n    pthread_mutex_lock(&mutex2);\n    printf(\"Thread 1 acquired mutex2\\n\");\n    \n    // Critical section\n    \n    pthread_mutex_unlock(&mutex2);\n    pthread_mutex_unlock(&mutex1);\n    return NULL;\n}\n\nvoid* thread_func2(void* arg) {\n    pthread_mutex_lock(&mutex2);\n    printf(\"Thread 2 acquired mutex2\\n\");\n    sleep(1); // Simulate work or context switch\n    pthread_mutex_lock(&mutex1);\n    printf(\"Thread 2 acquired mutex1\\n\");\n    \n    // Critical section\n    \n    pthread_mutex_unlock(&mutex1);\n    pthread_mutex_unlock(&mutex2);\n    return NULL;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "כן, קיפאון (Deadlock) יכול להתרחש בקטע קוד זה.\n\n**הסבר:**\nקיפאון מתרחש כאשר קבוצה של תהליכים או תהליכונים חוסמת זה את זה, כך שכל אחד ממתין למשאב המוחזק על ידי אחר בקבוצה. ארבעת התנאים ההכרחיים לקיפאון הם:\n1.  **מניעה הדדית (Mutual Exclusion)**: משאבים (כמו מנעולים) ניתנים לשימוש על ידי תהליך אחד בלבד בכל רגע נתון. במקרה זה, `mutex1` ו-`mutex2` מספקים מניעה הדדית.\n2.  **החזקה והמתנה (Hold and Wait)**: תהליך מחזיק במשאב אחד לפחות וממתין למשאב נוסף המוחזק על ידי תהליך אחר. בקוד הנתון, `thread_func1` מחזיק ב-`mutex1` וממתין ל-`mutex2`, בעוד ש-`thread_func2` מחזיק ב-`mutex2` וממתין ל-`mutex1`.\n3.  **אי-הפקעה (No Preemption)**: משאבים אינם ניתנים להפקעה מתהליך שמחזיק בהם; הם משוחררים רק מרצון על ידי התהליך המחזיק בהם. המנעולים בקוד פועלים באופן זה.\n4.  **המתנה מעגלית (Circular Wait)**: קיימת שרשרת סגורה של תהליכים, כאשר כל תהליך בשרשרת ממתין למשאב המוחזק על ידי התהליך הבא בשרשרת. זהו התנאי העיקרי שמוביל לקיפאון כאן.\n\n**תרחיש קיפאון ספציפי:**\nנניח ששני התהליכונים מתחילים לרוץ בו-זמנית:\n1.  `thread_func1` מבצע `pthread_mutex_lock(&mutex1)` בהצלחה, תופס את `mutex1`.\n2.  מיד לאחר מכן (או במקביל), `thread_func2` מבצע `pthread_mutex_lock(&mutex2)` בהצלחה, תופס את `mutex2`.\n3.  כעת, `thread_func1` מחזיק ב-`mutex1` ומגיע לשורה `pthread_mutex_lock(&mutex2)`. מכיוון ש-`mutex2` מוחזק על ידי `thread_func2`, `thread_func1` נכנס למצב המתנה.\n4.  באותו זמן, `thread_func2` מחזיק ב-`mutex2` ומגיע לשורה `pthread_mutex_lock(&mutex1)`. מכיוון ש-`mutex1` מוחזק על ידי `thread_func1`, `thread_func2` נכנס למצב המתנה.\n\nבנקודה זו, `thread_func1` ממתין ל-`mutex2` שמוחזק על ידי `thread_func2`, ו-`thread_func2` ממתין ל-`mutex1` שמוחזק על ידי `thread_func1`. נוצרה המתנה מעגלית, ושני התהליכונים חסומים זה על ידי זה, מה שמוביל לקיפאון. קריאות ה-`sleep(1)` מגבירות את הסבירות שאכן יתרחש מצב כזה על ידי יצירת חלון זמן שבו שני המנעולים יכולים להיתפס על ידי תהליכונים שונים לפני שהם מנסים לתפוס את המנעול השני."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

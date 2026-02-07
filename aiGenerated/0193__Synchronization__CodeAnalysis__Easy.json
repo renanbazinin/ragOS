@@ -1,0 +1,57 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 19:58:22",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4129,
+      "output_tokens": 1666,
+      "total_tokens": 7775
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Race Conditions",
+      "Mutexes",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה המשתמשת בחוטים מרובים לקידום מונה גלובלי משותף. עיין בקוד וענה על השאלות הבאות:",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\n#define NUM_THREADS 5\n#define INCREMENTS_PER_THREAD 100000\n\nint counter = 0;\n\nvoid* increment_counter(void* arg) {\n    for (int i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n        counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, increment_counter, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final counter value: %d\\n\", counter);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "101.1",
+        "text": "מהו הערך הסופי הצפוי של המונה `counter` לאחר שכל החוטים סיימו את ריצתם, בהנחה שהקוד רץ ללא שגיאות סנכרון?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "101.2",
+        "text": "האם ערך זה מובטח בפועל בריצת התוכנית הנתונה? אם לא, הסבר מדוע ומהי התופעה המתוארת. תאר בקצרה דוגמה לתזמון חוטים שיוביל לערך שאינו הערך הצפוי.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "101.3",
+        "text": "תקן את פונקציית `increment_counter` ואת פונקציית `main` כך שהמונה יגיע תמיד לערכו הצפוי, תוך שימוש במנגנון סנכרון `pthread_mutex_t`.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "101.1: הערך הסופי הצפוי של המונה `counter` הוא `NUM_THREADS * INCREMENTS_PER_THREAD`. במקרה זה, `5 * 100000 = 500000`.\n\n101.2: ערך זה אינו מובטח בפועל. התופעה המתוארת היא מצב מרוץ (Race Condition). מצב מרוץ מתרחש כאשר מספר חוטים ניגשים למשאב משותף (במקרה זה, המשתנה `counter`) ומנסים לשנות אותו במקביל, ללא מנגנון סנכרון מתאים, מה שעלול להוביל לתוצאות בלתי צפויות ושגויות. פעולת הקידום `counter++` אינה אטומית; היא מורכבת משלוש פעולות בסיסיות: קריאת הערך הנוכחי של `counter`, הגדלת הערך, וכתיבת הערך החדש בחזרה ל-`counter`. אם שני חוטים או יותר מבצעים פעולות אלה בו זמנית, חלק מהעדכונים עלולים ללכת לאיבוד.\nדוגמה לתזמון שגוי:\n1. חוט A קורא את `counter` (לדוגמה, הערך הוא 100).\n2. חוט B קורא את `counter` (גם הוא קורא את הערך 100, לפני שחוט A הספיק לכתוב בחזרה).\n3. חוט A מגדיל את הערך שקרא (100+1=101) וכותב אותו בחזרה ל-`counter`. כעת `counter` שווה 101.\n4. חוט B מגדיל את הערך שקרא (100+1=101) וכותב אותו בחזרה ל-`counter`. כעת `counter` שווה 101.\nבמקרה זה, למרות שבוצעו שתי פעולות קידום, המונה גדל באחד בלבד במקום בשניים, וקידום אחד אבד.\n\n101.3: כדי לתקן את הקוד ולהבטיח שהמונה יגיע לערכו הצפוי, יש להגן על הקטע הקריטי (הגישה ל-`counter` ושינויו) באמצעות מנגנון סנכרון כמו mutex. התיקון כולל הוספת משתנה mutex גלובלי, אתחולו, נעילתו לפני הגישה למונה ושחרורו לאחריה, ולבסוף השמדתו.\n\n```c\n#include <stdio.h>\n#include <pthread.h>\n\n#define NUM_THREADS 5\n#define INCREMENTS_PER_THREAD 100000\n\nint counter = 0;\npthread_mutex_t mutex; // הצהרה על משתנה mutex גלובלי\n\nvoid* increment_counter(void* arg) {\n    for (int i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n        pthread_mutex_lock(&mutex);   // נעילת ה-mutex לפני הגישה לקטע הקריטי\n        counter++;                     // הקטע הקריטי\n        pthread_mutex_unlock(&mutex); // שחרור ה-mutex לאחר היציאה מהקטע הקריטי\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    pthread_mutex_init(&mutex, NULL); // אתחול ה-mutex\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, increment_counter, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final counter value: %d\\n\", counter);\n    \n    pthread_mutex_destroy(&mutex); // השמדת ה-mutex\n    return 0;\n}\n```"
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

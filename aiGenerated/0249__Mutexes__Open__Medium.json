@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 20:14:41",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2046,
+      "output_tokens": 1668,
+      "total_tokens": 6904
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "Open",
+    "topic": [
+      "Mutexes",
+      "Deadlocks",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתונה תוכנית המשתמשת בשני חוטים (threads) ובשני משאבים (resources), R1 ו-R2, שכל אחד מהם מוגן על ידי מנעול (mutex) משלו, `mutex_R1` ו-`mutex_R2` בהתאמה. כל חוט צריך לגשת לשני המשאבים כדי לבצע את פעולתו. הקוד הבא מציג את לוגיקת הגישה למשאבים עבור שני החוטים:\n\n```c\npthread_mutex_t mutex_R1;\npthread_mutex_t mutex_R2;\n\nvoid* thread_func1(void* arg) {\n    pthread_mutex_lock(&mutex_R1);\n    // Do something with R1\n    pthread_mutex_lock(&mutex_R2);\n    // Do something with R1 and R2\n    pthread_mutex_unlock(&mutex_R2);\n    pthread_mutex_unlock(&mutex_R1);\n    return NULL;\n}\n\nvoid* thread_func2(void* arg) {\n    pthread_mutex_lock(&mutex_R2);\n    // Do something with R2\n    pthread_mutex_lock(&mutex_R1);\n    // Do something with R1 and R2\n    pthread_mutex_unlock(&mutex_R1);\n    pthread_mutex_unlock(&mutex_R2);\n    return NULL;\n}\n\nint main() {\n    pthread_mutex_init(&mutex_R1, NULL);\n    pthread_mutex_init(&mutex_R2, NULL);\n\n    pthread_t t1, t2;\n    pthread_create(&t1, NULL, thread_func1, NULL);\n    pthread_create(&t2, NULL, thread_func2, NULL);\n\n    pthread_join(t1, NULL);\n    pthread_join(t2, NULL);\n\n    pthread_mutex_destroy(&mutex_R1);\n    pthread_mutex_destroy(&mutex_R2);\n    return 0;\n}\n```\n\nהאם קיים סיכון לקיפאון (deadlock) בתוכנית זו? אם כן, הסבירו בפירוט מדוע וכיצד ניתן למנוע אותו. אם לא, הסבירו מדוע.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "כן, קיים סיכון לקיפאון (deadlock) בתוכנית זו. קיפאון יתרחש כאשר כל אחד מהחוטים יחזיק במנעול אחד וימתין למנעול השני, שמוחזק על ידי החוט האחר.\n\nהסבר מפורט: ארבעת התנאים לקיפאון מתקיימים במקרה זה:\n1.  **הדרה הדדית (Mutual Exclusion)**: כל מנעול (`mutex_R1`, `mutex_R2`) מגן על משאב אחד ורק חוט אחד יכול להחזיק בו בזמן נתון. תנאי זה מתקיים.\n2.  **החזקה והמתנה (Hold and Wait)**: חוט יכול להחזיק במנעול אחד (לדוגמה, `thread_func1` מחזיק ב-`mutex_R1`) ובמקביל להמתין למנעול אחר (לדוגמה, `thread_func1` ממתין ל-`mutex_R2`). תנאי זה מתקיים.\n3.  **אי-נשללות (No Preemption)**: לא ניתן לשלול מנעול מחוט שמחזיק בו בכוח. המנעול ישוחרר רק מרצון על ידי החוט שמחזיק בו. תנאי זה מתקיים.\n4.  **המתנה מעגלית (Circular Wait)**: קיים מעגל של המתנה. `thread_func1` מחזיק ב-`mutex_R1` וממתין ל-`mutex_R2`. במקביל, `thread_func2` מחזיק ב-`mutex_R2` וממתין ל-`mutex_R1`. נוצר מעגל שבו כל חוט ממתין למשאב שמוחזק על ידי החוט האחר. תנאי זה מתקיים.\n\nתרחיש לדוגמה לקיפאון:\n1.  `thread_func1` מבצע `pthread_mutex_lock(&mutex_R1)` ומצליח לרכוש את `mutex_R1`.\n2.  `thread_func2` מבצע `pthread_mutex_lock(&mutex_R2)` ומצליח לרכוש את `mutex_R2`.\n3.  `thread_func1` מנסה לבצע `pthread_mutex_lock(&mutex_R2)` אך נחסם, מכיוון ש-`mutex_R2` מוחזק על ידי `thread_func2`.\n4.  `thread_func2` מנסה לבצע `pthread_mutex_lock(&mutex_R1)` אך נחסם, מכיוון ש-`mutex_R1` מוחזק על ידי `thread_func1`.\nבשלב זה, שני החוטים חסומים באופן הדדי ואינם יכולים להמשיך, והתוכנית נמצאת בקיפאון.\n\nמניעת קיפאון:\nהדרך הנפוצה למנוע קיפאון זה היא על ידי אכיפת סדר עולמי קבוע לרכישת המנעולים. כלומר, כל החוטים המעורבים חייבים לרכוש את המנעולים באותו סדר. במקרה זה, ניתן להחליט ש-`mutex_R1` תמיד יירכש לפני `mutex_R2`.\n\nדוגמה לתיקון ב-`thread_func2`:\n```c\nvoid* thread_func2_fixed(void* arg) {\n    pthread_mutex_lock(&mutex_R1); // סדר רכישה אחיד: קודם R1\n    pthread_mutex_lock(&mutex_R2); // ואז R2\n    // Do something with R1 and R2\n    pthread_mutex_unlock(&mutex_R2);\n    pthread_mutex_unlock(&mutex_R1);\n    return NULL;\n}\n```\nעם שינוי זה, שני החוטים ינסו לרכוש קודם את `mutex_R1`. רק אחד מהם יצליח, ולאחר מכן ימשיך לרכוש את `mutex_R2`. לאחר שיסיים את העבודה וישחרר את שני המנעולים, החוט השני יוכל להמשיך. באופן זה, תנאי ההמתנה המעגלית נמנע."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 20:23:14",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4189,
+      "output_tokens": 1012,
+      "total_tokens": 7385
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Mutexes",
+      "Concurrency",
+      "Race Condition",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המשתמשת בחוטים (threads) לביצוע פעולה משותפת. מטרת התוכנית היא להגדיל מונה גלובלי (counter) על ידי שני חוטים. עיין בקוד וזהה את הבעיה העיקרית בו. הסבר מדוע היא מתרחשת וכיצד ניתן לתקן אותה.",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h> // For exit\n\nint counter = 0;\npthread_mutex_t my_mutex;\n\nvoid* increment_thread(void* arg) {\n    for (int i = 0; i < 100000; ++i) {\n        // Critical section: incrementing counter\n        counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t tids[2];\n\n    pthread_mutex_init(&my_mutex, NULL); // Initialize mutex\n\n    // Create two threads\n    pthread_create(&tids[0], NULL, increment_thread, NULL);\n    pthread_create(&tids[1], NULL, increment_thread, NULL);\n\n    // Wait for threads to finish\n    pthread_join(tids[0], NULL);\n    pthread_join(tids[1], NULL);\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    pthread_mutex_destroy(&my_mutex); // Destroy mutex\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הבעיה העיקרית בקוד היא תנאי מרוץ (race condition). שני החוטים מנסים לגשת ולשנות את המונה הגלובלי `counter` במקביל ללא כל מנגנון סנכרון. הפעולה `counter++` אינה אטומית; היא מורכבת משלושה שלבים: קריאת ערך המונה, הגדלתו ב-1, וכתיבת הערך החדש בחזרה לזיכרון. כאשר שני חוטים מבצעים פעולה זו במקביל, ייתכן ששניהם יקראו את אותו ערך של `counter` לפני שאחד מהם יספיק לכתוב את הערך המוגדל בחזרה. לדוגמה, אם `counter` הוא 0, חוט א' קורא 0, חוט ב' קורא 0. חוט א' מגדיל ל-1 וכותב 1. חוט ב' מגדיל ל-1 וכותב 1. התוצאה הסופית תהיה 1 במקום 2. כתוצאה מכך, הערך הסופי של `counter` יהיה בדרך כלל נמוך מ-200,000 (הערך הצפוי של 2 חוטים * 100,000 איטרציות) וישתנה בין הרצות שונות.\n\nכדי לתקן את הבעיה, יש להגן על הקטע הקריטי (הגדלת המונה) באמצעות המוטקס `my_mutex`. יש לנעול את המוטקס לפני הגישה למשתנה המשותף ולשחרר אותו לאחר מכן. התיקון לקוד ייראה כך:\n\n```c\nvoid* increment_thread(void* arg) {\n    for (int i = 0; i < 100000; ++i) {\n        pthread_mutex_lock(&my_mutex);   // נעל את המוטקס לפני הגישה למשתנה המשותף\n        counter++;                       // קטע קריטי\n        pthread_mutex_unlock(&my_mutex); // שחרר את המוטקס לאחר הגישה\n    }\n    return NULL;\n}\n```"
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

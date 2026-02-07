@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Semaphores",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 21:03:46",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3751,
+      "output_tokens": 2179,
+      "total_tokens": 10439
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Semaphores",
+      "Concurrency",
+      "Resource Management",
+      "Deadlock"
+    ],
+    "content": {
+      "text": "נתון קטע קוד המדמה מערכת שבה מספר רב של חוטים (threads) מנסים לגשת לבריכת משאבים משותפת המכילה `NUM_RESOURCES` משאבים זהים. בכל פעם, חוט רוצה לתפוס משאב אחד, להשתמש בו, ולשחרר אותו. בנוסף, ישנו מונה גלובלי `total_operations` שמתעד את מספר הפעולות הכולל של תפיסה ושחרור, ועדכון המונה דורש קטע קריטי.\nהקוד הבא מנסה לממש את ההתנהגות הזו באמצעות סמפורים:\n\nנתחו את קטע הקוד הנתון. האם הוא פותר את בעיית הגישה לבריכת המשאבים והעדכון של המונה הגלובלי באופן נכון? אם כן, הסבירו מדוע. אם לא, זהו את הבעיה (או הבעיות) המרכזית, הסבירו אותה בפירוט, והציעו תיקון מינימלי לקוד.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <semaphore.h>\n#include <unistd.h> // For usleep\n\n#define NUM_RESOURCES 3\n#define NUM_THREADS 5\n#define OPERATIONS_PER_THREAD 2\n\nsem_t resource_pool; // Limits concurrent access to N resources\nsem_t mutex;         // Protects the shared counter\nint total_operations = 0;\n\nvoid use_resource() {\n    // Simulate using the resource\n    usleep(10000); // 10ms\n}\n\nvoid* thread_func(void* arg) {\n    for (int i = 0; i < OPERATIONS_PER_THREAD; ++i) {\n        // Attempt to acquire a resource and update counter\n        sem_wait(&mutex);        // Acquire mutex first\n        sem_wait(&resource_pool); // Then acquire resource slot\n\n        total_operations++;\n        printf(\"Thread %ld acquired resource. Total ops: %d\\n\", (long)arg, total_operations);\n\n        use_resource(); // Use the resource\n\n        sem_post(&resource_pool); // Release resource slot\n        sem_post(&mutex);         // Release mutex last\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n    sem_init(&resource_pool, 0, NUM_RESOURCES); // Initialize with N available resources\n    sem_init(&mutex, 0, 1);                   // Initialize mutex for critical section\n\n    printf(\"Starting simulation with %d resources and %d threads...\\n\", NUM_RESOURCES, NUM_THREADS);\n\n    for (long i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, thread_func, (void*)i);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Simulation finished. Final total operations: %d\\n\", total_operations);\n\n    sem_destroy(&resource_pool);\n    sem_destroy(&mutex);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הקוד הנתון אינו פותר את הבעיה באופן נכון. הבעיה המרכזית בקוד היא סדר רכישת הסמפורים (semaphores) בתוך פונקציית `thread_func`.\n\n**הסבר הבעיה:**\n1.  **מטרת הסמפורים:**\n    *   הסמפור `resource_pool` הוא סמפור סופר (counting semaphore) המאותחל ל-`NUM_RESOURCES`. מטרתו לאפשר ל-`NUM_RESOURCES` חוטים לגשת למשאבים באופן מקביל. כלומר, הוא מגביל את מספר החוטים שיכולים להיות בקטע הקוד שבו הם 'מחזיקים' משאב.\n    *   הסמפור `mutex` הוא סמפור בינארי (binary semaphore) / מנעול (mutex) המאותחל ל-1. מטרתו להגן על המונה המשותף `total_operations` מפני תנאי מירוץ (race conditions), ולוודא שרק חוט אחד מעדכן את המונה בכל רגע נתון.\n\n2.  **סדר הרכישה השגוי:** בקוד הנתון, חוט רוכש קודם את ה-`mutex` (`sem_wait(&mutex);`) ורק לאחר מכן מנסה לרכוש משבצת משאב מ-`resource_pool` (`sem_wait(&resource_pool);`).\n\n3.  **ההשלכות:**\n    *   ברגע שחוט אחד רוכש את ה-`mutex`, אף חוט אחר אינו יכול לרכוש את ה-`mutex` ולהמשיך הלאה. המשמעות היא שרק חוט אחד יכול להיכנס לקטע הקוד שמתחיל ב-`sem_wait(&mutex)` בכל רגע נתון. \n    *   זה הופך למעשה את המערכת למערכת שבה רק חוט אחד יכול לתפוס משאב (ולהיכנס לקטע הקריטי של עדכון המונה) בכל רגע נתון, במקום לאפשר ל-`NUM_RESOURCES` חוטים לתפוס משאבים במקביל. זה מגביל באופן חמור את הקונקרנטיות (concurrency) של המערכת וסותר את מטרת ה-`resource_pool` כסמפור סופר המאפשר גישה מקבילה למספר משאבים.\n    *   במילים אחרות, גם אם ישנם `NUM_RESOURCES` זמינים (לדוגמה, `NUM_RESOURCES=3`) ורק חוט אחד משתמש במשאב, חוטים אחרים לא יוכלו להתחיל בתהליך רכישת המשאב מכיוון שהם יחסמו בניסיון לרכוש את ה-`mutex`.\n    *   אמנם במקרה זה לא ייווצר בהכרח קיפאון (deadlock) קלאסי, אך ייווצר מצב של חוסר יעילות דרמטי וביצועים ירודים, מכיוון שהגישה למשאבים הופכת לטורית (sequential) במקום מקבילית.\n\n**תיקון מינימלי לקוד:**\nכדי לפתור את הבעיה, יש לשנות את סדר רכישת הסמפורים. יש לרכוש את הסמפור `resource_pool` קודם, כדי לאפשר ל-`NUM_RESOURCES` חוטים להיכנס לקטע שבו הם מחזיקים משאב. רק לאחר מכן, בתוך קטע זה, יש לרכוש את ה-`mutex` כדי להגן על עדכון המונה `total_operations` בקטע הקריטי הקצר בלבד.\n\n```c\nvoid* thread_func(void* arg) {\n    for (int i = 0; i < OPERATIONS_PER_THREAD; ++i) {\n        // 1. רכישת משבצת משאב קודם - מאפשר ל-NUM_RESOURCES חוטים להחזיק משאבים במקביל\n        sem_wait(&resource_pool);\n\n        // 2. כעת, עדכון המונה המשותף בתוך קטע קריטי המוגן ע\"י mutex\n        sem_wait(&mutex);\n        total_operations++;\n        printf(\"Thread %ld acquired resource. Total ops: %d\\n\", (long)arg, total_operations);\n        sem_post(&mutex); // שחרור ה-mutex מיד לאחר עדכון המונה\n\n        use_resource(); // 3. שימוש במשאב - יכול להתבצע במקביל ע\"י NUM_RESOURCES חוטים\n\n        // 4. שחרור משבצת המשאב\n        sem_post(&resource_pool);\n    }\n    return NULL;\n}\n```\nהתיקון מבטיח ש-`NUM_RESOURCES` חוטים יכולים להחזיק משאבים במקביל, בעוד שעדכון המונה `total_operations` מוגן כהלכה מפני תנאי מירוץ על ידי ה-`mutex` הנרכש ומשוחרר בקטע קריטי קצר בלבד. זה מאפשר ניצול יעיל של המשאבים ומקסום הקונקרנטיות."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

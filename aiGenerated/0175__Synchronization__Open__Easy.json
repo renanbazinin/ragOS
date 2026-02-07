@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 19:50:32",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3682,
+      "output_tokens": 1142,
+      "total_tokens": 6208
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Synchronization",
+      "Race Condition",
+      "Mutex"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא ב-C שבו שני תהליכונים (threads) מנסים לעדכן משתנה גלובלי משותף. המשתנה `counter` מאותחל ל-0. כל תהליכון מבצע לולאה שבה הוא מגדיל את `counter` 1000 פעמים.\n\n1. מהי התוצאה הצפויה של `counter` בסיום ריצת שני התהליכונים?\n2. האם התוצאה מובטחת? הסבר מדוע או מדוע לא.\n3. כיצד ניתן לתקן את הקוד כדי להבטיח את התוצאה הנכונה באמצעות mutex? יש לכלול את קטע הקוד המתוקן.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\nint counter = 0; // Shared global variable\n\nvoid *increment(void *arg) {\n    for (int i = 0; i < 1000; i++) {\n        counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t tid1, tid2;\n\n    pthread_create(&tid1, NULL, increment, NULL);\n    pthread_create(&tid2, NULL, increment, NULL);\n\n    pthread_join(tid1, NULL);\n    pthread_join(tid2, NULL);\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1. התוצאה הצפויה של `counter` בסיום ריצת שני התהליכונים היא 2000. כל תהליכון מגדיל את המונה 1000 פעמים, כך ששני תהליכונים יחד אמורים להגדיל אותו 2000 פעמים.\n\n2. התוצאה אינה מובטחת. זוהי דוגמה למצב מרוץ (Race Condition). פעולת `counter++` אינה אטומית, אלא מורכבת משלושה שלבים:\n   א. קריאת הערך הנוכחי של `counter`.\n   ב. הגדלת הערך שנקרא ב-1.\n   ג. כתיבת הערך החדש בחזרה ל-`counter`.\n   כאשר שני תהליכונים מנסים לבצע פעולה זו במקביל, ייתכן ששניהם יקראו את אותו ערך של `counter`, יגדילו אותו בנפרד, ולאחר מכן יכתבו את הערך המוגדל בחזרה. במצב כזה, אחת ההגדלות 'תאבד', והערך הסופי יהיה קטן מ-2000.\n\n3. כדי לתקן את הקוד ולהבטיח את התוצאה הנכונה, יש להשתמש ב-mutex (מנעול הדדי) כדי להגן על הקטע הקריטי (critical section) שבו המשתנה המשותף `counter` משתנה. ה-mutex יבטיח שרק תהליכון אחד יוכל לגשת לקטע הקריטי בכל רגע נתון. הנה הקוד המתוקן:\n\n```c\n#include <stdio.h>\n#include <pthread.h>\n\nint counter = 0; // Shared global variable\npthread_mutex_t mutex; // Mutex for synchronization\n\nvoid *increment(void *arg) {\n    for (int i = 0; i < 1000; i++) {\n        pthread_mutex_lock(&mutex); // Lock mutex before accessing critical section\n        counter++;\n        pthread_mutex_unlock(&mutex); // Unlock mutex after accessing critical section\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t tid1, tid2;\n\n    pthread_mutex_init(&mutex, NULL); // Initialize the mutex\n\n    pthread_create(&tid1, NULL, increment, NULL);\n    pthread_create(&tid2, NULL, increment, NULL);\n\n    pthread_join(tid1, NULL);\n    pthread_join(tid2, NULL);\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    pthread_mutex_destroy(&mutex); // Destroy the mutex\n\n    return 0;\n}\n```"
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

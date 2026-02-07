@@ -1,0 +1,58 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Semaphores",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 21:02:18",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3751,
+      "output_tokens": 3191,
+      "total_tokens": 14003
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Semaphores",
+      "Deadlock",
+      "Resource Allocation",
+      "Concurrency",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתונה בעיית הקצאת משאבים במערכת. קיימת בריכה של `NUM_RESOURCES` משאבים זהים ומוגבלים. מספר חוטים (threads) רצים במקביל, וכל חוט נדרש לתפוס `RESOURCES_PER_THREAD` משאבים, לבצע עבודה כלשהי, ולאחר מכן לשחרר את כל המשאבים שתפס.\nלהלן קטע קוד המנסה לממש את לוגיקת העבודה של חוט כזה. שימו לב לערכים של `NUM_RESOURCES`, `RESOURCES_PER_THREAD` ו-`NUM_THREADS`.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <semaphore.h>\n#include <unistd.h> // For sleep\n\n#define NUM_RESOURCES 5       // Total available resources\n#define RESOURCES_PER_THREAD 3 // Resources each thread needs\n#define NUM_THREADS 3        // Number of threads attempting to acquire resources\n\nsem_t resource_pool; // Initialized to NUM_RESOURCES\n\nvoid* worker_thread(void* arg) {\n    int thread_id = *(int*)arg;\n    printf(\"Thread %d: Attempting to acquire %d resources...\\n\", thread_id, RESOURCES_PER_THREAD);\n\n    for (int i = 0; i < RESOURCES_PER_THREAD; ++i) {\n        sem_wait(&resource_pool);\n        printf(\"Thread %d: Acquired resource #%d.\\n\", thread_id, i + 1);\n        // Introduce a small delay to increase deadlock probability\n        usleep(10000); \n    }\n\n    printf(\"Thread %d: All %d resources acquired. Working...\\n\", thread_id, RESOURCES_PER_THREAD);\n    sleep(1); // Simulate work\n    \n    printf(\"Thread %d: Releasing %d resources.\\n\", thread_id, RESOURCES_PER_THREAD);\n    for (int i = 0; i < RESOURCES_PER_THREAD; ++i) {\n        sem_post(&resource_pool);\n    }\n    return NULL;\n}\n\nint main() {\n    sem_init(&resource_pool, 0, NUM_RESOURCES); // Initialize semaphore with total resources\n\n    pthread_t threads[NUM_THREADS];\n    int tids[NUM_THREADS];\n\n    printf(\"System initialized with %d total resources. Each thread needs %d resources.\\n\", NUM_RESOURCES, RESOURCES_PER_THREAD);\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        tids[i] = i;\n        pthread_create(&threads[i], NULL, worker_thread, &tids[i]);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"All threads finished.\\n\");\n    sem_destroy(&resource_pool);\n    return 0;\n}"
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "האם קטע הקוד הנתון יכול להוביל לקיפאון (Deadlock)? אם כן, תארו תרחיש ספציפי (לפי סדר פעולות החוטים) שמוביל לקיפאון והסבירו מדוע הוא מתרחש.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "הציעו תיקון לבעיה שתיארתם בסעיף הקודם. צרפו את קטע הקוד המתוקן עבור הפונקציה `worker_thread` בלבד (כולל הצהרה על משתנים גלובליים חדשים אם נדרש), והסבירו את התיקון שהצעתם.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.3",
+        "text": "האם התיקון שהצעתם בסעיף 2 עלול להציג בעיות חדשות (כגון הרעבה (Starvation) או חוסר יעילות) או טרייד-אופים מסוימים? נמקו.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "סעיף 1: קיפאון (Deadlock)\nכן, קטע הקוד הנתון עלול להוביל לקיפאון.\n\n**תרחיש לדוגמה:**\nבהינתן:\n*   `NUM_RESOURCES = 5` (סה\"כ משאבים זמינים)\n*   `RESOURCES_PER_THREAD = 3` (משאבים שכל חוט צריך)\n*   `NUM_THREADS = 3` (מספר החוטים)\n\n1.  **חוט 0** מבצע `sem_wait` פעם אחת, תופס משאב 1. סמפור `resource_pool` כעת 4.\n2.  **חוט 1** מבצע `sem_wait` פעם אחת, תופס משאב 1. סמפור `resource_pool` כעת 3.\n3.  **חוט 2** מבצע `sem_wait` פעם אחת, תופס משאב 1. סמפור `resource_pool` כעת 2.\n4.  **חוט 0** מבצע `sem_wait` פעם שנייה, תופס משאב 1. סמפור `resource_pool` כעת 1.\n5.  **חוט 1** מבצע `sem_wait` פעם שנייה, תופס משאב 1. סמפור `resource_pool` כעת 0.\n\nבשלב זה, חוט 0 מחזיק 2 משאבים וממתין למשאב שלישי. חוט 1 מחזיק 2 משאבים וממתין למשאב שלישי. חוט 2 מחזיק משאב 1 וממתין למשאב שני.\nהסמפור `resource_pool` הגיע ל-0, כלומר אין יותר משאבים פנויים.\nאף אחד מהחוטים לא יכול להמשיך לתפוס את המשאבים הנותרים לו, ולכן אף אחד מהם לא יכול לשחרר את המשאבים שהוא מחזיק כרגע. נוצר מעגל המתנה (circular wait) בין החוטים, וכולם נשארים חסומים לצמיתות. זהו מצב של קיפאון.\n\nסעיף 2: תיקון מוצע\nכדי למנוע קיפאון במקרה זה, יש לוודא שחוט רוכש את כל המשאבים הנדרשים לו באופן אטומי, או שהוא לא רוכש אף אחד מהם. אחת הדרכים לעשות זאת היא להשתמש במנעול (mutex) נוסף שיגן על שלב רכישת המשאבים. המנעול מבטיח שרק חוט אחד יוכל לנסות לרכוש משאבים בכל רגע נתון.\n\n**קוד מתוקן עבור `worker_thread`:**\n```c\n// הגדרה גלובלית של המנעול החדש\npthread_mutex_t acquisition_lock = PTHREAD_MUTEX_INITIALIZER;\n\nvoid* worker_thread(void* arg) {\n    int thread_id = *(int*)arg;\n    printf(\"Thread %d: Attempting to acquire %d resources (using mutex for atomicity)...\\n\", thread_id, RESOURCES_PER_THREAD);\n\n    // תפוס את המנעול כדי להבטיח רכישה אטומית של כל המשאבים\n    pthread_mutex_lock(&acquisition_lock);\n\n    // המתן לכל המשאבים בזה אחר זה בתוך המנעול\n    for (int i = 0; i < RESOURCES_PER_THREAD; ++i) {\n        sem_wait(&resource_pool); // עלול לחסום כאן, אך המנעול מוחזק\n        printf(\"Thread %d: Acquired resource #%d within mutex.\\n\", thread_id, i + 1);\n        usleep(10000); \n    }\n    \n    // שחרר את המנעול רק לאחר שכל המשאבים נרכשו בהצלחה\n    pthread_mutex_unlock(&acquisition_lock);\n\n    printf(\"Thread %d: All %d resources acquired. Working...\\n\", thread_id, RESOURCES_PER_THREAD);\n    sleep(1); // Simulate work\n    \n    printf(\"Thread %d: Releasing %d resources.\\n\", thread_id, RESOURCES_PER_THREAD);\n    for (int i = 0; i < RESOURCES_PER_THREAD; ++i) {\n        sem_post(&resource_pool);\n    }\n    return NULL;\n}\n// הערה: ב-main() יש לוודא אתחול ושיחרור המנעול: pthread_mutex_init(&acquisition_lock, NULL); ו- pthread_mutex_destroy(&acquisition_lock);\n```\n**הסבר לתיקון:**\nהוספנו מנעול גלובלי (`acquisition_lock`) המגן על הלולאה שבה החוטים רוכשים את המשאבים. כאשר חוט נכנס ללולאת הרכישה, הוא תופס את המנעול `acquisition_lock`. רק לאחר שרכש בהצלחה את כל `RESOURCES_PER_THREAD` המשאבים (כלומר, כל קריאות `sem_wait` בלולאה הסתיימו בהצלחה), הוא משחרר את המנעול.\nגישה זו מונעת קיפאון מכיוון שהיא מבטיחה שרק חוט אחד יכול להימצא בשלב \"ניסיון רכישת כל המשאבים\" בכל רגע נתון. אם חוט מתחיל לרכוש משאבים, אף חוט אחר לא יכול להתחיל תהליך רכישה משלו עד שהחוט הראשון יסיים או יקבל את כל המשאבים שלו וישחרר את המנעול. זה מונע הקצאה חלקית של משאבים לחוטים מרובים שעלולה להוביל למעגל המתנה.\n\nסעיף 3: טרייד-אופים ובעיות פוטנציאליות\nהתיקון שהוצע אכן מונע קיפאון, אך הוא מציג מספר טרייד-אופים ובעיות פוטנציאליות:\n\n1.  **ירידה במקביליות (Reduced Concurrency):** התיקון הופך את שלב רכישת המשאבים לטורי (sequential). רק חוט אחד יכול להיכנס לקטע הקריטי המוגן על ידי `acquisition_lock` ולנסות לרכוש משאבים. גם אם יש מספיק משאבים פנויים בבריכה עבור חוט אחר, הוא לא יוכל להתחיל לרכוש אותם עד שהחוט הנוכחי יסיים את רכישת כל המשאבים שלו וישחרר את `acquisition_lock`. זה עלול להפחית משמעותית את רמת המקביליות וניצול המשאבים במערכת.\n2.  **חוסר יעילות (Inefficiency):** אם חוט תופס את `acquisition_lock` ונקלע למצב שבו הוא ממתין על `sem_wait` (כי אין מספיק משאבים זמינים), הוא ימשיך להחזיק את `acquisition_lock`. במצב כזה, כל שאר החוטים שינסו לרכוש משאבים ייחסמו על `pthread_mutex_lock` ולא יוכלו אפילו לנסות לרכוש משאבים, גם אם חלקם פנויים. זה מבזבז זמן מעבד ומעכב חוטים אחרים שלא לצורך.\n3.  **פוטנציאל להרעבה (Potential for Starvation):** למרות שהפתרון מונע קיפאון, הוא עלול להוביל להרעבה בתרחישים מסוימים. אם יש זרם קבוע של חוטים שמבקשים משאבים, והחוטים שנבחרים על ידי המתזמן (scheduler) הם תמיד אלו שזקוקים למספר רב של משאבים או נתקעים בהמתנה ארוכה בתוך הקטע הקריטי, חוטים אחרים שזקוקים למעט משאבים או יכולים לסיים מהר עלולים להמתין זמן רב באופן בלתי מוגבל.\n\nלסיכום, בעוד שהתיקון מונע קיפאון בצורה יעילה, הוא עושה זאת במחיר של הגבלת המקביליות ופוטנציאל לחוסר יעילות, במיוחד במערכות עם דרישות משאבים מגוונות או עומס גבוה."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

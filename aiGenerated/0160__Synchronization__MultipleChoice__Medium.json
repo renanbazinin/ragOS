@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 19:46:19",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1118,
+      "output_tokens": 754,
+      "total_tokens": 3313
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Synchronization",
+      "Race Condition",
+      "Mutex"
+    ],
+    "content": {
+      "text": "נתונה פיסת קוד המשתמשת בשני תהליכונים (threads) המעדכנים משתנה גלובלי משותף `counter`. כל תהליכון מבצע לולאה של 100,000 איטרציות, ובכל איטרציה מגדיל את `counter` באחד. איזו מהטענות הבאות נכונה לגבי קוד זה?",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\nint counter = 0; // משתנה גלובלי משותף\n\nvoid* increment(void* arg) {\n    for (int i = 0; i < 100000; i++) {\n        counter++; // פעולה לא אטומית\n    }\n    return NULL;\n}\n\n// פונקציית main (לא מוצגת במלואה) תיצור ותריץ שני תהליכונים שיקראו ל-increment.",
+      "options": [
+        "א. קוד זה יבטיח שהערך הסופי של counter יהיה תמיד 200,000.",
+        "ב. קוד זה עלול לסבול מבעיית Race Condition, וניתן לפתור אותה באמצעות שימוש ב-mutex.",
+        "ג. קוד זה עלול לסבול מבעיית Deadlock, וניתן לפתור אותה באמצעות שימוש בסמפור.",
+        "ד. קוד זה בטוח לשימוש (thread-safe) מכיוון שפעולת ההגדלה counter++ היא אטומית."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "הטענה הנכונה היא ב'. פעולת ההגדלה `counter++` אינה אטומית; היא מורכבת מקריאה של הערך הנוכחי של `counter`, הגדלתו באחד, וכתיבת הערך החדש בחזרה לזיכרון. כאשר שני תהליכונים מנסים לבצע פעולה זו במקביל ללא מנגנון סנכרון, ייתכן שתהליכון אחד יקרא את הערך, ותהליכון שני יקרא גם הוא את אותו ערך לפני שהתהליכון הראשון הספיק לכתוב את הערך המעודכן. כתוצאה מכך, אחד העדכונים יאבד, והערך הסופי של `counter` יהיה קטן מ-200,000. מצב זה נקרא Race Condition. הפתרון הנפוץ לבעיה זו הוא הגנה על הקטע הקריטי (critical section) באמצעות mutex, שיבטיח שרק תהליכון אחד יוכל לבצע את פעולת ההגדלה בכל רגע נתון. אין כאן בעיית Deadlock מכיוון שאין תלות מעגלית במשאבים."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

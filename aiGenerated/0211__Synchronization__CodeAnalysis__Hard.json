@@ -1,0 +1,56 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 20:04:03",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4129,
+      "output_tokens": 4191,
+      "total_tokens": 21632
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Concurrency",
+      "Semaphores",
+      "Reusable Barrier"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה המנסה לממש מחסום (Barrier) רב-פעמי. N_THREADS חוטים מקדמים מונה גלובלי משותף shared_counter N_INCREMENTS_PER_THREAD פעמים כל אחד. לאחר כל קידום של המונה, כל החוטים צריכים להגיע למחסום, ורק כאשר כולם הגיעו, הם משוחררים להמשיך לקידום הבא. בסיום התוכנית יודפס הערך הסופי של shared_counter. ניתן להניח שכל קריאות המערכת מצליחות.\n\n",
+      "code_snippet": "1 #include <stdio.h>\n2 #include <pthread.h>\n3 #include <semaphore.h>\n4 #include <unistd.h>\n5\n6 #define N_THREADS 3 // מספר חוטים\n7 #define N_INCREMENTS_PER_THREAD 2 // כמה פעמים כל חוט יקדם את המונה בסך הכל\n8\n9 int shared_counter = 0;\n10 sem_t mutex; // להגנה על shared_counter ו-barrier_count\n11 sem_t barrier_sem; // לחסימת חוטים במחסום\n12 int barrier_count = 0; // מונה חוטים שהגיעו למחסום\n13\n14 void* thread_func(void* arg) {\n15    long tid = (long)arg;\n16\n17    for (int i = 0; i < N_INCREMENTS_PER_THREAD; ++i) {\n18        // --- Critical section for shared_counter ---\n19        sem_wait(&mutex);\n20        shared_counter++;\n21        printf(\"Thread %ld: incremented counter to %d\\n\", tid, shared_counter);\n22        sem_post(&mutex);\n23        // --- End critical section ---\n24\n25        // --- Barrier logic ---\n26        sem_wait(&mutex);\n27        barrier_count++;\n28        if (barrier_count == N_THREADS) {\n29            // Last thread to arrive, release all others\n30            printf(\"Thread %ld: ALL arrived at barrier. Releasing.\\n\", tid);\n31            for (int j = 0; j < N_THREADS; ++j) {\n32                sem_post(&barrier_sem);\n33            }\n34        }\n35        sem_post(&mutex);\n36\n37        sem_wait(&barrier_sem); // Wait for all threads to pass\n38\n39        // --- Post-barrier logic: Reset barrier_count ---\n40        sem_wait(&mutex);\n41        barrier_count--;\n42        if (barrier_count == 0) {\n43            // Last thread to leave resets for next cycle.\n44            // This is where the flaw lies for reusable barriers.\n45            printf(\"Thread %ld: ALL left barrier. Resetting for next cycle.\\n\", tid);\n46        }\n47        sem_post(&mutex);\n48        // --- End barrier logic ---\n49    }\n50    return NULL;\n51}\n52\n53 int main() {\n54    pthread_t threads[N_THREADS];\n55    sem_init(&mutex, 0, 1);\n56    sem_init(&barrier_sem, 0, 0); // Initially closed\n57\n58    for (long i = 0; i < N_THREADS; ++i) {\n59        pthread_create(&threads[i], NULL, thread_func, (void*)i);\n60    }\n61\n62    for (int i = 0; i < N_THREADS; ++i) {\n63        pthread_join(threads[i], NULL);\n64    }\n65\n66    printf(\"Final counter value: %d\\n\", shared_counter);\n67\n68    sem_destroy(&mutex);\n69    sem_destroy(&barrier_sem);\n70    return 0;\n71}"
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "הסבירו מדוע המימוש הנתון של המחסום הרב-פעמי אינו עובד בצורה נכונה ועלול להוביל לבעיות. הסבירו את הסיבה העיקרית לכשל זה.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "תארו תזמון ספציפי (לדוגמה, עבור N_THREADS=2 ו-N_INCREMENTS_PER_THREAD=2) שבו מתרחשת הבעיה שתוארה בסעיף הקודם. ציינו בבירור מהו הערך של shared_counter בכל שלב רלוונטי וכיצד הוא מושפע מהכשל במחסום. מהו הערך הסופי המקסימלי של shared_counter שיכול להתקבל במקרה זה?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.3",
+        "text": "תקנו את הפונקציה thread_func כך שהמחסום יעבוד בצורה נכונה ויהיה רב-פעמי. ניתן להוסיף סמפורים ומשתנים גלובליים כנדרש (יש לציין את ערכי האתחול בהערה).",
+        "code_snippet": "void* thread_func(void* arg) {\n    long tid = (long)arg;\n\n    for (int i = 0; i < N_INCREMENTS_PER_THREAD; ++i) {\n        // Critical section for shared_counter\n        sem_wait(&mutex);\n        shared_counter++;\n        printf(\"Thread %ld: incremented counter to %d\\n\", tid, shared_counter);\n        sem_post(&mutex);\n\n        // Barrier logic (corrected)\n        // ... (your corrected code here)\n    }\n    return NULL;\n}",
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "10.1: המימוש הנתון של המחסום הרב-פעמי אינו נכון בגלל בעיית ה-'Turnstile' (קרוסלה) או 'Premature Release'. סמפור ה-`barrier_sem` מאותחל ל-0, ולאחר שכל N_THREADS החוטים מגיעים, החוט האחרון קורא ל-`sem_post(&barrier_sem)` N_THREADS פעמים. לאחר מכן, כל חוט קורא ל-`sem_wait(&barrier_sem)` פעם אחת. הבעיה היא שפעולות `sem_post` הן מצטברות. אם חוט מסוים מהיר מאוד, הוא עלול לסיים את מחזור המחסום הנוכחי (כלומר, לבצע את ה-`sem_wait` שלו, להקטין את `barrier_count` ל-0, ולחזור לתחילת הלולאה) ולבצע `sem_wait(&barrier_sem)` עבור האיטרציה הבאה, *לפני* שכל החוטים האחרים סיימו את ה-`sem_wait` שלהם עבור האיטרציה הנוכחית. הדבר מאפשר לחוט המהיר 'לגנוב' `sem_post` שנועד לחוט אחר או לאיטרציה הבאה, ובכך לעבור את המחסום בטרם עת, מבלי שכל החוטים האחרים הגיעו אליו, ומפר את תנאי הסנכרון של המחסום. הדבר עלול להוביל לחסימה (Deadlock) של חוטים אחרים שיחכו ל-`sem_post` שכבר נצרך, או להפרה של סדר הפעולות המתוכנן.\n\n10.2: נניח N_THREADS=2 ו-N_INCREMENTS_PER_THREAD=2. הערך הסופי המצופה של `shared_counter` הוא 4.\n\nתזמון שמוביל לבעיה:\n1.  חוט 0: מבצע `sem_wait(&mutex)`, מקדם `shared_counter` ל-1. מבצע `sem_post(&mutex)`.\n2.  חוט 1: מבצע `sem_wait(&mutex)`, מקדם `shared_counter` ל-2. מבצע `sem_post(&mutex)`.\n3.  חוט 0: מבצע `sem_wait(&mutex)`, מגדיל `barrier_count` ל-1. מבצע `sem_post(&mutex)`.\n4.  חוט 1: מבצע `sem_wait(&mutex)`, מגדיל `barrier_count` ל-2. מכיוון ש-`barrier_count == N_THREADS`, חוט 1 מבצע `sem_post(&barrier_sem)` פעמיים. (ערך `barrier_sem` הופך ל-2). מבצע `sem_post(&mutex)`.\n5.  חוט 0: מבצע `sem_wait(&barrier_sem)`. (ערך `barrier_sem` הופך ל-1). חוט 0 עובר את המחסום. הוא מבצע `sem_wait(&mutex)`, מקטין `barrier_count` ל-1. מבצע `sem_post(&mutex)`.\n6.  **נקודת הכשל**: חוט 0, בהיותו מהיר מאוד, מיד ממשיך לאיטרציה השנייה שלו. הוא מבצע `sem_wait(&mutex)`, מקדם `shared_counter` ל-3. מבצע `sem_post(&mutex)`.\n7.  חוט 0: נכנס שוב ללוגיקת המחסום: מבצע `sem_wait(&mutex)`, מגדיל `barrier_count` ל-2. מכיוון ש-`barrier_count == N_THREADS`, חוט 0 מבצע `sem_post(&barrier_sem)` פעמיים. (ערך `barrier_sem` הופך ל-1 (מה-sem_post שחוט 1 עשה וטרם נצרך) + 2 (מחוט 0) = 3). מבצע `sem_post(&mutex)`.\n8.  חוט 0: מבצע `sem_wait(&barrier_sem)`. (ערך `barrier_sem` הופך ל-2). חוט 0 עובר את המחסום בפעם השנייה.\n9.  בנקודה זו, `shared_counter` הוא 3. חוט 0 סיים את כל פעולות הקידום שלו ועבר את המחסום פעמיים. חוט 1 עדיין לא סיים את האיטרציה הראשונה שלו (הוא תקוע ב-`sem_wait(&barrier_sem)` או בדיוק עבר אותו). כלומר, חוט 0 עבר את המחסום השני לפני שחוט 1 בכלל הגיע למחסום הראשון בפעם השנייה. זה מפר את תנאי המחסום.\n10. חוט 1: לבסוף מבצע `sem_wait(&barrier_sem)`. (ערך `barrier_sem` הופך ל-1). חוט 1 עובר את המחסום. הוא מבצע `sem_wait(&mutex)`, מקטין `barrier_count` ל-0. מבצע `sem_post(&mutex)`.\n11. חוט 1: ממשיך לאיטרציה השנייה שלו. מבצע `sem_wait(&mutex)`, מקדם `shared_counter` ל-4. מבצע `sem_post(&mutex)`.\n12. חוט 1: נכנס ללוגיקת המחסום: מבצע `sem_wait(&mutex)`, מגדיל `barrier_count` ל-1. מבצע `sem_post(&mutex)`.\n13. חוט 1: מבצע `sem_wait(&barrier_sem)`. (ערך `barrier_sem` הופך ל-0). חוט 1 עובר את המחסום. הוא מבצע `sem_wait(&mutex)`, מקטין `barrier_count` ל-0. מבצע `sem_post(&mutex)`.\n\nבמקרה זה, `shared_counter` יגיע ל-4. עם זאת, ייתכן תזמון שבו חוט 1 ייתקע ב-`sem_wait(&barrier_sem)` מכיוון שחוט 0 'גנב' את ה-`sem_post` שנועד לו, מה שיוביל ל-`shared_counter` סופי של 3 (אם חוט 0 מסיים את שתי האיטרציות וחוט 1 נתקע אחרי הקידום הראשון שלו). הערך הסופי המקסימלי של `shared_counter` שעלול להתקבל במקרה של חסימה חלקית הוא `N_THREADS * N_INCREMENTS_PER_THREAD - (מספר החוטים שנתקעו * מספר הקידומים שנותרו להם)`. במקרה של תזמון כשל חמור שבו חוט אחד מסיים את כל הקידומים שלו וחוט אחר נתקע לאחר הקידום הראשון, הערך המקסימלי הוא `(N_INCREMENTS_PER_THREAD * (N_THREADS - 1)) + N_INCREMENTS_PER_THREAD = N_THREADS * N_INCREMENTS_PER_THREAD`. אך אם חוט אחד יכול לעבור את המחסום מספר פעמים מבלי שכולם הגיעו, הדבר עלול לגרום לחוטים אחרים להיתקע. למשל, אם חוט 0 מבצע את כל N_INCREMENTS_PER_THREAD הקידומים שלו וכל המעברים במחסום, וחוט 1 נתקע אחרי הקידום הראשון שלו, אז הערך הסופי יהיה `N_INCREMENTS_PER_THREAD + 1`. לדוגמה, עבור N_THREADS=2 ו-N_INCREMENTS_PER_THREAD=2, הערך המקסימלי שעלול להתקבל הוא 3 (אם חוט 0 מסיים את שתי האיטרציות וחוט 1 נתקע לאחר הקידום הראשון). אם התוכנית הייתה מתרחשת ללא חסימה, הערך הנכון הוא 4.\n\n10.3: תיקון המימוש באמצעות 'Double Turnstile' (קרוסלה כפולה) עם שני סמפורים:\n\nגלובליים (יש לציין ערכי אתחול בהערה):\nsem_t mutex; // Initialized: 1\nsem_t turnstile1; // Initialized: 0\nsem_t turnstile2; // Initialized: 0\nint barrier_count = 0; // Initialized: 0\n\n```c\nvoid* thread_func(void* arg) {\n    long tid = (long)arg;\n\n    for (int i = 0; i < N_INCREMENTS_PER_THREAD; ++i) {\n        // Critical section for shared_counter\n        sem_wait(&mutex);\n        shared_counter++;\n        printf(\"Thread %ld: incremented counter to %d\\n\", tid, shared_counter);\n        sem_post(&mutex);\n\n        // Barrier logic (corrected - Phase 1: All threads arrive at turnstile1)\n        sem_wait(&mutex);\n        barrier_count++;\n        if (barrier_count == N_THREADS) {\n            // Last thread to arrive at turnstile1, open it for all\n            for (int j = 0; j < N_THREADS; ++j) {\n                sem_post(&turnstile1);\n            }\n        }\n        sem_post(&mutex);\n\n        sem_wait(&turnstile1); // Wait for all threads to pass turnstile1\n        // All threads are now past turnstile1\n\n        // Barrier logic (corrected - Phase 2: All threads leave turnstile1 and prepare for next cycle)\n        sem_wait(&mutex);\n        barrier_count--;\n        if (barrier_count == 0) {\n            // Last thread to leave turnstile1, open turnstile2 for all\n            for (int j = 0; j < N_THREADS; ++j) {\n                sem_post(&turnstile2);\n            }\n        }\n        sem_post(&mutex);\n\n        sem_wait(&turnstile2); // Wait for all threads to pass turnstile2 (ensures all left previous phase)\n        // All threads are now past turnstile2, ready for next iteration\n    }\n    return NULL;\n}\n```\n\nבפונקציית `main` יש לשנות את אתחול הסמפורים:\n```c\n// ...\nsem_init(&mutex, 0, 1);\nsem_init(&turnstile1, 0, 0); // סמפור ראשון, סגור בהתחלה\nsem_init(&turnstile2, 0, 0); // סמפור שני, סגור בהתחלה\n// ...\n// יש לשנות את קריאת ה-pthread_create ל-thread_func_corrected אם משנים את שם הפונקציה\n// ...\nsem_destroy(&turnstile1);\nsem_destroy(&turnstile2);\n// ...\n```"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

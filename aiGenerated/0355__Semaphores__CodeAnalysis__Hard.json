@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Semaphores",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 21:03:13",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3751,
+      "output_tokens": 2423,
+      "total_tokens": 16380
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Semaphores",
+      "Concurrency",
+      "Threads",
+      "Barrier"
+    ],
+    "content": {
+      "text": "נתון מימוש של מחסום (Barrier) עבור N_THREADS חוטים, המיועד לשימוש חוזר (reusable barrier). המחסום אמור להבטיח שכל החוטים יגיעו לנקודה מסוימת בתוכנית לפני שמי מהם יוכל להמשיך הלאה. לאחר שכולם עברו, המחסום אמור להתאפס ולהיות מוכן לשימוש חוזר.\n\nיש לנתח את קוד המחסום הנתון ולזהות האם הוא פועל באופן תקין. אם כן, הסבירו מדוע. אם לא, תארו בפירוט את התרחיש הבעייתי (Race Condition / Deadlock / Starvation) והסבירו מדוע הוא מתרחש. בנוסף, הציעו תיקון לקוד שיפתור את הבעיה תוך שימוש בסמפורים בלבד.",
+      "code_snippet": "#include <pthread.h>\n#include <semaphore.h>\n#include <stdio.h>\n#include <unistd.h>\n\n#define N_THREADS 5 // מספר החוטים המשתתפים במחסום\n\nsem_t mutex;         // מנעול להגנה על המונה\nsem_t barrier_sem;   // סמפור לחסימת חוטים\nint count = 0;       // מונה חוטים שהגיעו למחסום\n\nvoid barrier_init() {\n    sem_init(&mutex, 0, 1);\n    sem_init(&barrier_sem, 0, 0); // מאותחל ל-0, כך שחוטים יחסמו מיד\n    count = 0;\n}\n\nvoid barrier_wait() {\n    sem_wait(&mutex);\n    count++;\n    if (count == N_THREADS) {\n        // החוט האחרון שהגיע משחרר את כל החוטים\n        for (int i = 0; i < N_THREADS; ++i) {\n            sem_post(&barrier_sem);\n        }\n        count = 0; // איפוס המונה עבור שימוש חוזר במחסום\n    }\n    sem_post(&mutex);\n\n    sem_wait(&barrier_sem); // כל החוטים ממתינים כאן\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "המימוש הנתון של המחסום אינו פועל באופן תקין לשימוש חוזר. הוא סובל מבעיית \"מצב מרוץ\" (Race Condition) שעלולה לגרום לחוטים לעבור את המחסום בטרם עת, מבלי להמתין לשאר החוטים, ובכך מפרה את תכונת המחסום.\n\n**תיאור התרחיש הבעייתי (Race Condition):**\nנניח ש-N_THREADS = 2 (שני חוטים, T1 ו-T2). המחסום אמור לוודא ששניהם יגיעו לנקודה מסוימת לפני שימשיכו.\n\n1.  T1 קורא ל-`barrier_wait()`: נועל את `mutex`, `count` הופך ל-1, ומשחרר את `mutex`.\n2.  T2 קורא ל-`barrier_wait()`: נועל את `mutex`, `count` הופך ל-2.\n3.  `count == N_THREADS` מתקיים. T2 נכנס לבלוק ה-`if`.\n4.  T2 מבצע לולאה וקורא ל-`sem_post(&barrier_sem)` פעמיים. כעת ערך `barrier_sem` הוא 2.\n5.  T2 מיד מאפס את המונה: `count = 0;`.\n6.  T2 משחרר את `mutex`.\n7.  גם T1 וגם T2 ממשיכים לקרוא ל-`sem_wait(&barrier_sem)`. שניהם יעברו בהצלחה, וערך `barrier_sem` יחזור ל-0.\n8.  **הנקודה הקריטית:** נניח ש-T2 הוא חוט מהיר במיוחד. מיד לאחר שעבר את `sem_wait(&barrier_sem)` עבור המחזור הראשון של המחסום, הוא קורא שוב ל-`barrier_wait()` עבור המחזור השני.\n9.  T2 נועל את `mutex`, `count` הופך ל-1, ומשחרר את `mutex`.\n10. בינתיים, T1 הוא חוט איטי. ייתכן שהוא עדיין מבצע עיבוד כלשהו לאחר שעבר את המחסום הראשון, או שהוא עדיין בדרך לקריאה ל-`barrier_wait()` עבור המחזור השני.\n11. אם T2 ממשיך בריצתו המהירה ומגיע שוב למצב שבו `count == N_THREADS` (לדוגמה, אם T1 עדיין לא הגיע למחסום השני ו-T2 הוא החוט היחיד שהספיק להתקדם), T2 שוב יבצע `sem_post(&barrier_sem)` פעמיים ויאפס את `count`.\n12. כתוצאה מכך, כאשר T1 יגיע בסופו של דבר ל-`barrier_wait()` עבור המחזור השני, הוא ימצא את `barrier_sem` עם ערך חיובי (מכיוון ש-T2 כבר פירסם עבורו מראש). T1 יעבור את המחסום באופן מיידי מבלי להמתין ל-T2, ובכך תכונת המחסום נשברת.\n\nהבעיה נובעת מכך שאיפוס המונה `count = 0;` מתבצע על ידי החוט האחרון שמגיע למחסום, וזאת *לפני* שכל שאר החוטים הספיקו לעבור את `sem_wait(&barrier_sem)`. חוט מהיר יכול להיכנס מחדש למחסום, לאפס את המונה שוב ולשחרר סמפורים עודפים, מה שמאפשר לחוטים לעקוף את המחסום.\n\n**תיקון הקוד (מימוש \"מחסום כפול\" - Double Turnstile Barrier):**\nכדי לפתור בעיה זו ולממש מחסום ניתן לשימוש חוזר, נדרש מנגנון מורכב יותר, המכונה לעיתים \"מחסום כפול\" (Double Turnstile Barrier). מנגנון זה משתמש בשני סמפורים בנוסף למנעול ולמונה, כדי לשלוט בכניסה וביציאה מהמחסום ולהבטיח איפוס נכון.\n\n```c\n#include <pthread.h>\n#include <semaphore.h>\n#include <stdio.h>\n#include <unistd.h>\n\n#define N_THREADS 5 // מספר החוטים המשתתפים במחסום\n\nsem_t mutex;         // מנעול להגנה על המונה\nsem_t turnstile1;    // סמפור למחסום הכניסה (מאותחל ל-0)\nsem_t turnstile2;    // סמפור למחסום היציאה/איפוס (מאותחל ל-1)\nint count = 0;       // מונה חוטים שהגיעו למחסום\n\nvoid barrier_init() {\n    sem_init(&mutex, 0, 1);\n    sem_init(&turnstile1, 0, 0); // חוסם את כולם בהתחלה\n    sem_init(&turnstile2, 0, 1); // מאפשר לחוט אחד לעבור כדי לאפס את השער הבא\n    count = 0;\n}\n\nvoid barrier_wait() {\n    sem_wait(&mutex);\n    count++;\n    if (count == N_THREADS) { // החוט האחרון הגיע\n        sem_wait(&turnstile2); // נועל את turnstile2 כדי למנוע כניסה מוקדמת למחזור הבא\n        for (int i = 0; i < N_THREADS; ++i) {\n            sem_post(&turnstile1); // משחרר את כל החוטים דרך turnstile1\n        }\n    }\n    sem_post(&mutex);\n\n    sem_wait(&turnstile1); // כל החוטים ממתינים כאן (שער כניסה)\n\n    // שלב שני של המחסום (יציאה ואיפוס)\n    sem_wait(&mutex);\n    count--;\n    if (count == 0) { // החוט האחרון שעוזב את המחסום\n        for (int i = 0; i < N_THREADS; ++i) {\n            sem_wait(&turnstile1); // אוסף בחזרה את ההיתרים מ-turnstile1 (סוגר את שער הכניסה)\n        }\n        sem_post(&turnstile2); // משחרר את turnstile2 עבור המחזור הבא\n    }\n    sem_post(&mutex);\n}\n```\n\n**הסבר על התיקון:**\nהתיקון משתמש בשני סמפורים כ\"שערי ביטחון\" (turnstiles).\n*   `turnstile1` משמש לשחרור כל החוטים לאחר שהאחרון הגיע, בדומה לפתרון המקורי.\n*   `turnstile2` משמש כדי לוודא שרק חוט אחד (החוט האחרון שעוזב את המחזור הנוכחי) יכול לאפס את `turnstile1` ולשחרר את השער למחזור הבא. זה מונע מחוטים מהירים להיכנס למחזור הבא לפני שכל החוטים סיימו את המחזור הקודם, ובכך נמנע מצב המרוץ של איפוס מוקדם של המונה והסמפורים העודפים."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Semaphores",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 20:52:21",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4278,
+      "output_tokens": 2746,
+      "total_tokens": 15449
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Semaphores",
+      "Synchronization",
+      "Producer-Consumer",
+      "Deadlock",
+      "Starvation"
+    ],
+    "content": {
+      "text": "נתונה מערכת ייצור המורכבת משני סוגי תהליכים: `Assembler` (מרכיב) ו-`Finisher` (מסיים). תהליכים אלו משתפים ביניהם חוצץ (buffer) בגודל קבוע `BUFFER_SIZE` עבור מוצרים בהרכבה חלקית.\n\n*   **תהליכי `Assembler`:**\n    *   כל תהליך `Assembler` צריך לקבל זרוע רובוטית (`RobotArm`) כדי להרכיב מוצר חלקי. קיימות `R` זרועות רובוטיות זמינות במפעל.\n    *   לאחר הרכבת המוצר החלקי, הוא מוכנס לחוצץ.\n*   **תהליכי `Finisher`:**\n    *   כל תהליך `Finisher` מוציא מוצר חלקי מהחוצץ.\n    *   לאחר מכן, הוא צריך לקבל עמדת בקרת איכות (`QualityControlStation`) כדי לסיים את המוצר. קיימות `Q` עמדות בקרת איכות זמינות במפעל.\n\n**מגבלות נוספות:**\n1.  החוצץ יכול להכיל לכל היותר `BUFFER_SIZE` מוצרים חלקיים.\n2.  כדי למנוע עומס יתר, מספר המוצרים החלקיים הכולל בכל רגע נתון (אלו הנמצאים בחוצץ, בתוספת אלו שמטופלים כרגע על ידי תהליכי `Finisher`) מוגבל ל-`MAX_WIP`.\n\nכתבו את פונקציות `assemble_product()` ו-`finish_product()` המממשות את הלוגיקה של תהליכי ה-`Assembler` וה-`Finisher` בהתאמה, תוך שימוש בסמפורים בלבד. עליכם להגדיף את כל הסמפורים הנדרשים ולציין את ערכי האתחול שלהם.\n\n**שאלה:**\nהאם המימוש שהצעתם עלול לגרום לקיפאון (deadlock) או להרעבה (starvation)? אם כן, הסבירו מדוע וכיצד ניתן לפתור זאת. אם לא, הסבירו מדוע.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "פתרון:\n\n**הגדרת סמפורים וערכי אתחול:**\n```c\n#include <semaphore.h>\n#include <stdio.h>\n#include <stdlib.h> \n#include <pthread.h>\n#include <unistd.h> \n\n// הגדרות קבועים (לדוגמה)\n#define R 2             // מספר זרועות רובוטיות זמינות\n#define Q 1             // מספר עמדות בקרת איכות זמינות\n#define BUFFER_SIZE 5   // גודל החוצץ המשותף\n#define MAX_WIP 7       // מגבלת מוצרים בהרכבה (Work-In-Progress) הכוללת (בחוצץ + בטיפול)\n\n// סמפורים\nsem_t robotArms;        // סמפור ספירה לאתחול ב-R. שולט בגישה לזרועות רובוטיות.\nsem_t qcStations;       // סמפור ספירה לאתחול ב-Q. שולט בגישה לעמדות בקרת איכות.\nsem_t emptySlots;       // סמפור ספירה לאתחול ב-BUFFER_SIZE. מייצג מקומות פנויים בחוצץ.\nsem_t filledSlots;      // סמפור ספירה לאתחול ב-0. מייצג מקומות תפוסים בחוצץ.\nsem_t buffer_mutex;     // סמפור בינארי (mutex) לאתחול ב-1. להגנה על גישה לחוצץ.\nsem_t wip_limit;        // סמפור ספירה לאתחול ב-MAX_WIP. מגביל את כמות המוצרים בהרכבה הכוללת.\n\n// חוצץ משותף (לדוגמה, מערך פשוט)\nint buffer[BUFFER_SIZE];\nint in = 0, out = 0;\n\n// פונקציית אתחול לסמפורים (תקרא פעם אחת בתוכנית הראשית)\nvoid init_semaphores() {\n    sem_init(&robotArms, 0, R);\n    sem_init(&qcStations, 0, Q);\n    sem_init(&emptySlots, 0, BUFFER_SIZE);\n    sem_init(&filledSlots, 0, 0);\n    sem_init(&buffer_mutex, 0, 1);\n    sem_init(&wip_limit, 0, MAX_WIP);\n}\n```\n\n**פונקציות `assemble_product()` ו-`finish_product()`:**\n\n```c\nvoid assemble_product() {\n    // תהליך מרכיב (Assembler)\n    // 1. קבל חריץ במגבלת ה-WIP הכוללת (מונים מוצר זה כ-WIP מרגע שההרכבה החלה).\n    sem_wait(&wip_limit); \n\n    // 2. קבל זרוע רובוטית.\n    sem_wait(&robotArms); \n    printf(\"Assembler: Acquired Robot Arm, assembling product...\\n\");\n    // simulate_assembly(); // סימולציית הרכבה\n    // 3. שחרר זרוע רובוטית.\n    sem_post(&robotArms); \n\n    // 4. קבל חריץ פנוי בחוצץ.\n    sem_wait(&emptySlots); \n    // 5. קבל מנעול לגישה לחוצץ.\n    sem_wait(&buffer_mutex); \n\n    // הוסף פריט לחוצץ\n    buffer[in] = 1; // ייצוג פשוט של מוצר\n    in = (in + 1) % BUFFER_SIZE;\n    printf(\"Assembler: Product assembled and put into buffer. (WIP slot taken, Robot Arm used)\\n\");\n    \n    // 6. שחרר מנעול לגישה לחוצץ.\n    sem_post(&buffer_mutex); \n    // 7. אותת שהחוצץ מכיל כעת פריט נוסף.\n    sem_post(&filledSlots);  \n}\n\nvoid finish_product() {\n    // תהליך מסיים (Finisher)\n    // 1. קבל חריץ מלא מהחוצץ.\n    sem_wait(&filledSlots); \n    // 2. קבל מנעול לגישה לחוצץ.\n    sem_wait(&buffer_mutex); \n\n    // הוצא פריט מהחוצץ\n    // int product = buffer[out];\n    out = (out + 1) % BUFFER_SIZE;\n    printf(\"Finisher: Took product from buffer.\\n\");\n\n    // 3. שחרר מנעול לגישה לחוצץ.\n    sem_post(&buffer_mutex); \n    // 4. אותת שהחוצץ מכיל כעת חריץ פנוי נוסף.\n    sem_post(&emptySlots); \n\n    // 5. קבל עמדת בקרת איכות.\n    sem_wait(&qcStations); \n    printf(\"Finisher: Acquired QC Station, finishing product...\\n\");\n    // simulate_finishing(product); // סימולציית סיום\n    // 6. שחרר עמדת בקרת איכות.\n    sem_post(&qcStations); \n\n    // 7. המוצר גמור לחלוטין, שחרר את חריץ ה-WIP הגלובלי.\n    sem_post(&wip_limit); \n    printf(\"Finisher: Product finished and released. (WIP slot released, QC Station used)\\n\");\n}\n```\n\n**ניתוח קיפאון (Deadlock) והרעבה (Starvation):**\n\n**קיפאון (Deadlock):**\nהמימוש המוצע אינו צפוי לגרום לקיפאון. קיפאון נוצר כאשר קיימת תלות מעגלית במשאבים בין תהליכים. נבחן את סדר רכישת המשאבים:\n*   **תהליכי `Assembler` רוכשים משאבים בסדר הבא:** `wip_limit` -> `robotArms` (משוחרר) -> `emptySlots` -> `buffer_mutex`.\n*   **תהליכי `Finisher` רוכשים משאבים בסדר הבא:** `filledSlots` -> `buffer_mutex` -> `qcStations` (משוחרר).\n\nאין כאן תלות מעגלית ברכישת משאבים: `buffer_mutex` נרכש תמיד לאחר `emptySlots` (על ידי `Assembler`) או `filledSlots` (על ידי `Finisher`). סדר זה, יחד עם העובדה ש-`wip_limit` נרכש על ידי המרכיב ומשוחרר על ידי המסיים (ומשמש כבקרת זרימה גלובלית ולא כמשאב שנתקע במחזור), מונע מצב של קיפאון. למשל, `Assembler` לא יכול להחזיק ב-`buffer_mutex` ולחכות ל-`emptySlots` כי הוא רוכש את `emptySlots` לפני ה-`buffer_mutex`. באופן דומה, `Finisher` לא יכול להחזיק ב-`buffer_mutex` ולחכות ל-`filledSlots` מסיבה דומה.\n\n**הרעבה (Starvation):**\nמימוש סמפורים סטנדרטי (כמו זה שב-`POSIX semaphores`) בדרך כלל אינו מבטיח הוגנות (fairness) בסדר ההתעוררות של תהליכים הממתינים לסמפור. כאשר מספר תהליכים ממתינים על סמפור (באמצעות `sem_wait`) ותהליך אחר מבצע `sem_post`, מערכת ההפעלה בוחרת איזה תהליך להעיר. ייתכן מצב שבו תהליך מסוים נדחה שוב ושוב לטובת תהליכים אחרים, ובכך הוא \"מורעב\" מגישה למשאב. מצב זה יכול להתרחש עבור כל אחד מהסמפורים: `robotArms`, `qcStations`, `emptySlots`, `filledSlots`, `buffer_mutex`, ו-`wip_limit`. כדי למנוע הרעבה באופן מוחלט, נדרש מנגנון תור הוגן (כמו תור FIFO) הממומש על גבי הסמפורים, אך זהו מימוש מורכב יותר שאינו חלק משימוש בסיסי בסמפורים."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

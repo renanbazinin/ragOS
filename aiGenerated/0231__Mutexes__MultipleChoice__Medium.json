@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 20:09:32",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 961,
+      "output_tokens": 694,
+      "total_tokens": 4342
+    }
+  },
+  "question": {
+    "id": 6,
+    "type": "MultipleChoice",
+    "topic": [
+      "Synchronization",
+      "Mutexes",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "ברוב מימושי המנעולים (mutex) הסטנדרטיים (לדוגמה, `pthread_mutex_t` ב-C/C++), מהי התוצאה הצפויה אם חוט (thread) מנסה לשחרר מנעול אשר נתפס על ידי חוט אחר?",
+      "code_snippet": null,
+      "options": [
+        "המנעול ישוחרר בהצלחה, והחוט המנסה לשחרר יקבל בעלות עליו.",
+        "התוכנית תיתקל בשגיאת זמן ריצה (runtime error) או תתנהג באופן בלתי מוגדר (undefined behavior), שעלול להוביל לקריסה.",
+        "החוט המנסה לשחרר ייחסם עד שהחוט שתפס את המנעול במקור ישחרר אותו.",
+        "המנעול יישאר תפוס, והפעולה תחזיר קוד שגיאה (לדוגמה, `EPERM`) מבלי לגרום לקריסה."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "התוכנית תיתקל בשגיאת זמן ריצה (runtime error) או תתנהג באופן בלתי מוגדר (undefined behavior), שעלול להוביל לקריסה.",
+      "explanation": "רוב מימושי המנעולים הסטנדרטיים (כמו `pthread_mutex_t` עם סוג `PTHREAD_MUTEX_NORMAL` או `PTHREAD_MUTEX_DEFAULT`) מבוססים על קונספט של בעלות (ownership), כאשר רק החוט שתפס את המנעול רשאי לשחרר אותו. ניסיון לשחרר מנעול שלא נתפס על ידי החוט הנוכחי מוביל להתנהגות בלתי מוגדרת (undefined behavior) על פי תקן POSIX. התנהגות בלתי מוגדרת זו מתבטאת לעיתים קרובות בשגיאת זמן ריצה, קריסת התוכנית, או מצב לא עקבי. בעוד שסוגי מנעולים מסוימים (כמו `PTHREAD_MUTEX_ERRORCHECK`) יחזירו קוד שגיאה (לדוגמה, `EPERM`) מבלי לגרום לקריסה, זו אינה התנהגות ברירת המחדל או הנפוצה ביותר עבור מנעולים סטנדרטיים שאינם מוגדרים במפורש לבדיקת שגיאות. לכן, התשובה המכילה התנהגות בלתי מוגדרת וקריסה היא הנפוצה והמדויקת ביותר עבור המקרה הכללי."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

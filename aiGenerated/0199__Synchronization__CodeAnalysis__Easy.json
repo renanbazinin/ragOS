@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 19:59:17",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4129,
+      "output_tokens": 689,
+      "total_tokens": 6108
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Threads",
+      "Mutex"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה המשתמשת בחוטים (threads) לקידום מונה משותף באמצעות מנגנון סנכרון. עליכם לנתח את הקוד ולענות על השאלה: מה יהיה הערך הסופי של המונה (counter) שיוצג בפלט?",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\n#define NUM_THREADS 5\n#define INCREMENTS_PER_THREAD 10\n\nint counter = 0;\npthread_mutex_t mutex;\n\nvoid* increment_counter(void* arg) {\n    for (int i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n        pthread_mutex_lock(&mutex);\n        counter++;\n        pthread_mutex_unlock(&mutex);\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n    pthread_mutex_init(&mutex, NULL);\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, increment_counter, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    pthread_mutex_destroy(&mutex);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הערך הסופי שיוצג בפלט יהיה 50. ישנם 5 חוטים (NUM_THREADS=5), וכל חוט מגדיל את המונה 10 פעמים (INCREMENTS_PER_THREAD=10). סך הכל יתבצעו 5 * 10 = 50 פעולות הגדלה. השימוש ב-mutex מבטיח שכל פעולת הגדלה של המונה תהיה אטומית, כלומר, לא יהיו מצבי מרוץ (race conditions) שבהם עדכונים אובדים. כל חוט נועל את ה-mutex לפני הגישה למונה, מבצע את ההגדלה, ומשחרר את ה-mutex, ובכך מבטיח גישה בלעדית למשאב המשותף. לכן, כל 50 ההגדלות יבוצעו בהצלחה והמונה יגיע לערכו הסופי הנכון."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

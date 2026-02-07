@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 20:27:49",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3648,
+      "output_tokens": 1391,
+      "total_tokens": 7063
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Mutexes",
+      "Threads",
+      "Concurrency",
+      "Race Conditions"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה, המשתמשת בחוטים (threads) ובמוטקס (mutex) כדי לעדכן משתנה גלובלי משותף. נתון שכל קריאות המערכת מצליחות.\n\nמה יהיה הפלט הסופי של התוכנית? הסבירו מדוע, ומה היה קורה אם המוטקס לא היה בשימוש.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\n#define NUM_THREADS 2\n#define INCREMENTS_PER_THREAD 100000\n\nint counter = 0;\npthread_mutex_t mutex;\n\nvoid* thread_func(void* arg) {\n    int i;\n    for (i = 0; i < INCREMENTS_PER_THREAD; i++) {\n        pthread_mutex_lock(&mutex);\n        counter++;\n        pthread_mutex_unlock(&mutex);\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n    int i;\n\n    pthread_mutex_init(&mutex, NULL);\n\n    for (i = 0; i < NUM_THREADS; i++) {\n        pthread_create(&threads[i], NULL, thread_func, NULL);\n    }\n\n    for (i = 0; i < NUM_THREADS; i++) {\n        pthread_join(threads[i], NULL);\n    }\n\n    pthread_mutex_destroy(&mutex);\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפלט הסופי של התוכנית יהיה:\nFinal counter value: 200000\n\n**הסבר:**\n1.  התוכנית מאתחלת משתנה גלובלי `counter` ל-0 ומוטקס `mutex`.\n2.  היא יוצרת שני חוטים (threads), כשכל חוט מבצע את הפונקציה `thread_func`.\n3.  בתוך `thread_func`, כל חוט מבצע לולאה `INCREMENTS_PER_THREAD` (שהוגדר כ-100,000) פעמים.\n4.  בכל איטרציה, החוט קורא ל-`pthread_mutex_lock(&mutex)` כדי לנעול את המוטקס. פעולה זו מבטיחה שרק חוט אחד יכול להיכנס לקטע הקריטי (critical section) שבו `counter` מוגדל.\n5.  לאחר הגדלת `counter` ב-1, החוט קורא ל-`pthread_mutex_unlock(&mutex)` כדי לשחרר את המוטקס, ובכך מאפשר לחוטים אחרים (אם ישנם) לנסות ולרכוש את המוטקס.\n6.  מכיוון שכל אחד משני החוטים מבצע 100,000 הגדלות, ופעולות אלו מוגנות על ידי המוטקס, סך ההגדלות יהיה `2 * 100,000 = 200,000`. המוטקס מונע תנאי מרוץ (race condition) ומבטיח שכל פעולת הגדלה תתבצע באופן אטומי ולא יאבדו עדכונים.\n7.  הקריאות ל-`pthread_join` מבטיחות שהחוט הראשי ימתין לסיום שני חוטי העבודה לפני שישמיד את המוטקס וידפיס את הערך הסופי של `counter`.\n\n**מה היה קורה אם המוטקס לא היה בשימוש:**\nאם קריאות ה-`pthread_mutex_lock` וה-`pthread_mutex_unlock` היו מוסרות מהקוד, היה נוצר תנאי מרוץ (race condition).\nפעולת `counter++` אינה אטומית, והיא מורכבת משלושה שלבים עיקריים ברמת המעבד:\n1.  קריאת הערך הנוכחי של `counter` לתוך אוגר.\n2.  הגדלת הערך באוגר.\n3.  כתיבת הערך החדש מהאוגר חזרה לזיכרון (למשתנה `counter`).\n\nללא מוטקס, חוטים מרובים יכלו לשלב את השלבים הללו באופן לא צפוי. לדוגמה:\n*   חוט א' קורא את `counter` (נניח 5).\n*   חוט ב' קורא את `counter` (גם הוא קורא 5).\n*   חוט א' מגדיל את הערך באוגר שלו ל-6 וכותב 6 חזרה ל-`counter`.\n*   חוט ב' מגדיל את הערך באוגר שלו ל-6 וכותב 6 חזרה ל-`counter`.\n\nבמקרה זה, שתי פעולות הגדלה שהיו אמורות להגדיל את `counter` ב-2, בפועל הגדילו אותו ב-1 בלבד, ובכך אבד עדכון אחד. כתוצאה מכך, הערך הסופי של `counter` היה נמוך מ-200,000 ולא דטרמיניסטי (היה משתנה בין הרצות שונות של התוכנית)."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

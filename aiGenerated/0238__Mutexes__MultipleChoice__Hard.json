@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 20:11:43",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 970,
+      "output_tokens": 1081,
+      "total_tokens": 5927
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Mutexes",
+      "Deadlock",
+      "Concurrency",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא ב-C++:\n\n```cpp\n#include <mutex>\n#include <iostream>\n#include <thread>\n#include <vector>\n\nstd::mutex global_mtx;\nint counter = 0;\n\nclass MyProcessor {\npublic:\n    void increment_and_log() {\n        global_mtx.lock();\n        counter++;\n        std::cout << \"Counter: \" << counter << std::endl;\n        global_mtx.unlock();\n    }\n\n    void perform_complex_operation() {\n        global_mtx.lock();\n        // Some initial work...\n        std::cout << \"Performing complex operation...\" << std::endl;\n        increment_and_log(); // Calls another function that also tries to lock global_mtx\n        // More work after increment...\n        global_mtx.unlock();\n    }\n};\n\nvoid worker_thread(MyProcessor* proc) {\n    proc->perform_complex_operation();\n}\n\nint main() {\n    MyProcessor processor_obj;\n    std::thread t1(worker_thread, &processor_obj);\n    std::thread t2(worker_thread, &processor_obj);\n    t1.join();\n    t2.join();\n    std::cout << \"Final counter value: \" << counter << std::endl;\n    return 0;\n}\n```\n\nמה יקרה כאשר תוכנית זו תורץ?",
+      "code_snippet": null,
+      "options": [
+        "א. התוכנית תרוץ ללא בעיות ותדפיס את המונה הסופי 2.",
+        "ב. התוכנית תקרוס (crash) עקב שגיאת זמן ריצה (runtime error) הקשורה לנעילה כפולה.",
+        "ג. התוכנית תיכנס למצב של קיפאון (deadlock) כאשר אחד מהתהליכים ינסה לנעול את המוטקס בשנית.",
+        "ד. התוכנית תיכנס למצב של תחרות (race condition) אשר עלול להוביל לערך סופי שגוי של המונה.",
+        "ה. התוכנית תיכנס למצב של קיפאון (deadlock) כאשר שני התהליכים ינסו לנעול את המוטקס בו זמנית."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "התשובה הנכונה היא ג'.\nהקוד מדגים שימוש ב-`std::mutex` רגיל, שאינו מוטקס רקורסיבי. מוטקס רגיל אינו מאפשר לאותו תהליך לנעול אותו מספר פעמים. כאשר תהליך מנסה לנעול מוטקס שכבר נמצא בבעלותו, הקריאה ל-`lock()` תיחסם לנצח, מה שמוביל למצב של קיפאון (deadlock) עבור אותו תהליך.\n\nבמקרה זה:\n1.  הפונקציה `perform_complex_operation` נועלת את `global_mtx`.\n2.  בתוך `perform_complex_operation`, נקראת הפונקציה `increment_and_log`.\n3.  הפונקציה `increment_and_log` מנסה לנעול את `global_mtx` *שוב*.\nמכיוון ש-`global_mtx` כבר נעול על ידי אותו תהליך, הקריאה השנייה ל-`global_mtx.lock()` תגרום לתהליך להיכנס למצב המתנה אינסופי (deadlock), מכיוון שלעולם לא ישוחרר על ידי תהליך אחר, והוא עצמו לא יכול לשחרר אותו לפני שתפיסת הנעילה השנייה תושלם. שני התהליכים יגיעו למצב זה, כל אחד בנפרד, וכך התוכנית כולה תיתקע.\nכדי לפתור בעיה זו, ניתן להשתמש ב-`std::recursive_mutex` במקום `std::mutex`, או לתכנן מחדש את הקוד כך שמוטקס לא יילקח פעמיים על ידי אותו תהליך."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

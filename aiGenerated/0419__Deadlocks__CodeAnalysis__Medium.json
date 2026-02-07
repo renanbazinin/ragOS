@@ -1,0 +1,53 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Deadlocks",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 21:25:36",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2852,
+      "output_tokens": 1547,
+      "total_tokens": 7856
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Deadlocks",
+      "Synchronization",
+      "Mutexes",
+      "Concurrency",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא המדמה שני תהליכונים (threads) המנסים לגשת לשני משאבים (המיוצגים על ידי mutexes).",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <unistd.h> // For sleep\n\npthread_mutex_t mutexA;\npthread_mutex_t mutexB;\n\nvoid* thread_func1(void* arg) {\n    printf(\"Thread 1: Trying to acquire Mutex A...\\n\");\n    pthread_mutex_lock(&mutexA);\n    printf(\"Thread 1: Acquired Mutex A. Trying to acquire Mutex B...\\n\");\n    sleep(1); // Introduce a delay to increase deadlock probability\n    pthread_mutex_lock(&mutexB);\n    printf(\"Thread 1: Acquired Mutex B. Critical Section 1.\\n\");\n    pthread_mutex_unlock(&mutexB);\n    pthread_mutex_unlock(&mutexA);\n    printf(\"Thread 1: Released Mutex A and B.\\n\");\n    return NULL;\n}\n\nvoid* thread_func2(void* arg) {\n    printf(\"Thread 2: Trying to acquire Mutex B...\\n\");\n    pthread_mutex_lock(&mutexB);\n    printf(\"Thread 2: Acquired Mutex B. Trying to acquire Mutex A...\\n\");\n    sleep(1); // Introduce a delay\n    pthread_mutex_lock(&mutexA);\n    printf(\"Thread 2: Acquired Mutex A. Critical Section 2.\\n\");\n    pthread_mutex_unlock(&mutexA);\n    pthread_mutex_unlock(&mutexB);\n    printf(\"Thread 2: Released Mutex B and A.\\n\");\n    return NULL;\n}\n\nint main() {\n    pthread_t tid1, tid2;\n\n    pthread_mutex_init(&mutexA, NULL);\n    pthread_mutex_init(&mutexB, NULL);\n\n    pthread_create(&tid1, NULL, thread_func1, NULL);\n    pthread_create(&tid2, NULL, thread_func2, NULL);\n\n    pthread_join(tid1, NULL);\n    pthread_join(tid2, NULL);\n\n    pthread_mutex_destroy(&mutexA);\n    pthread_mutex_destroy(&mutexB);\n\n    printf(\"Main: Program finished.\\n\");\n    return 0;\n}"
+    },
+    "sub_questions": [
+      {
+        "id": "a",
+        "text": "האם קיים סיכוי למצב קיפאון (Deadlock) בקטע קוד זה? נמק את תשובתך על בסיס ארבעת התנאים לקיפאון.",
+        "code_snippet": null,
+        "options": [
+          "כן",
+          "לא"
+        ],
+        "solution": {
+          "is_present_in_file": true,
+          "correct_option": "כן",
+          "explanation": "כן, קיים סיכוי למצב קיפאון (Deadlock).\nארבעת התנאים לקיפאון מתקיימים במערכת זו:\n1.  **מניעה הדדית (Mutual Exclusion):** המוטקסים (mutexA, mutexB) מספקים מניעה הדדית, כלומר רק תהליכון אחד יכול להחזיק במוטקס נתון בכל רגע. אם תהליכון מנסה לתפוס מוטקס תפוס, הוא נחסם עד שהמוטקס ישוחרר.\n2.  **החזקה והמתנה (Hold and Wait):** כל תהליכון יכול להחזיק במוטקס אחד (לדוגמה, Thread 1 מחזיק ב-mutexA) ולהמתין למוטקס אחר (Thread 1 ממתין ל-mutexB). במקרה של קיפאון, Thread 1 יחזיק ב-mutexA וימתין ל-mutexB, בעוד Thread 2 יחזיק ב-mutexB וימתין ל-mutexA.\n3.  **אי-שלילה (No Preemption):** המוטקסים לא נשללים בכוח מתהליכון שמחזיק בהם; הם משוחררים רק מרצון על ידי התהליכון שהחזיק בהם. מערכת ההפעלה או תהליכון אחר אינם יכולים לכפות שחרור של מוטקס.\n4.  **המתנה מעגלית (Circular Wait):** תרחיש אפשרי לקיפאון הוא כדלקמן:\n    *   Thread 1 מבצע `pthread_mutex_lock(&mutexA)` ומצליח לתפוס את mutexA.\n    *   מיד לאחר מכן (או תוך כדי ה-`sleep(1)` של Thread 1), Thread 2 מבצע `pthread_mutex_lock(&mutexB)` ומצליח לתפוס את mutexB.\n    *   כעת, Thread 1 מנסה לבצע `pthread_mutex_lock(&mutexB)` אך mutexB מוחזק על ידי Thread 2, ולכן Thread 1 נחסם.\n    *   ובמקביל, Thread 2 מנסה לבצע `pthread_mutex_lock(&mutexA)` אך mutexA מוחזק על ידי Thread 1, ולכן Thread 2 נחסם.\n    *   נוצר מעגל המתנה: Thread 1 ממתין ל-Thread 2 שישחרר את mutexB, ו-Thread 2 ממתין ל-Thread 1 שישחרר את mutexA. אף אחד מהם לא יכול להמשיך, לשחרר את המשאב שברשותו, או להתקדם, וכתוצאה מכך נוצר מצב קיפאון. ה-`sleep(1)` המכוון בקוד מגדיל את הסבירות להתרחשות תרחיש זה על ידי יצירת חלון זמן שבו שני התהליכונים יכולים לתפוס את המוטקס הראשון שלהם לפני שהשני ניסה לתפוס את המוטקס השני."
+        }
+      }
+    ],
+    "points": 15,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": null
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

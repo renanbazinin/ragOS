@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 19:44:46",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1118,
+      "output_tokens": 671,
+      "total_tokens": 5217
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Synchronization",
+      "Race Conditions",
+      "Mutexes"
+    ],
+    "content": {
+      "text": "נתונה פיסת הקוד הבאה:\nאם מספר חוטים (threads) שונים קוראים לפונקציה `increment_shared_counter()` במקביל, איזו מהטענות הבאות נכונה לגבי הערך הסופי של `shared_counter` לאחר שכל החוטים סיימו את ביצועם?",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\nint shared_counter = 0; // משתנה גלובלי משותף\n\nvoid increment_shared_counter() {\n    shared_counter++;\n}",
+      "options": [
+        "א. הערך הסופי של `shared_counter` תמיד יהיה נכון, מכיוון שפעולת הקידום `++` היא אטומית במעבדים מודרניים.",
+        "ב. הערך הסופי של `shared_counter` תמיד יהיה שגוי עקב Race Condition.",
+        "ג. הערך הסופי של `shared_counter` עלול להיות שגוי עקב Race Condition, ונדרש מנגנון סנכרון (לדוגמה, Mutex) כדי להבטיח נכונות.",
+        "ד. המערכת תמיד תקרוס (crash) עקב Race Condition.",
+        "ה. Race Condition אינו רלוונטי במקרה זה מכיוון שאין כתיבה למשתנה מצד מספר חוטים."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "פעולת הקידום `shared_counter++` אינה פעולה אטומית. היא מורכבת משלוש פעולות בסיסיות: קריאת הערך של `shared_counter` מהזיכרון, הגדלת הערך, וכתיבת הערך החדש בחזרה לזיכרון. כאשר מספר חוטים מבצעים פעולה זו במקביל ללא סנכרון, ייתכן שחוט אחד יקרא את הערך, חוט אחר יקרא את אותו ערך לפני שהחוט הראשון הספיק לכתוב את הערך המעודכן, וכתוצאה מכך עדכונים מסוימים עלולים ללכת לאיבוד. מצב זה נקרא Race Condition. כדי למנוע זאת ולהבטיח שהערך הסופי יהיה נכון, יש להגן על הקטע הקריטי (הכולל את פעולת הקידום) באמצעות מנגנון סנכרון כמו Mutex."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

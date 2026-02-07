@@ -1,0 +1,35 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Deadlocks",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 21:14:21",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2716,
+      "output_tokens": 503,
+      "total_tokens": 4233
+    }
+  },
+  "question": {
+    "id": 9,
+    "type": "Open",
+    "topic": [
+      "Deadlocks"
+    ],
+    "content": {
+      "text": "הסבר בקצרה מהו קיפאון (deadlock) במערכת הפעלה, וציין את ארבעת התנאים ההכרחיים לקיומו.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "קיפאון (deadlock) הוא מצב במערכת הפעלה שבו שני תהליכים או יותר חסומים באופן קבוע וממתינים זה לזה לשחרור משאבים, כאשר כל אחד מהם מחזיק במשאב שהאחר זקוק לו ואינו יכול להמשיך.\n\nארבעת התנאים ההכרחיים לקיומו של קיפאון הם:\n1.  **מניעה הדדית (Mutual Exclusion):** משאב יכול להיות מוחזק על ידי תהליך אחד בלבד בכל רגע נתון. אם תהליך אחר מבקש את המשאב, עליו להמתין עד שהמשאב ישוחרר.\n2.  **החזקה והמתנה (Hold and Wait):** תהליך מחזיק במשאב אחד לפחות וממתין למשאבים נוספים המוחזקים על ידי תהליכים אחרים.\n3.  **אי-הפקעה (No Preemption):** משאבים אינם ניתנים להפקעה. הם יכולים להשתחרר רק באופן וולונטרי על ידי התהליך שמחזיק אותם, לאחר שסיים את השימוש בהם.\n4.  **המתנה מעגלית (Circular Wait):** קיימת שרשרת מעגלית של תהליכים, כאשר כל תהליך בשרשרת ממתין למשאב המוחזק על ידי התהליך הבא בשרשרת."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

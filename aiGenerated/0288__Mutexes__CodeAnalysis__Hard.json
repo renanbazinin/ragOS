@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 20:35:04",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4847,
+      "output_tokens": 1770,
+      "total_tokens": 10433
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Mutexes",
+      "Concurrency",
+      "Deadlocks"
+    ],
+    "content": {
+      "text": "נתונה מערכת עם שני משאבים משותפים, resourceA ו-resourceB, המיוצגים על ידי משתני int. כל משאב מוגן על ידי מוטקס משלו: mutexA עבור resourceA ו-mutexB עבור resourceB.\nהמערכת כוללת שתי פונקציות: transfer_A_to_B(int amount) ו-transfer_B_to_A(int amount), המיועדות להעביר כמות מסוימת של ערך בין המשאבים באופן מאובטח. כלומר, transfer_A_to_B מפחיתה את amount מ-resourceA ומוסיפה אותו ל-resourceB, ו-transfer_B_to_A מבצעת את הפעולה ההפוכה. שתי הפונקציות מיועדות לרוץ במקביל על ידי חוטים שונים.\nלהלן מימוש הפונקציות:\n\nהקוד המתואר אינו תקין ויכול להוביל לבעיה חמורה כאשר הפונקציות נקראות במקביל על ידי חוטים שונים.\n1. תארו מהי הבעיה וכיצד היא יכולה להתרחש (יש לתאר ריצה ברורה עם מספר חוטים כרצונכם).\n2. תקנו את מימוש הפונקציות transfer_A_to_B ו-transfer_B_to_A כך שיעבדו באופן תקין וימנעו את הבעיה. יש לשנות את סדר תפיסת המוטקסים בלבד, ללא הוספת משתנים או אובייקטי סנכרון נוספים.",
+      "code_snippet": "```c\n#include <pthread.h>\n#include <unistd.h> // for sleep\n\n// משאבים משותפים\nint resourceA = 100;\nint resourceB = 100;\n\n// מוטקסים להגנה על המשאבים\npthread_mutex_t mutexA;\npthread_mutex_t mutexB;\n\n// פונקציה להעברת כמות מ-A ל-B\nvoid transfer_A_to_B(int amount) {\n    pthread_mutex_lock(&mutexA);\n    sleep(1); // מדמה עבודה או החלפת הקשר\n    pthread_mutex_lock(&mutexB);\n\n    resourceA -= amount;\n    resourceB += amount;\n\n    pthread_mutex_unlock(&mutexB);\n    pthread_mutex_unlock(&mutexA);\n}\n\n// פונקציה להעברת כמות מ-B ל-A\nvoid transfer_B_to_A(int amount) {\n    pthread_mutex_lock(&mutexB);\n    sleep(1); // מדמה עבודה או החלפת הקשר\n    pthread_mutex_lock(&mutexA);\n\n    resourceB -= amount;\n    resourceA += amount;\n\n    pthread_mutex_unlock(&mutexA);\n    pthread_mutex_unlock(&mutexB);\n}\n```"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1. הבעיה: קיפאון (Deadlock).\n   הבעיה יכולה להתרחש כאשר שני חוטים מנסים לבצע פעולות העברה במקביל, כאשר כל אחד מהם תופס מוטקס אחד וממתין למוטקס השני שנתפס על ידי החוט האחר. לדוגמה:\n\n   *   **חוט 1** קורא ל-`transfer_A_to_B(10)`:\n       *   תופס את `mutexA`.\n       *   מתבצעת `sleep(1)` (מדמה עבודה או החלפת הקשר).\n   *   **חוט 2** קורא ל-`transfer_B_to_A(10)` (במקביל לחוט 1, בזמן שחוט 1 ב-`sleep`):\n       *   תופס את `mutexB`.\n       *   מתבצעת `sleep(1)` (מדמה עבודה או החלפת הקשר).\n   *   **חוט 1** מנסה כעת לתפוס את `mutexB` אך הוא חסום, מכיוון ש-`mutexB` נתפס על ידי חוט 2.\n   *   **חוט 2** מנסה כעת לתפוס את `mutexA` אך הוא חסום, מכיוון ש-`mutexA` נתפס על ידי חוט 1.\n\n   בנקודה זו, שני החוטים חסומים באופן הדדי וממתינים זה לזה לשחרר את המוטקס שהם זקוקים לו. אף אחד מהם לא יכול להמשיך, והמערכת נכנסת למצב של קיפאון.\n\n2. תיקון: כדי למנוע קיפאון, יש להקפיד על סדר אחיד של תפיסת מוטקסים בכל הפונקציות שצריכות לתפוס מספר מוטקסים. במקרה זה, נקבע שכל הפונקציות יתפסו תמיד את `mutexA` לפני `mutexB`.\n\n   ```c\n// פונקציה להעברת כמות מ-A ל-B (ללא שינוי בסדר תפיסת המוטקסים)\nvoid transfer_A_to_B(int amount) {\n    pthread_mutex_lock(&mutexA);\n    pthread_mutex_lock(&mutexB); // תמיד תופסים את mutexA לפני mutexB\n\n    resourceA -= amount;\n    resourceB += amount;\n\n    pthread_mutex_unlock(&mutexB);\n    pthread_mutex_unlock(&mutexA);\n}\n\n// פונקציה להעברת כמות מ-B ל-A (תיקון סדר תפיסת המוטקסים)\nvoid transfer_B_to_A(int amount) {\n    pthread_mutex_lock(&mutexA); // תופסים קודם את mutexA\n    pthread_mutex_lock(&mutexB); // ואז את mutexB\n\n    resourceB -= amount;\n    resourceA += amount;\n\n    pthread_mutex_unlock(&mutexB);\n    pthread_mutex_unlock(&mutexA);\n}\n   ```\n   הסבר לתיקון: על ידי אכיפת סדר קבוע (למשל, תמיד `mutexA` ואז `mutexB`), אנו מבטיחים שלעולם לא ייווצר מצב שבו חוט אחד מחזיק ב-`mutexA` וממתין ל-`mutexB` בעוד חוט אחר מחזיק ב-`mutexB` וממתין ל-`mutexA`. חוטים תמיד ינסו לתפוס את המוטקסים באותו סדר, וכך אם חוט אחד כבר תפס את `mutexA`, כל חוט אחר שינסה לתפוס את `mutexA` יחסם עד ש-`mutexA` ישוחרר, ובכך נמנע את מעגל ההמתנה ההדדית שגורם לקיפאון."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

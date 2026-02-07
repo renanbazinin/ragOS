@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 20:07:22",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 860,
+      "output_tokens": 246,
+      "total_tokens": 2063
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Mutexes",
+      "Concurrency",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "מטרתו העיקרית של mutex היא לאפשר לחוטים מרובים להיכנס למקטע קריטי בו זמנית.",
+      "code_snippet": null,
+      "options": [
+        "נכון",
+        "לא נכון"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "לא נכון",
+      "explanation": "לא נכון. מטרתו העיקרית של mutex היא להבטיח גישה הדדית בלבדית (mutual exclusion) למקטע קריטי, כלומר, לאפשר לחוט אחד בלבד להיכנס למקטע הקריטי בכל רגע נתון ובכך למנוע תנאי מרוץ."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

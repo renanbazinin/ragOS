@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Semaphores",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 21:06:34",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3751,
+      "output_tokens": 2038,
+      "total_tokens": 10581
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Semaphores",
+      "Deadlock",
+      "Concurrency",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתונה תוכנית המשתמשת בשני סמפורים בינאריים, `sem_A` ו-`sem_B`, המאותחלים ל-1, כדי להגן על שני משאבים משותפים. שני סוגי חוטים פועלים במקביל במערכת. חוטים מסוג `thread_A_then_B` מנסים לתפוס את `sem_A` ולאחר מכן את `sem_B`, ואילו חוטים מסוג `thread_B_then_A` מנסים לתפוס את `sem_B` ולאחר מכן את `sem_A`. לאחר תפיסת שני הסמפורים, החוטים מבצעים פעולה כלשהי (כגון עדכון משתנה משותף `shared_counter`) ומשחררים אותם בסדר הפוך. נתון קטע הקוד הבא:\n\nהאם קטע הקוד הנתון יכול להוביל למצב של קיפאון (deadlock)? אם כן, תאר/י תרחיש ספציפי המוביל לקיפאון והסבר/י מדוע הוא מתרחש. בנוסף, הצע/י שינוי מינימלי בקוד כדי למנוע קיפאון, והסבר/י מדוע הפתרון שלך מונע קיפאון.",
+      "code_snippet": "sem_t sem_A; // initialized to 1\nsem_t sem_B; // initialized to 1\nint shared_counter = 0;\n\nvoid* thread_A_then_B(void* arg) {\n    sem_wait(&sem_A);\n    // Simulate some work or context switch\n    // usleep(10000);\n    sem_wait(&sem_B);\n    \n    // Critical section\n    shared_counter++;\n\n    sem_post(&sem_B);\n    sem_post(&sem_A);\n    return NULL;\n}\n\nvoid* thread_B_then_A(void* arg) {\n    sem_wait(&sem_B);\n    // Simulate some work or context switch\n    // usleep(10000);\n    sem_wait(&sem_A);\n    \n    // Critical section\n    shared_counter++;\n\n    sem_post(&sem_A);\n    sem_post(&sem_B);\n    return NULL;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "כן, קטע הקוד הנתון יכול להוביל למצב של קיפאון (deadlock). קיפאון מתרחש כאשר שני חוטים או יותר ממתינים זה לזה באופן בלתי הפיך, כאשר כל אחד מהם מחזיק במשאב שהאחר זקוק לו וממתין למשאב המוחזק על ידי האחר.\n\n**תרחיש קיפאון ספציפי:**\n1.  **חוט `thread_A_then_B` רץ:** הוא מבצע `sem_wait(&sem_A)` ומצליח לתפוס את `sem_A`. בשלב זה, `sem_A` מוחזק על ידו ו-`sem_B` חופשי.\n2.  **מתרחש מעבר הקשר (context switch) לחוט `thread_B_then_A`:**\n3.  **חוט `thread_B_then_A` רץ:** הוא מבצע `sem_wait(&sem_B)` ומצליח לתפוס את `sem_B`. בשלב זה, `sem_B` מוחזק על ידו ו-`sem_A` מוחזק על ידי `thread_A_then_B`.\n4.  **מתרחש מעבר הקשר בחזרה לחוט `thread_A_then_B`:**\n5.  **חוט `thread_A_then_B` מנסה להמשיך:** הוא מנסה לבצע `sem_wait(&sem_B)`. אך `sem_B` מוחזק כעת על ידי `thread_B_then_A`, ולכן `thread_A_then_B` נכנס למצב המתנה על `sem_B`.\n6.  **מתרחש מעבר הקשר בחזרה לחוט `thread_B_then_A`:**\n7.  **חוט `thread_B_then_A` מנסה להמשיך:** הוא מנסה לבצע `sem_wait(&sem_A)`. אך `sem_A` מוחזק כעת על ידי `thread_A_then_B`, ולכן `thread_B_then_A` נכנס למצב המתנה על `sem_A`.\n\nבנקודה זו, שני החוטים נמצאים במצב המתנה הדדית: `thread_A_then_B` ממתין ל-`sem_B` המוחזק על ידי `thread_B_then_A`, ו-`thread_B_then_A` ממתין ל-`sem_A` המוחזק על ידי `thread_A_then_B`. אף אחד מהם לא יכול להמשיך, והמערכת נכנסת לקיפאון.\n\n**פתרון למניעת קיפאון (שינוי מינימלי):**\nכדי למנוע קיפאון במצב כזה, יש להבטיח שכל החוטים תופסים את המשאבים באותו סדר. שינוי זה מונע את התנאי של 'המתנה מעגלית' (Circular Wait), שהוא אחד מארבעת התנאים ההכרחיים לקיפאון (על פי תנאי קופמן). לדוגמה, נוכל לשנות את `thread_B_then_A` כך שתתפוס את `sem_A` לפני `sem_B`.\n\n**קוד מתוקן (שינוי ב-`thread_B_then_A`):**\n```c\nsem_t sem_A; // initialized to 1\nsem_t sem_B; // initialized to 1\nint shared_counter = 0;\n\nvoid* thread_A_then_B(void* arg) {\n    sem_wait(&sem_A);\n    // usleep(10000);\n    sem_wait(&sem_B);\n    \n    shared_counter++;\n\n    sem_post(&sem_B);\n    sem_post(&sem_A);\n    return NULL;\n}\n\nvoid* thread_B_then_A(void* arg) {\n    sem_wait(&sem_A); // שינוי: תופסים את sem_A קודם\n    // usleep(10000);\n    sem_wait(&sem_B); // ואז את sem_B\n    \n    shared_counter++;\n\n    sem_post(&sem_B);\n    sem_post(&sem_A); // משחררים בסדר הפוך: B ואז A\n    return NULL;\n}\n```\n\n**הסבר מדוע הפתרון מונע קיפאון:**\nעל ידי אכיפת סדר תפיסת משאבים אחיד (תמיד קודם `sem_A` ואז `sem_B`) עבור כל החוטים שצריכים את שני המשאבים, אנו מבטלים את האפשרות ל'המתנה מעגלית'. אם חוט אחד תפס את `sem_A` וממתין ל-`sem_B`, החוט השני לא יוכל לתפוס את `sem_B` לפני שהוא תפס את `sem_A` (אשר אולי כבר מוחזק על ידי החוט הראשון). במקרה כזה, החוט השני פשוט ימתין ל-`sem_A` עד שיתפנה, ולא יוכל לתפוס את `sem_B` ולגרום להמתנה מעגלית. כאשר `sem_A` ישוחרר, החוט השני יוכל לתפוס אותו, ואז לתפוס את `sem_B` (אשר יהיה זמין ברגע שהחוט הראשון ישחרר אותו), וכך שניהם יוכלו להשלים את פעולתם ללא קיפאון."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

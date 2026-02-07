@@ -1,0 +1,57 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 19:52:07",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1598,
+      "output_tokens": 2865,
+      "total_tokens": 7780
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "Open",
+    "topic": [
+      "Synchronization",
+      "Race Conditions",
+      "Mutexes",
+      "Semaphores"
+    ],
+    "content": {
+      "text": "נתון קטע קוד המשתמש בשני חוטים (threads) המבצעים פעולות על משאבים משותפים. כל חוט מטרתו להגדיל מונה גלובלי (shared_counter) ולרשום את ה-ID שלו במערך לוג (log_of_updates) במיקום המתאים לערך המונה *לפני* ההגדלה.\n\nקראו את הקוד בעיון וענו על השאלות הבאות:",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <semaphore.h>\n#include <unistd.h>\n\n#define NUM_ITERATIONS 50000\n#define NUM_THREADS 2\n#define LOG_ARRAY_SIZE (NUM_ITERATIONS * NUM_THREADS)\n\nint shared_counter = 0;\nint log_of_updates[LOG_ARRAY_SIZE]; // To log which thread updated at which logical step\n\n// Thread IDs for demonstration (0 or 1)\nint thread_ids[NUM_THREADS] = {0, 1};\n\nvoid* thread_routine(void* arg) {\n    int thread_id = *(int*)arg;\n    for (int i = 0; i < NUM_ITERATIONS; ++i) {\n        // Critical section operations\n        int current_index = shared_counter; // Read shared_counter\n        shared_counter++;                   // Increment shared_counter\n        if (current_index < LOG_ARRAY_SIZE) {\n            log_of_updates[current_index] = thread_id; // Write to log_of_updates\n        }\n    }\n    return NULL;\n}\n\n/*\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    printf(\"Starting threads...\n\");\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, thread_routine, &thread_ids[i]);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final shared_counter: %d (Expected: %d)\n\", shared_counter, NUM_ITERATIONS * NUM_THREADS);\n\n    printf(\"First 10 log entries: \");\n    for (int i = 0; i < 10 && i < LOG_ARRAY_SIZE; ++i) {\n        printf(\"%d \", log_of_updates[i]);\n    }\n    printf(\"\\n\");\n    \n    printf(\"Last 10 log entries: \");\n    for (int i = LOG_ARRAY_SIZE - 10; i < LOG_ARRAY_SIZE; ++i) {\n        if (i >= 0) printf(\"%d \", log_of_updates[i]);\n    }\n    printf(\"\\n\");\n\n    return 0;\n}\n*/",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "7.1",
+        "text": "הסבירו מדוע קטע הקוד הזה עלול להוביל לתוצאות שגויות. תארו דוגמה קונקרטית לתרחיש ריצה (interleaving) שיגרום לבעיה בערך הסופי של shared_counter ו/או בתוכן המערך log_of_updates.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "7.2",
+        "text": "כתבו גרסה מתוקנת של הפונקציה `thread_routine` המשתמשת ב-mutex (מנעול) כדי למנוע את הבעיות שתוארו בסעיף הקודם. ציינו היכן יש להצהיר ולאתחל את המנעול.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "7.3",
+        "text": "כתבו גרסה מתוקנת נוספת של הפונקציה `thread_routine` המשתמשת בסמפור (semaphore) בינארי (או mutex כפי שמומש לעיתים באמצעות סמפור) כדי לפתור את אותן הבעיות. ציינו היכן יש להצהיר ולאתחל את הסמפור.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": 20,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "7.1. **הסבר הבעיה:**\nקטע הקוד סובל מ-Race Condition (מצב מרוץ) עקב גישה לא מסונכרנת למשתנים הגלובליים המשותפים `shared_counter` ו-`log_of_updates` על ידי מספר חוטים במקביל. הפעולות `int current_index = shared_counter; shared_counter++; log_of_updates[current_index] = thread_id;` אינן אטומיות. כלומר, מערכת ההפעלה יכולה להחליף הקשר (context switch) בין חוטים בכל נקודה בביצוע של שלוש הפעולות הללו.\n\n**דוגמה לתרחיש ריצה שיגרום לבעיה:**\nנניח ש-`shared_counter` שווה ל-5 בתחילת האיטרציה.\n1.  **חוט 0 מתוזמן:**\n    *   קורא: `current_index = shared_counter;` (כלומר `current_index = 5;`) \n    *   **החלפת הקשר** לחוט 1.\n2.  **חוט 1 מתוזמן:**\n    *   קורא: `current_index = shared_counter;` (כלומר `current_index = 5;` - שימו לב ש-`shared_counter` עדיין 5)\n    *   מגדיל: `shared_counter++;` (כלומר `shared_counter` הופך ל-6)\n    *   כותב ללוג: `log_of_updates[5] = 1;`\n    *   **החלפת הקשר** לחוט 0.\n3.  **חוט 0 ממשיך:**\n    *   מגדיל: `shared_counter++;` (כלומר `shared_counter` הופך ל-6. **זו טעות!** המונה היה אמור להיות 7 אם שני החוטים היו מבצעים את ההגדלה באופן אטומי)\n    *   כותב ללוג: `log_of_updates[5] = 0;` (**זו טעות!** חוט 0 דרס את הערך שחוט 1 כתב במיקום 5, ובפועל חוט 1 לא \"נרשם\" בלוג כלל במיקום זה, למרות שביצע פעולה). \n\n**השלכות:**\n*   **ערך סופי שגוי של `shared_counter`**: המונה הסופי יהיה נמוך מהצפוי (לדוגמה, במקום 100,000 עבור 2 חוטים ו-50,000 איטרציות לכל אחד, הוא יהיה פחות מכך). במקרה הדוגמה לעיל, במקום 7 הוא 6. אובדן עדכונים.\n*   **תוכן שגוי במערך `log_of_updates`**: חלק מהעדכונים יידרסו על ידי חוטים אחרים, ועלולות להיות כניסות חסרות או שגויות. במקרה הדוגמה לעיל, `log_of_updates[5]` אמור היה להכיל שני עדכונים (אחד מ-0 ואחד מ-1) אך מכיל רק את האחרון שנדרס.\n\n7.2. **פתרון באמצעות Mutex:**\nכדי למנוע את מצב המרוץ, יש להגן על ה-Critical Section (האזור הקריטי) באמצעות Mutex. ה-Critical Section במקרה זה כולל את הקריאה ל-`shared_counter`, ההגדלה שלו, והכתיבה ל-`log_of_updates`.\n\n**הצהרה ואיפוס המנעול:**\nיש להצהיר על משתנה Mutex גלובלי ולאתחל אותו פעם אחת לפני יצירת החוטים (לרוב בפונקציית `main`).\n```c\npthread_mutex_t counter_mutex; // הצהרה גלובלית\n\n// בתוך פונקציית main, לפני יצירת החוטים:\npthread_mutex_init(&counter_mutex, NULL);\n```\n\n**גרסה מתוקנת של `thread_routine`:**\n```c\nvoid* thread_routine_mutex(void* arg) {\n    int thread_id = *(int*)arg;\n    for (int i = 0; i < NUM_ITERATIONS; ++i) {\n        pthread_mutex_lock(&counter_mutex); // נעל את המנעול לפני הכניסה לאזור הקריטי\n\n        // Critical section operations\n        int current_index = shared_counter;\n        shared_counter++;\n        if (current_index < LOG_ARRAY_SIZE) {\n            log_of_updates[current_index] = thread_id;\n        }\n\n        pthread_mutex_unlock(&counter_mutex); // שחרר את המנעול לאחר היציאה מהאזור הקריטי\n    }\n    return NULL;\n}\n```\n\n7.3. **פתרון באמצעות Semaphore בינארי:**\nניתן להשתמש בסמפור בינארי באופן דומה ל-Mutex כדי להגן על אזור קריטי. סמפור בינארי מאותחל לערך 1, וכל קריאה ל-`sem_wait` מקטינה אותו ב-1 (וחוסמת אם הוא 0), וכל קריאה ל-`sem_post` מגדילה אותו ב-1.\n\n**הצהרה ואיפוס הסמפור:**\nיש להצהיר על משתנה Semaphore גלובלי ולאתחל אותו פעם אחת לפני יצירת החוטים (לרוב בפונקציית `main`).\n```c\nsem_t counter_sem; // הצהרה גלובלית\n\n// בתוך פונקציית main, לפני יצירת החוטים:\n// sem_init(sem, pshared, value)\n// pshared = 0: הסמפור משותף לחוטים בתוך אותו תהליך.\n// value = 1: ערך אתחול 1 הופך אותו לסמפור בינארי (כמו mutex).\nsem_init(&counter_sem, 0, 1);\n```\n\n**גרסה מתוקנת של `thread_routine`:**\n```c\nvoid* thread_routine_semaphore(void* arg) {\n    int thread_id = *(int*)arg;\n    for (int i = 0; i < NUM_ITERATIONS; ++i) {\n        sem_wait(&counter_sem); // המתן (acquire) לסמפור לפני הכניסה לאזור הקריטי\n\n        // Critical section operations\n        int current_index = shared_counter;\n        shared_counter++;\n        if (current_index < LOG_ARRAY_SIZE) {\n            log_of_updates[current_index] = thread_id;\n        }\n\n        sem_post(&counter_sem); // שחרר (release) את הסמפור לאחר היציאה מהאזור הקריטי\n    }\n    return NULL;\n}\n```"
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

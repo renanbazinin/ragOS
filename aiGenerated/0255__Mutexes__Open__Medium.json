@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 20:17:17",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2046,
+      "output_tokens": 1861,
+      "total_tokens": 8786
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "Open",
+    "topic": [
+      "Mutexes",
+      "Deadlocks",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתונה פיסת קוד הכוללת שימוש בשני mutex-ים. שני חוטים (threads) מריצים את הפונקציה `do_work` כאשר כל חוט מקבל ערך שונה עבור `id`.\nהאם קיים תרחיש שעלול להוביל לקיפאון (deadlock) בתוכנית זו?\nאם כן, תאר/י תרחיש כזה והסבר/י מדוע הוא מוביל לקיפאון, וכיצד ניתן למנוע אותו.\nאם לא, הסבר/י מדוע קיפאון אינו אפשרי.",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h> // For sleep\n\npthread_mutex_t mutex1 = PTHREAD_MUTEX_INITIALIZER;\npthread_mutex_t mutex2 = PTHREAD_MUTEX_INITIALIZER;\n\nvoid* do_work(void* arg) {\n    int id = *(int*)arg;\n\n    if (id == 0) {\n        pthread_mutex_lock(&mutex1);\n        printf(\"Thread %d acquired mutex1\\n\", id);\n        sleep(1); // Simulate work or context switch\n        pthread_mutex_lock(&mutex2);\n        printf(\"Thread %d acquired mutex2\\n\", id);\n        // Critical section\n        printf(\"Thread %d in critical section\\n\", id);\n        pthread_mutex_unlock(&mutex2);\n        pthread_mutex_unlock(&mutex1);\n        printf(\"Thread %d released both mutexes\\n\", id);\n    } else { // id == 1\n        pthread_mutex_lock(&mutex2);\n        printf(\"Thread %d acquired mutex2\\n\", id);\n        sleep(1); // Simulate work or context switch\n        pthread_mutex_lock(&mutex1);\n        printf(\"Thread %d acquired mutex1\\n\", id);\n        // Critical section\n        printf(\"Thread %d in critical section\\n\", id);\n        pthread_mutex_unlock(&mutex1);\n        pthread_mutex_unlock(&mutex2);\n        printf(\"Thread %d released both mutexes\\n\", id);\n    }\n    return NULL;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "כן, קיים תרחיש שיוביל לקיפאון (deadlock) בתוכנית זו.\n\n**תיאור התרחיש לקיפאון:**\n1.  חוט 0 (עם `id = 0`) מבצע `pthread_mutex_lock(&mutex1)` ומצליח לרכוש את `mutex1`.\n2.  מתרחש מיתוג הקשר (context switch).\n3.  חוט 1 (עם `id = 1`) מבצע `pthread_mutex_lock(&mutex2)` ומצליח לרכוש את `mutex2`.\n4.  מתרחש מיתוג הקשר (או שחוט 1 ממשיך לרוץ).\n5.  חוט 0 מנסה כעת לבצע `pthread_mutex_lock(&mutex2)`. אך `mutex2` מוחזק כרגע על ידי חוט 1, ולכן חוט 0 נחסם וממתין לשחרורו.\n6.  חוט 1 מנסה כעת לבצע `pthread_mutex_lock(&mutex1)`. אך `mutex1` מוחזק כרגע על ידי חוט 0, ולכן חוט 1 נחסם וממתין לשחרורו.\n\nבשלב זה, שני החוטים חסומים באופן הדדי: חוט 0 ממתין לחוט 1 שישחרר את `mutex2`, וחוט 1 ממתין לחוט 0 שישחרר את `mutex1`. אף אחד מהם לא יכול להמשיך, ולכן נוצר קיפאון.\n\n**הסבר מדוע הוא מוביל לקיפאון (בהתבסס על ארבעת התנאים של Coffman):**\n1.  **Mutual Exclusion (הדרה הדדית):** Mutex-ים מטבעם אוכפים הדרה הדדית; רק חוט אחד יכול להחזיק ב-mutex מסוים בכל רגע נתון. תנאי זה מתקיים.\n2.  **Hold and Wait (החזקה והמתנה):** כל חוט מחזיק במשאב אחד (mutex) בזמן שהוא ממתין לרכישת משאב נוסף. חוט 0 מחזיק ב-`mutex1` וממתין ל-`mutex2`. חוט 1 מחזיק ב-`mutex2` וממתין ל-`mutex1`. תנאי זה מתקיים.\n3.  **No Preemption (אי-הפקעה):** לא ניתן להפקיע mutex מחוט שמחזיק בו; רק החוט שהחזיק בו יכול לשחרר אותו. תנאי זה מתקיים.\n4.  **Circular Wait (המתנה מעגלית):** קיים מעגל של חוטים, כאשר כל חוט במעגל ממתין למשאב שמוחזק על ידי החוט הבא במעגל. במקרה זה, חוט 0 ממתין ל-`mutex2` שמוחזק על ידי חוט 1, וחוט 1 ממתין ל-`mutex1` שמוחזק על ידי חוט 0. זהו מעגל המתנה. תנאי זה מתקיים.\nמכיוון שכל ארבעת התנאים מתקיימים, קיפאון אפשרי.\n\n**כיצד ניתן למנוע קיפאון זה:**\nהדרך הנפוצה והפשוטה ביותר למנוע קיפאון מסוג זה היא להבטיח שכל החוטים ירכשו את ה-mutex-ים באותו סדר עקבי. אם שני החוטים היו מנסים לרכוש קודם את `mutex1` ולאחר מכן את `mutex2` (או להפך, אך באותו סדר עבור שניהם), הקיפאון היה נמנע.\n**תיקון קוד לדוגמה (שני החוטים רוכשים את `mutex1` ואז `mutex2`):**\n```c\nvoid* do_work_fixed(void* arg) {\n    int id = *(int*)arg;\n\n    // Both threads acquire mutex1 then mutex2\n    pthread_mutex_lock(&mutex1);\n    printf(\"Thread %d acquired mutex1\\n\", id);\n    pthread_mutex_lock(&mutex2);\n    printf(\"Thread %d acquired mutex2\\n\", id);\n\n    // Critical section\n    printf(\"Thread %d in critical section\\n\", id);\n\n    pthread_mutex_unlock(&mutex2);\n    pthread_mutex_unlock(&mutex1);\n    printf(\"Thread %d released both mutexes\\n\", id);\n    return NULL;\n}\n```\nבמימוש מתוקן זה, גם אם חוט 0 רוכש את `mutex1` ומתרחש מיתוג הקשר, כאשר חוט 1 ינסה לרכוש את `mutex1`, הוא ייחסם. חוט 0 בסופו של דבר ירוץ, ירכוש את `mutex2`, יסיים את הקטע הקריטי, ישחרר את `mutex2` ואז את `mutex1`. רק אז חוט 1 יוכל לרכוש את `mutex1` ולהמשיך."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

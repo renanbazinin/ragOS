@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 20:21:46",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3905,
+      "output_tokens": 1924,
+      "total_tokens": 9284
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "Open",
+    "topic": [
+      "Mutexes",
+      "Synchronization",
+      "Concurrency",
+      "Condition Variables"
+    ],
+    "content": {
+      "text": "במערכת מרובת תהליכים, לעיתים קרובות נדרש להגביל את מספר התהליכים שיכולים לגשת לקטע קריטי מסוים בו-זמנית, אך לאו דווקא לאחד בלבד. לדוגמה, קטע קריטי שעושה שימוש במאגר של N חיבורי רשת זמינים. יש לממש אובייקט סנכרון חדש בשם `PermitMutex` שיאפשר לכל היותר N תהליכים להיכנס לקטע קריטי בו-זמנית. כאשר N תהליכים נמצאים בקטע הקריטי, כל תהליך נוסף שינסה להיכנס ימתין עד שאחד מהתהליכים הקיימים יצא. יש להשתמש אך ורק באובייקטי סנכרון מסוג `pthread_mutex_t` ו-`pthread_cond_t`. יש להגדיר את מבנה הנתונים של `PermitMutex` ולממש את הפונקציות `init_permit_mutex()`, `destroy_permit_mutex()`, `acquire_permit()` ו-`release_permit()`.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "המימוש של `PermitMutex` ידרוש מבנה נתונים שיכיל מונה של הרשאות זמינות (`available_permits`), מנעול (`pthread_mutex_t`) להגנה על מונה זה, ומשתנה תנאי (`pthread_cond_t`) לתהליכים הממתינים להרשאה. הנה המימוש:\n\n```c\n#include <pthread.h>\n#include <stdlib.h> // For malloc, free (though not strictly needed for this snippet)\n\ntypedef struct {\n    pthread_mutex_t mutex;\n    pthread_cond_t cond;\n    int available_permits;\n    int max_permits; // Store N for completeness, though not strictly used in logic\n} PermitMutex;\n\n// Initialize the PermitMutex with a maximum number of permits\nvoid init_permit_mutex(PermitMutex *pm, int N) {\n    pthread_mutex_init(&pm->mutex, NULL);\n    pthread_cond_init(&pm->cond, NULL);\n    pm->available_permits = N;\n    pm->max_permits = N; \n}\n\n// Destroy the PermitMutex, releasing associated resources\nvoid destroy_permit_mutex(PermitMutex *pm) {\n    pthread_mutex_destroy(&pm->mutex);\n    pthread_cond_destroy(&pm->cond);\n}\n\n// Acquire a permit (enter critical section if available)\nvoid acquire_permit(PermitMutex *pm) {\n    pthread_mutex_lock(&pm->mutex);\n    // Loop is crucial to handle spurious wakeups and re-check condition\n    while (pm->available_permits == 0) {\n        pthread_cond_wait(&pm->cond, &pm->mutex);\n    }\n    pm->available_permits--;\n    pthread_mutex_unlock(&pm->mutex);\n}\n\n// Release a permit (exit critical section)\nvoid release_permit(PermitMutex *pm) {\n    pthread_mutex_lock(&pm->mutex);\n    pm->available_permits++;\n    // Signal one waiting thread. For this specific problem, signal is generally sufficient\n    // as only one thread can acquire a permit at a time when one becomes available.\n    // In other scenarios, pthread_cond_broadcast might be considered if multiple\n    // threads could simultaneously proceed.\n    pthread_cond_signal(&pm->cond);\n    pthread_mutex_unlock(&pm->mutex);\n}\n```\n\n**הסבר:**\n\n1.  **מבנה `PermitMutex`**: המבנה מכיל `pthread_mutex_t` להבטחת הדדיות (Mutual Exclusion) בעת גישה למשתנים המשותפים, `pthread_cond_t` לתזמון והמתנה של תהליכים, ו-`available_permits` שהוא מונה של ההרשאות הפנויות כרגע.\n\n2.  **`init_permit_mutex(PermitMutex *pm, int N)`**: פונקציה זו מאתחלת את המוטקס, את משתנה התנאי, ומגדירה את מספר ההרשאות הזמינות הראשוני ל-N.\n\n3.  **`acquire_permit(PermitMutex *pm)`**: \n    *   התהליך נועל את המוטקס (`pthread_mutex_lock`) כדי להגן על הגישה ל-`available_permits` ועל הקריאה ל-`pthread_cond_wait`.\n    *   הוא נכנס ללולאת `while (pm->available_permits == 0)`. לולאה זו היא קריטית ממספר סיבות: ראשית, היא מבטיחה שתהליך ימתין *רק* כאשר אין הרשאות זמינות. שנית, היא מטפלת ב\"התעוררויות שווא\" (spurious wakeups) שבהן `pthread_cond_wait` עשוי לחזור למרות שהתנאי עדיין לא מתקיים. הלולאה מבטיחה שהתנאי ייבדק שוב לאחר כל התעוררות.\n    *   אם יש הרשאה זמינה (כלומר, `available_permits > 0`), התהליך מקטין את המונה ב-1 וממשיך בדרכו, לאחר ששחרר את המוטקס (`pthread_mutex_unlock`).\n\n4.  **`release_permit(PermitMutex *pm)`**: \n    *   התהליך נועל את המוטקס.\n    *   הוא מגדיל את `available_permits` ב-1, משמע הרשאה אחת התפנתה.\n    *   הוא קורא ל-`pthread_cond_signal(&pm->cond)` כדי להעיר תהליך אחד הממתין על משתנה התנאי (אם יש כזה). התהליך שהתעורר יוכל כעת לבדוק את התנאי בלולאת ה-`while` שלו ב-`acquire_permit`.\n    *   לבסוף, התהליך משחרר את המוטקס. \n\n**נכונות ודיון:**\n*   **מניעה הדדית מורחבת**: המוטקס מבטיח שהגישה למונה `available_permits` היא הדדית, ומונעת מצבי מירוץ (race conditions) בשינוי ערכו. המונה עצמו מבטיח שכל היותר N תהליכים יחזיקו הרשאה בו-זמנית.\n*   **חופש מקיפאון (Deadlock-free)**: המימוש אינו מכיל תנאים לקיפאון. תהליכים ממתינים רק אם אין הרשאות, ומשתחררים כאשר הרשאה מתפנה. אין תלות מעגלית במשאבים.\n*   **הוגנות (Fairness)**: המימוש עם `pthread_cond_signal` לא מבטיח הוגנות חזקה (לדוגמה, בסדר FIFO) בין התהליכים הממתינים. מערכת ההפעלה קובעת איזה תהליך ממתין יתעורר. עבור הוגנות חזקה יותר, ייתכן שיהיה צורך במנגנוני תור מורכבים יותר או שימוש ב-`pthread_cond_broadcast` יחד עם מונה תהליכים ממתינים, אם כי זה פחות יעיל ויכול להוביל ל\"עדר מתעורר\" (thundering herd) אם רק אחד יכול להמשיך."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

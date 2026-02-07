@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 20:01:48",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3136,
+      "output_tokens": 1241,
+      "total_tokens": 7510
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Threads",
+      "Race Conditions"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה, המשתמשת ב-pthreads וב-mutex. יש להניח שכל הקריאות ל-pthread הצליחו.\n\nמהו הערך הסופי של `shared_val` שיודפס על ידי התוכנית? האם הפלט של השורות המודפסות בתוך הפונקציה `worker` (כלומר, 'Thread %ld: shared_val = %d') יהיה דטרמיניסטי? נמק את תשובתך באופן מלא.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <unistd.h>\n\n#define NUM_THREADS 3\n#define INCREMENTS_PER_THREAD 5\n\nint shared_val = 0;\npthread_mutex_t my_mutex;\n\nvoid* worker(void* arg) {\n    long thread_id = (long)arg;\n\n    for (int i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n        pthread_mutex_lock(&my_mutex);\n        shared_val++;\n        pthread_mutex_unlock(&my_mutex);\n        \n        // The printf statement is outside the mutex lock\n        printf(\"Thread %ld: shared_val = %d\\n\", thread_id, shared_val);\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n    pthread_mutex_init(&my_mutex, NULL);\n\n    for (long i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, worker, (void*)i);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final shared_val: %d\\n\", shared_val);\n    pthread_mutex_destroy(&my_mutex);\n    return 0;\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הסבר:\n\n1.  **ערך סופי של `shared_val`:**\n    הערך הסופי של `shared_val` שיודפס על ידי התוכנית יהיה **15**.\n    *   ישנם 3 תהליכונים (`NUM_THREADS = 3`).\n    *   כל תהליכון מבצע 5 הגדלות (`INCREMENTS_PER_THREAD = 5`).\n    *   סה\"כ הגדלות אמורות להיות: 3 * 5 = 15.\n    *   פעולת ההגדלה `shared_val++` מוגנת על ידי mutex (באמצעות `pthread_mutex_lock` ו-`pthread_mutex_unlock`). זה מבטיח שכל הגדלה בודדת היא אטומית, ומונע תנאי מרוץ על עדכון המונה עצמו. לכן, כל ההגדלות מבוצעות כראוי והערך הסופי של `shared_val` יהיה מדויק ונכון.\n\n2.  **דטרמיניזם של הפלט בתוך הפונקציה `worker`:**\n    הפלט של השורות המודפסות בתוך הפונקציה `worker` (`printf(\"Thread %ld: shared_val = %d\\n\", thread_id, shared_val);`) **לא יהיה דטרמיניסטי**.\n    *   הקריאה ל-`pthread_mutex_unlock(&my_mutex);` מתרחשת *לפני* הקריאה ל-`printf`.\n    *   משמעות הדבר היא שברגע שתהליכון מסיים להגדיל את `shared_val` ומשחרר את ה-mutex, תהליכון אחר יכול מיד לרכוש את ה-mutex, להגדיל את `shared_val` שוב, ולשחרר אותו. \n    *   בזמן שהתהליכון הראשון ממשיך לשורת ה-`printf` שלו, הערך של `shared_val` עשוי כבר להיות גבוה יותר מכיוון שתהליכונים אחרים הספיקו לעדכן אותו. לכן, הערך של `shared_val` שיודפס בכל שורת `printf` בתוך ה-`worker` יהיה תלוי בסדר הריצה הספציפי של התהליכונים.\n    *   בנוסף, סדר ההדפסה בין התהליכונים אינו מובטח, מה שתורם לאי-דטרמיניסטיות של הפלט הכולל. אין שום מנגנון סנכרון המבטיח ששורת `printf` תופעל מיד לאחר שחרור ה-mutex, או ששני תהליכונים לא ינסו להדפיס בו זמנית, מה שעלול לערבב את הפלט."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

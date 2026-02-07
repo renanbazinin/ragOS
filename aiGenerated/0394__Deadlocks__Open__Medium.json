@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Deadlocks",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 21:15:25",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3559,
+      "output_tokens": 2216,
+      "total_tokens": 9378
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "Open",
+    "topic": [
+      "Deadlocks",
+      "Synchronization",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתונה פיסת קוד בשפת C++ המממשת שתי פונקציות, `transfer_money` ו-`update_balance`, המשתמשות בשני מנעולים (mutexes) שונים, `lockA` ו-`lockB`. נתחו את הקוד המצורף והסבירו האם קיים סיכון לקיפאון (deadlock). אם כן, תארו מצב שבו קיפאון אכן מתרחש, והציעו פתרון לבעיה. הפתרון צריך למנוע קיפאון תוך שמירה על נכונות הפעולות.",
+      "code_snippet": "#include <mutex>\n#include <thread>\n#include <iostream>\n\nstd::mutex lockA;\nstd::mutex lockB;\n\nvoid transfer_money(int from_account, int to_account, double amount) {\n    std::cout << \"Thread \" << std::this_thread::get_id() << \": Trying to lock A for transfer.\" << std::endl;\n    lockA.lock();\n    std::cout << \"Thread \" << std::this_thread::get_id() << \": Locked A. Trying to lock B.\" << std::endl;\n    lockB.lock();\n    \n    // Simulate money transfer\n    std::cout << \"Thread \" << std::this_thread::get_id() << \": Transferring \" << amount \n              << \" from \" << from_account << \" to \" << to_account << std::endl;\n    \n    lockB.unlock();\n    lockA.unlock();\n    std::cout << \"Thread \" << std::this_thread::get_id() << \": Unlocked A and B. Transfer complete.\" << std::endl;\n}\n\nvoid update_balance(int account, double new_balance) {\n    std::cout << \"Thread \" << std::this_thread::get_id() << \": Trying to lock B for update.\" << std::endl;\n    lockB.lock();\n    std::cout << \"Thread \" << std::this_thread::get_id() << \": Locked B. Trying to lock A.\" << std::endl;\n    lockA.lock();\n\n    // Simulate balance update\n    std::cout << \"Thread \" << std::this_thread::get_id() << \": Updating balance for account \" \n              << account << \" to \" << new_balance << std::endl;\n\n    lockA.unlock();\n    lockB.unlock();\n    std::cout << \"Thread \" << std::this_thread::get_id() << \": Unlocked B and A. Update complete.\" << std::endl;\n}\n\nint main() {\n    std::thread t1(transfer_money, 101, 102, 50.0);\n    std::thread t2(update_balance, 101, 1000.0);\n\n    t1.join();\n    t2.join();\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "ניתוח קיפאון (Deadlock Analysis):\nכן, קיים סיכון לקיפאון בקוד המצורף. קיפאון יכול להתרחש כאשר מתקיימים ארבעת התנאים הבאים:\n1.  **מניעה הדדית (Mutual Exclusion):** המנעולים (`lockA`, `lockB`) מבטיחים שתא אחד בלבד יכול להחזיק משאב מסוים (את המנעול) בכל רגע נתון.\n2.  **החזקה והמתנה (Hold and Wait):** חוט יכול להחזיק במנעול אחד (למשל, `lockA` בפונקציה `transfer_money`) ולהמתין למנעול אחר (למשל, `lockB`).\n3.  **אי-הפקעה (No Preemption):** לא ניתן להפקיע מנעול מחוט שמחזיק בו; רק החוט עצמו יכול לשחרר אותו.\n4.  **המתנה מעגלית (Circular Wait):** זהו התנאי שמופר בקוד הנתון.\n\nתרחיש קיפאון:\nנניח שמתרחש הרצף הבא:\n*   **חוט 1** קורא לפונקציה `transfer_money`. הוא נועל את `lockA`.\n*   **חוט 2** קורא לפונקציה `update_balance`. הוא נועל את `lockB`.\n*   כעת, **חוט 1** מנסה לנעול את `lockB`, אך `lockB` מוחזק על ידי חוט 2. חוט 1 נכנס למצב המתנה.\n*   באותו זמן, **חוט 2** מנסה לנעול את `lockA`, אך `lockA` מוחזק על ידי חוט 1. חוט 2 נכנס למצב המתנה.\nשני החוטים ממתינים זה לזה באופן מעגלי, ולעולם לא יוכלו להמשיך, מה שמוביל לקיפאון.\n\nפתרון:\nהדרך הנפוצה והיעילה ביותר למנוע קיפאון מסוג זה היא לשבור את תנאי \"המתנה מעגלית\" על ידי אכיפת סדר עקבי של רכישת מנעולים. כלומר, כל החוטים שצריכים לנעול את `lockA` וגם את `lockB`, חייבים לנעול אותם תמיד באותו סדר (לדוגמה, תמיד `lockA` ואז `lockB`).\n\nקוד פתרון (השינויים בפונקציה `update_balance`):\n```c++\n#include <mutex>\n#include <thread>\n#include <iostream>\n\nstd::mutex lockA;\nstd::mutex lockB;\n\nvoid transfer_money(int from_account, int to_account, double amount) {\n    std::cout << \"Thread \" << std::this_thread::get_id() << \": Trying to lock A for transfer.\" << std::endl;\n    lockA.lock();\n    std::cout << \"Thread \" << std::this_thread::get_id() << \": Locked A. Trying to lock B.\" << std::endl;\n    lockB.lock();\n    \n    std::cout << \"Thread \" << std::this_thread::get_id() << \": Transferring \" << amount \n              << \" from \" << from_account << \" to \" << to_account << std::endl;\n    \n    lockB.unlock();\n    lockA.unlock();\n    std::cout << \"Thread \" << std::this_thread::get_id() << \": Unlocked A and B. Transfer complete.\" << std::endl;\n}\n\nvoid update_balance(int account, double new_balance) {\n    // פתרון: אכיפת סדר נעילה קבוע: תמיד lockA ואז lockB\n    std::cout << \"Thread \" << std::this_thread::get_id() << \": Trying to lock A for update.\" << std::endl;\n    lockA.lock(); // שינוי: נועלים את lockA קודם\n    std::cout << \"Thread \" << std::this_thread::get_id() << \": Locked A. Trying to lock B.\" << std::endl;\n    lockB.lock(); // שינוי: נועלים את lockB אחר כך\n\n    std::cout << \"Thread \" << std::this_thread::get_id() << \": Updating balance for account \" \n              << account << \" to \" << new_balance << std::endl;\n\n    lockB.unlock();\n    lockA.unlock();\n    std::cout << \"Thread \" << std::this_thread::get_id() << \": Unlocked B and A. Update complete.\" << std::endl;\n}\n\nint main() {\n    std::thread t1(transfer_money, 101, 102, 50.0);\n    std::thread t2(update_balance, 101, 1000.0);\n\n    t1.join();\n    t2.join();\n\n    return 0;\n}\n```\nעל ידי אכיפת סדר נעילה עקבי (לדוגמה, תמיד `lockA` ואז `lockB`), אנו מבטיחים שלעולם לא תיווצר המתנה מעגלית. אם חוט 1 מחזיק ב-`lockA` וממתין ל-`lockB`, וחוט 2 מנסה לנעול את `lockB`, הוא יצטרך קודם לנעול את `lockA`. אם `lockA` כבר מוחזק על ידי חוט 1, חוט 2 ימתין ל-`lockA` מבלי להחזיק ב-`lockB`, ובכך נשברת המעגליות.",
+      "difficulty_estimation": "Medium"
+    }
+  }
+}

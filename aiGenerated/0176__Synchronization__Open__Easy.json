@@ -1,0 +1,55 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 19:50:54",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3682,
+      "output_tokens": 1451,
+      "total_tokens": 8840
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Synchronization",
+      "Race Conditions",
+      "Mutexes"
+    ],
+    "content": {
+      "text": "נתון קטע קוד בשפת C שבו מספר תהליכונים (threads) מנסים לעדכן משתנה גלובלי משותף (counter) ללא מנגנוני סנכרון. ענה על השאלות הבאות:",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\nint counter = 0;\n\nvoid* increment_counter(void* arg) {\n    for (int i = 0; i < 100000; i++) {\n        counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t tids[2];\n\n    pthread_create(&tids[0], NULL, increment_counter, NULL);\n    pthread_create(&tids[1], NULL, increment_counter, NULL);\n\n    pthread_join(tids[0], NULL);\n    pthread_join(tids[1], NULL);\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    return 0;\n}"
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "מהי הבעיה בקטע הקוד הנתון? הסבר מדוע היא מתרחשת.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "מהו הערך הסופי הצפוי של `counter` אם הקוד היה רץ כהלכה? מהי הפלט הטיפוסי בפועל, ומדוע הוא עשוי להשתנות?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.3",
+        "text": "שנה את קטע הקוד הנתון כך שיסנכרן נכונה את הגישה למשתנה `counter` באמצעות mutexים של POSIX, ויבטיח את הערך הסופי הנכון. הצג את הקוד המתוקן.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "10.1: הבעיה בקטע הקוד היא תנאי מרוץ (Race Condition). מספר תהליכונים ניגשים למשתנה המשותף `counter` ומנסים לעדכן אותו בו זמנית. הפעולה `counter++` אינה אטומית; היא מורכבת מכמה פעולות מכונה: קריאת הערך הנוכחי של `counter` מהזיכרון, הגדלתו באחד, וכתיבת הערך החדש בחזרה לזיכרון. כאשר מספר תהליכונים מבצעים פעולות אלו במקביל, ייתכן שתהליכון אחד יקרא את הערך, יבוצע מיתוג הקשר (context switch) לתהליכון אחר שיקרא ויעדכן את אותו ערך, ואז התהליכון הראשון ימשיך ויכתוב את הערך הישן + 1 בחזרה, ובכך ידרוס את העדכון של התהליכון השני. זה מוביל לאיבוד עדכונים.\n\n10.2: הערך הסופי הצפוי של `counter` אם הקוד היה רץ כהלכה הוא 200,000. כל אחד משני התהליכונים מבצע 100,000 הגדלות, ולכן סך ההגדלות אמור להיות 2 * 100,000. הפלט הטיפוסי בפועל יהיה ערך נמוך מ-200,000, למשל 120,000, 150,000, או כל ערך אחר בטווח שבין 0 ל-200,000 (כולל). הערך עשוי להשתנות בין הרצות שונות ואף על אותה מכונה, מכיוון שתזמון התהליכונים אינו דטרמיניסטי, ומספר העדכונים שאבדו תלוי בסדר ובזמני המיתוגים בין התהליכונים.\n\n10.3: כדי לסנכרן נכונה את הגישה למשתנה `counter`, יש להשתמש ב-mutex. ה-mutex מבטיח שרק תהליכון אחד יוכל להיכנס לקטע הקריטי (הגדלת המונה) בכל רגע נתון. יש לאתחל את ה-mutex לפני יצירת התהליכונים ולשחרר אותו בסיום. הנה הקוד המתוקן:\n```c\n#include <stdio.h>\n#include <pthread.h>\n\nint counter = 0;\npthread_mutex_t mutex; // Declare a mutex\n\nvoid* increment_counter(void* arg) {\n    for (int i = 0; i < 100000; i++) {\n        pthread_mutex_lock(&mutex); // Acquire the mutex\n        counter++;\n        pthread_mutex_unlock(&mutex); // Release the mutex\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t tids[2];\n\n    pthread_mutex_init(&mutex, NULL); // Initialize the mutex\n\n    pthread_create(&tids[0], NULL, increment_counter, NULL);\n    pthread_create(&tids[1], NULL, increment_counter, NULL);\n\n    pthread_join(tids[0], NULL);\n    pthread_join(tids[1], NULL);\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    pthread_mutex_destroy(&mutex); // Destroy the mutex\n\n    return 0;\n}\n```"
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

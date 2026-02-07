@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 19:46:59",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 968,
+      "output_tokens": 1047,
+      "total_tokens": 5358
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Synchronization",
+      "Reader-Writer Lock",
+      "Starvation",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתונה מימוש חלקי של מנגנון נעילת קוראים-כותבים (Reader-Writer Lock) ב-C/C++ באמצעות mutex-ים של pthreads. המטרה היא לאפשר לקוראים מרובים לגשת למשאב במקביל, אך לאפשר רק לכותב אחד לגשת למשאב בכל רגע, ולמנוע גישת קוראים בזמן כתיבה.\n\n```c\n#include <pthread.h>\n#include <semaphore.h>\n\n// Global variables\nint readers_count = 0;\npthread_mutex_t mutex_readers; // Protects readers_count\npthread_mutex_t resource_lock; // Protects the shared resource for writers\n\nvoid init() {\n    pthread_mutex_init(&mutex_readers, NULL);\n    pthread_mutex_init(&resource_lock, NULL);\n}\n\nvoid reader_acquire() {\n    pthread_mutex_lock(&mutex_readers);\n    readers_count++;\n    if (readers_count == 1) {\n        pthread_mutex_lock(&resource_lock); // First reader locks resource for writers\n    }\n    pthread_mutex_unlock(&mutex_readers);\n}\n\nvoid reader_release() {\n    pthread_mutex_lock(&mutex_readers);\n    readers_count--;\n    if (readers_count == 0) {\n        pthread_mutex_unlock(&resource_lock); // Last reader unlocks resource for writers\n    }\n    pthread_mutex_unlock(&mutex_readers);\n}\n\nvoid writer_acquire() {\n    pthread_mutex_lock(&resource_lock); // Writer locks the resource\n}\n\nvoid writer_release() {\n    pthread_mutex_unlock(&resource_lock); // Writer unlocks the resource\n}\n```\n\nבהתבסס על הקוד לעיל, איזו מהטענות הבאות נכונה לגבי המימוש?",
+      "code_snippet": null,
+      "options": [
+        "א. המימוש נכון ומבטיח שאין תנאי מרוץ (race conditions) ואין רעב (starvation) עבור אף סוג של תהליכים (קוראים או כותבים).",
+        "ב. המימוש עלול לגרום לתנאי מרוץ כאשר מספר קוראים מנסים להיכנס בו זמנית.",
+        "ג. המימוש עלול לגרום לרעב של כותבים (writer starvation) אם יש זרם קבוע של קוראים.",
+        "ד. המימוש עלול לגרום לרעב של קוראים (reader starvation) אם יש זרם קבוע של כותבים.",
+        "ה. המימוש עלול לגרום למבוי סתום (deadlock) במצבים מסוימים."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג. המימוש עלול לגרום לרעב של כותבים (writer starvation) אם יש זרם קבוע של קוראים.",
+      "explanation": "הסבר: המימוש הנתון הוא סוג של מנגנון קוראים-כותבים המעדיף קוראים. כאשר קורא ראשון מגיע, הוא נועל את המשאב (resource_lock), וחוסם כותבים. קוראים נוספים יכולים להיכנס בחופשיות. הבעיה המרכזית מתרחשת כאשר יש זרם מתמשך של קוראים: כל עוד יש לפחות קורא אחד פעיל, resource_lock נשאר תפוס על ידי קבוצת הקוראים, והכותבים הממתינים על writer_acquire לעולם לא יוכלו לתפוס את המנעול, וכתוצאה מכך יסבלו מרעב (starvation). אין תנאי מרוץ על readers_count מכיוון שהוא מוגן על ידי mutex_readers. אין מבוי סתום מכיוון שאין תלות מעגלית במנעולים, והמנעולים נתפסים ומשוחררים בסדר לינארי פשוט שאינו יוצר מעגל המתנה."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

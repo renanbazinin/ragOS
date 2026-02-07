@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 20:21:19",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3905,
+      "output_tokens": 2330,
+      "total_tokens": 15300
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Mutexes",
+      "Deadlock Prevention",
+      "Fairness",
+      "Synchronization",
+      "Resource Allocation"
+    ],
+    "content": {
+      "text": "מערכת ההפעלה מנהלת מערך של N משאבים ייחודיים, `Resource[0]`, `Resource[1]`, ..., `Resource[N-1]`. כל משאב מוגן על ידי מנעול (mutex) משלו. חוטים רבים במערכת נדרשים באופן תדיר לרכוש שני משאבים ספציפיים, נניח `Resource[i]` ו-`Resource[j]` (כאשר `i != j`), לבצע פעולה כלשהי, ולאחר מכן לשחרר אותם.\n\nממשו את הפונקציות `acquire_two_resources(ResourceManager *rm, int i, int j)` ו-`release_two_resources(ResourceManager *rm, int i, int j)`. המימוש צריך לקיים את הדרישות הבאות:\n1. מניעת קיפאון (Deadlock Prevention): המימוש חייב להבטיח שלא יתרחש מצב של קיפאון לעולם.\n2. הוגנות (Fairness): יש להבטיח שאף חוט המבקש לרכוש שני משאבים `i` ו-`j` לא יורעב (starve) ללא הגבלת זמן, בעוד שחוטים אחרים ממשיכים לרכוש ולשחרר משאבים.\n3. יעילות: המימוש צריך למזער המתנה מיותרת ככל הניתן.\n\nהשתמשו באובייקטים מסוג `pthread_mutex_t` ובפעולותיהם בלבד (ללא סמפורים או משתני תנאי).",
+      "code_snippet": "```c\n#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n\ntypedef struct {\n    int N; // Number of resources\n    // Add necessary synchronization primitives here\n} ResourceManager;\n\nvoid init_resource_manager(ResourceManager *rm, int n_resources);\nvoid destroy_resource_manager(ResourceManager *rm);\nvoid acquire_two_resources(ResourceManager *rm, int i, int j);\nvoid release_two_resources(ResourceManager *rm, int i, int j);\n```",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "פתרון זה משתמש בשני מנגנוני סנכרון עיקריים כדי לעמוד בדרישות:\n\n1.  **מניעת קיפאון (Deadlock Prevention):** כדי למנוע קיפאון, אנו נוקטים בגישה של רכישת משאבים בסדר קנוני (קבוע). כאשר חוט מבקש לרכוש את משאב `i` ומשאב `j`, הוא תמיד ירכוש קודם את המשאב בעל האינדקס הנמוך יותר, ולאחר מכן את המשאב בעל האינדקס הגבוה יותר. לדוגמה, אם חוט מבקש (3, 7), הוא ירכוש קודם את `resource_locks[3]` ולאחר מכן את `resource_locks[7]`. אם חוט אחר מבקש (7, 3), הוא גם ירכוש קודם את `resource_locks[3]` ואז את `resource_locks[7]`. גישה זו מבטיחה שמעגל המתנה לעולם לא ייווצר, ובכך מונעת קיפאון.\n\n2.  **הוגנות (Fairness):** כדי להבטיח הוגנות ולמנוע הרעבה, אנו משתמשים ב-`request_serializer_mutex` גלובלי. כל חוט המבקש לרכוש זוג משאבים חייב קודם לרכוש את `request_serializer_mutex`. מנעול זה מבטיח שרק חוט אחד בכל רגע נתון יוכל לנסות לרכוש את זוג המשאבים שלו. לאחר שהחוט רכש את `request_serializer_mutex`, הוא ממשיך לרכוש את שני המשאבים הספציפיים שלו בסדר הקנוני שתואר לעיל. רק לאחר ששני המשאבים נרכשו בהצלחה, `request_serializer_mutex` משוחרר. מנגנון זה יוצר תור FIFO (First-In, First-Out) עבור כל הבקשות לרכישת זוגות משאבים, ובכך מבטיח שאף חוט לא יורעב – כל בקשה תקבל את תורה ותטופל בסופו של דבר.\n\n3.  **יעילות:** הפתרון ממזער המתנה מיותרת במובן זה שאחרי שחוט רוכש את `request_serializer_mutex`, הוא ירכוש את המשאבים הנדרשים שלו מיד כשהם פנויים. עם זאת, יש לציין שהשימוש ב-`request_serializer_mutex` גלובלי מפחית את המקביליות האפשרית במערכת, מכיוון שכל בקשות הרכישה נסגרות לסדרה (מועברות בתור אחת אחרי השנייה). לדוגמה, אם חוט אחד מבקש את (R0, R1) וחוט אחר מבקש את (R2, R3) – משאבים שאינם חופפים – הם עדיין יצטרכו לחכות זה לזה ב-`request_serializer_mutex`. זוהי פשרה נפוצה כאשר דורשים הוגנות מחמירה עם מנעולים בלבד, ללא שימוש במשתני תנאי (condition variables) המאפשרים המתנה חכמה יותר.\n\n```c\n#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n\ntypedef struct {\n    int N; // Number of resources\n    pthread_mutex_t *resource_locks; // Array of mutexes, one per resource\n    pthread_mutex_t request_serializer_mutex; // Global mutex to ensure fairness for acquisition attempts\n} ResourceManager;\n\n// Initialization function\nvoid init_resource_manager(ResourceManager *rm, int n_resources) {\n    rm->N = n_resources;\n    rm->resource_locks = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t) * n_resources);\n    if (rm->resource_locks == NULL) {\n        perror(\"Failed to allocate resource_locks\");\n        exit(EXIT_FAILURE);\n    }\n    for (int i = 0; i < n_resources; ++i) {\n        if (pthread_mutex_init(&rm->resource_locks[i], NULL) != 0) {\n            perror(\"Failed to initialize resource mutex\");\n            exit(EXIT_FAILURE);\n        }\n    }\n    if (pthread_mutex_init(&rm->request_serializer_mutex, NULL) != 0) {\n        perror(\"Failed to initialize request serializer mutex\");\n        exit(EXIT_FAILURE);\n    }\n}\n\n// Destruction function\nvoid destroy_resource_manager(ResourceManager *rm) {\n    for (int i = 0; i < rm->N; ++i) {\n        pthread_mutex_destroy(&rm->resource_locks[i]);\n    }\n    free(rm->resource_locks);\n    pthread_mutex_destroy(&rm->request_serializer_mutex);\n}\n\n// Acquire two resources\nvoid acquire_two_resources(ResourceManager *rm, int i, int j) {\n    // Ensure valid indices\n    if (i < 0 || i >= rm->N || j < 0 || j >= rm->N || i == j) {\n        fprintf(stderr, \"Invalid resource indices: %d, %d\\n\", i, j);\n        return;\n    }\n\n    // Use the request_serializer_mutex to ensure fairness for acquisition attempts\n    // This mutex is held for the entire duration of acquiring both resource locks.\n    // This serializes all attempts to acquire a pair of resources.\n    pthread_mutex_lock(&rm->request_serializer_mutex);\n\n    // Acquire resources in canonical order to prevent deadlock\n    int idx1 = (i < j) ? i : j;\n    int idx2 = (i < j) ? j : i;\n\n    pthread_mutex_lock(&rm->resource_locks[idx1]);\n    pthread_mutex_lock(&rm->resource_locks[idx2]);\n\n    // Release the request_serializer_mutex ONLY AFTER both resources are acquired.\n    // This makes the entire acquisition process (for a pair) atomic from the perspective\n    // of other threads trying to acquire any resources.\n    pthread_mutex_unlock(&rm->request_serializer_mutex);\n}\n\n// Release two resources\nvoid release_two_resources(ResourceManager *rm, int i, int j) {\n    // Ensure valid indices\n    if (i < 0 || i >= rm->N || j < 0 || j >= rm->N || i == j) {\n        fprintf(stderr, \"Invalid resource indices: %d, %d\\n\", i, j);\n        return;\n    }\n\n    // Release resources in reverse canonical order (or any order, as release order doesn't cause deadlock)\n    // For consistency, releasing in reverse order of acquisition is good practice.\n    int idx1 = (i < j) ? i : j;\n    int idx2 = (i < j) ? j : i;\n\n    pthread_mutex_unlock(&rm->resource_locks[idx2]);\n    pthread_mutex_unlock(&rm->resource_locks[idx1]);\n}\n```"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

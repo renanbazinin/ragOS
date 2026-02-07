@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 20:13:59",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2084,
+      "output_tokens": 1080,
+      "total_tokens": 6828
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "Open",
+    "topic": [
+      "Mutexes",
+      "Synchronization",
+      "Concurrency",
+      "Threads"
+    ],
+    "content": {
+      "text": "הסבר/י בקצרה מהו Mutex (מנעול הדדי) ומה מטרתו העיקרית בתכנות מקבילי.\nהדגם/הדגימי באמצעות קטע קוד פשוט ב-C/C++ כיצד ניתן להשתמש ב-Mutex כדי להגן על משאב משותף (לדוגמה, מונה גלובלי) מפני תנאי מירוץ (Race Condition) כאשר מספר תהליכונים (threads) מנסים לגשת אליו ולעדכן אותו בו זמנית.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "Mutex (מנעול הדדי) הוא אובייקט סנכרון בסיסי המשמש להבטחת בלעדיות הדדית (mutual exclusion) בגישה למשאבים משותפים (כמו משתנים גלובליים, מבני נתונים, קבצים ועוד) בסביבת ריבוי תהליכונים (multi-threading).\nמטרתו העיקרית היא למנוע תנאי מירוץ (Race Conditions), מצב שבו מספר תהליכונים ניגשים למשאב משותף בו-זמנית, ולפחות אחד מהם מבצע שינוי, מה שעלול להוביל לתוצאות בלתי צפויות ולא עקביות.\nMutex מבטיח שרק תהליכון אחד יכול \"לנעול\" (lock) את המשאב, לגשת אליו ולבצע עליו פעולות, ולאחר מכן \"לשחרר\" (unlock) אותו. כל תהליכון אחר שינסה לנעול את ה-Mutex כשהוא כבר נעול ימתין עד שהתהליכון הנוכחי ישחרר אותו.\n\nדוגמה לקטע קוד ב-C/C++ המשתמש ב-Mutex להגנה על מונה גלובלי:\n```c\n#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n\n#define NUM_THREADS 5\n#define ITERATIONS_PER_THREAD 100000\n\nint shared_counter = 0;\npthread_mutex_t counter_mutex;\n\n// פונקציית התהליכון המגדילה את המונה המשותף\nvoid* increment_counter(void* arg) {\n    for (int i = 0; i < ITERATIONS_PER_THREAD; ++i) {\n        pthread_mutex_lock(&counter_mutex); // נעל את ה-Mutex לפני גישה למשאב המשותף\n        shared_counter++; // אזור קריטי: גישה למשתנה משותף\n        pthread_mutex_unlock(&counter_mutex); // שחרר את ה-Mutex לאחר סיום הגישה\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    // אתחול ה-Mutex\n    if (pthread_mutex_init(&counter_mutex, NULL) != 0) {\n        fprintf(stderr, \"Mutex init failed\\n\");\n        return 1;\n    }\n\n    // יצירת תהליכונים\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        if (pthread_create(&threads[i], NULL, increment_counter, NULL) != 0) {\n            fprintf(stderr, \"Thread creation failed\\n\");\n            return 1;\n        }\n    }\n\n    // המתנה לסיום כל התהליכונים\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    // השמדת ה-Mutex (שחרור משאבי מערכת)\n    pthread_mutex_destroy(&counter_mutex);\n\n    printf(\"Final shared_counter value: %d\\n\", shared_counter);\n    printf(\"Expected value: %d\\n\", NUM_THREADS * ITERATIONS_PER_THREAD);\n\n    return 0;\n}\n```"
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

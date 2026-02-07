@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 20:01:06",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3136,
+      "output_tokens": 2082,
+      "total_tokens": 10459
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Producer-Consumer",
+      "Mutex",
+      "Condition Variables"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C הבאה המשתמשת ב-pthreads, mutexes, ו-condition variables. התוכנית מדמה תהליך יצרן-צרכן עם משאב משותף (מונה `count`) וגודל חיץ מוגבל (`MAX_COUNT`).\n\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <pthread.h>\n#include <unistd.h> // For usleep\n\n#define MAX_COUNT 5\n#define NUM_OPERATIONS 10\n\nint count = 0;\npthread_mutex_t mutex;\npthread_cond_t cond_producer; // Condition for producer to wait if buffer is full\npthread_cond_t cond_consumer; // Condition for consumer to wait if buffer is empty\n\nvoid* producer(void* arg) {\n    for (int i = 0; i < NUM_OPERATIONS; ++i) {\n        pthread_mutex_lock(&mutex);\n        while (count == MAX_COUNT) {\n            printf(\"Producer waiting (count=%d)...\\n\", count);\n            pthread_cond_wait(&cond_producer, &mutex);\n        }\n        count++;\n        printf(\"Producer: count = %d\\n\", count);\n        pthread_cond_signal(&cond_consumer);\n        pthread_mutex_unlock(&mutex);\n        usleep(100000); // Simulate work\n    }\n    return NULL;\n}\n\nvoid* consumer(void* arg) {\n    for (int i = 0; i < NUM_OPERATIONS; ++i) {\n        pthread_mutex_lock(&mutex);\n        while (count == 0) {\n            printf(\"Consumer waiting (count=%d)...\\n\", count);\n            pthread_cond_wait(&cond_consumer, &mutex);\n        }\n        count--;\n        printf(\"Consumer: count = %d\\n\", count);\n        pthread_cond_signal(&cond_producer);\n        pthread_mutex_unlock(&mutex);\n        usleep(150000); // Simulate work\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t prod_tid, cons_tid;\n\n    pthread_mutex_init(&mutex, NULL);\n    pthread_cond_init(&cond_producer, NULL);\n    pthread_cond_init(&cond_consumer, NULL);\n\n    pthread_create(&prod_tid, NULL, producer, NULL);\n    pthread_create(&cons_tid, NULL, consumer, NULL);\n\n    pthread_join(prod_tid, NULL);\n    pthread_join(cons_tid, NULL);\n\n    printf(\"Final count value: %d\\n\", count);\n\n    pthread_mutex_destroy(&mutex);\n    pthread_cond_destroy(&cond_producer);\n    pthread_cond_destroy(&cond_consumer);\n\n    return 0;\n}\n```\n\nבהתבסס על התוכנית הנתונה:\n1.  מה יהיה הערך הסופי של המשתנה `count` המודפס על ידי התוכנית הראשית (`main`)? נמקו את תשובתכם.\n2.  תארו את אופי הפלט שיופק על ידי התוכנית, והסבירו מדוע הוא כך. (האם הוא דטרמיניסטי? אילו ערכים יכולים להופיע? מה היחס ביניהם?)\n3.  האם קיימת בתוכנית סכנה למצב קיפאון (Deadlock)? נמקו את תשובתכם.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.  **ערך סופי של `count`:**\n    הערך הסופי של `count` יהיה 0.\n    **נימוק:**\n    *   גם תהליכון היצרן וגם תהליכון הצרכן מבצעים `NUM_OPERATIONS` פעולות, שכל אחת מהן מגדילה או מקטינה את `count` באחד.\n    *   היצרן מבצע 10 הגדלות (`count++`).\n    *   הצרכן מבצע 10 הקטנות (`count--`).\n    *   הפעולות מוגנות על ידי mutex ומתואמות באמצעות condition variables כך ש-`count` לעולם לא יעבור את `MAX_COUNT` (5) או ירד מתחת ל-0.\n    *   השפעה נטו על `count` היא `10 - 10 = 0`. מכיוון ש-`count` מתחיל מ-0, הוא יחזור ל-0 בסיום כל הפעולות.\n\n2.  **אופי הפלט:**\n    הפלט לא יהיה דטרמיניסטי מבחינת סדר ההודעות \"Producer: count = X\" ו-\"Consumer: count = Y\", אך הוא יהיה דטרמיניסטי מבחינת רצף הערכים הלוגי.\n    *   **אי-דטרמיניסטיות**: סדר ההרצה של תהליכונים תלוי בתזמן מערכת ההפעלה, ולכן סדר ההדפסות מהיצרן והצרכן ישתנה בין הרצות שונות (בנוסף לשימוש ב-`usleep` שמשפיע על התזמון).\n    *   **דטרמיניסטיות לוגית**: \n        *   הודעות \"Producer: count = X\" יציגו ערכים של `count` בין 1 ל-`MAX_COUNT` (כלומר, 1 עד 5).\n        *   הודעות \"Consumer: count = Y\" יציגו ערכים של `count` בין 0 ל-`MAX_COUNT - 1` (כלומר, 0 עד 4).\n        *   כל הדפסה של היצרן תגדיל את `count` באחד, וכל הדפסה של הצרכן תקטין את `count` באחד.\n        *   הודעות \"Producer waiting...\" יופיעו כאשר `count` מגיע ל-`MAX_COUNT` (5) והיצרן מנסה להגדיל אותו שוב, אך נאלץ להמתין שהצרכן יפנה מקום.\n        *   הודעות \"Consumer waiting...\" יופיעו כאשר `count` מגיע ל-0 והצרכן מנסה להקטין אותו שוב, אך נאלץ להמתין שהיצרן ייצר פריט.\n        *   כל הדפסה מתרחשת בתוך critical section (לאחר נעילת ה-mutex), כך שהערך המודפס של `count` יהיה תמיד עקבי לרגע ההדפסה.\n\n3.  **סכנה למצב קיפאון (Deadlock):**\n    לא, לא קיימת סכנה למצב קיפאון (deadlock) בתוכנית זו.\n    **נימוק:**\n    *   נעילת ה-mutex מתבצעת תמיד לפני כניסה לאזור הקריטי ושחרורו מתבצע תמיד לאחר היציאה ממנו. אין מצב של החזקה ב-mutex אחד וניסיון לנעול mutex אחר.\n    *   התהליכונים ממתינים על condition variables (באמצעות `pthread_cond_wait`) אך עושים זאת תוך שחרור אוטומטי של ה-mutex וחזרה לנעול אותו עם קבלת האות. זה מונע מצב שבו תהליכון אחד מחזיק ב-mutex וממתין לאירוע שתהליכון אחר צריך את אותו mutex כדי לייצר/לצרוך, ובכך לא יאפשר לו להתקדם.\n    *   השימוש בלולאות `while` סביב `pthread_cond_wait` הוא הדרך הנכונה לטפל ב-spurious wakeups ומבטיח שהתהליכון ימשיך רק כאשר התנאי באמת מתקיים, מבלי להכניס באג לוגי או deadlock.\n    *   קיים רק mutex אחד וזוג condition variables, וכל תהליכון משתמש בהם בסדר הגיוני: נועל mutex, בודק תנאי, ממתין אם צריך (משחרר mutex), מבצע פעולה, מאותת, ומשחרר mutex. אין פקודות נעילה מרובות בסדר שונה שיכול להוביל ל-deadlock."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

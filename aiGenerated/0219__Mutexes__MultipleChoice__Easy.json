@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 20:07:29",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 860,
+      "output_tokens": 417,
+      "total_tokens": 2105
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Mutexes",
+      "Synchronization",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "מהו התפקיד העיקרי של Mutex במערכת הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "מניעת קיפאון (Deadlock)",
+        "הבטחת הדרה הדדית (Mutual Exclusion)",
+        "תיאום בין תהליכים שונים (Process Coordination)",
+        "הגברת ביצועים של תוכניות מקביליות"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "הבטחת הדרה הדדית (Mutual Exclusion)",
+      "explanation": "התפקיד העיקרי והבסיסי של Mutex הוא להבטיח הדרה הדדית (mutual exclusion) בין תהליכים או ת'רדים. הדרה הדדית מבטיחה שרק תהליך או ת'רד אחד יוכל לגשת לקטע קריטי (critical section) או למשאב משותף בכל רגע נתון, ובכך למנוע מצבי מרוץ (race conditions) ולשמור על עקביות הנתונים. בעוד ש-Mutex יכול להיות כלי במניעת קיפאון או תיאום, אלה אינם תפקידיו העיקריים ישירות, והוא אינו מיועד להגברת ביצועים באופן ישיר (לרוב הוא אף גורם לסריאליזציה ובכך עלול להקטין ביצועים)."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

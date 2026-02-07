@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Semaphores",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 20:37:05",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1032,
+      "output_tokens": 593,
+      "total_tokens": 3399
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Semaphores"
+    ],
+    "content": {
+      "text": "נתון סמפור (semaphore) בשם S שאותחל לערך 3.\nבמהלך ביצוע התוכנית, התרחשו הפעולות הבאות:\n- 5 קריאות לפונקציה wait(S)\n- 3 קריאות לפונקציה signal(S)\nבהנחה שאין פעולות נוספות על הסמפור וכל הקריאות בוצעו במלואן, מה יהיה ערכו הסופי של הסמפור S?",
+      "code_snippet": null,
+      "options": [
+        "א. 0",
+        "ב. 1",
+        "ג. 2",
+        "ד. -1",
+        "ה. 3"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "הסמפור S מאותחל לערך 3.\n\nכל קריאה ל-wait(S) מורידה את ערך הסמפור ב-1. אם ערך הסמפור הופך שלילי, התהליך הקורא נחסם. מספר שלילי מציין כמה תהליכים חסומים ממתינים.\nכל קריאה ל-signal(S) מעלה את ערך הסמפור ב-1. אם ערך הסמפור היה שלילי (כלומר, היו תהליכים חסומים), אחד מהם משוחרר.\n\nנתחיל עם S = 3.\n\nלאחר 5 קריאות wait(S):\n1. S = 2\n2. S = 1\n3. S = 0\n4. S = -1 (תהליך נחסם)\n5. S = -2 (תהליך נוסף נחסם)\nבשלב זה, ערך הסמפור הוא -2, ושני תהליכים חסומים.\n\nלאחר 3 קריאות signal(S):\n1. S = -1 (תהליך אחד משוחרר)\n2. S = 0 (התהליך השני משוחרר)\n3. S = 1 (אין תהליכים חסומים, הערך פשוט עולה)\n\nלכן, ערכו הסופי של הסמפור יהיה 1."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

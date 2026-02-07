@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 20:01:27",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3136,
+      "output_tokens": 1116,
+      "total_tokens": 7647
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Threads",
+      "Deadlock"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה המשתמשת בספריות `pthread` ו-`stdio`. התוכנית מיועדת לסכם ערכים משותפים באמצעות מספר תהליכונים.\nמה יהיה הערך הסופי של המשתנה `shared_counter` שהודפס על ידי התוכנית, או מה יקרה לתוכנית? (שים לב: `pthread_mutex_t` הוא בדרך כלל mutex לא רקורסיבי, אלא אם צוין אחרת במפורש).",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <unistd.h> // לצרכי הדגמה של הקשר, אך לא קריטי לבעיה זו\n\n#define NUM_THREADS 3\n#define NUM_ITERATIONS 1000\n\nlong long shared_counter = 0;\npthread_mutex_t mutex;\n\nvoid* thread_function(void* arg) {\n    for (int i = 0; i < NUM_ITERATIONS; ++i) {\n        pthread_mutex_lock(&mutex);\n        shared_counter++;\n    }\n    pthread_mutex_unlock(&mutex); // שחרור ה-mutex מתבצע מחוץ ללולאה\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n    pthread_mutex_init(&mutex, NULL);\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, thread_function, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(&threads[i], NULL);\n    }\n\n    pthread_mutex_destroy(&mutex);\n\n    printf(\"Final shared_counter: %lld\\n\", shared_counter);\n    return 0;\n}",
+      "options": [
+        "א. 0",
+        "ב. 3000",
+        "ג. ערך כלשהו בין 0 ל-3000 (כולל)",
+        "ד. התוכנית תיתקע (Deadlock)",
+        "ה. התוכנית תקרוס (Segmentation Fault)"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ד",
+      "explanation": "התוכנית תיכנס למצב של Deadlock.\n\n`pthread_mutex_t` כברירת מחדל הוא mutex מסוג `PTHREAD_MUTEX_NORMAL` (לא רקורסיבי). המשמעות היא שתהליכון שמנסה לנעול mutex שכבר נמצא בבעלותו (כלומר, הוא כבר ביצע `pthread_mutex_lock` עליו ולא שחרר אותו עדיין) ייכנס למצב של Deadlock עצמי (self-deadlock).\n\nבפונקציה `thread_function`, כל תהליכון מבצע לולאה `NUM_ITERATIONS` פעמים. בתוך הלולאה, הוא קורא ל-`pthread_mutex_lock(&mutex)`.\n\nבאיטרציה הראשונה של הלולאה (כאשר `i=0`), התהליכון ינעל בהצלחה את ה-mutex.\nבאיטרציה השנייה של הלולאה (כאשר `i=1`), אותו תהליכון ינסה שוב לנעול את אותו ה-mutex. מכיוון שהוא כבר מחזיק ב-mutex והוא מסוג `PTHREAD_MUTEX_NORMAL`, ניסיון נעילה זה ייחסם, והתהליכון ייכנס למצב של Deadlock עצמי. הוא לא יוכל להמשיך לנעול את ה-mutex או לשחרר אותו, מכיוון ששחרור ה-mutex מתבצע רק מחוץ ללולאה.\n\nכל אחד מ-`NUM_THREADS` התהליכונים יגיע למצב Deadlock זה באופן עצמאי. לכן, התוכנית לעולם לא תגיע לשלב שבו היא מדפיסה את הערך הסופי של `shared_counter`, מכיוון שכל התהליכונים ייתקעו בניסיונם השני לנעול את ה-mutex. התוכנית תיתקע ולא תסיים את ריצתה באופן תקין.\n\nהפלט הצפוי הוא שהתוכנית לא תסיים את ריצתה ותיתקע (Deadlock)."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

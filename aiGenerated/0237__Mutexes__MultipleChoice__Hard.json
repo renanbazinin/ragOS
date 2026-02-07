@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Mutexes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 20:11:21",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 970,
+      "output_tokens": 903,
+      "total_tokens": 5445
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Synchronization",
+      "Mutexes",
+      "Deadlock",
+      "Pthreads"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המשתמשת בספריות pthreads. תהליך (thread) תופס מנעול מסוג pthread_mutex_t שאינו מוגדר כרקרוסיבי (non-recursive). בתוך המקטע הקריטי, התהליך מנסה לתפוס את אותו המנעול בשנית. מהי התוצאה הסבירה ביותר של פעולה זו?",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h>\n\npthread_mutex_t my_mutex;\n\nvoid* thread_func(void* arg) {\n    printf(\"Thread trying to lock mutex for the first time.\\n\");\n    pthread_mutex_lock(&my_mutex);\n    printf(\"Thread acquired mutex for the first time. Trying to lock again...\\n\");\n    pthread_mutex_lock(&my_mutex); // This is the problematic line\n    printf(\"Thread acquired mutex for the second time (should not happen with non-recursive mutex).\\n\");\n    pthread_mutex_unlock(&my_mutex);\n    printf(\"Thread unlocked mutex once.\\n\");\n    pthread_mutex_unlock(&my_mutex);\n    printf(\"Thread unlocked mutex twice.\\n\");\n    return NULL;\n}\n\nint main() {\n    pthread_mutex_init(&my_mutex, NULL); // Default is PTHREAD_MUTEX_NORMAL (non-recursive)\n\n    pthread_t tid;\n    pthread_create(&tid, NULL, thread_func, NULL);\n    pthread_join(tid, NULL);\n\n    pthread_mutex_destroy(&my_mutex);\n    return 0;\n}",
+      "options": [
+        "א. התוכנית תקרוס מיד עם ניסיון התפיסה השנייה של המנעול.",
+        "ב. התהליך ייכנס למצב קיפאון (deadlock) וימתין לעצמו לשחרר את המנעול.",
+        "ג. המנעול ייתפס בהצלחה בפעם השנייה, אך ישוחרר רק לאחר שחרור כפול.",
+        "ד. התוכנית תמשיך לרוץ כרגיל, אך המנעול לא ייתפס שוב והפעולה השנייה תתעלם.",
+        "ה. התנהגות בלתי מוגדרת (undefined behavior) כתוצאה מניסיון תפיסה כפול."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "התשובה הנכונה היא ב'. על פי תקן POSIX, כאשר תהליך מנסה לתפוס מנעול מסוג PTHREAD_MUTEX_NORMAL (שהוא ברירת המחדל ואינו רקרוסיבי) שהוא כבר מחזיק בו, התוצאה המוגדרת היא קיפאון (deadlock). התהליך ימתין לעצמו לשחרר את המנעול, אך מכיוון שהוא זה שמחזיק בו, השחרור לא יקרה והתהליך ייתקע. מנעולים רקרוסיביים (PTHREAD_MUTEX_RECURSIVE) מאפשרים תפיסה חוזרת על ידי אותו תהליך, אך זה לא המקרה כאן. מנעולים מסוג PTHREAD_MUTEX_ERRORCHECK היו מחזירים שגיאה במקרה כזה, אך PTHREAD_MUTEX_NORMAL מוביל לקיפאון."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

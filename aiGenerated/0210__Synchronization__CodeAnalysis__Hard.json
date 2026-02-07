@@ -1,0 +1,51 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 20:02:48",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4129,
+      "output_tokens": 2174,
+      "total_tokens": 14918
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Deadlock",
+      "Condition Variables",
+      "Mutexes"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המשתמשת בחוטים (threads) לסנכרון גישה למונה משותף `counter`. כל חוט מנסה לקדם את המונה מספר קבוע של פעמים (`INCREMENTS_PER_THREAD`). עם זאת, קיימת הגבלה: חוט יכול לקדם את המונה רק אם ערכו הנוכחי זוגי. אם המונה אי-זוגי, החוט חייב להמתין. לאחר קידום המונה, החוט מאותת לחוטים אחרים. יש לנתח את הקוד ולזהות בעיות סנכרון אפשריות.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <stdlib.h>\n\n#define NUM_THREADS 3\n#define INCREMENTS_PER_THREAD 2\n\nint counter = 0;\npthread_mutex_t mutex;\npthread_cond_t cond_even;\n\nvoid* worker(void* arg) {\n    for (int i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n        pthread_mutex_lock(&mutex);\n\n        // Wait until counter is even\n        while (counter % 2 != 0) {\n            pthread_cond_wait(&cond_even, &mutex);\n        }\n\n        // Increment counter\n        counter++;\n\n        // Signal that counter has changed.\n        pthread_cond_signal(&cond_even); \n        pthread_mutex_unlock(&mutex);\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n    long i;\n\n    pthread_mutex_init(&mutex, NULL);\n    pthread_cond_init(&cond_even, NULL);\n\n    for (i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, worker, (void*)i);\n    }\n\n    for (i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    pthread_mutex_destroy(&mutex);\n    pthread_cond_destroy(&cond_even);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "8.1",
+        "text": "האם התוכנית הנתונה עלולה להיכנס למצב של קיפאון (deadlock) או רעב (starvation)? נמקו את תשובתכם והסבירו את התרחיש המוביל לבעיה. מה יהיה הערך הסופי של `counter` במקרה של בעיה?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.2",
+        "text": "תקנו את פונקציית `worker` כך שכל `NUM_THREADS * INCREMENTS_PER_THREAD` הקידומים יבוצעו באופן תקין וללא מצבי מרוץ או קיפאון, ושהתוכנית תסיים את ריצתה. אם תידרשו לשנות או להסיר את אילוץ הזוגיות המקורי כדי להשיג זאת, הסבירו מדוע ואיזה אילוץ חדש (אם בכלל) אתם אוכפים במקומו. ניתן להשתמש רק ב-mutexes ו-condition variables. רשמו את הקוד המתוקן של פונקציית `worker` בלבד.",
+        "code_snippet": "void* worker(void* arg) {\n    // Write your corrected code here\n}",
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "8.1: כן, התוכנית עלולה להיכנס למצב של קיפאון (deadlock). המצב נוצר כדלקמן:\nהמונה `counter` מתחיל מערך 0 (זוגי). חוט כלשהו (נניח חוט A) רוכש את המנעול, בודק שהמונה זוגי (0 % 2 == 0), וממשיך לקדם אותו. המונה הופך ל-1 (אי-זוגי). לאחר מכן, חוט A קורא ל-`pthread_cond_signal(&cond_even)` ומשחרר את המנעול.\nכעת, המונה `counter` שווה ל-1 (אי-זוגי). כל החוטים האחרים, וגם חוט A עצמו בניסיונו הבא לקדם את המונה, ינסו לרכוש את המנעול. לאחר שיצליחו, הם יגיעו ללולאת ה-`while (counter % 2 != 0)`. מכיוון ש-`counter` הוא 1 (אי-זוגי), התנאי נכון, והם יקראו ל-`pthread_cond_wait(&cond_even, &mutex)`.\nהבעיה היא שפעולת הקידום `counter++` תמיד הופכת מספר זוגי לאי-זוגי. כלומר, ברגע שהמונה הופך ל-1, הוא לעולם לא יוכל לחזור להיות זוגי באמצעות פעולת `counter++` תחת האילוץ שרק כאשר הוא זוגי מותר לקדם אותו. אף חוט לא יוכל לקדם את המונה מעבר ל-1, מכיוון שהתנאי \"מונה זוגי\" לעולם לא יתקיים שוב.\nלכן, כל החוטים ימתינו על `cond_even` ללא תקווה שמישהו יאותת להם, והתוכנית תיכנס לקיפאון.\nהערך הסופי של `counter` יהיה 1.\n\n8.2: כדי לאפשר לכל הקידומים להסתיים, יש להסיר את אילוץ הזוגיות המקורי, מכיוון שהוא מוביל לקיפאון אינהרנטי עם פעולת `counter++`. אם נשמור על האילוץ, המונה לעולם לא יוכל לעבור את הערך 1.\nהאילוץ החדש שנוכף הוא פשוט סנכרון נכון של גישה למונה משותף, ללא תלות בזוגיות. המטרה היא להבטיח שכל חוט יקדם את המונה את מספר הפעמים הנדרש, ושהמונה יגיע לערך הסופי הנכון (`NUM_THREADS * INCREMENTS_PER_THREAD`), ללא מצבי מרוץ או קיפאון.\nבמקרה זה, משתנה התנאי `cond_even` אינו נחוץ עוד, שכן אין תנאי מורכב מעבר לגישה בלעדית למשאב. ניתן להשתמש ב-mutex בלבד. אם בכל זאת רוצים להשתמש ב-condition variable, אפשר לאותת על שינוי כלשהו, אך זה אינו הכרחי לתיקון הבעיה הספציפית הזו.\n\nקוד מתוקן (הסרת אילוץ הזוגיות ושימוש ב-mutex בלבד):\n\n```c\nvoid* worker(void* arg) {\n    for (int i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n        pthread_mutex_lock(&mutex); // נעל את המונה לגישה בלעדית\n        counter++;                 // קדם את המונה\n        pthread_mutex_unlock(&mutex); // שחרר את המנעול\n    }\n    return NULL;\n}\n```\n\nאם נתעקש לשמור על השימוש ב-condition variable (לדוגמה, אם היה אילוץ מורכב יותר):\n```c\nvoid* worker(void* arg) {\n    for (int i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n        pthread_mutex_lock(&mutex);\n        // אין צורך בלולאת while עם תנאי זוגיות, כי היא הגורם לקיפאון.\n        // אם היה תנאי לגיטימי אחר (למשל, \"מונה קטן מ-X\"), היינו משתמשים בו כאן.\n        counter++;\n        pthread_cond_signal(&cond_even); // מאותת שחל שינוי, למקרה שחוטים אחרים ממתינים לתנאי כלשהו\n        pthread_mutex_unlock(&mutex);\n    }\n    return NULL;\n}\n```\nהתיקון הראשון (שימוש ב-mutex בלבד) הוא הפתרון המינימלי והנכון ביותר לאפשר את השלמת כל הקידומים ללא תלות באילוץ הזוגיות. התיקון השני מראה איך ניתן להשתמש ב-condition variable גם אם התנאי הוסר, אך הוא מיותר במקרה זה."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

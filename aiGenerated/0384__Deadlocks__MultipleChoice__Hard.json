@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Deadlocks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 21:13:27",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 1426,
+      "total_tokens": 8596
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Deadlocks",
+      "Synchronization",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא בשפת C המציג שני תהליכונים המנסים לרכוש שני משאבים (mutexes) באמצעות אסטרטגיית 'שחרור וניסיון חוזר' (release and retry) כאשר רכישת המשאב השני נכשלת. איזה מבין המשפטים הבאים נכון לגבי קטע קוד זה?",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h> // For sleep\n\npthread_mutex_t mutex_resA = PTHREAD_MUTEX_INITIALIZER;\npthread_mutex_t mutex_resB = PTHREAD_MUTEX_INITIALIZER;\n\n// Function to simulate a process acquiring resources\nvoid* acquire_resources(void* arg) {\n    long thread_id = (long)arg;\n    int first_res_id = (thread_id == 0) ? 0 : 1; // Thread 0 tries A then B, Thread 1 tries B then A\n    int second_res_id = (thread_id == 0) ? 1 : 0;\n\n    pthread_mutex_t* first_mutex = (first_res_id == 0) ? &mutex_resA : &mutex_resB;\n    pthread_mutex_t* second_mutex = (second_res_id == 0) ? &mutex_resA : &mutex_resB;\n\n    printf(\"Thread %ld trying to acquire mutex %d\\n\", thread_id, first_res_id);\n    pthread_mutex_lock(first_mutex);\n    printf(\"Thread %ld acquired mutex %d\\n\", thread_id, first_res_id);\n\n    sleep(1); // Simulate some work/hold time\n\n    printf(\"Thread %ld trying to acquire mutex %d\\n\", thread_id, second_res_id);\n    while (pthread_mutex_trylock(second_mutex) != 0) {\n        printf(\"Thread %ld failed to acquire mutex %d, releasing mutex %d and retrying...\\n\", thread_id, second_res_id, first_res_id);\n        pthread_mutex_unlock(first_mutex);\n        sleep(1); // Wait a bit before retrying\n        pthread_mutex_lock(first_mutex);\n        printf(\"Thread %ld re-acquired mutex %d\\n\", thread_id, first_res_id);\n    }\n    printf(\"Thread %ld acquired mutex %d\\n\", thread_id, second_res_id);\n\n    // Critical section\n    printf(\"Thread %ld in critical section with both mutexes\\n\", thread_id);\n    sleep(1);\n\n    pthread_mutex_unlock(second_mutex);\n    pthread_mutex_unlock(first_mutex);\n    printf(\"Thread %ld released both mutexes and finished\\n\", thread_id);\n    return NULL;\n}\n\nint main() {\n    pthread_t t0, t1;\n    pthread_create(&t0, NULL, acquire_resources, (void*)0);\n    pthread_create(&t1, NULL, acquire_resources, (void*)1);\n\n    pthread_join(t0, NULL);\n    pthread_join(t1, NULL);\n\n    printf(\"Main: All threads completed.\\n\");\n    return 0;\n}",
+      "options": [
+        "א. הקוד יכנס למצב קיפאון (deadlock) בוודאות, מכיוון שתנאי \"המתנה מעגלית\" (Circular Wait) מתקיים.",
+        "ב. הקוד לעולם לא יכנס למצב קיפאון, מכיוון שהוא מונע את תנאי \"החזק והמתן\" (Hold and Wait).",
+        "ג. הקוד לעולם לא יכנס למצב קיפאון, מכיוון שהוא מונע את תנאי \"אי-נטילה מוקדמת\" (No Preemption).",
+        "ד. הקוד עלול להיכנס למצב קיפאון, אך רק תחת עומס גבוה מאוד של תהליכונים נוספים.",
+        "ה. הקוד לעולם לא יכנס למצב קיפאון, אך עלול לסבול מרעב (starvation) של אחד התהליכונים לאורך זמן."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "הקוד מיישם אסטרטגיה שבה אם תהליכון אינו מצליח לרכוש את המשאב השני הנדרש לו באמצעות `pthread_mutex_trylock`, הוא *משחרר* את המשאב הראשון שהוא מחזיק ומנסה שוב את תהליך הרכישה. פעולה זו מונעת במפורש את תנאי \"החזק והמתן\" (Hold and Wait) הנדרש להיווצרות קיפאון. תנאי זה קובע שתהליך מחזיק במשאב אחד לפחות וממתין לרכישת משאבים נוספים המוחזקים על ידי תהליכים אחרים. על ידי שחרור המשאב הראשון, התהליכון אינו \"מחזיק וממתין\" במובן הבעייתי, ובכך נמנעת היווצרות תלות מעגלית שתוביל לקיפאון. בעוד שאסטרטגיה זו עשויה באופן תיאורטי להוביל לרעב (starvation) - מצב בו תהליכון מסוים נכשל שוב ושוב ברכישת שני המשאבים וממשיך לנסות ללא הצלחה - היא מונעת ביעילות מצב קיפאון (deadlock)."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}
