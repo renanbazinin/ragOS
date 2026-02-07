@@ -1,0 +1,63 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Synchronization",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 19:01:41",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4129,
+      "output_tokens": 1401,
+      "total_tokens": 8985
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Semaphores",
+      "Starvation",
+      "Race Conditions"
+    ],
+    "content": {
+      "text": "לפניכם מימוש מוצע למנגנון Read-Write Lock המשתמש בסמפורים. המנגנון נועד לאפשר למספר קוראים (Readers) לקרוא מהמשאב בו-זמנית, אך להבטיח בלעדיות לכותב (Writer) יחיד. הנחו כי כל הסמפורים מאותחלים כראוי (mutex=1, writeBlock=1) וכי המשתנה readersCount מאותחל ל-0.",
+      "code_snippet": "1  sem_t mutex;\n2  sem_t writeBlock;\n3  int readersCount = 0;\n4\n5  void startRead() {\n6    sem_wait(&mutex);\n7    readersCount++;\n8    if (readersCount == 1)\n9      sem_wait(&writeBlock);\n10   sem_post(&mutex);\n11 }\n12\n13 void endRead() {\n14   sem_wait(&mutex);\n15   readersCount--;\n16   if (readersCount == 0)\n17     sem_post(&writeBlock);\n18   sem_post(&mutex);\n19 }\n20\n21 void startWrite() {\n22   sem_wait(&writeBlock);\n23 }\n24\n25 void endWrite() {\n26   sem_post(&writeBlock);\n27 }",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "האם המימוש הנוכחי עלול לגרום להרעבה (Starvation)? אם כן, של אילו חוטים (קוראים או כותבים) ובאילו תנאים?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "נניח שקיימים שלושה חוטים: R1, R2 (קוראים) ו-W1 (כותב). הציגו סדר פעולות (Interleaving) שבו W1 מגיע בזמן ש-R1 נמצא בקטע הקריטי, אך R2 מצליח להיכנס לקטע הקריטי לפני ש-W1 מתחיל לכתוב.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.3",
+        "text": "מה יקרה אם נעביר את שורה 15 (הורדת המונה) אל מחוץ לבלוק הסנכרון, כלומר מיד אחרי שורה 18? הסבירו את ההשלכה על תקינות הקוד.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.4",
+        "text": "כדי למנוע הרעבת כותבים, מוצע להוסיף סמפור נוסף בשם readTry המאותחל ל-1. היכן יש להוסיף את הקריאות ל-sem_wait ו-sem_post של סמפור זה בפונקציות startRead ו-startWrite?",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.1: המימוש עלול לגרום להרעבת כותבים (Writers). אם יש זרם קבוע של קוראים שנכנסים לקטע הקריטי (startRead) לפני שהקורא האחרון מסיים (endRead), המשתנה readersCount לעולם לא יגיע ל-0, ולכן הסמפור writeBlock לא ישוחרר לעולם עבור הכותב.\n\n1.2: תרחיש אפשרי: \nא. R1 מבצע startRead, נועל את mutex, מקדם ל-1, נועל את writeBlock ומשחרר את mutex.\nב. W1 מבצע startWrite ונעצר (blocked) ב-sem_wait על writeBlock.\nג. R2 מבצע startRead, נועל את mutex, מקדם ל-2. מכיוון ש-2 != 1, הוא מדלג על ה-wait ומשחרר את mutex.\nד. R2 נכנס לקטע הקריטי בזמן ש-W1 עדיין ממתין.\n\n1.3: העברת readersCount-- אל מחוץ ל-mutex תיצור מצב מרוץ (Race Condition). אם שני חוטים יבצעו endRead במקביל, הפעולה האריתמטית (שאינה אטומית) עלולה להסתיים בערך שגוי. בנוסף, הבדיקה if (readersCount == 0) עלולה להתבצע על ערך לא מעודכן, מה שיוביל לכך ש-writeBlock לא ישוחרר לעולם (Deadlock לכותבים) או ישוחרר פעמיים.\n\n1.4: הפתרון למניעת הרעבת כותבים:\nב-startRead: יש להוסיף sem_wait(&readTry) בשורה 5.5 (לפני ה-mutex) ו-sem_post(&readTry) בשורה 10.5 (אחרי שחרור ה-mutex).\nב-startWrite: יש להוסיף sem_wait(&readTry) לפני ה-wait על writeBlock, ו-sem_post(&readTry) מיד לאחר מכן (או בסוף הכתיבה). \nבצורה זו, כותב שמגיע יתפוס את readTry וימנע מקוראים חדשים להיכנס עד שיסיים."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}
