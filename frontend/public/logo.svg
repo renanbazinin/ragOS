@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <defs>
+    <linearGradient id="bookGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1e40af;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="pageGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#60a5fa;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Book base -->
+  <rect x="40" y="50" width="120" height="140" rx="8" fill="url(#bookGradient)" stroke="#1e3a8a" stroke-width="3"/>
+  
+  <!-- Book spine highlight -->
+  <path d="M 50 50 Q 50 45 54 45 L 54 195 Q 50 195 50 190 Z" fill="#60a5fa" opacity="0.3"/>
+  
+  <!-- Pages -->
+  <rect x="48" y="45" width="108" height="4" rx="2" fill="#e2e8f0" opacity="0.8"/>
+  
+  <!-- Open book effect (right page) -->
+  <path d="M 100 70 L 145 70 Q 148 70 148 73 L 148 175 Q 148 178 145 178 L 100 178 Z" 
+        fill="url(#pageGradient)" opacity="0.9"/>
+  
+  <!-- Page lines -->
+  <line x1="108" y1="85" x2="138" y2="85" stroke="#1e40af" stroke-width="2" opacity="0.4"/>
+  <line x1="108" y1="95" x2="138" y2="95" stroke="#1e40af" stroke-width="2" opacity="0.4"/>
+  <line x1="108" y1="105" x2="135" y2="105" stroke="#1e40af" stroke-width="2" opacity="0.4"/>
+  
+  <!-- OS/Terminal icon overlay -->
+  <circle cx="75" cy="120" r="28" fill="#1e293b" stroke="#60a5fa" stroke-width="2"/>
+  
+  <!-- Terminal prompt symbol -->
+  <path d="M 58 112 L 68 120 L 58 128" stroke="#60a5fa" stroke-width="3" 
+        stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <line x1="72" y1="126" x2="86" y2="126" stroke="#60a5fa" stroke-width="3" stroke-linecap="round"/>
+  
+  <!-- Sparkle/AI indicator -->
+  <circle cx="145" cy="60" r="4" fill="#fbbf24" opacity="0.9"/>
+  <path d="M 145 52 L 145 68 M 137 60 L 153 60" stroke="#fbbf24" stroke-width="2" opacity="0.6"/>
+</svg>

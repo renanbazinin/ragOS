@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { BookOpen, Brain, FileText, Filter, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Shuffle, ArrowLeft, Layers, Hash, ListChecks } from 'lucide-react';
+import { Brain, FileText, Filter, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Shuffle, ArrowLeft, Layers, Hash, ListChecks } from 'lucide-react';
 import { getAIQuestions, getAIStats, getExams, getExam, getAllExamQuestions, getExamFilterOptions } from './localData';
 import type { AIQuestionItem, AIStats, ExamSummary, ExamData, QuestionJSON, ExamQuestion, AllExamQuestionsResponse, ExamFilterOptions } from './types';
 import PracticeCard from './PracticeCard';
@@ -172,7 +172,7 @@ export default function PracticePage() {
       <header className="header">
         <div className="header-inner">
           <div className="logo">
-            <BookOpen size={28} />
+            <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="ragOS" width="32" height="32" style={{ marginRight: '-4px' }} />
             <h1>ragOS</h1>
             <span className="subtitle">Practice Mode</span>
           </div>

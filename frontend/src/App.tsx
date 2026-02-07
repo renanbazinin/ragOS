@@ -1,6 +1,6 @@
 import { useState, useEffect, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Sparkles, Filter, ChevronDown, ChevronUp, BookOpen, Settings, Brain } from 'lucide-react';
+import { Search, Sparkles, Filter, ChevronDown, ChevronUp, Settings, Brain } from 'lucide-react';
 import { searchQuestions, generateQuestion, getTopics, getStats } from './api';
 import type { SearchResult, QuestionJSON, Stats } from './types';
 import QuestionCard from './QuestionCard';
@@ -108,7 +108,7 @@ function App() {
       <header className="header">
         <div className="header-inner">
           <div className="logo">
-            <BookOpen size={28} />
+            <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="ragOS" width="32" height="32" style={{ marginRight: '-4px' }} />
             <h1>ragOS</h1>
             <span className="subtitle">OS Exam Question Generator</span>
           </div>
