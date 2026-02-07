@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 18:03:40",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1022,
+      "output_tokens": 541,
+      "total_tokens": 3195
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "Processes",
+      "System Calls"
+    ],
+    "content": {
+      "text": "מה יהיה הפלט של הקוד הבא, בהנחה שכל קריאות המערכת מצליחות?",
+      "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\nint main() {\n    int x = 10;\n    if (fork() == 0) {\n        x += 5;\n        printf(\"%d \", x);\n    } else {\n        wait(NULL);\n        x -= 5;\n        printf(\"%d \", x);\n    }\n    return 0;\n}",
+      "options": [
+        "א. 15 5",
+        "ב. 15 15",
+        "ג. 5 5",
+        "ד. 5 15",
+        "ה. הפלט אינו דטרמיניסטי ותלוי בתזמון המעבד."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א. 15 5",
+      "explanation": "לאחר הקריאה ל-fork, נוצר תהליך בן המקבל עותק נפרד של מרחב הכתובות. בתהליך הבן, fork מחזירה 0, לכן הוא נכנס לבלוק ה-if, מעדכן את ה-x המקומי שלו ל-15 ומדפיס אותו. בתהליך האב, fork מחזירה את ה-PID של הבן (ערך חיובי), ולכן הוא עובר לבלוק ה-else. האב מבצע wait(NULL) ולכן ממתין לסיום הבן לפני שהוא ממשיך בביצוע. לאחר שהבן מסיים, האב מפחית 5 מה-x שלו (שנשאר בערך 10 במקור כי הזיכרון נפרד) ומדפיס 5. לכן הפלט יהיה 15 ולאחר מכן 5."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

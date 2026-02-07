@@ -1,0 +1,51 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 18:21:00",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3826,
+      "output_tokens": 1274,
+      "total_tokens": 10795
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Processes",
+      "Fork",
+      "Wait",
+      "Process Hierarchy"
+    ],
+    "content": {
+      "text": "לפניכם קטע קוד בשפת C המשתמש בקריאות המערכת fork ו-wait. עליכם לנתח את פעולת התוכנית ולענות על הסעיפים הבאים. הניחו כי כל הקריאות ל-fork מצליחות וכי אין בעיות זיכרון או משאבים. יש לפרט ולנמק את כל שלבי החישוב.",
+      "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\nint main() {\n    int val = 5;\n    for (int i = 0; i < 2; i++) {\n        if (fork() == 0) {\n            val += 2;\n            if (fork() > 0) {\n                val *= 2;\n                wait(NULL);\n            }\n        } else {\n            wait(NULL);\n            val -= 1;\n        }\n    }\n    printf(\"%d\\n\", val);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "כמה תהליכים סה\"כ (כולל תהליך האב המקורי) ייווצרו במהלך הרצת התוכנית? הציגו את עץ התהליכים (ניתן להשתמש בשמות כמו P0, P1 וכו' כדי לסמן את התהליכים).",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "מהם הערכים שיודפסו למסך? יש לציין איזה ערך הודפס על ידי כל תהליך שזיהיתם בסעיף הקודם (לדוגמה: 'תהליך P0 הדפיס X').",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": 20,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "ניתוח עץ התהליכים:\n1. התחלה: תהליך P0 עם val=5.\n2. איטרציה i=0:\n   - P0 מבצע fork ויוצר את P1. P0 נכנס ל-else, מחכה ל-P1 ומבצע val -= 1 (val=4).\n   - P1 (בן) מבצע val += 2 (val=7). אז P1 מבצע fork נוסף ויוצר את P2. \n   - ב-P1 (אב של P2), התנאי fork()>0 מתקיים: val *= 2 (val=14), מחכה ל-P2.\n   - ב-P2 (בן של P1), התנאי fork()>0 לא מתקיים. P2 ממשיך עם val=7.\nכעת יש 3 תהליכים (P0, P1, P2) שממשיכים לאיטרציה i=1.\n\n3. איטרציה i=1:\n   - כל אחד מ-3 התהליכים משכפל את המבנה של האיטרציה הקודמת:\n   - P0 (val=4) יוצר את P3. P3 יוצר את P4. P0 מחכה ל-P3 ומבצע val -= 1 (val=3).\n   - P3 (בן של P0) מבצע val=4+2=6, יוצר את P4, הופך ל-val=12 ומחכה ל-P4. P4 נשאר val=6.\n   - P1 (val=14) יוצר את P5. P5 יוצר את P6. P1 מחכה ל-P5 ומבצע val -= 1 (val=13).\n   - P5 (בן של P1) מבצע val=14+2=16, יוצר את P6, הופך ל-val=32 ומחכה ל-P6. P6 נשאר val=16.\n   - P2 (val=7) יוצר את P7. P7 יוצר את P8. P2 מחכה ל-P7 ומבצע val -= 1 (val=6).\n   - P7 (בן של P2) מבצע val=7+2=9, יוצר את P8, הופך ל-val=18 ומחכה ל-P8. P8 נשאר val=9.\n\nסיכום:\n10.1: סה\"כ נוצרו 9 תהליכים.\n10.2: הערכים המודפסים הם:\n- P0 מדפיס 3\n- P1 מדפיס 13\n- P2 מדפיס 6\n- P3 מדפיס 12\n- P4 מדפיס 6\n- P5 מדפיס 32\n- P6 מדפיס 16\n- P7 מדפיס 18\n- P8 מדפיס 9"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

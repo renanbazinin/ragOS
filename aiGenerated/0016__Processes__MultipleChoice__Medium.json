@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 18:11:30",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1022,
+      "output_tokens": 490,
+      "total_tokens": 2267
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "Processes",
+      "System Calls",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "מה יהיה הפלט של הקוד הבא (בהנחה שכל קריאות המערכת מצליחות)?",
+      "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\nint main() {\n    int x = 10;\n    if (fork() == 0) {\n        x += 5;\n        printf(\"%d \", x);\n    } else {\n        wait(NULL);\n        x -= 3;\n        printf(\"%d \", x);\n    }\n    return 0;\n}",
+      "options": [
+        "א. 15 12",
+        "ב. 15 7",
+        "ג. 7 15",
+        "ד. 12 15",
+        "ה. התוצאה אינה דטרמיניסטית ותלויה במתזמן."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב. 15 7",
+      "explanation": "לאחר הקריאה ל-fork, נוצרים שני תהליכים נפרדים עם מרחבי כתובות נפרדים. שינוי משתנה בתהליך הבן אינו משפיע על המשתנה בתהליך האב. תהליך הבן מעדכן את x ל-15 ומדפיס. תהליך האב מחכה לסיום הבן באמצעות wait, ולכן הבן תמיד ידפיס ראשון. לאחר מכן האב מעדכן את ה-x המקומי שלו (שערכו נותר 10) ל-7 ומדפיס."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

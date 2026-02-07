@@ -1,0 +1,57 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 18:40:30",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2766,
+      "output_tokens": 1085,
+      "total_tokens": 5181
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "Open",
+    "topic": [
+      "Threads",
+      "Concurrency",
+      "Memory Layout",
+      "Process vs Thread"
+    ],
+    "content": {
+      "text": "לפניכם קטע קוד בשפת C המשתמש בספריית pthreads. הניחו כי כל הקריאות למערכת מצליחות וכי התוכנית רצה על מערכת עם מעבד מרובה ליבות.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\nint global_var = 0;\n\nvoid* thread_func(void* arg) {\n    int local_var = 0;\n    for (int i = 0; i < 1000; i++) {\n        global_var++;\n        local_var++;\n    }\n    printf(\"%d \", local_var);\n    return NULL;\n}\n\nint main() {\n    pthread_t t1, t2;\n    pthread_create(&t1, NULL, thread_func, NULL);\n    pthread_create(&t2, NULL, thread_func, NULL);\n    pthread_join(t1, NULL);\n    pthread_join(t2, NULL);\n    printf(\"%d\\n\", global_var);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "7.1",
+        "text": "מה יהיו הערכים שיודפסו עבור המשתנה local_var על ידי שני החוטים? נמקו.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "7.2",
+        "text": "מהו טווח הערכים האפשרי שיודפס עבור המשתנה global_var בפקודת ה-printf האחרונה ב-main? הסבירו מדוע.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "7.3",
+        "text": "נניח ונחליף את יצירת החוטים (pthread_create) ביצירת תהליכים על ידי fork, ואת ה-pthread_join בפקודת wait. כיצד ישתנה הפלט עבור global_var בסוף הריצה של תהליך האב?",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "7.1: כל חוט ידפיס 1000. הסבר: המשתנה local_var הוא משתנה מקומי המוקצה על המחסנית (stack). לכל חוט (Thread) יש מחסנית נפרדת משלו, ולכן כל חוט מעדכן עותק פרטי שלו שאינו מושפע מהחוט השני.\n\n7.2: טווח הערכים הוא [1000, 2000]. הסבר: המשתנה global_var נמצא במקטע הנתונים המשותף לכל החוטים באותו תהליך. מכיוון שאין סנכרון (כמו Mutex) על הגישה למשתנה, נוצר מצב מרוץ (Race Condition). בפעולת הקידום (global_var++), חוט אחד עלול לקרוא את הערך, ובזמן שהוא מחשב את התוצאה, החוט השני יקרא את אותו ערך ישן, מה שיגרום לעדכון של אחד מהם 'להידרס'. המינימום הוא 1000 (במקרה שחוט אחד תמיד דורס את השני) והמקסימום הוא 2000 (במקרה שלא היו התנגשויות כלל).\n\n7.3: הפלט עבור global_var בתהליך האב יהיה 0. הסבר: כאשר משתמשים ב-fork, נוצר תהליך חדש עם מרחב כתובות נפרד. למרות שבתחילה הזיכרון מועתק (או משתמש ב-Copy-on-Write), שינויים שמבצע תהליך הבן על משתנה גלובלי אינם משפיעים על המשתנה בזיכרון של תהליך האב. מכיוון שתהליך האב עצמו לא שינה את global_var ב-main, הערך יישאר 0."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 18:09:11",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 965,
+      "output_tokens": 361,
+      "total_tokens": 2287
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Processes",
+      "System Calls"
+    ],
+    "content": {
+      "text": "מה קורה לתהליך אב הקורא למערכת הקריאה wait() כאשר תהליך הבן שלו עדיין פעיל?",
+      "code_snippet": null,
+      "options": [
+        "א. תהליך האב ממשיך בביצוע הקוד שלו כרגיל ובמקביל לבן.",
+        "ב. תהליך האב עובר למצב 'חסום' (Blocked/Waiting) עד אשר אחד מצאצאיו יסיים את ריצתו.",
+        "ג. תהליך האב נמחק מהטבלה של מערכת ההפעלה.",
+        "ד. תהליך הבן הופך להיות תהליך יתום (Orphan)."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "מערכת הקריאה wait() נועדה לסנכרון בין תהליכים. כאשר תהליך אב קורא לה, הוא מושהה על ידי מערכת ההפעלה (עובר למצב Blocked) עד שאחד מתהליכי הבן שלו מסיים את ריצתו (מבצע exit), ורק אז האב חוזר למצב Ready."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

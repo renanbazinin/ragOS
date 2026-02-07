@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 18:34:22",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1815,
+      "output_tokens": 701,
+      "total_tokens": 4602
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Threads",
+      "Concurrency",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "נתון קוד ה-C הבא המשתמש בספריית pthreads. מה מהבאים מתאר נכונה את הפלט הצפוי של התוכנית?",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n\nvoid* thread_func(void* arg) {\n    int* id = (int*)arg;\n    printf(\"%d \", *id);\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[5];\n    for (int i = 0; i < 5; i++) {\n        pthread_create(&threads[i], NULL, thread_func, &i);\n    }\n    for (int i = 0; i < 5; i++) {\n        pthread_join(threads[i], NULL);\n    }\n    return 0;\n}",
+      "options": [
+        "א. התוכנית תמיד תדפיס את המספרים 0 עד 4 בסדר עולה (0 1 2 3 4).",
+        "ב. התוכנית תמיד תדפיס את המספרים 0 עד 4 בסדר כלשהו.",
+        "ג. התוכנית תמיד תדפיס את המספר 5 חמש פעמים.",
+        "ד. התוכנית עלולה להדפיס מספרים בטווח 0-5, כאשר ייתכן שמספר מסוים יודפס יותר מפעם אחת.",
+        "ה. תתרחש שגיאת הידור (Compilation Error) כי לא ניתן להעביר כתובת של משתנה מקומי לפונקציית החוט."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ד",
+      "explanation": "הבעיה בקוד היא שכל החוטים (threads) מקבלים מצביע לאותו מיקום בזיכרון - המשתנה המקומי i שנמצא על המחסנית של פונקציית main. כיוון שהחוטים רצים במקביל ללולאת היצירה, ייתכן שערכו של i ישתנה על ידי ה-main thread לפני שחוט מסוים יספיק לקרוא אותו ולהדפיסו. בסיום הלולאה הראשונה i מגיע לערך 5. לכן, הפלט תלוי בתזמון (Race Condition): ייתכן שחלק מהחוטים ידפיסו ערכים ישנים של i, חלק ידפיסו את הערך הנוכחי, וחלק ידפיסו 5 אם הם ירוצו רק לאחר שהלולאה הסתיימה."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

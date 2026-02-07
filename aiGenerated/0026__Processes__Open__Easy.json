@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 18:15:08",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5185,
+      "output_tokens": 622,
+      "total_tokens": 7272
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "Open",
+    "topic": [
+      "Processes",
+      "fork"
+    ],
+    "content": {
+      "text": "כמה תהליכים נוצרים בסך הכל (כולל תהליך האב המקורי) במהלך הרצת הקוד הבא? יש לפרט את שלבי ההיווצרות של התהליכים.",
+      "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n#include <sys/types.h>\n\nint main() {\n    fork();\n    pid_t pid = fork();\n    if (pid > 0) {\n        fork();\n    }\n    printf(\"Process\\n\");\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "להלן שלבי היווצרות התהליכים:\n1. בתחילה קיים תהליך אחד (נסמנו P1).\n2. לאחר פקודת ה-fork() הראשונה, נוצר תהליך בן (P2). כעת יש במערכת 2 תהליכים.\n3. לאחר פקודת ה-fork() השנייה, כל אחד משני התהליכים הקיימים (P1 ו-P2) מתפצל פעם נוספת. נוצרים שני תהליכים חדשים (P3 ו-P4). כעת יש במערכת 4 תהליכים.\n4. המשתנה pid מכיל את ערך ההחזר של ה-fork השני. בתהליכי האב של הפיצול השני (P1 ו-P2) הערך יהיה גדול מ-0 (ה-PID של הבן), ובתהליכי הבן החדשים (P3 ו-P4) הערך יהיה 0.\n5. פקודת ה-if מתבצעת רק עבור תהליכים בהם pid > 0, כלומר רק P1 ו-P2 מבצעים את ה-fork() השלישי.\n6. ה-fork השלישי יוצר עוד שני תהליכים (P5 ו-P6).\n7. לסיכום: 1 (התחלתי) + 1 (ב-fork הראשון) + 2 (ב-fork השני) + 2 (ב-fork השלישי בתוך ה-if) = 6 תהליכים סך הכל."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 18:27:33",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2231,
+      "output_tokens": 654,
+      "total_tokens": 4341
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Processes",
+      "System Calls",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה בשפת C. מה יהיה הפלט של התוכנית? הניחו שכל קריאות המערכת מצליחות ושהפלט מודפס מיד ללא חוצץ (buffering).",
+      "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\nint x = 5;\n\nint main() {\n    for (int i = 0; i < 2; i++) {\n        if (fork() == 0) {\n            x += 10;\n            printf(\"%d\", x);\n            return 0;\n        } else {\n            wait(NULL);\n            x -= 2;\n            printf(\"%d\", x);\n        }\n    }\n    return 0;\n}",
+      "options": [
+        "א. 153131",
+        "ב. 1513131",
+        "ג. 155133",
+        "ד. 15151313",
+        "ה. 151331"
+      ]
+    },
+    "sub_questions": null,
+    "points": 10,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "בכל איטרציה של הלולאה, תהליך האב יוצר תהליך בן ומחכה לסיומו בעזרת wait. כיוון שכל תהליך מקבל מרחב כתובות נפרד, השינויים במשתנה הגלובלי x בתוך הבן אינם משפיעים על האב, אך הבן יורש את הערך הנוכחי של x מהאב ברגע ה-fork. באיטרציה הראשונה (i=0): הבן מקבל x=5, מוסיף 10 ומדפיס 15. האב מחכה, מעדכן את ה-x שלו ל-3 (5-2) ומדפיס 3. באיטרציה השנייה (i=1): האב (שה-x שלו הוא 3) יוצר בן חדש. הבן יורש x=3, מוסיף 10 ומדפיס 13. האב מחכה, מעדכן את ה-x שלו ל-1 (3-2) ומדפיס 1. התוצאה המצטברת היא 153131."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 18:32:47",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1127,
+      "output_tokens": 437,
+      "total_tokens": 3038
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Threads",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "בהינתן קוד C המשתמש בספריית pthreads, איזה מהמשתנים הבאים משותף (shared) ונגיש גם לחוט החישוב הראשי (main thread) וגם לחוט החדש שנוצר?",
+      "code_snippet": "int x = 10;\n\nvoid* my_func(void* arg) {\n    int y = 20;\n    x++;\n    return NULL;\n}\n\nint main() {\n    pthread_t tid;\n    pthread_create(&tid, NULL, my_func, NULL);\n    // ... code ...\n    return 0;\n}",
+      "options": [
+        "א. המשתנה x בלבד",
+        "ב. המשתנה y בלבד",
+        "ג. גם x וגם y",
+        "ד. אף אחד מהמשתנים אינו משותף"
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "המשתנה x הוא משתנה גלובלי, ולכן הוא נמצא במקטע הנתונים (Data Segment) המשותף לכל החוטים (threads) באותו תהליך. לעומת זאת, המשתנה y הוא משתנה מקומי המוגדר בתוך פונקציית החוט, ולכן הוא מוקצה על המחסנית (Stack) הפרטית של החוט ואינו משותף לחוטים אחרים."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

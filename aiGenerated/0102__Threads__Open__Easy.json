@@ -1,0 +1,35 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 18:39:27",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3183,
+      "output_tokens": 516,
+      "total_tokens": 5539
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "Open",
+    "topic": [
+      "Threads"
+    ],
+    "content": {
+      "text": "לפניך קטע קוד בשפת C המשתמש בספריית pthreads. מהן האפשרויות השונות לפלט התוכנית? הסבר/י מדוע ייתכנו מספר אפשרויות והאם קיימת הבטחה לגבי סדר ההדפסה של האותיות A ו-B.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\nvoid* thread_func(void* arg) {\n    printf(\"B\");\n    return NULL;\n}\n\nint main() {\n    pthread_t t;\n    pthread_create(&t, NULL, thread_func, NULL);\n    printf(\"A\");\n    pthread_join(t, NULL);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": 10,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפלט של התוכנית יכול להיות 'AB' או 'BA'. הסיבה לכך היא שברגע שמתבצעת הקריאה ל-pthread_create, נוצר חוט (thread) חדש שמתחיל לרוץ במקביל לחוט הראשי. התזמון (scheduling) של החוטים על ידי מערכת ההפעלה אינו דטרמיניסטי, ולכן אין לדעת מי יבצע את פקודת ה-printf שלו קודם: החוט הראשי שממשיך מיד לאחר הקריאה ל-create, או החוט החדש שנוצר. פקודת ה-pthread_join מבטיחה שהחוט הראשי ימתין לסיום החוט החדש לפני שהתוכנית כולה תסתיים, אך מכיוון שהיא ממוקמת אחרי ה-printf של ה-main, היא אינה משפיעה על סדר ההדפסה היחסי בין A ל-B."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

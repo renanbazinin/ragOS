@@ -1,0 +1,269 @@
+{
+  "metadata": {
+    "course_name": "מערכות הפעלה",
+    "year": "תשפ\"ד",
+    "semester": "סמסטר א'",
+    "moed": "מועד א'",
+    "exam_date": "04.03.2024",
+    "source_file": "os24AA.pdf"
+  },
+  "questions": [
+    {
+      "id": 1,
+      "type": "MultipleChoice",
+      "topic": [
+        "File Systems"
+      ],
+      "content": {
+        "text": "איזה מפריטי המידע הבאים אינו נשמר ב-inode במערכת UNIX?",
+        "code_snippet": null,
+        "options": [
+          "א. שם הקובץ.",
+          "ב. גודל הקובץ בבתים.",
+          "ג. זמן שינוי אחרון (last modification time).",
+          "ד. מספר ה-links שמצביעים לקובץ (link count).",
+          "ה. כל התשובות האחרות אינן נכונות."
+        ]
+      },
+      "sub_questions": null,
+      "points": 5,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": "א",
+        "explanation": "א'. לקובץ אין שם ב-inode, אלא רק כחלק מה-hard link המתאים בתיקייה כלשהי."
+      },
+      "difficulty_estimation": "Medium"
+    },
+    {
+      "id": 2,
+      "type": "MultipleChoice",
+      "topic": [
+        "Memory Management",
+        "Virtual Memory"
+      ],
+      "content": {
+        "text": "מה תפקידו של ה-MMU?",
+        "code_snippet": null,
+        "options": [
+          "א. סיוע בתרגום כתובות וירטואליות.",
+          "ב. העתקת מידע מ/אל התקני קלט/פלט.",
+          "ג. ביצוע החלפת הקשר (context switch).",
+          "ד. סיוע למתזמן (scheduler) בקבלת החלטה.",
+          "ה. כל התשובות האחרות אינן נכונות."
+        ]
+      },
+      "sub_questions": null,
+      "points": 5,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": "א",
+        "explanation": "א'. כפי שנלמד, ה-MMU הוא רכיב חומרה המתרגם כתובת וירטואלית לכתובת פיזית."
+      },
+      "difficulty_estimation": "Easy"
+    },
+    {
+      "id": 3,
+      "type": "MultipleChoice",
+      "topic": [
+        "Synchronization",
+        "Mutexes",
+        "Semaphores",
+        "Concurrency"
+      ],
+      "content": {
+        "text": "נתונה הטענה: על מנת להשתמש נכונה במשתנה תנאי תמיד יש צורך להשתמש גם במנעול.",
+        "code_snippet": null,
+        "options": [
+          "א. הטענה נכונה.",
+          "ב. הטענה לא נכונה.",
+          "ג. הטענה לא נכונה, אלא להיפך: על מנת להשתמש נכונה במנעול תמיד יש צורך להשתמש גם במשתנה תנאי.",
+          "ד. הטענה לא נכונה, על מנת להשתמש נכונה במשתנה תנאי תמיד יש צורך להשתמש במשתנה עזר רגיל ולא במנעול.",
+          "ה. כל התשובות האחרות אינן נכונות."
+        ]
+      },
+      "sub_questions": null,
+      "points": 5,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": "א",
+        "explanation": "א'. כדי להימנע מ-lost signal, תמיד יש צורך להשתמש במנעול עם משתנה תנאי וזה גם חלק מהממשק המובנה של משתני תנאי."
+      },
+      "difficulty_estimation": "Medium"
+    },
+    {
+      "id": 4,
+      "type": "MultipleChoice",
+      "topic": [
+        "I/O",
+        "Disk Scheduling"
+      ],
+      "content": {
+        "text": "נתונה הטענה: בהינתן שני דיסקים קשיחים כלשהם, הדיסק עם מהירות הסיבוב (RPM) הגבוהה יותר יבצע קריאות מבלוק רנדומלי מהר יותר.",
+        "code_snippet": null,
+        "options": [
+          "א. הטענה נכונה.",
+          "ב. הטענה נכונה רק אם מהירות הסיבוב של הדיסק המהיר יותר היא לפחות 7200.",
+          "ג. הטענה נכונה רק אם מהירות הסיבוב של הדיסק המהיר יותר היא לכל היותר 7200.",
+          "ד. הטענה לא נכונה.",
+          "ה. כל התשובות האחרות אינן נכונות."
+        ]
+      },
+      "sub_questions": null,
+      "points": 5,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": "ד",
+        "explanation": "ד'. מהירות הקריאה של דיסק תלויה בעוד פרמטרים מלבד מהירות הסיבוב, כמו זמן ה-seek וקצב ההעברה."
+      },
+      "difficulty_estimation": "Medium"
+    },
+    {
+      "id": 5,
+      "type": "MultipleChoice",
+      "topic": [
+        "Virtual Memory",
+        "Paging",
+        "Page Replacement"
+      ],
+      "content": {
+        "text": "נתון כי במערכת הפעלה א' כתובת וירטואלית מכילה 32 ביטים ואילו במערכת הפעלה ב' כתובת וירטואלית מכילה 40 ביטים. איזו טענה בהכרח נכונה?",
+        "code_snippet": null,
+        "options": [
+          "א. במערכת הפעלה א' יש יותר דפים בזיכרון הוירטואלי של כל תהליך.",
+          "ב. במערכת הפעלה ב' יש יותר דפים בזיכרון הוירטואלי של כל תהליך.",
+          "ג. במערכת הפעלה א' יבוצעו יותר פסיקות דף (page faults).",
+          "ד. במערכת הפעלה ב' יבוצעו יותר פסיקות דף (page faults)",
+          "ה. כל התשובות האחרות אינן נכונות."
+        ]
+      },
+      "sub_questions": null,
+      "points": 5,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": "ה",
+        "explanation": "ה'. גודל הכתובת הוירטואלית אינו מעיד על גודל הדף או כמות הדפים במערכת ולכן לא ניתן לדעת באיזו מערכת הפעלה יש יותר דפים בזיכרון הוירטואלי, ואינו מעיד על גודל הזיכרון והשימוש בו הפיזי ולכן לא ניתן לדעת היכן יבוצעו יותר פסיקות דף."
+      },
+      "difficulty_estimation": "Hard"
+    },
+    {
+      "id": 6,
+      "type": "CodeAnalysis",
+      "topic": [
+        "Processes",
+        "System Calls",
+        "Concurrency",
+        "Memory Management",
+        "Virtual Memory",
+        "Paging"
+      ],
+      "content": {
+        "text": "נתונה התוכנית הבאה: תזכורת: באופרטור &&, אם האופרנד הראשון הוא FALSE, לא נבדק/מבוצע האופרנד השני.",
+        "code_snippet": "int main(int argc, char *argv[])\n{\n    char *str = \"hello\";\n\n    if (fork() && fork()) {\n        wait(NULL);\n        printf(\"1: %s\\n\", str);\n        wait(NULL);\n        printf(\"1: %s\\n\", str);\n    }\n    else {\n        wait(NULL);\n        printf(\"0: %s\\n\", str);\n        str = \"goodbye\";\n        wait(NULL);\n        printf(\"0: %s\\n\", str);\n    }\n}"
+      },
+      "sub_questions": [
+        {
+          "id": "6.1",
+          "text": "מהם כל הפלטים האפשריים של התוכנית, בהנחה שכל הקריאות ל-fork הצליחו? יש להסביר כל פלט באופן מפורט.",
+          "code_snippet": null,
+          "options": null
+        },
+        {
+          "id": "6.2",
+          "text": "הנתונים להלן רלוונטיים לשני הסעיפים הבאים: נתונה מערכת עם זיכרון פיזי של 16GB בה כתובת וירטואלית מכילה 32 ביטים. המערכת משתמש בטבלת דפים לינארית. כל כניסה בטבלת הדפים היא בגודל 32 ביטים, כאשר 25 ביטים משמשים לאחסון מספר המסגרת. נתון תהליך במערכת אשר בטבלת הדפים שלו: דף 0 ממופה למסגרת 4, דף 1 למסגרת 5, דף 2 למסגרת 6 ודף 3 למסגרת 7. כל שאר הדפים בשימוש אך לא נוכחים (0=valid=1, present). יש לפרט ולנמק את כל החישובים. מה גודל טבלת הדפים של התהליך (בבתים)? גודל הטבלה:",
+          "code_snippet": null,
+          "options": null
+        },
+        {
+          "id": "6.3",
+          "text": "התהליך הנתון ניגש לכתובת 0BBB ואז לכתוב 1FFF (הכתובות בבסיס 16). עבור כל גישה, האם תתרחש פסיקת דף (page fault)? אם כן יש להסביר, אחרת יש לפרט את הכתובת הפיזית אליה ניגשים. :0BBB פסיקת דף / כתובת פיזית: :1FFF פסיקת דף / כתובת פיזית:",
+          "code_snippet": null,
+          "options": null
+        }
+      ],
+      "points": null,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": null,
+        "explanation": "6.1: 1. יש 5 פלטים אפשריים:\n0: hello\n0: goodbye\n0: hello\n0: goodbye\n1: hello\n1: hello\n\n0: hello\n0: hello\n0: goodbye\n0: goodbye\n1: hello\n1: hello\n\n0: hello\n0: goodbye\n1: hello\n0: hello\n0: goodbye\n1: hello\n\n0: hello\n0: hello\n1: hello\n0: goodbye\n0: goodbye\n1: hello\n\n0: hello\n0: goodbye\n0: hello\n1: hello\n0: goodbye\n1: hello\n\n6.2: כתובת פיזית מורכבת מ-34 ביטים. מספר מסגרת הוא 25 ביטים לכן נשארו 9 ביטים להיסט וגודל דף הוא 512B. כתובת וירטואלית היא 32 ביטים לכן נשארו 23 ביטים למספר הדף ולכל תהליך יש 8M דפים. כל רשומה בטבלה בגודל 4B (32 ביטים) ויש בטבלה 8M רשומות – סה\"כ 32MB\n\n6.3: 0BBB: ההיסט הוא 9 ביטים לכן מספר הדף שניגש אליו (הביטים שנשארו) הוא 5. דף מספר 5 לא ממופה לכן תתרחש פסיקת דף.\n1FFF: מספר הדף הוא 15. דף מספר 15 לא ממופה לכן תתרחש פסיקת דף."
+      },
+      "difficulty_estimation": "Hard"
+    },
+    {
+      "id": 7,
+      "type": "Open",
+      "topic": [
+        "Threads",
+        "Synchronization",
+        "Semaphores",
+        "Concurrency"
+      ],
+      "content": {
+        "text": "במסעדת מזון מהיר מקומית יש 3 סוגי עובדים: קופאים הלוקחים את הזמנות הלקוחות, טבחים המכינים את האוכל במטבח, עובדי הגשה המוסרים את האוכל המוכן ללקוחות.\nלצורך מחשוב המסעדה הוחלט לייצג כל עובד ע\"י חוט, ונתונות הפונקציות הבאות:\n- take_order() – חוסמת את החוט הקורא עד שמגיעה הזמנה חדשה, אז היא חוזרת. פונקציה זו אינה בטוחה לשימוש במקביל (כלומר, אסור לקרוא לה בו-זמנית מחוטים שונים).\n- cook_order() – מכינה את האוכל להזמנה הבאה לפי הסדר, וחוסמת את החוט הקורא עד שהאוכל להזמנה מוכן, אז היא חוזרת. פונקציה זו בטוחה לשימוש במקביל, אך אסור לקרוא לה אם אין הזמנה שממתינה להכנה.\n- serve_order() – מגישה את ההזמנה הבאה לפי הסדר, וחוסמת את החוט הקורא עד שהאוכל המוכן הוגש, אז היא חוזרת. פונקציה זו בטוחה לשימוש במקביל, אך אסור לקרוא לה אם אין הזמנה מוכנה הממתינה להגשה.\nשימו לב: פונקציות אלו נתונות ויש להשתמש בהן במימוש הקוד למסעדה (אין צורך לממש אותן).\nרצף הפעולות התקין הוא: קופאי קורא ל-take_order לקבלת הזמנה וכאשר הקריאה חוזרת הוא מיידע שיש הזמנה ממתינה, אז טבח קורא ל-cook_order להכנת הזמנה וכאשר הקריאה חוזרת הוא מיידע שיש הזמנה מוכנה, אז עובד הגשה קורא ל-serve_order להגשת ההזמנה.\nשימו לב: יתכנו כמה עובדים מכל סוג, ומספר העובדים אינו ידוע מראש.\nבשאלה זו יש לכתוב קוד לכל עובד (הפונקציה הראשית של החוט) כך שהמסעדה תעבוד באופן תקין.\nלצורך הפתרון ניתן להשתמש בסמפורים בלבד (כלומר, לא ניתן להשתמש בפעולות מעבד אטומיות או באובייקטי סנכרון אחרים מלבד סמפורים) וניתן להניח כי הסמפורים הוגנים (הראשון שהמתין יהיה הראשון שיחזור).\nיש לתאר בקצרה ובבירור את הפתרון ולכתוב קוד ברור.\nתיאור הפתרון:\nמשתנים גלובליים (יש לכתוב ערכי אתחול בהערה):",
+        "code_snippet": "void* cashier (void *arg) {\n}\nvoid* cook(void *arg) {\n}\nvoid* serve_worker (void *arg) {\n}"
+      },
+      "sub_questions": null,
+      "points": 25,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": null,
+        "explanation": "sem_t mutex; // init to 1\nsem_t orders, cooked; // init to 0\n\nvoid* cashier (void *arg) {\n    while (1) {\n        sem_wait(&mutex);\n        take_order(); // receive order exclusively\n        sem_post(&mutex);\n        sem_post(&orders); // order received, ready to cook\n    }\n}\n\nvoid* cook(void* arg) {\n    while (1) {\n        sem_wait(&orders);\n        cook_order();\n        sem_post(&cooked); // order cooked, ready to serve\n    }\n}\n\nvoid* serve_worker(void* arg) {\n    while (1) {\n        sem_wait(&cooked);\n        serve_order();\n    }\n}"
+      },
+      "difficulty_estimation": "Hard"
+    },
+    {
+      "id": 8,
+      "type": "Open",
+      "topic": [
+        "File Systems",
+        "I/O",
+        "Security"
+      ],
+      "content": {
+        "text": "נתונה מערכת קבצים VSFS המשתמשת ב-journaling, עם הנתונים הבאים:\n- גודל בלוק הוא 4KB.\n- גודל inode הוא 256 בתים.\n- בכל inode יש 6 מצביעים ישירים, 2 מצביעים עקיפים, 1 עקיף כפול, 1 עקיף משולש.\n- המערכת אינה משתמשת ב-metadata journaling, כלומר גם ה-DATA של כל פעולה נכתב אל ה-journal.\nיש לפרט ולנמק את כל החישובים.",
+        "code_snippet": null
+      },
+      "sub_questions": [
+        {
+          "id": "8.1",
+          "text": "משתמש יצר קובץ חדש (ריק) בנתיב: home/mta/a.txt/ פרטו את כל הגישות לדיסק (כולל ה-journal) כדי לבצע את הפעולה במלואה, לפי הסדר בו נדרש שיבוצעו, במקרה המינימלי המוביל למספר הגישות הנמוך ביותר. לכל גישה יש לציין אם זו קריאה או כתיבה, לאן ניגשים ומדוע. יש לציין גם היכן אנו ממתינים לכתיבות שיסתיימו (fsync). אין צורך לציין מספרי בלוקים אלא רק סוג בלוק שנקרא או נכתב.",
+          "code_snippet": null,
+          "options": null
+        },
+        {
+          "id": "8.2",
+          "text": "מבין הגישות בסעיף הקודם (שאלה 8.1), מה הגישה הראשונה אחריה נוכל להבטיח בוודאות שהפעולה תתבצע בהצלחה גם אם המערכת תקרוס? יש לנמק את התשובה.",
+          "code_snippet": null,
+          "options": null
+        }
+      ],
+      "points": null,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": null,
+        "explanation": "8.1: 1. במקרה המינימלי, כל ה-inodes שנצטרך נמצאים באותו בלוק וגם כל ה-bitmaps. שלבים a-d נדרשים כדי למצוא את הנתונים של התיקייה אליה נוסיף את a.txt. שלבים f-j הם השימוש ב-journal ללא metadata journaling. שאלות שהניחו קיומו של cache גם קיבלו את מלוא הנקודות. 1. נקרא את הבלוק המכיל את 2 inode (יחד עם כל שאר ה-inodes הדרושים). 2. נקרא את בלוק הנתונים של התיקייה / 3. נקרא את בלוק הנתונים של התיקייה home/ (ה-inode כבר זמין) 4. נקרא את בלוק הנתונים של התיקייה home/mta/ 5. נקרא inode bitmap למציאת inode פנוי (באותו בלוק של 2) 6. נכתוב טרנזקציה ללוג בלי TxE – פרטי inode של הקובץ החדש + inode bitmap מעודכן + פרטי inode מעודכנים של home/mta + inode עבור home/mta + בלוק נתונים חדש של home/mta fsync .7 8. נסגור את הטרנזקציה עם כתיבת TxE fsync .9 10. נכתוב inode bitmap מעודכן 11. נכתוב inode של התיקייה home/mta/ יחד עם ה-inode של הקובץ 12. נכתוב בלוק נתונים חדש עבור home/mta/ (עם רשומה של הקובץ שהתווסף) טעות נפוצה, שגם גררה הורדת ניקוד משמעותית, הייתה לכתוב טרנזקציה ללוג כבר בשלב a אבל כמובן שלא ניתן לעשות זאת לפני שיודעים את הפרטים אותם נרצה לכתוב לטרנזקציה.\n\n8.2: אחרי סגירת הטרנזקציה בשלב 8."
+      },
+      "difficulty_estimation": "Hard"
+    },
+    {
+      "id": 9,
+      "type": "Open",
+      "topic": [
+        "I/O",
+        "Disk Scheduling",
+        "File Systems"
+      ],
+      "content": {
+        "text": "נתונה מערכת עם מנגנון 5-RAID בעל 6 דיסקים קשיחים (ממוספרים 1-6), כאשר בלוק ה-stripe- parity הראשון נמצא בדיסק 6, ב-stripe השני בדיסק 5, וכן הלאה באופן מעגלי. הבלוקים ממוספרים החל מ-0, כלומר מספר הבלוק הלוגי הראשון במערך (RAID) הוא 0 ומספר הבלוק הפיזי הראשון בכל דיסק הוא 0. לפי כך, ה-stripe הראשון מכיל את הבלוקים הלוגיים 0-4. בוצעה גישה לבלוק לוגי 535 של המערכת (RAID). לאיזה דיסק ולאיזה בלוק בדיסק זה תתבצע הגישה בפועל? בלוק בפועל:",
+        "code_snippet": null
+      },
+      "sub_questions": null,
+      "points": 10,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": null,
+        "explanation": "בכל שורה יש 5 בלוקים של מידע (ועוד בלוק parity), כלומר בלוק 535 הוא בשורה 107, והוא בלוק המידע הראשון בשורה זו. ה-parity בשורה 107 הוא בדיסק הראשון, כלומר בלוק המידע הראשון הוא בדיסק השני. לכן הגישה שנבצע היא לבלוק 107 בדיסק השני."
+      },
+      "difficulty_estimation": "Medium"
+    }
+  ]
+}

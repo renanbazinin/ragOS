@@ -1,0 +1,62 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 18:18:27",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3602,
+      "output_tokens": 1029,
+      "total_tokens": 6073
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Processes",
+      "Fork",
+      "Address Space"
+    ],
+    "content": {
+      "text": "לפניכם קטע קוד בשפת C המשתמש בקריאת המערכת fork(). הניחו כי כל הקריאות למערכת מצליחות וכי הפלט נכתב למסך באופן מיידי (ללא buffering).",
+      "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\nint main() {\n    int x = 10;\n    pid_t pid1 = fork();\n\n    if (pid1 == 0) {\n        x += 5;\n        pid_t pid2 = fork();\n        if (pid2 == 0) {\n            x *= 2;\n            printf(\"A: x=%d\\n\", x);\n        } else {\n            wait(NULL);\n            x -= 2;\n            printf(\"B: x=%d\\n\", x);\n        }\n    } else {\n        wait(NULL);\n        x += 1;\n        printf(\"C: x=%d\\n\", x);\n    }\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "כמה תהליכים נוצרו בסך הכל במהלך ריצת התוכנית (כולל התהליך הראשי)? ציירו את עץ התהליכים.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "מה יהיה הפלט של התוכנית? האם סדר ההדפסות מובטח? הסבירו.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.3",
+        "text": "האם שינוי המשתנה x בתהליך אחד משפיע על ערכו בתהליך אחר? הסבירו מדוע על סמך מנגנון הזיכרון של תהליכים.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.4",
+        "text": "מה יקרה אם נסיר את כל קריאות ה-wait(NULL) מהקוד? האם ערכי ה-x המודפסים ישתנו? האם סדר ההדפסה ישתנה?",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.1: נוצרו 3 תהליכים בסך הכל. התהליך הראשי (P1) יוצר בן (P2), והבן (P2) יוצר נכד (P3). עץ התהליכים הוא ליניארי: P1 -> P2 -> P3.\n\n1.2: הפלט יהיה:\nA: x=30\nB: x=13\nC: x=11\nסדר ההדפסות מובטח בגלל קריאות ה-wait. תהליך P2 מחכה ל-P3 (לכן A לפני B), ותהליך P1 מחכה ל-P2 (לכן B לפני C).\n\n1.3: לא. בעת ביצוע fork, התהליך הבן מקבל העתק של מרחב הכתובות של האב (Copy-on-Write). לכן, לכל תהליך יש עותק פרטי משלו של המשתנה x בזיכרון שלו, ושינויים בו אינם משפיעים על תהליכים אחרים.\n\n1.4: ערכי ה-x המודפסים לא ישתנו, כי המרחבים עדיין מופרדים. עם זאת, סדר ההדפסה לא יהיה מובטח יותר ויהיה תלוי במתזמן (Scheduler), שכן התהליכים ירוצו במקביל ללא סנכרון."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

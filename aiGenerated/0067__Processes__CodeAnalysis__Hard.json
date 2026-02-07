@@ -1,0 +1,57 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 18:29:22",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3664,
+      "output_tokens": 1303,
+      "total_tokens": 10047
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Processes",
+      "System Calls",
+      "Memory Management",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה בשפת C. הניחו שכל קריאות המערכת מצליחות, שתהליכים אינם נוצרים מחוץ לקוד המוצג, ושתזמון התהליכים (Scheduling) אינו ידוע מראש. הנחה נוספת: הפונקציה fflush(stdout) מבטיחה שהפלט נשלח למסך באופן מיידי.",
+      "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n#include <sys/wait.h>\n#include <stdlib.h>\n\nint main() {\n    int x = 10;\n    for (int i = 0; i < 2; i++) {\n        pid_t pid = fork();\n        if (pid == 0) {\n            x += 5;\n            if (i == 0) {\n                if (fork() == 0) {\n                    x += 10;\n                }\n                x *= 2;\n            }\n            printf(\"%d:%d \", i, x);\n            fflush(stdout);\n            exit(0);\n        } else {\n            x -= 2;\n            waitpid(pid, NULL, 0);\n        }\n    }\n    printf(\"Done:%d\\n\", x);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "כמה תהליכים נוצרו במהלך ריצת התוכנית (כולל התהליך המקורי)? ציירו את עץ התהליכים.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "האם ייתכן שהפלט \"0:50\" יופיע לאחר הפלט \"1:13\"? נמקו את תשובתכם על סמך מנגנון ה-wait בתוכנית.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.3",
+        "text": "מהו הפלט המלא (או הפלטים האפשריים) של התוכנית? יש לפרט את החישוב עבור כל תהליך.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1. נוצרו 4 תהליכים בסך הכל: התהליך הראשי (P1), הבן שלו מהאיטרציה הראשונה (P2), הנכד (P3 - הבן של P2), והבן של הראשי מהאיטרציה השנייה (P4).\n\n2. כן, ייתכן שהפלט '0:50' יופיע אחרי '1:13'. הסיבה היא שהתהליך הראשי (P1) מבצע waitpid(pid) רק עבור הבנים הישירים שלו (P2 ו-P4). P1 מחכה ש-P2 יסתיים לפני שהוא ממשיך לאיטרציה הבאה (i=1), אבל P2 עצמו לא מחכה לבן שלו (P3). לכן, ברגע ש-P2 מסיים ומדפיס, P1 יכול להמשיך, ליצור את P4 ולהדפיס '1:13', בזמן ש-P3 עדיין רץ או ממתין לתורו להדפיס.\n\n3. פירוט החישובים:\n- P1 (הראשי): מתחיל עם x=10. ב-i=0 מבצע x-=2 (x=8) ומחכה ל-P2. ב-i=1 מבצע x-=2 (x=6) ומחכה ל-P4. בסוף מדפיס 'Done:6'.\n- P2 (בן של P1, i=0): יורש x=10. מבצע x+=5 (x=15). יוצר את P3. מבצע x*=2 (x=30). מדפיס '0:30' ויוצא.\n- P3 (בן של P2): יורש x=15. מבצע x+=10 (x=25). מבצע x*=2 (x=50). מדפיס '0:50' ויוצא.\n- P4 (בן של P1, i=1): יורש x=8. מבצע x+=5 (x=13). מדפיס '1:13' ויוצא.\n\nסדר ההדפסות: '0:30' חייב להופיע לפני '1:13' (כי P1 מחכה ל-P2). '0:50' יכול להופיע בכל מקום לפני 'Done:6'. 'Done:6' תמיד אחרון.\nפלטים אפשריים לדוגמה: \n- 0:30 0:50 1:13 Done:6\n- 0:50 0:30 1:13 Done:6\n- 0:30 1:13 0:50 Done:6"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

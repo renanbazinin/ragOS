@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 18:32:34",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1127,
+      "output_tokens": 331,
+      "total_tokens": 2165
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "Threads",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "מה מהבאים משותף לכל החוטים (threads) השייכים לאותו תהליך?",
+      "code_snippet": null,
+      "options": [
+        "א. המחסנית (Stack)",
+        "ב. אוגרי המעבד (Registers)",
+        "ג. מונה הפקודות (Program Counter)",
+        "ד. מרחב הכתובות ומשתנים גלובליים",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ד",
+      "explanation": "חוטים באותו תהליך חולקים את מרחב הכתובות, קוד, נתונים (משתנים גלובליים) ומשאבי מערכת כמו קבצים פתוחים. לעומת זאת, לכל חוט יש הקשר ריצה פרטי הכולל מחסנית, אוגרים ומונה פקודות (PC) משלו."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

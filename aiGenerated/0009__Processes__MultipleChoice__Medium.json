@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 18:09:47",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1022,
+      "output_tokens": 424,
+      "total_tokens": 2152
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "Processes",
+      "System Calls"
+    ],
+    "content": {
+      "text": "כמה פעמים תודפס המחרוזת \"Hello\" כתוצאה מהרצת הקוד הבא? הנח שכל הקריאות ל-fork מצליחות.",
+      "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\nint main() {\n    if (fork() == 0) {\n        fork();\n        printf(\"Hello\\n\");\n    } else {\n        wait(NULL);\n    }\n    return 0;\n}",
+      "options": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "0"
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "2",
+      "explanation": "התהליך המקורי (האב) מבצע fork. תהליך האב מקבל ערך חיובי (PID של הבן) ונכנס לבלוק ה-else, שם הוא מבצע wait וממתין לסיום בנו. תהליך הבן מקבל 0 ונכנס לבלוק ה-if. בתוך ה-if, תהליך הבן מבצע fork נוסף, מה שיוצר תהליך נכד. גם הבן וגם הנכד ממשיכים לשורת ה-printf ומדפיסים \"Hello\". סה\"כ ההדפסה מתבצעת פעמיים."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

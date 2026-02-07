@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 18:03:25",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 965,
+      "output_tokens": 391,
+      "total_tokens": 3715
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Processes"
+    ],
+    "content": {
+      "text": "מה קורה למצב התהליך (Process State) כאשר הוא מבצע קריאת מערכת חוסמת (Blocking I/O), כמו קריאה מקובץ מהדיסק שטרם נטען?",
+      "code_snippet": null,
+      "options": [
+        "א. התהליך עובר למצב Ready ומחכה בתור למעבד.",
+        "ב. התהליך נשאר במצב Running ומבצע Busy Waiting עד שהנתונים מגיעים.",
+        "ג. התהליך עובר למצב Blocked (או Waiting) עד לסיום פעולת ה-I/O.",
+        "ד. התהליך עובר למצב Terminated ומערכת ההפעלה סוגרת אותו עקב שגיאה."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "כאשר תהליך מבצע פעולת I/O חוסמת, הוא אינו יכול להמשיך בביצוע הקוד שלו עד שהנתונים מוכנים. כדי לא לבזבז זמן מעבד יקר, מערכת ההפעלה מעבירה את התהליך למצב Blocked ומוציאה אותו מהמעבד. רק כאשר פעולת ה-I/O מסתיימת, התהליך יועבר חזרה למצב Ready."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

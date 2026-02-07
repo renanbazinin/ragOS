@@ -1,0 +1,58 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 18:30:46",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3664,
+      "output_tokens": 1264,
+      "total_tokens": 11008
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Processes",
+      "System Calls",
+      "fork",
+      "exec",
+      "Wait"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה בשפת C. הניחו כי המזהה (PID) של התהליך המריץ את הפונקציה main הוא 100. כל קריאת מערכת שמצליחה מחזירה ערך תקין (לפי התיעוד), ותהליכים חדשים מקבלים מזהה הגדול ב-1 מהמזהה האחרון שהוקצה במערכת. הניחו כי לא נוצרים תהליכים אחרים במערכת בזמן הריצה, וכי הפונקציה printf מדפיסה ישירות למסך ללא שימוש ב-buffer (כאילו בוצע fflush).",
+      "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n#include <sys/wait.h>\n#include <stdlib.h>\n\nint main() {\n    pid_t pid;\n    printf(\"P%d\\n\", getpid());\n    if (fork() == 0) {\n        if (fork() || fork()) {\n            printf(\"T%d\\n\", getpid());\n        }\n        exit(0);\n    }\n    pid = fork();\n    if (pid == 0) {\n        execlp(\"ls\", \"ls\", NULL);\n        printf(\"E%d\\n\", getpid());\n        exit(1);\n    }\n    waitpid(pid, NULL, 0);\n    printf(\"D%d\\n\", getpid());\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "כמה תהליכים נוצרו בסך הכל במהלך ריצת התוכנית (כולל התהליך הראשי)? פרטו את ה-PID של כל אחד מהם ואת הקשר ביניהם (מי האבא של מי).",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "האם ייתכן מצב בו המחרוזת 'D100' תודפס לפני המחרוזת 'T101'? נמקו את תשובתכם.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.3",
+        "text": "נניח כי הקריאה ל-execlp נכשלה (למשל, הקובץ ls לא נמצא). מה יהיו כל ההדפסות של התוכנית במקרה זה? (אין צורך לציין את סדר ההדפסות, אלא רק אילו מחרוזות יופיעו).",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1. נוצרו 5 תהליכים בסך הכל:\n- תהליך 100: התהליך הראשי.\n- תהליך 101: נוצר על ידי 100 בשורה 9.\n- תהליך 102: נוצר על ידי 101 בשורה 10 (ב-fork הראשון).\n- תהליך 103: נוצר על ידי 102 בשורה 10 (ב-fork השני, מכיוון שה-fork הראשון החזיר 0 ל-102).\n- תהליך 104: נוצר על ידי 100 בשורה 15.\n\n2. כן, ייתכן. תהליך 100 מבצע waitpid עבור תהליך 104 בלבד. הוא אינו ממתין לסיום של תהליך 101 או צאצאיו (102, 103). לכן, אם תהליך 104 יסיים את פעולתו (ה-ls יסתיים) ותהליך 100 ימשיך להדפסה בשורה 22 לפני שתהליך 101 יספיק להגיע להדפסה בשורה 11, 'D100' יודפס לפני 'T101'.\n\n3. אם execlp נכשל, התהליך (104) לא מוחלף וממשיך לשורה הבאה בקוד. ההדפסות שיופיעו הן:\n- P100 (מהתהליך הראשי בתחילת הריצה).\n- T101 (מתהליך 101, שעובר את תנאי ה-OR בגלל short-circuit).\n- T102 (מתהליך 102, שמבצע את ה-fork השני בתנאי ה-OR).\n- E104 (מתהליך 104, המדפיס הודעת שגיאה לאחר כישלון ה-exec).\n- D100 (מתהליך 100, לאחר שסיים להמתין ל-104)."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

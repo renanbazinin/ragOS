@@ -1,0 +1,56 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 18:17:15",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3602,
+      "output_tokens": 983,
+      "total_tokens": 5881
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "Open",
+    "topic": [
+      "Processes",
+      "fork",
+      "Memory Isolation"
+    ],
+    "content": {
+      "text": "לפניכם קטע קוד בשפת C המשתמש בקריאת המערכת fork. הניחו שכל הקריאות ל-fork מצליחות ושהפלט מודפס למסך באופן מיידי. הניחו כי פקודת ה-wait(NULL) גורמת לתהליך האב להמתין לסיום ביצועו של תהליך הבן הישיר שלו.",
+      "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\nint main() {\n    int x = 10;\n    if (fork() == 0) {\n        x += 5;\n        if (fork() == 0) {\n            x += 5;\n            printf(\"%d\\n\", x);\n        } else {\n            wait(NULL);\n            x -= 2;\n            printf(\"%d\\n\", x);\n        }\n    } else {\n        wait(NULL);\n        x -= 5;\n        printf(\"%d\\n\", x);\n    }\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "7.1",
+        "text": "כמה תהליכים נוצרו בסך הכל במהלך ריצת התוכנית (כולל התהליך הראשי)?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "7.2",
+        "text": "מה יהיו הערכים שיודפסו למסך ובאיזה סדר? נמקו את תשובתכם.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "7.3",
+        "text": "האם שינוי המשתנה x בתהליך הבן משפיע על ערכו של x בתהליך האב? הסבירו מדוע על סמך מנגנוני ניהול זיכרון בסיסיים של תהליכים.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "7.1: נוצרו 3 תהליכים בסך הכל. התהליך הראשי (P1) קרא ל-fork ויצר את P2. תהליך P2 קרא ל-fork פנימי ויצר את P3.\n\n7.2: הערכים שיודפסו הם 20, לאחר מכן 13, ולבסוף 5. \nהסבר: \n- תהליך P3 (הנכד) מקבל x=15 מ-P2, מוסיף 5 ומדפיס 20.\n- תהליך P2 (הבן) ממתין ל-P3, לאחר מכן מחסיר 2 מה-x שלו (שהיה 15) ומדפיס 13.\n- תהליך P1 (האב) ממתין ל-P2, לאחר מכן מחסיר 5 מה-x שלו (שהיה 10) ומדפיס 5.\nהסדר מובטח בזכות קריאות ה-wait.\n\n7.3: לא, השינוי אינו משפיע. בעת ביצוע fork, מערכת ההפעלה יוצרת העתק של מרחב הכתובות של האב עבור הבן. למרות שבתחילה הנתונים זהים, לכל תהליך יש זיכרון וירטואלי נפרד. בזכות מנגנון Copy-on-Write, ברגע שתהליך מנסה לשנות משתנה, נוצר עותק פיזי נפרד עבורו, ולכן שינויים בתהליך אחד אינם נראים בתהליך אחר."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

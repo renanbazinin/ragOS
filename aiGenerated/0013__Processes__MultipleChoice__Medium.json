@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 18:10:47",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1022,
+      "output_tokens": 575,
+      "total_tokens": 3358
+    }
+  },
+  "question": [
+    {
+      "id": 10,
+      "type": "MultipleChoice",
+      "topic": [
+        "Processes",
+        "System Calls",
+        "Fork"
+      ],
+      "content": {
+        "text": "מה יהיה הפלט של הקוד הבא (בהנחה שכל קריאות המערכת מצליחות והפלט מודפס למסך באופן מיידי)?",
+        "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\nint main() {\n    int x = 10;\n    if (fork() == 0) {\n        x += 5;\n        if (fork() == 0) {\n            printf(\"%d \", x);\n        } else {\n            wait(NULL);\n            printf(\"%d \", x);\n        }\n    } else {\n        wait(NULL);\n        printf(\"%d \", x);\n    }\n    return 0;\n}",
+        "options": [
+          "א. 10 15 15",
+          "ב. 15 15 10",
+          "ג. 15 20 10",
+          "ד. 15 10 10",
+          "ה. 15 15 15"
+        ]
+      },
+      "sub_questions": null,
+      "points": 5,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": "ב. 15 15 10",
+        "explanation": "התהליך הראשי מתחיל עם x=10. הוא מבצע fork. בתהליך הבן, x הופך ל-15. הבן מבצע fork נוסף ליצירת נכד. הנכד יורש את x=15 ומדפיס אותו. הבן מחכה לנכד (wait) ואז מדפיס את ה-x שלו (שהוא 15). לבסוף, תהליך האב המקורי, שחיכה לסיום הבן, מדפיס את ה-x שלו. מכיוון ש-fork יוצר העתק נפרד של מרחב הכתובות, השינויים בבן ובנכד לא השפיעו על ה-x של האב, ולכן הוא מדפיס 10."
+      },
+      "difficulty_estimation": "Medium"
+    }
+  ]
+}

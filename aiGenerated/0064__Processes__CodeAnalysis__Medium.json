@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 18:27:56",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2231,
+      "output_tokens": 667,
+      "total_tokens": 3993
+    }
+  },
+  "question": [
+    {
+      "id": 1,
+      "type": "CodeAnalysis",
+      "topic": [
+        "Processes",
+        "System Calls",
+        "Memory Management"
+      ],
+      "content": {
+        "text": "נתונה התוכנית הבאה בשפת C. מה יהיה הפלט של התוכנית? הניחו שכל קריאות המערכת מצליחות, שההדפסות מתבצעות מיד ללא חוצץ (buffer), ושתהליך אב תמיד ממתין לסיום ילדיו לפני שהוא ממשיך בביצוע.",
+        "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\nint val = 5;\n\nint main() {\n    pid_t pid;\n    pid = fork();\n    if (pid == 0) {\n        val += 15;\n        if (fork() == 0) {\n            val += 20;\n            printf(\"%d\", val);\n        } else {\n            wait(NULL);\n            printf(\"%d\", val);\n        }\n    } else {\n        wait(NULL);\n        val += 10;\n        printf(\"%d\", val);\n    }\n    return 0;\n}",
+        "options": [
+          "א. 402015",
+          "ב. 404015",
+          "ג. 402025",
+          "ד. 404025",
+          "ה. 204015"
+        ]
+      },
+      "sub_questions": null,
+      "points": 10,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": "א",
+        "explanation": "לאחר ה-fork הראשון, נוצר תהליך בן (C1) בו המשתנה הגלובלי val הוא 5. C1 מעדכן את val ל-20. לאחר מכן C1 מבצע fork נוסף ויוצר נכד (G1). ב-G1 המשתנה val מתחיל ב-20, מעודכן ל-40 ומודפס. כיוון שלכל תהליך מרחב זיכרון נפרד (Copy on Write), השינוי בנכד לא משפיע על C1. לכן, לאחר ה-wait ב-C1, הוא מדפיס את הערך שלו שהוא 20. תהליך האב המקורי המתין לסיום C1, ולאחר מכן הוסיף 10 לערך המקורי שלו (5) והדפיס 15. התוצאה המשורשרת היא 402015."
+      },
+      "difficulty_estimation": "Medium"
+    }
+  ]
+}

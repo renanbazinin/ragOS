@@ -1,0 +1,293 @@
+{
+  "metadata": {
+    "course_name": "Operating Systems",
+    "year": "2020",
+    "semester": "Summer",
+    "moed": "Moed A",
+    "exam_date": "23.09.2020",
+    "source_file": "os20SA.pdf"
+  },
+  "questions": [
+    {
+      "id": 1,
+      "type": "MultipleChoice",
+      "topic": [
+        "Deadlocks",
+        "Concurrency",
+        "Processes"
+      ],
+      "content": {
+        "text": "אם יש הרעבה בהכרח יש גם קיפאון.\nנכון / לא נכון",
+        "code_snippet": null,
+        "options": [
+          "נכון",
+          "לא נכון"
+        ]
+      },
+      "sub_questions": null,
+      "points": null,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": "לא נכון",
+        "explanation": "לא נכון. תיתכן הרעבה ללא קיפאון, לדוגמה במנעול TAS תיתכן הרעבה אבל לא קיפאון."
+      },
+      "difficulty_estimation": "Easy"
+    },
+    {
+      "id": 2,
+      "type": "MultipleChoice",
+      "topic": [
+        "Scheduling",
+        "CPU Scheduling"
+      ],
+      "content": {
+        "text": "באלגוריתם תזמון Round Robin, זמן המחזור הוא אופטימלי.\nנכון / לא נכון",
+        "code_snippet": null,
+        "options": [
+          "נכון",
+          "לא נכון"
+        ]
+      },
+      "sub_questions": null,
+      "points": null,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": "לא נכון",
+        "explanation": "לא נכון. זמן המחזור של RR הוא גרוע, כפי שראינו בשיעור."
+      },
+      "difficulty_estimation": "Easy"
+    },
+    {
+      "id": 3,
+      "type": "MultipleChoice",
+      "topic": [
+        "Virtual Memory",
+        "Paging",
+        "Memory Management"
+      ],
+      "content": {
+        "text": "הגדלת ה-TLB יכולה להקטין את ה-hit ratio.\nנכון / לא נכון",
+        "code_snippet": null,
+        "options": [
+          "נכון",
+          "לא נכון"
+        ]
+      },
+      "sub_questions": null,
+      "points": null,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": "נכון",
+        "explanation": "נכון. לדוגמה עבור אלגוריתם FIFO זה אפשרי."
+      },
+      "difficulty_estimation": "Medium"
+    },
+    {
+      "id": 4,
+      "type": "MultipleChoice",
+      "topic": [
+        "Synchronization",
+        "Concurrency",
+        "Mutexes"
+      ],
+      "content": {
+        "text": "במחשב עם מעבד יחיד, תמיד נעדיף מנעול שלא מבצע spinning.\nנכון / לא נכון",
+        "code_snippet": null,
+        "options": [
+          "נכון",
+          "לא נכון"
+        ]
+      },
+      "sub_questions": null,
+      "points": null,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": "נכון",
+        "explanation": "נכון. אם חוט נכשל בתפיסת המנעול, אין טעם לבצע spinning כי אף חוט אחר לא רץ במקביל (מעבד יחיד). כלומר המנעול לא ישוחרר וה-spinning מבזבז זמן מעבד."
+      },
+      "difficulty_estimation": "Easy"
+    },
+    {
+      "id": 5,
+      "type": "MultipleChoice",
+      "topic": [
+        "File Systems",
+        "I/O",
+        "Atomic Operations"
+      ],
+      "content": {
+        "text": "בעיית ה-crash consistency כאשר מוסיפים בלוק נתונים חדש לקובץ קיים (הדוגמה שניתנה בשיעור) תיפתר אם נוכל לבצע 2 כתיבות לדיסק בבת אחת.\nנכון / לא נכון",
+        "code_snippet": null,
+        "options": [
+          "נכון",
+          "לא נכון"
+        ]
+      },
+      "sub_questions": null,
+      "points": null,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": "נכון",
+        "explanation": "נכון. היכולת לבצע 2 כתיבות במקביל לא אומרת שאלו חייבות להיות 2 הכתיבות הראשונות. ראשית נכתוב רק את ה-DATA, מאחר ואין בעיה לקרוס אחרי כתיבת ה-DATA בלבד. לאחר מכן ננצל את היכולת החדשה כדי לעדכן את ה-inode וגם את ה-data bitmap יחד, כך שאם נקרוס לפני אז לא קרה כלום (עודכן רק ה-DATA), ואם נקרוס אחרי אז הפעולה בוצעה במלואה. כך לא יתכן שנקרוס אחרי 2 כתיבות – אלא רק אחרי אחת או 3."
+      },
+      "difficulty_estimation": "Medium"
+    },
+    {
+      "id": 6,
+      "type": "Open",
+      "topic": [
+        "Deadlocks",
+        "Concurrency"
+      ],
+      "content": {
+        "text": "מהם ארבעת התנאים לקיום קיפאון? הסבירו כל אחד מהם.",
+        "code_snippet": null,
+        "options": null
+      },
+      "sub_questions": null,
+      "points": null,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": null,
+        "explanation": "בהתאם לשקפים."
+      },
+      "difficulty_estimation": "Easy"
+    },
+    {
+      "id": 7,
+      "type": "CodeAnalysis",
+      "topic": [
+        "Processes",
+        "System Calls",
+        "IPC"
+      ],
+      "content": {
+        "text": "מריצים את קטע הקוד הבא:\nציירו את עץ התהליכים שנוצר, וציינו עבור כל תהליך בעץ את הפלט שלו. מהם כל הפלטים האפשריים של הקוד הנ\"ל?",
+        "code_snippet": "fork();\nif (fork() == 0) {\n    printf(\"B\");\n} else {\n    wait(NULL);\n    printf(\"A\");\n}",
+        "options": null
+      },
+      "sub_questions": null,
+      "points": null,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": null,
+        "explanation": "הפלט של התהליך הראשי (שורש העץ) ושל הבן השמאלי הוא A, של הבן הימני ושל הנכד הוא B.\nהפלטים האפשריים הם: BABA, BBAABAAB. פלט נפוץ שפוספס הוא BAAB, במקרה שבו ה-wait של השורש חוזר בעקבות סיום הבן השמאלי שלו, לפני שהבן הימני מדפיס B.\nעץ התהליכים:\n(Image of tree is missing, but the text describes the outputs)"
+      },
+      "difficulty_estimation": "Medium"
+    },
+    {
+      "id": 8,
+      "type": "CodeAnalysis",
+      "topic": [
+        "Synchronization",
+        "Mutexes",
+        "Concurrency",
+        "Deadlocks",
+        "Atomic Operations"
+      ],
+      "content": {
+        "text": "נתון קטע הקוד הבא למימוש מנעול עבור 2 חוטים, כאשר לכל חוט מזהה (0 או 1) המועבר כפרמטר i:\nהאם המנעול מקיים מניעה הדדית? חופש מקיפאון? הוגנות?",
+        "code_snippet": "int turn;\nvoid lock(int i) {\n    turn = i;\n    while (turn != i);\n}\nvoid unlock(int i) {\n    turn = 1-i;\n}",
+        "options": null
+      },
+      "sub_questions": [
+        {
+          "id": "מניעה הדדית",
+          "text": "מניעה הדדית:",
+          "code_snippet": null,
+          "options": [
+            "כן",
+            "לא"
+          ]
+        },
+        {
+          "id": "חופש מקיפאון",
+          "text": "חופש מקיפאון:",
+          "code_snippet": null,
+          "options": [
+            "כן",
+            "לא"
+          ]
+        },
+        {
+          "id": "הוגנות",
+          "text": "הוגנות:",
+          "code_snippet": null,
+          "options": [
+            "כן",
+            "לא"
+          ]
+        }
+      ],
+      "points": null,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": null,
+        "explanation": "מניעה הדדית – לא מתקיימת.\nדוגמה נגדית: חוט 0 קורא ל-lock, רץ לבד ונכנס לקטע הקריטי, אח\"כ חוט 1 קורא ל-lock ויכנס גם.\nחופש מקיפאון – מתקיים.\nנניח בשלילה שיש קיפאון. אם רק חוט אחד חסום בלולאה, אז הרי הוא עדכן את התור לערך של עצמו (החוט האחר לא רץ או, אם רץ בעבר, בהכרח סיים בעדכון התור לחוט הראשון), לכן זו סתירה. אם 2 החוטים חסומים בלולאה, לא יתכן שהתור הוא לא 0 ולא 1 – אלו הערכים היחידים שמעודכנים אל המשתנה, לכן זו גם סתירה.\nהוגנות – לא מתקיימת.\nדוגמה נגדית: חוט 0 קורא ל-lock ומעדכן 0=turn אך לפני הכניסה ללולאה מגיע חוט 1, משנה את התור ל-1 ונכנס לקטע הקריטי. כעת חוט 0 חסום בהמתנה לתור. כשחוט 1 יוצא מהקטע הקריטי הוא מעדכן את התור ל-0 אבל אז ינסה לתפוס שוב את המנעול (לפני ש-0 יראה את השינוי) ויעדכן שוב את התור ל-1, כך יכנס שוב לקטע הקריטי, וחוזר חלילה.\nתשובה שחזרה על עצמה היא שאם אין מניעה הדדית בהכרח יש חופש מקיפאון – זה לא נכון."
+      },
+      "difficulty_estimation": "Hard"
+    },
+    {
+      "id": 9,
+      "type": "Open",
+      "topic": [
+        "Virtual Memory",
+        "Paging",
+        "Memory Management"
+      ],
+      "content": {
+        "text": "נתונה מערכת עם זיכרון וירטואלי של 1MB, גודל דף של 2KB, וזיכרון פיזי של 4MB.\nמהם הגדלים של ה-VPN, ה-PFN, וכמה זיכרון פיזי תתפוס טבלת דפים (לינארית) של תהליך, במינימום?\nגודל VPN: ________ גודל PFN: ________ גודל טבלה: ________",
+        "code_snippet": null,
+        "options": null
+      },
+      "sub_questions": null,
+      "points": null,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": null,
+        "explanation": "כתובת וירטואלית היא 20 ביטים (זיכרון וירטואלי 1MB), מתוכם 11 מייצגים את ההיסט (גודל דף 2KB), לכן נשאר VPN=9.\nכתובת פיזית היא 22 ביטים (זיכרון פיזי 4MB), ההיסט זהה – 11, לכן נשאר PFN=11.\nלכל תהליך יש 512 דפים (2^9) בזיכרון הוירטואלי, כלומר שטבלת הדפים שלו מכילה 512 רשומות. כל רשומה מכילה לפחות 2 בתים (11 ביטים עבור PFN, מעוגל מעלה לחזקה הקרובה של 2), לכן הטבלה כולה תתפוס 1KB."
+      },
+      "difficulty_estimation": "Medium"
+    },
+    {
+      "id": 10,
+      "type": "Open",
+      "topic": [
+        "I/O",
+        "Disk Scheduling"
+      ],
+      "content": {
+        "text": "נתונים שני דיסקים קשיחים עם הנתונים הבאים:\nA: RPM 7500, seek time 10ms, transfer rate 250 MB/s\nB: RPM 15000, seek time 4ms, transfer rate 125 MB/s\nבהינתן workload אקראי של 4KB וסדרתי של 100MB, איזה דיסק קשיח נעדיף לכל אחד?",
+        "code_snippet": null,
+        "options": null
+      },
+      "sub_questions": [
+        {
+          "id": "סדרתי",
+          "text": "סדרתי: B / A",
+          "code_snippet": null,
+          "options": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "id": "אקראי",
+          "text": "אקראי: B / A",
+          "code_snippet": null,
+          "options": [
+            "A",
+            "B"
+          ]
+        }
+      ],
+      "points": null,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": null,
+        "explanation": "בחישוב זמני הפעולה לכל תרחיש, נקבל שדיסק A מהיר יותר בתרחיש הסדרתי, ודיסק B מהיר יותר בתרחיש האקראי."
+      },
+      "difficulty_estimation": "Medium"
+    }
+  ]
+}

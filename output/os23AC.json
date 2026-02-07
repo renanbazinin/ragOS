@@ -1,0 +1,112 @@
+{
+  "metadata": {
+    "course_name": "Operating Systems",
+    "year": "2023",
+    "semester": "Semester A",
+    "moed": "Moed C",
+    "exam_date": "28.03.2023",
+    "source_file": "os23AC.pdf"
+  },
+  "questions": [
+    {
+      "id": 1,
+      "type": "Open",
+      "topic": [
+        "Memory Management",
+        "Paging",
+        "Virtual Memory"
+      ],
+      "content": {
+        "text": "נתונה מערכת עם זיכרון פיזי בגודל 64KB וגודל דף של 512B. נתון שכל כניסה בטבלת הדפים (PTE) מכילה מספר מסגרת בלבד, ונדרש שכל טבלה תאוחסן בדף אחד בדיוק."
+      },
+      "sub_questions": [
+        {
+          "id": "1.1",
+          "text": "בהינתן שתהליך תרגום כתובת וירטואלית לפיזית מתבצע ברמה אחת בלבד, מה גודל הזיכרון הוירטואלי של תהליך?\nמרחב הכתובות:",
+          "code_snippet": null,
+          "options": null
+        },
+        {
+          "id": "1.2",
+          "text": "שדרגו את רכיב ה-MMU במערכת כך שיתמוך בתהליך תרגום של שתי רמות. מה גודל הזיכרון הוירטואלי של תהליך?\nמרחב הכתובות:",
+          "code_snippet": null,
+          "options": null
+        },
+        {
+          "id": "1.3",
+          "text": "במערכת של הסעיף הראשון (1.1) נתון ש-4KB מתוך הזיכרון הפיזי משוריין לטובת הקרנל, וזמין במערכת שטח החלפה (swap space) בגודל 256KB שכרגע כולו פנוי. בהנחה שהזיכרון של הקרנל כולו פנוי, כמה תהליכי משתמש יכולים לרוץ במערכת?\nמספר תהליכים:",
+          "code_snippet": null,
+          "options": null
+        }
+      ],
+      "points": null,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": null,
+        "explanation": "1.1: ה-PFN הוא 7 ביטים, כלומר גודל כל כניסה בטבלת הדפים הוא בית אחד (לאחר ריפוד – עיגול לחזקה הקרובה של 2). לכן לכל תהליך יש 512 דפים (טבלת הדפים דיוק בגודל דף), ומרחב הכתובות הוא 256KB.\n1.2: כמו בסעיף הקודם יש 512 כניסות בכל טבלה/חלק, כעת יש 2 רמות לכן סה\"כ 512^2 כניסות ברמה התחתונה, כלומר 256K דפים לכל תהליך. נכפיל בגודל דף ונקבל מרחב כתובות של 128MB.\n1.3: המגבלה תהיה הזיכרון של הקרנל עבור טבלאות הדפים של התהליכים. אין משמעות לגודל ה-swap space מאחר וטבלאות הדפים לא נשמרות בו. ב-4KB ניתן להכניס טבלאות דפים של 8 תהליכים."
+      },
+      "difficulty_estimation": "Medium"
+    },
+    {
+      "id": 2,
+      "type": "CodeAnalysis",
+      "topic": [
+        "Synchronization",
+        "Semaphores",
+        "Concurrency",
+        "Threads"
+      ],
+      "content": {
+        "text": "בסניף דואר מקומי יש פקיד יחיד ו-2 סוגי תורים: תור רגיל ותור מהיר. הפקיד מטפל בלקוחות לפי סדר הגעתם. לקוחות בתור המהיר עוקפים את הלקוחות בתור הרגיל, כך שהפקיד מטפל בהם קודם ולפי סדר הגעתם לתור המהיר. במילים אחרות, כאשר הפקיד פנוי הוא מטפל בלקוחות לפי החוקיות הבאה:\n- אם יש לקוחות ממתינים בתור המהיר, הפקיד מטפל בלקוח הבא מהתור המהיר.\n- אחרת, אם יש לקוחות ממתינים בתור הרגיל, הפקיד מטפל בלקוח הבא מהתור הרגיל.\nשימו לב: אין להתחיל טיפול בלקוח מהתור הרגיל אם יש לקוחות ממתינים בתור המהיר. בכל רגע נתון מטופל לקוח אחד בלבד.\nלצורך מחשוב הסניף הוחלט לייצג כל לקוח ע\"י חוט ולממש אובייקט סנכרון עם 4 פעולות:\n- לקוח קורא לפעולה enter_regq כדי להיכנס לתור הרגיל, ולפעולה enter_fastq כדי להיכנס לתור המהיר. פעולות אלו חוזרות רק כאשר הגיע תורו של הלקוח, אז הוא ניגש לטיפול אצל הפקיד.\n- לקוח שסיים את הטיפול אצל הפיקוד קורא לפעולה exit_regq אם המתין בתור הרגיל, ולפעולה exit_fastq אם המתין בתור המהיר. רק אחרי שקריאה זו הסתיימה, הפקיד פנוי לטפל בלקוח הבא.\nבשאלה זו יש לממש את אובייקט הסנכרון כך שיקיים את 3 התכונות: מניעה הדדית, חופש מקיפאון, והוגנות. ניתן להשתמש באובייקטי סנכרון ופעולות אטומיות כרצונכם.\nמשתנים גלובליים (יש לציין ערכי אתחול בהערה):",
+        "code_snippet": "void enter_regq() {\n}\nvoid enter_fastq() {\n}\nvoid exit_regq() {\n}\nvoid exit_fastq() {\n}",
+        "options": null
+      },
+      "sub_questions": null,
+      "points": 34,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": null,
+        "explanation": "int fast_wait = 0;\nsem_t fastlock; // init to 1 (any fair lock)\nsem_t reglock; // init to 1 (any fair lock)\n\nvoid enter_regq() {\n    sem_wait(&reglock); // wait until I'm first in regq\n    while (1) {\n        sem_wait(&fastlock); // prevent fastq entering\n        if (fast_wait == 0) // make sure no fast q are waiting\n            return;\n        sem_post(&fastlock); // otherwise release and retry\n    }\n}\nvoid exit_regq() {\n    sem_post(&fastlock); // release both q locks\n    sem_post(&reglock); // (order doesn't matter)\n}\nvoid enter_fastq() {\n    fetch_and_add(&fast_wait, 1); // mark waiting in fast q\n    sem_wait(&fastlock); // wait for turn\n}\nvoid exit_fastq() {\n    fetch_and_add(&fast_wait, -1); // no longer waiting\n    sem_post(&fastlock); // proceed to next in line\n}"
+      },
+      "difficulty_estimation": "Hard"
+    },
+    {
+      "id": 3,
+      "type": "Open",
+      "topic": [
+        "File Systems",
+        "I/O"
+      ],
+      "content": {
+        "text": "נתונה מערכת קבצים VSFS על גבי דיסק עם גודל סקטור וגודל בלוק של 4KB. נתון שיש במערכת 1,000,000 בלוקים פנויים של DATA ו-100,000 inodes פנויים. יש לפרט ולנמק את כל החישובים."
+      },
+      "sub_questions": [
+        {
+          "id": "3.1",
+          "text": "משתמש הריץ את הסקריפט הבא בשפת BASH (ראו הערות לכל שורה):\nכמה בלוקים של DATA וכמה inodes פנויים יהיו לאחר הרצת הסקריפט?\nמספר בלוקים:\nמספר inodes:",
+          "code_snippet": "for d in a{1..10}; do\n    mkdir $d\n    # iterate over a1, a2, ..., a10\n    # create dirs a1, a2, ..., a10\n    for x in b{1..10}; do\n        mkdir $d/$x\n        # iterate over b1, b2, ..., b10\n        # create dirs $d/b1, $d/b2, ...\n        for f in h{1..10}; do\n            # iterate over h1, h2, ..., h10\n            echo hello > $d/$x/$f\n        done\n        # close the loop: for f ...\n    done\n    # close the loop: for x ...\ndone\n# close the loop: for d ...",
+          "options": null
+        },
+        {
+          "id": "3.2",
+          "text": "לאחר הרצת הסקריפט מהסעיף הקודם, המשתמש הריץ את הפקודה הבאה:\nrm -rf a* # recursively remove all files and dirs\nהאם כמות הבלוקים ו-inodes הפנויים חזרה בדיוק למה שהייתה קודם (לפני הרצת הסקריפט המקורי)?\nהכמות חזרה\n/\nהכמות לא חזרה: מספר בלוקים:\nמספר inodes:",
+          "code_snippet": "rm -rf a* # recursively remove all files and dirs",
+          "options": null
+        },
+        {
+          "id": "3.3",
+          "text": "במצב המקורי של המערכת (לפני המתואר בסעיפים הקודמים), משתמש הריץ את הסקריפט BASH הבא:\nמה תהיה ההשפעה של הסקריפט על מערכת הקבצים (מבחינת הבלוקים הפנויים)?\nהאם הסקריפט ירוץ לנצח? אם כן יש לתאר כיצד זה יתכן, אחרת לתאר מדוע לא.\nירוץ לנצח\n/\nלא ירוץ לנצח",
+          "code_snippet": "x=1;\nwhile [ $x ] ; do # practically, kind of infinite loop\n    echo hello > $x\n    let x=$x+1 # like x++ in C language\ndone",
+          "options": null
+        }
+      ],
+      "points": null,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": null,
+        "explanation": "3.1: נוצרות 10 תיקיות בלולאה החיצונית, 100 באמצעית (10 לכל אחת בראשונה), ו-1000 קבצים בלולאה הפנימית (10 לכל תיקייה בלולאה האמצעית).\nבכל תיקייה יש קובץ יחיד לכן מספיק המינימום של בלוק DATA אחד וכך גם לכל קובץ, לכן בסה\"כ נוצלו 1110 בלוקים של DATA ו-1110 inodes.\n3.2: כן, לאחר מחיקת כל הקבצים והתיקיות נפנה את כל הבלוקים וה-inodes, לכן כמות הבלוקים ו-inodes הפנויים תהיה זהה (מאחר שהכל משוחרר במחיקה).\n3.3: ייווצרו קבצים עד שלא יהיו יותר inodes פנויים – כל קובץ תופס בלוק DATA אחד, לכן המגבלה תהיה כמות ה-inodes (מאחר שיש יותר בלוקי DATA). לאחר מכן הסקריפט ימשיך לרוץ בלולאה אינסופית אך יודפסו הודעות שגיאה."
+      },
+      "difficulty_estimation": "Medium"
+    }
+  ]
+}

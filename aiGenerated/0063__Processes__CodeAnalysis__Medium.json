@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 18:27:45",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2231,
+      "output_tokens": 625,
+      "total_tokens": 3941
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Processes",
+      "System Calls",
+      "Fork"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה בשפת C. הניחו כי כל קריאות המערכת מצליחות, וכי הפלט מודפס מיד למסך (ללא buffering). מה יהיה הפלט של התוכנית?",
+      "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n#include <sys/wait.h>\n#include <stdlib.h>\n\nint main() {\n    int x = 5;\n    for (int i = 0; i < 2; i++) {\n        if (fork() == 0) {\n            x += 10;\n            printf(\"%d\", x);\n            exit(0);\n        } else {\n            x += 2;\n            wait(NULL);\n        }\n    }\n    printf(\"%d\", x);\n    return 0;\n}",
+      "options": [
+        "א. 15159",
+        "ב. 15179",
+        "ג. 152535",
+        "ד. 151719",
+        "ה. 15177"
+      ]
+    },
+    "sub_questions": null,
+    "points": 10,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "בתחילת התוכנית x=5. באיטרציה הראשונה (i=0), מתבצע fork. הבן הראשון מקבל עותק של x=5, מעדכן אותו ל-15 (x += 10), מדפיס '15' ומסיים (exit). האב באותו זמן מעדכן את ה-x שלו ל-7 (x += 2) ומחכה לסיום הבן. באיטרציה השנייה (i=1), האב (שבו x=7) מבצע fork נוסף. הבן השני מקבל עותק של x=7, מעדכן אותו ל-17 (x += 10), מדפיס '17' ומסיים. האב מעדכן את ה-x שלו ל-9 (x += 2) ומחכה לסיום הבן. בסיום הלולאה, האב מדפיס את הערך הסופי של x שלו, שהוא 9. לכן הפלט המצטבר הוא 15179."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

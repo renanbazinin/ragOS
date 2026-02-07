@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 18:20:21",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3826,
+      "output_tokens": 1192,
+      "total_tokens": 11078
+    }
+  },
+  "question": [
+    {
+      "id": 10,
+      "type": "Open",
+      "topic": [
+        "Processes",
+        "Fork",
+        "Wait",
+        "Process Tree"
+      ],
+      "content": {
+        "text": "נתון הקוד הבא בשפת C. הנח שכל הקריאות למערכת מצליחות, שההדפסות מתבצעות ללא buffering (כלומר יוצאות מיד למסך), ושאין השהיות חיצוניות. ענה על הסעיפים הבאים:\n1. כמה פעמים תודפס האות 'A' וכמה פעמים תודפס האות 'B' על המסך?\n2. תאר את עץ התהליכים שנוצר. עבור כל תהליך, ציין אילו אותיות הוא מדפיס ובאיזה שלב.\n3. האם ייתכן מצב שבו האות 'B' מודפסת לפני כל מופע כלשהו של האות 'A'? נמק את תשובתך על סמך מנגנון הסנכרון בקוד.",
+        "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\nint main() {\n    int i, status;\n    pid_t pid;\n    for (i = 0; i < 2; i++) {\n        pid = fork();\n        if (pid == 0) {\n            // Child process\n            if (i == 0) {\n                fork();\n            }\n            printf(\"A\");\n        } else {\n            // Parent process\n            waitpid(pid, &status, 0);\n            printf(\"B\");\n        }\n    }\n    return 0;\n}",
+        "options": null
+      },
+      "sub_questions": null,
+      "points": 20,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": null,
+        "explanation": "ניתוח הריצה:\n1. איטרציה i=0:\n- תהליך האב המקורי (P1) מבצע fork ויוצר את P2. \n- P1 נכנס ל-else ומחכה ל-P2 (באמצעות waitpid).\n- P2 (הבן) נכנס ל-if (pid == 0). כיוון ש-i=0, הוא מבצע fork נוסף ויוצר את P3.\n- P2 מדפיס 'A'.\n- P3 (הנכד) נוצר בתוך הבלוק של i=0 ומדפיס 'A'.\n\n2. איטרציה i=1:\n- P2 ו-P3 ממשיכים לאיטרציה הבאה. \n- P2 מבצע fork ויוצר את P4. P2 מחכה ל-P4 ומדפיס 'B'.\n- P4 (הנין) מדפיס 'A' (הוא לא עושה fork כי i=1) ומסיים.\n- P3 מבצע fork ויוצר את P5. P3 מחכה ל-P5 ומדפיס 'B'.\n- P5 (הנין) מדפיס 'A' ומסיים.\n- לאחר ש-P2 מסיים את i=1 ויוצא, P1 (שחיכה לו) מדפיס 'B' וממשיך ל-i=1.\n- P1 (ב-i=1) מבצע fork ויוצר את P6. P1 מחכה ל-P6 ומדפיס 'B'.\n- P6 מדפיס 'A' ומסיים.\n\nסיכום הדפסות:\n- האות 'A' מודפסת ע\"י: P2(i=0), P3(i=0), P4(i=1), P5(i=1), P6(i=1). סה\"כ 5 פעמים.\n- האות 'B' מודפסת ע\"י: P2(i=1), P3(i=1), P1(i=0), P1(i=1). סה\"כ 4 פעמים.\n\nתשובה לסעיף 3:\nלא, לא ייתכן ש-'B' תודפס לפני כל 'A'. בקוד קיים שימוש ב-waitpid המאלץ את האב לחכות לסיום הילד שלו לפני הדפסת 'B'. לדוגמה, P2 ו-P3 מדפיסים 'A' מיד בתחילת הריצה (i=0) עוד לפני שהם יכולים להגיע לשלב ההדפסה של 'B' או לפני ש-P1 יכול להשתחרר מה-wait שלו. כיוון ש-P2 חייב להדפיס 'A' ב-i=0 לפני שהוא בכלל מגיע ל-i=1 או מסיים, ו-P1 מחכה ל-P2, ה-'A' של P2 תמיד תופיע לפני ה-'B' של P1."
+      },
+      "difficulty_estimation": "Hard"
+    }
+  ]
+}

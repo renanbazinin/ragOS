@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 18:34:56",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1815,
+      "output_tokens": 811,
+      "total_tokens": 5196
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Threads",
+      "Concurrency",
+      "Race Condition"
+    ],
+    "content": {
+      "text": "נתון הקוד הבא הכתוב בשפת C ומשתמש בספריית pthreads. מה מהבאים מתאר נכונה את התנהגות התוכנית?",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n\nint global_sum = 0;\n\nvoid* thread_func(void* arg) {\n    int val = *(int*)arg;\n    for (int i = 0; i < 1000; i++) {\n        global_sum += val;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[2];\n    for (int i = 1; i <= 2; i++) {\n        pthread_create(&threads[i-1], NULL, thread_func, &i);\n    }\n    for (int i = 0; i < 2; i++) {\n        pthread_join(threads[i], NULL);\n    }\n    printf(\"%d\\n\", global_sum);\n    return 0;\n}",
+      "options": [
+        "א. התוכנית תמיד תדפיס 3000, מכיוון שהלולאה הראשונה רצה עבור i=1 ו-i=2.",
+        "ב. התוכנית תדפיס ערך שבין 1000 ל-3000, אך הערך יהיה תמיד כפולה של 1000.",
+        "ג. הפלט עשוי להיות שונה מ-3000 גם בשל Race Condition על global_sum וגם בשל העברת מצביע למשתנה הלוקאלי i שערכו משתנה ב-main.",
+        "ד. התוכנית תגרום לשגיאת סגמנטציה (Segmentation Fault) כיוון שחוטי המשנה מנסים לגשת לזיכרון של המחסנית של חוט ה-main.",
+        "ה. התוכנית תדפיס תמיד 3000, שכן pthread_join מבצע סנכרון (Memory Barrier) שמבטיח את תקינות הערך של global_sum."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "התשובה הנכונה היא ג'. ישנן שתי בעיות סנכרון עיקריות בקוד: 1. Race Condition על המשתנה הגלובלי: הפעולה global_sum += val אינה אטומית. כאשר שני חוטים מנסים לעדכן את המשתנה בו-זמנית, עדכונים עלולים ללכת לאיבוד. 2. Argument Race: הכתובת של המשתנה i מועברת לחוטים. כיוון ש-i משתנה בלולאה ב-main בזמן שהחוטים נוצרים, ייתכן שחוט יקרא את הערך של i מהזיכרון רק לאחר ש-main כבר קידם אותו (למשל ל-2 או ל-3), ולכן val בתוך החוט לא יהיה בהכרח הערך המיועד (1 או 2)."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

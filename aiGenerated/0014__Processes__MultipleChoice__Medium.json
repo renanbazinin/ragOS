@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 18:10:58",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1022,
+      "output_tokens": 531,
+      "total_tokens": 2786
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Processes",
+      "System Calls",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "לפניך קטע קוד בשפת C המשתמש בקריאת המערכת fork. מה יהיה הפלט של התוכנית (בהנחה שכל הקריאות ל-fork ו-wait מצליחות)?",
+      "code_snippet": "int main() {\n    int x = 10;\n    if (fork() == 0) {\n        x += 5;\n        if (fork() == 0) {\n            x += 5;\n            printf(\"%d\", x);\n        } else {\n            wait(NULL);\n        }\n    } else {\n        wait(NULL);\n        x -= 5;\n        printf(\"%d\", x);\n    }\n    return 0;\n}",
+      "options": [
+        "א. 205",
+        "ב. 2015",
+        "ג. 1510",
+        "ד. 2010",
+        "ה. 155"
+      ]
+    },
+    "sub_questions": null,
+    "points": 10,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א. 205",
+      "explanation": "לאחר ביצוע fork, נוצר עותק של התהליך עם מרחב כתובות נפרד (Copy-on-Write). בתהליך הבן הראשון, x הופך ל-15. לאחר מכן הוא מבצע fork נוסף, ובתהליך הנכד x הופך ל-20 ומודפס. בתהליך האב המקורי, x נשאר 10 (כי הוא לא מושפע מהשינויים בבנים), ולאחר ה-wait הוא מופחת ב-5 ומודפס הערך 5. כיוון שהאב והבן ממתינים לסיום הצאצאים שלהם, ההדפסה של ה-20 תתבצע לפני ה-5."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

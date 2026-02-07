@@ -1,0 +1,251 @@
+{
+  "metadata": {
+    "course_name": "Operating Systems",
+    "year": "2022",
+    "semester": "Semester B",
+    "moed": "Moed B",
+    "exam_date": "18.07.2022",
+    "source_file": "os22BB.pdf"
+  },
+  "questions": [
+    {
+      "id": 1,
+      "type": "MultipleChoice",
+      "topic": [
+        "Disk Scheduling",
+        "I/O"
+      ],
+      "content": {
+        "text": "בתזמון SCAN לעומת C-SCAN, הראש הקורא-כותב עובר את אותו מרחק בסקטורים, וההבדל מתבטא רק בסדר הטיפול בבקשות / סקטורים.\nנכון / לא נכון",
+        "code_snippet": null,
+        "options": [
+          "נכון",
+          "לא נכון"
+        ]
+      },
+      "sub_questions": null,
+      "points": 5,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": "לא נכון",
+        "explanation": "לא נכון. דוגמה נגדית: הראש הקורא-כותב היה בסקטור 40 והגיעו בקשות ל-10 ו-20. בתזמון SCAN נטפל קודם ב-20 ואז 10 (מרחק כולל של 30), אך ב-C-SCAN נטפל קודם ב-10 ואז ב-20 (מרחק כולל של 40)."
+      },
+      "difficulty_estimation": "Medium"
+    },
+    {
+      "id": 2,
+      "type": "MultipleChoice",
+      "topic": [
+        "Memory Management",
+        "Concurrency",
+        "IPC"
+      ],
+      "content": {
+        "text": "בגישה לזיכרון משותף יש הבדל בביצועים בין פעולות קריאה לפעולות כתיבה.\nנכון / לא נכון",
+        "code_snippet": null,
+        "options": [
+          "נכון",
+          "לא נכון"
+        ]
+      },
+      "sub_questions": null,
+      "points": 5,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": "נכון",
+        "explanation": "נכון. פעולות כתיבה דורשות אקסקלוסיביות ושליחת הודעת invalidate על גבי ה-bus ולכן פוגעות יותר בביצועים לעומת קריאות שיכולות להתבצע באופן מקומי גם כאשר למעבדים אחרים יש את אותו ערך.\nהסבר נוסף: עבור זיכרון משותף בין תהליכים עם מנגנון copy-on-write, פעולות כתיבה יכולות לגרור שכפול של הזיכרון."
+      },
+      "difficulty_estimation": "Medium"
+    },
+    {
+      "id": 3,
+      "type": "MultipleChoice",
+      "topic": [
+        "Memory Management",
+        "Virtual Memory",
+        "Paging"
+      ],
+      "content": {
+        "text": "אם כל המסגרות בזיכרון תפוסות, לא ניתן להקצות זיכרון חדש לתהליכים.\nנכון / לא נכון",
+        "code_snippet": null,
+        "options": [
+          "נכון",
+          "לא נכון"
+        ]
+      },
+      "sub_questions": null,
+      "points": 5,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": "לא נכון",
+        "explanation": "לא נכון. באמצעות מנגנון ההחלפה אנו לא מוגבלים לכמות המסגרות בזיכרון הפיזי ויכולים לאחסן דפים בדיסק."
+      },
+      "difficulty_estimation": "Medium"
+    },
+    {
+      "id": 4,
+      "type": "MultipleChoice",
+      "topic": [
+        "Processes",
+        "Scheduling"
+      ],
+      "content": {
+        "text": "תהליך במצב Ready יכול להסתיים.\nנכון / לא נכון",
+        "code_snippet": null,
+        "options": [
+          "נכון",
+          "לא נכון"
+        ]
+      },
+      "sub_questions": null,
+      "points": 5,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": "נכון",
+        "explanation": "נכון. ע\"י קריאות חיצוניות כמו kill ניתן לעצור תהליך גם כשהוא לא במצב Running.\n(התקבל גם: לא נכון, כאשר מתייחסים לריצה תקינה וסיום יזום ע\"י התהליך)."
+      },
+      "difficulty_estimation": "Medium"
+    },
+    {
+      "id": 5,
+      "type": "MultipleChoice",
+      "topic": [
+        "Synchronization",
+        "Deadlocks",
+        "Mutexes"
+      ],
+      "content": {
+        "text": "בשימוש במנעולים המקיימים חופש מקיפאון ניתן להגיע לקיי יע לקיפאון.\nנכון / לא נכון",
+        "code_snippet": null,
+        "options": [
+          "נכון",
+          "לא נכון"
+        ]
+      },
+      "sub_questions": null,
+      "points": 5,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": "נכון",
+        "explanation": "נכון. הדוגמה הקלאסית של קיפאון (2 חוטים שתופסים 2 מנעולים בסדר הפוך) יכולה להוביל לקיפאון גם אם 2 המנעולים מקיימים חופש מקיפאון."
+      },
+      "difficulty_estimation": "Medium"
+    },
+    {
+      "id": 6,
+      "type": "CodeAnalysis",
+      "topic": [
+        "Processes",
+        "System Calls",
+        "IPC"
+      ],
+      "content": {
+        "text": "נתונה התוכנית הבאה:\nניתן להניח שכל הקריאות ל-fork הצליחו.",
+        "code_snippet": "int main() {\n  int r1 = fork() || fork();\n  if (r1) {\n    char* args[3] = {\"echo\", \"r1: TRUE\", NULL};\n    execvp(args[0], args);\n    printf(\"r1: TRUE\\n\");\n  } else {\n    printf(\"r1: FALSE\\n\");\n  }\n  wait(NULL);\n\n  int r2 = fork() && fork();\n  if (r2) {\n    char* args[3] = {\"echo\", \"r2: TRUE\", NULL};\n    execvp(args[0], args);\n  }\n  else {\n    printf(\"r2: FALSE\\n\");\n  }\n  if (r1 || r2)\n    printf(\"END\\n\");\n}"
+      },
+      "sub_questions": [
+        {
+          "id": "6.1",
+          "text": "כתבו פלט אפשרי של התוכנית הנתונה בהנחה שכל קריאות המערכת הצליחו, ולאחריו הסבר.",
+          "code_snippet": null,
+          "options": null
+        },
+        {
+          "id": "6.2",
+          "text": "כמה תהליכים נוצרו במהלך ריצה תקינה של התוכנית, כולל התהליך הראשי?\nמספר תהליכים:\nנימוק:",
+          "code_snippet": null,
+          "options": null
+        },
+        {
+          "id": "6.3",
+          "text": "האם יתכנו זומבים בשלב כלשהו במהלך הריצה? אם כן, יש לציין את כל תהליכי הזומבים האפשריים בכל שלב, אחרת להסביר מדוע לא.\nיתכנו זומבים / לא יתכנו זומבים",
+          "code_snippet": null,
+          "options": null
+        },
+        {
+          "id": "6.4",
+          "text": "במידה ולא קיים הקובץ echo במערכת, האם התשובה לסעיף 6.2 תשתנה?\nאם כן, יש לציין את התשובה לאחר השינוי, אחרת להסביר מדוע אין שינוי.\nהתשובה תשתנה: / התשובה לא תשתנה",
+          "code_snippet": null,
+          "options": null
+        }
+      ],
+      "points": null,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": null,
+        "explanation": "1. בשורת ()fork() || fork נוצרים 2 תהליכים חדשים: תהליך בן ותהליך נכד.\nהקריאה ל-execvp לא חוזרת, כלומר 2 התהליכים שיגיעו לשורה 5 (האב והבן) לא ימשיכו הלאה.\nהתהליך שמגיע ל-wait בשורה 10 הוא הנכד, אין לו בנים לכן מיד ימשיך הלאה.\nבשורת ()fork() && fork נוצרים 2 תהליכים חדשים: 2 תהליכי בנים (של הנכד המקורי).\nל-execvp בשורה 15 מגיע תהליך יחיד (הנכד המקורי), ולא ממשיך הלאה.\nאף אחד לא ידפיס את הפלט בשורה 20 (עבור 2 התהליכים שנותרו מתקיים 0==r1==r2).\nפלט:\nr1: TRUE\nr1: TRUE\nr1: FALSE\nr2: TRUE\nr2: FALSE\nr2: FALSE\n2. לפי ההסבר בסעיף הקודם נוצרו 5 תהליכים.\n3. כל תהליך יכול להיות זומבי מלבד התהליך הראשי (שלא ידוע לגביו).\nאין אף מנגנון שמכתיב סדר בין התהליכים. בכל נקודה בריצה, כל תהליך בן שמסתיים לפני תהליך האב שלו יהפוך לזומבי עד שתהליך האב יסתיים גם.\n4. אם echo לא קיים אז כל הקריאות ל-execvp יכשלו והתהליכים ימשיכו הלאה לפקודה הבאה במקום לא לחזור מהקריאה.\n2 התהליכים שהגיעו לשורה 5 ימשיכו לשורה 12, כל אחד מהם מייצר 2 תהליכי בנים שלא נוצרו קודם. נוספו 4 תהליכים שלא היו קודם, סה\"כ 9 תהליכים."
+      },
+      "difficulty_estimation": "Medium"
+    },
+    {
+      "id": 7,
+      "type": "Open",
+      "topic": [
+        "Synchronization",
+        "Mutexes",
+        "Atomic Operations",
+        "Concurrency",
+        "Threads"
+      ],
+      "content": {
+        "text": "מנעול ניתן לביטול (Abortable Lock) הוא מנעול אשר, מלבד פעולת הנעילה הסטנדרטית, מכיל פעולה נוספת שיכולה לחזור מבלי לתפוס את המנעול. לדוגמה, המנעול המובנה של לינוקס הוא מנעול ניתן לביטול עם 2 הפעולות שנלמדו: trylock, timedlock.\nפעולת נעילה נוספת זו נדרשת להחזיר 0 אם תפסה את המנעול בהצלחה, ומספר אחר אם לא. ניתן להניח שהחוט בודק את ערך ההחזר ולא נכנס לקטע הקריטי אם הנעילה נכשלה.\nלשאלה זו מצורפים המימושים הרגילים שנלמדו בכיתה (ללא ביטול) של שני המנעולים הבאים: מנעול TTAS, מנעול Anderson Queue Lock) ALock). המימושים מצורפים ללא פונקציות אתחול והריסה. הקבוע N הוא מספר החוטים המקסימלי, והמשתנה mine הוא משתנה עזר ייחודי לכל חוט (אשר ערכו נשמר בין קריאות עבור אותו חוט בלבד).\nבשאלה זו יש לממש מנעול ניתן לביטול ע\"י מימוש פעולת trylock, המבוסס על מנעולים אלו.\nשימו לב: בכל סעיף נדרש גם לעדכן את פעולת lock (נעילה ללא ביטול) כך שתעבוד עם השינויים. ניתן להניח שחוט אשר קרא ל-trylock ונכשל לא יבצע קריאה נוספת ל-trylock לפני שתפס את המנעול בהצלחה. כלומר, אחרי קריאת trylock שנכשלה מובטח שהקריאה הבאה של החוט (אם תהיה כזו) תהיה קריאה ל-lock.\nיש לשמור על כל התכונות של המימוש הקיים של כל מנעול (מניעה הדדית, חופש מקיפאון, הוגנות). ניתן להשתמש בפעולות אטומיות כרצונכם, אך לא ניתן להשתמש באובייקטי סנכרון אחרים.",
+        "code_snippet": "typedef struct {\n  int state;\n} TTASLock;\n\nvoid lock(TTASLock *lock) {\n  while (1) {\n    while (lock->state);\n    if (!testAndSet(&lock->state, 1))\n      return;\n  }\n}\n\nvoid unlock (TTASLock *lock) {\n  lock->state = 0;\n}\n\ntypedef struct {\n  int next;\n  int flags[N];\n} ALock; // Anderson queue lock\n\nvoid lock(ALock *lock, int *mine) {\n  *mine = fetchAndAdd(&lock->next);\n  while (!lock->flags[(*mine) % N]);\n}\n\nvoid unlock (ALock *lock, int *mine) {\n  lock->flags[(*mine) % N] = 0;\n  lock->flags[(*mine+1) % N] = 1;\n}"
+      },
+      "sub_questions": [
+        {
+          "id": "7.1",
+          "text": "ממשו מנעול TTAS הניתן לביטול.\nהסבר:",
+          "code_snippet": "typedef struct _ttas_lock {\n    int state;\n} TTASLock;\n\nvoid init(TTASLock *lock) {\n    lock->state = 0;\n}\n\nint destroy(TTASLock *lock) {\n    return 0;\n}\n\nvoid lock(TTASLock *lock) {\n    while (1) {\n        while (lock->state);\n        if (!testAndSet(&lock->state, 1))\n            return;\n    }\n}\n\nint trylock(TTASLock *lock) {\n    if ((lock->state) || (testAndSet(&lock->state, 1)))\n        return 1;\n    else\n        return 0;\n}\n\nvoid unlock(TTASLock *lock) {\n    lock->state = 0;\n}",
+          "options": null
+        },
+        {
+          "id": "7.2",
+          "text": "ממשו מנעול אנדרסון (ALock) הניתן לביטול.\nהסבר:",
+          "code_snippet": "typedef struct _a_lock {\n    int next;\n    int flags[2*N];\n} ALock;\n\nvoid init(ALock *lock) {\n    for (int i = 1; i < 2*N; ++i)\n        lock->flags[i] = 0;\n    lock->flags[0] = 1;\n    lock->next = 0;\n}\n\nint destroy(ALock *lock) {\n    return 0;\n}\n\nvoid lock(ALock *lock, int *mine) {\n    *mine = fetchAndAdd(&lock->next);\n    while (!lock->flags[(*mine) % (2*N)]);\n}\n\nint trylock (ALock *lock, int *mine) {\n    *mine = fetchAndAdd(&lock->next);\n    return ! testAndSet(&lock->flags[(*mine)%(2*N)], 1);\n}\n\nvoid unlock (ALock *lock, int *mine) {\n    lock->flags[(*mine)%(2*N)] = 0;\n    int i = 1;\n    while (testAndSet(&lock->flags[(*mine + i)%(2*N)], 1)) {\n        lock->flags[(*mine + i)%(2*N))] = 0;\n        ++i;\n    }\n}",
+          "options": null
+        }
+      ],
+      "points": null,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": null,
+        "explanation": "1. הוספת הפעולה trylock אינה משפיעה על אף אחת מפעולות המנעול האחרות.\n2. במנעול ALock לא ניתן לחזור סתם בפונקציית הנעילה, מאחר שכל חוט צריך לקדם את התור ביציאה מהקטע הקריטי. אם נקדם את התור מוקדם מדי לא תתקיים מניעה הדדית, ואם לא נקדם את התור לא יתקיים חופש מקיפאון.\nבמקום זאת, נשאיר סימון מיוחד בתא אשר יבהיר לחוט שלפנינו שעליו לקדם את התור פעם נוספת. את עדכון התא נדאג לבצע עם פעולת TAS כדי לעדכן באופן אטומי. שינוי נוסף שנדרש הוא הגדלת המערך מ-N ל-2N, מאחר שחוט שמבצע trylock עלול לקרוא ל-lock ולתפוס תא נוסף במערך.\nהסימון המיוחד הוא ערך של 1 בתא. כלומר, אם חוט ינסה לעדכן את התא הבא ל-1 ויראה שהערך בו הוא כבר 1, אז זה יסמן שעליו להמשיך להתקדם במערך."
+      },
+      "difficulty_estimation": "Medium"
+    },
+    {
+      "id": 8,
+      "type": "Open",
+      "topic": [
+        "File Systems",
+        "I/O",
+        "Disk Scheduling"
+      ],
+      "content": {
+        "text": "שאלה 8",
+        "code_snippet": null
+      },
+      "sub_questions": [
+        {
+          "id": "8.1",
+          "text": "קריאת המערכת lseek מאפשרת למקם את סמן המיקום הנוכחי בקובץ גם מעבר לסוף הקובץ, ובכך ליצור \"חור\" בנתוני הקובץ. אם בהמשך נקרא את הנתונים מהחור שנוצר, ערכי הבתים שיוחזרו יהיו כולם אפס.\nנתונות שתי אפשרויות למימוש היכולת הזו במערכת הקבצים. באפשרות הראשונה, בביצוע Iseek נקצה את כל הבלוקים החסרים ונאפס אותם כחלק מהפעולה של קריאת המערכת. באפשרות השניה, לא נבצע הקצאה מראש (עם ביצוע הפעולה) אלא רק כאשר תתבצע פעולה במיקום שהוא חלק מה\"חור\" (קריאה או כתיבה של נתונים אלו).\nתארו את היתרונות והחסרונות של כל אפשרות.",
+          "code_snippet": null,
+          "options": null
+        },
+        {
+          "id": "8.2",
+          "text": "נתונה מערכת שצריכה לייצר קבצים בגודל משתנה (שאינו ידוע מראש), כך שתוכן כל הנתונים בקבצים אלו הוא 0 (כל הבתים הם 0). ידוע שהגודל המקסימלי לכל קובץ הוא 100MB, והגודל הממוצע של הקבצים הוא 10MB.\nלצורך מימוש המערכת, סטודנט א' הציע להתעלם מהגודל הנדרש בפועל לכל קובץ ותמיד לייצר קבצים בגודל 100MB. סטודנט הציע לא להתעלם מהגודל הנדרש אלא בכל פעם שנדרש ליצור קובץ, ניצור קובץ ריק ואז נכתוב אליו 1MB שוב ושוב עד שגודל הקובץ יגיע או יחרוג מהגודל המדויק הנדרש עבור הקובץ הספציפי.\nמלאו את הטבלה הבאה עם נתונים של שני דיסקים קשיחים כך שהפתרון של סטודנט א' יהיה מהיר יותר עם הדיסק הראשון (מאשר עם השני), והפתרון של סטודנט ב' יהיה מהיר יותר עם הדיסק השני.\nיש להתעלם מפעולות במערכת הקבצים מלבד הכתיבה לקבצים עצמם (כמו גישה ל-inode, חיפוש ב-bitmap וכו').\nניתן להניח שכל פעולת הקצאה מוצאת בלוקים רציפים, אך פעולות הקצאה נפרדות לא בהכרח יהיו רציפות.\nRPM\nSEEK TIME\nTRANSFER RATE\nדיסק ראשון\nדיסק שני",
+          "code_snippet": null,
+          "options": null
+        }
+      ],
+      "points": null,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": null,
+        "explanation": "1. הקצאת כל הבלוקים מראש: פעולת ה-Iseek איטית, אבל פעולות עתידיות על הקובץ יהיו מהירות בכל מיקום, ולא נצטרך לשמור מידע נוסף.\nלא להקצות מראש: פעולת ה-Iseek מהירה, אבל פעולות עתידיות עלולות להיות איטיות ונצטרך לשמור ב-inode מידע נוסף על מיקום החורים בקובץ.\n2. עבור סטודנט א' נדרש לכתוב יותר מידע (100MB לקובץ, במקום 10MB לקובץ בממוצע) אבל לכל קובץ נכתוב בכתיבה רציפה אחת, לכן נרצה דיסק עם קצב מהיר אבל זמן מיקום איטי כך כתיבות מרובות יהיו איטיות בגלל זמן המיקום בכל כתיבה.\nעבור סטודנט ב' נדרש לכתוב פחות מידע (10MB בממוצע לקובץ) אבל בפעולות כתיבה נפרדות של 1MB, דומה לפעולה אקראית. לכן נרצה דיסק עם זמן מיקום מהיר וקצב איטי כך לא תהיה השפעה גדולה לחלוקה לכתיבות מרובות (אקראיות), אך תהיה השפעה גדולה לכתיבה של פחות נתונים בסה\"כ.\nדיסק ראשון:\nRPM: 30 (1s)\nSEEK TIME: 1s\nTRANSFER RATE: 100 MB/s\nדיסק שני:\nRPM: 30,000 (1ms)\nSEEK TIME: 1ms\nTRANSFER RATE: 10 MB/s\nעבור סטודנט א':\nבדיסק הראשון זמן הטיפול הממוצע בכל קובץ הוא 3 שניות (זמן סיבוב: שניה, זמן seek: שניה, זמן העברה: שניה).\nבדיסק השני זמן הטיפול מעל 10 שניות (זמן ההעברה לבד הוא 10 שניות).\nעבור סטודנט ב':\nבדיסק הראשון זמן הטיפול הממוצע בכל קובץ הוא מעל 20 שניות (גודל ממוצע של 10MB, כל פעולה של 1MB תיקח 2 שניות רק לזמן ההמתנה לסיבוב +seek, לזה יש להוסיף את זמן ההעברה).\nבדיסק השני זמן הטיפול הממוצע הוא 1.02 שניות (לכל פעולה של 1MB יתקיים – זמן סיבוב: 1ms, זמן seek: 1ms, זמן העברה: 100ms)."
+      },
+      "difficulty_estimation": "Medium"
+    }
+  ]
+}

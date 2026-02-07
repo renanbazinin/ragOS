@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 18:38:08",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 968,
+      "output_tokens": 737,
+      "total_tokens": 4400
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "Threads",
+      "Process Management",
+      "POSIX"
+    ],
+    "content": {
+      "text": "נתון קוד C המשתמש בספריית Pthreads. תהליך מסוים יוצר שני תהליכונים (Threads) בנוסף לתהליכון הראשי (Main thread). אחד מהתהליכונים החדשים שנוצרו מבצע קריאה למערכת (System Call) מסוג fork(). איזה מההיגדים הבאים מתאר נכונה את מצב התהליך הבן שנוצר מיד לאחר הקריאה?",
+      "code_snippet": "void* thread_func(void* arg) {\n    pid_t pid = fork();\n    if (pid == 0) {\n        // מה קיים כאן בתוך התהליך הבן?\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t t1, t2;\n    pthread_create(&t1, NULL, thread_func, NULL);\n    pthread_create(&t2, NULL, some_other_func, NULL);\n    pthread_join(t1, NULL);\n    pthread_join(t2, NULL);\n    return 0;\n}",
+      "options": [
+        "א. התהליך הבן יכיל העתק של כל התהליכונים שהיו קיימים בתהליך האב (סה\"כ 3 תהליכונים).",
+        "ב. התהליך הבן יכיל רק תהליכון אחד, שהוא העתק של התהליכון שביצע את הקריאה ל-fork.",
+        "ג. התהליך הבן יכיל רק את התהליכון הראשי (Main thread), וכל שאר התהליכונים יופסקו.",
+        "ד. הפעולה אינה מוגדרת (Undefined behavior) ותלויה במימוש הספציפי של ה-Scheduler של מערכת ההפעלה."
+      ]
+    },
+    "sub_questions": null,
+    "points": 10,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "לפי תקן POSIX, כאשר תהליך מרובה תהליכונים קורא ל-fork, התהליך הבן שנוצר הוא העתק של תהליך האב מבחינת מרחב הכתובות (Address Space), אך הוא מכיל רק תהליכון אחד בלבד - התהליכון שביצע את הקריאה ל-fork. שאר התהליכונים שהיו קיימים באב אינם נוצרים בבן. זוהי נקודה קריטית כי אם התהליכונים האחרים החזיקו במנעולים (Mutexes) ברגע הקריאה, המנעולים יופיעו כתפוסים בבן אך התהליכון שאמור לשחרר אותם לא קיים שם, מה שעלול להוביל ל-Deadlock."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 18:23:43",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2103,
+      "output_tokens": 447,
+      "total_tokens": 4969
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Processes",
+      "System Calls"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה. כמה פעמים תודפס המחרוזת \"Hello\"?",
+      "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n\nint main() {\n    if (fork() == 0) {\n        fork();\n        printf(\"Hello\\n\");\n    }\n    return 0;\n}",
+      "options": [
+        "א. 1",
+        "ב. 2",
+        "ג. 3",
+        "ד. 4"
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "התהליך הראשי (האב) מבצע fork() ראשון. תהליך האב מקבל מהקריאה את ה-PID של הבן (ערך חיובי), ולכן התנאי fork() == 0 אינו מתקיים עבורו והוא מדלג על הבלוק. תהליך הבן מקבל מהקריאה את הערך 0, ולכן הוא נכנס לתוך בלוק ה-if. בתוך הבלוק, תהליך הבן מבצע fork() נוסף, מה שיוצר תהליך חדש (נכד). בשלב זה, גם הבן וגם הנכד נמצאים בתוך הבלוק וממשיכים לביצוע פקודת ה-printf. לכן, המחרוזת תודפס פעמיים (פעם אחת על ידי הבן ופעם אחת על ידי הנכד)."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

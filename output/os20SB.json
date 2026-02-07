@@ -1,0 +1,272 @@
+{
+  "metadata": {
+    "course_name": "Operating Systems",
+    "year": "2020",
+    "semester": "Summer",
+    "moed": "Moed B",
+    "exam_date": "26.10.2020",
+    "source_file": "os20SB.pdf"
+  },
+  "questions": [
+    {
+      "id": 1,
+      "type": "MultipleChoice",
+      "topic": [
+        "Concurrency",
+        "Synchronization",
+        "Deadlocks"
+      ],
+      "content": {
+        "text": "בבעיית הפילוסופים הסועדים (dining philosophers) ניתן למנוע הרעבה.\nנכון / לא נכון",
+        "code_snippet": null,
+        "options": [
+          "נכון",
+          "לא נכון"
+        ]
+      },
+      "sub_questions": null,
+      "points": null,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": "לא נכון",
+        "explanation": "לא נכון. ניתן למנוע הרעבה, לדוגמה בשימוש במנעול הוגן."
+      },
+      "difficulty_estimation": "Medium"
+    },
+    {
+      "id": 2,
+      "type": "MultipleChoice",
+      "topic": [
+        "Scheduling",
+        "CPU Scheduling"
+      ],
+      "content": {
+        "text": "באלגוריתם תזמון STCF עם overlap, זמן התגובה (response time) הוא אופטימלי.\nנכון / לא נכון",
+        "code_snippet": null,
+        "options": [
+          "נכון",
+          "לא נכון"
+        ]
+      },
+      "sub_questions": null,
+      "points": null,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": "לא נכון",
+        "explanation": "לא נכון. בתזמון STCF זמן התגובה גרוע. השימוש ב-overlap לא משנה את זה."
+      },
+      "difficulty_estimation": "Medium"
+    },
+    {
+      "id": 3,
+      "type": "MultipleChoice",
+      "topic": [
+        "Memory Management",
+        "Paging"
+      ],
+      "content": {
+        "text": ".internal fragmentation יש בעיית buddy allocation באלגוריתם ההקצאה.\nנכון / לא נכון",
+        "code_snippet": null,
+        "options": [
+          "נכון",
+          "לא נכון"
+        ]
+      },
+      "sub_questions": null,
+      "points": null,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": "נכון",
+        "explanation": "נכון. כפי שמופיע בשקפים – ההקצאה היא בחזקות של 2 ולכן כל דרישה להקצאה שאינה חזקה של 2 תגרום לפרגמנטציה."
+      },
+      "difficulty_estimation": "Medium"
+    },
+    {
+      "id": 4,
+      "type": "MultipleChoice",
+      "topic": [
+        "Synchronization",
+        "Concurrency",
+        "Context Switch"
+      ],
+      "content": {
+        "text": "מנעול מונע החלפת הקשר (context switch) בקטע הקריטי.\nנכון / לא נכון",
+        "code_snippet": null,
+        "options": [
+          "נכון",
+          "לא נכון"
+        ]
+      },
+      "sub_questions": null,
+      "points": null,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": "לא נכון",
+        "explanation": "לא נכון. מנעול בפני עצמו לא מונע החלפת הקשר, אלא רק מונע ממספר חוטים להריץ קטע קוד מסוים במקביל (גם אם מתבצעת החלפת הקשר)."
+      },
+      "difficulty_estimation": "Medium"
+    },
+    {
+      "id": 5,
+      "type": "MultipleChoice",
+      "topic": [
+        "File Systems",
+        "I/O",
+        "Disk Scheduling"
+      ],
+      "content": {
+        "text": "שימוש ב-4-RAID משפר את כל ביצועי הכתיבה לדיסק.\nנכון / לא נכון",
+        "code_snippet": null,
+        "options": [
+          "נכון",
+          "לא נכון"
+        ]
+      },
+      "sub_questions": null,
+      "points": null,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": "לא נכון",
+        "explanation": "לא נכון. בתרחיש של כתיבות אקראיות, שימוש ב-4-RAID פוגע בביצועי הדיסק לעומת שימוש בדיסק יחיד. בתרחישי כתיבות סדרתיות או קריאות – הביצועים משתפרים."
+      },
+      "difficulty_estimation": "Medium"
+    },
+    {
+      "id": 6,
+      "type": "Open",
+      "topic": [
+        "Deadlocks",
+        "Synchronization"
+      ],
+      "content": {
+        "text": "מה הפתרון לכל אחד מארבעת התנאים לקיום קיפאון (deadlock)\n.Mutual exclusion, Hold-and-wait, No preemption, Circular wait :התנאים הם",
+        "code_snippet": null,
+        "options": null
+      },
+      "sub_questions": null,
+      "points": null,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": null,
+        "explanation": "בהתאם לשקפים."
+      },
+      "difficulty_estimation": "Medium"
+    },
+    {
+      "id": 7,
+      "type": "CodeAnalysis",
+      "topic": [
+        "Processes",
+        "System Calls",
+        "Concurrency"
+      ],
+      "content": {
+        "text": "מריצים את קטע הקוד הבא:\nציירו את עץ התהליכים שנוצר, וציינו עבור כל תהליך בעץ את הפלט שלו. מהם כל הפלטים האפשריים של הקוד הנ\"ל?",
+        "code_snippet": "int i = 0;\nif (fork()) {\n    ++i;\n    fork();\n}\nelse if (fork())\n    ++i;\nprintf(\"%d\", i);",
+        "options": null
+      },
+      "sub_questions": null,
+      "points": null,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": null,
+        "explanation": "הפלט של תהליך אחד (תהליך הנכד משמאל) הוא 0 ושל כל השאר 1, בכל סדר אפשרי.\nלכן הפלטים האפשריים הם: 0111, 1011, 1110, 1111.\nעץ התהליכים: [Diagram of process tree showing P0 forks P1, P0 forks P2, P1 forks P3. P0, P1, P2 print 1, P3 prints 0.]"
+      },
+      "difficulty_estimation": "Hard"
+    },
+    {
+      "id": 8,
+      "type": "Open",
+      "topic": [
+        "Synchronization",
+        "Mutexes",
+        "Concurrency"
+      ],
+      "content": {
+        "text": "נתון קטע הקוד הבא למימוש מנעול עבור 2 חוטים, כאשר לכל חוט מזהה (0 או 1) המועבר כפרמטר ו:\nהאם המנעול מקיים מניעה הדדית? חופש מקיפאון? הוגנות?",
+        "code_snippet": "int turn;\nvoid lock(int i) {\n    turn = 1-i;\n    while (turn != i);\n}\nvoid unlock(int i) {\n    turn = 1-i;\n}",
+        "options": null
+      },
+      "sub_questions": [
+        {
+          "id": "a",
+          "text": "מניעה הדדית:",
+          "code_snippet": null,
+          "options": [
+            "כן",
+            "לא"
+          ]
+        },
+        {
+          "id": "b",
+          "text": "חופש מקיפאון:",
+          "code_snippet": null,
+          "options": [
+            "כן",
+            "לא"
+          ]
+        },
+        {
+          "id": "c",
+          "text": "הוגנות:",
+          "code_snippet": null,
+          "options": [
+            "כן",
+            "לא"
+          ]
+        }
+      ],
+      "points": null,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": null,
+        "explanation": "מניעה הדדית – מתקיימת.\nאם יש 2 חוטים בקטע הקריטי בו-זמנית, שניהם יצאו מהלולאה כלומר 0==turn וגם 1==turn, זו סתירה.\nחופש מקיפאון – לא מתקיים.\nאם רק חוט אחד מנסה לתפוס את המנעול, נניח חוט 0, הוא מעדכן 1=turn ולא יכנס לקטע הקריטי לעולם למרות שהמנעול פנוי.\nהוגנות – מתקיימת.\nאם חוט חסום בלולאת ה-while הוא לא מעדכן יותר את turn, לכן לא יתכן שהחוט השני תופס ומשחרר את המנעול שוב ושוב מאחר וכל חוט מעדכן turn רק לחוט האחר ולא לעצמו."
+      },
+      "difficulty_estimation": "Hard"
+    },
+    {
+      "id": 9,
+      "type": "Open",
+      "topic": [
+        "Memory Management",
+        "Virtual Memory",
+        "Paging"
+      ],
+      "content": {
+        "text": "נתונה מערכת עם זיכרון וירטואלי של 4MB, גודל דף של 1KB, וזיכרון פיזי של 8MB.\nמהם הגדלים של ה-VPN, ה-PFN, וכמה זיכרון פיזי תתפוס טבלת דפים (לינארית) של תהליך, במינימום?\nגודל VPN: ____ גודל PFN: ____ גודל טבלה: ____",
+        "code_snippet": null,
+        "options": null
+      },
+      "sub_questions": null,
+      "points": null,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": null,
+        "explanation": "כתובת וירטואלית היא 22 ביטים (זיכרון וירטואלי 4MB), מתוכם 10 מייצגים את ההיסט (גודל דף 1KB), לכן נשאר VPN=12.\nכתובת פיזית היא 23 ביטים (זיכרון פיזי 8MB), ההיסט זהה – 10, לכן נשאר PFN=13.\nלכל תהליך יש 4K דפים (2^12) בזיכרון הוירטואלי, כלומר שטבלת הדפים שלו מכילה 4K רשומות. כל רשומה מכילה לפחות 2 בתים (13 ביטים עבור PFN, מעוגל מעלה לחזקה הקרובה של 2), לכן הטבלה כולה תתפוס 8KB."
+      },
+      "difficulty_estimation": "Medium"
+    },
+    {
+      "id": 10,
+      "type": "Open",
+      "topic": [
+        "I/O",
+        "Disk Scheduling",
+        "File Systems"
+      ],
+      "content": {
+        "text": "נתונים שני דיסקים קשיחים עם הנתונים הבאים:\nA: RPM 7500, seek time 10ms, transfer rate 250 MB/s\nB: RPM 15000, seek time 4ms, transfer rate 125 MB/s\nמה גודל הפעולה המינימלי שנדרש לעשות כדי להבטיח קצב שהוא לפחות 90% מקצב ההעברה המקסימלי של הדיסק?\nועבור 50%\nדיסק קשיח A – קצב 90%: ____ קצב 50%: ____\nדיסק קשיח B – קצב 90%: ____ קצב 50%: ____",
+        "code_snippet": null,
+        "options": null
+      },
+      "sub_questions": null,
+      "points": null,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": null,
+        "explanation": "זמן הסיבוב של A הוא 8ms, כלומר המתנה לסיבוב של 4ms. מהירות ההעברה היא 250MB/s כלומר לוקח 4ms ל-1MB.\nנניח שגודל הפעולה שמבצעים הוא X (ב-MB), אז הזמן שתיקח פעולה הוא: 4ms + 10ms + X*4ms.\nעם קצב העברה של 90% ב-A (כלומר 225MB/s), זמן ההעברה עבור 1MB הוא 1000/225ms. נכפיל ב-X כדי לקבל את זמן ההעברה של X MB ונקבל 1000X/225ms. הזמנים האלו שווים, כלומר: 225/14+4X = 1000X. מהשוויון הזה נקבל:\nX=31.5MB\nבאופן דומה עבור 50% נקבל: 125/14+4X = 1000X ולכן X=3.5MB\nעבור B עם 90% נקבל: X=6.75MB ועם 50% נקבל: X=0.75MB"
+      },
+      "difficulty_estimation": "Hard"
+    }
+  ]
+}

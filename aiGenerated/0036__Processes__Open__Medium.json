@@ -1,0 +1,62 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 18:17:40",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3602,
+      "output_tokens": 1148,
+      "total_tokens": 5683
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "Open",
+    "topic": [
+      "Processes",
+      "fork",
+      "Process Lifecycle"
+    ],
+    "content": {
+      "text": "נתון קוד בשפת C המשתמש בקריאת המערכת fork. הניחו שכל הקריאות ל-fork מצליחות.",
+      "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\nint main() {\n    int x = 10;\n    if (fork() == 0) {\n        x += 5;\n        if (fork() == 0) {\n            x += 5;\n            printf(\"C2: x = %d\\n\", x);\n        } else {\n            wait(NULL);\n            printf(\"C1: x = %d\\n\", x);\n        }\n    } else {\n        wait(NULL);\n        x -= 5;\n        printf(\"P: x = %d\\n\", x);\n    }\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "7.1",
+        "text": "כמה תהליכים נוצרים סה\"כ במהלך ריצת התוכנית (כולל התהליך הראשי)? תארו את עץ התהליכים שנוצר.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "7.2",
+        "text": "מה יהיה הפלט של התוכנית? הסבירו מדוע השינויים במשתנה x בכל תהליך אינם משפיעים על ערכו בתהליכים האחרים.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "7.3",
+        "text": "הגדירו מהו תהליך \"זומבי\" (Zombie Process). האם במהלך ריצת קוד זה (כפי שהוא כתוב) אחד התהליכים הופך לזומבי לפרק זמן מסוים? הסבירו.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "7.4",
+        "text": "מה יקרה אם נסיר את כל קריאות ה-wait מהקוד? התייחסו בפרט למושג \"תהליך יתום\" (Orphan Process).",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "7.1: נוצרים 3 תהליכים בסך הכל. התהליך הראשי (P) קורא ל-fork ויוצר את תהליך הבן הראשון (C1). תהליך C1 קורא ל-fork ויוצר את תהליך הנכד (C2). המבנה הוא שרשרת: P -> C1 -> C2.\n\n7.2: הפלט יהיה:\nC2: x = 20\nC1: x = 15\nP: x = 5\nהסבר: כאשר מתבצע fork, נוצר עותק של מרחב הכתובות של תהליך האב עבור הבן. למרות שבתחילה הם חולקים דפים פיזיים (Copy-on-Write), לוגית לכל תהליך יש משתנה x משלו בכתובת וירטואלית זהה אך בזיכרון פיזי נפרד. לכן, שינוי של x ב-C2 לא משפיע על C1, ושינוי ב-C1 לא משפיע על P.\n\n7.3: תהליך זומבי הוא תהליך שסיים את ביצועו (קרא ל-exit) אך עדיין קיימת עבורו רשומה בטבלת התהליכים של מערכת ההפעלה, כיוון שהאב טרם קרא ל-wait כדי לאסוף את סטטוס הסיום שלו. בקוד זה, C2 יהיה זומבי מרגע סיומו ועד ש-C1 יסיים את ה-wait, וכנ\"ל לגבי C1 מול P.\n\n7.4: ללא wait, תהליכי הבנים עלולים להפוך ליתומים אם האב יסיים לפניהם. תהליך יתום הוא תהליך שאביו הסתיים, ובמצב זה מערכת ההפעלה מאמצת אותו (בדרך כלל ע\"י תהליך ה-init/systemd ש-PID שלו הוא 1) כדי להבטיח שמישהו יבצע עליו wait בסיום."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

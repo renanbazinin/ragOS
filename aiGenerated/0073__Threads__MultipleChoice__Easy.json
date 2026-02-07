@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 18:31:58",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1127,
+      "output_tokens": 321,
+      "total_tokens": 2050
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Threads",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "איזה מהמשאבים הבאים משותף (shared) לכל החוטים (threads) השייכים לאותו תהליך?",
+      "code_snippet": null,
+      "options": [
+        "א. המחסנית (Stack)",
+        "ב. משתנים גלובליים ומרחב הכתובות (Global Variables / Address Space)",
+        "ג. אוגרי המעבד (CPU Registers)",
+        "ד. מונה התוכנית (Program Counter)"
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "חוטים בתוך אותו תהליך חולקים את אותו מרחב כתובות, הכולל את קטע הנתונים (משתנים גלובליים) והערימה (Heap). לעומת זאת, לכל חוט יש מחסנית (Stack), אוגרים ומונה תוכנית (PC) משלו, המהווים את ההקשר (Context) הייחודי שלו."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

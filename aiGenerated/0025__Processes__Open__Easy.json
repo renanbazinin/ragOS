@@ -1,0 +1,35 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 18:14:55",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5185,
+      "output_tokens": 615,
+      "total_tokens": 7834
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Processes"
+    ],
+    "content": {
+      "text": "לפניכם קטע קוד בשפת C המשתמש בקריאות מערכת מסוג fork. כמה פעמים תודפס המחרוזת \"Hello\" במהלך הרצה תקינה של התוכנית? הסבירו את תשובתכם על ידי מעקב אחר יצירת התהליכים.",
+      "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n\nint main() {\n    fork();\n    if (fork() == 0) {\n        fork();\n    }\n    printf(\"Hello\\n\");\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "המחרוזת \"Hello\" תודפס 6 פעמים. \nמעקב אחר יצירת התהליכים:\n1. התוכנית מתחילה עם תהליך אב יחיד (P1).\n2. לאחר ה-fork() הראשון, נוצר תהליך בן (P2). כעת ישנם 2 תהליכים במערכת.\n3. שני התהליכים (P1 ו-P2) מגיעים לשורת ה-if ומבצעים fork() נוסף. נוצרים שני תהליכים חדשים: P3 (הבן של P1) ו-P4 (הבן של P2). כעת ישנם 4 תהליכים במערכת.\n4. תנאי ה-if בודק האם הערך המוחזר מפעולת ה-fork הוא 0. תנאי זה מתקיים אך ורק עבור תהליכי הבן שזה עתה נוצרו (P3 ו-P4).\n5. בתוך בלוק ה-if, התהליכים P3 ו-P4 מבצעים fork() נוסף, מה שיוצר שני תהליכים חדשים נוספים (P5 ו-P6). כעת ישנם סה\"כ 6 תהליכים במערכת.\n6. כל 6 התהליכים הקיימים (P1, P2, P3, P4, P5, P6) ממשיכים בביצוע הקוד ומגיעים לשורת ה-printf. לכן, המחרוזת תודפס 6 פעמים."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

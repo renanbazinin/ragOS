@@ -1,0 +1,50 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 18:41:05",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2766,
+      "output_tokens": 963,
+      "total_tokens": 4575
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "Open",
+    "topic": [
+      "Threads",
+      "Concurrency",
+      "User-level vs Kernel-level Threads"
+    ],
+    "content": {
+      "text": "נניח מערכת הפעלה התומכת בשני מודלים שונים לניהול חוטים (Threads): מודל Many-to-One (חוטים ברמת המשתמש) ומודל One-to-One (חוטים ברמת הליבה). תהליך מסוים יוצר 4 חוטים. חוט מספר 1 מבצע קריאת מערכת חוסמת (Blocking System Call) לקריאת נתונים מהדיסק, בעוד ששאר החוטים (2, 3, ו-4) מבצעים חישובים מתמטיים.",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n\nint counter = 0;\n\nvoid* worker(void* arg) {\n    for (int i = 0; i < 1000000; i++) {\n        counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t t1, t2;\n    pthread_create(&t1, NULL, worker, NULL);\n    pthread_create(&t2, NULL, worker, NULL);\n    pthread_join(t1, NULL);\n    pthread_join(t2, NULL);\n    printf(\"Final counter: %d\\n\", counter);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "7.1",
+        "text": "תאר מה יקרה לחוטים 2, 3 ו-4 בזמן שחוט 1 ממתין לדיסק בכל אחד מהמודלים (Many-to-One ו-One-to-One).",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "7.2",
+        "text": "התייחס לקוד ה-C המצורף. מהי הבעיה הלוגית בקוד זה, ומה יהיה הפלט הצפוי של התוכנית (האם תמיד יודפס 2,000,000)? הסבר מדוע.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": 20,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "7.1: במודל Many-to-One, כל החוטים של התהליך ממופים לישות תזמון אחת בליבה. לכן, כאשר חוט 1 מבצע קריאה חוסמת, הליבה חוסמת את התהליך כולו, וחוטים 2, 3 ו-4 לא יוכלו לרוץ עד שהקריאה תסתיים. במודל One-to-One, כל חוט ממופה לישות תזמון נפרדת בליבה. לכן, רק חוט 1 ייחסם, וחוטים 2, 3 ו-4 יוכלו להמשיך לרוץ במקביל על מעבדים אחרים או בתורות תזמון נפרדים.\n\n7.2: הבעיה בקוד היא מרוץ תהליכים (Race Condition) על המשתנה הגלובלי counter. הפעולה ++counter אינה אטומית (היא מורכבת מקריאה, הוספה וכתיבה). מאחר ששני החוטים ניגשים ומשנים את אותו משתנה ללא סנכרון (למשל ללא Mutex), ייתכן שחוט אחד יקרא ערך ישן לפני שהשני הספיק לעדכן אותו. לכן, הפלט כמעט תמיד יהיה קטן מ-2,000,000, והוא אינו דטרמיניסטי."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

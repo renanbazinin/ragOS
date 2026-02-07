@@ -1,0 +1,57 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 18:31:51",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3664,
+      "output_tokens": 1088,
+      "total_tokens": 6615
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Processes",
+      "System Calls",
+      "fork",
+      "Short-circuit Evaluation"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה בשפת C. הניחו שכל קריאות המערכת מצליחות, אין תהליכים נוספים במערכת שמשפיעים על הריצה, וכל הדפסה מתבצעת באופן מיידי ללא חוצץ (buffer).",
+      "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\nint main() {\n    int x = 0;\n    if (fork() || fork()) {\n        x++;\n        if (!fork()) {\n            x += 2;\n        }\n    } else {\n        x--;\n    }\n    while(wait(NULL) > 0);\n    printf(\"%d \", x);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "כמה תהליכים נוצרו בסך הכל במהלך ריצת התוכנית (כולל התהליך הראשי)? הציגו את עץ התהליכים.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "מהם כל הערכים האפשריים שיוצגו כפלט של התוכנית? הסבירו אילו תהליכים מדפיסים אילו ערכים.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.3",
+        "text": "נניח ונחליף את האופרטור || בשורה 6 באופרטור &&. כמה תהליכים ייווצרו כעת במערכת (כולל התהליך הראשי)?",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1. סך הכל נוצרו 5 תהליכים:\n- תהליך אב (P1) מבצע fork ראשון. הוא מקבל ערך חיובי ולכן בגלל short-circuit של || הוא לא מבצע את ה-fork השני ונכנס לבלוק ה-if.\n- הבן הראשון (P2) מקבל 0 מה-fork הראשון, ולכן חייב לבצע את ה-fork השני. הוא יוצר את P3.\n- P2 מקבל ערך חיובי מה-fork השני ונכנס לבלוק ה-if.\n- P3 מקבל 0 מה-fork השני ונכנס לבלוק ה-else.\n- בתוך בלוק ה-if, תהליכים P1 ו-P2 מבצעים fork נוסף (P4 ו-P5 בהתאמה). סך הכל 5 תהליכים.\n\n2. הערכים המודפסים הם 1, 1, 3, 3, 1-:\n- P1 ו-P2: מקדמים את x ל-1. ב-fork הפנימי האבא (P1/P2) מקבל PID ולכן ה-if הפנימי לא מתקיים עבורו. הם מדפיסים 1.\n- P4 ו-P5 (הבנים של ה-fork הפנימי): יורשים x=1, נכנסים ל-if הפנימי ומבצעים x += 2. הם מדפיסים 3.\n- P3: נכנס ל-else ומבצע x--. הוא מדפיס 1-.\n\n3. אם נחליף ל-&&, ייווצרו 4 תהליכים:\n- P1 מבצע fork ראשון (P2). P1 ממשיך ל-fork שני (P3). P2 נכשל בתנאי (קיבל 0) ועובר ל-else.\n- P1 מצליח בשני ה-forks ונכנס ל-if. P3 נכשל בתנאי (קיבל 0 ב-fork השני) ועובר ל-else.\n- בתוך ה-if, רק P1 מבצע fork נוסף (P4).\n- סך הכל: P1, P2, P3, P4."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

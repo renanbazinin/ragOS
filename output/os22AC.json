@@ -1,0 +1,252 @@
+{
+  "metadata": {
+    "course_name": "Operating Systems",
+    "year": "2022",
+    "semester": "Semester A",
+    "moed": "Moed C",
+    "exam_date": "01.02.2022",
+    "source_file": "os22AC.pdf"
+  },
+  "questions": [
+    {
+      "id": 1,
+      "type": "Open",
+      "topic": [
+        "Synchronization",
+        "Semaphores",
+        "Deadlocks"
+      ],
+      "content": {
+        "text": "האם יתכן קיפאון בתוכנית שמשתמשת רק בסמפורים שאינם בינאריים? אם כן, יש להדגים תרחיש שיוביל לקיפאון, אחרת יש להסביר בפירוט מדוע לא.\nיתכן / לא יתכן",
+        "code_snippet": null,
+        "options": null
+      },
+      "sub_questions": null,
+      "points": 10,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": null,
+        "explanation": "יתכן. עם 2 סמפורים שמאותחלים ל-2, אפשר להגיע לאותה בעיה בסיסית שהוצגה בשיעור של קיפאון אם כל חוט מנסה להקצות לעצמו 2 משאבים מכל סמפור."
+      },
+      "difficulty_estimation": "Medium"
+    },
+    {
+      "id": 2,
+      "type": "Open",
+      "topic": [
+        "Scheduling",
+        "CPU Scheduling"
+      ],
+      "content": {
+        "text": "מתי נעדיף להשתמש בתזמון lottery על פני תזמון stride ומדוע? מתי נעדיף להשתמש בתזמון stride על פני תזמון lottery ומדוע?",
+        "code_snippet": null,
+        "options": null
+      },
+      "sub_questions": null,
+      "points": 10,
+      "solution": {
+        "is_present_in_file": false,
+        "correct_option": null,
+        "explanation": null
+      },
+      "difficulty_estimation": "Medium"
+    },
+    {
+      "id": 3,
+      "type": "Open",
+      "topic": [
+        "File Systems",
+        "I/O"
+      ],
+      "content": {
+        "text": "מתי נעיף להשתמש בכל אחת מרמות ה-RAID שנלמדו (0, 1, 4, 5)? יש לפרט ולנמק את הסיבות לשימוש בכל רמה.",
+        "code_snippet": null,
+        "options": null
+      },
+      "sub_questions": null,
+      "points": 10,
+      "solution": {
+        "is_present_in_file": false,
+        "correct_option": null,
+        "explanation": null
+      },
+      "difficulty_estimation": "Medium"
+    },
+    {
+      "id": 4,
+      "type": "Open",
+      "topic": [
+        "Scheduling",
+        "CPU Scheduling",
+        "Concurrency"
+      ],
+      "content": {
+        "text": "SQMS תזמון (single-queue multiprocessor scheduling) כפי שנלמד הוא בעייתי. הציעו דרך לשפר אותו באופן משמעותי, מבלי להשתמש בתורים נוספים. יש לפרט את השינויים ולנמק מדוע ישפרו את הביצועים.",
+        "code_snippet": null,
+        "options": null
+      },
+      "sub_questions": null,
+      "points": 10,
+      "solution": {
+        "is_present_in_file": false,
+        "correct_option": null,
+        "explanation": null
+      },
+      "difficulty_estimation": "Medium"
+    },
+    {
+      "id": 5,
+      "type": "Open",
+      "topic": [
+        "File Systems"
+      ],
+      "content": {
+        "text": "למה משמש ה-imap במערכת הקבצים LFS? מתי וכיצד נשתמש בו? מתי נקרא אותו מהדיסק?",
+        "code_snippet": null,
+        "options": null
+      },
+      "sub_questions": null,
+      "points": 10,
+      "solution": {
+        "is_present_in_file": false,
+        "correct_option": null,
+        "explanation": null
+      },
+      "difficulty_estimation": "Medium"
+    },
+    {
+      "id": 6,
+      "type": "Open",
+      "topic": [
+        "Virtual Memory",
+        "Paging",
+        "Memory Management"
+      ],
+      "content": {
+        "text": "מתי מתרחש TLB miss? מה התהליך המלא שקורה בעקבות TLB miss?",
+        "code_snippet": null,
+        "options": null
+      },
+      "sub_questions": null,
+      "points": 10,
+      "solution": {
+        "is_present_in_file": false,
+        "correct_option": null,
+        "explanation": null
+      },
+      "difficulty_estimation": "Medium"
+    },
+    {
+      "id": 7,
+      "type": "CodeAnalysis",
+      "topic": [
+        "Synchronization",
+        "Mutexes",
+        "Concurrency",
+        "Atomic Operations",
+        "Threads"
+      ],
+      "content": {
+        "text": "נתון קטע הקוד הבא למימוש מנעול עבור N חוטים, כאשר לכל חוט מזהה ייחודי (בין 0 ל-1-N) המועבר כפרמטר me לפונקציית lock:",
+        "code_snippet": "typedef struct {\nint turn;\nint busy;\n} FlakyLock;\n\nvoid init(FlakyLock *lock) {\nlock->busy = 0;\n}\n\nvoid lock(FlakyLock *lock, int me) {\ndo {\ndo {\nlock->turn = me;\n} while (lock->busy);\nlock->busy = 1;\n} while (lock->turn != me);\n}\n\nvoid unlock (FlakyLock *lock) {\nlock->busy = 0;\n}",
+        "options": null
+      },
+      "sub_questions": [
+        {
+          "id": "a",
+          "text": "האם המנעול מקיים מניעה הדדית?",
+          "code_snippet": null,
+          "options": [
+            "כן",
+            "לא"
+          ],
+          "solution": {
+            "is_present_in_file": true,
+            "correct_option": "כן",
+            "explanation": "מניעה הדדית -מתקיימת.\nנניח בשלילה שיש 2 חוטים (או יותר) בקטע הקריטי. שניהם יצאו מהלולאה החיצונית כלומר כל אחד ראה שה-turn שווה למזהה שלו. נבחין שהיחיד שמעדכן את turn למזהה של חוט הוא אותו חוט עצמו כלומר כל אחד מ-2 החוטים עדכן בשלב מסוים את התור עבור עצמו.\nנסתכל על החוט השני שיצא מהלולאה, חוט זה בהכרח עדכן את התור אחרי שהחוט הראשון יצא מהלולאה (אחרת היה רואה שהתור לא שלו). אותו חוט ראשון, לפני היציאה מהלולאה עדכן גם את busy ל-1. החוט השני בודק את המשתנה busy אחרי עדכון התור (שהתבצע אחרי שהחוט הראשון נכנס לקטע הקריטי, כלומר בהכרח אחרי שעדכן כבר את busy), לכן החוט השני בהכרח חסום בלולאה הפנימית ולא יתכן שנכנס לקטע הקריטי."
+          }
+        },
+        {
+          "id": "b",
+          "text": "חופש מקיפאון:",
+          "code_snippet": null,
+          "options": [
+            "כן",
+            "לא"
+          ],
+          "solution": {
+            "is_present_in_file": true,
+            "correct_option": "לא",
+            "explanation": "חופש מקיפאון – לא מתקיים.\nדוגמה נגדית: חוט 0 מנסה לתפוס את המנעול, מעדכן את התור ל-0 ואז את busy ל-1. לפני שמגיע לתנאי בלולאה החיצונית, חוט 1 מנסה לתפוס את המנעול ומעדכן את התור ל-1 וכעת חסום בלולאה הפנימית בגלל busy. חוט 0 לא עובר את הלולאה החיצונית (כי התור הוא 1) וחוזר ללולאה הפנימית, שם מעדכן את התור ל-0 וחסום בגלל busy. 2 החוטים חסומים ולא יצליחו לתפוס את המנעול לעולם, למרות שהמנעול פנוי."
+          }
+        },
+        {
+          "id": "c",
+          "text": "הוגנות:",
+          "code_snippet": null,
+          "options": [
+            "כן",
+            "לא"
+          ],
+          "solution": {
+            "is_present_in_file": true,
+            "correct_option": "לא",
+            "explanation": "הוגנות – לא מתקיימת.\nדוגמה נגדית: חוט 0 מנסה לתפוס את המנעול, מעדכן את התור ל-0 ונעצר לפני עדכון busy. חוט 1 מנסה לתפוס את המנעול, מעדכן את התור ל-1 ומתקדם ונכנס אל הקטע הקריטי. כעת חוט 0 יתקדם ויראה שלא תורו, לכן יהיה חסום בלולאה הפנימית.\nחוט 1 ישחרר את המנעול (יעדכן busy ל-0) ולפני שחוט 0 יראה זאת, חוט 1 ינסה לתפוס את המנעול שוב ויעדכן שוב את התור ל-1 ואת busy ל-1 (ויכנס לקטע הקריטי). חוט 0 ממשיך להיות חסום בלולאה הפנימית. כך חוזר חלילה."
+          }
+        }
+      ],
+      "points": 20,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": null,
+        "explanation": null
+      },
+      "difficulty_estimation": "Medium"
+    },
+    {
+      "id": 8,
+      "type": "Open",
+      "topic": [
+        "Memory Management",
+        "Paging",
+        "Virtual Memory"
+      ],
+      "content": {
+        "text": "נתונה מערכת עם זיכרון פיזי של 64KB וגודל דף של 512B. כל טבלת דפים תופסת דף יחיד, ותהליך התרגום של כתובת וירטואלית לפיזית מתבצע ברמה אחת בלבד. כל כניסה בטבלת הדפים (PTE) מכילה מספר מסגרת, ריפוד, ועוד שלושה ביטים: ביט valid, ביט access, ביט dirty",
+        "code_snippet": null,
+        "options": null
+      },
+      "sub_questions": [
+        {
+          "id": "8.1",
+          "text": "מה גודל הזיכרון הוירטואלי של תהליך?\nגודל זיכרון:",
+          "code_snippet": null,
+          "options": null,
+          "solution": {
+            "is_present_in_file": true,
+            "correct_option": null,
+            "explanation": "1. תרגום ברמה אחת זו טבלת דפים לינארית. כתובת פיזית היא 216 בתים כלומר 16 ביטים לכתובת, מתוכם 9 ביטים עבור היסט (גודל דף 29 בתים). לכן ה-PFN הוא 7 ביטים.\nכל PTE מכיל PFN ועוד 3 ביטים, נוסיף ריפוד כדי להגיע לחזקה הקרובה של 2 ונקבל 16 ביטים = 2 בתים לכל כניסה בטבלת הדפים.\nגודל דף הוא 512B ונתון שטבלת הדפים תופסת דף יחיד, לכן יש 256 דפים לתהליך, גודל כל דף 512B וסה\"כ הזיכרון הוירטואלי הוא 128KB."
+          }
+        },
+        {
+          "id": "8.2",
+          "text": "נתון שחצי מהזיכרון הפיזי במערכת משוריין עבור מערכת ההפעלה, והמערכת אינה תומכת בהחלפה (swapping) או במנגנון copy-on-write.\nנניח שהרצנו תהליך יחיד במערכת (לא רץ במערכת אף תהליך אחר) אשר מבצע קריאות ל-fork בלולאה עד שנגמר הזיכרון הפיזי במערכת. התהליך המקורי (וכל תהליך בן שנוצר) משתמש ב-10 דפים של קוד ו-5 דפים של מחסנית.\nכמה תהליכי משתמש יכולים להיווצר סך הכל, כולל התהליך הראשי?\nמספר תהליכים:",
+          "code_snippet": null,
+          "options": null,
+          "solution": {
+            "is_present_in_file": true,
+            "correct_option": null,
+            "explanation": "2. בזיכרון הפיזי יש 128 מסגרות (לפי סעיף קודם), חצי משוריינות למערכת ההפעלה (מרחב הקרנל) כלומר 64 לקרנל ו-64 לתהליכים (מרחב המשתמש).\nכל תהליך דורש מסגרת אחת במרחב הקרנל עבור טבלת הדפים.\nהקוד משותף לכל התהליכים, לכן במרחב המשתמש נתפוס 10 מסגרות עבור הקוד (לכל התהליכים יחד), ועוד 5 מסגרות עבור המחסנית של כל תהליך.\nעם 10 תהליכים נקבל שתפוסות 10 מסגרות בקרנל ו-60 מסגרות במשתמש ולא נוכל ליצור תהליכים נוספים (כי אין מספיק מקום במרחב המשתמש)."
+          }
+        }
+      ],
+      "points": null,
+      "solution": {
+        "is_present_in_file": true,
+        "correct_option": null,
+        "explanation": null
+      },
+      "difficulty_estimation": "Medium"
+    }
+  ]
+}

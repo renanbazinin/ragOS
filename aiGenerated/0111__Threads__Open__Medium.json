@@ -1,0 +1,56 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 18:41:49",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2766,
+      "output_tokens": 1083,
+      "total_tokens": 4792
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Threads",
+      "Concurrency",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "סטודנט כתב תוכנית ב-C המשתמשת בחוטים (threads) כדי להדפיס את המזהה של כל חוט. הקוד נראה כך:",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n\nvoid* print_id(void* arg) {\n    int id = *((int*)arg);\n    printf(\"My ID is: %d\\n\", id);\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[4];\n    for (int i = 0; i < 4; i++) {\n        pthread_create(&threads[i], NULL, print_id, &i);\n    }\n    for (int i = 0; i < 4; i++) {\n        pthread_join(threads[i], NULL);\n    }\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "הסטודנט הריץ את התוכנית וקיבל את הפלט הבא: \nMy ID is: 1\nMy ID is: 2\nMy ID is: 4\nMy ID is: 4\nהסבירו מדוע התוכנית לא הדפיסה את המספרים 0 עד 3 בסדר כלשהו, ומהי הבעיה בגישה לזיכרון בקוד זה.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "הציעו שתי דרכים שונות לתיקון הבעיה (שינוי הקוד כך שכל חוט ידפיס בוודאות מזהה ייחודי מ-0 עד 3), והסבירו את היתרון/חיסרון של כל אחת.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.3",
+        "text": "אם נזיז את הקריאה ל-pthread_join אל תוך הלולאה הראשונה (מיד לאחר ה-pthread_create), האם הבעיה תיפתר? מה תהיה ההשפעה על זמן הריצה הכולל של התוכנית?",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "10.1: הבעיה היא race condition על המשתנה i. הסטודנט מעביר לכל חוט מצביע לאותו מיקום בזיכרון (הכתובת של i במחסנית של main). בזמן שהחוטים נוצרים ומתחילים לרוץ, הלולאה ב-main ממשיכה להתקדם ולשנות את הערך של i. לכן, חוט עשוי לקרוא את הערך של i לאחר שהוא כבר גדל. בדוגמה, חוטים מסוימים קראו את אותו ערך, וערך 0 לא נקרא בכלל כי הלולאה התקדמה לפני שהחוט הראשון הספיק לקרוא מהזיכרון.\n\n10.2: דרך א: העברת הערך עצמו על ידי casting. במקום &i, נעביר (void*)(long)i. בחוט נבצע casting חזרה ל-int. יתרון: אין צורך בניהול זיכרון נוסף. חיסרון: מסתמך על כך שגודל מצביע גדול או שווה לגודל int.\nדרך ב: הקצאת מערך של מזהים או הקצאה דינמית (malloc) לכל חוט בנפרד. יתרון: בטוח וגנרי לכל סוג מידע. חיסרון: דורש ניהול זיכרון (שחרור).\n\n10.3: כן, הבעיה תיפתר כי ה-main thread ימתין לסיום כל חוט לפני שיקדם את i באיטרציה הבאה. עם זאת, התוכנית תהפוך לסדרתית לחלוטין (Sequential) ולא יהיה כל ניצול של מקביליות, מה שיבטל את המטרה של שימוש בחוטים."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

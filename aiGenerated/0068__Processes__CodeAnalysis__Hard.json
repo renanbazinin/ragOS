@@ -1,0 +1,58 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Processes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 18:30:04",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3664,
+      "output_tokens": 1222,
+      "total_tokens": 10509
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Processes",
+      "System Calls",
+      "Fork",
+      "Exec",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה בשפת C. הניחו שכל קריאות המערכת מצליחות, שקריאת ה-exec מוצאת את הפקודה echo, ושכל הדפסה מתבצעת באופן מיידי ללא חוצץ (buffer). כמו כן, הניחו כי המערכת אינה יוצרת תהליכים נוספים פרט לאלו המצוינים בקוד.",
+      "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n#include <sys/wait.h>\n#include <stdlib.h>\n\nint main() {\n    printf(\"A\");\n    fflush(stdout);\n    if (fork() && fork()) {\n        fork();\n    } else {\n        if (fork() == 0) {\n            execlp(\"echo\", \"echo\", \"B\", NULL);\n            printf(\"D\");\n            fflush(stdout);\n        }\n    }\n    printf(\"C\");\n    fflush(stdout);\n    while(wait(NULL) > 0);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "כמה תהליכים נוצרו סה\"כ במהלך ריצת התוכנית (כולל התהליך הראשי)? הסבירו בעזרת פירוט שלבי הריצה או עץ תהליכים.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "האם הפלט \"ACCCBCB\" הוא פלט אפשרי עבור ריצה של תוכנית זו? נמקו.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.3",
+        "text": "האם התו 'D' יודפס אי פעם? הסבירו מדוע.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1. ניתוח תהליכים: \n- P0 (הראשי) מדפיס A.\n- P0 מבצע fork() ראשון ויוצר את P1. עבור P0 התוצאה אמת, לכן הוא ממשיך ל-fork() השני ויוצר את P2. התנאי (fork && fork) אמת עבור P0 ולכן הוא נכנס לבלוק ה-if ומבצע fork() שלישי ליצירת P3. גם P0 וגם P3 מדפיסים C.\n- P1 (נוצר ב-fork הראשון): עבורו ה-fork הראשון מחזיר 0. בשל אופרטור ה-&& מתבצע short-circuit ו-P1 עובר לבלוק ה-else. שם הוא מבצע fork() ויוצר את P4. P4 מבצע exec ומדפיס B. P1 ממשיך ומדפיס C.\n- P2 (נוצר ב-fork השני): עבורו ה-fork השני מחזיר 0. התנאי (אמת && 0) הוא שקר, לכן P2 עובר לבלוק ה-else. שם הוא מבצע fork() ויוצר את P5. P5 מבצע exec ומדפיס B. P2 ממשיך ומדפיס C.\nסה\"כ תהליכים: P0, P1, P2, P3, P4, P5 - סה\"כ 6 תהליכים.\n\n2. ניתוח פלט: \n- 'A' מודפס פעם אחת (P0).\n- 'C' מודפס 4 פעמים על ידי התהליכים P0, P3, P1, P2.\n- 'B' מודפס פעמיים על ידי התהליכים P4, P5 (באמצעות echo).\nהפלט \"ACCCBCB\" מכיל פעם אחת A, ארבע פעמים C ופעמיים B. כיוון שאין סדר מחייב בין התהליכים השונים (פרט לכך ש-A מודפס ראשון), פלט זה אפשרי.\n\n3. הדפסת 'D':\n- התו 'D' לא יודפס לעולם. התהליכים P4 ו-P5, שהם היחידים שמגיעים לשורה זו, מבצעים קריאת execlp לפני ההדפסה. קריאת exec מחליפה את מרחב הכתובות והקוד של התהליך בקוד של התוכנית echo, ולכן הפקודה printf(\"D\") שמופיעה אחרי ה-exec לא תתבצע לעולם (אלא אם ה-exec נכשל, אך הנחנו שהצליח)."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

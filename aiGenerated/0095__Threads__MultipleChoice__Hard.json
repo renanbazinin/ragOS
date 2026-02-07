@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Threads",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 18:37:47",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 968,
+      "output_tokens": 919,
+      "total_tokens": 6518
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "Threads",
+      "Memory Visibility",
+      "Optimization",
+      "Pthreads"
+    ],
+    "content": {
+      "text": "במערכת המשתמשת ב-POSIX Threads (Pthreads), נתון הקוד הבא בשפת C. מהי הטענה המדויקת ביותר לגבי התנהגות התוכנית בעת הרצה על מעבד מרובה ליבות (Multi-core) עם רמת אופטימיזציה גבוהה (למשל O3-)?",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n\nvoid* thread_func(void* arg) {\n    int* p = (int*)arg;\n    while (*p == 0); // Wait for flag to change\n    printf(\"Value changed!\\n\");\n    return NULL;\n}\n\nint main() {\n    pthread_t t1;\n    int flag = 0;\n    pthread_create(&t1, NULL, thread_func, &flag);\n    \n    // Simulate some work\n    for (volatile int i = 0; i < 1000000; i++);\n    \n    flag = 1;\n    pthread_join(t1, NULL);\n    return 0;\n}",
+      "options": [
+        "א. התוכנית תקינה לחלוטין ותדפיס תמיד את ההודעה, שכן חוטים חולקים את אותו מרחב כתובות והשינוי ב-flag ייראה מיד לחוט t1.",
+        "ב. התוכנית עלולה להיכנס ללולאה אינסופית בגלל אופטימיזציות קומפיילר, שכן ללא סנכרון או שימוש ב-volatile, החוט t1 עשוי לטעון את הערך של flag לרגיסטר פעם אחת בלבד ולא לבדוק שוב את הזיכרון.",
+        "ג. תתרחש שגיאת Segmentation Fault כיוון שחוט t1 מנסה לגשת למחסנית (Stack) של החוט הראשי, דבר שאינו מותר במודל של Kernel-level threads.",
+        "ד. הקריאה ל-pthread_join תגרום ל-Deadlock כיוון שהיא חוסמת את החוט הראשי מלערוך את המשתנה flag.",
+        "ה. התוכנית לא תתקמפל כיוון שלא ניתן להעביר כתובת של משתנה מקומי (flag) כארגומנט לפונקציה pthread_create."
+      ]
+    },
+    "sub_questions": null,
+    "points": 10,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "במרחב כתובות משותף, חוטים אכן יכולים לגשת לאותם משתנים (כולל משתנים על מחסנית של חוט אחר כל עוד הוא חי). עם זאת, ללא מנגנוני סנכרון (כמו Mutex) או הגדרת המשתנה כ-volatile, הקומפיילר עשוי להניח שערכו של flag אינו משתנה בתוך הלולאה בחוט t1 (כי אין שום קריאה לפונקציה או כתיבה למשתנה בתוך הלולאה). לכן, הקומפיילר עשוי לבצע אופטימיזציה שבה הערך נטען לרגיסטר פעם אחת בלבד לפני הלולאה. במצב כזה, השינוי שביצע החוט הראשי בזיכרון לא יורגש בתוך הלולאה והחוט ייתקע בלולאה אינסופית."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}
