@@ -1,0 +1,52 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Deadlocks",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 21:47:48",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3443,
+      "output_tokens": 3023,
+      "total_tokens": 11490
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Deadlocks",
+      "Synchronization",
+      "Concurrency",
+      "Mutexes"
+    ],
+    "content": {
+      "text": "נתונה מערכת מרובת תהליכונים (multi-threaded system) הכוללת N תהליכוני עבודה (worker threads) ושני משאבים גלובליים נפרדים: `ResourceX` ו-`ResourceY`. כל אחד מהמשאבים מוגן על ידי מנעול הדדי (mutex) משלו. כל תהליכון במערכת נדרש לרכוש את שני המשאבים, `ResourceX` ו-`ResourceY`, על מנת לבצע משימה יחידה.\nאופן רכישת המשאבים מוגדר באופן הבא:\n*   תהליכונים בעלי מזהה זוגי (even ID) רוכשים תחילה את `ResourceX` ולאחר מכן את `ResourceY`.\n*   תהליכונים בעלי מזהה אי-זוגי (odd ID) רוכשים תחילה את `ResourceY` ולאחר מכן את `ResourceX`.\n\nלהלן קטע קוד המדגים את מבנה המערכת ואת לוגיקת הפעולה של תהליכון בודד:",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h> // For sleep\n\npthread_mutex_t mutex_X;\npthread_mutex_t mutex_Y;\n\nvoid init_resources() {\n    pthread_mutex_init(&mutex_X, NULL);\n    pthread_mutex_init(&mutex_Y, NULL);\n}\n\nvoid destroy_resources() {\n    pthread_mutex_destroy(&mutex_X);\n    pthread_mutex_destroy(&mutex_Y);\n}\n\nvoid* worker_thread(void* arg) {\n    long thread_id = (long)arg;\n\n    if (thread_id % 2 == 0) { // Even ID: acquire X then Y\n        printf(\"Thread %ld: Trying to acquire ResourceX...\\n\", thread_id);\n        pthread_mutex_lock(&mutex_X);\n        printf(\"Thread %ld: Acquired ResourceX. Trying to acquire ResourceY...\\n\", thread_id);\n        // Simulate work or delay to increase deadlock probability\n        sleep(1);\n        pthread_mutex_lock(&mutex_Y);\n        printf(\"Thread %ld: Acquired ResourceY. Performing task...\\n\", thread_id);\n        // Task execution\n        sleep(2);\n        printf(\"Thread %ld: Releasing ResourceY...\\n\", thread_id);\n        pthread_mutex_unlock(&mutex_Y);\n        printf(\"Thread %ld: Releasing ResourceX...\\n\", thread_id);\n        pthread_mutex_unlock(&mutex_X);\n        printf(\"Thread %ld: Task completed.\\n\", thread_id);\n    } else { // Odd ID: acquire Y then X\n        printf(\"Thread %ld: Trying to acquire ResourceY...\\n\", thread_id);\n        pthread_mutex_lock(&mutex_Y);\n        printf(\"Thread %ld: Acquired ResourceY. Trying to acquire ResourceX...\\n\", thread_id);\n        // Simulate work or delay to increase deadlock probability\n        sleep(1);\n        pthread_mutex_lock(&mutex_X);\n        printf(\"Thread %ld: Acquired ResourceX. Performing task...\\n\", thread_id);\n        // Task execution\n        sleep(2);\n        printf(\"Thread %ld: Releasing ResourceX...\\n\", thread_id);\n        pthread_mutex_unlock(&mutex_X);\n        printf(\"Thread %ld: Releasing ResourceY...\\n\", thread_id);\n        pthread_mutex_unlock(&mutex_Y);\n        printf(\"Thread %ld: Task completed.\\n\", thread_id);\n    }\n    return NULL;\n}\n// פונקציית main ליצירת תהליכונים תהיה כאן, אך אינה נחוצה לשאלה",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "a",
+        "text": "האם תצורה זו של רכישת משאבים עלולה להוביל למצב של קיפאון (deadlock)? אם כן, הסבירו בפירוט מדוע, תוך התייחסות לארבעת התנאים ההכרחיים לקיפאון של Coffman (מניעה הדדית, החזק והמתן, אי-הפקעה, המתנה מעגלית).",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "b",
+        "text": "הציעו פתרון קוד מתוקן, המונע קיפאון במערכת זו, תוך שמירה על רמת מקביליות סבירה. נמקו את הפתרון שלכם והסבירו כיצד הוא מונע את תנאי הקיפאון הספציפיים שהובילו לבעיה בסעיף הקודם.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "**סעיף א': ניתוח קיפאון**\nכן, תצורה זו של רכישת משאבים עלולה בהחלט להוביל למצב של קיפאון (deadlock). ננתח זאת באמצעות ארבעת התנאים ההכרחיים לקיפאון של Coffman:\n\n1.  **מניעה הדדית (Mutual Exclusion)**: תנאי זה מתקיים. כל אחד מהמשאבים, `ResourceX` ו-`ResourceY`, מוגן על ידי מנעול הדדי (mutex). פירוש הדבר הוא שרק תהליכון אחד יכול להחזיק במנעול של משאב נתון בכל רגע נתון.\n2.  **החזק והמתן (Hold and Wait)**: תנאי זה מתקיים. תהליכונים רוכשים מנעול אחד (למשל, `mutex_X` עבור תהליכון זוגי או `mutex_Y` עבור תהליכון אי-זוגי) ומחזיקים בו, תוך כדי שהם ממתינים למנעול השני שהם צריכים (למשל, `mutex_Y` עבור תהליכון זוגי או `mutex_X` עבור תהליכון אי-זוגי).\n3.  **אי-הפקעה (No Preemption)**: תנאי זה מתקיים. מנעולי `pthread_mutex_t` אינם ניתנים להפקעה. ברגע שתהליכון רוכש מנעול, הוא יחזיק בו עד שישחרר אותו מרצונו.\n4.  **המתנה מעגלית (Circular Wait)**: תנאי זה יכול להתקיים, והוא הגורם הישיר לקיפאון בתצורה זו.\n    *   דמיינו תהליכון זוגי (לדוגמה, `thread_id = 0`) רוכש את `mutex_X`.\n    *   באותו זמן, דמיינו תהליכון אי-זוגי (לדוגמה, `thread_id = 1`) רוכש את `mutex_Y`.\n    *   כעת, `thread_id = 0` מחזיק ב-`mutex_X` ומנסה לרכוש את `mutex_Y` (שמוחזק על ידי `thread_id = 1`).\n    *   במקביל, `thread_id = 1` מחזיק ב-`mutex_Y` ומנסה לרכוש את `mutex_X` (שמוחזק על ידי `thread_id = 0`).\n    *   נוצר מעגל המתנה: `thread_id = 0` ממתין ל-`mutex_Y` שמוחזק על ידי `thread_id = 1`, ו-`thread_id = 1` ממתין ל-`mutex_X` שמוחזק על ידי `thread_id = 0`. שני התהליכונים חסומים זה על ידי זה, והמערכת נכנסת לקיפאון.\n\n**סעיף ב': פתרון למניעת קיפאון**\nהדרך היעילה ביותר למנוע קיפאון במקרה זה היא לשבור את תנאי \"המתנה מעגלית\" על ידי אכיפת סדר עקבי (כלל גלובלי) לרכישת משאבים עבור כל התהליכונים. במקום לאפשר סדרי רכישה שונים, כל התהליכונים ירכשו את המשאבים באותו סדר קבוע.\n\n**קוד מתוקן:**\n```c\n#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h> // For sleep\n\npthread_mutex_t mutex_X;\npthread_mutex_t mutex_Y;\n\nvoid init_resources() {\n    pthread_mutex_init(&mutex_X, NULL);\n    pthread_mutex_init(&mutex_Y, NULL);\n}\n\nvoid destroy_resources() {\n    pthread_mutex_destroy(&mutex_X);\n    pthread_mutex_destroy(&mutex_Y);\n}\n\nvoid* worker_thread_fixed(void* arg) {\n    long thread_id = (long)arg;\n\n    // אכיפת סדר רכישה עקבי לכל התהליכונים: תמיד X ואז Y\n    printf(\"Thread %ld: Trying to acquire ResourceX...\\n\", thread_id);\n    pthread_mutex_lock(&mutex_X);\n    printf(\"Thread %ld: Acquired ResourceX. Trying to acquire ResourceY...\\n\", thread_id);\n    // מדמה עבודה או עיכוב להגברת סבירות לבעיה (כעת למטרת הדגמה בלבד)\n    sleep(1);\n    pthread_mutex_lock(&mutex_Y);\n    printf(\"Thread %ld: Acquired ResourceY. Performing task...\\n\", thread_id);\n    // ביצוע המשימה\n    sleep(2);\n    printf(\"Thread %ld: Releasing ResourceY...\\n\", thread_id);\n    pthread_mutex_unlock(&mutex_Y);\n    printf(\"Thread %ld: Releasing ResourceX...\\n\", thread_id);\n    pthread_mutex_unlock(&mutex_X);\n    printf(\"Thread %ld: Task completed.\\n\", thread_id);\n\n    return NULL;\n}\n// פונקציית main ליצירת תהליכונים תהיה כאן, אך אינה נחוצה לשאלה\n```\n\n**הסבר לפתרון:**\nהפתרון המתוקן אוכף סדר רכישה גלובלי: כל התהליכונים, ללא קשר למזהה שלהם, ינסו לרכוש תחילה את `mutex_X` ולאחר מכן את `mutex_Y`. \nפעולה זו מונעת את תנאי ה\"המתנה מעגלית\". כעת, לא ייתכן מצב שבו תהליכון אחד מחזיק ב-`mutex_X` וממתין ל-`mutex_Y`, בעוד שתהליכון אחר מחזיק ב-`mutex_Y` וממתין ל-`mutex_X`. כל התהליכונים מחכים לאותו משאב ראשון (`mutex_X`), ורק לאחר קבלתו ממשיכים למשאב השני (`mutex_Y`).\nהדבר מבטיח שאם `mutex_X` מוחזק, כל מי שרוצה אותו ימתין לו. אם `mutex_X` פנוי, תהליכון ירכוש אותו, ואז ינסה לרכוש את `mutex_Y`. אם `mutex_Y` תפוס, הוא יחכה, אבל הוא לא יחזיק ב-`mutex_Y` וימתין ל-`mutex_X`, ובכך נשבר המעגל.\nפתרון זה שומר על רמת מקביליות סבירה מכיוון שתהליכונים עדיין יכולים לבצע את משימותיהם במקביל, כל עוד הם לא מתחרים על אותם מנעולים באותו רגע, או אם המנעולים משוחררים במהירות. למרות שיש סדר רכישה מחמיר, עדיין יתכן שתהליכון אחד יחזיק בשני המנעולים ויבצע את משימתו, בזמן שתהליכונים אחרים ממתינים בתור מסודר."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

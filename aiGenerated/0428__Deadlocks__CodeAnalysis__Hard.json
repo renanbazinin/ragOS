@@ -1,0 +1,51 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Deadlocks",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 21:48:22",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3900,
+      "output_tokens": 2060,
+      "total_tokens": 12150
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Deadlocks",
+      "Synchronization",
+      "Resource Management",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "מערכת הפעלה מנהלת שני סוגי משאבים: ResourceA ו-ResourceB. לכל סוג משאב קיים מספר מוגבל של יחידות זמינות. תהליכים במערכת נדרשים לתפוס יחידה אחת מכל סוג משאב (אחת מ-ResourceA ואחת מ-ResourceB) כדי לבצע עבודה מסוימת, ולאחר מכן לשחרר אותם. הקוד הבא מציג מימוש של מנגנון תפיסה ושחרור של המשאבים, ופונקציית תהליך המשתמשת בהם. נתון כי עבור ResourceA ו-ResourceB, מספר היחידות הזמינות ההתחלתי הוא 1 לכל אחד (כלומר, `init_resource(&resourceA, 1);` ו-`init_resource(&resourceB, 1);`), וכי קיימים שני תהליכים (חוטים) הפועלים במקביל.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <pthread.h>\n#include <unistd.h> // For sleep\n\n// Resource structure definition\ntypedef struct {\n    pthread_mutex_t lock;\n    pthread_cond_t cond;\n    int available_count;\n    int total_count;\n} Resource;\n\n// Global resources (for simplicity in this example)\nResource resourceA;\nResource resourceB;\n\n// Function to initialize a resource\nvoid init_resource(Resource* res, int count) {\n    pthread_mutex_init(&res->lock, NULL);\n    pthread_cond_init(&res->cond, NULL);\n    res->available_count = count;\n    res->total_count = count;\n}\n\n// Function to acquire a resource instance\nvoid acquire_resource(Resource* res) {\n    pthread_mutex_lock(&res->lock);\n    while (res->available_count <= 0) {\n        pthread_cond_wait(&res->cond, &res->lock);\n    }\n    res->available_count--;\n    pthread_mutex_unlock(&res->lock);\n}\n\n// Function to release a resource instance\nvoid release_resource(Resource* res) {\n    pthread_mutex_lock(&res->lock);\n    res->available_count++;\n    pthread_cond_signal(&res->cond); // Signal one waiting thread\n    pthread_mutex_unlock(&res->lock);\n}\n\n// Thread function that attempts to acquire both resources\nvoid* thread_func(void* arg) {\n    long thread_id = (long)arg;\n\n    // Simulate different acquisition orders based on thread ID\n    if (thread_id % 2 == 0) { // Even threads acquire A then B\n        acquire_resource(&resourceA);\n        sleep(1); // Simulate some work or delay\n        acquire_resource(&resourceB);\n        \n        // Simulate critical section work\n        sleep(2);\n\n        release_resource(&resourceB);\n        release_resource(&resourceA);\n    } else { // Odd threads acquire B then A\n        acquire_resource(&resourceB);\n        sleep(1); // Simulate some work or delay\n        acquire_resource(&resourceA);\n        \n        // Simulate critical section work\n        sleep(2);\n\n        release_resource(&resourceA);\n        release_resource(&resourceB);\n    }\n    return NULL;\n}"
+    },
+    "sub_questions": [
+      {
+        "id": "101.1",
+        "text": "האם ייתכן מצב של קיפאון (Deadlock) במערכת המתוארת? נמקו את תשובתכם בהתבסס על ארבעת התנאים ההכרחיים לקיפאון של קופמן (Coffman Conditions).",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "101.2",
+        "text": "אם אכן ייתכן קיפאון, הציעו שינוי קוד מינימלי למנגנון תפיסת המשאבים שימנע קיפאון, תוך שמירה על עקרונות המניעה ההדדית ושימוש יעיל במשאבים. הציגו את הקוד המעודכן והסבירו מדוע הוא פותר את הבעיה.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1. כן, ייתכן מצב של קיפאון (Deadlock) במערכת המתוארת. נבחן את ארבעת התנאים ההכרחיים לקיפאון:\n   א. מניעה הדדית (Mutual Exclusion): מתקיים. כל יחידת משאב (ResourceA או ResourceB) ניתנת לתפיסה בלעדית על ידי תהליך אחד בלבד בכל רגע נתון. המנעולים (`pthread_mutex_t`) והמונה `available_count` מבטיחים זאת.\n   ב. אחיזה והמתנה (Hold and Wait): מתקיים. תהליך (חוט) יכול לתפוס משאב אחד (לדוגמה, ResourceA) ולהמתין לתפיסת משאב נוסף (ResourceB) תוך כדי שהוא מחזיק במשאב הראשון.\n   ג. אי-הפקעה (No Preemption): מתקיים. ברגע שתהליך תפס משאב, המשאב לא יכול להילקח ממנו בכוח; התהליך חייב לשחרר אותו מרצונו.\n   ד. המתנה מעגלית (Circular Wait): מתקיים. בתרחיש של שני חוטים ושתי יחידות משאב (אחת מכל סוג), אם חוט 0 (זוגי) תופס את ResourceA וממתין ל-ResourceB, ובמקביל חוט 1 (אי-זוגי) תופס את ResourceB וממתין ל-ResourceA, נוצר מעגל המתנה. חוט 0 ממתין למשאב שחוט 1 מחזיק, וחוט 1 ממתין למשאב שחוט 0 מחזיק.\n\n2. כדי למנוע קיפאון, ניתן לשנות את הקוד כך שימנע את תנאי ההמתנה המעגלית על ידי אכיפת סדר עקבי לתפיסת המשאבים. כלומר, כל התהליכים יתפסו את ResourceA תחילה, ורק לאחר מכן את ResourceB. שינוי זה מבטיח שלא תיווצר שרשרת המתנה מעגלית.\n\n   הקוד המעודכן לפונקציית `thread_func` ייראה כך:\n   ```c\nvoid* thread_func(void* arg) {\n    long thread_id = (long)arg;\n\n    // כל החוטים תופסים את ResourceA ואז את ResourceB\n    acquire_resource(&resourceA);\n    sleep(1); // לדמות עבודה או עיכוב\n    acquire_resource(&resourceB);\n    \n    // לדמות עבודה בקטע הקריטי\n    sleep(2);\n\n    release_resource(&resourceB);\n    release_resource(&resourceA);\n    \n    return NULL;\n}\n   ```\n   **הסבר לפתרון:**\n   שינוי זה מונע את תנאי ההמתנה המעגלית. כעת, כל החוטים מנסים לתפוס את ResourceA ראשונים. אם יש רק יחידה אחת של ResourceA, רק חוט אחד יצליח לתפוס אותה. חוט זה ימשיך לתפוס את ResourceB. לאחר מכן, הוא ישחרר את שני המשאבים, מה שיאפשר לחוט אחר לתפוס את ResourceA. לעולם לא ייווצר מצב שבו חוט אחד מחזיק ב-ResourceA וממתין ל-ResourceB, בעוד חוט אחר מחזיק ב-ResourceB וממתין ל-ResourceA, מכיוון שכולם מנסים לתפוס את ResourceA קודם. בכך, אנו מבטלים את האפשרות להמתנה מעגלית ושומרים על שאר התנאים ההכרחיים לקיפאון, שהם לגיטימיים במערכות המשתמשות במשאבים משותפים."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

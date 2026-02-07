@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Memory Management",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 22:04:08",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2852,
+      "output_tokens": 1089,
+      "total_tokens": 5710
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Memory Management",
+      "Stack",
+      "Heap",
+      "Memory Leak",
+      "C/C++"
+    ],
+    "content": {
+      "text": "נתונה תוכנית ה-C הבאה. נתח את השימוש בזיכרון בתוכנית זו. ציין אילו סוגי זיכרון (לדוגמה: מחסנית, ערימה, גלובלי) משמשים לאחסון המשתנים השונים, והאם התוכנית סובלת מדליפת זיכרון. אם קיימת דליפת זיכרון, הסבר היכן היא מתרחשת ומדוע.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h> // For malloc and free\n\nvoid allocate_and_lose() {\n    int *data = (int *)malloc(10 * sizeof(int)); // Allocate 40 bytes\n    if (data == NULL) {\n        printf(\"Memory allocation failed!\\n\");\n        return;\n    }\n    // No free(data) here\n}\n\nint main() {\n    int stack_array[5]; // Allocate 20 bytes on stack\n    for (int i = 0; i < 5; ++i) {\n        stack_array[i] = i;\n    }\n\n    int *heap_ptr = (int *)malloc(20 * sizeof(int)); // Allocate 80 bytes\n    if (heap_ptr == NULL) {\n        printf(\"Memory allocation failed!\\n\");\n        return 1;\n    }\n    for (int i = 0; i < 20; ++i) {\n        heap_ptr[i] = i * 2;\n    }\n\n    allocate_and_lose(); // This call will cause a leak\n\n    free(heap_ptr); // Correctly free memory allocated in main\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הניתוח: \n1.  **`stack_array`**: משתנה זה הוא מערך מקומי (local array) המוגדר בתוך הפונקציה `main`. הוא מוקצה על **המחסנית (Stack)**. גודלו ידוע בזמן קומפילציה, והוא משוחרר אוטומטית כאשר הפונקציה `main` מסתיימת.\n2.  **`heap_ptr`**: זהו מצביע (pointer) מקומי המוגדר בתוך הפונקציה `main`, ולכן הוא עצמו מוקצה על **המחסנית (Stack)**. אולם, הזיכרון שאליו הוא מצביע (20 אינטגרים) מוקצה באופן דינמי על **הערימה (Heap)** באמצעות קריאה ל-`malloc`. זיכרון זה משוחרר כראוי באמצעות `free(heap_ptr)` לפני סיום התוכנית.\n3.  **`data`** (בתוך הפונקציה `allocate_and_lose`): זהו מצביע מקומי המוגדר בתוך הפונקציה `allocate_and_lose`, ולכן הוא עצמו מוקצה על **המחסנית (Stack)**. הזיכרון שאליו הוא מצביע (10 אינטגרים) מוקצה באופן דינמי על **הערימה (Heap)** באמצעות קריאה ל-`malloc`.\n\n**דליפת זיכרון (Memory Leak):**\nהתוכנית **סובלת מדליפת זיכרון**.\nהדליפה מתרחשת בפונקציה `allocate_and_lose`. בתוך פונקציה זו, מוקצה זיכרון על הערימה באמצעות `malloc` עבור המצביע `data`. אולם, הפונקציה מסתיימת מבלי לבצע קריאה ל-`free(data)`. כתוצאה מכך, הזיכרון שהוקצה על הערימה נשאר תפוס על ידי התהליך, אך המצביע `data` (שהיה על המחסנית) נעלם עם סיום הפונקציה. אין עוד דרך לגשת לזיכרון שהוקצה או לשחרר אותו, ולכן הוא הופך לזיכרון דולף (leaked memory) שאינו בשימוש ואינו ניתן לשחרור עד לסיום התהליך כולו."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 22:20:32",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 952,
+      "total_tokens": 5362
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Virtual Memory",
+      "Paging",
+      "TLB",
+      "Address Translation",
+      "Memory Accesses"
+    ],
+    "content": {
+      "text": "נתונה מערכת הפעלה המשתמשת בכתובות וירטואליות של 64 ביט, גודל דף של 4KB, ומבנה טבלאות דפים בעל 4 רמות (4-level page table). ה-TLB (Translation Lookaside Buffer) ריק בתחילת ריצת תהליך חדש. נתייחס לפעם הראשונה בה התהליך מבצע את הפעולה הבאה:",
+      "code_snippet": "*(int*)0x00007FFFFFFF0000 = 10;",
+      "options": [
+        "א. הפעולה תוביל ל-page fault מכיוון שה-TLB ריק.",
+        "ב. הפעולה תדרוש בדיוק 5 גישות לזיכרון הראשי (RAM): 4 גישות עבור תרגום הכתובת דרך טבלאות הדפים, וגישה אחת לכתיבת הנתון.",
+        "ג. הפעולה תדרוש בדיוק 4 גישות לזיכרון הראשי (RAM) לצורך תרגום הכתובת בלבד, אך לא תבוצע גישת כתיבה לנתון.",
+        "ד. הפעולה תדרוש גישה אחת בלבד לזיכרון הראשי (RAM) לאחר ה-TLB miss, מכיוון שהדף כבר טעון.",
+        "ה. הפעולה לא תכלול גישות לטבלאות הדפים כלל, מכיוון שהדף כבר נמצא בזיכרון הפיזי."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "התשובה הנכונה היא ב'.\nכאשר הכתובת הוירטואלית `0x00007FFFFFFF0000` נגישה לראשונה:\n1.  **TLB Miss**: ה-TLB ריק, ולכן תתרחש החטאה (miss).\n2.  **Page Table Walk**: המעבד יצטרך לבצע תרגום כתובת דרך טבלאות הדפים. מכיוון שמדובר במערכת 64 ביט עם דפים בגודל 4KB ו-4 רמות של טבלאות דפים, התרגום יכלול 4 גישות לזיכרון הראשי (RAM) כדי לאחזר את רשומות טבלת הדפים השונות (PML4, PDPT, PD, PT) עד למציאת רשומת הדף הסופית (PTE). כל גישה לרמת טבלה היא גישת זיכרון ל-RAM.\n3.  **TLB Update**: לאחר שהכתובת הפיזית נמצאה, ה-TLB יעודכן עם המיפוי החדש.\n4.  **Data Write**: לבסוף, תתבצע גישה נוספת לזיכרון הראשי (RAM) כדי לכתוב את הערך `10` לכתובת הפיזית המתורגמת.\nלכן, סך הכל 4 גישות ל-RAM עבור ה-page table walk + גישה אחת ל-RAM עבור כתיבת הנתון = 5 גישות ל-RAM.\n\nטענה א' שגויה מכיוון ש-TLB miss אינו בהכרח page fault. page fault מתרחש כאשר הדף אינו בזיכרון הפיזי או לא נגיש, ולא רק בגלל שה-TLB ריק.\nטענות ג', ד', ה' שגויות מכיוון שהן אינן מתארות נכונה את מספר הגישות לזיכרון או את התהליך כולו."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Memory Management",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 22:03:54",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2852,
+      "output_tokens": 845,
+      "total_tokens": 6039
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Memory Management",
+      "Heap",
+      "Memory Leaks",
+      "C/C++"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה בשפת C. עיין בקוד וענה על השאלה:\n\nמהי הבעיה העיקרית עם ניהול הזיכרון בתוכנית זו? הסבר בפירוט כיצד הבעיה מתרחשת ומהן ההשלכות האפשריות שלה.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n\nvoid allocate_and_print() {\n    int* ptr = (int*)malloc(sizeof(int));\n    if (ptr == NULL) {\n        printf(\"Memory allocation failed!\\n\");\n        return;\n    }\n    *ptr = 100;\n    printf(\"Value: %d\\n\", *ptr);\n    // חסרה קריאה ל-free(ptr);\n}\n\nint main() {\n    allocate_and_print();\n    allocate_and_print();\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": 10,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הבעיה העיקרית בתוכנית זו היא דליפת זיכרון (memory leak). הפונקציה `allocate_and_print` מקצה זיכרון על הערימה (heap) באמצעות `malloc` עבור משתנה מסוג `int` אך אינה משחררת אותו באמצעות `free` לפני שהיא מסיימת את ריצתה. בכל פעם שהפונקציה נקראת (כמו במקרה זה, פעמיים מתוך `main`), היא מקצה בלוק זיכרון חדש. המצביע `ptr` הוא משתנה מקומי לפונקציה, וכאשר הפונקציה מסיימת את ריצתה, המצביע הזה נעלם (מפונה מהמחסנית). כתוצאה מכך, הכתובת לבלוק הזיכרון שהוקצה הולכת לאיבוד, והזיכרון נשאר תפוס על הערימה אך אינו נגיש יותר לתוכנית, ולא ניתן לשחררו. לאורך זמן, אם התוכנית הייתה ממשיכה לקרוא לפונקציה זו שוב ושוב, היא הייתה צורכת יותר ויותר זיכרון פנוי מהמערכת, מה שעלול להוביל לחוסר זיכרון (Out Of Memory) ולגרום לקריסת התוכנית או להאט את ביצועי המערכת כולה.",
+      "code_snippet": "// תיקון לבעיית דליפת הזיכרון:\n#include <stdio.h>\n#include <stdlib.h>\n\nvoid allocate_and_print() {\n    int* ptr = (int*)malloc(sizeof(int));\n    if (ptr == NULL) {\n        printf(\"Memory allocation failed!\\n\");\n        return;\n    }\n    *ptr = 100;\n    printf(\"Value: %d\\n\", *ptr);\n    free(ptr); // שחרור הזיכרון שהוקצה\n}\n\nint main() {\n    allocate_and_print();\n    allocate_and_print();\n    return 0;\n}"
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

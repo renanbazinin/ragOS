@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 22:16:25",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 967,
+      "output_tokens": 401,
+      "total_tokens": 2623
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Virtual Memory",
+      "Paging",
+      "TLB",
+      "Address Translation"
+    ],
+    "content": {
+      "text": "כאשר תהליך ניגש לכתובת וירטואלית, ותרגום הכתובת אינו נמצא ב-TLB (Translation Lookaside Buffer), מהו הצעד הבא שהמערכת תבצע?",
+      "code_snippet": null,
+      "options": [
+        "א. תתרחש מיד תקלת דף (Page Fault).",
+        "ב. המערכת תבדוק את טבלת הדפים (Page Table) בזיכרון הראשי.",
+        "ג. המערכת תטען את הדף מהדיסק לזיכרון הראשי.",
+        "ד. התהליך יופסק (terminated)."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "כאשר מתרחש TLB Miss, המערכת מחפשת את תרגום הכתובת בטבלת הדפים (Page Table) שנמצאת בזיכרון הראשי (RAM). רק אם מתגלה בטבלת הדפים שהדף אינו נמצא בזיכרון הפיזי (כלומר, ה-Present Bit הוא 0), תתרחש תקלת דף (Page Fault). אם הדף נמצא בזיכרון הפיזי, ה-TLB יעודכן והגישה תמשיך."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

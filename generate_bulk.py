@@ -82,6 +82,57 @@ TYPES = ["MultipleChoice", "Open", "CodeAnalysis"]
 
 DIFFICULTIES = ["Easy", "Medium", "Hard"]
 
+# ── Subject mapping (broad category over topic) ─────────────────────────────
+# Every topic maps to one of 4 subjects
+SUBJECTS = ["Virtualization", "Concurrency", "File Systems", "Disks"]
+
+TOPIC_TO_SUBJECT: dict[str, str] = {
+    # Virtualization
+    "Processes": "Virtualization",
+    "Threads": "Virtualization",
+    "Context Switching": "Virtualization",
+    "System Calls": "Virtualization",
+    "Signals": "Virtualization",
+    "CPU Scheduling": "Virtualization",
+    "Scheduling": "Virtualization",
+    "Memory Management": "Virtualization",
+    "Virtual Memory": "Virtualization",
+    "Paging": "Virtualization",
+    "Page Replacement": "Virtualization",
+    "TLB": "Virtualization",
+    "Copy-on-Write": "Virtualization",
+    "IPC": "Virtualization",
+    # Concurrency
+    "Synchronization": "Concurrency",
+    "Mutexes": "Concurrency",
+    "Semaphores": "Concurrency",
+    "Condition Variables": "Concurrency",
+    "Atomic Operations": "Concurrency",
+    "Race Conditions": "Concurrency",
+    "Deadlocks": "Concurrency",
+    "Producer-Consumer": "Concurrency",
+    "Concurrency": "Concurrency",
+    # File Systems
+    "File Systems": "File Systems",
+    "Networking": "File Systems",
+    "Security": "File Systems",
+    # Disks
+    "Disk Scheduling": "Disks",
+    "I/O": "Disks",
+    "RAID": "Disks",
+}
+
+def get_subject(topic_hint: str) -> str:
+    """Resolve a topic (or compound topic) to its subject."""
+    # Direct match
+    if topic_hint in TOPIC_TO_SUBJECT:
+        return TOPIC_TO_SUBJECT[topic_hint]
+    # Compound topic like "Processes and Threads" — use first part
+    for t in TOPIC_TO_SUBJECT:
+        if t in topic_hint:
+            return TOPIC_TO_SUBJECT[t]
+    return "Virtualization"  # fallback
+
 # ── Which combos to generate ────────────────────────────────────────────────
 # We weight the matrix so popular/important topics get more questions.
 
@@ -281,9 +332,11 @@ def generate_and_save(
             return False, usage
 
     # Wrap in our standard format
+    subject = get_subject(topic)
     output = {
         "metadata": {
             "source": "ai_generated",
+            "subject": subject,
             "topic_hint": topic,
             "requested_type": qtype,
             "requested_difficulty": difficulty,

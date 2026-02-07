@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 22:16:47",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 967,
+      "output_tokens": 617,
+      "total_tokens": 2983
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Virtual Memory",
+      "Paging",
+      "Demand Paging",
+      "Page Faults"
+    ],
+    "content": {
+      "text": "איזו מהטענות הבאות מתארת בצורה הטובה ביותר את היתרון המרכזי של מנגנון דפדוף לפי דרישה (Demand Paging) בזיכרון וירטואלי, המסתמך על Page Faults?",
+      "code_snippet": null,
+      "options": [
+        "א. הוא מאפשר לטעון את כל התוכנית לזיכרון הפיזי מראש, ובכך מונע עיכובים בזמן ריצה.",
+        "ב. הוא מאפשר להריץ תוכניות שגודלן גדול יותר מהזיכרון הפיזי הזמין, על ידי טעינת חלקים מהן רק בעת הצורך.",
+        "ג. הוא מפחית את הצורך ב-TLB (Translation Lookaside Buffer) על ידי אופטימיזציה של גישה לטבלאות דפים.",
+        "ד. הוא מבטיח שכל הנתונים של תהליך יהיו תמיד בזיכרון הפיזי, ובכך משפר את ביצועי ה-CPU.",
+        "ה. הוא מגדיל את ניצול ה-CPU על ידי הקצאת זיכרון פיזי קבוע לכל תהליך, ללא קשר לשימוש בפועל."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב'. דפדוף לפי דרישה מאפשר לטעון דפי זיכרון פיזיים רק כאשר הם נדרשים בפועל (בעת גישה לדף וגרימת Page Fault). יתרון זה מאפשר להריץ תוכניות גדולות יותר מהזיכרון הפיזי הזמין, מכיוון שרק חלק קטן מהתוכנית צריך להיות ב-RAM בכל רגע נתון. זה גם משפר את ניצול הזיכרון הפיזי ומאפשר ריבוי משימות יעיל יותר. שאר האפשרויות אינן נכונות: א' ו-ד' מתארות מצב הפוך מדפדוף לפי דרישה; ג' אינו נכון מכיוון ש-TLB עדיין חיוני לביצועים; ה' אינו יתרון של מנגנון זה ולרוב גם לא המטרה."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

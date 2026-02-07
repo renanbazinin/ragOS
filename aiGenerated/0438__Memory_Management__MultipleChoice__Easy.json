@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Memory Management",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 21:32:52",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 901,
+      "output_tokens": 410,
+      "total_tokens": 2226
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Memory Management"
+    ],
+    "content": {
+      "text": "מהי פרגמנטציה חיצונית (External Fragmentation)?",
+      "code_snippet": null,
+      "options": [
+        "א. בזבוז זיכרון בתוך בלוק שהוקצה לתהליך, מכיוון שהתהליך דרש פחות מהגודל שהוקצה.",
+        "ב. מצב שבו יש מספיק זיכרון פנוי בסך הכל כדי למלא בקשה חדשה, אך הוא מפוזר בבלוקים קטנים ולא רציפים.",
+        "ג. מצב שבו יש יותר מדי תהליכים בזיכרון הפיזי, מה שגורם להאטה במערכת.",
+        "ד. בזבוז זיכרון הנגרם כתוצאה מהחלפת דפים (paging) תכופה מדי בין הזיכרון הראשי לדיסק.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב. פרגמנטציה חיצונית מתרחשת כאשר סך הזיכרון הפנוי מספיק כדי למלא בקשת הקצאה, אך הוא אינו רציף ומפוזר בבלוקים קטנים שאינם יכולים להכיל את הבקשה כולה. אפשרות א' מתארת פרגמנטציה פנימית."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

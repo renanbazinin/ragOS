@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Memory Management",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 22:03:24",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2852,
+      "output_tokens": 1132,
+      "total_tokens": 7098
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Memory Management"
+    ],
+    "content": {
+      "text": "נתונה תוכנית ה-C הבאה. ציין עבור כל אחד מהמשתנים הבאים היכן הוא מאוחסן בזיכרון (מחסנית (Stack), ערימה (Heap), או מקטע נתונים (Data Segment / BSS)). הסבר בקצרה את בחירתך:\n1.  `global_var`\n2.  `static_var`\n3.  `local_main_var`\n4.  `local_func_var`\n5.  הזיכרון שהוקצה על ידי `malloc` (שאליו מצביע `heap_ptr`)\n6.  המשתנה `heap_ptr` עצמו",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n\nint global_var = 10; // Global variable\nstatic int static_var = 20; // Static global variable\n\nvoid func() {\n    int local_func_var = 30; // Local variable in func\n    printf(\"Address of local_func_var in func: %p\\n\", (void*)&local_func_var);\n}\n\nint main() {\n    int local_main_var = 40; // Local variable in main\n    char* heap_ptr = (char*)malloc(100); // Dynamically allocated memory\n\n    printf(\"Address of global_var: %p\\n\", (void*)&global_var);\n    printf(\"Address of static_var: %p\\n\", (void*)&static_var);\n    printf(\"Address of local_main_var: %p\\n\", (void*)&local_main_var);\n    printf(\"Address of heap_ptr (pointer itself): %p\\n\", (void*)&heap_ptr);\n    printf(\"Address pointed to by heap_ptr (heap memory): %p\\n\", (void*)heap_ptr);\n\n    func();\n\n    free(heap_ptr);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "להלן פירוט מיקום האחסון בזיכרון עבור כל אחד מהמשתנים:\n\n1.  `global_var`: מאוחסן במקטע הנתונים (Data Segment).\n    **הסבר:** זהו משתנה גלובלי מאותחל, והוא נטען לזיכרון כחלק ממקטע הנתונים של התוכנית בזמן טעינה.\n\n2.  `static_var`: מאוחסן במקטע הנתונים (Data Segment).\n    **הסבר:** זהו משתנה סטטי גלובלי מאותחל. משתנים סטטיים (בין אם גלובליים ובין אם מקומיים) מאוחסנים במקטע הנתונים (או במקטע BSS אם אינם מאותחלים), ומחזיקים את ערכם לאורך כל חיי התוכנית.\n\n3.  `local_main_var`: מאוחסן במחסנית (Stack).\n    **הסבר:** זהו משתנה מקומי לפונקציה `main`. משתנים מקומיים (אוטומטיים) נוצרים על המחסנית כאשר הפונקציה נקראת ונמחקים כאשר הפונקציה מסתיימת.\n\n4.  `local_func_var`: מאוחסן במחסנית (Stack).\n    **הסבר:** בדומה ל-`local_main_var`, זהו משתנה מקומי לפונקציה `func` ונוצר על המחסנית כאשר `func` נקראת.\n\n5.  הזיכרון שהוקצה על ידי `malloc` (שאליו מצביע `heap_ptr`): מאוחסן בערימה (Heap).\n    **הסבר:** פונקציית `malloc` משמשת להקצאת זיכרון דינמי בזמן ריצה, וזיכרון זה מוקצה מהערימה. יש לשחרר זיכרון זה במפורש באמצעות `free`.\n\n6.  המשתנה `heap_ptr` עצמו: מאוחסן במחסנית (Stack).\n    **הסבר:** `heap_ptr` הוא משתנה מצביע מקומי לפונקציה `main`. כמו כל משתנה מקומי אחר, הוא מאוחסן על המחסנית. רק הזיכרון שאליו הוא מצביע נמצא בערימה."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

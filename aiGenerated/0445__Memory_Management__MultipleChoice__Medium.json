@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Memory Management",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 21:33:48",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 967,
+      "output_tokens": 489,
+      "total_tokens": 2236
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Memory Management",
+      "Paging",
+      "Fragmentation"
+    ],
+    "content": {
+      "text": "איזו בעיית פרגמנטציה קיימת במערכת ניהול זיכרון המבוססת על דפדוף (Paging)?",
+      "code_snippet": null,
+      "options": [
+        "א. פרגמנטציה חיצונית (External Fragmentation) בלבד.",
+        "ב. פרגמנטציה פנימית (Internal Fragmentation) בלבד.",
+        "ג. גם פרגמנטציה פנימית וגם פרגמנטציה חיצונית.",
+        "ד. ללא בעיות פרגמנטציה כלל.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "בדפדוף, הזיכרון הפיזי מחולק למסגרות (frames) בגודל קבוע, והזיכרון הלוגי מחולק לדפים (pages) באותו גודל. תהליכים מקבלים הקצאה של דפים שלמים. אם תהליך זקוק לפחות זיכרון מהדף האחרון שהוקצה לו, החלק הנותר של הדף אינו בשימוש ומהווה פרגמנטציה פנימית. פרגמנטציה חיצונית, שבה ישנם חללים פנויים קטנים שאינם רציפים ולא מספיק גדולים להכיל יחידת הקצאה, אינה קיימת בדפדוף כי הקצאת הזיכרון היא ביחידות קבועות וקטנות (דפים/מסגרות), והזיכרון הפנוי מנוהל ברמת המסגרת, לא כבלוקים רציפים בגודל משתנה."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

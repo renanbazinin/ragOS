@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 22:20:50",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1615,
+      "output_tokens": 480,
+      "total_tokens": 3423
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Virtual Memory",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "הסבירו בקצרה מהו זיכרון וירטואלי (Virtual Memory) וציינו שני יתרונות עיקריים בשימוש בו.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "זיכרון וירטואלי הוא מנגנון לניהול זיכרון המאפשר לתהליכים להשתמש במרחב כתובות לוגי גדול יותר ממה שזמין פיזית בזיכרון ה-RAM. הוא יוצר אשליה של זיכרון רציף וגדול לכל תהליך, ומערכת ההפעלה מטפלת במיפוי כתובות וירטואליות לכתובות פיזיות, לרוב באמצעות דפדוף (paging) ושימוש בדיסק כמקום אחסון משני.\n\nשני יתרונות עיקריים בשימוש בזיכרון וירטואלי הם:\n1.  **הרחבת מרחב הכתובות**: מאפשר לתהליכים להשתמש בזיכרון גדול יותר ממה שזמין בזיכרון הפיזי, על ידי שימוש בדיסק כמחסן זמני לחלקים מהזיכרון שאינם בשימוש פעיל.\n2.  **הגנה על זיכרון**: מספק הפרדה בין מרחבי הכתובות של תהליכים שונים, ובכך מונע מתהליך אחד לגשת או לשנות בטעות או בזדון את הזיכרון של תהליך אחר. כל תהליך רואה את הזיכרון שלו כמרחב פרטי."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

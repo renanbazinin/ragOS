@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 22:15:39",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 946,
+      "output_tokens": 385,
+      "total_tokens": 2290
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Virtual Memory",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של זיכרון וירטואלי (Virtual Memory)?",
+      "code_snippet": null,
+      "options": [
+        "א. להגדיל את כמות הזיכרון הפיזי הזמין למערכת.",
+        "ב. לאפשר לכל תהליך להשתמש במרחב כתובות לוגי משלו, ולבודד תהליכים אחד מהשני.",
+        "ג. להאיץ את מהירות העיבוד של המעבד על ידי שימוש בזיכרון מטמון (cache).",
+        "ד. לספק דרך מהירה יותר לגשת לקבצים המאוחסנים בדיסק."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב'. זיכרון וירטואלי מאפשר לכל תהליך להשתמש במרחב כתובות לוגי משלו, שלרוב גדול יותר מהזיכרון הפיזי, ומספק שכבת הפשטה שמבודדת תהליכים זה מזה ומגנה על הזיכרון הפיזי מפני גישה לא חוקית. זה גם מאפשר לטעון רק חלקים מהתהליך לזיכרון הפיזי בעת הצורך."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

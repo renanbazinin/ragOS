@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Memory Management",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 21:50:29",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3027,
+      "output_tokens": 515,
+      "total_tokens": 4686
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "Open",
+    "topic": [
+      "Memory Management",
+      "Fragmentation"
+    ],
+    "content": {
+      "text": "הסבירו את המושגים 'פרגמנטציה פנימית' (Internal Fragmentation) ו'פרגמנטציה חיצונית' (External Fragmentation) בניהול זיכרון. תנו דוגמה קצרה לכל אחד מהמושגים.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "פרגמנטציה פנימית (Internal Fragmentation):\nמתרחשת כאשר מקצים בלוק זיכרון גדול יותר מהגודל המבוקש בפועל, והזיכרון העודף בתוך הבלוק אינו בשימוש. הזיכרון המבוזבז נמצא בתוך הבלוק שהוקצה. לדוגמה: במערכת דפדוף (Paging) עם גודל דף של 4KB, אם תהליך זקוק רק ל-3KB עבור דף מסוים, ה-1KB הנותר בתוך אותו דף יהווה פרגמנטציה פנימית.\n\nפרגמנטציה חיצונית (External Fragmentation):\nמתרחשת כאשר יש מספיק זיכרון פנוי בסך הכל כדי לספק בקשה, אך הזיכרון הפנוי מפוזר בבלוקים קטנים ולא רציפים, כך שלא ניתן להקצות בלוק רציף אחד בגודל הנדרש. הזיכרון המבוזבז נמצא מחוץ לכל בלוק שהוקצה. לדוגמה: אם יש לנו 20KB זיכרון פנוי, המחולק לארבעה בלוקים של 5KB כל אחד, ותהליך מבקש 12KB זיכרון רציף, הבקשה תיכשל למרות שסך הזיכרון הפנוי (20KB) גדול מהנדרש (12KB)."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

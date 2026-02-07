@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Mutexes",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 21:43:15",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3905,
+      "output_tokens": 1780,
+      "total_tokens": 9888
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Synchronization",
+      "Mutexes",
+      "Threads",
+      "Deadlock",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתונה ספרייה המכילה שתי פונקציות, `outer_function` ו-`inner_function`, אשר שתיהן ניגשות למשאב משותף כלשהו. הפונקציה `outer_function` קוראת ל-`inner_function` כחלק מפעולתה. שתי הפונקציות חייבות להיות בטוחות לשימוש בריבוי תהליכים (thread-safe) ומוגנות מפני תנאי מירוץ על המשאב המשותף באמצעות מנעול (mutex).\n\n**סעיף 1: ניתוח בעיה**\nהסבירו מדוע שימוש במנעול `pthread_mutex_t` רגיל (שאינו רקורסיבי) יגרום לקיפאון (deadlock) אם `outer_function` תנסה לנעול את המשאב, ואז `inner_function` (שנקראת מתוך `outer_function` על ידי אותו חוט) תנסה לנעול את אותו המשאב שוב.\n\n**סעיף 2: מימוש מנעול רקורסיבי**\nממשו מבנה נתונים בשם `recursive_mutex_t` ואת הפעולות `recursive_mutex_init`, `recursive_mutex_destroy`, `recursive_mutex_lock` ו-`recursive_mutex_unlock` עבורו. המימוש צריך להתנהג כמנעול רקורסיבי, כלומר, חוט שמחזיק כבר במנעול יכול לנעול אותו שוב בהצלחה, אך חייב לשחרר אותו מספר פעמים זהה למספר הפעמים שרכש אותו לפני שחוטים אחרים יוכלו לרכוש אותו. השתמשו אך ורק במנעול `pthread_mutex_t` רגיל, משתנה מצב (condition variable), מונה, ומזהה חוט (`pthread_t`). אין להשתמש ב-`pthread_mutex_t` מסוג `PTHREAD_MUTEX_RECURSIVE` במימוש עצמו.\n\nהקוד עבור ההגדרות והפונקציות הנדרשות:",
+      "code_snippet": "```c\n#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n\ntypedef struct {\n    pthread_mutex_t internal_lock; // Protects owner, count, and cond\n    pthread_cond_t cond;           // For waiting threads\n    pthread_t owner;                // ID of the thread currently holding the lock\n    int count;                      // Recursion count\n} recursive_mutex_t;\n\nvoid recursive_mutex_init(recursive_mutex_t* m);\nvoid recursive_mutex_destroy(recursive_mutex_t* m);\nvoid recursive_mutex_lock(recursive_mutex_t* m);\nvoid recursive_mutex_unlock(recursive_mutex_t* m);\n```"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "**סעיף 1: ניתוח בעיה**\nמנעול `pthread_mutex_t` רגיל הוא מנעול שאינו רקורסיבי. כאשר חוט רוכש מנעול כזה, הוא הופך לבעליו. אם אותו חוט ינסה לרכוש את אותו המנעול שוב, לפני שחרורו, החוט ייחסם וימתין לעצמו שישחרר את המנעול, מה שיוביל לקיפאון עצמי (self-deadlock). בתרחיש הנתון, `outer_function` רוכשת את המנעול. לאחר מכן, `inner_function` (שנקראת על ידי `outer_function`, כלומר על ידי אותו חוט) מנסה לרכוש את אותו המנעול. מכיוון שהמנעול כבר מוחזק על ידי אותו החוט, `inner_function` תחסם, והחוט ייכנס למצב קיפאון.\n\n**סעיף 2: מימוש מנעול רקורסיבי**\nמנעול רקורסיבי מאפשר לאותו חוט לרכוש את המנעול מספר פעמים. הוא שומר מונה של מספר הפעמים שהבעלים הנוכחי רכש אותו. המנעול משוחרר באופן מלא רק כאשר המונה יורד לאפס. המימוש דורש מנעול רגיל להגנה על המצב הפנימי (בעלים, מונה), משתנה מצב להמתנה, מונה ומזהה חוט.\n\n```c\n#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n\ntypedef struct {\n    pthread_mutex_t internal_lock; // Protects owner, count, and cond\n    pthread_cond_t cond;           // For waiting threads\n    pthread_t owner;                // ID of the thread currently holding the lock\n    int count;                      // Recursion count\n} recursive_mutex_t;\n\nvoid recursive_mutex_init(recursive_mutex_t* m) {\n    pthread_mutex_init(&m->internal_lock, NULL);\n    pthread_cond_init(&m->cond, NULL);\n    m->owner = 0; // Initialize with a value that pthread_equal will correctly identify as not owned\n    m->count = 0;\n}\n\nvoid recursive_mutex_destroy(recursive_mutex_t* m) {\n    pthread_mutex_destroy(&m->internal_lock);\n    pthread_cond_destroy(&m->cond);\n}\n\nvoid recursive_mutex_lock(recursive_mutex_t* m) {\n    pthread_mutex_lock(&m->internal_lock);\n\n    // If the lock is owned by another thread, wait\n    while (m->count > 0 && !pthread_equal(m->owner, pthread_self())) {\n        pthread_cond_wait(&m->cond, &m->internal_lock);\n    }\n\n    // If the lock is now free or owned by the current thread\n    if (m->count == 0) {\n        m->owner = pthread_self();\n    }\n    m->count++;\n\n    pthread_mutex_unlock(&m->internal_lock);\n}\n\nvoid recursive_mutex_unlock(recursive_mutex_t* m) {\n    pthread_mutex_lock(&m->internal_lock);\n\n    // Error check: attempting to unlock a mutex not owned by the current thread\n    if (!pthread_equal(m->owner, pthread_self())) {\n        fprintf(stderr, \"Error: Attempting to unlock a recursive mutex not owned by current thread!\\n\");\n        pthread_mutex_unlock(&m->internal_lock);\n        return;\n    }\n\n    m->count--;\n\n    // If the count drops to zero, the lock is fully released\n    if (m->count == 0) {\n        m->owner = 0; // Mark as unowned. Value 0 is often used for unowned in pthread_t context.\n        pthread_cond_signal(&m->cond); // Signal one waiting thread\n    }\n\n    pthread_mutex_unlock(&m->internal_lock);\n}\n```"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

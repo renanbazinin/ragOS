@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 22:15:47",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 946,
+      "output_tokens": 394,
+      "total_tokens": 2562
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Virtual Memory",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "מהו היתרון העיקרי של זיכרון וירטואלי (Virtual Memory)?",
+      "code_snippet": null,
+      "options": [
+        "א. האצת מהירות הגישה לנתונים בזיכרון הפיזי.",
+        "ב. מניעת צורך בשימוש בדיסק הקשיח לאחסון נתונים.",
+        "ג. מתן אשליה של מרחב זיכרון גדול ורציף לכל תהליך, ובידוד בין מרחבי כתובות של תהליכים שונים.",
+        "ד. הקטנת כמות הזיכרון הפיזי הנדרשת להפעלת מערכת ההפעלה.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג. זיכרון וירטואלי מאפשר למערכת ההפעלה לספק לכל תהליך אשליה של מרחב כתובות פרטי, גדול ורציף, גם אם הזיכרון הפיזי קטן יותר או מפוצל. בנוסף, הוא מאפשר בידוד בין תהליכים, כך שתהליך אחד לא יכול לגשת לזיכרון של תהליך אחר."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

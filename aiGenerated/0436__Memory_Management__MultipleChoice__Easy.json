@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Memory Management",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 21:32:38",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 901,
+      "output_tokens": 286,
+      "total_tokens": 2215
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Memory Management",
+      "Virtual Memory"
+    ],
+    "content": {
+      "text": "מהו סוג הכתובת שהמעבד (CPU) מייצר כאשר הוא ניגש לזיכרון?",
+      "code_snippet": null,
+      "options": [
+        "א. כתובת וירטואלית",
+        "ב. כתובת פיזית",
+        "ג. כתובת דיסק",
+        "ד. כתובת יחסית"
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "המעבד (CPU) תמיד מייצר כתובות וירטואליות (Virtual Addresses). יחידת ניהול הזיכרון (MMU) היא זו שאחראית לתרגם את הכתובות הוירטואליות לכתובות פיזיות (Physical Addresses) לפני הגישה לזיכרון הפיזי."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

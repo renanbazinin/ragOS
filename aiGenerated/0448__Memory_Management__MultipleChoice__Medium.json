@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "topic_hint": "Memory Management",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 21:34:12",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 967,
+      "output_tokens": 375,
+      "total_tokens": 2195
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Memory Management",
+      "Fragmentation",
+      "Paging",
+      "Segmentation"
+    ],
+    "content": {
+      "text": "איזו משיטות ניהול הזיכרון הבאות סובלת בעיקר מפרגמנטציה חיצונית (External Fragmentation)?",
+      "code_snippet": null,
+      "options": [
+        "א. Paging (דפדוף)",
+        "ב. Segmentation (פילוח)",
+        "ג. גם דפדוף וגם פילוח",
+        "ד. לא דפדוף ולא פילוח"
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "פרגמנטציה חיצונית מתרחשת כאשר יש מספיק זיכרון פנוי בסך הכל, אך הוא מפוזר בבלוקים קטנים שאינם רציפים, כך שלא ניתן להקצות יחידה גדולה יותר. שיטת הפילוח (Segmentation) מקצה בלוקים בגדלים משתנים עבור סגמנטים, מה שמוביל לפרגמנטציה חיצונית. שיטת הדפדוף (Paging) מחלקת את הזיכרון לבלוקים בגודל קבוע (דפים ומסגרות), ובכך מונעת פרגמנטציה חיצונית אך עלולה לגרום לפרגמנטציה פנימית."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

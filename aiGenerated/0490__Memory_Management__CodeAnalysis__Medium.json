@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Memory Management",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 22:05:37",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2670,
+      "output_tokens": 1135,
+      "total_tokens": 7907
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Memory Management",
+      "Heap",
+      "Virtual Memory",
+      "Paging",
+      "malloc"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה, המבצעת הקצאות זיכרון באמצעות `malloc`.\nהניחו כי גודל דף במערכת ההפעלה הוא 4096 בתים (4KB).\nהניחו שכל קריאה ל-`malloc(CHUNK_SIZE)` דורשת מ-`malloc` לנהל בלוק בגודל `CHUNK_SIZE + 16` בתים (כאשר 16 בתים הם עבור מידע פנימי של `malloc` כמו גודל הבלוק, מצביע לבלוק הבא/קודם ב-free list וכו').\nכמו כן, הניחו ש-`malloc` מקצה זיכרון מה-heap, וכי ה-heap גדל בצעדים של דפים שלמים כאשר נדרש זיכרון חדש מהמערכת (כלומר, קריאות `sbrk` או `mmap` של `malloc` מבקשות בלוקים בגודל דף או כפולה של דף).\nהתעלמו מזיכרון הנדרש עבור קוד, נתונים גלובליים ומחסנית, והתמקדו רק בזיכרון הווירטואלי המוקצה ל-heap עבור הנתונים וה-overhead של `malloc`.\nמהו המספר המינימלי של דפי זיכרון וירטואליים שיוקצו ל-heap של התהליך לאחר סיום לולאת ההקצאות?",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n\n#define NUM_ALLOCATIONS 100\n#define CHUNK_SIZE 100 // bytes\n\nint main() {\n    void* ptrs[NUM_ALLOCATIONS];\n\n    for (int i = 0; i < NUM_ALLOCATIONS; ++i) {\n        ptrs[i] = malloc(CHUNK_SIZE);\n        if (ptrs[i] == NULL) {\n            perror(\"malloc failed\");\n            return 1;\n        }\n    }\n\n    // Assume the program reaches this point.\n\n    // Cleanup for completeness, not part of the question's analysis point\n    for (int i = 0; i < NUM_ALLOCATIONS; ++i) {\n        free(ptrs[i]);\n    }\n\n    return 0;\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "התהליך מבצע 100 הקצאות של 100 בתים כל אחת.\nעל פי הנתון, כל הקצאה של `CHUNK_SIZE` דורשת מ-`malloc` לנהל בלוק בגודל `CHUNK_SIZE + 16` בתים (הכולל את הנתונים ומידע פנימי של `malloc`).\nלכן, כל בלוק זיכרון בפועל שתופס `malloc` הוא בגודל `100 + 16 = 116` בתים.\nהזיכרון הכולל ש-`malloc` צריך לנהל עבור כל ההקצאות הוא `100 * 116 = 11600` בתים.\nמערכת ההפעלה מקצה זיכרון ל-heap בצעדים של דפים שלמים, שגודלם 4096 בתים.\nכדי לספק 11600 בתים, `malloc` יצטרך לבקש מהמערכת מספר דפים שיכיל לפחות כמות זו.\nמספר הדפים הנדרש הוא `ceil(11600 / 4096)`.\n`11600 / 4096 = 2.832...`\nלכן, `malloc` יבקש 3 דפים ממערכת ההפעלה.\n`3 * 4096 = 12288` בתים.\nהמספר המינימלי של דפים וירטואליים שיוקצו ל-heap יהיה 3.\n(הערה: חלק מהזיכרון בתוך הדפים הללו יהיה \"פנוי\" או ישמש לצרכים פנימיים אחרים של `malloc` מעבר לבלוקים המוקצים בפועל, אך מנקודת מבט של דפי זיכרון וירטואליים שהוקצו ל-heap מה-OS, יהיו אלה 3 דפים)."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

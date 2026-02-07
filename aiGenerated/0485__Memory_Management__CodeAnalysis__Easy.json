@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Memory Management",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 22:03:38",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2852,
+      "output_tokens": 511,
+      "total_tokens": 5750
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Memory Management",
+      "Heap",
+      "malloc",
+      "free"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה בשפת C. עיין בקוד וענה על השאלה:\n\nלאחר ביצוע הקריאה לפונקציה `free(ptr)` בשורה 12, מהו המצב הנכון ביותר לגבי הזיכרון שהיה מצביע אליו `ptr`?",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h> // For malloc and free\n\nint main() {\n    int* ptr = (int*) malloc(sizeof(int));\n    if (ptr == NULL) {\n        printf(\"Memory allocation failed!\\n\");\n        return 1;\n    }\n\n    *ptr = 10;\n    printf(\"Value before free: %d\\n\", *ptr);\n\n    free(ptr); // Line 12\n    printf(\"Memory freed.\\n\");\n\n    return 0;\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הקריאה לפונקציה `free(ptr)` משחררת את הזיכרון שהוקצה בעבר באמצעות `malloc` בחזרה לבריכת הזיכרון (heap) של התהליך. זיכרון זה מסומן כעת כזמין להקצאות עתידיות על ידי `malloc`. חשוב לציין שהזיכרון אינו מוחזר בהכרח מיד למערכת ההפעלה, אלא נשאר זמין לשימוש פנימי של מנהל הזיכרון של התהליך. הגישה לזיכרון זה לאחר שחרורו (use-after-free) היא התנהגות בלתי מוגדרת (undefined behavior) ויכולה להוביל לקריסות או פרצות אבטחה."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

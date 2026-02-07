@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Memory Management",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 22:07:01",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2670,
+      "output_tokens": 2066,
+      "total_tokens": 12402
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Memory Management",
+      "Paging",
+      "Locality",
+      "Performance"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה המאתחלת מטריצה גדולה.\nהמערכת עליה רצה התוכנית משתמשת בזיכרון וירטואלי עם חלוקה לדפים (paging).\nנתונים:\n- גודל דף הוא 4KB.\n- גודל משתנה `int` הוא 4 בתים.\n- המטריצה מאוחסנת בזיכרון באופן רציף (row-major order).\n- המערכת מתחילה עם זיכרון ריק (כלומר, כל גישה לדף בפעם הראשונה תגרום ל-page fault).\n- יש מספיק מסגרות פיזיות (physical frames) להכיל את כל דפי המטריצה.\n\nיש לנתח את קטעי הקוד הבאים ולענות על השאלה.\n\nכמה page faults (לערך) יתרחשו בעת הפעלת הפונקציה `init_matrix_row_major()` וכמה page faults (לערך) יתרחשו בעת הפעלת הפונקציה `init_matrix_col_major()`?\nהסבר מדוע, למרות שמספר ה-page faults הכולל זהה בשני המקרים, הפונקציה `init_matrix_row_major()` תהיה מהירה יותר באופן משמעותי בפועל.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n\n#define ROWS 1024\n#define COLS 1024\n\nint matrix[ROWS][COLS]; // Global static allocation\n\nvoid init_matrix_row_major() {\n    for (int i = 0; i < ROWS; ++i) {\n        for (int j = 0; j < COLS; ++j) {\n            matrix[i][j] = i * COLS + j;\n        }\n    }\n}\n\nvoid init_matrix_col_major() {\n    for (int j = 0; j < COLS; ++j) {\n        for (int i = 0; i < ROWS; ++i) {\n            matrix[i][j] = i * COLS + j;\n        }\n    }\n}\n\nint main() {\n    // ניתן להריץ כל אחת מהפונקציות בנפרד\n    // init_matrix_row_major();\n    // init_matrix_col_major();\n    return 0;\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "חישוב גודל המטריצה ומספר הדפים:\nגודל המטריצה הכולל: `1024 שורות * 1024 עמודות * 4 בתים/int = 4,194,304 בתים = 4MB`.\nגודל דף: `4KB = 4096 בתים`.\nמספר הדפים הכולל הנדרש למטריצה: `4MB / 4KB = 1024 דפים`.\n\nעל פי הנתונים, המערכת מתחילה עם זיכרון ריק וכל גישה לדף בפעם הראשונה גורמת ל-page fault. בנוסף, יש מספיק מסגרות פיזיות להכיל את כל דפי המטריצה, כלומר דף שנטען לזיכרון הפיזי יישאר שם ולא יוחלף.\nלכן, כל אחד מ-1024 דפי המטריצה ייטען לזיכרון הפיזי בדיוק פעם אחת.\n**מספר ה-page faults הכולל יהיה 1024 עבור שתי הפונקציות.**\n\nהסבר להבדל בביצועים:\n\n1.  **`init_matrix_row_major()`:**\n    *   פונקציה זו ניגשת לאלמנטים בסדר שבו הם מאוחסנים בזיכרון (row-major). כלומר, `matrix[i][j]` ואחריו `matrix[i][j+1]` הם סמוכים בזיכרון.\n    *   גודל שורה: `1024 עמודות * 4 בתים/int = 4096 בתים = 4KB`. כלומר, כל שורה תופסת בדיוק דף אחד.\n    *   כאשר ניגשים ל-`matrix[i][0]` בפעם הראשונה, מתרחש page fault וכל הדף (השורה כולה) נטען לזיכרון הפיזי.\n    *   הגישות הבאות לאלמנטים `matrix[i][1]` עד `matrix[i][1023]` ימצאו את הנתונים כבר בזיכרון הפיזי (ולרוב גם ב-cache) ולא יגרמו ל-page faults נוספים או ל-cache misses רבים.\n    *   הגישות מתבצעות עם לוקליות מרחבית (spatial locality) מצוינת.\n    *   סה\"כ: 1024 page faults, המתרחשים באופן סדרתי (אחד לכל שורה).\n\n2.  **`init_matrix_col_major()`:**\n    *   פונקציה זו ניגשת לאלמנטים בסדר טור-אחרי-טור. כלומר, `matrix[0][j]`, `matrix[1][j]`, `matrix[2][j]` וכן הלאה.\n    *   אלמנטים אלו אינם סמוכים בזיכרון. `matrix[0][j]` נמצא בדף של שורה 0, `matrix[1][j]` נמצא בדף של שורה 1 וכו'. המרחק בין `matrix[i][j]` ל-`matrix[i+1][j]` הוא `1024 * 4 = 4KB`, כלומר בדיוק גודל דף.\n    *   כאשר `j=0`, בלולאה הפנימית (`i`):\n        *   `matrix[0][0]` נגיש - page fault לדף של שורה 0.\n        *   `matrix[1][0]` נגיש - page fault לדף של שורה 1.\n        *   ...\n        *   `matrix[1023][0]` נגיש - page fault לדף של שורה 1023.\n        *   בשלב זה, כל 1024 דפי המטריצה נטענו לזיכרון הפיזי.\n    *   הגישות מתבצעות עם לוקליות מרחבית (spatial locality) ירודה מאוד. בכל איטרציה של הלולאה הפנימית (`i`), אנו קופצים לדף זיכרון אחר.\n    *   למרות שסה\"כ מספר ה-page faults הוא גם 1024, הם מתרחשים כולם ברצף מהיר מאוד בתחילת הביצוע (בעת איפוס הטור הראשון). רצף כה גדול של page faults דורש עבודה רבה ממערכת ה-I/O ומהמעבד (לטיפול בהפרעות) ופוגע קשות בביצועים.\n    *   בנוסף, לוקליות מרחבית ירודה זו גורמת למספר גבוה בהרבה של Cache misses וגם ל-TLB misses רבים (אם ה-TLB אינו גדול מספיק להכיל את כל 1024 הדפים בו זמנית), מה שמאט את הביצועים באופן דרמטי גם לאחר שכל הדפים כבר נטענו לזיכרון הפיזי.\n\n**לסיכום:**\nבשני המקרים יתרחשו 1024 page faults.\nעם זאת, `init_matrix_row_major()` תהיה מהירה יותר באופן משמעותי מכיוון שהיא מנצלת לוקליות מרחבית טובה יותר, מה שמביא לפחות Cache misses ושימוש יעיל יותר ב-TLB, ופיזור טוב יותר של ה-page faults לאורך זמן. לעומתה, `init_matrix_col_major()` סובלת מלוקליות מרחבית ירודה, גורמת ל-1024 page faults כמעט בו-זמנית בתחילת הריצה, וכן למספר רב של Cache/TLB misses לאורך כל הריצה.",
+      "code_snippet": null
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

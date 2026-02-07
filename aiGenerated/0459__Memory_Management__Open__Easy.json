@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Memory Management",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 21:50:47",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3027,
+      "output_tokens": 1612,
+      "total_tokens": 6884
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Memory Management",
+      "Stack",
+      "Heap"
+    ],
+    "content": {
+      "text": "הסבירו את ההבדלים העיקריים בין זיכרון ה-Stack לזיכרון ה-Heap בהקשר של ניהול זיכרון במערכות הפעלה. התייחסו לאופן הקצאת הזיכרון, שחרורו, אורך חיי הנתונים ושימושים אופייניים לכל אחד. תנו דוגמת קוד פשוטה ב-C/C++ המדגימה שימוש בשני סוגי הזיכרון.",
+      "code_snippet": "#include <iostream>\n#include <vector> // For dynamic array elements on heap implicitly\n\nvoid exampleFunction() {\n    // Stack allocation: 'x' is allocated on the stack\n    int x = 10;\n    std::cout << \"Stack variable x: \" << x << std::endl;\n\n    // Heap allocation: 'ptr_heap_int' points to memory on the heap\n    int* ptr_heap_int = new int; // Explicit heap allocation\n    *ptr_heap_int = 20;\n    std::cout << \"Heap variable pointed by ptr_heap_int: \" << *ptr_heap_int << std::endl;\n\n    // Another stack allocation: 'arr_stack' is a fixed-size array on the stack\n    int arr_stack[5] = {1, 2, 3, 4, 5};\n    std::cout << \"Stack array element: \" << arr_stack[0] << std::endl;\n\n    // Another heap allocation: 'vec_heap' object itself is on stack,\n    // but its elements are stored on the heap.\n    std::vector<int> vec_heap; \n    vec_heap.push_back(30);\n    std::cout << \"Heap vector element: \" << vec_heap[0] << std::endl;\n\n    // Deallocate explicitly allocated heap memory\n    delete ptr_heap_int;\n    // 'vec_heap' destructor will automatically deallocate its heap memory when it goes out of scope\n}\n\nint main() {\n    exampleFunction();\n    // After exampleFunction returns, all stack-allocated variables within it\n    // (like x, arr_stack, ptr_heap_int pointer, and vec_heap object) are deallocated.\n    // The memory pointed to by ptr_heap_int was explicitly deleted.\n    // The memory used by vec_heap for its elements was implicitly deleted by its destructor.\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "**זיכרון ה-Stack (מחסנית):**\n*   **אופן הקצאה ושחרור:** הקצאה ושחרור אוטומטיים (LIFO - Last-In, First-Out). הזיכרון מוקצה כאשר פונקציה נקראת ומשתנים מקומיים נוצרים, ומשוחרר אוטומטית כאשר הפונקציה מסיימת את ריצתה וחוזרת.\n*   **אורך חיים:** קצר, מוגבל לסקופ (scope) של הפונקציה או הבלוק בו הוגדרו המשתנים.\n*   **גודל:** בדרך כלל קבוע ומוגבל יחסית (נקבע בזמן קומפילציה או בתחילת ריצת התוכנית). ניסיונות להקצות יותר מדי זיכרון על ה-Stack יכולים לגרום ל-Stack Overflow.\n*   **מהירות:** מהיר מאוד, מכיוון שההקצאה פשוטה וכוללת הזזת מצביע (stack pointer).\n*   **שימושים אופייניים:** משתנים מקומיים, פרמטרים של פונקציות, כתובות חזרה מפונקציות (call frames).\n\n**זיכרון ה-Heap (ערימה):**\n*   **אופן הקצאה ושחרור:** הקצאה דינמית וידנית. הזיכרון מוקצה באופן מפורש על ידי המתכנת (באמצעות פונקציות כמו `malloc`/`calloc` ב-C או `new` ב-C++), ודורש שחרור ידני מפורש (באמצעות `free` ב-C או `delete` ב-C++). אי שחרור זיכרון עלול לגרום לדליפות זיכרון (memory leaks).\n*   **אורך חיים:** ארוך, יכול להישאר זמין גם לאחר שהפונקציה שהקצתה אותו סיימה את ריצתה, עד לשחרורו המפורש או סיום התוכנית.\n*   **גודל:** גמיש ולא מוגבל מראש כמו ה-Stack (מוגבל רק על ידי גודל הזיכרון הפיזי/וירטואלי הזמין במערכת).\n*   **מהירות:** איטי יחסית ל-Stack, מכיוון שהקצאה ושחרור דורשים חיפוש של בלוק זיכרון מתאים וניהול מורכב יותר.\n*   **שימושים אופייניים:** אובייקטים ונתונים שגודלם אינו ידוע בזמן קומפילציה, אובייקטים שצריכים לשרוד מעבר לסקופ של פונקציה מסוימת, מבני נתונים דינמיים (רשימות מקושרות, עצים, מערכים דינמיים).\n\n**דוגמת קוד:**\nבקוד המצורף:\n*   `int x` ו-`int arr_stack[5]` מוקצים על ה-Stack. הם קיימים רק כל עוד `exampleFunction` רצה.\n*   `int* ptr_heap_int = new int;` מקצה זיכרון עבור שלם בודד על ה-Heap. המצביע `ptr_heap_int` עצמו מוקצה על ה-Stack, אך הזיכרון אליו הוא מצביע נמצא על ה-Heap. זיכרון זה חייב להיות משוחרר ידנית באמצעות `delete ptr_heap_int;`.\n*   `std::vector<int> vec_heap;` יוצר אובייקט `vector` על ה-Stack. עם זאת, ה-`vector` מנהל באופן פנימי מערך דינמי על ה-Heap עבור האלמנטים שלו. כאשר `vec_heap` יוצא מטווח (scope), ה-destructor שלו משחרר אוטומטית את הזיכרון שהוקצה על ה-Heap עבור האלמנטים."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

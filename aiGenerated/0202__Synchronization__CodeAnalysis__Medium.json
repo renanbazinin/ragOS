@@ -1,0 +1,57 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Synchronization",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 21:42:50",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3136,
+      "output_tokens": 2185,
+      "total_tokens": 9748
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Deadlock",
+      "Mutexes",
+      "Pthreads"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה, המשתמשת ב-pthreads ובמנעולים (mutexes) כדי לגשת למשאבים משותפים:\n\n",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <unistd.h> // For sleep\n\npthread_mutex_t mutex1 = PTHREAD_MUTEX_INITIALIZER;\npthread_mutex_t mutex2 = PTHREAD_MUTEX_INITIALIZER;\n\nint resource1 = 0;\nint resource2 = 0;\n\nvoid* thread_func1(void* arg) {\n    printf(\"Thread 1: Trying to lock mutex1...\\n\");\n    pthread_mutex_lock(&mutex1);\n    printf(\"Thread 1: Locked mutex1. Trying to lock mutex2...\\n\");\n    sleep(1); \n    pthread_mutex_lock(&mutex2);\n    printf(\"Thread 1: Locked mutex2. Accessing resources.\\n\");\n\n    resource1++;\n    resource2++;\n\n    pthread_mutex_unlock(&mutex2);\n    printf(\"Thread 1: Unlocked mutex2.\\n\");\n    pthread_mutex_unlock(&mutex1);\n    printf(\"Thread 1: Unlocked mutex1. Exiting.\\n\");\n    return NULL;\n}\n\nvoid* thread_func2(void* arg) {\n    printf(\"Thread 2: Trying to lock mutex2...\\n\");\n    pthread_mutex_lock(&mutex2);\n    printf(\"Thread 2: Locked mutex2. Trying to lock mutex1...\\n\");\n    sleep(1); \n    pthread_mutex_lock(&mutex1);\n    printf(\"Thread 2: Locked mutex1. Accessing resources.\\n\");\n\n    resource1--;\n    resource2--;\n\n    pthread_mutex_unlock(&mutex1);\n    printf(\"Thread 2: Unlocked mutex1.\\n\");\n    pthread_mutex_unlock(&mutex2);\n    printf(\"Thread 2: Unlocked mutex2. Exiting.\\n\");\n    return NULL;\n}\n\nint main() {\n    pthread_t tid1, tid2;\n\n    pthread_create(&tid1, NULL, thread_func1, NULL);\n    pthread_create(&tid2, NULL, thread_func2, NULL);\n\n    pthread_join(tid1, NULL);\n    pthread_join(tid2, NULL);\n\n    printf(\"Main: Final resource1 = %d, resource2 = %d\\n\", resource1, resource2);\n\n    pthread_mutex_destroy(&mutex1);\n    pthread_mutex_destroy(&mutex2);\n\n    return 0;\n}"
+    },
+    "sub_questions": [
+      {
+        "id": "7.1",
+        "text": "האם קיים פוטנציאל למצב של קיפאון (Deadlock) בתוכנית זו? אם כן, הסבר מדוע וציין את התנאים ההכרחיים לקיפאון שמתקיימים כאן. אם לא, הסבר מדוע.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "7.2",
+        "text": "בהנחה שהתוכנית רצה ללא קיפאון ומסיימת את ריצתה בהצלחה, מה יהיו הערכים הסופיים של המשתנים resource1 ו-resource2 בסיום ריצת התוכנית?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "7.3",
+        "text": "כיצד ניתן למנוע קיפאון בתוכנית זו על ידי שינוי מינימלי בקוד, תוך שמירה על הפונקציונליות המקורית של גישה למשאבים? ציין את השינוי הספציפי ואת ההיגיון מאחוריו.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": 10,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "פתרון:\n\nא. כן, קיים פוטנציאל למצב של קיפאון (Deadlock) בתוכנית זו.\nההסבר: קיפאון יכול להתרחש כאשר Thread 1 רוכש את mutex1 ולאחר מכן מנסה לרכוש את mutex2, ובמקביל Thread 2 רוכש את mutex2 ולאחר מכן מנסה לרכוש את mutex1. אם התזמון של ריצת התהליכונים מאפשר לכל אחד מהם לרכוש את המנעול הראשון שלו לפני שהשני רכש את שניהם, שניהם יכנסו למצב המתנה אינסופי זה לזה.\nהתנאים ההכרחיים לקיפאון שמתקיימים כאן הם (תנאי קופמן):\n1.  **הדדיות (Mutual Exclusion)**: המנעולים (mutexes) מבטיחים שרק תהליכון אחד יכול להחזיק במשאב (מנעול) בכל רגע נתון.\n2.  **החזק והמתן (Hold and Wait)**: כל תהליכון מחזיק במנעול אחד (לדוגמה, Thread 1 מחזיק ב-mutex1) וממתין למנעול נוסף (mutex2).\n3.  **אי-הפקעה (No Preemption)**: לא ניתן להפקיע מנעול מתהליכון שמחזיק בו; המנעול ישוחרר רק מרצון על ידי התהליכון המחזיק בו.\n4.  **המתנה מעגלית (Circular Wait)**: נוצרת שרשרת המתנה מעגלית: Thread 1 ממתין ל-mutex2 שמוחזק על ידי Thread 2, ו-Thread 2 ממתין ל-mutex1 שמוחזק על ידי Thread 1.\nהקריאות ל-sleep(1) מגבירות את הסיכוי לתזמון שיגרום לקיפאון.\n\nב. בהנחה שהתוכנית רצה ללא קיפאון ומסיימת את ריצתה בהצלחה, שני התהליכונים יבצעו את פעולותיהם באופן מלא.\n*   Thread 1 מגדיל את resource1 ואת resource2 באחד (resource1 = 1, resource2 = 1).\n*   Thread 2 מקטין את resource1 ואת resource2 באחד (resource1 = 0, resource2 = 0).\nלכן, הערכים הסופיים יהיו:\nresource1 = 0\nresource2 = 0\n\nג. ניתן למנוע קיפאון על ידי שבירת תנאי 'המתנה מעגלית' (Circular Wait) באמצעות קביעת סדר קבוע לרכישת המנעולים. השינוי המינימלי ביותר הוא לגרום לשני התהליכונים לרכוש את המנעולים באותו הסדר. לדוגמה, שניהם ירכשו תמיד את mutex1 ואז את mutex2.\n\nשינוי מוצע בקוד (בפונקציה thread_func2 בלבד):\n```c\nvoid* thread_func2(void* arg) {\n    printf(\"Thread 2: Trying to lock mutex1...\\n\");\n    pthread_mutex_lock(&mutex1); // שינוי כאן: קודם mutex1\n    printf(\"Thread 2: Locked mutex1. Trying to lock mutex2...\\n\");\n    sleep(1); \n    pthread_mutex_lock(&mutex2); // ואז mutex2\n    printf(\"Thread 2: Locked mutex2. Accessing resources.\\n\");\n\n    resource1--;\n    resource2--;\n\n    pthread_mutex_unlock(&mutex2);\n    printf(\"Thread 2: Unlocked mutex2.\\n\");\n    pthread_mutex_unlock(&mutex1);\n    printf(\"Thread 2: Unlocked mutex1. Exiting.\\n\");\n    return NULL;\n}\n```\nההיגיון מאחורי השינוי: כאשר כל התהליכונים רוכשים את המנעולים באותו סדר (לדוגמה, תמיד mutex1 ואז mutex2), לא יכולה להיווצר המתנה מעגלית. אם תהליכון אחד מחזיק ב-mutex1 וממתין ל-mutex2, אף תהליכון אחר לא יכול להחזיק ב-mutex2 ולחכות ל-mutex1, מכיוון שהוא היה צריך לרכוש קודם את mutex1 (שכבר מוחזק). זה מבטיח שאם יתרחש חסימה, היא תהיה ליניארית ולא מעגלית, ובסופו של דבר אחד מהתהליכונים יתקדם וישחרר את המשאבים."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

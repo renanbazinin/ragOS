@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 21:44:34",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2630,
+      "output_tokens": 2407,
+      "total_tokens": 14281
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "Open",
+    "topic": [
+      "Synchronization",
+      "Semaphores",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "במערכת הפעלה נתונה, מספר רב של תהליכים (P1, P2, ..., Pn) ניגשים למסד נתונים משותף. קיימות שתי מגבלות סנכרון עיקריות:\n1.  רק עד MAX_CONCURRENT_DB_ACCESS תהליכים יכולים לגשת למסד הנתונים בו-זמנית.\n2.  לפני כל גישה למסד הנתונים, כל תהליך חייב לעדכן מונה גלובלי active_db_queries המייצג את מספר התהליכים הפעילים במסד הנתונים כרגע. עדכון מונה זה (הגדלה או הקטנה) חייב להיות פעולה מוגנת הדדית (mutual exclusion).\nלאחר סיום הגישה למסד הנתונים, התהליך מקטין את המונה active_db_queries ומשחרר את הגישה למסד הנתונים.\n\nנתון קוד C/C++ חלקי עבור פונקציית תהליך (thread_function). עליכם להשלים את הקוד החסר באמצעות סמפורים (semaphores) בלבד, כך שיענה על כל דרישות הסנכרון. בנוסף, הסבירו במילים מדוע הפתרון שלכם נכון וכיצד כל סמפור תורם לסנכרון.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <pthread.h>\n#include <semaphore.h>\n#include <unistd.h> // For sleep\n\n#define MAX_CONCURRENT_DB_ACCESS 3\n#define NUM_THREADS 5\n\n// Global variables\nint active_db_queries = 0;\nsem_t db_access_sem; // Semaphore for controlling concurrent DB access\nsem_t mutex_sem;     // Mutex for protecting active_db_queries\n\nvoid *thread_function(void *arg) {\n    int thread_id = *(int *)arg;\n\n    while (1) {\n        printf(\"Thread %d: Waiting to access DB...\\n\", thread_id);\n\n        // Simulate some work before accessing DB\n        sleep(rand() % 2);\n\n        // --- Synchronization Start: Add semaphore logic here ---\n\n        // 1. Acquire mutex for active_db_queries\n        // 2. Increment active_db_queries\n        // 3. Release mutex\n\n        // 4. Acquire access to DB (limited by MAX_CONCURRENT_DB_ACCESS)\n\n        printf(\"Thread %d: Accessing DB. Current active: %d\\n\", thread_id, active_db_queries);\n        // Simulate DB operation\n        sleep(rand() % 3 + 1); // DB operation takes 1-3 seconds\n\n        printf(\"Thread %d: Done with DB access.\\n\", thread_id);\n\n        // 6. Release DB access\n\n        // 7. Acquire mutex for active_db_queries\n        // 8. Decrement active_db_queries\n        // 9. Release mutex\n\n        // --- Synchronization End ---\n\n        // Simulate some work after accessing DB\n        sleep(rand() % 2);\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n    int thread_ids[NUM_THREADS];\n\n    // Initialize semaphores\n    sem_init(&db_access_sem, 0, MAX_CONCURRENT_DB_ACCESS); // Counting semaphore\n    sem_init(&mutex_sem, 0, 1);                             // Binary semaphore (mutex)\n\n    // Create threads\n    for (int i = 0; i < NUM_THREADS; i++) {\n        thread_ids[i] = i;\n        pthread_create(&threads[i], NULL, thread_function, &thread_ids[i]);\n    }\n\n    // Join threads (in a real scenario, these might run indefinitely)\n    for (int i = 0; i < NUM_THREADS; i++) {\n        pthread_join(threads[i], NULL);\n    }\n\n    // Destroy semaphores\n    sem_destroy(&db_access_sem);\n    sem_destroy(&mutex_sem);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": 15,
+    "solution": {
+      "is_present_in_file": false,
+      "correct_option": null,
+      "explanation": "הפתרון דורש שימוש בשני סמפורים:\n1.  **`db_access_sem`**: סמפור מונה (counting semaphore) שמאתחל לערך `MAX_CONCURRENT_DB_ACCESS`. סמפור זה משמש לשליטה על מספר הגישות המקבילות למסד הנתונים. כל תהליך שרוצה לגשת למסד הנתונים מבצע `sem_wait(&db_access_sem)`. אם הסמפור גדול מ-0, הוא יורד ב-1 והתהליך ממשיך. אם הוא 0, התהליך נחסם עד שתהליך אחר מבצע `sem_post`. לאחר סיום הגישה למסד הנתונים, התהליך מבצע `sem_post(&db_access_sem)` כדי לשחרר מקום עבור תהליכים אחרים.\n2.  **`mutex_sem`**: סמפור בינארי (binary semaphore), או mutex, שמאתחל לערך 1. סמפור זה משמש להבטחת הדרה הדדית (mutual exclusion) על המונה הגלובלי `active_db_queries`. לפני כל פעולת הגדלה או הקטנה של המונה, תהליך מבצע `sem_wait(&mutex_sem)`. זה מבטיח שרק תהליך אחד יכול לעדכן את המונה בכל רגע נתון. לאחר עדכון המונה, התהליך מבצע `sem_post(&mutex_sem)` כדי לשחרר את ה-mutex לתהליכים אחרים.\n\nלהלן הקוד המלא והנכון לפונקציית `thread_function` ולפונקציית `main`:\n#include <stdio.h>\n#include <stdlib.h>\n#include <pthread.h>\n#include <semaphore.h>\n#include <unistd.h> // For sleep\n\n#define MAX_CONCURRENT_DB_ACCESS 3\n#define NUM_THREADS 5\n\n// Global variables\nint active_db_queries = 0;\nsem_t db_access_sem; // Semaphore for controlling concurrent DB access\nsem_t mutex_sem;     // Mutex for protecting active_db_queries\n\nvoid *thread_function(void *arg) {\n    int thread_id = *(int *)arg;\n\n    while (1) {\n        printf(\"Thread %d: Waiting to access DB...\\n\", thread_id);\n\n        // Simulate some work before accessing DB\n        sleep(rand() % 2);\n\n        // --- Synchronization Start ---\n\n        // 1. Acquire mutex for active_db_queries\n        sem_wait(&mutex_sem);\n        // 2. Increment active_db_queries\n        active_db_queries++;\n        printf(\"Thread %d: active_db_queries incremented to %d.\\n\", thread_id, active_db_queries);\n        // 3. Release mutex\n        sem_post(&mutex_sem);\n\n        // 4. Acquire access to DB (limited by MAX_CONCURRENT_DB_ACCESS)\n        sem_wait(&db_access_sem);\n\n        printf(\"Thread %d: Accessing DB. Current active: %d\\n\", thread_id, active_db_queries);\n        // Simulate DB operation\n        sleep(rand() % 3 + 1); // DB operation takes 1-3 seconds\n\n        printf(\"Thread %d: Done with DB access.\\n\", thread_id);\n\n        // 6. Release DB access\n        sem_post(&db_access_sem);\n\n        // 7. Acquire mutex for active_db_queries\n        sem_wait(&mutex_sem);\n        // 8. Decrement active_db_queries\n        active_db_queries--;\n        printf(\"Thread %d: active_db_queries decremented to %d.\\n\", thread_id, active_db_queries);\n        // 9. Release mutex\n        sem_post(&mutex_sem);\n\n        // --- Synchronization End ---\n\n        // Simulate some work after accessing DB\n        sleep(rand() % 2);\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n    int thread_ids[NUM_THREADS];\n\n    // Initialize semaphores\n    sem_init(&db_access_sem, 0, MAX_CONCURRENT_DB_ACCESS); // Counting semaphore\n    sem_init(&mutex_sem, 0, 1);                             // Binary semaphore (mutex)\n\n    // Create threads\n    for (int i = 0; i < NUM_THREADS; i++) {\n        thread_ids[i] = i;\n        pthread_create(&threads[i], NULL, thread_function, &thread_ids[i]);\n    }\n\n    // Join threads (in a real scenario, these might run indefinitely)\n    for (int i = 0; i < NUM_THREADS; i++) {\n        pthread_join(threads[i], NULL);\n    }\n\n    // Destroy semaphores\n    sem_destroy(&db_access_sem);\n    sem_destroy(&mutex_sem);\n\n    return 0;\n}"
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

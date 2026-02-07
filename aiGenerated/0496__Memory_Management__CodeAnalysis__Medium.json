@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Memory Management",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 22:08:34",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2670,
+      "output_tokens": 2267,
+      "total_tokens": 11461
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Memory Management",
+      "Paging",
+      "Locality"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה בשפת C/C++. המערך matrix מוגדר גלובלית, ולכן נמצא בקטע הנתונים (data segment) של התהליך.\nנתוני המערכת:\n*   גודל דף (page size) הוא 4KB.\n*   גודל משתנה `int` הוא 4 בתים.\n*   המערך `matrix` ממוקם באזור זיכרון שבתחילה אינו טעון לזיכרון פיזי (כל הדפים אינם תקפים).\n*   הניחו כי זיכרון פיזי זמין למערך קטן ממספר הדפים הכולל של המערך, כך שמתרחשים חילופי דפים (page replacements).\n\n```c\n#include <stdio.h>\n#include <stdlib.h>\n\n#define ROWS 1024\n#define COLS 1024\n\nint matrix[ROWS][COLS]; // Global array\n\nvoid access_row_major() {\n    for (int i = 0; i < ROWS; ++i) {\n        for (int j = 0; j < COLS; ++j) {\n            matrix[i][j] = i * j; // Access row by row\n        }\n    }\n}\n\nvoid access_col_major() {\n    for (int j = 0; j < COLS; ++j) {\n        for (int i = 0; i < ROWS; ++i) {\n            matrix[i][j] = i * j; // Access column by column\n        }\n    }\n}\n\nint main() {\n    // Assume one of the functions is called here:\n    // access_row_major();\n    // OR\n    // access_col_major();\n    return 0;\n}\n```\n\nענו על השאלות הבאות:\n1.  כמה page faults (כשל דף) יתרחשו כאשר הפונקציה `access_row_major()` תתבצע? הסבירו.\n2.  כמה page faults יתרחשו כאשר הפונקציה `access_col_major()` תתבצע? הסבירו.\n3.  איזו תבנית גישה יעילה יותר מבחינת כשל דף ומדוע?",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n\n#define ROWS 1024\n#define COLS 1024\n\nint matrix[ROWS][COLS]; // Global array\n\nvoid access_row_major() {\n    for (int i = 0; i < ROWS; ++i) {\n        for (int j = 0; j < COLS; ++j) {\n            matrix[i][j] = i * j; // Access row by row\n        }\n    }\n}\n\nvoid access_col_major() {\n    for (int j = 0; j < COLS; ++j) {\n        for (int i = 0; i < ROWS; ++i) {\n            matrix[i][j] = i * j; // Access column by column\n        }\n    }\n}\n\nint main() {\n    // Assume one of the functions is called here:\n    // access_row_major();\n    // OR\n    // access_col_major();\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": 15,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "נתחיל בניתוח גודל המערך וחלוקתו לדפים:\n*   גודל המערך הכולל: `1024 שורות * 1024 עמודות * 4 בתים/שלם = 4,194,304 בתים = 4MB`.\n*   גודל דף: `4KB = 4096 בתים`.\n*   מספר שלמים בדף אחד: `4096 בתים / 4 בתים/שלם = 1024 שלמים`.\n*   מכיוון ש-C מאחסנת מערכים רב-ממדיים בסדר שורה-עיקרי (row-major order), כל שורה במערך `matrix` תופסת בדיוק דף אחד: `1024 שלמים/שורה * 4 בתים/שלם = 4096 בתים = 1 דף`.\n*   סה\"כ דפים למערך: `4MB / 4KB = 1024 דפים`.\n\n**ניתוח `access_row_major()`:**\nהפונקציה ניגשת לאלמנטים בסדר שורה-עיקרי, כלומר, היא משלימה את כל הגישות לשורה `i` לפני שהיא עוברת לשורה `i+1`.\n*   כאשר ניגשים לראשונה לאלמנט כלשהו בשורה `i` (לדוגמה `matrix[i][0]`), יתרחש כשל דף עבור הדף המכיל את שורה `i`. דף זה יוטען לזיכרון הפיזי.\n*   כל הגישות הבאות לאלמנטים באותה שורה (`matrix[i][1]` עד `matrix[i][1023]`) יתבצעו בתוך אותו דף שכבר נטען, ולכן לא יגרמו לכשלי דף נוספים.\n*   כאשר הפונקציה עוברת לשורה הבאה (`i+1`), היא תיגש שוב לדף חדש (דף `i+1`), מה שיגרום לכשל דף נוסף.\n*   מכיוון שיש `ROWS` (1024) שורות, וכל שורה תופסת דף אחד, יתרחשו בסך הכל `1024` כשלי דף.\n\n**ניתוח `access_col_major()`:**\nהפונקציה ניגשת לאלמנטים בסדר עמודה-עיקרי, כלומר, היא משלימה את כל הגישות לעמודה `j` לפני שהיא עוברת לעמודה `j+1`.\n*   כאשר הפונקציה ניגשת לאלמנטים בעמודה `j`, היא ניגשת ל-`matrix[0][j]`, `matrix[1][j]`, ..., `matrix[1023][j]`.\n*   `matrix[0][j]` נמצא בדף 0. `matrix[1][j]` נמצא בדף 1. ... `matrix[1023][j]` נמצא בדף 1023.\n*   בכל פעם שהלולאה הפנימית (`for i`) מתקדמת, היא ניגשת לאלמנט הנמצא בדף שונה.\n*   מכיוון שהזיכרון הפיזי מוגבל (כפי שצוין בשאלה), הדפים שנטענו עבור גישות קודמות באותה עמודה (או בעמודות קודמות) יוחלפו בזיכרון הפיזי לפני שתידרש גישה חוזרת אליהם (בהתאם למדיניות החלפת הדפים). כלומר, סביר מאוד שכל גישה לאלמנט תגרור כשל דף.\n*   לולאת ה-`i` הפנימית מבצעת `ROWS` (1024) גישות, וכל אחת מהן תגרום לכשל דף.\n*   לולאת ה-`j` החיצונית מבצעת `COLS` (1024) איטרציות.\n*   לכן, סך כשלי הדף יהיה `ROWS * COLS = 1024 * 1024 = 1,048,576`.\n\n**השוואת יעילות:**\nהפונקציה `access_row_major()` יעילה בהרבה מבחינת כשלי דף. היא גורמת ל-`1024` כשלי דף, בעוד ש-`access_col_major()` גורמת ל-`1,048,576` כשלי דף.\nהסיבה לכך היא עקרון המיקום המרחבי (spatial locality). המערך מאוחסן בזיכרון בסדר שורה-עיקרי.\n*   `access_row_major()` מנצלת את העובדה שאלמנטים סמוכים בשורה נמצאים באותו דף (או בדפים סמוכים). ברגע שדף נטען, ניתן לגשת לכל האלמנטים שבו ללא כשלי דף נוספים, מה שממזער את מספר כשלי הדף הכולל.\n*   `access_col_major()`, לעומת זאת, קופצת בין דפים שונים עבור כל גישה לאלמנט בעמודה. הדפים הנדרשים לכל עמודה הם הדפים של כל השורות, ובהינתן זיכרון פיזי מוגבל, הדפים האלה יוחלפו כל הזמן, מה שמוביל למספר עצום של כשלי דף וביצועים ירודים."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 22:20:58",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1615,
+      "output_tokens": 453,
+      "total_tokens": 3024
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Virtual Memory",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "הסבר בקצרה את המטרה העיקרית של זיכרון וירטואלי (Virtual Memory) במערכות הפעלה, וציין שני יתרונות מרכזיים שהוא מספק.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "המטרה העיקרית של זיכרון וירטואלי היא לאפשר לתהליכים להשתמש במרחב כתובות גדול יותר מזה הזמין בזיכרון הפיזי, וליצור אשליה של זיכרון רציף ופרטי לכל תהליך.\n\nיתרונות מרכזיים:\n1.  **הרחבת מרחב הכתובות:** מאפשר לתהליכים להשתמש בזיכרון גדול יותר ממה שקיים פיזית במערכת, על ידי שימוש בדיסק כהרחבה לזיכרון הראשי (swapping).\n2.  **הגנה ובידוד:** מספק הפרדה ובידוד בין מרחבי הכתובות של תהליכים שונים, ובכך מונע מתהליך אחד לגשת או לשנות בטעות או בזדון את הזיכרון של תהליך אחר.\n3.  **ניהול זיכרון פשוט יותר למתכנת:** משחרר את המתכנת מהצורך לנהל את הזיכרון הפיזי, ומאפשר לו לכתוב קוד כאילו כל הזיכרון זמין ורציף."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

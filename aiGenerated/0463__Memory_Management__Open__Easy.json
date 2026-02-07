@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Memory Management",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 21:51:34",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3027,
+      "output_tokens": 488,
+      "total_tokens": 5002
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Memory Management",
+      "Fragmentation"
+    ],
+    "content": {
+      "text": "הסבר מהי פרגמנטציה פנימית ומהי פרגמנטציה חיצונית בניהול זיכרון. תאר בקצרה מצב שבו כל אחד מסוגי הפרגמנטציה מתרחש.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "פרגמנטציה פנימית (Internal Fragmentation) מתרחשת כאשר זיכרון מוקצה ליחידות בגודל קבוע (לדוגמה, דפים או בלוקים בגודל קבוע), והתהליך זקוק לפחות זיכרון ממה שהוקצה לו. השטח הלא מנוצל בתוך הבלוק המוקצה הוא פרגמנטציה פנימית. לדוגמה: אם גודל דף הוא 4KB ותהליך זקוק ל-3KB, אז 1KB מבוזבז בתוך הדף.\n\nפרגמנטציה חיצונית (External Fragmentation) מתרחשת כאשר יש מספיק זיכרון פנוי בסך הכל כדי לספק בקשה, אך הזיכרון הפנוי מפוזר בבלוקים קטנים ולא רציפים, כך שאף בלוק בודד אינו גדול מספיק כדי לעמוד בבקשה. לדוגמה: במערכת עם הקצאת זיכרון דינמית בגודל משתנה, כאשר תהליכים נטענים ופורקים מהזיכרון, נוצרים 'חורים' קטנים של זיכרון פנוי. תהליך חדש הדורש בלוק זיכרון גדול ורציף לא יוכל להיטען, גם אם סך הזיכרון הפנוי מספיק."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

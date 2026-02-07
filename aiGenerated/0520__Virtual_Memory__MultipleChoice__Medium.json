@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 22:17:34",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 967,
+      "output_tokens": 551,
+      "total_tokens": 3597
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Virtual Memory",
+      "Memory Management",
+      "Paging"
+    ],
+    "content": {
+      "text": "אחד היתרונות המרכזיים של מנגנון הזיכרון הוירטואלי (Virtual Memory) הוא:",
+      "code_snippet": null,
+      "options": [
+        "א. הגדלת מהירות הגישה לזיכרון הפיזי (RAM).",
+        "ב. מתן אשליה של מרחב זיכרון רציף וגדול לכל תהליך, ללא תלות בזיכרון הפיזי בפועל.",
+        "ג. ביטול מוחלט של הצורך בטעינת קוד תוכניות לזיכרון הראשי.",
+        "ד. מניעת כל סוגי שגיאות הגישה לזיכרון (segmentation faults)."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב. זיכרון וירטואלי מספק לכל תהליך מרחב כתובות לוגי משלו, שנראה רציף וגדול יותר ממה שקיים בפועל בזיכרון הפיזי. זה מאפשר למערכת ההפעלה למקם דפי זיכרון פיזיים לא רציפים עבור תהליך, ולנהל את הזיכרון בצורה גמישה ויעילה יותר, תוך מתן אשליה של רציפות לתהליך. אפשרות א' אינה נכונה, מכיוון שלרוב זיכרון וירטואלי מוסיף תקורה (overhead) ועלול להאט גישה עקב צורך בחיפושי טבלאות דפים ו-TLB misses. אפשרות ג' אינה נכונה, קוד תוכניות עדיין נטען לזיכרון הראשי. אפשרות ד' אינה נכונה, זיכרון וירטואלי מספק הגנה ועוזר לזהות שגיאות גישה לא חוקיות, אך אינו מונע את התרחשותן באופן מוחלט."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

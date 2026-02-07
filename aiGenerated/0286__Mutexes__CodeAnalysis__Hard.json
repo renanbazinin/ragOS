@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 21:43:51",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4847,
+      "output_tokens": 1931,
+      "total_tokens": 13191
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Mutexes",
+      "Synchronization",
+      "Concurrency",
+      "Deadlock",
+      "Barrier"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המנסה לממש מחסום (barrier) עבור N חוטים באמצעות מוטקס יחיד ומונה משותף. המטרה היא שכל N החוטים יגיעו לנקודה מסוימת בקוד לפני שמי מהם ימשיך הלאה. נתח את קוד המחסום המוצג להלן. האם הקוד יפעל כמצופה? אם לא, תאר את הבעיה (סוגה, כיצד היא מתרחשת, ומהן השלכותיה) והסבר מדוע היא מתרחשת. לאחר מכן, הצע פתרון נכון או ציין את המנגנונים הדרושים לפתרון נכון.",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h> // For sleep, though not strictly needed for the problem demonstration\n\n#define N_THREADS 3 // מספר החוטים במערכת\n\npthread_mutex_t barrier_mutex;\nint thread_count = 0; // מונה משותף לחוטים שהגיעו למחסום\n\nvoid *thread_func(void *arg) {\n    long id = (long)arg;\n    printf(\"Thread %ld: Arrived at barrier point 1.\\n\", id);\n\n    pthread_mutex_lock(&barrier_mutex); // תפוס את המוטקס\n\n    thread_count++; // הגדל את מונה החוטים שהגיעו\n\n    if (thread_count < N_THREADS) {\n        // אם זה לא החוט האחרון שהגיע\n        printf(\"Thread %ld: Waiting for other threads. Current count: %d/%d\\n\", id, thread_count, N_THREADS);\n        while (thread_count < N_THREADS) {\n            // המתן לחוטים אחרים בזמן שהמוטקס תפוס\n            // (פעולה זו היא שורש הבעיה)\n        }\n    } else {\n        // זהו החוט האחרון שהגיע\n        printf(\"Thread %ld: Last thread arrived. Releasing barrier.\\n\", id);\n        thread_count = 0; // אפס את המונה לשימוש עתידי במחסום\n    }\n\n    pthread_mutex_unlock(&barrier_mutex); // שחרר את המוטקס\n    printf(\"Thread %ld: Passed barrier point 1.\\n\", id);\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[N_THREADS];\n    pthread_mutex_init(&barrier_mutex, NULL);\n\n    for (long i = 0; i < N_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, thread_func, (void *)i);\n    }\n\n    for (int i = 0; i < N_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    pthread_mutex_destroy(&barrier_mutex);\n    printf(\"All threads finished.\\n\");\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הקוד אינו פועל כמצופה ויוביל למצב של קיפאון (Deadlock). \n\n**הבעיה:**\nחוטים מגיעים למחסום, תופסים את המוטקס `barrier_mutex` ומגדילים את המונה `thread_count`. כל עוד `thread_count` קטן מ-`N_THREADS` (כלומר, הם אינם החוט האחרון שהגיע), החוטים נכנסים ללולאת `while (thread_count < N_THREADS)` **כאשר הם עדיין מחזיקים במוטקס**. \n\n**כיצד זה מוביל לקיפאון:**\nאם `N_THREADS` הוא 3, לדוגמה:\n1.  חוט 0 תופס את `barrier_mutex`, מגדיל את `thread_count` ל-1, ונכנס ללולאת ה-`while` כשהוא מחזיק במוטקס.\n2.  כל שאר `N-1` החוטים ינסו לתפוס את `barrier_mutex` באמצעות `pthread_mutex_lock` אך ייחסמו לעד, מכיוון שהחוט הראשון לעולם לא ישחרר את המוטקס (הוא תקוע בלולאה שמחכה למונה שיגדל, אך המונה לא יכול לגדול כי אף חוט אחר לא יכול לתפוס את המוטקס כדי להגדיל אותו). כתוצאה מכך, המערכת תיכנס למצב של קיפאון.\n\n**השלכות:**\nהתוכנית תיתקע ולא תשלים את ריצתה. החוטים יישארו במצב חסום, והמשאבים שהם תופסים (כמו המוטקס) לא ישוחררו, מה שיכול למנוע מחוטים אחרים במערכת (אפילו אלה שלא קשורים למחסום זה) מלהתקדם אם הם זקוקים למשאבים אלה.\n\n**פתרון נכון:**\nמוטקסים מיועדים להבטחת הדרה הדדית (mutual exclusion) על משאב משותף, אך אינם מיועדים למנגנוני איתות (signaling) והמתנה מורכבים כמו מחסום. עבור מנגנוני איתות והמתנה יעילים, יש להשתמש ב**משתני תנאי (Condition Variables)** בשילוב עם מוטקסים. \n\nפתרון נכון למחסום באמצעות מוטקס ומשתנה תנאי ייראה בערך כך:\n```c\n#include <pthread.h>\n#include <stdio.h>\n\n#define N_THREADS 3\n\npthread_mutex_t barrier_mutex;\npthread_cond_t barrier_cond;\nint thread_count = 0;\n\nvoid *thread_func(void *arg) {\n    long id = (long)arg;\n    printf(\"Thread %ld: Arrived at barrier point 1.\\n\", id);\n\n    pthread_mutex_lock(&barrier_mutex);\n    thread_count++;\n\n    if (thread_count < N_THREADS) {\n        // אם זה לא החוט האחרון, המתן על משתנה התנאי\n        while (thread_count < N_THREADS) { // Loop for spurious wakeups\n            pthread_cond_wait(&barrier_cond, &barrier_mutex);\n        }\n    } else {\n        // זהו החוט האחרון, אפס את המונה ואותת לכל הממתינים\n        thread_count = 0; // Reset for next barrier use\n        pthread_cond_broadcast(&barrier_cond);\n    }\n\n    pthread_mutex_unlock(&barrier_mutex);\n    printf(\"Thread %ld: Passed barrier point 1.\\n\", id);\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[N_THREADS];\n    pthread_mutex_init(&barrier_mutex, NULL);\n    pthread_cond_init(&barrier_cond, NULL);\n\n    for (long i = 0; i < N_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, thread_func, (void *)i);\n    }\n\n    for (int i = 0; i < N_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    pthread_mutex_destroy(&barrier_mutex);\n    pthread_cond_destroy(&barrier_cond);\n    printf(\"All threads finished.\\n\");\n    return 0;\n}\n```",
+      "difficulty_estimation": "Hard"
+    }
+  }
+}

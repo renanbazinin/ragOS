@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 21:46:06",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4278,
+      "output_tokens": 2883,
+      "total_tokens": 13720
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "Open",
+    "topic": [
+      "Semaphores",
+      "Concurrency",
+      "Deadlock",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתבונן במערכת המדמה פס ייצור תעשייתי, הכוללת שלושה סוגי עובדים (תהליכונים) ושני חוצצים (buffers) משותפים. עובדי הרכבה (Assemblers) מרכיבים חלקים ומכניסים אותם לחוצץ החלקים המורכבים (assembled_parts_buffer). עובדי בדיקה (Testers) לוקחים חלקים מהחוצץ הראשון, בודקים אותם, ומכניסים אותם לחוצץ החלקים המבוקרים (tested_parts_buffer). לבסוף, עובדי אריזה (Packers) לוקחים חלקים מהחוצץ השני ואורזים אותם. המערכת משתמשת בסמפורים לצורך סנכרון וניהול גישה לחוצצים. גודל כל חוצץ מוגבל.\n\nלפניכם קטע קוד בשפת C/C++ המממש חלק מהלוגיקה של עובד הבדיקה (tester). קטע קוד זה מכיל פגם לוגי.\n\n",
+      "code_snippet": "/* כלולות: <semaphore.h>, <pthread.h>, <stdio.h>, <stdlib.h>, <unistd.h> */\n\n#define BUFFER_SIZE_A 5 // גודל חוצץ חלקים מורכבים\n#define BUFFER_SIZE_T 5 // גודל חוצץ חלקים מבוקרים\n\nsem_t mutex_A, full_A, empty_A; // סמפורים לחוצץ חלקים מורכבים\nsem_t mutex_T, full_T, empty_T; // סמפורים לחוצץ חלקים מבוקרים\n\n// במציאות, אלו יהיו מבני נתונים של חוצצים. לצורך הבעיה, נשתמש במונים פשוטים.\nint assembled_parts_count = 0;\nint tested_parts_count = 0;\n\n// פונקציות assembler ו-packer לא מוצגות במלואן, אך פועלות כצרכן/יצרן סטנדרטי.\n// לדוגמה, assembler:\n/*\nvoid *assembler(void *arg) {\n    while (1) {\n        sem_wait(&empty_A);\n        sem_wait(&mutex_A);\n        assembled_parts_count++;\n        printf(\"Assembler: Added part. Total assembled: %d\\n\", assembled_parts_count);\n        sem_post(&mutex_A);\n        sem_post(&full_A);\n        // ... (השהיה וכו')\n    }\n    return NULL;\n}\n*/\n\n// פונקציית עובד הבדיקה (Tester) - מכילה את הפגם\nvoid *tester(void *arg) {\n    while (1) {\n        // שלב 1: צריכת חלק מורכב מ-assembled_parts_buffer\n        sem_wait(&full_A);  // ממתין לחלק מורכב זמין\n        sem_wait(&mutex_A); // נועל גישה לחוצץ assembled_parts_buffer\n\n        assembled_parts_count--; // צורך חלק\n        printf(\"Tester: Consumed assembled part. Remaining: %d\\n\", assembled_parts_count);\n\n        // מדמה פעולת בדיקה\n        usleep(rand() % 100000 + 50000); \n\n        // שלב 2: ייצור חלק מבוקר והכנסתו ל-tested_parts_buffer\n        // ** פגם לוגי פוטנציאלי מתרחש כאן **\n        sem_wait(&empty_T); // ממתין למקום פנוי בחוצץ tested_parts_buffer\n        sem_wait(&mutex_T); // נועל גישה לחוצץ tested_parts_buffer\n\n        // רק לאחר שקיבלנו את שני הסמפורים לחוצץ T, אנו משחררים את הסמפורים של חוצץ A.\n        sem_post(&mutex_A); // שחרור נעילה לחוצץ assembled_parts_buffer\n        sem_post(&empty_A); // איתות על מקום פנוי בחוצץ assembled_parts_buffer\n\n        tested_parts_count++; // מייצר חלק מבוקר\n        printf(\"Tester: Added tested part. Total tested: %d\\n\", tested_parts_count);\n\n        sem_post(&mutex_T); // שחרור נעילה לחוצץ tested_parts_buffer\n        sem_post(&full_T);  // איתות על חלק מבוקר זמין\n\n        usleep(rand() % 100000 + 50000);\n    }\n    return NULL;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": 20,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הבעיה בקוד של פונקציית ה-`tester` היא פוטנציאל לקיפאון (Deadlock) כתוצאה מסדר שגוי של פעולות `sem_wait` ו-`sem_post`.\n\n**הסבר הקיפאון:**\n1.  **תנאים מקדימים לקיפאון:** נניח שכל המקומות ב-`tested_parts_buffer` מלאים (כלומר, `empty_T` שווה ל-0) ו/או עובדי האריזה (Packers) אינם צורכים מספיק מהר. במקביל, נניח שעובדי ההרכבה (Assemblers) מילאו את רוב ה-`assembled_parts_buffer` (כלומר, `empty_A` קרוב ל-0 או שווה לו).\n2.  **תרחיש קיפאון:**\n    *   תהליכון `tester` כלשהו מצליח לצרוך חלק מורכב מ-`assembled_parts_buffer`. הוא מבצע `sem_wait(&full_A)` ו-`sem_wait(&mutex_A)` בהצלחה, צורך את החלק, ומגיע לשלב 2 בקוד.\n    *   כעת, תהליכון ה-`tester` מנסה להכניס את החלק המבוקר ל-`tested_parts_buffer`. הוא מבצע `sem_wait(&empty_T)`. מכיוון ש-`empty_T` שווה ל-0 (בהתאם לתנאים המקדימים), תהליכון ה-`tester` נכנס למצב חסימה וממתין שמקום יתפנה ב-`tested_parts_buffer`.\n    *   **הבעיה המרכזית:** בזמן שתהליכון ה-`tester` חסום בהמתנה ל-`empty_T`, הוא עדיין מחזיק בסמפור `mutex_A` (הוא לא שחרר אותו עדיין). הוא גם מחזיק בעצם את ה\"חלק\" שצרך מ-`assembled_parts_buffer` (הוא עדיין לא ביצע `sem_post(&empty_A)`).\n    *   כתוצאה מכך:\n        *   **עובדי הרכבה (Assemblers):** אם `assembled_parts_buffer` מלא, או אם `empty_A` קרוב ל-0, עובדי ההרכבה יצטרכו לבצע `sem_wait(&empty_A)`. אם הם יצליחו, הם יצטרכו לבצע `sem_wait(&mutex_A)`. אך `mutex_A` מוחזק על ידי תהליכון ה-`tester` החסום, ולכן עובדי ההרכבה ייחסמו.\n        *   **עובדי אריזה (Packers):** כדי ש-`empty_T` יגדל ויאפשר ל-`tester` להמשיך, עובדי האריזה צריכים לצרוך חלקים מ-`tested_parts_buffer`. אך אם אין חלקים ב-`tested_parts_buffer` (כי ה-`tester` חסום ולא יכול לייצר), או אם הם צריכים לגשת ל-`mutex_T` שגם הוא עלול להיות מוחזק (אם תהליכונים אחרים של `tester` הגיעו לשלב זה וגם הם חסומים על `empty_T` או `mutex_T`), הם לא יוכלו להתקדם.\n    *   נוצר מעגל המתנה: ה-`tester` ממתין ל-`packer` שיפנה מקום ב-`tested_parts_buffer`, אך ה-`packer` לא יכול לפנות מקום כי ה-`tester` לא ייצר, וה-`tester` לא יכול לייצר כי הוא חסום על `empty_T` (תוך כדי שהוא חוסם את ה-`assemblers` מלהתקדם על ידי החזקת `mutex_A`).\n\n**התיקון המוצע:**\nהפתרון הוא לשחרר את הסמפורים של חוצץ `assembled_parts_buffer` מיד לאחר סיום השימוש בהם (כלומר, לאחר צריכת החלק המורכב), ורק לאחר מכן לנסות לרכוש את הסמפורים של חוצץ `tested_parts_buffer`. זה מבטיח שתהליכון ה-`tester` לא יחזיק נעילה מיותרת על משאב אחד (`mutex_A`) בזמן שהוא ממתין למשאב אחר (`empty_T`).\n\n**קוד מתוקן עבור פונקציית `tester`:**\n```c\nvoid *tester(void *arg) {\n    while (1) {\n        // שלב 1: צריכת חלק מורכב מ-assembled_parts_buffer\n        sem_wait(&full_A);  // ממתין לחלק מורכב זמין\n        sem_wait(&mutex_A); // נועל גישה לחוצץ assembled_parts_buffer\n\n        assembled_parts_count--; // צורך חלק\n        printf(\"Tester: Consumed assembled part. Remaining: %d\\n\", assembled_parts_count);\n\n        // שחרור הסמפורים של חוצץ A מיד לאחר השימוש בהם\n        sem_post(&mutex_A); // שחרור נעילה לחוצץ assembled_parts_buffer\n        sem_post(&empty_A); // איתות על מקום פנוי בחוצץ assembled_parts_buffer\n\n        // מדמה פעולת בדיקה\n        usleep(rand() % 100000 + 50000); \n\n        // שלב 2: ייצור חלק מבוקר והכנסתו ל-tested_parts_buffer\n        sem_wait(&empty_T); // ממתין למקום פנוי בחוצץ tested_parts_buffer\n        sem_wait(&mutex_T); // נועל גישה לחוצץ tested_parts_buffer\n\n        tested_parts_count++; // מייצר חלק מבוקר\n        printf(\"Tester: Added tested part. Total tested: %d\\n\", tested_parts_count);\n\n        sem_post(&mutex_T); // שחרור נעילה לחוצץ tested_parts_buffer\n        sem_post(&full_T);  // איתות על חלק מבוקר זמין\n\n        usleep(rand() % 100000 + 50000);\n    }\n    return NULL;\n}\n```\nתיקון זה מבטיח שהתהליכון `tester` ישחרר את המשאבים מחוצץ A לפני שהוא ינסה לרכוש משאבים מחוצץ T, ובכך מונע את התנאי המרכזי לקיפאון בשרשרת זו."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

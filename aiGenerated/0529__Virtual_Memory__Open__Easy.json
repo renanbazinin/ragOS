@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 22:20:41",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1615,
+      "output_tokens": 504,
+      "total_tokens": 3430
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Virtual Memory",
+      "Paging",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "נתונה מערכת עם זיכרון וירטואלי של 2MB, גודל דף של 4KB, וזיכרון פיזי של 16MB.\nמהם הגדלים של ה-VPN, ה-PFN, וכמה זיכרון פיזי תתפוס טבלת דפים (לינארית) של תהליך, במינימום?\nגודל VPN: ________ גודל PFN: ________ גודל טבלה: ________",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "כתובת וירטואלית היא 21 ביטים (זיכרון וירטואלי 2MB = 2^21 בתים), מתוכם 12 ביטים מייצגים את ההיסט (גודל דף 4KB = 2^12 בתים), לכן נשאר VPN=9 ביטים.\nכתובת פיזית היא 24 ביטים (זיכרון פיזי 16MB = 2^24 בתים), ההיסט זהה – 12 ביטים, לכן נשאר PFN=12 ביטים.\nלכל תהליך יש 512 דפים (2^9) בזיכרון הוירטואלי, כלומר שטבלת הדפים שלו מכילה 512 רשומות. כל רשומה מכילה לפחות 2 בתים (12 ביטים עבור PFN, מעוגל מעלה ל-16 ביטים שהם 2 בתים), לכן הטבלה כולה תתפוס 512 רשומות * 2 בתים/רשומה = 1024 בתים = 1KB."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}
