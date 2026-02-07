@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { BookOpen, Brain, FileText, Filter, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Shuffle, ArrowLeft, Layers, Hash, ListChecks } from 'lucide-react';
-import { getAIQuestions, getAIStats, getExams, getExam, getAllExamQuestions, getExamFilterOptions } from './api';
+import { getAIQuestions, getAIStats, getExams, getExam, getAllExamQuestions, getExamFilterOptions } from './localData';
 import type { AIQuestionItem, AIStats, ExamSummary, ExamData, QuestionJSON, ExamQuestion, AllExamQuestionsResponse, ExamFilterOptions } from './types';
 import PracticeCard from './PracticeCard';
 
