@@ -7,7 +7,7 @@ import PracticePage from './PracticePage.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename="/ragOS">
       <Routes>
         <Route path="/" element={<App />} />
         <Route path="/practice" element={<PracticePage />} />
