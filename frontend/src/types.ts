@@ -82,6 +82,7 @@ export interface AIQuestionItem {
     requested_difficulty: string;
     generated_at: string;
     examples_used: number;
+    subject?: string;
     token_usage?: {
       prompt_tokens: number;
       output_tokens: number;
@@ -105,6 +106,7 @@ export interface AIStats {
   types: Record<string, number>;
   difficulties: Record<string, number>;
   topics: Record<string, number>;
+  subjects: Record<string, number>;
 }
 
 export interface ExamSummary {
@@ -156,4 +158,5 @@ export interface ExamFilterOptions {
   types: Record<string, number>;
   difficulties: Record<string, number>;
   years: string[];
+  subjects: Record<string, number>;
 }

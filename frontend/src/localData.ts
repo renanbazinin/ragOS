@@ -37,6 +37,7 @@ let _aiCache: (QuestionJSON & {
   _requested_type: string;
   _requested_difficulty: string;
   _generated_at: string;
+  _subject: string;
 })[] | null = null;
 
 async function loadExams(): Promise<RawExam[]> {
@@ -66,6 +67,8 @@ function shuffle<T>(arr: T[]): T[] {
 
 export async function getAIQuestions(params: {
   topic?: string;
+  topics?: string[];
+  subject?: string;
   question_type?: string;
   difficulty?: string;
   page?: number;
@@ -74,7 +77,17 @@ export async function getAIQuestions(params: {
   const all = await loadAI();
   let filtered = [...all];
 
-  if (params.topic) {
+  if (params.subject) {
+    const s = params.subject;
+    filtered = filtered.filter(q => q._subject === s);
+  }
+  if (params.topics && params.topics.length > 0) {
+    const selected = params.topics.map(t => t.toLowerCase());
+    filtered = filtered.filter(q => {
+      const qTopics = Array.isArray(q.topic) ? q.topic : [String(q.topic || '')];
+      return selected.some(sel => qTopics.some(tp => tp.toLowerCase().includes(sel)));
+    });
+  } else if (params.topic) {
     const t = params.topic.toLowerCase();
     filtered = filtered.filter(q => {
       const topics = Array.isArray(q.topic) ? q.topic : [String(q.topic || '')];
@@ -104,6 +117,7 @@ export async function getAIQuestions(params: {
         requested_difficulty: q._requested_difficulty,
         generated_at: q._generated_at,
         examples_used: 0,
+        subject: q._subject,
       },
       question: q as QuestionJSON,
       _filename: q._source_file,
@@ -120,6 +134,7 @@ export async function getAIStats(): Promise<AIStats> {
   const types: Record<string, number> = {};
   const difficulties: Record<string, number> = {};
   const topics: Record<string, number> = {};
+  const subjects: Record<string, number> = {};
 
   for (const q of all) {
     const t = q.type || 'Unknown';
@@ -130,9 +145,11 @@ export async function getAIStats(): Promise<AIStats> {
     for (const tp of tl) {
       if (tp) topics[tp] = (topics[tp] || 0) + 1;
     }
+    const s = q._subject || 'Unknown';
+    subjects[s] = (subjects[s] || 0) + 1;
   }
 
-  return { total: all.length, types, difficulties, topics };
+  return { total: all.length, types, difficulties, topics, subjects };
 }
 
 export async function getExams(): Promise<ExamSummary[]> {
@@ -164,6 +181,7 @@ export async function getExamFilterOptions(): Promise<ExamFilterOptions> {
   const types: Record<string, number> = {};
   const difficulties: Record<string, number> = {};
   const years = new Set<string>();
+  const subjects: Record<string, number> = {};
 
   for (const exam of exams) {
     if (exam.metadata?.year) years.add(exam.metadata.year);
@@ -184,6 +202,7 @@ export async function getExamFilterOptions(): Promise<ExamFilterOptions> {
     types: Object.fromEntries(Object.entries(types).sort((a, b) => b[1] - a[1])),
     difficulties: Object.fromEntries(Object.entries(difficulties).sort((a, b) => b[1] - a[1])),
     years: [...years].sort(),
+    subjects,
   };
 }
 
@@ -192,6 +211,7 @@ export async function getAllExamQuestions(params: {
   difficulty?: string;
   year?: string;
   topic?: string;
+  topics?: string[];
   filenames?: string[];
   limit?: number;
   shuffle?: boolean;
@@ -225,7 +245,13 @@ export async function getAllExamQuestions(params: {
   if (params.year) {
     allQuestions = allQuestions.filter(q => (q._exam_year || '').includes(params.year!));
   }
-  if (params.topic) {
+  if (params.topics && params.topics.length > 0) {
+    const selected = params.topics.map(t => t.toLowerCase());
+    allQuestions = allQuestions.filter(q => {
+      const qTopics = Array.isArray(q.topic) ? q.topic : [String(q.topic || '')];
+      return selected.some(sel => qTopics.some(tp => tp.toLowerCase().includes(sel)));
+    });
+  } else if (params.topic) {
     const tl = params.topic.toLowerCase();
     allQuestions = allQuestions.filter(q => {
       const topics = Array.isArray(q.topic) ? q.topic : [String(q.topic || '')];
