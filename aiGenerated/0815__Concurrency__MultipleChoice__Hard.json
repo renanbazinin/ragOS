@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 00:35:06",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 1087,
+      "total_tokens": 4109
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Concurrency",
+      "Synchronization",
+      "Deadlock"
+    ],
+    "content": {
+      "text": "נתון הקוד הבא המשתמש בספריות pthread ליצירת שני תהליכונים ושני מנעולים (mutexes):\n\nבהנחה ששני התהליכונים רצים במקביל על מעבדים שונים או באותו מעבד עם מיתוג הקשר (context switching) כלשהו, מהי הטענה הנכונה ביותר לגבי הרצת הקוד?",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h> // For sleep\n\npthread_mutex_t mutexA = PTHREAD_MUTEX_INITIALIZER;\npthread_mutex_t mutexB = PTHREAD_MUTEX_INITIALIZER;\n\nvoid* thread_func1(void* arg) {\n    pthread_mutex_lock(&mutexA);\n    printf(\"Thread 1 acquired mutex A\\n\");\n    sleep(1); // Simulate work or delay\n    pthread_mutex_lock(&mutexB);\n    printf(\"Thread 1 acquired mutex B\\n\");\n    // ... critical section ...\n    pthread_mutex_unlock(&mutexB);\n    pthread_mutex_unlock(&mutexA);\n    return NULL;\n}\n\nvoid* thread_func2(void* arg) {\n    pthread_mutex_lock(&mutexB);\n    printf(\"Thread 2 acquired mutex B\\n\");\n    sleep(1); // Simulate work or delay\n    pthread_mutex_lock(&mutexA);\n    printf(\"Thread 2 acquired mutex A\\n\");\n    // ... critical section ...\n    pthread_mutex_unlock(&mutexA);\n    pthread_mutex_unlock(&mutexB);\n    return NULL;\n}\n\nint main() {\n    pthread_t t1, t2;\n    pthread_create(&t1, NULL, thread_func1, NULL);\n    pthread_create(&t2, NULL, thread_func2, NULL);\n    pthread_join(t1, NULL);\n    pthread_join(t2, NULL);\n    printf(\"Main finished\\n\");\n    return 0;\n}",
+      "options": [
+        "א. הקוד ירוץ תמיד בהצלחה ויסיים את פעולתו ללא בעיות.",
+        "ב. הקוד עלול להיכנס למצב של קיפאון (deadlock).",
+        "ג. הקוד עלול לגרום לתנאי מרוץ (race condition) על נתונים משותפים שאינם מוגנים כראוי.",
+        "ד. הקוד יגרום לשגיאת הרצה (runtime error) עקב ניסיון לשחרר מנעול שאינו נעול."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "התשובה הנכונה היא ב'. הקוד מדגים מצב קלאסי של קיפאון (deadlock). קיפאון יכול להתרחש כאשר מתקיימים ארבעה תנאים: מניעה הדדית (mutual exclusion), אחיזה והמתנה (hold and wait), אי-נתיקות (no preemption), והמתנה מעגלית (circular wait). במקרה זה, שני התהליכונים מנסים לרכוש את אותם שני מנעולים (mutexA ו-mutexB) אך בסדר הפוך. תהליכון 1 רוכש את mutexA ולאחר מכן מנסה לרכוש את mutexB. תהליכון 2 רוכש את mutexB ולאחר מכן מנסה לרכוש את mutexA. אם תהליכון 1 ירכוש את mutexA ותהליכון 2 ירכוש את mutexB בערך באותו זמן, שניהם ימתינו אינסופית למנעול שהשני מחזיק בו. זוהי דוגמה מובהקת למצב של המתנה מעגלית המובילה לקיפאון. תנאי מרוץ (race condition) מתייחס לגישה לא מוגנת למשאב משותף, אך כאן הבעיה העיקרית היא בסדר רכישת המנעולים שמוביל לחסימה הדדית, ולא בגישה לנתונים בתוך האזור הקריטי עצמו (שבמקרה זה מוגן על ידי שני המנעולים)."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

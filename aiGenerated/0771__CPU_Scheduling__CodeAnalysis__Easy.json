@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "CPU Scheduling",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 00:14:51",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2646,
+      "output_tokens": 1379,
+      "total_tokens": 8237
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "CPU Scheduling",
+      "Processes",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה:\nהניחו את ההנחות הבאות:\n1.  המערכת משתמשת באלגוריתם תזמון Round Robin (RR) עם קוונטום (quantum) של 20 מילישניות.\n2.  כל קריאות המערכת (fork, usleep) מצליחות.\n3.  אין תקורה (overhead) למעבר הקשר (context switch).\n4.  כל תהליך, לאחר קריאת `printf` ו-`usleep`, מבצע עבודה שמשך זמןה הכולל הוא 10 מילישניות. זמן זה קצר מהקוונטום.\n5.  התהליך הראשי (parent) ותהליכי הבן (children) מוכנים לריצה מיד לאחר יצירתם, והם מתזומנים בסדר הבא: Parent, Child 1, Child 2. סדר זה נשמר לאורך כל הריצה כל עוד התהליכים מוכנים.\n6.  הפלט הסטנדרטי אינו מחוצץ (unbuffered).",
+      "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\nint main() {\n    setbuf(stdout, NULL);\n    printf(\"Start\\n\");\n\n    pid_t pid1 = fork();\n    if (pid1 == 0) { // Child 1\n        for (int i = 0; i < 3; ++i) {\n            printf(\"A\");\n            usleep(10000); // 10ms\n        }\n        _exit(0);\n    }\n\n    pid_t pid2 = fork();\n    if (pid2 == 0) { // Child 2 (forked by original parent)\n        for (int i = 0; i < 3; ++i) {\n            printf(\"B\");\n            usleep(10000); // 10ms\n        }\n        _exit(0);\n    }\n\n    // Parent continues\n    for (int i = 0; i < 3; ++i) {\n        printf(\"P\");\n        usleep(10000); // 10ms\n    }\n\n    // Wait for children to finish\n    waitpid(pid1, NULL, 0);\n    waitpid(pid2, NULL, 0);\n\n    printf(\"\\nEnd\\n\");\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "התוכנית מתחילה בהדפסת \"Start\\n\".\nלאחר מכן, התהליך הראשי (P) יוצר שני תהליכי בנים. נניח ש-`pid1` הוא עבור Child 1 (C1) ו-`pid2` עבור Child 2 (C2).\nבהתאם להנחות, תזמון התהליכים הוא Round Robin בסדר P, C1, C2. סדר זה נשמר לאורך כל הריצה כל עוד התהליכים מוכנים.\nכל תהליך מבצע לולאה של 3 איטרציות, ובכל איטרציה הוא מדפיס תו (P, A, או B) וממתין 10 מילישניות. זמן ההמתנה הזה קצר מהקוונטום (20 מילישניות).\nלכן, בכל פעם שתהליך מקבל את המעבד, הוא יסיים את פעולתו (הדפסה + שינה) בתוך הקוונטום שלו, וייתן למתזמן להעביר את המעבד לתהליך הבא בתור ברשימת התהליכים המוכנים (P -> C1 -> C2 -> P -> ...).\n\nהפלט יתנהל כך:\n1.  התהליך הראשי מדפיס: `Start\\n`\n2.  התהליך הראשי (P) רץ ראשון, מדפיס: `P`\n3.  Child 1 (C1) רץ שני, מדפיס: `A`\n4.  Child 2 (C2) רץ שלישי, מדפיס: `B`\n5.  התהליך הראשי (P) רץ שוב, מדפיס: `P`\n6.  Child 1 (C1) רץ שוב, מדפיס: `A`\n7.  Child 2 (C2) רץ שוב, מדפיס: `B`\n8.  התהליך הראשי (P) רץ בפעם האחרונה, מדפיס: `P`\n9.  Child 1 (C1) רץ בפעם האחרונה, מדפיס: `A`\n10. Child 2 (C2) רץ בפעם האחרונה, מדפיס: `B`\n\nבנקודה זו, כל שלושת התהליכים סיימו את הלולאות שלהם. תהליכי הבן יצאו (`_exit(0)`). התהליך הראשי ימתין לסיום הבנים באמצעות `waitpid`, ולאחר מכן ידפיס את שורת הסיום.\n\nלכן, הפלט הכולל יהיה:\n```\nStart\nPABPABPAB\nEnd\n```"
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Paging",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 23:20:53",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3971,
+      "output_tokens": 2937,
+      "total_tokens": 26700
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Paging",
+      "Virtual Memory",
+      "TLB",
+      "Page Faults",
+      "Memory Protection"
+    ],
+    "content": {
+      "text": "נתונה מערכת הפעלה המנהלת זיכרון וירטואלי באמצעות מנגנון Paging דו-שכבתי.\nגודל עמוד: 4KB (2^12 בתים).\nמרחב כתובות וירטואליות ופיזיות: 32 ביט.\n\n**מבנה טבלת העמודים:**\nכתובת וירטואלית (VA) מחולקת לשלושה חלקים:\n*   אינדקס ספריות עמודים (PDI): ביטים [31-22] (10 ביטים)\n*   אינדקס טבלת עמודים (PTI): ביטים [21-12] (10 ביטים)\n*   היסט בתוך העמוד (Offset): ביטים [11-0] (12 ביטים)\n\n**TLB:**\nה-TLB מכיל 4 כניסות, הוא fully associative, ומשתמש במדיניות החלפה LRU (Least Recently Used). בתחילת הריצה ה-TLB ריק.\n\n**פורמט כניסת טבלת עמודים (PTE) / כניסת ספריית עמודים (PDE):**\n*   ביט 0: Present (P) - 1 אם העמוד/טבלה נמצא בזיכרון הפיזי, 0 אחרת.\n*   ביט 1: Read/Write (R/W) - 1 עבור קריאה/כתיבה, 0 עבור קריאה בלבד.\n*   ביטים [31-12]: Physical Frame Number (PFN) או כתובת פיזית של טבלת העמודים הבאה (מיושר ל-4KB).\n\n**מצב התחלתי של טבלאות העמודים הרלוונטיות:**\nנניח שכתובת ספריית העמודים (Page Directory) היא `0x100000`.\nנניח שכתובת טבלת העמודים (Page Table) עבור PDI=1 היא `0x110000`.\n\n*   **כניסת ספריית עמודים (PDE) עבור PDI = 1:**\n    *   כתובת פיזית של ה-PDE: `0x100004` (בהנחה שגודל PDE הוא 4 בתים)\n    *   ערך ה-PDE: `0x110003` (מצביע לטבלת עמודים ב-`0x110000`, Present=1, R/W=1)\n\n*   **כניסות טבלת העמודים (PTEs) בטבלת העמודים ב-`0x110000`:**\n    *   **PTE עבור PTI = 0 (VA `0x00400000` - `0x00400FFF`):** `0x200003` (PFN `0x200`, Present=1, R/W=1)\n    *   **PTE עבור PTI = 10 (VA `0x0040A000` - `0x0040AFFF`):** `0x20A001` (PFN `0x20A`, Present=1, R/W=0 - **קריאה בלבד!**)\n    *   **PTE עבור PTI = 100 (VA `0x00464000` - `0x00464FFF`):** `0x00000000` (Present=0 - **לא קיים בזיכרון!**)\n    *   כל שאר כניסות ה-PTE בטווח PDI=1 שאינן מוזכרות במפורש נניח שהן Present=1, R/W=1, עם PFNים עוקבים (לדוגמה, PTI `k` ממופה ל-PFN `0x200 + k`).\n\n**טיפול בכשלי עמוד (Page Faults):**\n*   אם ביט Present הוא 0 (P=0): מתרחש Page Fault מסוג \"Not Present\". מערכת ההפעלה מקצה מסגרת פיזית חדשה, טוענת את העמוד לזיכרון, מעדכנת את ה-PTE ל-`new_PFN | 0x3` (P=1, R/W=1), ומאתחלת מחדש את הפקודה שגרמה לכשל.\n*   אם ביט Present הוא 1 (P=1) אך גישת הכתיבה אינה מותרת (R/W=0): מתרחש Page Fault מסוג \"Protection Fault\". מערכת ההפעלה מפסיקה את התוכנית.\n\n**התוכנית הבאה:**\nנתונה התוכנית הבאה בשפת C. נניח ש-`sizeof(int) = 4` בתים.\nהתוכנית ניגשת למערך `arr` שמתחיל בכתובת וירטואלית `0x00400000`.\n",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n\n#define PAGE_SIZE 4096 // 4KB\n#define INT_PER_PAGE (PAGE_SIZE / sizeof(int)) // 1024 integers per page\n\nint main() {\n    int* arr = (int*)0x00400000;\n\n    // Access Pattern 1: Access a R/W page (PTI=0)\n    arr[0] = 10; // Write access\n\n    // Access Pattern 2: Attempt to write to a Read-Only page (PTI=10)\n    arr[INT_PER_PAGE * 10] = 20; // Write access\n\n    // Access Pattern 3: Attempt to read from a Not-Present page (PTI=100)\n    int val = arr[INT_PER_PAGE * 100]; // Read access\n\n    // Access Pattern 4: Sequential access to fill TLB and demonstrate LRU\n    for (int i = 0; i < 6; ++i) {\n        arr[INT_PER_PAGE * i + 1] = i; // Write access to second element of each page\n    }\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "101.1",
+        "text": "נתחו את ריצת התוכנית. כמה TLB Hits, TLB Misses, Page Faults (Not Present) ו-Page Faults (Protection) יתרחשו עד שהתוכנית תסיים את ריצתה (או תופסק)?\nציינו את המצב הסופי של המונים הללו.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "**ניתוח מפורט של ריצת התוכנית:**\n\n**מצב התחלתי:**\nTLB: ריק (קיבולת 4 כניסות, מדיניות LRU)\nTLB Hits: 0\nTLB Misses: 0\nPage Faults (Not Present): 0\nPage Faults (Protection): 0\nהתוכנית הופסקה: לא\n\n**דפוס גישה 1: `arr[0] = 10;` (VA `0x00400000`)**\n1.  **VA `0x00400000`**:\n    *   הכתובת מתפרשת כ-PDI=1, PTI=0, Offset=0.\n    *   **TLB Miss** (ה-TLB ריק).\n    *   **Page Table Walk**:\n        *   מערכת ההפעלה ניגשת ל-PDE עבור PDI=1 (בכתובת פיזית `0x100004`). ערך ה-PDE הוא `0x110003` (Present=1, R/W=1). זהו זיכרון פיזי שמכיל את טבלת העמודים הבאה.\n        *   מערכת ההפעלה ניגשת ל-PTE עבור PTI=0 (בכתובת פיזית `0x110000`). ערך ה-PTE הוא `0x200003` (Present=1, R/W=1). ה-PFN הוא `0x200`.\n        *   סוג הגישה הוא כתיבה (write). בדיקת הרשאות: R/W=1, לכן הגישה מותרת.\n    *   הוספה ל-TLB: `(0x00400000, 0x200000)`. כעת זו הכניסה הכי לאחרונה בשימוש (LRU=0).\n    *   **TLB Misses: 1**.\n\n**מצב מצטבר לאחר דפוס גישה 1:**\nTLB Hits: 0\nTLB Misses: 1\nPage Faults (Not Present): 0\nPage Faults (Protection): 0\nTLB: `[ (0x00400000, 0x200000, LRU=0) ]` (כאשר 0 מציין הכי לאחרונה בשימוש)\n\n**דפוס גישה 2: `arr[INT_PER_PAGE * 10] = 20;` (VA `0x0040A000`)**\n`INT_PER_PAGE * 10` מצביע לתחילת עמוד מספר 10 (VA `0x0040A000`).\n1.  **VA `0x0040A000`**:\n    *   הכתובת מתפרשת כ-PDI=1, PTI=10, Offset=0.\n    *   **TLB Miss** (הכניסה אינה נמצאת ב-TLB).\n    *   **Page Table Walk**:\n        *   מערכת ההפעלה ניגשת ל-PDE עבור PDI=1 (בכתובת פיזית `0x100004`). ערך ה-PDE הוא `0x110003` (Present=1, R/W=1).\n        *   מערכת ההפעלה ניגשת ל-PTE עבור PTI=10 (בכתובת פיזית `0x110028`). ערך ה-PTE הוא `0x20A001` (Present=1, R/W=0). ה-PFN הוא `0x20A`.\n        *   סוג הגישה הוא כתיבה (write). בדיקת הרשאות: R/W=0 (קריאה בלבד). הגישה אינה מותרת.\n    *   **Protection Fault!** התוכנית מנסה לכתוב לעמוד המוגדר כקריאה בלבד.\n    *   מערכת ההפעלה מפסיקה את התוכנית.\n    *   **Page Faults (Protection): 1**.\n    *   **TLB Misses: 1** (סה\"כ 2).\n\n**מצב סופי של המונים כאשר התוכנית מופסקת:**\n*   **TLB Hits: 0**\n*   **TLB Misses: 2**\n*   **Page Faults (Not Present): 0**\n*   **Page Faults (Protection): 1**\n*   **התוכנית הופסקה: כן**\n\n**הערה:** דפוסי הגישה 3 ו-4 לא יבוצעו כלל, כיוון שהתוכנית מופסקת מיד לאחר כשל ההגנה בדפוס גישה 2."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "CPU Scheduling",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 00:20:07",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2670,
+      "output_tokens": 2336,
+      "total_tokens": 11839
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "CPU Scheduling",
+      "Concurrency",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה. הניחו שהתוכנית רצה על מעבד יחיד (single-core CPU) ומשתמשת במתזמן (scheduler) מונע-פקודות (preemptive) מסוג Round Robin עם קוונטום זמן קצר. כל קריאות ה-`printf` נדפסות מיידית.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <unistd.h> // For usleep or sleep\n\nvolatile int shared_flag = 0; // Shared flag\n\nvoid* thread_A_func(void* arg) {\n    printf(\"Thread A: Starting heavy computation...\\n\");\n    for (long i = 0; i < 500000000; ++i) { // Simulate heavy computation\n        // Busy loop\n    }\n    shared_flag = 1; // Signal that A has finished its main work\n    printf(\"Thread A: Computation finished, flag set.\\n\");\n    return NULL;\n}\n\nvoid* thread_B_func(void* arg) {\n    printf(\"Thread B: Waiting for flag from A...\\n\");\n    while (shared_flag == 0) {\n        // Busy-wait loop\n        // This loop consumes CPU cycles\n    }\n    printf(\"Thread B: Flag detected, proceeding.\\n\");\n    return NULL;\n}\n\nint main() {\n    pthread_t tid_A, tid_B;\n\n    printf(\"Main: Creating threads...\\n\");\n    pthread_create(&tid_B, NULL, thread_B_func, NULL); // Create B first\n    pthread_create(&tid_A, NULL, thread_A_func, NULL); // Then A\n\n    pthread_join(tid_A, NULL);\n    pthread_join(tid_B, NULL);\n\n    printf(\"Main: All threads finished.\\n\");\n    return 0;\n}"
+    },
+    "sub_questions": [
+      {
+        "id": "8.1",
+        "text": "תארו את סדר ההדפסות האפשרי של התוכנית. הסבירו מדוע ייתכנו סדרי הדפסה שונים, וציינו לפחות שני סדרים אפשריים.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.2",
+        "text": "הסבירו מדוע השימוש בלולאת ה-`while (shared_flag == 0)` ב-`thread_B_func` אינו יעיל מבחינת ניצול מעבד, וכיצד הוא משפיע על זמן הריצה הכולל של התוכנית. הציעו דרך יעילה יותר לממש את ההמתנה ב-`thread_B_func`.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": false,
+      "correct_option": null,
+      "explanation": "פתרון לשאלה 8.1:\nקריאות ה-`printf` שאינן תלויות ב-`shared_flag` יתרחשו בדרך כלל בהתחלה ובסוף. סדר יצירת ה-threads משפיע על הסדר שבו הם נכנסים ל-ready queue, אך המתזמן יכול להחליט לתזמן כל אחד מהם. לכן: \n1. `Main: Creating threads...` תמיד יודפס ראשון.\n2. `Thread B: Waiting for flag from A...` ו-`Thread A: Starting heavy computation...` יכולים להופיע בסדרים שונים, תלוי בתזמון הראשוני של A ו-B. מכיוון ש-B נוצר ראשון, ייתכן שיתחיל ראשון וידפיס את הודעת ההמתנה שלו. אך אם A מתחיל מיד אחריו, הוא ידפיס את ההודעה שלו. \n3. לאחר ש-A יסיים את החישוב הכבד ויקבע את `shared_flag` ל-1, ורק לאחר מכן, `Thread A: Computation finished, flag set.` יודפס.\n4. לבסוף, כאשר B יתזמן שוב ויגלה ש-`shared_flag` הוא 1, הוא ידפיס `Thread B: Flag detected, proceeding.`. סדר ההדפסה של הודעה זו ביחס להדפסה הסופית של A תלוי שוב בתזמון. יש לציין ש-A קובע את הדגל *לפני* שהוא מדפיס את הודעת הסיום שלו. לכן, B יכול להתחיל את ההדפסה שלו *לאחר* שהדגל נקבע, אך *לפני* ש-A מדפיס את הודעת הסיום שלו, אם המתזמן מחליט לתת ל-B לרוץ בדיוק אחרי ש-A קבע את הדגל ולפני ש-A קרא ל-printf.\n5. `Main: All threads finished.` יודפס אחרון, רק לאחר ששני ה-threads סיימו וה-`main` ביצע `pthread_join` עבור שניהם.\n\nדוגמאות לסדרי הדפסה אפשריים:\nא. `Main: Creating threads...`\n   `Thread B: Waiting for flag from A...`\n   `Thread A: Starting heavy computation...`\n   (המתזמן מעביר בין A ל-B במשך החישוב של A)\n   `Thread A: Computation finished, flag set.`\n   `Thread B: Flag detected, proceeding.`\n   `Main: All threads finished.`\n\nב. `Main: Creating threads...`\n   `Thread A: Starting heavy computation...`\n   `Thread B: Waiting for flag from A...`\n   (המתזמן מעביר בין A ל-B במשך החישוב של A)\n   `Thread A: Computation finished, flag set.`\n   `Thread B: Flag detected, proceeding.`\n   `Main: All threads finished.`\n\nפתרון לשאלה 8.2:\nהשימוש בלולאת ה-`while (shared_flag == 0)` ב-`thread_B_func` הוא דוגמה ל-\"busy-waiting\" (המתנה פעילה). הוא אינו יעיל מכיוון ש-`thread_B` צורך זמן מעבד יקר (CPU cycles) על ידי בדיקה חוזרת ונשנית של המשתנה `shared_flag` בלולאה, במקום להיכנס למצב המתנה (blocked state) ולפנות את המעבד ל-`thread_A` או ל-threads אחרים. במערכת חד-מעבדית (single-core), זה אומר ש-`thread_B` למעשה גונב זמן מעבד מ-`thread_A`, מה שמאריך את הזמן שלוקח ל-`thread_A` לסיים את החישוב הכבד שלו ולקבוע את הדגל. כתוצאה מכך, זמן הריצה הכולל של התוכנית יהיה ארוך יותר באופן משמעותי מאשר אם `thread_B` היה ממתין באופן חוסם. למעשה, במצב של busy-waiting, שני ה-threads מתחרים על המעבד, כאשר אחד (B) לא מבצע עבודה שימושית.\n\nדרך יעילה יותר לממש את ההמתנה ב-`thread_B_func` היא באמצעות מנגנוני סנכרון חוסמים, כגון mutex ו-condition variable. לדוגמה:\n\n```c\n#include <stdio.h>\n#include <pthread.h>\n\npthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;\npthread_cond_t cond = PTHREAD_COND_INITIALIZER;\nvolatile int shared_flag = 0;\n\nvoid* thread_A_func(void* arg) {\n    printf(\"Thread A: Starting heavy computation...\\n\");\n    for (long i = 0; i < 500000000; ++i) {\n        // Busy loop\n    }\n    \n    pthread_mutex_lock(&mutex);\n    shared_flag = 1; // Signal that A has finished its main work\n    pthread_cond_signal(&cond); // Wake up waiting threads\n    pthread_mutex_unlock(&mutex);\n    \n    printf(\"Thread A: Computation finished, flag set.\\n\");\n    return NULL;\n}\n\nvoid* thread_B_func(void* arg) {\n    printf(\"Thread B: Waiting for flag from A...\\n\");\n    \n    pthread_mutex_lock(&mutex);\n    while (shared_flag == 0) {\n        pthread_cond_wait(&cond, &mutex); // Wait efficiently\n    }\n    pthread_mutex_unlock(&mutex);\n    \n    printf(\"Thread B: Flag detected, proceeding.\\n\");\n    return NULL;\n}\n\n// main function remains largely the same\n```\n\nבפתרון זה, `thread_B` נכנס למצב המתנה (blocked) כאשר הוא קורא ל-`pthread_cond_wait`, ובכך מפנה את המעבד ל-`thread_A` (או ל-threads אחרים). `thread_A` מעיר את `thread_B` רק כאשר הוא מסיים את עבודתו וקובע את הדגל, באמצעות `pthread_cond_signal`. זה מאפשר ניצול יעיל יותר של המעבד וקיצור זמן הריצה הכולל של התוכנית."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

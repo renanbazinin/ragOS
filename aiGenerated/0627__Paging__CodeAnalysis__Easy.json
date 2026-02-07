@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Paging",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 23:12:00",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2724,
+      "output_tokens": 776,
+      "total_tokens": 5610
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Paging"
+    ],
+    "content": {
+      "text": "נתונה מערכת זיכרון המשתמשת בטכניקת Paging עם גודל עמוד של 4KB.\nלמען הפשטות, טבלת העמודים (Page Table) מכילה את הערכים הבאים (המספרים הם בבסיס עשרוני):\n\n| Virtual Page Number (VPN) | Physical Frame Number (PFN) |\n| :------------------------ | :-------------------------- |\n| 0                         | 10                          |\n| 1                         | 12                          |\n| 2                         | 8                           |\n| 3                         | 15                          |\n\nנתונה כתובת וירטואלית `0x32A4`.\nמהי הכתובת הפיזית המתאימה לכתובת וירטואלית זו?",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "ראשית, נחשב את גודל ההיסט (offset) בכתובת. מכיוון שגודל עמוד הוא 4KB, שהם 2^12 בתים, ההיסט יהיה בן 12 ביטים.\nהכתובת הווירטואלית הנתונה היא `0x32A4`.\nנפריד את הכתובת הווירטואלית למספר העמוד הווירטואלי (VPN) ולהיסט (offset):\nהיסט (12 הביטים הפחות משמעותיים): `0x2A4`\nמספר עמוד וירטואלי (שאר הביטים, כלומר `0x32A4 >> 12`): `0x3` (או 3 בבסיס עשרוני)\n\nכעת, נשתמש בטבלת העמודים כדי למצוא את מספר המסגרת הפיזית (PFN) המתאים ל-VPN 3.\nמטבלת העמודים אנו רואים של-VPN 3 מתאים PFN 15.\n\nלבסוף, נבנה את הכתובת הפיזית על ידי שילוב ה-PFN עם ההיסט:\nכתובת פיזית = `(PFN << מספר ביטים של היסט) | היסט`\nכתובת פיזית = `(15 << 12) | 0x2A4`\n\nבבסיס הקסדצימלי:\n`15` בבסיס עשרוני הוא `F` בבסיס הקסדצימלי.\nהזזה של `F` ב-12 ביטים שמאלה היא `0xF000`.\nשילוב עם ההיסט: `0xF000 | 0x2A4 = 0xF2A4`.\n\nלכן, הכתובת הפיזית המתאימה היא `0xF2A4`."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

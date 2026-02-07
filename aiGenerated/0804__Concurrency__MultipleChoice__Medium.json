@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 00:30:33",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 939,
+      "output_tokens": 778,
+      "total_tokens": 4429
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Concurrency",
+      "Race Conditions",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המשתמשת ב-pthreads כמתואר מטה. מהו ערכו הסופי האפשרי של המשתנה הגלובלי `counter` לאחר הרצת התוכנית?",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\nint counter = 0; // Shared variable\n\nvoid *increment(void *arg) {\n    for (int i = 0; i < 100000; i++) {\n        counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t tid1, tid2;\n\n    pthread_create(&tid1, NULL, increment, NULL);\n    pthread_create(&tid2, NULL, increment, NULL);\n\n    pthread_join(tid1, NULL);\n    pthread_join(tid2, NULL);\n\n    printf(\"Final counter: %d\\n\", counter);\n    return 0;\n}",
+      "options": [
+        "200000",
+        "100000",
+        "ערך לא דטרמיניסטי שקטן או שווה ל-200000",
+        "ערך לא דטרמיניסטי שגדול מ-200000"
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ערך לא דטרמיניסטי שקטן או שווה ל-200000",
+      "explanation": "התוכנית סובלת מתנאי מירוץ (race condition) על המשתנה המשותף `counter`. הפעולה `counter++` אינה אטומית; היא מורכבת מקריאה (read) של הערך הנוכחי, הגדלה (increment) שלו, וכתיבה (write) של הערך החדש. כאשר שני תהליכונים (threads) מנסים לבצע פעולה זו בו-זמנית ללא סנכרון (לדוגמה, באמצעות mutex), ייתכן שאחד התהליכונים יקרא את הערך, תהליכון אחר יקרא את אותו ערך, שניהם יגדילו אותו, ושניהם יכתבו את הערך המוגדל, ובכך תאבד אחת ההגדלות. לכן, הערך הסופי של `counter` יהיה לא דטרמיניסטי ותמיד יהיה קטן או שווה ל-200000. האפשרות הנפוצה ביותר היא שהערך יהיה קטן מ-200000, אך תיאורטית, אם לוח הזמנים יתמזל באופן קיצוני ותהליכון אחד יסיים את כל הלולאה שלו לפני שהשני מבצע ולו הגדלה אחת, הוא יכול להגיע ל-200000. לכן, התשובה המדויקת ביותר היא ערך לא דטרמיניסטי שקטן או שווה ל-200000."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

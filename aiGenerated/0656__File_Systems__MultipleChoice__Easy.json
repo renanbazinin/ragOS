@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "File Systems",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 23:26:35",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1088,
+      "output_tokens": 321,
+      "total_tokens": 1907
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "File Systems"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של מערכת קבצים?",
+      "code_snippet": null,
+      "options": [
+        "א. לנהל את תזמון המעבד.",
+        "ב. להקצות זיכרון פיזי לתהליכים.",
+        "ג. לארגן ולנהל קבצים על התקני אחסון.",
+        "ד. לטפל בתקשורת רשת."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג'. מערכת קבצים אחראית לארגון, אחסון וניהול קבצים על התקני אחסון כמו דיסקים קשיחים או SSD, ולספק ממשק למשתמשים ותוכניות לגשת אליהם. שאר האפשרויות מתארות תפקידים של רכיבים אחרים במערכת ההפעלה (כמו מתזמן המעבד, מנהל הזיכרון ומנהל הרשת)."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

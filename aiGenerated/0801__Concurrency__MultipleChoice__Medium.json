@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 00:30:01",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 939,
+      "output_tokens": 831,
+      "total_tokens": 3259
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Concurrency",
+      "Race Condition",
+      "Shared Memory"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא המציג שני תהליכונים (threads) המנסים להגדיל מונה משותף. מהו הערך הסופי האפשרי הנמוך ביותר של המשתנה `counter` לאחר ששני התהליכונים סיימו את ריצתם, בהנחה שכל תהליכון מבצע 1000 הגדלות וללא כל מנגנון סנכרון?",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\nint counter = 0;\n\nvoid* increment_counter(void* arg) {\n    for (int i = 0; i < 1000; ++i) {\n        counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t tid1, tid2;\n    pthread_create(&tid1, NULL, increment_counter, NULL);\n    pthread_create(&tid2, NULL, increment_counter, NULL);\n    pthread_join(tid1, NULL);\n    pthread_join(tid2, NULL);\n    printf(\"Final counter value: %d\\n\", counter);\n    return 0;\n}",
+      "options": [
+        "0",
+        "1",
+        "1000",
+        "כל ערך בין 1 ל-2000 (כולל)"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "כל ערך בין 1 ל-2000 (כולל)",
+      "explanation": "קיימת כאן בעיית תחרות (Race Condition) בגלל שפעולת ההגדלה (`counter++`) אינה אטומית. היא מורכבת משלושה שלבים: קריאת הערך, הגדלתו, וכתיבת הערך החדש. ללא מנגנון סנכרון (כמו Mutex), ייתכן מצב שבו שני תהליכונים קוראים את אותו ערך של `counter`, שניהם מגדילים אותו, ושניהם כותבים בחזרה את הערך שלהם. במקרה כזה, אחת ההגדלות \"נאבדת\".\n\nהערך המקסימלי האפשרי הוא 2000 (כאשר אין איבוד של הגדלות, לדוגמה אם התהליכונים רצים בטור או על מעבד יחיד ללא החלפת הקשר).\n\nהערך המינימלי האפשרי הוא 1. לדוגמה, אם תהליכון A קורא את `counter` (שהוא 0), ואז מופסק. תהליכון B מבצע את כל 1000 ההגדלות שלו בהצלחה, כך ש`counter` מגיע ל-1000. לאחר מכן, תהליכון A ממשיך ומבצע את פעולת הכתיבה שלו (כותב 1, שכן הוא הגדיל את ה-0 שקרא בהתחלה). במקרה זה, הערך הסופי יהיה 1.\n\nלכן, כל ערך בין 1 ל-2000 (כולל) אפשרי."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

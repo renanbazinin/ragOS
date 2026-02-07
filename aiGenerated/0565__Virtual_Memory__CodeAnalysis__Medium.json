@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 22:44:47",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3180,
+      "output_tokens": 2125,
+      "total_tokens": 10232
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Virtual Memory",
+      "Paging",
+      "Copy-on-Write",
+      "Page Faults",
+      "fork"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה, המבצעת הקצאת זיכרון גדולה, מאתחלת חלקים ממנה, ולאחר מכן מבצעת `fork`. עליך לנתח את הקוד ולהשיב על השאלה.\n\nיש להניח את ההנחות הבאות לגבי המערכת:\n- גודל דף זיכרון (PAGE_SIZE) הוא 4KB.\n- מערכת ההפעלה משתמשת במנגנון זיכרון וירטואלי עם Copy-on-Write (CoW) עבור אזורי זיכרון הניתנים לכתיבה (writable).\n- כל גישה ראשונה לדף זיכרון (קריאה או כתיבה) גורמת ל-page fault. כלומר, דפים מוקצים פיזית רק בעת הגישה הראשונה אליהם (demand paging).\n- הקריאה ל-`malloc` מצליחה ומחזירה מצביע לזיכרון המיושר לגודל דף (page-aligned).\n- קוד התוכנית עצמו, המחסנית, הערימה של המערכת, וטבלאות דפים אינם נכללים בחישוב מספר ה-page faults, אלא רק הגישות למערך `large_array`.\n- פעולות `printf` אינן גורמות ל-page faults על המערך `large_array` עצמו.\n\nכמה page faults מינימליים הקשורים לגישה למערך `large_array` יתרחשו בסך הכל במהלך ריצת התוכנית (כולל תהליך האב והבן), עד לסיום שני התהליכים? נמק את תשובתך.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n#include <string.h> // For memset\n\n#define PAGE_SIZE 4096 // 4KB\n#define ARRAY_SIZE (256 * PAGE_SIZE) // 1MB array, 256 pages\n\nint main() {\n    char *large_array = (char *)malloc(ARRAY_SIZE);\n    if (large_array == NULL) {\n        perror(\"malloc failed\");\n        return 1;\n    }\n\n    // Initialize the first page and the last page\n    memset(large_array, 0, PAGE_SIZE); // Accesses first page\n    memset(large_array + ARRAY_SIZE - PAGE_SIZE, 0, PAGE_SIZE); // Accesses last page\n\n    printf(\"Array allocated and partially initialized. PID: %d\\n\", getpid());\n\n    pid_t pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        free(large_array);\n        return 1;\n    } else if (pid == 0) { // Child process\n        printf(\"Child process (PID: %d) started.\\n\", getpid());\n        // Child modifies the first page\n        for (int i = 0; i < PAGE_SIZE; ++i) {\n            large_array[i] = 'C';\n        }\n        printf(\"Child modified first page. Exiting.\\n\");\n        _exit(0); // Use _exit to avoid flushing parent's stdio buffer\n    } else { // Parent process\n        printf(\"Parent process (PID: %d) forked child (PID: %d).\\n\", getpid(), pid);\n        // Parent modifies the last page\n        for (int i = 0; i < PAGE_SIZE; ++i) {\n            large_array[ARRAY_SIZE - PAGE_SIZE + i] = 'P';\n        }\n        printf(\"Parent modified last page. Waiting for child.\\n\");\n        wait(NULL);\n        printf(\"Child finished. Parent exiting.\\n\");\n    }\n\n    free(large_array);\n    return 0;\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "ננתח את מספר ה-page faults שנגרמים עקב גישה למערך `large_array`:\n\n1.  **הקצאת זיכרון (`malloc`):** הקריאה ל-`malloc(ARRAY_SIZE)` מקצה זיכרון וירטואלי בגודל 1MB (256 דפים). בשלב זה, לא מתרחשים page faults מכיוון שהזיכרון הפיזי מוקצה רק בעת הגישה הראשונה אליו (demand paging).\n\n2.  **אתחול הדף הראשון (`memset(large_array, 0, PAGE_SIZE)`):** פעולה זו ניגשת לדף הזיכרון הראשון של המערך. זוהי הגישה הראשונה לדף זה. מכיוון שהדף אינו בזיכרון הפיזי, נגרם **page fault אחד**. הדף מובא לזיכרון הפיזי ונרשם בטבלת הדפים של תהליך האב.\n\n3.  **אתחול הדף האחרון (`memset(large_array + ARRAY_SIZE - PAGE_SIZE, 0, PAGE_SIZE)`):** פעולה זו ניגשת לדף הזיכרון האחרון של המערך. זוהי הגישה הראשונה לדף זה. נגרם **page fault אחד נוסף**. הדף מובא לזיכרון הפיזי ונרשם בטבלת הדפים של תהליך האב.\n    *   סה\"כ page faults עד כה: 2.\n\n4.  **קריאה ל-`fork()`:** כאשר `fork()` נקרא, מרחב הכתובות הווירטואלי של תהליך האב משוכפל עבור תהליך הבן. הודות למנגנון Copy-on-Write (CoW), דפי הזיכרון הניתנים לכתיבה (כמו אלו של `large_array`) משותפים בתחילה בין האב לבן ומסומנים כקריאה בלבד (read-only) בטבלאות הדפים של שניהם. בשלב זה, שני הדפים (הראשון והאחרון) שנגעו בהם כבר נמצאים בזיכרון הפיזי ומשותפים. 254 הדפים הנותרים עדיין לא הוקצו פיזית כלל.\n\n5.  **תהליך הבן (`if (pid == 0)`):**\n    *   **שינוי הדף הראשון (`for (int i = 0; i < PAGE_SIZE; ++i) { large_array[i] = 'C'; }`):** הבן מנסה לשנות את הדף הראשון. מכיוון שדף זה משותף עם האב ומסומן כ-read-only (בשל CoW), הגישה הראשונה לכתיבה על ידי הבן גורמת ל-**page fault של CoW**. מערכת ההפעלה יוצרת עותק פרטי של דף זה עבור תהליך הבן, ומעדכנת את טבלת הדפים של הבן שתצביע על העותק החדש. הדף המקורי נשאר עבור האב (שעדיין לא שינה אותו).\n    *   סה\"כ page faults עד כה: 2 (מהאב) + 1 (מהבן) = 3.\n\n6.  **תהליך האב (`else { // Parent process }`):**\n    *   **שינוי הדף האחרון (`for (int i = 0; i < PAGE_SIZE; ++i) { large_array[ARRAY_SIZE - PAGE_SIZE + i] = 'P'; }`):** האב מנסה לשנות את הדף האחרון. בדומה למקרה של הבן, דף זה משותף עם הבן ומסומן כ-read-only. הגישה הראשונה לכתיבה על ידי האב גורמת ל-**page fault של CoW**. מערכת ההפעלה יוצרת עותק פרטי של דף זה עבור תהליך האב, ומעדכנת את טבלת הדפים של האב שתצביע על העותק החדש. הדף המקורי נשאר עבור הבן (שעדיין לא שינה אותו).\n    *   סה\"כ page faults: 2 (מהאב לפני fork) + 1 (מהבן) + 1 (מהאב אחרי fork) = **4 page faults**.\n\nלסיכום, בסך הכל יתרחשו 4 page faults הקשורים לגישה למערך `large_array`."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

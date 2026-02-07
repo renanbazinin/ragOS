@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 00:30:51",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 939,
+      "output_tokens": 251,
+      "total_tokens": 1912
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Concurrency",
+      "Deadlock"
+    ],
+    "content": {
+      "text": "קיום של תנאי No Preemption הכרחי על מנת שיתרחש Deadlock.\nנכון / לא נכון",
+      "code_snippet": null,
+      "options": [
+        "נכון",
+        "לא נכון"
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "נכון",
+      "explanation": "נכון. ארבעת התנאים ההכרחיים (Conditions for Deadlock) על מנת שיתרחש Deadlock הם: Mutual Exclusion, Hold and Wait, No Preemption ו-Circular Wait. אם אחד מהתנאים הללו לא מתקיים, לא יכול להיווצר Deadlock. לפיכך, קיומו של No Preemption הוא אכן הכרחי."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

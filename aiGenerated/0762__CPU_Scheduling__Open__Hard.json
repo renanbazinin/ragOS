@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "CPU Scheduling",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 00:08:22",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2859,
+      "output_tokens": 2785,
+      "total_tokens": 12369
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "CPU Scheduling",
+      "Multi-level Feedback Queue",
+      "Process Management"
+    ],
+    "content": {
+      "text": "נתונה מערכת הפעלה המשתמשת באלגוריתם תזמון מורכב הכולל שתי תורים:\n1.  **תור עדיפות גבוהה (HP - High Priority)**: ממומש כ-Round Robin עם קוונטום זמן של 5ms. תהליכים חדשים נכנסים לתור זה. תהליכים שתם זמנם בתור זה (השתמשו בכל הקוונטום שלהם) ועוד לא סיימו את פעולת ה-CPU הנוכחית, עוברים לתור LP.\n2.  **תור עדיפות נמוכה (LP - Low Priority)**: ממומש כ-FCFS. תהליכים בתור זה ירוצו רק כאשר תור HP ריק.\n3.  **טיפול ב-I/O**: כאשר תהליך מבצע פעולת I/O, הוא עוזב את תור התזמון. בסיום פעולת ה-I/O, התהליך חוזר לתור HP.\n4.  **זמן החלפת קשר (Context Switch)**: 1ms.\n5.  **הנחות**:\n    *   אם מספר תהליכים מגיעים בו-זמנית או חוזרים מ-I/O בו-זמנית, הסדר ביניהם הוא לפי ה-PID הנמוך ביותר.\n    *   הזמן הנדרש ל-I/O אינו נכלל בקוונטום ה-CPU ואינו מושפע מזמן החלפת קשר.\n    *   חישובי ה-CPU burst הם נטו, ללא זמן החלפת קשר.\n    *   התהליכים מוכנים לריצה מיד עם הגעתם (arrival time).\n\nנתונים שלושה תהליכים:\n\n| תהליך (PID) | זמן הגעה (Arrival Time) | רצף פעולות (CPU/IO Bursts) |\n| :---------- | :--------------------- | :------------------------- |\n| P1          | 0ms                    | CPU(10ms), I/O(20ms), CPU(5ms) |\n| P2          | 2ms                    | CPU(8ms), I/O(10ms), CPU(2ms) |\n| P3          | 3ms                    | CPU(6ms)                  |\n\nחשב את זמן הסיום (Completion Time) וזמן ההמתנה (Waiting Time) עבור כל אחד מהתהליכים. הצג את מהלך התזמון באופן מפורט.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "נבצע סימולציה מפורטת של מהלך התזמון:\n\n**מצב התחלתי:**\nזמן = 0ms\nתור HP: ריק\nתור LP: ריק\nתהליכי I/O: ריק\nתהליך רץ: אף אחד\n\n**שלבי הסימולציה:**\n\n*   **זמן 0ms:**\n    *   P1 מגיע (זמן הגעה 0ms) ונכנס לתור HP. \n    *   P1 מתחיל לרוץ.\n    *   P1 CPU Burst 1 נשאר: 10ms.\n\n*   **זמן 2ms:**\n    *   P2 מגיע (זמן הגעה 2ms) ונכנס לתור HP. \n    *   HP: [P2]\n    *   P2 CPU Burst 1 נשאר: 8ms.\n\n*   **זמן 3ms:**\n    *   P3 מגיע (זמן הגעה 3ms) ונכנס לתור HP. \n    *   HP: [P2, P3]\n    *   P3 CPU Burst 1 נשאר: 6ms.\n\n*   **זמן 5ms:**\n    *   הקוונטום של P1 מסתיים (רץ 5ms).\n    *   P1 CPU Burst 1 נשאר: 5ms.\n    *   P1 עובר לתור LP (כי לא סיים את ה-CPU Burst).\n    *   HP: [P2, P3]\n    *   LP: [P1]\n    *   החלפת קשר (Context Switch) של 1ms.\n    *   זמן נוכחי: 5ms + 1ms = 6ms.\n\n*   **זמן 6ms:**\n    *   P2 (מה-HP) מתחיל לרוץ.\n\n*   **זמן 11ms:**\n    *   הקוונטום של P2 מסתיים (רץ 5ms).\n    *   P2 CPU Burst 1 נשאר: 3ms.\n    *   P2 עובר לתור LP.\n    *   HP: [P3]\n    *   LP: [P1, P2]\n    *   החלפת קשר של 1ms.\n    *   זמן נוכחי: 11ms + 1ms = 12ms.\n\n*   **זמן 12ms:**\n    *   P3 (מה-HP) מתחיל לרוץ.\n\n*   **זמן 17ms:**\n    *   הקוונטום של P3 מסתיים (רץ 5ms).\n    *   P3 CPU Burst 1 נשאר: 1ms.\n    *   P3 עובר לתור LP.\n    *   HP: []\n    *   LP: [P1, P2, P3]\n    *   החלפת קשר של 1ms.\n    *   זמן נוכחי: 17ms + 1ms = 18ms.\n\n*   **זמן 18ms:**\n    *   תור HP ריק. P1 (מה-LP, FCFS) מתחיל לרוץ. P1 CPU Burst 1 נשאר: 5ms.\n\n*   **זמן 23ms:**\n    *   P1 מסיים את ה-CPU Burst הראשון (רץ 5ms). \n    *   P1 מתחיל פעולת I/O (20ms). P1 עוזב את תורי התזמון.\n    *   P1 יחזור מ-I/O בזמן 23ms + 20ms = 43ms.\n    *   החלפת קשר של 1ms.\n    *   זמן נוכחי: 23ms + 1ms = 24ms.\n\n*   **זמן 24ms:**\n    *   תור HP ריק. P2 (מה-LP, FCFS) מתחיל לרוץ. P2 CPU Burst 1 נשאר: 3ms.\n\n*   **זמן 27ms:**\n    *   P2 מסיים את ה-CPU Burst הראשון (רץ 3ms).\n    *   P2 מתחיל פעולת I/O (10ms). P2 עוזב את תורי התזמון.\n    *   P2 יחזור מ-I/O בזמן 27ms + 10ms = 37ms.\n    *   החלפת קשר של 1ms.\n    *   זמן נוכחי: 27ms + 1ms = 28ms.\n\n*   **זמן 28ms:**\n    *   תור HP ריק. P3 (מה-LP, FCFS) מתחיל לרוץ. P3 CPU Burst 1 נשאר: 1ms.\n\n*   **זמן 29ms:**\n    *   P3 מסיים את ה-CPU Burst הראשון (רץ 1ms). P3 מסיים את כל פעולות ה-CPU שלו.\n    *   **P3 סיום (Completion Time): 29ms.**\n    *   החלפת קשר של 1ms.\n    *   זמן נוכחי: 29ms + 1ms = 30ms.\n\n*   **זמן 30ms - 37ms:**\n    *   ה-CPU אינו פעיל (Idle). אין תהליכים בתורים.\n\n*   **זמן 37ms:**\n    *   P2 מסיים פעולת I/O וחוזר לתור HP. \n    *   P2 מתחיל לרוץ (ה-CPU היה פנוי).\n    *   P2 CPU Burst 2 נשאר: 2ms.\n\n*   **זמן 39ms:**\n    *   P2 מסיים את ה-CPU Burst השני (רץ 2ms). P2 מסיים את כל פעולות ה-CPU שלו.\n    *   **P2 סיום (Completion Time): 39ms.**\n    *   החלפת קשר של 1ms.\n    *   זמן נוכחי: 39ms + 1ms = 40ms.\n\n*   **זמן 40ms - 43ms:**\n    *   ה-CPU אינו פעיל (Idle). אין תהליכים בתורים.\n\n*   **זמן 43ms:**\n    *   P1 מסיים פעולת I/O וחוזר לתור HP. \n    *   P1 מתחיל לרוץ (ה-CPU היה פנוי).\n    *   P1 CPU Burst 2 נשאר: 5ms.\n\n*   **זמן 48ms:**\n    *   P1 מסיים את ה-CPU Burst השני (רץ 5ms). P1 מסיים את כל פעולות ה-CPU שלו.\n    *   **P1 סיום (Completion Time): 48ms.**\n\n\n**חישוב זמני המתנה (Waiting Time):**\nזמן המתנה = זמן סיום - זמן הגעה - סך כל זמן CPU Burst - סך כל זמן I/O.\n\n*   **P1:**\n    *   זמן סיום: 48ms\n    *   זמן הגעה: 0ms\n    *   סך כל זמן CPU Burst: 10ms + 5ms = 15ms\n    *   סך כל זמן I/O: 20ms\n    *   **זמן המתנה ל-P1 = 48 - 0 - 15 - 20 = 13ms.**\n\n*   **P2:**\n    *   זמן סיום: 39ms\n    *   זמן הגעה: 2ms\n    *   סך כל זמן CPU Burst: 8ms + 2ms = 10ms\n    *   סך כל זמן I/O: 10ms\n    *   **זמן המתנה ל-P2 = 39 - 2 - 10 - 10 = 17ms.**\n\n*   **P3:**\n    *   זמן סיום: 29ms\n    *   זמן הגעה: 3ms\n    *   סך כל זמן CPU Burst: 6ms\n    *   סך כל זמן I/O: 0ms\n    *   **זמן המתנה ל-P3 = 29 - 3 - 6 - 0 = 20ms.**",
+      "difficulty_estimation": "Hard"
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Paging",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 22:53:56",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 909,
+      "output_tokens": 357,
+      "total_tokens": 2341
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Paging",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "איזה מהבאים אינו מהווה מידע שניתן למצוא בדרך כלל בערך בטבלת עמודים (PTE - Page Table Entry)?",
+      "code_snippet": null,
+      "options": [
+        "א. מספר מסגרת (Frame Number)",
+        "ב. סיבית תקפות (Valid Bit)",
+        "ג. גודל העמוד (Page Size)",
+        "ד. סיביות הגנה (Protection Bits)",
+        "ה. סיבית שינוי (Dirty Bit)"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג. גודל העמוד (Page Size) הוא פרמטר כלל-מערכתי (או לכל היותר פר-תהליך, אך נקבע על ידי המערכת) ואינו מאוחסן בתוך כל ערך בטבלת העמודים. טבלת העמודים מכילה מידע ספציפי לכל עמוד וכיצד למפות אותו לזיכרון פיזי, כגון מספר המסגרת הפיזית, סיביות תקפות, הגנה ושינוי."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

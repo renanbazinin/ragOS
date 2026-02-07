@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "CPU Scheduling",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 00:14:28",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2646,
+      "output_tokens": 875,
+      "total_tokens": 6744
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "CPU Scheduling",
+      "Processes",
+      "System Calls"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה, המשתמשת ב-fork ליצירת תהליכים בנים. יש להניח שהמערכת מריצה תהליכים על מעבד יחיד (single CPU) ומשתמשת באלגוריתם תזמון מסוג FCFS (First Come, First Served). כמו כן, יש להניח שכל קריאות המערכת מצליחות, ושתהליך האב יוצר את כל התהליכים הבנים לפני שהם מתחילים לרוץ. הפלט הסטנדרטי אינו מבוּפָר (unbuffered).\n\nמה יהיה הפלט המדויק של התוכנית?",
+      "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n#include <sys/wait.h>\n#include <stdlib.h>\n\n#define NUM_CHILDREN 3\n#define PRINT_COUNT 2\n\nint main() {\n    setbuf(stdout, NULL); // Disable buffering for immediate output\n    char chars[NUM_CHILDREN] = {'A', 'B', 'C'};\n\n    for (int i = 0; i < NUM_CHILDREN; ++i) {\n        pid_t pid = fork();\n        if (pid == -1) {\n            perror(\"fork failed\");\n            exit(1);\n        }\n        if (pid == 0) { // Child process\n            for (int j = 0; j < PRINT_COUNT; ++j) {\n                printf(\"%c\", chars[i]);\n            }\n            exit(0);\n        }\n    }\n\n    // Parent waits for all children to complete\n    for (int i = 0; i < NUM_CHILDREN; ++i) {\n        wait(NULL);\n    }\n\n    printf(\"\\nParent finished.\\n\");\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "התוכנית יוצרת 3 תהליכי בנים בלולאה. תהליך האב יוצר את הבנים בסדר: הראשון מדפיס 'A', השני מדפיס 'B', והשלישי מדפיס 'C'. לאחר יצירת כל הבנים, תהליך האב נכנס למצב המתנה (wait) עבורם.\n\nמכיוון שאלגוריתם התזמון הוא FCFS (First Come, First Served) ומוגדר במפורש שתהליך האב יוצר את כל התהליכים הבנים לפני שהם מתחילים לרוץ, התהליכים הבנים יבוצעו על ידי המעבד לפי סדר יצירתם. לכן, תהליך הבן הראשון (שמדפיס 'A') ירוץ עד לסיומו, ואז תהליך הבן השני (שמדפיס 'B') ירוץ עד לסיומו, וכן הלאה. כל תהליך בן מדפיס את התו שלו פעמיים.\n\nלבסוף, לאחר שכל הבנים סיימו את ריצתם, תהליך האב יתעורר מה-wait וידפיס את הודעת הסיום. \n\nהפלט המדויק יהיה:\nAABBCC\nParent finished.\n"
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

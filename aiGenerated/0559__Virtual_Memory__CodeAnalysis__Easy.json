@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 22:41:22",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2806,
+      "output_tokens": 829,
+      "total_tokens": 5557
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Virtual Memory"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C קצרה המקצה מערך של מספרים שלמים. נניח שגודל שלם (int) הוא 4 בתים, וגודל עמוד (page size) במערכת ההפעלה הוא 4KB (כלומר 4096 בתים). המערך ממוקם בכתובת וירטואלית התחלתית 0x10000000. בהתבסס על קוד ה-C המצורף, מהי הכתובת הווירטואלית המדויקת של האיבר arr[250] במערך, ועל איזה מספר עמוד וירטואלי (Virtual Page Number) הוא נופל?",
+      "code_snippet": "#include <stdio.h>\n\nint main() {\n    int arr[1000]; // נניח שהמערך מתחיל בכתובת 0x10000000\n    \n    // פעולות כלשהן על arr...\n    \n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": 10,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "גודל שלם (int) הוא 4 בתים. לכן, האיבר arr[250] נמצא בקיזוז של 250 * 4 = 1000 בתים מהכתובת ההתחלתית של המערך.\n\nהכתובת הווירטואלית של arr[250] היא: 0x10000000 (כתובת התחלתית) + 1000 (קיזוז) = 0x100003E8.\n\nגודל עמוד הוא 4KB, שהם 4096 בתים. המשמעות היא שה-12 ביטים הנמוכים ביותר של הכתובת הווירטואלית (bits 0-11) מייצגים את הקיזוז בתוך העמוד (page offset), והביטים הגבוהים יותר מייצגים את מספר העמוד הווירטואלי (Virtual Page Number - VPN).\n\nכדי למצוא את מספר העמוד הווירטואלי, נחלק את הכתובת הווירטואלית בגודל העמוד:\n0x100003E8 / 4096 = 0x100003E8 / 0x1000.\n\nהכתובת 0x100003E8 נופלת בעמוד שמתחיל בכתובת 0x10000000. מספר העמוד הווירטואלי הוא 0x10000000 / 0x1000 = 0x10000.\nהקיזוז בתוך העמוד הוא 0x3E8 (1000 בתים).\n\nלכן, הכתובת הווירטואלית של arr[250] היא 0x100003E8 והיא נופלת על עמוד וירטואלי מספר 0x10000."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

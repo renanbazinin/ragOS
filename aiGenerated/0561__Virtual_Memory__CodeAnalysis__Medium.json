@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 22:42:19",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3180,
+      "output_tokens": 2251,
+      "total_tokens": 11817
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Virtual Memory",
+      "Paging",
+      "Copy-on-Write",
+      "Processes"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המשתמשת במערך גלובלי גדול. התוכנית מאתחלת חלק מהמערך, ואז מבצעת fork(). תהליך האב ותהליך הבן משנים כל אחד חלק אחר של המערך. יש להניח שמערכת ההפעלה משתמשת בזיכרון וירטואלי עם מנגנון Copy-on-Write (CoW), וגודל דף הוא 4KB. גודל המערך הכולל הוא 4MB (מערך של int-ים).\n\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\n#define PAGE_SIZE 4096 // 4KB\n#define ARRAY_SIZE (1024 * 1024) // 4MB total array size (1024 pages of integers)\n\nint global_array[ARRAY_SIZE]; // Array of integers\n\nint main() {\n    // 1. Initialize first part of the array\n    for (int i = 0; i < ARRAY_SIZE / 2; ++i) {\n        global_array[i] = i;\n    }\n\n    pid_t pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        return 1;\n    } else if (pid == 0) { // Child process\n        // 2. Child modifies the second half of the array\n        for (int i = ARRAY_SIZE / 2; i < ARRAY_SIZE; ++i) {\n            global_array[i] = i * 2;\n        }\n        exit(0);\n    } else { // Parent process\n        // 3. Parent modifies the first half of the array\n        for (int i = 0; i < ARRAY_SIZE / 2; ++i) {\n            global_array[i] = i * 3;\n        }\n        wait(NULL); // Wait for child to finish\n    }\n\n    return 0;\n}\n```\n\nבהתעלם מזיכרון הנדרש לקוד, למחסנית, לערימה או למבני נתונים של מערכת ההפעלה (כגון טבלאות דפים), כמה דפים פיזיים בסך הכל יוקצו על ידי מערכת ההפעלה עבור המערך `global_array` לאחר ששני התהליכים (האב והבן) סיימו את פעולותיהם? הסבירו את חישוביכם לפרטי פרטים.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\n#define PAGE_SIZE 4096 // 4KB\n#define ARRAY_SIZE (1024 * 1024) // 4MB total array size (1024 pages of integers)\n\nint global_array[ARRAY_SIZE]; // Array of integers\n\nint main() {\n    // 1. Initialize first part of the array\n    for (int i = 0; i < ARRAY_SIZE / 2; ++i) {\n        global_array[i] = i;\n    }\n\n    pid_t pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        return 1;\n    } else if (pid == 0) { // Child process\n        // 2. Child modifies the second half of the array\n        for (int i = ARRAY_SIZE / 2; i < ARRAY_SIZE; ++i) {\n            global_array[i] = i * 2;\n        }\n        exit(0);\n    } else { // Parent process\n        // 3. Parent modifies the first half of the array\n        for (int i = 0; i < ARRAY_SIZE / 2; ++i) {\n            global_array[i] = i * 3;\n        }\n        wait(NULL); // Wait for child to finish\n    }\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הסבר:\n1.  **גודל המערך והדפים**:\n    *   גודל המערך `global_array` הוא `1024 * 1024` איברים מסוג `int`. כל `int` הוא 4 בתים.\n    *   גודל המערך הכולל: `4 * 1024 * 1024` בתים = `4MB`.\n    *   גודל דף: `4KB` (`4096` בתים).\n    *   מספר הדפים הכולל הנדרש למערך: `4MB / 4KB` = `1024` דפים.\n\n2.  **שלב 1: אתחול המערך לפני `fork()`**:\n    *   הלולאה הראשונה מאתחלת את החצי הראשון של המערך (`global_array[0]` עד `global_array[ARRAY_SIZE / 2 - 1]`).\n    *   חצי זה של המערך הוא `2MB` (`512` דפים).\n    *   כאשר התהליך כותב לחלק זה של המערך, `512` דפים פיזיים מוקצים עבורו. נניח שדפים אלה מוכנסים לזיכרון פיזי.\n\n3.  **שלב 2: קריאה ל-`fork()` ו-Copy-on-Write (CoW)**:\n    *   כאשר `fork()` נקרא, מרחב הכתובות הוירטואלי של תהליך האב משוכפל עבור תהליך הבן.\n    *   בזכות מנגנון CoW, בתחילה, הן האב והן הבן חולקים את אותם `512` דפים פיזיים שהוקצו בשלב 1. דפים אלה מסומנים כקריאה בלבד (read-only).\n    *   החצי השני של המערך (`global_array[ARRAY_SIZE / 2]` עד `global_array[ARRAY_SIZE - 1]`, שהם `512` דפים נוספים) עדיין לא נגעו בהם. הם ככל הנראה אינם מגובים פיזית או שהם דפי אפס משותפים. במקרה של כתיבה אליהם, יוקצו דפים חדשים בנפרד לכל תהליך.\n\n4.  **שלב 3: שינויים בתהליך הבן**:\n    *   תהליך הבן משנה את החצי השני של המערך (`global_array[ARRAY_SIZE / 2]` עד `global_array[ARRAY_SIZE - 1]`).\n    *   חצי זה של המערך הוא `2MB` (`512` דפים).\n    *   כאשר הבן כותב לדפים אלה לראשונה, מתרחשת תקלת דף (page fault). מכיוון שדפים אלו לא היו בשימוש לפני ה-fork (או היו דפי אפס משותפים), מערכת ההפעלה מקצה `512` דפים פיזיים *חדשים* באופן פרטי עבור הבן.\n\n5.  **שלב 4: שינויים בתהליך האב**:\n    *   תהליך האב משנה את החצי הראשון של המערך (`global_array[0]` עד `global_array[ARRAY_SIZE / 2 - 1]`).\n    *   חצי זה של המערך הוא `2MB` (`512` דפים).\n    *   דפים אלה נגעו בהם בשלב 1, ונחלקו עם הבן במצב read-only לאחר ה-fork.\n    *   כאשר האב מנסה לכתוב לדפים אלה, מתרחשת תקלת דף. מנגנון CoW נכנס לפעולה: מערכת ההפעלה יוצרת עותק של כל דף (מתוך ה-`512` המשותפים) ומקצה `512` דפים פיזיים *חדשים* ופרטיים עבור האב. האב כותב לעותקים הפרטיים שלו.\n\n**חישוב סך הדפים הפיזיים:**\n*   דפים שהוקצו לפני ה-`fork()` (עבור חצי המערך הראשון): `512` דפים.\n*   דפים שהוקצו עבור תהליך הבן (עבור חצי המערך השני): `512` דפים.\n*   דפים שהוקצו עבור תהליך האב (עבור חצי המערך הראשון, בגלל CoW): `512` דפים.\n\n**סך הכל:** `512 + 512 + 512 = 1536` דפים פיזיים."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

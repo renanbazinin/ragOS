@@ -1,0 +1,65 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 22:42:50",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3180,
+      "output_tokens": 2474,
+      "total_tokens": 10913
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Virtual Memory",
+      "Paging",
+      "TLB",
+      "Memory Access Patterns",
+      "Performance"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המשתמשת במערך דו-ממדי גדול. גודל המערך הוא 1024x1024 שלמים (integers).\nבמערכת ההפעלה הנתונה:\n- גודל דף הוא 4KB (קילובייט).\n- גודל שלם (int) הוא 4 בתים.\n- ה-TLB (Translation Lookaside Buffer) יכול להכיל 64 כניסות.\n- מדיניות החלפת דפים (Page Replacement Policy) היא LRU (Least Recently Used).\n- מדיניות החלפת כניסות ב-TLB היא LRU.\n- המערכת משתמשת ב-Demand Paging, והזיכרון ההתחלתי (cache/TLB) ריק לחלוטין.\n\nיש לנתח את קטע הקוד ולענות על השאלות הבאות בהקשר של זיכרון וירטואלי:",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n\n#define MATRIX_SIZE 1024 // 1024x1024 integers\n#define PAGE_SIZE 4096   // 4KB page size\n#define INT_SIZE 4       // Size of int in bytes\n\nint matrix[MATRIX_SIZE][MATRIX_SIZE];\n\nint main() {\n    // Scenario 1: Row-major access\n    for (int i = 0; i < MATRIX_SIZE; ++i) {\n        for (int j = 0; j < MATRIX_SIZE; ++j) {\n            matrix[i][j] = i * j; // Access (i,j)\n        }\n    }\n\n    // Scenario 2: Column-major access\n    for (int j = 0; j < MATRIX_SIZE; ++j) {\n        for (int i = 0; i < MATRIX_SIZE; ++i) {\n            matrix[i][j] = i * j; // Access (i,j)\n        }\n    }\n\n    return 0;\n}"
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "כמה Page Faults יתרחשו במהלך ביצוע \"תרחיש 1: גישה לפי שורה\" (Row-major access)? נמק/י.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "כמה TLB Misses יתרחשו במהלך ביצוע \"תרחיש 1: גישה לפי שורה\" (Row-major access)? נמק/י.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.3",
+        "text": "כמה Page Faults יתרחשו במהלך ביצוע \"תרחיש 2: גישה לפי עמודה\" (Column-major access)? נמק/י.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.4",
+        "text": "כמה TLB Misses יתרחשו במהלך ביצוע \"תרחיש 2: גישה לפי עמודה\" (Column-major access)? נמק/י.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "חישובים כלליים:\n*   גודל המערך: 1024 שורות * 1024 עמודות * 4 בתים/שלם = 4,194,304 בתים = 4MB.\n*   גודל דף: 4096 בתים = 4KB.\n*   מספר השלמים בדף אחד: 4096 בתים / 4 בתים/שלם = 1024 שלמים.\n*   מספר הדפים הכולל הנדרש למערך: 4MB / 4KB = 1024 דפים.\n*   כל שורה במערך מכילה 1024 שלמים, ולכן תופסת 1024 * 4 = 4096 בתים, כלומר בדיוק דף אחד.\n\n1.1. Page Faults בתרחיש 1 (Row-major access):\n*   בגישת Row-major, הלולאה הפנימית (j) עוברת על כל האיברים בשורה הנוכחית (i). ב-C, מערכים דו-ממדיים נשמרים בזיכרון בסדר Row-major, כלומר איברי שורה רציפים בזיכרון.\n*   מאחר שכל שורה תופסת בדיוק דף אחד והגישה היא רציפה בתוך השורה, הגישה הראשונה לאיבר matrix[i][0] תגרום ל-Page Fault (בהנחה שהדף אינו בזיכרון, כפי שצוין). \n*   כל שאר הגישות לאיברים matrix[i][1] עד matrix[i][MATRIX_SIZE-1] יהיו באותו הדף שכבר נטען, ולכן לא יגרמו ל-Page Fault נוסף עבור שורה זו.\n*   מכיוון שיש MATRIX_SIZE = 1024 שורות, וכל שורה גורמת ל-Page Fault אחד, סך הכל יתרחשו 1024 Page Faults.\n*   מספר Page Faults: 1024.\n\n1.2. TLB Misses בתרחיש 1 (Row-major access):\n*   בדומה ל-Page Faults, הגישה הראשונה לכל דף (כלומר, הגישה הראשונה לכל שורה, matrix[i][0]) תגרום ל-TLB Miss, מכיוון שה-TLB ריק בתחילה.\n*   לאחר ה-TLB Miss, ה-PTE (Page Table Entry) של הדף נטען ל-TLB.\n*   כל הגישות הבאות לאיברים באותה השורה (matrix[i][1] עד matrix[i][MATRIX_SIZE-1]) יהיו TLB Hit, מכיוון שה-PTE של הדף כבר נמצא ב-TLB.\n*   מכיוון שיש MATRIX_SIZE = 1024 שורות, וכל שורה גורמת ל-TLB Miss אחד (כדי לטעון את ה-PTE של הדף של אותה שורה), סך הכל יתרחשו 1024 TLB Misses.\n*   ה-TLB מכיל 64 כניסות. כשנגיע לשורה ה-65, ה-PTE של שורה 0 יפלט (LRU). אך מכיוון שהגישה לכל שורה היא חד-פעמית ורציפה, ואין חזרה לדפים קודמים באותו לולאה, כל דף חדש ייצור TLB Miss.\n*   מספר TLB Misses: 1024.\n\n1.3. Page Faults בתרחיש 2 (Column-major access):\n*   בגישת Column-major, הלולאה הפנימית (i) עוברת על איברים בעמודה הנוכחית (j), כלומר matrix[0][j], matrix[1][j], ..., matrix[MATRIX_SIZE-1][j].\n*   כפי שצוין, כל שורה תופסת דף אחד. לכן, הגישה ל-matrix[i][j] עבור i שונה פירושה גישה לדף אחר בזיכרון וירטואלי.\n*   לדוגמה, matrix[0][j] נמצא בדף 0, matrix[1][j] נמצא בדף 1, וכן הלאה, עד matrix[1023][j] שנמצא בדף 1023.\n*   כל גישה לאיבר matrix[i][j] (עבור i משתנה) תגרום ל-Page Fault, מכיוון שאנו ניגשים לדף חדש שאינו בזיכרון (בהנחה שאין מספיק זיכרון פיזי להחזיק את כל הדפים בבת אחת, ודפים קודמים נפלטו).\n*   הלולאה החיצונית (j) רצה 1024 פעמים, והלולאה הפנימית (i) רצה 1024 פעמים. בכל איטרציה של הלולאה הפנימית, אנו ניגשים לדף חדש (שלא נטען לאחרונה).\n*   לכן, מספר ה-Page Faults הכולל יהיה MATRIX_SIZE * MATRIX_SIZE = 1024 * 1024 = 1,048,576.\n*   מספר Page Faults: 1,048,576.\n\n1.4. TLB Misses בתרחיש 2 (Column-major access):\n*   בדומה ל-Page Faults, בגישת Column-major, כל גישה לאיבר matrix[i][j] (כאשר i משתנה) תגרום ל-TLB Miss.\n*   זאת מכיוון שכל גישה לאיבר matrix[i][j] עבור i שונה מובילה לדף וירטואלי שונה.\n*   ה-TLB יכול להכיל רק 64 כניסות. מכיוון שאנו ניגשים ל-1024 דפים שונים ברצף (עבור כל עמודה j), ה-TLB יתמלא ויפלוט כניסות ישנות לפי מדיניות LRU. כלומר, כמעט כל גישה לדף חדש תגרום ל-TLB Miss.\n*   מספר ה-TLB Misses הכולל יהיה MATRIX_SIZE * MATRIX_SIZE = 1024 * 1024 = 1,048,576.\n*   מספר TLB Misses: 1,048,576.",
+      "code_snippet": null
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 00:34:51",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 1056,
+      "total_tokens": 4893
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Concurrency",
+      "Synchronization",
+      "Deadlock"
+    ],
+    "content": {
+      "text": "נתון קטע קוד בשפת C++ המשתמש בשני מנעולים (mutexes) ובשני תהליכונים (threads) המנסים לגשת למשאבים מוגנים על ידי מנעולים אלו. מהי הטענה הנכונה ביותר לגבי התנהגות הקוד תחת הרצה מקבילית?",
+      "code_snippet": "#include <mutex>\n#include <thread>\n#include <iostream>\n#include <vector>\n#include <chrono>\n\nstd::mutex m1;\nstd::mutex m2;\n\nvoid thread_func_A() {\n    std::cout << \"Thread A: Trying to lock m1...\\n\";\n    m1.lock();\n    std::cout << \"Thread A: Locked m1, trying to lock m2...\\n\";\n    std::this_thread::sleep_for(std::chrono::milliseconds(10)); // Potential context switch\n    m2.lock();\n    std::cout << \"Thread A: Locked m2.\\n\";\n    // ... critical section ...\n    m2.unlock();\n    m1.unlock();\n    std::cout << \"Thread A: Unlocked m1 and m2.\\n\";\n}\n\nvoid thread_func_B() {\n    std::cout << \"Thread B: Trying to lock m2...\\n\";\n    m2.lock();\n    std::cout << \"Thread B: Locked m2, trying to lock m1...\\n\";\n    std::this_thread::sleep_for(std::chrono::milliseconds(10)); // Potential context switch\n    m1.lock();\n    std::cout << \"Thread B: Locked m1.\\n\";\n    // ... critical section ...\n    m1.unlock();\n    m2.unlock();\n    std::cout << \"Thread B: Unlocked m1 and m2.\\n\";\n}\n\n// Usage example:\n// int main() {\n//     std::thread t1(thread_func_A);\n//     std::thread t2(thread_func_B);\n//     t1.join();\n//     t2.join();\n//     return 0;\n// }",
+      "options": [
+        "א. הקוד ירוץ תמיד ללא בעיות ויסיים את פעולתו בהצלחה.",
+        "ב. הקוד יגרום בהכרח למצב של קיפאון (Deadlock).",
+        "ג. הקוד עלול להיכנס למצב של קיפאון (Deadlock), אך אינו מובטח.",
+        "ד. הקוד עלול לגרום למצב של תחרות (Race Condition) בגישה למנעולים, אך לא לקיפאון.",
+        "ה. הקוד יגרום לשגיאת קומפילציה עקב שימוש לא נכון במנעולים."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "הקוד מדגים מצב קלאסי של פוטנציאל לקיפאון (Deadlock). תהליכון A מנסה לתפוס את מנעול m1 ואז את m2, בעוד שתהליכון B מנסה לתפוס את מנעול m2 ואז את m1. אם יתרחש תזמון מסוים שבו תהליכון A יתפוס את m1 ותהליכון B יתפוס את m2 (לפני שכל אחד מהם יצליח לתפוס את המנעול השני), שניהם ימתינו זה לזה לשחרור המנעול שהשני מחזיק, וכתוצאה מכך תיווצר חסימה הדדית – קיפאון. עם זאת, קיפאון אינו מובטח. ייתכן שתהליכון אחד יצליח לתפוס את שני המנעולים ולשחרר אותם לפני שהתהליכון השני יגיע לניסיון תפיסת המנעול השני שלו. לכן, הטענה הנכונה ביותר היא שהקוד עלול להיכנס למצב של קיפאון, אך זה אינו מובטח."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

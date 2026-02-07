@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Paging",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 23:15:31",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3180,
+      "output_tokens": 2338,
+      "total_tokens": 9584
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Paging",
+      "Memory Management",
+      "TLB",
+      "Locality"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המבצעת גישה לזיכרון בשתי דרכים שונות על מערך גדול. גודל דף במערכת הוא 4KB (4096 בתים). ה-TLB (Translation Lookaside Buffer) במערכת מכיל 64 כניסות. יש להתעלם מהשפעות מטמון הנתונים (data cache) ולהתמקד בהתנהגות ה-Paging וה-TLB בלבד.\n\n```c\n#include <stdio.h>\n#include <stdlib.h>\n\n#define ARRAY_SIZE (256 * 1024 * 1024) // 256 MB\n#define PAGE_SIZE 4096 // 4 KB\n\nint main() {\n    char *arr = (char *)malloc(ARRAY_SIZE);\n    if (arr == NULL) {\n        perror(\"malloc failed\");\n        return 1;\n    }\n\n    // Ensure all pages are mapped and resident in physical memory.\n    // This loop forces initial page faults for all pages.\n    for (long i = 0; i < ARRAY_SIZE; i += PAGE_SIZE) {\n        arr[i] = 0;\n    }\n\n    // --- Loop 1: Sequential Access ---\n    printf(\"Starting sequential access (Loop 1)...\\n\");\n    for (long i = 0; i < ARRAY_SIZE; ++i) {\n        arr[i] = (char)(i % 256);\n    }\n    printf(\"Sequential access finished.\\n\");\n\n    // --- Loop 2: Strided Access ---\n    // Stride is PAGE_SIZE * 2 to ensure we hit different pages frequently\n    printf(\"Starting strided access (Loop 2)...\\n\");\n    for (long i = 0; i < ARRAY_SIZE; i += (PAGE_SIZE * 2)) {\n        arr[i] = (char)(i % 256);\n    }\n    printf(\"Strided access finished.\\n\");\n\n    free(arr);\n    return 0;\n}\n```\n\n**שאלות:**\n1.  השוו ונתחו את מספר ה-TLB misses הצפוי עבור \"לולאה 1: גישה סדרתית\" לעומת \"לולאה 2: גישה מדלגת\". הסבירו מדוע קיים הבדל.\n2.  האם לולאה כלשהי עלולה לגרום ל-page faults נוספים (מעבר לאלה שנגרמו על ידי אתחול המערך)? הסבירו מדוע.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n\n#define ARRAY_SIZE (256 * 1024 * 1024) // 256 MB\n#define PAGE_SIZE 4096 // 4 KB\n\nint main() {\n    char *arr = (char *)malloc(ARRAY_SIZE);\n    if (arr == NULL) {\n        perror(\"malloc failed\");\n        return 1;\n    }\n\n    // Ensure all pages are mapped and resident in physical memory.\n    // This loop forces initial page faults for all pages.\n    for (long i = 0; i < ARRAY_SIZE; i += PAGE_SIZE) {\n        arr[i] = 0;\n    }\n\n    // --- Loop 1: Sequential Access ---\n    printf(\"Starting sequential access (Loop 1)...\\n\");\n    for (long i = 0; i < ARRAY_SIZE; ++i) {\n        arr[i] = (char)(i % 256);\n    }\n    printf(\"Sequential access finished.\\n\");\n\n    // --- Loop 2: Strided Access ---\n    // Stride is PAGE_SIZE * 2 to ensure we hit different pages frequently\n    printf(\"Starting strided access (Loop 2)...\\n\");\n    for (long i = 0; i < ARRAY_SIZE; i += (PAGE_SIZE * 2)) {\n        arr[i] = (char)(i % 256);\n    }\n    printf(\"Strided access finished.\\n\");\n\n    free(arr);\n    return 0;\n}\n",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": 20,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.  **השוואת TLB misses:**\n    *   **לולאה 1 (גישה סדרתית):** לולאה זו ניגשת לבתים בזיכרון באופן רציף. בכל פעם שהתוכנית ניגשת לדף חדש (כלומר, כתובת זיכרון שעוברת לדף אחר), תתרחש TLB miss אם ה-PTE (Page Table Entry) עבור דף זה אינו נמצא כבר ב-TLB. לאחר שה-PTE נטען ל-TLB, כל הגישות הבאות לבתים בתוך אותו דף יגרמו ל-TLB hit. מאחר וגודל ה-TLB הוא 64 כניסות, הוא יכול להכיל מיפויים עבור 64 דפים, שהם 64 * 4KB = 256KB. המערך כולו גדול בהרבה (256MB). לכן, ה-TLB יתמלא ויתחיל לפנות כניסות ישנות. אך בגלל הגישה הסדרתית, בכל פעם שניגשים לדף חדש, סביר להניח שהדף שפונה הוא הדף שהיה בשימוש לפני זמן רב, והדף החדש הנטען יהיה בשימוש ל-4KB הבאים. לכן, מספר ה-TLB misses יהיה בקירוב מספר הדפים הכולל במערך: `ARRAY_SIZE / PAGE_SIZE = 256MB / 4KB = 65536` TLB misses.\n    *   **לולאה 2 (גישה מדלגת):** לולאה זו ניגשת לזיכרון בקפיצות של `PAGE_SIZE * 2 = 8KB`. כל קפיצה כזו מובילה לכתובת שנמצאת בדף *שונה* מהדף הקודם אליו ניגשנו (למעשה, היא מדלגת על דף אחד ומגיעה לדף הבא אחריו). מאחר וכל גישה היא לדף אחר, וגודל ה-TLB (64 כניסות) קטן בהרבה ממספר הדפים הכולל אליהם ניגשים בלולאה זו (שהוא `ARRAY_SIZE / (PAGE_SIZE * 2) = 256MB / 8KB = 32768` דפים ייחודיים), כמעט כל גישה תגרום ל-TLB miss. בכל פעם שניגשים לדף חדש, ה-PTE שלו יוכנס ל-TLB, אך מכיוון שהגישות אינן סדרתיות וה-TLB קטן יחסית למספר הדפים הייחודיים שאליהם ניגשים, סביר להניח שה-PTE שהוכנס קודם לכן כבר פונה. לכן, מספר ה-TLB misses יהיה גבוה מאוד, בקירוב `ARRAY_SIZE / (PAGE_SIZE * 2) = 32768`.\n    *   **הבדל:** לולאה 2 תגרום למספר TLB misses גבוה בהרבה מלולאה 1. הסיבה לכך היא שלולאה 1 מנצלת את עקרון המקומיות המרחבית (spatial locality) בצורה יעילה, מה שמאפשר ל-TLB למפות אזור זיכרון גדול יחסית (256KB) לפני שהוא נאלץ לפנות כניסות. לעומת זאת, לולאה 2 \"מביסה\" את ה-TLB על ידי דילוג קבוע לדפים חדשים, ובכך כמעט כל גישה גורמת ל-TLB miss.\n\n2.  **Page Faults נוספים:**\n    *   הלולאה הראשונית `for (long i = 0; i < ARRAY_SIZE; i += PAGE_SIZE)` מבצעת גישה לכל דף במערך. פעולה זו גורמת ל-page fault ראשוני עבור כל דף, ומבטיחה שכל הדפים המרכיבים את המערך `arr` יטענו לזיכרון פיזי וימופו על ידי טבלת הדפים של התהליך.\n    *   לאחר לולאת האתחול, כל הדפים של המערך כבר נמצאים בזיכרון פיזי. לכן, הן \"לולאה 1: גישה סדרתית\" והן \"לולאה 2: גישה מדלגת\" ניגשות לכתובות זיכרון שכבר ממופות וממוקמות בזיכרון הפיזי.\n    *   בהנחה שאין לחץ זיכרון משמעותי במערכת שיגרום ל-OS לפנות דפים מהזיכרון הפיזי (השאלה מבקשת להתמקד בהתנהגות ה-Paging וה-TLB בלבד ולהתעלם מהשפעות מטמון נתונים), לא צפויים להתרחש page faults *נוספים* באף אחת מהלולאות, מעבר לאלה שנגרמו על ידי לולאת האתחול.",
+      "code_snippet": null
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

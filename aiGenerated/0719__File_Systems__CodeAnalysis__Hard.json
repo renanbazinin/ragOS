@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "File Systems",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 23:52:31",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3062,
+      "output_tokens": 2636,
+      "total_tokens": 10967
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "File Systems",
+      "Links",
+      "System Calls",
+      "Inode"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C הבאה, המבצעת סדרת פעולות על מערכת הקבצים. נתחו את הקוד וציינו את הפלט המדויק של התוכנית, כולל הודעות שגיאה מ-`perror` במקרה של כשל. יש להניח שהתיקייה הנוכחית ריקה לפני הרצת התוכנית וכל קריאות המערכת מצליחות אלא אם כן צוין אחרת.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/stat.h>\n#include <fcntl.h>\n#include <string.h>\n#include <errno.h> // For errno\n\nint main() {\n    // 1. Create a file and write some content\n    int fd = open(\"original.txt\", O_CREAT | O_WRONLY | O_TRUNC, 0644);\n    if (fd == -1) { perror(\"open original.txt\"); return 1; }\n    write(fd, \"Hello World\\n\", 12);\n    close(fd);\n    printf(\"1. Created original.txt\\n\");\n\n    // 2. Create a hard link to original.txt\n    if (link(\"original.txt\", \"hardlink.txt\") == -1) { perror(\"link hardlink.txt\"); return 1; }\n    printf(\"2. Created hardlink.txt pointing to original.txt\\n\");\n\n    // 3. Create a symbolic link to original.txt\n    if (symlink(\"original.txt\", \"symlink.txt\") == -1) { perror(\"symlink symlink.txt\"); return 1; }\n    printf(\"3. Created symlink.txt pointing to original.txt\\n\");\n\n    // 4. Rename original.txt to new_name.txt\n    if (rename(\"original.txt\", \"new_name.txt\") == -1) { perror(\"rename original.txt\"); return 1; }\n    printf(\"4. Renamed original.txt to new_name.txt\\n\");\n\n    // 5. Try to read from hardlink.txt\n    char buffer[100];\n    int bytes_read;\n    fd = open(\"hardlink.txt\", O_RDONLY);\n    if (fd == -1) { perror(\"5. open hardlink.txt (after rename)\"); }\n    else {\n        bytes_read = read(fd, buffer, sizeof(buffer) - 1);\n        if (bytes_read > 0) {\n            buffer[bytes_read] = '\\0';\n            printf(\"5. Read from hardlink.txt: %s\", buffer);\n        }\n        close(fd);\n    }\n\n    // 6. Try to read from symlink.txt\n    fd = open(\"symlink.txt\", O_RDONLY);\n    if (fd == -1) { perror(\"6. open symlink.txt (after rename)\"); } // This will fail\n    else {\n        bytes_read = read(fd, buffer, sizeof(buffer) - 1);\n        if (bytes_read > 0) {\n            buffer[bytes_read] = '\\0';\n            printf(\"6. Read from symlink.txt: %s\", buffer);\n        }\n        close(fd);\n    }\n    \n    // 7. Unlink hardlink.txt\n    if (unlink(\"hardlink.txt\") == -1) { perror(\"7. unlink hardlink.txt\"); return 1; }\n    printf(\"7. Unlinked hardlink.txt\\n\");\n\n    // 8. Try to read from new_name.txt\n    fd = open(\"new_name.txt\", O_RDONLY);\n    if (fd == -1) { perror(\"8. open new_name.txt (after unlink hardlink)\"); }\n    else {\n        bytes_read = read(fd, buffer, sizeof(buffer) - 1);\n        if (bytes_read > 0) {\n            buffer[bytes_read] = '\\0';\n            printf(\"8. Read from new_name.txt: %s\", buffer);\n        }\n        close(fd);\n    }\n\n    // 9. Unlink new_name.txt\n    if (unlink(\"new_name.txt\") == -1) { perror(\"9. unlink new_name.txt\"); return 1; }\n    printf(\"9. Unlinked new_name.txt\\n\");\n\n    // 10. Try to read from symlink.txt\n    fd = open(\"symlink.txt\", O_RDONLY);\n    if (fd == -1) { perror(\"10. open symlink.txt (after unlink new_name)\"); } // This will also fail\n    else {\n        bytes_read = read(fd, buffer, sizeof(buffer) - 1);\n        if (bytes_read > 0) {\n            buffer[bytes_read] = '\\0';\n            printf(\"10. Read from symlink.txt: %s\", buffer);\n        }\n        close(fd);\n    }\n\n    return 0;\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "ניתוח התוכנית צעד אחר צעד:\n\n1.  **`open(\"original.txt\", ...)` וכתיבה:**\n    *   נוצר קובץ בשם `original.txt` עם התוכן \"Hello World\\n\".\n    *   פלט: `1. Created original.txt`\n2.  **`link(\"original.txt\", \"hardlink.txt\")`:**\n    *   נוצר קישור קשיח (hard link) בשם `hardlink.txt` המצביע לאותו Inode של `original.txt`. כעת, לשני השמות יש Inode משותף ומונה הקישורים (link count) של ה-Inode הוא 2.\n    *   פלט: `2. Created hardlink.txt pointing to original.txt`\n3.  **`symlink(\"original.txt\", \"symlink.txt\")`:**\n    *   נוצר קישור סימבולי (symbolic link) בשם `symlink.txt`. קובץ זה מכיל את המחרוזת \"original.txt\" ולא מצביע ישירות ל-Inode של הקובץ המקורי.\n    *   פלט: `3. Created symlink.txt pointing to original.txt`\n4.  **`rename(\"original.txt\", \"new_name.txt\")`:**\n    *   הקובץ `original.txt` משנה את שמו ל-`new_name.txt`. פעולה זו משנה את שם הרשומה בספרייה, אך ה-Inode נשאר זהה. מונה הקישורים של ה-Inode אינו משתנה.\n    *   פלט: `4. Renamed original.txt to new_name.txt`\n5.  **`open(\"hardlink.txt\", O_RDONLY)` וקריאה:**\n    *   `hardlink.txt` עדיין מצביע ל-Inode המשותף (שכעת מקושר גם ל-`new_name.txt`). לכן, הפתיחה תצליח והתוכן ייקרא.\n    *   פלט: `5. Read from hardlink.txt: Hello World\\n`\n6.  **`open(\"symlink.txt\", O_RDONLY)` וקריאה:**\n    *   `symlink.txt` מצביע למחרוזת \"original.txt\". מכיוון ש-`original.txt` כבר לא קיים (שמו שונה ל-`new_name.txt`), הקישור הסימבולי הפך לקישור תלוי (dangling symlink). ניסיון פתיחתו יכשל עם שגיאת \"No such file or directory\" (ENOENT).\n    *   פלט: `6. open symlink.txt (after rename): No such file or directory`\n7.  **`unlink(\"hardlink.txt\")`:**\n    *   הקישור הקשיח `hardlink.txt` נמחק. מונה הקישורים של ה-Inode המשותף יורד מ-2 ל-1. מכיוון שמונה הקישורים עדיין לא אפס, נתוני הקובץ לא נמחקים.\n    *   פלט: `7. Unlinked hardlink.txt`\n8.  **`open(\"new_name.txt\", O_RDONLY)` וקריאה:**\n    *   `new_name.txt` הוא כעת הקישור היחיד ל-Inode. פתיחתו תצליח והתוכן ייקרא.\n    *   פלט: `8. Read from new_name.txt: Hello World\\n`\n9.  **`unlink(\"new_name.txt\")`:**\n    *   הקובץ `new_name.txt` נמחק. מונה הקישורים של ה-Inode יורד מ-1 ל-0. מכיוון שמונה הקישורים הגיע לאפס, נתוני הקובץ (הבלוקים) ישוחררו.\n    *   פלט: `9. Unlinked new_name.txt`\n10. **`open(\"symlink.txt\", O_RDONLY)` וקריאה:**\n    *   `symlink.txt` עדיין מצביע למחרוזת \"original.txt\". מכיוון שגם `original.txt` (או `new_name.txt`) כבר לא קיימים, הקישור הסימבולי נשאר תלוי ופתיחתו תיכשל שוב עם אותה שגיאה.\n    *   פלט: `10. open symlink.txt (after unlink new_name): No such file or directory`\n\n**פלט סופי משוער (כולל הודעות perror):**\n```\n1. Created original.txt\n2. Created hardlink.txt pointing to original.txt\n3. Created symlink.txt pointing to original.txt\n4. Renamed original.txt to new_name.txt\n5. Read from hardlink.txt: Hello World\n6. open symlink.txt (after rename): No such file or directory\n7. Unlinked hardlink.txt\n8. Read from new_name.txt: Hello World\n9. Unlinked new_name.txt\n10. open symlink.txt (after unlink new_name): No such file or directory\n```"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

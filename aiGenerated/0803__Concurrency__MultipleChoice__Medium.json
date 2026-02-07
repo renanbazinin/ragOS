@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 00:30:18",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 939,
+      "output_tokens": 450,
+      "total_tokens": 2337
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Concurrency",
+      "Synchronization",
+      "Mutexes"
+    ],
+    "content": {
+      "text": "בהינתן mutex מסוג POSIX (pthreads) סטנדרטי, מהי התוצאה הסבירה ביותר כאשר תהליך מנסה לבצע unlock על mutex שאינו נעול על ידו?",
+      "code_snippet": null,
+      "options": [
+        "הפעולה מצליחה, וה-mutex הופך ללא נעול.",
+        "התהליך נכנס למצב deadlock.",
+        "הפעולה גורמת לשגיאת זמן ריצה (runtime error) או התנהגות בלתי מוגדרת (undefined behavior).",
+        "התהליך ממתין עד שה-mutex יהיה זמין."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "הפעולה גורמת לשגיאת זמן ריצה (runtime error) או התנהגות בלתי מוגדרת (undefined behavior).",
+      "explanation": "בתקן POSIX, ניסיון לשחרר mutex באמצעות `pthread_mutex_unlock` על ידי תהליך שאינו מחזיק בו מוביל להתנהגות בלתי מוגדרת (undefined behavior). בפועל, הדבר עלול להתבטא בקריסת התוכנית, שחיתות נתונים (זיכרון), או מצב שבו ה-mutex נראה כפנוי למרות שתהליך אחר עדיין עשוי להחזיק בו באופן לוגי, מה שמוביל ל-race conditions או deadlocks עתידיים. על כן, יש לוודא תמיד שתהליך משחרר רק mutex שהוא עצמו נעל."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

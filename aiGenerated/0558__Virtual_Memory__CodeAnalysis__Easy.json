@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 22:41:09",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2806,
+      "output_tokens": 566,
+      "total_tokens": 4634
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Virtual Memory",
+      "Memory Management",
+      "Segmentation Faults",
+      "Pointers"
+    ],
+    "content": {
+      "text": "נתונה פיסת קוד C הבאה. בהתחשב בידע שלך על זיכרון וירטואלי במערכות הפעלה, הסבר מה יקרה כאשר קוד זה יבוצע. התייחס להשפעה על התהליך ולמושגים רלוונטיים של זיכרון וירטואלי.",
+      "code_snippet": "#include <stdio.h>\n\nint main() {\n    int *ptr; // Pointer declared but not initialized\n    *ptr = 10; // Attempting to dereference an uninitialized pointer\n    printf(\"Value: %d\\n\", *ptr);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": 15,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הקוד מנסה לכתוב למיקום זיכרון שאינו מוגדר עבור המצביע `ptr`. כאשר המצביע `ptr` מוכרז, הוא מכיל ערך אקראי (garbage value), מכיוון שלא אותחל לכתובת חוקית. הניסיון לבצע `*ptr = 10;` יגרום למערכת ההפעלה לנסות לגשת לכתובת זיכרון וירטואלית אקראית זו. סביר להניח שכתובת זו אינה ממופה למסגרת עמודים פיזית (physical page frame) בטבלת העמודים של התהליך, או שהיא נמצאת מחוץ לתחום הזיכרון המוקצה לתהליך. כתוצאה מכך, יתרחש 'Page Fault' (כשל עמוד) חומרה. מערכת ההפעלה תזהה שזוהי גישה בלתי חוקית לזיכרון (ולא רק עמוד שצריך להיטען מהדיסק), ותשלח אות `SIGSEGV` (Segmentation Violation) לתהליך. קבלת אות זה תוביל לסיום בלתי צפוי של התהליך (crash) עם הודעת 'Segmentation fault'."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

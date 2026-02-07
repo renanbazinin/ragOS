@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "CPU Scheduling",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 00:01:47",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2314,
+      "output_tokens": 444,
+      "total_tokens": 3584
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "CPU Scheduling",
+      "Scheduling Algorithms"
+    ],
+    "content": {
+      "text": "תאר את אלגוריתם תזמון המעבד First-Come, First-Served (FCFS). ציין יתרון וחיסרון עיקריים של אלגוריתם זה.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "תיאור: אלגוריתם FCFS (First-Come, First-Served) מתזמן תהליכים לפי סדר הגעתם לתור המוכנים (ready queue). התהליך הראשון שמגיע מקבל את המעבד, ורץ עד לסיומו או עד שהוא נכנס למצב המתנה (לדוגמה, פעולת קלט/פלט). זהו אלגוריתם לא מונע (non-preemptive).\nיתרון עיקרי: פשוט מאוד ליישום ולהבנה. קל להבטיח הוגנות בסיסית בכך ש\"הראשון שהגיע הוא הראשון שמקבל שירות\".\nחיסרון עיקרי: יכול לגרום לזמני המתנה וזמני מחזור (turnaround time) ארוכים מאוד עבור תהליכים קצרים, במיוחד אם תהליך ארוך מגיע ראשון. תופעה זו מכונה 'אפקט השיירה' (convoy effect), והיא עלולה להוביל לניצול נמוך של המעבד אם תהליכים ארוכים גורמים לתהליכי I/O-bound קצרים לחכות זמן רב."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

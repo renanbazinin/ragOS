@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "CPU Scheduling",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 00:16:07",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2646,
+      "output_tokens": 1501,
+      "total_tokens": 8490
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "CPU Scheduling",
+      "Processes",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה. הניחו כי המערכת פועלת על מעבד יחיד (single CPU) ומשתמשת באלגוריתם תזמון Round Robin (RR) עם קוונטום זמן (time quantum) של 1 יחידת זמן.\nכל קריאת `printf` נחשבת לפעולה שלוקחת בדיוק 1 יחידת זמן CPU. זמן יצירת תהליך (`fork`) וזמן החלפת הקשר (context switch) זניחים (0 יחידות זמן).\nלאחר קריאת ה-`fork`, שני התהליכים (האב והבן) מועברים לתור המוכנים. נניח שהתהליך האב ממשיך לרוץ את שארית הקוונטום שלו (אם נותרה), ולאחר מכן מתבצעת החלפת קשר. אם לשניהם יש קוונטום מלא, האב ירוץ, ואז הבן, וחוזר חלילה.\nמהו פלט אפשרי אחד של התוכנית? נמקו את תשובתכם בפירוט.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h> // For fork, getpid\n#include <sys/wait.h> // For wait\n\nint main() {\n    setbuf(stdout, NULL); // Disable buffering for immediate output\n    printf(\"Start\\n\");\n    pid_t pid = fork();\n\n    if (pid == -1) {\n        perror(\"fork failed\");\n        exit(1);\n    }\n\n    if (pid == 0) { // Child process\n        for (int i = 0; i < 3; ++i) {\n            printf(\"Child: %d\\n\", i);\n        }\n        printf(\"Child Done\\n\");\n        exit(0); // Child exits cleanly\n    } else { // Parent process\n        for (int i = 0; i < 2; ++i) {\n            printf(\"Parent: %d\\n\", i);\n        }\n        wait(NULL); // Parent waits for child\n        printf(\"Parent Done\\n\");\n    }\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "התוכנית מתחילה בהדפסת 'Start' ולאחר מכן יוצרת תהליך בן באמצעות `fork()`. קריאת `setbuf(stdout, NULL)` מבטיחה שהפלט יודפס מיד וללא בופר.\n\nלאחר ה-`fork`, שני התהליכים (האב והבן) נמצאים בתור המוכנים. על פי כלל התזמון הנתון (Round Robin עם קוונטום של יחידת זמן אחת, כאשר כל `printf` לוקח יחידת זמן אחת), התהליכים יבצעו פעולה אחת בתורם.\n\nשלבי הריצה:\n1.  התהליך הראשי (האב) מתחיל. מדפיס \"Start\".\n2.  האב מבצע `fork()`. נוצר תהליך בן. שני התהליכים (האב והבן) מוכנים לריצה.\n3.  נניח שהאב מקבל את המעבד ראשון (על פי ההנחה שהאב ממשיך לרוץ או מקבל את התור ראשון). \n4.  **אב**: מדפיס \"Parent: 0\". (מנצל יחידת זמן אחת). הקוונטום נגמר, מתבצעת החלפת קשר, והאב עובר לסוף תור המוכנים.\n5.  **בן**: מקבל את המעבד. מדפיס \"Child: 0\". (מנצל יחידת זמן אחת). הקוונטום נגמר, מתבצעת החלפת קשר, והבן עובר לסוף תור המוכנים.\n6.  **אב**: מקבל את המעבד. מדפיס \"Parent: 1\". (מנצל יחידת זמן אחת). הקוונטום נגמר, מתבצעת החלפת קשר, והאב עובר לסוף תור המוכנים.\n7.  **בן**: מקבל את המעבד. מדפיס \"Child: 1\". (מנצל יחידת זמן אחת). הקוונטום נגמר, מתבצעת החלפת קשר, והבן עובר לסוף תור המוכנים.\n8.  **אב**: מקבל את המעבד. הלולאה שלו מסתיימת. קורא ל-`wait(NULL)` ונכנס למצב חסימה (Blocked) עד שהבן יסיים את פעולתו.\n9.  **בן**: מקבל את המעבד. מדפיס \"Child: 2\". (מנצל יחידת זמן אחת). הקוונטום נגמר, מתבצעת החלפת קשר, והבן עובר לסוף תור המוכנים.\n10. **בן**: מקבל את המעבד. מדפיס \"Child Done\". (מנצל יחידת זמן אחת). הקוונטום נגמר, הבן קורא ל-`exit(0)` ומסיים את פעולתו (Terminated).\n11. **אב**: הבן סיים, מה שגורם לשחרור האב ממצב חסימה. האב עובר לתור המוכנים.\n12. **אב**: מקבל את המעבד. מדפיס \"Parent Done\".\n13. **אב**: מסיים את פעולתו (Terminated).\n\nלכן, פלט אפשרי אחד של התוכנית יהיה:\n```\nStart\nParent: 0\nChild: 0\nParent: 1\nChild: 1\nChild: 2\nChild Done\nParent Done\n```"
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 00:32:48",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 1364,
+      "total_tokens": 6071
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Concurrency",
+      "Deadlock",
+      "Livelock",
+      "Mutexes",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא המשתמש בשני מנעולים (mutex_A, mutex_B) ובשני תהליכונים (thread_func_1, thread_func_2) המנסים לגשת למשאבים משותפים:\n\n```c\n#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h>\n#include <stdbool.h>\n\npthread_mutex_t mutex_A = PTHREAD_MUTEX_INITIALIZER;\npthread_mutex_t mutex_B = PTHREAD_MUTEX_INITIALIZER;\n\nvoid* thread_func_1(void* arg) {\n    while (true) {\n        pthread_mutex_lock(&mutex_A);\n        printf(\"Thread 1: Locked A. Trying B...\\n\");\n        if (pthread_mutex_trylock(&mutex_B) == 0) { // Successfully locked B\n            printf(\"Thread 1: Locked B. Doing work...\\n\");\n            // Critical section\n            sleep(1); // Simulate work\n            pthread_mutex_unlock(&mutex_B);\n            pthread_mutex_unlock(&mutex_A);\n            break; // Done with this iteration\n        } else {\n            printf(\"Thread 1: Could not lock B. Unlocking A and retrying...\\n\");\n            pthread_mutex_unlock(&mutex_A);\n            sleep(1); // Backoff\n        }\n    }\n    return NULL;\n}\n\nvoid* thread_func_2(void* arg) {\n    while (true) {\n        pthread_mutex_lock(&mutex_B);\n        printf(\"Thread 2: Locked B. Trying A...\\n\");\n        if (pthread_mutex_trylock(&mutex_A) == 0) { // Successfully locked A\n            printf(\"Thread 2: Locked A. Doing work...\\n\");\n            // Critical section\n            sleep(1); // Simulate work\n            pthread_mutex_unlock(&mutex_A);\n            pthread_mutex_unlock(&mutex_B);\n            break; // Done with this iteration\n        } else {\n            printf(\"Thread 2: Could not lock A. Unlocking B and retrying...\\n\");\n            pthread_mutex_unlock(&mutex_B);\n            sleep(1); // Backoff\n        }\n    }\n    return NULL;\n}\n\n// הערה: פונקציית main יוצרת את שני התהליכונים וממתינה להם.\n// int main() {\n//     pthread_t t1, t2;\n//     pthread_create(&t1, NULL, thread_func_1, NULL);\n//     pthread_create(&t2, NULL, thread_func_2, NULL);\n//     pthread_join(t1, NULL);\n//     pthread_join(t2, NULL);\n//     printf(\"Both threads finished.\\n\");\n//     return 0;\n// }\n```\n\nאיזו טענה נכונה לגבי התנהגות התוכנית כאשר שני התהליכונים רצים במקביל?",
+      "code_snippet": null,
+      "options": [
+        "א. התוכנית תמיד תבצע deadlock.",
+        "ב. התוכנית תמיד תרוץ ללא deadlock ותסיים בהצלחה.",
+        "ג. התוכנית עלולה להיכנס למצב של livelock, בו התהליכונים מבזבזים זמן מעבד מבלי להתקדם.",
+        "ד. התוכנית עלולה להיכנס למצב של deadlock, אך לעולם לא למצב של livelock.",
+        "ה. התוכנית עלולה להיתקל ב-race condition המוביל לנתונים שגויים."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "התוכנית מנסה למנוע deadlock על ידי שחרור המנעול הראשון (mutex_A או mutex_B) אם המנעול השני לא נתפס בהצלחה באמצעות `pthread_mutex_trylock`. אסטרטגיה זו אכן מונעת deadlock קלאסי, שכן אף תהליכון לא יחזיק במנעול אחד וימתין באופן אינסופי למנעול אחר שתפוס. עם זאת, ייתכן מצב שבו שני התהליכונים יתפסו בו-זמנית את המנעול הראשון שלהם (thread_func_1 את mutex_A ו-thread_func_2 את mutex_B), ינסו לתפוס את המנעול השני, ייכשלו, ישחררו את המנעול שתפוס אצלם, ימתינו (sleep(1)) ויחזרו על התהליך. מצב זה, שבו תהליכונים מבזבזים משאבי מעבד על ניסיונות חוזרים ונשנים ללא התקדמות, נקרא livelock. לכן, התוכנית עלולה להיכנס למצב של livelock. אין כאן deadlock כי אף תהליכון לא ממתין לעד למנעול כשהוא מחזיק מנעול אחר. כמו כן, השימוש במנעולים מונע race conditions על הנתונים המשותפים (שאינם מופיעים בקוד, אך המנעולים מיועדים להגן עליהם)."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

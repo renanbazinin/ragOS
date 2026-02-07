@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "File Systems",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 23:27:10",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1032,
+      "output_tokens": 506,
+      "total_tokens": 4222
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "File Systems",
+      "Disk Management",
+      "Allocation Methods"
+    ],
+    "content": {
+      "text": "במערכת קבצים המשתמשת בשיטת הקצאה רציפה (Contiguous Allocation) עבור קבצים, מהי הבעיה המרכזית בניהול שטח דיסק הנובעת משיטה זו?",
+      "code_snippet": null,
+      "options": [
+        "א. היא סובלת מפיצול פנימי (Internal Fragmentation) משמעותי, שאינו מאפשר ניצול יעיל של בלוקים.",
+        "ב. היא דורשת טבלאות אינדקס גדולות מאוד (FAT או Inode Table) כדי לאתר את בלוקי הקובץ.",
+        "ג. היא מקשה מאוד על גישה אקראית (Random Access) לנתונים בתוך קובץ.",
+        "ד. היא נוטה לסבול מפיצול חיצוני (External Fragmentation) חמור, המקשה על הקצאת קבצים חדשים והגדלת קיימים."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ד",
+      "explanation": "ד'. שיטת הקצאה רציפה דורשת שכל הבלוקים של קובץ יהיו רציפים על הדיסק. כאשר קבצים נמחקים או משתנים בגודלם, נוצרים חורים (gaps) של שטח פנוי שאינם רציפים. עם הזמן, הדיסק הופך למפוצל חיצונית (External Fragmentation), מה שאומר שיש הרבה שטח פנוי בסך הכל, אך הוא מפוצל לחתיכות קטנות שאינן גדולות מספיק כדי להכיל קובץ חדש גדול או כדי להגדיל קובץ קיים. זוהי הבעיה המרכזית בניהול שטח אחסון בשיטה זו."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

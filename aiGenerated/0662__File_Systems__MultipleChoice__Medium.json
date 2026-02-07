@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "File Systems",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 23:27:40",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1032,
+      "output_tokens": 455,
+      "total_tokens": 2123
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "File Systems",
+      "Hard Links",
+      "File Deletion"
+    ],
+    "content": {
+      "text": "במערכת קבצים נפוצה (כמו ext4 או NTFS), מה קורה כאשר מוחקים קובץ שיש לו מספר קישורים קשיחים (hard links) המצביעים עליו?",
+      "code_snippet": null,
+      "options": [
+        "א. הקובץ נמחק מיד, וכל הקישורים הקשיחים הנותרים הופכים לבלתי תקינים (dangling).",
+        "ב. הקובץ (ה-inode ותוכן הנתונים) נמחק רק כאשר כל הקישורים הקשיחים המצביעים עליו נמחקים.",
+        "ג. ה-inode של הקובץ נמחק מיד, אך תוכן הקובץ נשאר עד שכל הקישורים נמחקים.",
+        "ד. מערכת הקבצים מונעת את מחיקת הקובץ כל עוד יש לו יותר מקישור קשיח אחד."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב. כאשר מוחקים קישור קשיח לקובץ, מערכת הקבצים מקטינה את מונה הקישורים (link count) השמור ב-inode של הקובץ. הקובץ עצמו (כולל ה-inode ותוכן הנתונים) נמחק פיזית ומשוחרר רק כאשר מונה הקישורים מגיע לאפס. כל עוד יש לפחות קישור קשיח אחד שמצביע על הקובץ, הוא נשאר קיים ונגיש דרך הקישורים האחרים."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

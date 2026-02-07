@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "File Systems",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 23:30:25",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3477,
+      "output_tokens": 541,
+      "total_tokens": 5024
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "File Systems"
+    ],
+    "content": {
+      "text": "מהו inode במערכת קבצים? אילו סוגי מידע הוא מאחסן, ומדוע הוא חשוב לניהול קבצים?",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "Inode הוא מבנה נתונים במערכת קבצים המכיל מידע אודות קובץ או תיקייה (metadata), למעט שמו של הקובץ ותוכן הנתונים שלו. הוא מאחסן מידע כגון:\n- סוג הקובץ (רגיל, תיקייה, קישור סימבולי וכו').\n- הרשאות גישה (permissions).\n- בעלות (UID, GID).\n- זמני יצירה, גישה ושינוי אחרונים.\n- גודל הקובץ.\n- מספר הקישורים הקשיחים (hard links) לקובץ.\n- מצביעים (pointers) לבלוקי הנתונים (data blocks) המכילים את תוכן הקובץ בפועל.\n\nה-inode חשוב לניהול קבצים מכיוון שהוא מפריד את המטא-דאטה של הקובץ מתוכן הנתונים שלו ומשמו. זה מאפשר:\n1. ניהול יעיל: מערכת הקבצים יכולה למצוא את תוכן הקובץ על הדיסק באמצעות המצביעים ב-inode, בלי צורך לחפש אותו לפי שם.\n2. קישורים קשיחים: מספר קבצים יכולים להצביע לאותו inode, מה שמאפשר לקישורים קשיחים לחלוק את אותם נתונים ואותה מטא-דאטה.\n3. עקביות: עדכון מטא-דאטה (כמו הרשאות או זמנים) אינו דורש שינוי במיקום הפיזי של נתוני הקובץ, אלא רק ב-inode עצמו."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

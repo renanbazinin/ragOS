@@ -1,0 +1,35 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 22:41:44",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2806,
+      "output_tokens": 1150,
+      "total_tokens": 8162
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Virtual Memory"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C הבאה. נתחו את התוכנית וענו על השאלות הבאות בהתייחס למערכת הפעלה המשתמשת בזיכרון וירטואלי, בהנחה שמערכת ההפעלה משתמשת בדפים בגודל 4KB:\n\n1.  האם הקריאה ל-`malloc` צפויה להיכשל במערכת עם פחות מ-4GB של זיכרון פיזי (RAM)? הסבירו.\n2.  כמה זיכרון פיזי (Resident Set Size - RSS) התוכנית צפויה לצרוך עבור המערך לאחר השורה `large_array[0] = 'A';`? הסבירו.\n3.  כמה זיכרון פיזי (RSS) התוכנית צפויה לצרוך עבור המערך לאחר השורה `large_array[4 * GIGABYTE - 1] = 'Z';`? הסבירו.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h> // For sleep\n\n#define GIGABYTE (1024ULL * 1024 * 1024)\n\nint main() {\n    printf(\"Allocating 4 GB of memory...\\n\");\n    char *large_array = (char *)malloc(4 * GIGABYTE);\n\n    if (large_array == NULL) {\n        perror(\"Failed to allocate memory\");\n        return 1;\n    }\n\n    printf(\"Memory allocated. Writing to the first byte...\\n\");\n    large_array[0] = 'A'; // Accessing the first page\n\n    printf(\"Writing to the last byte...\\n\");\n    large_array[4 * GIGABYTE - 1] = 'Z'; // Accessing the last page\n\n    printf(\"Sleeping for 10 seconds. Check process memory usage.\\n\");\n    sleep(10); // Allows checking memory usage in a separate terminal\n\n    printf(\"Freeing memory...\\n\");\n    free(large_array);\n\n    printf(\"Program finished.\\n\");\n    return 0;\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.  **כשלון `malloc`**: לא, הקריאה ל-`malloc` לא צפויה להיכשל במערכת עם פחות מ-4GB זיכרון פיזי. `malloc` מקצה מרחב כתובות וירטואלי (virtual address space) ולא זיכרון פיזי מיידית. כל עוד יש מספיק מרחב כתובות וירטואלי זמין (בדרך כלל גדול בהרבה מה-RAM במערכות 64 ביט), ההקצאה תצליח. זיכרון פיזי מוקצה ונכנס לשימוש רק כאשר התוכנית ניגשת בפועל לדפים הווירטואליים הללו (מנגנון Demand Paging).\n\n2.  **RSS לאחר `large_array[0] = 'A';`**: לאחר שורה זו, התוכנית צפויה לצרוך דף פיזי אחד (4KB) עבור המערך. הגישה ל-`large_array[0]` גורמת ל-Page Fault עבור הדף הווירטואלי הראשון של המערך. מערכת ההפעלה תאלץ להקצות דף פיזי ולמפות אותו לדף הווירטואלי הזה. שאר 4GB הווירטואליים עדיין אינם ממופים לזיכרון פיזי.\n\n3.  **RSS לאחר `large_array[4 * GIGABYTE - 1] = 'Z';`**: לאחר שורה זו, התוכנית צפויה לצרוך שני דפים פיזיים (8KB) עבור המערך. הגישה ל-`large_array[4 * GIGABYTE - 1]` גורמת ל-Page Fault עבור הדף הווירטואלי האחרון של המערך (שכמעט בוודאות נמצא בדף וירטואלי שונה מהדף הראשון). מערכת ההפעלה תקצה דף פיזי נוסף ותמפה אותו לדף הווירטואלי הזה. למרות שכל 4GB הווירטואליים של המערך שמורים, רק הדפים שאליהם ניגשו בפועל יקבלו הקצאה של זיכרון פיזי."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

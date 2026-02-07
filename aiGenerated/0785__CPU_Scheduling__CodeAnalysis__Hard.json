@@ -1,0 +1,52 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "CPU Scheduling",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 00:22:09",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4397,
+      "output_tokens": 4220,
+      "total_tokens": 20966
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "CPU Scheduling",
+      "Processes",
+      "System Calls",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה, המריצה מספר תהליכי ילד:\nיש להניח שהמערכת פועלת על מעבד יחיד (single CPU). קריאות המערכת `fork()` מצליחות תמיד, ואין עיכובים משמעותיים ביצירת תהליכים מעבר לזמן הריצה של `fork` עצמו. זמן החלפת קשר (context switch) זניח. כל פעולת `printf` מהירה ואינה צורכת זמן מעבד או קלט/פלט משמעותי. הפונקציה `cpu_intensive_work(duration_ms)` מבצעת עבודה תובענית במעבד שצורכת בדיוק `duration_ms` מילישניות של זמן מעבד, ואינה חוסמת את התהליך. קריאת `usleep(ms)` חוסמת את התהליך למשך `ms` מילישניות.\n",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\n#define NUM_PROCESSES 3 // מספר תהליכי ילד\n\n// פונקציית עזר לביצוע עבודה תובענית במעבד\n// מדמה עבודה של 'duration_ms' מילישניות\nvoid cpu_intensive_work(int duration_ms) {\n    // לצורך השאלה, נניח שפעולה זו צורכת בדיוק את זמן המעבד הנתון\n    // ואינה חוסמת את התהליך.\n}\n\nvoid child_task(int id, int cpu_burst_ms, int io_sleep_ms) {\n    printf(\"Child %d (PID %d): Starting CPU burst (%dms)\\n\", id, getpid(), cpu_burst_ms);\n    cpu_intensive_work(cpu_burst_ms); // מדמה עבודה תובענית במעבד\n    printf(\"Child %d (PID %d): Finished CPU burst, going to sleep (%dms)\\n\", id, getpid(), io_sleep_ms);\n    usleep(io_sleep_ms * 1000); // מדמה פעולת קלט/פלט או חסימה\n    printf(\"Child %d (PID %d): Woke up, finishing.\\n\", id, getpid());\n    exit(0);\n}\n\nint main() {\n    setbuf(stdout, NULL); // ודא פלט מיידי ללא בופר\n\n    pid_t pids[NUM_PROCESSES];\n    int i;\n\n    // יוצרים את תהליכי הילד\n    for (i = 0; i < NUM_PROCESSES; ++i) {\n        pids[i] = fork();\n        if (pids[i] == -1) {\n            perror(\"fork failed\");\n            exit(EXIT_FAILURE);\n        }\n        if (pids[i] == 0) { // תהליך ילד\n            // לילד i: צריכת מעבד של (i+1)*20ms, שינה של 100ms\n            child_task(i, (i + 1) * 20, 100);\n        }\n    }\n\n    printf(\"Parent (PID %d): Forked all children. Waiting for them to finish...\\n\", getpid());\n\n    // האב ממתין לכל הילדים\n    for (i = 0; i < NUM_PROCESSES; ++i) {\n        wait(NULL);\n    }\n\n    printf(\"Parent (PID %d): All children finished. Exiting.\\n\", getpid());\n    return 0;\n}\n",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "תארו את הפלט האפשרי היחיד של התוכנית תחת אלגוריתם תזמון FCFS (First-Come, First-Served). יש להסביר את סדר הפעולות המוביל לפלט זה.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "תארו את הפלט האפשרי היחיד של התוכנית תחת אלגוריתם תזמון Round Robin (RR) עם קוונטום זמן של 30ms. יש להסביר את סדר הפעולות המוביל לפלט זה. (התייחסו לרשימת התהליכים המוכנים כ-P0, P1, P2 בסדר יצירתם, וההורה נכנס למצב המתנה רק לאחר שכל הילדים נוצרו והוא סיים את פעולותיו הראשוניות).",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": false,
+      "correct_option": null,
+      "explanation": "ניתוח התהליכים וזמניהם:\n- תהליך ילד 0 (P0): דורש 20ms זמן מעבד, ואז נכנס לשינה של 100ms.\n- תהליך ילד 1 (P1): דורש 40ms זמן מעבד, ואז נכנס לשינה של 100ms.\n- תהליך ילד 2 (P2): דורש 60ms זמן מעבד, ואז נכנס לשינה של 100ms.\nהתהליך ההורה (Parent) יוצר את שלושת הילדים (P0, P1, P2). לאחר מכן, הוא מדפיס הודעה ונכנס למצב המתנה (wait) עבור הילדים. נניח שההורה מסיים את הלולאה וקריאת ה-printf שלו לפני שמתחיל תזמון משמעותי של הילדים.\n\n**1.1 פלט תחת FCFS:**\nבאופן ראשוני, ההורה יוצר את P0, P1, P2. הם נכנסים לתור המוכנים בסדר זה. ההורה מסיים את פעולותיו הראשוניות, מדפיס הודעה, ומיד נחסם בקריאה הראשונה ל-`wait(NULL)` מכיוון שאף ילד עדיין לא סיים.\n\nסדר הפעולות:\n1.  **זמן T=0**: ההורה יוצר את P0, P1, P2. הם נכנסים לתור המוכנים (P0, P1, P2). ההורה ממשיך, מדפיס: `Parent (PID X): Forked all children. Waiting for them to finish...` ומיד נחסם ב-`wait()`.\n2.  **P0 מקבל מעבד**: מדפיס `Child 0 (PID Y): Starting CPU burst (20ms)`. מבצע 20ms עבודת מעבד. מדפיס `Child 0 (PID Y): Finished CPU burst, going to sleep (100ms)`. נכנס לשינה של 100ms. (P0 יתעורר ב-T = 20 + 100 = 120ms).\n3.  **P1 מקבל מעבד** (לאחר ש-P0 נחסם, ב-T=20ms): מדפיס `Child 1 (PID Z): Starting CPU burst (40ms)`. מבצע 40ms עבודת מעבד. מדפיס `Child 1 (PID Z): Finished CPU burst, going to sleep (100ms)`. נכנס לשינה של 100ms. (P1 יתעורר ב-T = 20 + 40 + 100 = 160ms).\n4.  **P2 מקבל מעבד** (לאחר ש-P1 נחסם, ב-T=20+40=60ms): מדפיס `Child 2 (PID W): Starting CPU burst (60ms)`. מבצע 60ms עבודת מעבד. מדפיס `Child 2 (PID W): Finished CPU burst, going to sleep (100ms)`. נכנס לשינה של 100ms. (P2 יתעורר ב-T = 60 + 60 + 100 = 220ms).\n5.  **T=120ms**: P0 מתעורר מהשינה, נכנס לתור המוכנים ומקבל מעבד (הוא התהליך הראשון שמוכן). מדפיס `Child 0 (PID Y): Woke up, finishing.`. P0 יוצא.\n6.  ההורה מתעורר לרגע (מ-`wait`), מעבד את יציאת P0, ומיד נחסם שוב ב-`wait()` עבור הילדים הנותרים.\n7.  **T=160ms**: P1 מתעורר מהשינה, נכנס לתור המוכנים ומקבל מעבד. מדפיס `Child 1 (PID Z): Woke up, finishing.`. P1 יוצא.\n8.  ההורה מתעורר לרגע, מעבד את יציאת P1, ומיד נחסם שוב ב-`wait()`.\n9.  **T=220ms**: P2 מתעורר מהשינה, נכנס לתור המוכנים ומקבל מעבד. מדפיס `Child 2 (PID W): Woke up, finishing.`. P2 יוצא.\n10. ההורה מתעורר, מעבד את יציאת P2, מסיים את לולאת ה-`wait`, ומדפיס `Parent (PID X): All children finished. Exiting.`\n\n**פלט אפשרי יחיד תחת FCFS:**\n```\nParent (PID X): Forked all children. Waiting for them to finish...\nChild 0 (PID Y): Starting CPU burst (20ms)\nChild 0 (PID Y): Finished CPU burst, going to sleep (100ms)\nChild 1 (PID Z): Starting CPU burst (40ms)\nChild 1 (PID Z): Finished CPU burst, going to sleep (100ms)\nChild 2 (PID W): Starting CPU burst (60ms)\nChild 2 (PID W): Finished CPU burst, going to sleep (100ms)\nChild 0 (PID Y): Woke up, finishing.\nChild 1 (PID Z): Woke up, finishing.\nChild 2 (PID W): Woke up, finishing.\nParent (PID X): All children finished. Exiting.\n```\n(הערה: X, Y, Z, W מייצגים מזהי PID שונים וספציפיים לריצה).\n\n**1.2 פלט תחת Round Robin (RR) עם קוונטום 30ms:**\nבאופן ראשוני, ההורה יוצר את P0, P1, P2. הם נכנסים לתור המוכנים (P0, P1, P2). ההורה מסיים את פעולותיו הראשוניות, מדפיס הודעה, ומיד נחסם בקריאה הראשונה ל-`wait(NULL)` מכיוון שאף ילד עדיין לא סיים.\n\nסדר הפעולות:\n1.  **זמן T=0**: ההורה יוצר את P0, P1, P2. הם נכנסים לתור המוכנים (P0, P1, P2). ההורה ממשיך, מדפיס: `Parent (PID X): Forked all children. Waiting for them to finish...` ומיד נחסם ב-`wait()`.\n2.  **T=0ms: P0 מקבל מעבד**.\n    *   מדפיס `Child 0 (PID Y): Starting CPU burst (20ms)`.\n    *   מבצע 20ms עבודת מעבד (P0 דורש 20ms, שזה פחות מהקוונטום 30ms).\n    *   **T=20ms**: P0 מסיים את עבודת המעבד. מדפיס `Child 0 (PID Y): Finished CPU burst, going to sleep (100ms)`.\n    *   **T=20ms**: P0 נכנס לשינה של 100ms. (P0 יתעורר ב-T = 20 + 100 = 120ms).\n    *   P0 נחסם. המעבד מתפנה.\n3.  **T=20ms: P1 מקבל מעבד** (הראשון בתור המוכנים לאחר P0).\n    *   מדפיס `Child 1 (PID Z): Starting CPU burst (40ms)`.\n    *   מבצע 30ms עבודת מעבד (קוונטום מלא).\n    *   **T=50ms**: הקוונטום של P1 מסתיים. P1 מופסק (preempted) ונכנס לסוף תור המוכנים. (P1 עדיין זקוק ל-10ms מעבד).\n4.  **T=50ms: P2 מקבל מעבד** (הראשון בתור המוכנים לאחר P1).\n    *   מדפיס `Child 2 (PID W): Starting CPU burst (60ms)`.\n    *   מבצע 30ms עבודת מעבד (קוונטום מלא).\n    *   **T=80ms**: הקוונטום של P2 מסתיים. P2 מופסק ונכנס לסוף תור המוכנים. (P2 עדיין זקוק ל-30ms מעבד).\n5.  **T=80ms: P1 מקבל מעבד** (הראשון בתור המוכנים).\n    *   מבצע 10ms עבודת מעבד (הזמן הנותר עבור P1).\n    *   **T=90ms**: P1 מסיים את עבודת המעבד. מדפיס `Child 1 (PID Z): Finished CPU burst, going to sleep (100ms)`.\n    *   **T=90ms**: P1 נכנס לשינה של 100ms. (P1 יתעורר ב-T = 90 + 100 = 190ms).\n    *   P1 נחסם. המעבד מתפנה.\n6.  **T=90ms: P2 מקבל מעבד** (הראשון בתור המוכנים).\n    *   מבצע 30ms עבודת מעבד (הזמן הנותר עבור P2).\n    *   **T=120ms**: P2 מסיים את עבודת המעבד. מדפיס `Child 2 (PID W): Finished CPU burst, going to sleep (100ms)`.\n    *   **T=120ms**: P2 נכנס לשינה של 100ms. (P2 יתעורר ב-T = 120 + 100 = 220ms).\n    *   P2 נחסם. המעבד מתפנה.\n7.  **T=120ms**: P0 מתעורר מהשינה, נכנס לתור המוכנים ומקבל מעבד (הוא התהליך היחיד שמוכן). מדפיס `Child 0 (PID Y): Woke up, finishing.`. P0 יוצא.\n8.  ההורה מתעורר לרגע (מ-`wait`), מעבד את יציאת P0, ומיד נחסם שוב ב-`wait()` עבור הילדים הנותרים.\n9.  **T=190ms**: P1 מתעורר מהשינה, נכנס לתור המוכנים ומקבל מעבד. מדפיס `Child 1 (PID Z): Woke up, finishing.`. P1 יוצא.\n10. ההורה מתעורר לרגע, מעבד את יציאת P1, ומיד נחסם שוב ב-`wait()`.\n11. **T=220ms**: P2 מתעורר מהשינה, נכנס לתור המוכנים ומקבל מעבד. מדפיס `Child 2 (PID W): Woke up, finishing.`. P2 יוצא.\n12. ההורה מתעורר, מעבד את יציאת P2, מסיים את לולאת ה-`wait`, ומדפיס `Parent (PID X): All children finished. Exiting.`\n\n**פלט אפשרי יחיד תחת RR (קוונטום 30ms):**\n```\nParent (PID X): Forked all children. Waiting for them to finish...\nChild 0 (PID Y): Starting CPU burst (20ms)\nChild 0 (PID Y): Finished CPU burst, going to sleep (100ms)\nChild 1 (PID Z): Starting CPU burst (40ms)\nChild 2 (PID W): Starting CPU burst (60ms)\nChild 1 (PID Z): Finished CPU burst, going to sleep (100ms)\nChild 2 (PID W): Finished CPU burst, going to sleep (100ms)\nChild 0 (PID Y): Woke up, finishing.\nChild 1 (PID Z): Woke up, finishing.\nChild 2 (PID W): Woke up, finishing.\nParent (PID X): All children finished. Exiting.\n```\n(הערה: X, Y, Z, W מייצגים מזהי PID שונים וספציפיים לריצה).\n"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

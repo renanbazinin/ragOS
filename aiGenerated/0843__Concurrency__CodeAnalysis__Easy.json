@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 00:46:27",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5571,
+      "output_tokens": 1192,
+      "total_tokens": 11232
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Concurrency",
+      "Race Conditions",
+      "Threads",
+      "Shared Memory"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה המשתמשת בשני חוטים (threads) לשינוי משתנה גלובלי משותף `counter`. חוט אחד מגדיל את המונה `N` פעמים, והחוט השני מקטין את המונה `N` פעמים. ערך `N` הוא גדול מספיק (לדוגמה, 100,000) כדי להבטיח קיום תנאי מרוץ (race conditions). המונה מאותחל ל-0.\n\nמהו טווח הערכים האפשריים עבור `counter` בסיום ריצת התוכנית?",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n\n#define N 100000 // Number of operations per thread\n\nint counter = 0;\n\nvoid* increment_thread(void* arg) {\n    for (int i = 0; i < N; ++i) {\n        counter++;\n    }\n    return NULL;\n}\n\nvoid* decrement_thread(void* arg) {\n    for (int i = 0; i < N; ++i) {\n        counter--;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t tid1, tid2;\n\n    pthread_create(&tid1, NULL, increment_thread, NULL);\n    pthread_create(&tid2, NULL, decrement_thread, NULL);\n\n    pthread_join(tid1, NULL);\n    pthread_join(tid2, NULL);\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "התוכנית סובלת מתנאי מרוץ (race condition) על המשתנה הגלובלי המשותף `counter`. פעולות כמו `counter++` ו-`counter--` אינן אטומיות והן מורכבות משלושה שלבים עיקריים: קריאה (read) של הערך הנוכחי, שינוי (modify) הערך, וכתיבה (write) של הערך החדש.\n\nבגלל תזמוני ריצה שונים של החוטים, אחד השינויים עלול ללכת לאיבוד. לדוגמה:\nנניח `counter = 0`.\n1. חוט 1 (מגדיל) קורא את `counter` (ערך 0) ושומר אותו ברגיסטר.\n2. חוט 2 (מקטין) קורא את `counter` (ערך 0) ושומר אותו ברגיסטר משלו.\n3. חוט 1 מגדיל את הערך שברגיסטר שלו ל-1.\n4. חוט 2 מקטין את הערך שברגיסטר שלו ל-1-.\n5. חוט 1 כותב את הערך 1 ל-`counter`. כעת `counter = 1`.\n6. חוט 2 כותב את הערך 1- ל-`counter`. כעת `counter = -1`.\nבתרחיש זה, ההגדלה של חוט 1 אבדה.\n\nבאופן סימטרי, יכול להתרחש תרחיש שבו ההקטנה של חוט 2 אובדת, מה שיוביל לערך גבוה יותר.\nכתוצאה מכך, הערך הסופי של `counter` יכול להיות כל מספר שלם בין `N-` ל-`N` (כולל).\n*   הערך המינימלי האפשרי הוא `N-`. זה קורה אם כל `N` ההגדלות של חוט 1 \"נבלעות\" על ידי פעולות ההקטנה של חוט 2 (כלומר, בכל פעם שחוט 1 מסיים את פעולת ה-`write` שלו, חוט 2 כותב ערך נמוך יותר מיד לאחר מכן, או שחוט 1 קורא ערך, חוט 2 מסיים את כל פעולותיו, ואז חוט 1 כותב ערך מיושן).\n*   הערך המקסימלי האפשרי הוא `N`. זה קורה אם כל `N` ההקטנות של חוט 2 \"נבלעות\" על ידי פעולות ההגדלה של חוט 1.\n*   הערך המצופה (ללא תנאי מרוץ) הוא 0, והוא גם אפשרי אם אין איבוד של פעולות.\n\nלכן, טווח הערכים האפשריים הוא `[N-, N]`."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

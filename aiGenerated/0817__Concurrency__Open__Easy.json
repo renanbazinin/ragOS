@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 00:35:47",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1926,
+      "output_tokens": 1100,
+      "total_tokens": 4455
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "Open",
+    "topic": [
+      "Concurrency",
+      "Race Conditions",
+      "Critical Section"
+    ],
+    "content": {
+      "text": "מהו Race Condition (מצב מרוץ) וכיצד הוא נוצר? תאר/י דוגמה פשוטה למצב של Race Condition. כיצד ניתן למנוע Race Condition באמצעות שימוש בקטע קריטי (Critical Section)?",
+      "code_snippet": "int counter = 0; // משתנה גלובלי משותף\n\nvoid increment() {\n  counter++; // פעולה זו אינה אטומית ועלולה לגרום ל-Race Condition\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "Race Condition (מצב מרוץ) מתרחש כאשר שני תהליכים (או תהליכונים) או יותר ניגשים לאותו משאב משותף (כמו משתנה גלובלי) ומנסים לשנות אותו בו-זמנית, והתוצאה הסופית תלויה בסדר הלא-דטרמיניסטי שבו הפעולות מתבצעות. מצב זה עלול להוביל לתוצאות שגויות או בלתי צפויות, מכיוון שסדר הגישה למשאב המשותף אינו מובטח.\n\n**דוגמה פשוטה:**\nנניח שיש לנו משתנה גלובלי `int counter = 0;` ושני תהליכונים קוראים לפונקציה `increment()`:\n```c\nint counter = 0;\n\nvoid increment() {\n  counter++; // פעולה זו אינה אטומית! היא מורכבת מקריאה של counter, הגדלה של הערך, וכתיבה בחזרה ל-counter.\n}\n```\nאם שני תהליכונים קוראים לפונקציה `increment` כמעט בו-זמנית, ייתכן ששניהם יקראו את הערך 0 של `counter`. לאחר מכן, שניהם יגדילו את הערך שקראו ל-1, ושניהם יכתבו 1 בחזרה ל-`counter`. במצב זה, למרות ששני תהליכונים ביצעו הגדלה, הערך הסופי של `counter` יהיה 1 במקום 2, וזוהי תוצאה שגויה.\n\n**מניעה באמצעות קטע קריטי (Critical Section):**\nכדי למנוע Race Condition, יש להגן על הקוד הניגש למשאב המשותף באמצעות קטע קריטי. קטע קריטי הוא חלק בקוד שבו רק תהליך אחד מורשה להיכנס ולבצע פעולות בכל רגע נתון. כאשר תהליך נכנס לקטע הקריטי, כל תהליך אחר שינסה להיכנס לאותו קטע קריטי ייחסם וימתין עד שהתהליך הנוכחי יסיים ויצא מהקטע הקריטי. מנגנון זה מבטיח בלעדיות הדדית (Mutual Exclusion) בגישה למשאב המשותף.\n\nאחת הדרכים הנפוצות לממש קטע קריטי היא באמצעות מנעולים (mutexes). לדוגמה, נוכל להשתמש ב-mutex כדי להגן על המשתנה `counter`:\n```c\n#include <pthread.h>\n\nint counter = 0;\npthread_mutex_t mutex; // הצהרה על מנעול\n\nvoid init_mutex() {\n  pthread_mutex_init(&mutex, NULL); // אתחול המנעול\n}\n\nvoid increment_safe() {\n  pthread_mutex_lock(&mutex);   // נכנסים לקטע הקריטי: נועלים את המנעול\n  counter++;                     // פעולה בטוחה בתוך הקטע הקריטי\n  pthread_mutex_unlock(&mutex); // יוצאים מהקטע הקריטי: משחררים את המנעול\n}\n```\nבצורה זו, רק תהליך אחד יכול להחזיק את המנעול ולבצע את פעולת ההגדלה על `counter` בכל פעם. אם תהליך אחר ינסה לקרוא ל-`pthread_mutex_lock` כשהמנעול תפוס, הוא ייחסם עד שהמנעול ישוחרר. כך נמנע Race Condition ומובטחת נכונות הנתונים המשותפים."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

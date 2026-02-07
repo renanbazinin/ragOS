@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "File Systems",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 23:30:17",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 857,
+      "total_tokens": 4662
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "File Systems",
+      "Inode Structure",
+      "Block Allocation"
+    ],
+    "content": {
+      "text": "נתונה מערכת קבצים המשתמשת במבנה Inode עם 12 מצביעים ישירים (direct pointers), מצביע עקיף יחיד (single indirect pointer), מצביע עקיף כפול (double indirect pointer), ומצביע עקיף משולש (triple indirect pointer). גודל בלוק במערכת הקבצים הוא 4KB, וכל מצביע לבלוק דורש 4 בתים. מהו גודל הקובץ המרבי הנתמך על ידי מערכת קבצים זו?",
+      "code_snippet": null,
+      "options": [
+        "א. 4TB + 4GB + 4MB + 48KB",
+        "ב. 4TB + 4GB + 4MB",
+        "ג. 4TB + 4GB + 1MB + 48KB",
+        "ד. 4TB + 1GB + 4MB + 48KB",
+        "ה. אף תשובה אחרת אינה נכונה."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "הפתרון דורש חישוב של תרומת כל סוג מצביעים לגודל הקובץ המרבי:\n1.  **מצביעים ישירים (Direct Pointers)**: ישנם 12 מצביעים, וכל אחד מצביע לבלוק בגודל 4KB. סך הכל: 12 * 4KB = 48KB.\n2.  **מצביע עקיף יחיד (Single Indirect Pointer)**: בלוק אחד מכיל מצביעים לבלוקי נתונים. מספר המצביעים בבלוק הוא גודל בלוק / גודל מצביע = 4096 בתים / 4 בתים למצביע = 1024 מצביעים. כל אחד מהם מצביע לבלוק נתונים בגודל 4KB. סך הכל: 1024 * 4KB = 4096KB = 4MB.\n3.  **מצביע עקיף כפול (Double Indirect Pointer)**: בלוק אחד מכיל מצביעים לבלוקים עקיפים יחידים. כל אחד מ-1024 המצביעים בבלוק זה מצביע לבלוק עקיף יחיד, אשר בתורו מצביע ל-1024 בלוקי נתונים. סך הכל: 1024 * (1024 * 4KB) = 1024 * 4MB = 4096MB = 4GB.\n4.  **מצביע עקיף משולש (Triple Indirect Pointer)**: בלוק אחד מכיל מצביעים לבלוקים עקיפים כפולים. כל אחד מ-1024 המצביעים בבלוק זה מצביע לבלוק עקיף כפול, אשר בתורו מצביע ל-4GB של נתונים. סך הכל: 1024 * 4GB = 4096GB = 4TB.\n\nגודל הקובץ המרבי הוא סכום כל התרומות: 48KB + 4MB + 4GB + 4TB."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

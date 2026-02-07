@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "CPU Scheduling",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 00:16:42",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2646,
+      "output_tokens": 1116,
+      "total_tokens": 11499
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "CodeAnalysis",
+    "topic": [
+      "CPU Scheduling",
+      "Processes",
+      "System Calls"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה:\nיש להניח שקיימת יחידת עיבוד מרכזית (מעבד) אחת בלבד, ואלגוריתם התזמון הוא FIFO (First-In, First-Out).\nכל קריאות המערכת מצליחות, ואין חציצה לפלט הסטנדרטי (stdout).\nכתבו את הפלט המדויק של התוכנית.",
+      "code_snippet": "#include <stdio.h>\n#include <unistd.h> // for fork, getpid\n#include <sys/wait.h> // for wait\n\nint main() {\n    setbuf(stdout, NULL); // Disable buffering for immediate output\n\n    printf(\"Parent process started.\\n\");\n\n    pid_t pid1 = fork();\n    if (pid1 == 0) { // Child 1\n        printf(\"Child 1 created.\\n\");\n        return 0;\n    }\n\n    pid_t pid2 = fork();\n    if (pid2 == 0) { // Child 2\n        printf(\"Child 2 created.\\n\");\n        return 0;\n    }\n\n    // Parent waits for both children to finish\n    wait(NULL); // Waits for one child\n    wait(NULL); // Waits for the other child\n\n    printf(\"Parent process finished.\\n\");\n\n    return 0;\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפלט המדויק של התוכנית יהיה:\nParent process started.\nChild 1 created.\nChild 2 created.\nParent process finished.\n\nהסבר:\n1. התהליך הראשי (Parent) מתחיל ומדפיס \"Parent process started.\".\n2. התהליך הראשי מבצע `fork()` ויוצר את Child 1. Child 1 מתווסף לתור התהליכים המוכנים לריצה (Ready Queue).\n3. התהליך הראשי ממשיך מיד (מבלי שהילדים ירוצו בינתיים, מכיוון שקריאת `fork` היא מהירה והתהליך הראשי לא מסיים את רצף הפעולות שלו) ומבצע `fork()` נוסף, ויוצר את Child 2. Child 2 מתווסף לתור התהליכים המוכנים לריצה, אחרי Child 1. כעת, התהליך הראשי רץ, ותור ה-Ready הוא: `[Child 1, Child 2]`.\n4. התהליך הראשי קורא ל-`wait(NULL)` הראשון. קריאה זו חוסמת את התהליך הראשי, והוא עובר למצב חסום (Blocked).\n5. כעת, המעבד פנוי. אלגוריתם התזמון FIFO בוחר את התהליך הראשון בתור ה-Ready, שהוא Child 1. Child 1 רץ.\n6. Child 1 מדפיס \"Child 1 created.\" ויוצא. עם יציאתו, התהליך הראשי (שהיה חסום ב-`wait(NULL)` הראשון) משתחרר ועובר למצב מוכן לריצה. הוא מתווסף לסוף תור ה-Ready. כעת תור ה-Ready הוא: `[Child 2, Parent]`.\n7. המעבד פנוי שוב. אלגוריתם התזמון FIFO בוחר את התהליך הראשון בתור ה-Ready, שהוא Child 2. Child 2 רץ.\n8. Child 2 מדפיס \"Child 2 created.\" ויוצא. כעת, Child 2 הסתיים.\n9. המעבד פנוי שוב. אלגוריתם התזמון FIFO בוחר את התהליך הראשון בתור ה-Ready, שהוא התהליך הראשי. התהליך הראשי רץ.\n10. התהליך הראשי מבצע את ה-`wait(NULL)` השני. מכיוון ש-Child 2 כבר סיים את ריצתו (והוא 'זומבי'), קריאת `wait(NULL)` זו חוזרת מיד, מבלי לחסום את התהליך הראשי.\n11. התהליך הראשי ממשיך, מדפיס \"Parent process finished.\" ויוצא."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

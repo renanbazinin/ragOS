@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "CPU Scheduling",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 00:21:06",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2670,
+      "output_tokens": 2080,
+      "total_tokens": 9240
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "CPU Scheduling",
+      "Processes",
+      "System Calls"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה, המורצת על מערכת הפעלה מבוססת לינוקס המשתמשת בתזמון מעבד מונע-עדיפויות (preemptive priority-based scheduling). ערך `nice` נמוך יותר מציין עדיפות גבוהה יותר (כאשר ערך ברירת המחדל הוא 0). יש להניח כי המערכת תמיד מעדיפה תהליכים בעלי עדיפות גבוהה יותר, וכי קריאות המערכת `usleep` מאפשרות החלפת הקשרים (context switches) באופן מיידי.\nמהו הפלט הסביר ביותר של התוכנית? נמק את תשובתך באופן מפורט.",
+      "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n#include <sys/wait.h>\n#include <sys/resource.h> // For nice() and getpriority()\n\nint main() {\n    pid_t pid1, pid2;\n\n    printf(\"Parent (PID: %d) starts.\\n\", getpid());\n\n    pid1 = fork();\n    if (pid1 == 0) { // Child 1\n        // Child 1 inherits parent's nice (0) initially\n        nice(10); // Set lower priority for Child 1\n        printf(\"Child 1 (PID: %d, nice: %d) created, parent PID: %d.\\n\", getpid(), getpriority(PRIO_PROCESS, 0), getppid());\n        for (int i = 0; i < 2; ++i) {\n            printf(\"Child 1 (PID: %d) working %d.\\n\", getpid(), i);\n            usleep(50000); // Simulate some work\n        }\n        printf(\"Child 1 (PID: %d) exits.\\n\", getpid());\n        return 0;\n    }\n\n    // Parent continues after forking Child 1\n    pid2 = fork();\n    if (pid2 == 0) { // Child 2\n        // Child 2 inherits parent's nice (0) initially\n        nice(-5); // Set higher priority for Child 2\n        printf(\"Child 2 (PID: %d, nice: %d) created, parent PID: %d.\\n\", getpid(), getpriority(PRIO_PROCESS, 0), getppid());\n        for (int i = 0; i < 2; ++i) {\n            printf(\"Child 2 (PID: %d) working %d.\\n\", getpid(), i);\n            usleep(50000); // Simulate some work\n        }\n        printf(\"Child 2 (PID: %d) exits.\\n\", getpid());\n        return 0;\n    }\n\n    // Parent continues after forking Child 2\n    printf(\"Parent (PID: %d, nice: %d) processing.\\n\", getpid(), getpriority(PRIO_PROCESS, 0));\n    for (int i = 0; i < 1; ++i) { // Parent does less work\n        printf(\"Parent (PID: %d) working %d.\\n\", getpid(), i);\n        usleep(50000); // Simulate some work\n    }\n\n    waitpid(pid1, NULL, 0); // Wait for Child 1\n    waitpid(pid2, NULL, 0); // Wait for Child 2\n    printf(\"Parent (PID: %d) exits.\\n\", getpid());\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": 10,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "התוכנית יוצרת שלושה תהליכים: תהליך אב ושני תהליכי בנים (בן 1 ובן 2).\n1.  **תהליך האב (Parent)**: מתחיל עם עדיפות ברירת מחדל (nice 0). הוא יוצר את בן 1 ואז את בן 2. לאחר מכן, הוא מבצע מעט עבודה (לולאה אחת) ולבסוף ממתין לשני בניו לפני שהוא מסיים.\n2.  **תהליך בן 1 (Child 1)**: נוצר עם עדיפות ברירת מחדל (nice 0), אך מיד משנה את עדיפותו ל-nice 10. זוהי העדיפות הנמוכה ביותר מבין שלושת התהליכים.\n3.  **תהליך בן 2 (Child 2)**: נוצר גם הוא עם עדיפות ברירת מחדל (nice 0), אך מיד משנה את עדיפותו ל-nice -5. זוהי העדיפות הגבוהה ביותר מבין שלושת התהליכים.\n\nמכיוון שמערכת ההפעלה משתמשת בתזמון מונע-עדיפויות (preemptive priority-based scheduling), תהליכים בעלי ערך `nice` נמוך יותר (כלומר עדיפות גבוהה יותר) יקבלו את המעבד. קריאות `usleep` גורמות לתהליכים לוותר על המעבד, מה שמאפשר למתזמן להפעיל תהליכים בעלי עדיפות גבוהה יותר.\n\nהסדר הצפוי של קבלת המעבד וסיום העבודה הוא:\n1.  **Child 2 (nice -5)**: יקבל את המעבד ראשון וישלים את עבודתו (שתי איטרציות).\n2.  **Parent (nice 0)**: יקבל את המעבד לאחר ש-Child 2 יסיים את עבודתו, וישלים את עבודתו שלו (איטרציה אחת).\n3.  **Child 1 (nice 10)**: יקבל את המעבד רק לאחר ש-Child 2 וה-Parent יסיימו את עבודתם, ויסיים אחרון.\n\nהפלט הסביר ביותר של התוכנית (מספרי ה-PID ישתנו בכל הרצה):\n```\nParent (PID: X) starts.\nChild 1 (PID: Y, nice: 10) created, parent PID: X.\nChild 2 (PID: Z, nice: -5) created, parent PID: X.\nParent (PID: X, nice: 0) processing.\nChild 2 (PID: Z) working 0.\nChild 2 (PID: Z) working 1.\nChild 2 (PID: Z) exits.\nParent (PID: X) working 0.\nParent (PID: X) exits.\nChild 1 (PID: Y) working 0.\nChild 1 (PID: Y) working 1.\nChild 1 (PID: Y) exits.\n```\n\n**נימוק לסדר הפלט:**\n*   הודעות ה-'starts', 'created' ו-'processing' הראשוניות יכולות להופיע בסדר מעט שונה, מכיוון שהן מבוצעות מיד לאחר ה-fork, לפני שקריאות ה-`nice()` משפיעות באופן מלא על התזמון. עם זאת, ברגע שהעדיפויות נקבעו, המתזמן יעדיף באופן עקבי את Child 2.\n*   Child 2, עם העדיפות הגבוהה ביותר (nice -5), יבצע את שתי איטרציות העבודה שלו ויסיים ראשון, ולכן הודעת ה-'Child 2 exits' תופיע לפני הודעות ה-'exits' של האחרים.\n*   ה-Parent, עם עדיפות בינונית (nice 0), יבצע את איטרציית העבודה שלו לאחר ש-Child 2 יסיים את מרבית עבודתו. הוא ימתין לבניו באמצעות `waitpid`, אך מכיוון ש-Child 2 מסיים ראשון, ה-Parent יתחיל להמתין בעיקר ל-Child 1. הודעת ה-'Parent exits' תופיע לאחר סיום עבודת ה-Parent ולפני סיום עבודת Child 1.\n*   Child 1, עם העדיפות הנמוכה ביותר (nice 10), יקבל את המעבד רק לאחר שהתהליכים בעלי העדיפות הגבוהה יותר (Child 2 וה-Parent) יסיימו את מרבית עבודתם. לכן, הודעת ה-'Child 1 exits' תופיע אחרונה."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

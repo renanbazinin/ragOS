@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Paging",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 23:13:30",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2724,
+      "output_tokens": 1228,
+      "total_tokens": 6720
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Paging"
+    ],
+    "content": {
+      "text": "נתונה מערכת זיכרון וירטואלי המשתמשת במנגנון Paging. גודל עמוד הוא 4KB (2^12 בתים). אורך כתובת וירטואלית הוא 32 ביטים. טבלת העמודים של תהליך מסוים נתונה להלן:\n\n| מספר עמוד וירטואלי (VPN) | מספר מסגרת פיזית (PFN) | דגל תקפות (Valid Bit) |\n|-------------------------|-------------------------|-----------------------|\n| 0x00000                 | 0x10000                 | 1                     |\n| 0x00001                 | 0x10001                 | 1                     |\n| 0x00002                 | 0x10002                 | 0                     |\n| 0x00003                 | 0x10003                 | 1                     |\n\nנתונה תוכנית C המנסה לגשת לכתובת וירטואלית מסוימת. מה תהיה הכתובת הפיזית אליה ניגשת התוכנית, או האם תתרחש תקלת עמוד (Page Fault)?\n\n```c\n#include <stdio.h>\n\nint main() {\n    unsigned int virtual_address = 0x00003A50; // הכתובת הווירטואלית לגישה\n    // נניח שהתוכנית מנסה לגשת לזיכרון בכתובת זו\n    // לדוגמה: char* ptr = (char*)virtual_address; char value = *ptr;\n    printf(\"Attempting to access virtual address: 0x%X\\n\", virtual_address);\n    return 0;\n}\n```\n\nמהי הכתובת הפיזית המתאימה, או האם תתרחש תקלת עמוד? נמק.",
+      "code_snippet": "#include <stdio.h>\n\nint main() {\n    unsigned int virtual_address = 0x00003A50; // הכתובת הווירטואלית לגישה\n    // נניח שהתוכנית מנסה לגשת לזיכרון בכתובת זו\n    // לדוגמה: char* ptr = (char*)virtual_address; char value = *ptr;\n    printf(\"Attempting to access virtual address: 0x%X\\n\", virtual_address);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "ראשית, נחלץ את מספר העמוד הווירטואלי (VPN) ואת ההיסט בתוך העמוד (offset) מהכתובת הווירטואלית הנתונה, 0x00003A50.\nגודל העמוד הוא 4KB, כלומר 2^12 בתים. לכן, 12 הביטים הפחות משמעותיים של הכתובת מייצגים את ההיסט בתוך העמוד, ושאר הביטים מייצגים את מספר העמוד הווירטואלי.\n\nהכתובת הווירטואלית: 0x00003A50\nהיסט (Offset): 0x00003A50 & 0xFFF = 0xA50 (12 הביטים האחרונים)\nמספר עמוד וירטואלי (VPN): 0x00003A50 >> 12 = 0x00003\n\nלאחר מכן, נבדוק את טבלת העמודים עבור ה-VPN שחישבנו (0x00003):\nבטבלה אנו רואים של-VPN 0x00003 מתאים מספר מסגרת פיזית (PFN) 0x10003, ודגל התקפות (Valid Bit) הוא 1.\nמכיוון שדגל התקפות הוא 1, העמוד נמצא בזיכרון הפיזי ולא תתרחש תקלת עמוד.\n\nלבסוף, נבנה את הכתובת הפיזית על ידי שילוב ה-PFN עם ההיסט:\nכתובת פיזית = (PFN << 12) | Offset\nכתובת פיזית = (0x10003 << 12) | 0xA50\nכתובת פיזית = 0x10003000 | 0xA50\nכתובת פיזית = 0x10003A50\n\nלכן, הכתובת הפיזית אליה ניגשת התוכנית היא 0x10003A50."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

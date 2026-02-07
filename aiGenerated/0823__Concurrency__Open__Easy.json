@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 00:36:57",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1926,
+      "output_tokens": 506,
+      "total_tokens": 4461
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "Open",
+    "topic": [
+      "Concurrency",
+      "Race Conditions",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "מהו מצב מרוץ (Race Condition)? תנו דוגמה והסבירו כיצד ניתן למנוע אותו.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "מצב מרוץ (Race Condition) מתרחש כאשר מספר תהליכים או תהליכונים ניגשים לנתונים משותפים בו-זמנית, והתוצאה הסופית של הגישה תלויה בסדר הביצוע הלא-דטרמיניסטי שלהם.\n\nדוגמה: נניח שקיימת משתנה גלובלי `counter` המאותחל ל-0. שני תהליכונים מנסים להגדיל את `counter` ב-1. ללא סנכרון מתאים, ייתכן ששניהם יקראו את הערך 0, שניהם יגדילו אותו ל-1, ושניהם יכתבו 1 בחזרה ל-`counter`. במקרה כזה, הערך הסופי של `counter` יהיה 1 במקום 2 (הערך הצפוי).\n\nמניעה: ניתן למנוע מצבי מרוץ על ידי שימוש במנגנוני סנכרון כגון מנעולים (mutexes) או סמפורים (semaphores) כדי להבטיח בלעדיות הדדית (mutual exclusion) על הקטעים הקריטיים (critical sections) של הקוד הניגשים לנתונים המשותפים. בצורה זו, רק תהליכון אחד יכול לגשת לנתונים המשותפים בזמן נתון, ובכך מובטח שהפעולות על הנתונים המשותפים יתבצעו בצורה אטומית ומסודרת."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

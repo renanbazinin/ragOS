@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 00:38:22",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1930,
+      "output_tokens": 2003,
+      "total_tokens": 8682
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Concurrency",
+      "Synchronization",
+      "Semaphores",
+      "Mutexes",
+      "Producer-Consumer"
+    ],
+    "content": {
+      "text": "בעיית יצרן-צרכן עם חוצץ חסום\n\nנתון חוצץ חסום (Bounded Buffer) בגודל קבוע (BUFFER_SIZE), המשמש לתקשורת בין מספר יצרנים (Producers) למספר צרכנים (Consumers). היצרנים מוסיפים פריטים לחוצץ והצרכנים מוציאים פריטים ממנו. יש לממש את פונקציות הוספת הפריט (produce) והוצאת הפריט (consume) באופן בטוח מבחינת סנכרון, תוך שימוש במנעול (pthread_mutex_t) ושני סמפורים (sem_t): אחד עבור מקומות פנויים (empty) ואחד עבור מקומות תפוסים (full). יש להניח שהחוצץ עצמו הוא מערך וכי הפונקציות buffer_add ו-buffer_remove (שאינן מסונכרנות) כבר קיימות כפי שמוצג בקוד.",
+      "code_snippet": "#include <pthread.h>\n#include <semaphore.h>\n#include <stdlib.h> // For malloc, free\n\n#define BUFFER_SIZE 10 // Example size\n\ntypedef struct {\n    int *buffer;\n    int head;\n    int tail;\n    int count; // Current number of items in buffer\n    pthread_mutex_t mutex;\n    sem_t empty; // Number of empty slots\n    sem_t full;  // Number of full slots\n} BoundedBuffer;\n\n// Assume these functions manage the buffer array directly,\n// and are NOT thread-safe themselves. Synchronization is\n// expected in produce/consume.\nvoid buffer_add(BoundedBuffer *bb, int item) {\n    bb->buffer[bb->tail] = item;\n    bb->tail = (bb->tail + 1) % BUFFER_SIZE;\n    bb->count++;\n}\n\nint buffer_remove(BoundedBuffer *bb) {\n    int item = bb->buffer[bb->head];\n    bb->head = (bb->head + 1) % BUFFER_SIZE;\n    bb->count--;\n    return item;\n}\n\n// Function to initialize the buffer (provided for context)\nvoid bb_init(BoundedBuffer *bb) {\n    bb->buffer = (int*)malloc(sizeof(int) * BUFFER_SIZE);\n    bb->head = 0;\n    bb->tail = 0;\n    bb->count = 0;\n    pthread_mutex_init(&bb->mutex, NULL);\n    sem_init(&bb->empty, 0, BUFFER_SIZE); // Initially BUFFER_SIZE empty slots\n    sem_init(&bb->full, 0, 0);            // Initially 0 full slots\n}\n\n// Function to destroy the buffer resources (provided for context)\nvoid bb_destroy(BoundedBuffer *bb) {\n    free(bb->buffer);\n    pthread_mutex_destroy(&bb->mutex);\n    sem_destroy(&bb->empty);\n    sem_destroy(&bb->full);\n}\n\n// TODO: Implement these functions\nvoid produce(BoundedBuffer *bb, int item) {\n    // Your code here\n}\n\nint consume(BoundedBuffer *bb) {\n    // Your code here\n    return -1; // Placeholder\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון דורש שימוש בשילוב של סמפורים ומנעול (mutex) כדי להבטיח סנכרון נכון, למנוע תנאי מירוץ (race conditions) ולנהל חסימה יעילה של חוטים.\nלהלן המימוש של הפונקציות produce ו-consume:\n\n```c\nvoid produce(BoundedBuffer *bb, int item) {\n    sem_wait(&bb->empty);              // 1. המתן למקום פנוי בחוצץ\n    pthread_mutex_lock(&bb->mutex);    // 2. נעל את המנעול לגישה לחוצץ\n    buffer_add(bb, item);              // 3. הוסף את הפריט לחוצץ\n    pthread_mutex_unlock(&bb->mutex);  // 4. שחרר את המנעול\n    sem_post(&bb->full);               // 5. אותת שיש כעת פריט תפוס\n}\n\nint consume(BoundedBuffer *bb) {\n    sem_wait(&bb->full);              // 1. המתן לפריט תפוס בחוצץ\n    pthread_mutex_lock(&bb->mutex);    // 2. נעל את המנעול לגישה לחוצץ\n    int item = buffer_remove(bb);      // 3. הסר את הפריט מהחוצץ\n    pthread_mutex_unlock(&bb->mutex);  // 4. שחרר את המנעול\n    sem_post(&bb->empty);              // 5. אותת שיש כעת מקום פנוי\n    return item;\n}\n```\n\n**הסבר:**\n*   **סמפור `empty`**: מאותחל ל-`BUFFER_SIZE`. הוא משמש כדי לשלוט על מספר המקומות הפנויים בחוצץ. כאשר יצרן קורא ל-`sem_wait(&bb->empty)`, הוא נחסם אם אין מקומות פנויים. כאשר צרכן קורא ל-`sem_post(&bb->empty)`, הוא מאותת ששחרר מקום פנוי.\n*   **סמפור `full`**: מאותחל ל-0. הוא משמש כדי לשלוט על מספר הפריטים התפוסים בחוצץ. כאשר צרכן קורא ל-`sem_wait(&bb->full)`, הוא נחסם אם אין פריטים זמינים. כאשר יצרן קורא ל-`sem_post(&bb->full)`, הוא מאותת שהוסיף פריט תפוס.\n*   **מנעול (`pthread_mutex_t mutex`)**: משמש להבטחת גישה הדדית בלעדית (mutual exclusion) לחוצץ המשותף (המשתנים `head`, `tail`, `count` ומערך `buffer` עצמו). הוא מונע משני חוטים (יצרנים או צרכנים) לגשת ולשנות את מצב החuצץ בו-זמנית, ובכך מונע תנאי מירוץ.\n\n**סדר הפעולות קריטי:**\n1.  **קריאה ל-`sem_wait` לפני נעילת המנעול**: סמפורים אלו משמשים לחסימה יעילה של יצרנים/צרכנים כאשר אין מקום/פריטים. אם היינו נועלים את המנעול לפני ה-`sem_wait`, ייתכן שחוט ינעל את המנעול, ינסה לבצע `sem_wait` וייחסם כשהוא מחזיק את המנעול. זה היה מוביל לקיפאון (deadlock), שכן שום חוט אחר לא יוכל לשחרר את המשאב שהחוט החסום ממתין לו (כי הוא לא יכול לגשת לחוצץ כדי להוסיף/להסיר פריטים).\n2.  **שחרור המנעול לפני קריאה ל-`sem_post`**: המנעול מגן רק על הגישה לנתונים המשותפים בחוצץ. לאחר שהפעולה על החוצץ הסתיימה, יש לשחרר את המנעול כדי לאפשר לחוטים אחרים לגשת אליו. קריאת `sem_post` יכולה להעיר חוט חסום אחר, ורצוי שהחוט שיתעורר יוכל מיד לנסות לנעול את המנעול.\n\nסדר פעולות זה מבטיח את נכונות הסנכרון, מונע תנאי מירוץ ומאפשר לחוטים לחכות ביעילות מבלי לגרום לקיפאונות."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

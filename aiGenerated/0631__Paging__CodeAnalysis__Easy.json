@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Paging",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 23:13:13",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2724,
+      "output_tokens": 1087,
+      "total_tokens": 7918
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Paging",
+      "Virtual Memory",
+      "Address Translation"
+    ],
+    "content": {
+      "text": "נתונה מערכת הפעלה המשתמשת בזיכרון וירטואלי. גודל עמוד (page size) הוא 4KB (4096 בתים). נתון קטע קוד C המנסה לגשת לכתובת וירטואלית מסוימת. כמו כן, נתונה טבלת העמודים (page table) המפושטת עבור התהליך המריץ את הקוד. כתובת וירטואלית היא באורך 32 ביט.\n\nטבלת עמודים (Page Table) עבור התהליך (חלק רלוונטי):\n| מספר עמוד וירטואלי (VPN) | סיבית תקינות (Valid Bit) | מספר מסגרת עמוד פיזית (PFN) |\n|-------------------------|--------------------------|-------------------------------|\n| 0xABCD0                 | 1                        | 0x100                         |\n| 0xABCD1                 | 1                        | 0x200                         |\n| 0xABCD2                 | 0                        | 0x000                         |\n| 0xABCD3                 | 1                        | 0x300                         |\n\nבהתבסס על הקוד וטבלת העמודים, מהי הכתובת הפיזית אליה תתורגם הכתובת הוירטואלית `0xABCD1234`? הסבירו את הדרך לפתרון.",
+      "code_snippet": "#include <stdio.h>\n\nint main() {\n    // הכתובת הוירטואלית שאליה מנסים לגשת:\n    unsigned long virtual_address = 0xABCD1234; \n    printf(\"Attempting to access virtual address: 0x%lx\\n\", virtual_address);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון מבוסס על תהליך תרגום כתובות וירטואליות לכתובות פיזיות במערכת מבוססת עמודים.\n\n1.  **פירוק הכתובת הוירטואלית**: הכתובת הוירטואלית הנתונה היא `0xABCD1234`. גודל עמוד הוא 4KB, כלומר 2^12 בתים. לכן, 12 הביטים הנמוכים ביותר של הכתובת הוירטואלית מייצגים את ההיסט בתוך העמוד (page offset), ושאר הביטים מייצגים את מספר העמוד הוירטואלי (VPN).\n    -   היסט העמוד (Page Offset): `0x234` (12 הביטים האחרונים).\n    -   מספר העמוד הוירטואלי (VPN): `0xABCD1` (הביטים הנותרים).\n\n2.  **חיפוש בטבלת העמודים**: אנו מחפשים את ה-VPN `0xABCD1` בטבלת העמודים הנתונה.\n    -   עבור VPN `0xABCD1`, אנו מוצאים שסיבית התקינות (Valid Bit) היא 1, מה שאומר שהעמוד נמצא בזיכרון הפיזי. מספר מסגרת העמוד הפיזית (PFN) המתאים הוא `0x200`.\n\n3.  **הרכבת הכתובת הפיזית**: הכתובת הפיזית מורכבת מצירוף ה-PFN וה-Offset.\n    -   כתובת פיזית = (PFN << 12) | Offset\n    -   כתובת פיזית = (`0x200` << 12) | `0x234`\n    -   הזזה שמאלה ב-12 ביטים של `0x200` נותנת `0x200000`.\n    -   חיבור ההיסט: `0x200000` + `0x234` = `0x200234`.\n\nלכן, הכתובת הפיזית היא `0x200234`."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

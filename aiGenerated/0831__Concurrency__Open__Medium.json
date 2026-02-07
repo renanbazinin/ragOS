@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 00:39:46",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1930,
+      "output_tokens": 1618,
+      "total_tokens": 5775
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Concurrency",
+      "Synchronization",
+      "Producer-Consumer"
+    ],
+    "content": {
+      "text": "בבעיית היצרן-צרכן הקלאסית, יצרנים מייצרים פריטים וצרכנים צורכים אותם באמצעות חיץ (buffer) משותף בגודל קבוע. נתון חיץ חסום (bounded buffer) בגודל `BUFFER_SIZE`. עליכם לממש את הפונקציות `produce_item` (להוספת פריט לחיץ) ו-`consume_item` (להוצאת פריט מהחיץ) תוך שימוש בסמפורים וב-mutex כדי להבטיח סנכרון נכון ולמנוע תנאי מירוץ (race conditions) וקיפאונות (deadlocks). התייחסו למקרים של חיץ מלא וחיץ ריק. אין צורך לממש את לוגיקת הוספה/הוצאה בפועל של הנתונים, אלא רק את מנגנוני הסנכרון.",
+      "code_snippet": "#include <semaphore.h>\n#include <pthread.h>\n#include <stdlib.h>\n\n#define BUFFER_SIZE 10\n\ntypedef struct {\n    int buffer[BUFFER_SIZE];\n    int in;  // Next producer slot\n    int out; // Next consumer slot\n    sem_t empty; // Counts empty slots\n    sem_t full;  // Counts full slots\n    pthread_mutex_t mutex; // Protects buffer access\n} BoundedBuffer;\n\n// Initialize the buffer and synchronization primitives\nvoid init_buffer(BoundedBuffer *bb) {\n    bb->in = 0;\n    bb->out = 0;\n    sem_init(&bb->empty, 0, BUFFER_SIZE); // All slots initially empty\n    sem_init(&bb->full, 0, 0);            // No slots initially full\n    pthread_mutex_init(&bb->mutex, NULL);\n}\n\n// Destroy the synchronization primitives\nvoid destroy_buffer(BoundedBuffer *bb) {\n    sem_destroy(&bb->empty);\n    sem_destroy(&bb->full);\n    pthread_mutex_destroy(&bb->mutex);\n}\n\n// Function to produce an item\nvoid produce_item(BoundedBuffer *bb, int item) {\n    // TODO: Implement synchronization and item addition\n}\n\n// Function to consume an item\nint consume_item(BoundedBuffer *bb) {\n    // TODO: Implement synchronization and item removal\n    return -1; // Placeholder\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון לבעיית היצרן-צרכן עם חיץ חסום דורש שימוש בשני סמפורים וב-mutex. ה-mutex (`bb->mutex`) משמש להבטחת גישה בלעדית לחיץ עצמו (המשאב המשותף), כדי למנוע תנאי מירוץ בעת עדכון המצביעים `in` ו-`out` או הכנסה/הוצאה של פריטים. הסמפור `bb->empty` (אתחול ל-`BUFFER_SIZE`) עוקב אחר מספר המקומות הריקים בחיץ. יצרן מבצע `sem_wait` על `empty` לפני הוספת פריט, ומבצע `sem_post` על `full` לאחר הוספתו. הסמפור `bb->full` (אתחול ל-0) עוקב אחר מספר המקומות המלאים בחיץ. צרכן מבצע `sem_wait` על `full` לפני הוצאת פריט, ומבצע `sem_post` על `empty` לאחר הוצאתו.\n\n**מימוש פונקציית `produce_item`:**\n```c\nvoid produce_item(BoundedBuffer *bb, int item) {\n    sem_wait(&bb->empty); // Wait if buffer is full (no empty slots)\n    pthread_mutex_lock(&bb->mutex); // Acquire mutex for exclusive buffer access\n\n    // Critical section: Add item to buffer\n    bb->buffer[bb->in] = item;\n    bb->in = (bb->in + 1) % BUFFER_SIZE;\n\n    pthread_mutex_unlock(&bb->mutex); // Release mutex\n    sem_post(&bb->full); // Signal that a slot is now full\n}\n```\n\n**מימוש פונקציית `consume_item`:**\n```c\nint consume_item(BoundedBuffer *bb) {\n    int item;\n    sem_wait(&bb->full); // Wait if buffer is empty (no full slots)\n    pthread_mutex_lock(&bb->mutex); // Acquire mutex for exclusive buffer access\n\n    // Critical section: Remove item from buffer\n    item = bb->buffer[bb->out];\n    bb->out = (bb->out + 1) % BUFFER_SIZE;\n\n    pthread_mutex_unlock(&bb->mutex); // Release mutex\n    sem_post(&bb->empty); // Signal that a slot is now empty\n\n    return item;\n}\n```\n\n**הסבר:**\n1.  **`sem_wait(&bb->empty)` / `sem_wait(&bb->full)`:** פעולות אלו מבטיחות שהיצרן ימתין אם אין מקום פנוי (החיץ מלא), והצרכן ימתין אם אין פריטים זמינים (החיץ ריק). זה מונע גלישה (overflow) ותת-גלישה (underflow) של החיץ.\n2.  **`pthread_mutex_lock(&bb->mutex)` / `pthread_mutex_unlock(&bb->mutex)`:** ה-mutex משמש להגנה על הקטע הקריטי (critical section) שבו מתבצעת הגישה בפועל לחיץ (הוספה/הוצאה של פריט ועדכון המצביעים `in` ו-`out`). זה מבטיח שרק חוט אחד יגש לחיץ בכל רגע נתון, ובכך מונע תנאי מירוץ.\n3.  **`sem_post(&bb->full)` / `sem_post(&bb->empty)`:** לאחר שהיצרן מוסיף פריט, הוא מאותת שהתמלא מקום (`full`). לאחר שהצרכן מוציא פריט, הוא מאותת שהתפנה מקום (`empty`). אותות אלו מעירים חוטים אחרים שממתינים על הסמפורים המתאימים."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

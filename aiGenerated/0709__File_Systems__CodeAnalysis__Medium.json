@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "File Systems",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 23:47:04",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2680,
+      "output_tokens": 2284,
+      "total_tokens": 11974
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "File Systems",
+      "Processes",
+      "Concurrency",
+      "System Calls"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C הבאה המשתמשת במנגנוני מערכת קבצים ותהליכים. יש לנתח את הקוד ולציין את כל הפלטים האפשריים של התוכנית לשטף הפלט הסטנדרטי (stdout), תוך התמקדות בתוכן הסופי של הקובץ כפי שמודפס על ידי תהליך האב. הסבירו מדוע כל פלט אפשרי, ופרטו את מצב קובץ הנתונים ואיך ה-offset המשותף משתנה בכל אחד מהתרחישים.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <fcntl.h>\n#include <sys/wait.h>\n#include <string.h>\n\nint main() {\n    int fd;\n    char *filename = \"test_file.txt\";\n    char buffer_parent[] = \"AAAAA\"; // 5 'A's\n    char buffer_child[] = \"BBBBB\";  // 5 'B's\n\n    // Create and open the file, truncating if it exists\n    fd = open(filename, O_CREAT | O_TRUNC | O_RDWR, 0644);\n    if (fd == -1) {\n        perror(\"open failed\");\n        exit(1);\n    }\n\n    // Write some initial data\n    write(fd, \"123\", 3); // File: \"123\", current shared offset: 3\n\n    pid_t pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        exit(1);\n    } else if (pid == 0) { // Child process\n        printf(\"Child: Writing...\\n\");\n        // Child's file offset is inherited from parent (3)\n        lseek(fd, 1, SEEK_CUR); // Move offset by 1 relative to current shared offset\n        write(fd, buffer_child, strlen(buffer_child)); // Write 5 'B's\n        printf(\"Child: Finished writing.\\n\");\n        close(fd);\n        exit(0);\n    } else { // Parent process\n        printf(\"Parent: Writing...\\n\");\n        // Parent's file offset is also inherited from parent (3)\n        // No lseek here, writes from current shared offset\n        write(fd, buffer_parent, strlen(buffer_parent)); // Write 5 'A's\n        printf(\"Parent: Finished writing.\\n\");\n        wait(NULL); // Wait for child to finish\n        close(fd);\n\n        // Re-open the file to read its final content\n        fd = open(filename, O_RDONLY);\n        if (fd == -1) {\n            perror(\"re-open failed\");\n            exit(1);\n        }\n        char read_buf[20]; // Buffer to read content into\n        ssize_t bytes_read = read(fd, read_buf, sizeof(read_buf) - 1);\n        if (bytes_read == -1) {\n            perror(\"read failed\");\n            exit(1);\n        }\n        read_buf[bytes_read] = '\\0'; // Null-terminate the string\n        printf(\"Final file content: %s\\n\", read_buf);\n        close(fd);\n    }\n\n    return 0;\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "כדי לפתור את השאלה, יש להבין כיצד מתנהגים מתארי קבצים (file descriptors) במקרה של יצירת תהליך חדש (fork) וכיצד פעולות כתיבה (write) ושינוי מיקום (lseek) משפיעות על קובץ משותף. כאשר תהליך אב מבצע fork, תהליך הבן מקבל עותק של כל מתארי הקבצים של האב. עם זאת, מתארי קבצים אלו מצביעים לאותה טבלת קבצים (file table entry) בקרנל. המשמעות היא שהם חולקים את אותו מצביע קריאה/כתיבה (file offset) עבור הקובץ.\n\nנתחיל בניתוח הקוד:\n1.  הקובץ \"test_file.txt\" נוצר/נפתח במצב קריאה וכתיבה (O_RDWR) ונמחק תוכנו הקודם (O_TRUNC). מצביע הקובץ ההתחלתי הוא 0.\n2.  האב כותב \"123\" לקובץ. הקובץ מכיל כעת \"123\", ומצביע הקובץ המשותף מתקדם ל-3.\n3.  מתבצעת קריאת fork(). הן תהליך האב והן תהליך הבן יורשים את מתאר הקובץ `fd`, ושניהם חולקים את אותו מצביע קובץ משותף, שערכו כרגע הוא 3.\n\nקיימים שני תרחישים עיקריים לסדר הפעולות של הכתיבה, עקב אי-דטרמיניסטיות של תזמון תהליכים:\n\n**תרחיש 1: תהליך האב כותב לפני תהליך הבן**\n*   **האב:** מבצע `write(fd, buffer_parent, strlen(buffer_parent))`. הוא כותב \"AAAAA\" החל מה-offset המשותף הנוכחי (3). הקובץ הופך להיות: \"123AAAAA\". מצביע הקובץ המשותף מתקדם ל-3 + 5 = 8.\n*   **הבן:** מבצע `lseek(fd, 1, SEEK_CUR)`. ה-offset המשותף הנוכחי הוא 8 (לאחר כתיבת האב). ה-lseek מזיז את המצביע ב-1 קדימה, כך שהוא הופך ל-8 + 1 = 9.\n*   **הבן:** מבצע `write(fd, buffer_child, strlen(buffer_child))`. הוא כותב \"BBBBB\" החל מה-offset המשותף הנוכחי (9). הקובץ הופך להיות: \"123AAAAABBBBB\". מצביע הקובץ המשותף מתקדם ל-9 + 5 = 14.\n*   האב ממתין לבן (`wait(NULL)`), סוגר את הקובץ, פותח אותו מחדש לקריאה, קורא את התוכן ומדפיס.\n*   **פלט סופי אפשרי:** `Final file content: 123AAAAABBBBB`\n\n**תרחיש 2: תהליך הבן כותב לפני תהליך האב**\n*   **הבן:** מבצע `lseek(fd, 1, SEEK_CUR)`. ה-offset המשותף הנוכחי הוא 3 (לאחר כתיבת האב לפני ה-fork). ה-lseek מזיז את המצביע ב-1 קדימה, כך שהוא הופך ל-3 + 1 = 4.\n*   **הבן:** מבצע `write(fd, buffer_child, strlen(buffer_child))`. הוא כותב \"BBBBB\" החל מה-offset המשותף הנוכחי (4). הקובץ הופך להיות: \"123BBBBB\" (התו '3' בקובץ נדרס על ידי 'B' הראשון). מצביע הקובץ המשותף מתקדם ל-4 + 5 = 9.\n*   **האב:** מבצע `write(fd, buffer_parent, strlen(buffer_parent))`. הוא כותב \"AAAAA\" החל מה-offset המשותף הנוכחי (9). הקובץ הופך להיות: \"123BBBBBAAAAA\". מצביע הקובץ המשותף מתקדם ל-9 + 5 = 14.\n*   האב ממתין לבן (`wait(NULL)`), סוגר את הקובץ, פותח אותו מחדש לקריאה, קורא את התוכן ומדפיס.\n*   **פלט סופי אפשרי:** `Final file content: 123BBBBBAAAAA`\n\n**לגבי פלטי ה-printf הנוספים:**\nהשורות `\"Child: Writing...\"`, `\"Child: Finished writing.\"` ו-`\"Parent: Writing...\"`, `\"Parent: Finished writing.\"` יכולות להופיע בכל סדר אפשרי לפני שורת הפלט הסופית `\"Final file content: ...\"`, בהתאם לתזמון המדויק של מערכת ההפעלה. עם זאת, השורה `\"Final file content: ...\"` תמיד תופיע אחרונה מכיוון שתהליך האב ממתין לתהליך הבן לפני שהוא קורא את תוכן הקובץ ומדפיס אותו. לכן, ישנם שני פלטים סופיים אפשריים עבור תוכן הקובץ, וכל אחד מהם יכול להשתלב עם סדר שונה של הודעות ה-`printf` מהאב והבן."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

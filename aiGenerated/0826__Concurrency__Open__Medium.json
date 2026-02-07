@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 00:37:56",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1930,
+      "output_tokens": 1512,
+      "total_tokens": 6357
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "Open",
+    "topic": [
+      "Concurrency",
+      "Synchronization",
+      "Semaphores",
+      "Mutexes",
+      "Producer-Consumer"
+    ],
+    "content": {
+      "text": "בעיית המפיק-צרכן היא בעיית סנכרון קלאסית במערכות הפעלה. תארו את הבעיה בקצרה, והציגו מימוש של מאגר חסום (Bounded Buffer) עבורה באמצעות סמפורים (semaphores) ומנעול (mutex) ב-C/C++. יש להסביר את תפקידו של כל סמפור ושל המנעול בפתרון המוצע.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "תיאור בעיית המפיק-צרכן:\nבעיית המפיק-צרכן היא בעיית סנכרון קלאסית שבה ישנם שני סוגים של תהליכים (או ת'רדים): מפיקים (producers) וצרכנים (consumers). המפיקים מייצרים פריטים ומכניסים אותם למאגר משותף, בעוד הצרכנים מוציאים פריטים מהמאגר וצורכים אותם. המאגר הוא בדרך כלל בגודל סופי (מאגר חסום - Bounded Buffer). האתגר הוא להבטיח סנכרון נכון:\n1.  מפיק לא ינסה להוסיף פריט למאגר מלא.\n2.  צרכן לא ינסה להוציא פריט ממאגר ריק.\n3.  גישה למאגר המשותף תהיה מוגנת מפני תנאי מירוץ (race conditions).\n\nמימוש באמצעות סמפורים ומנעול:\nהפתרון משתמש בשני סמפורים ובמנעול אחד:\n*   `empty`: סמפור זה סופר את מספר התאים הריקים במאגר. הוא מאותחל לגודל המאגר (`BUFFER_SIZE`). המפיקים מבצעים עליו `sem_wait` (מפחיתים את מספר התאים הריקים), והצרכנים מבצעים עליו `sem_post` (מגדילים את מספר התאים הריקים). תפקידו למנוע ממפיק להכניס פריט למאגר מלא.\n*   `full`: סמפור זה סופר את מספר התאים המלאים במאגר. הוא מאותחל ל-0. המפיקים מבצעים עליו `sem_post` (מגדילים את מספר התאים המלאים), והצרכנים מבצעים עליו `sem_wait` (מפחיתים את מספר התאים המלאים). תפקידו למנוע מצרכן להוציא פריט ממאגר ריק.\n*   `mutex`: מנעול זה (pthread_mutex_t) משמש להבטחת גישה הדדית בלעדית (mutual exclusion) למאגר המשותף (המערך `buffer` והאינדקסים `in`, `out`). הוא מגן מפני תנאי מירוץ כאשר מספר תהליכים מנסים לגשת למאגר בו זמנית, ובכך מבטיח שהשינויים במאגר יהיו אטומיים ועקביים.\n\nקוד מימוש:\n```c\n#include <semaphore.h>\n#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h> // For malloc, free, exit\n\n#define BUFFER_SIZE 10\n\ntypedef struct {\n    int buffer[BUFFER_SIZE];\n    int in;  // Next write position\n    int out; // Next read position\n    sem_t empty;   // Counts empty slots, initialized to BUFFER_SIZE\n    sem_t full;    // Counts full slots, initialized to 0\n    pthread_mutex_t mutex; // Protects buffer access (in, out, buffer[])\n} BoundedBuffer;\n\n// Initializes the bounded buffer\nvoid init_buffer(BoundedBuffer *buf) {\n    buf->in = 0;\n    buf->out = 0;\n    sem_init(&buf->empty, 0, BUFFER_SIZE); // Initial empty slots = BUFFER_SIZE\n    sem_init(&buf->full, 0, 0);            // Initial full slots = 0\n    pthread_mutex_init(&buf->mutex, NULL);\n}\n\n// Destroys the bounded buffer's synchronization primitives\nvoid destroy_buffer(BoundedBuffer *buf) {\n    sem_destroy(&buf->empty);\n    sem_destroy(&buf->full);\n    pthread_mutex_destroy(&buf->mutex);\n}\n\n// Producer function: puts an item into the buffer\nvoid put(BoundedBuffer *buf, int item) {\n    sem_wait(&buf->empty); // Decrement empty count, wait if buffer is full\n    pthread_mutex_lock(&buf->mutex); // Acquire mutex for critical section\n    \n    buf->buffer[buf->in] = item;\n    buf->in = (buf->in + 1) % BUFFER_SIZE;\n    // printf(\"Producer produced: %d\\n\", item); // For demonstration\n\n    pthread_mutex_unlock(&buf->mutex); // Release mutex\n    sem_post(&buf->full);  // Increment full count, signal consumer\n}\n\n// Consumer function: gets an item from the buffer\nint get(BoundedBuffer *buf) {\n    sem_wait(&buf->full); // Decrement full count, wait if buffer is empty\n    pthread_mutex_lock(&buf->mutex); // Acquire mutex for critical section\n    \n    int item = buf->buffer[buf->out];\n    buf->out = (buf->out + 1) % BUFFER_SIZE;\n    // printf(\"Consumer consumed: %d\\n\", item); // For demonstration\n\n    pthread_mutex_unlock(&buf->mutex); // Release mutex\n    sem_post(&buf->empty); // Increment empty count, signal producer\n    \n    return item;\n}\n```"
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Paging",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 22:51:39",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1024,
+      "output_tokens": 363,
+      "total_tokens": 2538
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Paging",
+      "Memory Management",
+      "Virtual Memory"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של שיטת ה-Paging במערכת הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. לאפשר לזיכרון וירטואלי גדול יותר מהזיכרון הפיזי ולספק הגנה בין תהליכים.",
+        "ב. להגביר את מהירות הגישה לנתונים בדיסק הקשיח.",
+        "ג. למנוע מצבי קיפאון (deadlocks) בין תהליכים.",
+        "ד. לארגן קבצים במערכת הקבצים באופן היררכי.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "א'. שיטת ה-Paging מאפשרת ניהול זיכרון יעיל, כולל יצירת מרחב כתובות וירטואלי גדול מהזיכרון הפיזי הזמין, והיא גם מספקת מנגנון הגנה חשוב בין תהליכים שונים על ידי בידוד מרחבי הכתובות שלהם."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

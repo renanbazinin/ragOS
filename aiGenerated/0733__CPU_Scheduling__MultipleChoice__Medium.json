@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "CPU Scheduling",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 23:56:06",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1200,
+      "output_tokens": 651,
+      "total_tokens": 3691
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "CPU Scheduling",
+      "Round Robin",
+      "Starvation",
+      "Performance Metrics"
+    ],
+    "content": {
+      "text": "נתונה מערכת המשתמשת באלגוריתם תזמון Round Robin (RR) עם קוונטה בגודל q. עם זאת, אם זמן הריצה הנותר של תהליך (burst time) קטן או שווה ל-q, התהליך מורשה לרוץ עד לסיום ללא הפרעה (preemption). איזו טענה בהכרח נכונה לגבי שינוי זה?",
+      "code_snippet": null,
+      "options": [
+        "א. זמן המחזור הממוצע (Average Turnaround Time) של המערכת ישתפר משמעותית עבור כל התהליכים.",
+        "ב. תפוקת המעבד (CPU Utilization) תפחת עקב החלטות תזמון מורכבות יותר.",
+        "ג. קיימת סכנה מוגברת להרעבה (starvation) עבור תהליכים ארוכים יותר.",
+        "ד. זמן התגובה (Response Time) של כל התהליכים בהכרח ישתפר.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג. קיימת סכנה מוגברת להרעבה (starvation) עבור תהליכים ארוכים יותר.",
+      "explanation": "השינוי המוצע באלגוריתם RR מעניק עדיפות לתהליכים קצרים (אלו שזמן הריצה הנותר שלהם קטן או שווה לקוונטה), ומאפשר להם לרוץ עד לסיום ללא הפרעה. בעוד שזה יכול לשפר את זמן המחזור הממוצע הכולל (במיוחד עבור תהליכים קצרים) ולהפחית את מספר החלפות ההקשר עבורם, החיסרון המשמעותי הוא הסיכון להרעבה. אם יגיעו למערכת באופן רציף תהליכים קצרים חדשים העומדים בקריטריון זה, הם יקבלו עדיפות על פני תהליכים ארוכים שכבר נמצאים בתור, וימנעו מהם לרוץ או ידחו את ריצתם לזמן בלתי מוגבל. לכן, תהליכים ארוכים עשויים להמתין לזמן בלתי מוגבל או לזמן ארוך מאוד."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

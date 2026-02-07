@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Paging",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 22:59:04",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4788,
+      "output_tokens": 947,
+      "total_tokens": 7735
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Paging",
+      "Virtual Memory"
+    ],
+    "content": {
+      "text": "נתונה מערכת זיכרון וירטואלי עם גודל דף של 4KB. תהליך ניגש לכתובת וירטואלית 0xABCDE. ידוע שרשומת טבלת הדפים (PTE) עבור הדף הוירטואלי המתאים מצביעה על מספר מסגרת פיזית (PFN) 0x123. בהנחה שהדף נמצא בזיכרון (Present bit = 1), מהי הכתובת הפיזית המתקבלת? פרטו את החישובים.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "כדי לחשב את הכתובת הפיזית, עלינו לפרק את הכתובת הוירטואלית למספר דף וירטואלי (VPN) ולהיסט בתוך הדף (Offset), ולאחר מכן להחליף את ה-VPN במספר מסגרת פיזית (PFN) שניתן לנו.\n\n1.  **קביעת גודל ההיסט (Offset):**\n    גודל הדף הוא 4KB.\n    4KB = 4 * 1024 בתים = 4096 בתים.\n    מכיוון ש-2^12 = 4096, ההיסט בתוך הדף דורש 12 ביטים.\n\n2.  **פירוק הכתובת הוירטואלית:**\n    הכתובת הוירטואלית הנתונה היא 0xABCDE.\n    נמיר לבינארי (אפשר לחשוב עליה כ-20 ביטים לצורך העניין, למרות שגודל הכתובת הוירטואלית לא נתון במפורש, זה מספיק לחישוב):\n    0xABCDE = 1010 1011 1100 1101 1110 (בינארי)\n\n    *   **היסט (Offset):** 12 הביטים הפחות משמעותיים של הכתובת הוירטואלית.\n        Offset = 0xCDE (הביטים 1100 1101 1110)\n\n    *   **מספר דף וירטואלי (VPN):** הביטים הנותרים (המשמעותיים יותר).\n        VPN = 0xAB (הביטים 1010 1011)\n\n3.  **בניית הכתובת הפיזית:**\n    נתון שמספר המסגרת הפיזית (PFN) המתאים ל-VPN זה הוא 0x123.\n\n    הכתובת הפיזית נוצרת על ידי שילוב ה-PFN עם ההיסט:\n    Physical Address = (PFN << Offset_bits) | Offset\n    Physical Address = (0x123 << 12) | 0xCDE\n\n    נחשב:\n    0x123 << 12 = 0x123000 (מזיזים את 0x123 ב-12 ביטים שמאלה, כלומר מוסיפים 12 אפסים בסוף, שזה שקול לכפל ב-2^12).\n\n    Physical Address = 0x123000 + 0xCDE = 0x123CDE\n\nהכתובת הפיזית המתקבלת היא 0x123CDE."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

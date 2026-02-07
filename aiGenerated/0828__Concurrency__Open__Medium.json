@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 00:38:44",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1930,
+      "output_tokens": 1344,
+      "total_tokens": 7025
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Concurrency",
+      "Synchronization",
+      "Semaphores"
+    ],
+    "content": {
+      "text": "הסבירו מהו סמפור (Semaphore) ומהן שתי הפעולות העיקריות שלו. לאחר מכן, כתבו מימוש של סמפור באמצעות mutex ו-condition variables (שימוש ב-pthread). המימוש צריך לכלול את פונקציות האתחול (`semaphore_init`), ההשמדה (`semaphore_destroy`), ה-`wait` (או `P`) וה-`signal` (או `V`). הסבירו בקצרה מדוע השימוש ב-mutex ו-condition variables הכרחי למניעת מצבי מירוץ (race conditions) וכיצד הם תורמים לנכונות המימוש.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "סמפור (Semaphore) הוא אובייקט סנכרון המאפשר שליטה בגישה למשאבים משותפים או תיאום בין תהליכים/חוטים. יש לו ערך שלם (מונה) ושתי פעולות עיקריות:\n1.  `wait` (או `P`): מקטינה את ערך הסמפור. אם הערך הופך שלילי (או אפס, תלוי בהגדרה), החוט הקורא נחסם עד שערך הסמפור יהיה חיובי.\n2.  `signal` (או `V`): מגדילה את ערך הסמפור. אם ישנם חוטים חסומים שממתינים על הסמפור, אחד מהם (או יותר, תלוי במימוש) משוחרר.\n\nמימוש הסמפור באמצעות mutex ו-condition variables:\n\n```c\n#include <pthread.h>\n#include <stdlib.h> // For malloc/free\n\n// Semaphore structure\ntypedef struct {\n    int value;\n    pthread_mutex_t mutex;\n    pthread_cond_t cond;\n} Semaphore;\n\n// Initialize semaphore\nvoid semaphore_init(Semaphore *sem, int initial_value) {\n    sem->value = initial_value;\n    pthread_mutex_init(&sem->mutex, NULL);\n    pthread_cond_init(&sem->cond, NULL);\n}\n\n// Destroy semaphore\nvoid semaphore_destroy(Semaphore *sem) {\n    pthread_mutex_destroy(&sem->mutex);\n    pthread_cond_destroy(&sem->cond);\n}\n\n// Wait (P) operation\nvoid semaphore_wait(Semaphore *sem) {\n    pthread_mutex_lock(&sem->mutex);\n    while (sem->value <= 0) {\n        pthread_cond_wait(&sem->cond, &sem->mutex);\n    }\n    sem->value--;\n    pthread_mutex_unlock(&sem->mutex);\n}\n\n// Signal (V) operation\nvoid semaphore_signal(Semaphore *sem) {\n    pthread_mutex_lock(&sem->mutex);\n    sem->value++;\n    pthread_cond_signal(&sem->cond); // או pthread_cond_broadcast אם יש צורך להעיר מספר ממתינים\n    pthread_mutex_unlock(&sem->mutex);\n}\n```\n\nהשימוש ב-mutex ו-condition variables הוא הכרחי למניעת מצבי מירוץ (race conditions) ולהבטחת נכונות המימוש:\n*   **Mutex**: ה-mutex (מנעול) מבטיח שרק חוט אחד יוכל לגשת ולשנות את ערך ה-`value` של הסמפור בכל רגע נתון. ללא ה-mutex, מספר חוטים יכלו לנסות להקטין או להגדיל את `value` בו-זמנית, מה שעלול להוביל לערך שגוי של המונה (למשל, שני חוטים מבצעים `wait`, שניהם רואים `value=1`, שניהם מקטינים ל-`0` במקום שחוט אחד יקטין ל-`0` והשני יחסם). ה-mutex גם מגן על הגישה למשתנה התנאי עצמו.\n*   **Condition Variable**: ה-condition variable (משתנה תנאי) מאפשר לחוטים להמתין באופן יעיל כאשר הסמפור אינו זמין (כלומר, `value <= 0` בפעולת `wait`). במקום לבצע `busy-waiting` (לולאה שבודקת שוב ושוב את התנאי ומבזבזת זמן מעבד), החוט נכנס למצב שינה ומתעורר רק כאשר חוט אחר מבצע `signal` ומסמן שהתנאי אולי השתנה. זה חוסך משאבי מעבד ומאפשר ניהול תורים מסודר של חוטים ממתינים. ה-mutex נחוץ גם עם ה-condition variable כדי להבטיח שהבדיקה של התנאי (sem->value <= 0) והכניסה למצב שינה יהיו פעולה אטומית, וכדי למנוע מצב שבו `signal` נקרא לפני ש-`wait` נכנס למצב שינה, וכך ה-`signal` יאבד.\n\nבקיצור, ה-mutex מגן על המצב הפנימי של הסמפור, וה-condition variable מאפשר לחוטים להמתין באופן יעיל לתנאים מסוימים תוך כדי שחרור המנעול זמנית."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

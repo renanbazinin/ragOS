@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "File Systems",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 23:27:50",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1032,
+      "output_tokens": 482,
+      "total_tokens": 3048
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "File Systems",
+      "Directory Structure",
+      "Inodes"
+    ],
+    "content": {
+      "text": "מהו המידע שמאוחסן בדרך כלל בתוך רשומת ספרייה (directory entry) במערכת קבצים לינוקס טיפוסית (כמו ext4)?",
+      "code_snippet": null,
+      "options": [
+        "א. שם הקובץ, גודל הקובץ, וזמן השינוי האחרון.",
+        "ב. שם הקובץ, מספר ה-inode, וסוג הקובץ (לדוגמה, קובץ רגיל או ספרייה).",
+        "ג. מספר ה-inode, הרשאות גישה, ובעלות הקובץ.",
+        "ד. גודל הקובץ, הרשאות גישה, וזמן הגישה האחרון.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "רשומת ספרייה (directory entry) מקשרת שם קובץ למספר inode. לכן, היא חייבת להכיל את שם הקובץ ואת מספר ה-inode המתאים. מערכות קבצים רבות, כמו ext4, שומרות גם את סוג הקובץ (לדוגמה, קובץ רגיל, ספרייה, קישור סימבולי) בתוך רשומת הספרייה עצמה כאופטימיזציה, כדי למנוע גישה ל-inode עבור פעולות בסיסיות כמו 'ls -F' או בדיקת סוג הפריט. מידע אחר כמו גודל, זמנים, הרשאות ובעלות מאוחסן ב-inode עצמו."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

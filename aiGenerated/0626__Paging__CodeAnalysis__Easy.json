@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Paging",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 23:11:47",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2724,
+      "output_tokens": 1129,
+      "total_tokens": 6411
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Paging",
+      "Virtual Memory",
+      "Page Faults"
+    ],
+    "content": {
+      "text": "נתונה תוכנית ה-C הבאה:\n\nבהנחה כי:\n1. המערכת משתמשת ב-Demand Paging.\n2. גודל הדף הוא 4KB (כפי שהוגדר ב-`PAGE_SIZE`).\n3. גודל משתנה `int` הוא 4 בתים.\n4. המערך `arr` מוקצה בכתובת וירטואלית מיושרת לדף (page-aligned).\n5. בתחילת ריצת התוכנית, אף דף של המערך `arr` אינו נמצא בזיכרון הפיזי.\n6. כל גישה לאלמנט בתוך דף שאינו נמצא כרגע בזיכרון גורמת בדיוק לתקלת דף (page fault) אחת.\n7. מערכת ההפעלה טוענת את הדף כולו לזיכרון הפיזי בעקבות תקלת דף.\n\nכמה תקלות דף יתרחשו במהלך ביצוע לולאת ה-`for` בפונקציה `main`?",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n\n#define PAGE_SIZE 4096 // גודל דף בבתים\n#define NUM_PAGES 5    // מספר דפים שהמערך משתרע עליהם\n#define ELEMENTS_PER_PAGE (PAGE_SIZE / sizeof(int)) // מספר איברים מסוג int בדף אחד\n#define ARRAY_TOTAL_ELEMENTS (NUM_PAGES * ELEMENTS_PER_PAGE) // סך כל האיברים במערך\n\nint main() {\n    int* arr = (int*)malloc(ARRAY_TOTAL_ELEMENTS * sizeof(int));\n    if (arr == NULL) {\n        perror(\"malloc failed\");\n        return 1;\n    }\n\n    // לולאה הניגשת לכל האיברים במערך באופן סדרתי\n    for (int i = 0; i < ARRAY_TOTAL_ELEMENTS; ++i) {\n        arr[i] = i;\n    }\n\n    free(arr);\n    return 0;\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הסבר:\n*   `PAGE_SIZE` הוא 4096 בתים.\n*   גודל משתנה `int` הוא 4 בתים.\n*   לכן, `ELEMENTS_PER_PAGE` (מספר האיברים מסוג `int` בדף אחד) הוא 4096 / 4 = 1024.\n*   המערך משתרע על פני `NUM_PAGES` = 5 דפים.\n*   סך כל האיברים במערך הוא `ARRAY_TOTAL_ELEMENTS` = 5 * 1024 = 5120 איברים.\n*   לולאת ה-`for` ניגשת לכל האיברים במערך באופן סדרתי, החל מ-`arr[0]` ועד `arr[5119]`.\n*   כאשר `arr[0]` נגיש לראשונה, הוא נמצא בדף הראשון. מכיוון שדף זה אינו בזיכרון הפיזי, מתרחשת תקלת דף (page fault), וכל הדף הראשון נטען לזיכרון.\n*   גישות עוקבות לאיברים באותו דף (לדוגמה, `arr[1]` עד `arr[1023]`) לא יגרמו לתקלות דף נוספות, מכיוון שהדף שלהם כבר טעון.\n*   כאשר `arr[1024]` נגיש לראשונה, הוא נמצא בדף השני. דף זה אינו בזיכרון, ולכן מתרחשת תקלת דף שנייה, וכל הדף השני נטען.\n*   דפוס זה חוזר על עצמו: בכל פעם שהלולאה עוברת לדף חדש וניגשת לאלמנט הראשון שבו, מתרחשת תקלת דף.\n*   מכיוון שהמערך משתרע על פני 5 דפים, וכל דף נגיש לראשונה באופן סדרתי, תתרחש תקלת דף אחת בדיוק עבור כל אחד מ-5 הדפים.\n*   לכן, יתרחשו סך הכל 5 תקלות דף."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

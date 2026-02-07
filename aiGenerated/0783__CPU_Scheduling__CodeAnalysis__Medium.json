@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "CPU Scheduling",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 00:20:38",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2670,
+      "output_tokens": 1834,
+      "total_tokens": 10418
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "CPU Scheduling",
+      "Round Robin",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה בשפת C++ המשתמשת בחוטים (threads). התוכנית יוצרת שלושה חוטים, כאשר כל חוט מבצע לולאת busy-wait המדמה עבודה של מעבד, ולאחר מכן מגדיל מונה גלובלי משותף ומדפיס את מזהה החוט ואת ערך המונה. המערכת מריצה את התוכנית באמצעות מתזמן מעבד מסוג **Round Robin (RR)** עם **קוואנטום (quantum) של 4 יחידות זמן**. יש להניח כי כל 100,000 איטרציות בלולאת ה-busy-wait שוות ליחידת זמן אחת. כל החוטים נוצרים ומוכנים לריצה בזמן 0, והמתזמן יבחר אותם בסדר יצירתם (tA, tB, tC) בפעם הראשונה. פעולת ההדפסה `std::cout` נחשבת כפעולה מהירה שאינה צורכת זמן מעבד משמעותי ואינה גורמת להחלפת הקשר (context switch) נוספת.\n\nמהו הפלט המדויק של התוכנית ל-`std::cout` (כולל הודעת ה-`Main`) ומהו הערך הסופי של המונה הגלובלי `global_counter`?\nיש להסביר את שלבי הריצה המלאים של המתזמן.",
+      "code_snippet": "#include <iostream>\n#include <thread>\n#include <vector>\n#include <chrono> \n\n// Global shared counter\nint global_counter = 0;\n\n// Busy-wait function to simulate CPU burst\nvoid busy_wait(int iterations) {\n    volatile int dummy = 0; // volatile to prevent optimization\n    for (int i = 0; i < iterations; ++i) {\n        dummy++;\n    }\n}\n\n// Thread function for A (10 units of work)\nvoid thread_func_A() {\n    busy_wait(1000000); \n    global_counter++;\n    std::cout << \"A: \" << global_counter << std::endl;\n}\n\n// Thread function for B (5 units of work)\nvoid thread_func_B() {\n    busy_wait(500000); \n    global_counter++;\n    std::cout << \"B: \" << global_counter << std::endl;\n}\n\n// Thread function for C (15 units of work)\nvoid thread_func_C() {\n    busy_wait(1500000); \n    global_counter++;\n    std::cout << \"C: \" << global_counter << std::endl;\n}\n\nint main() {\n    std::cout << \"Main: Starting threads...\" << std::endl;\n    std::thread tA(thread_func_A);\n    std::thread tB(thread_func_B);\n    std::thread tC(thread_func_C);\n\n    tA.join();\n    tB.join();\n    tC.join();\n\n    std::cout << \"Main: Final counter value: \" << global_counter << std::endl;\n    return 0;\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון דורש מעקב אחר מצב המתזמן (Round Robin) וזמני הריצה של כל חוט.\n\n**נתונים:**\n*   זמן עבודה של חוט A: 1000000 איטרציות = 10 יחידות זמן.\n*   זמן עבודה של חוט B: 500000 איטרציות = 5 יחידות זמן.\n*   זמן עבודה של חוט C: 1500000 איטרציות = 15 יחידות זמן.\n*   קוואנטום (Q) = 4 יחידות זמן.\n*   תור מוכנים התחלתי (על פי סדר יצירה): [A, B, C]\n\n**שלבי הריצה:**\n1.  **זמן 0:** המתזמן בוחר את **A**. A רץ למשך 4 יחידות זמן.\n    *   A נשאר: 10 - 4 = 6 יחידות.\n    *   תור מוכנים: [B, C, A]\n2.  המתזמן בוחר את **B**. B רץ למשך 4 יחידות זמן.\n    *   B נשאר: 5 - 4 = 1 יחידה.\n    *   תור מוכנים: [C, A, B]\n3.  המתזמן בוחר את **C**. C רץ למשך 4 יחידות זמן.\n    *   C נשאר: 15 - 4 = 11 יחידות.\n    *   תור מוכנים: [A, B, C]\n4.  המתזמן בוחר את **A**. A רץ למשך 4 יחידות זמן.\n    *   A נשאר: 6 - 4 = 2 יחידות.\n    *   תור מוכנים: [B, C, A]\n5.  המתזמן בוחר את **B**. B רץ למשך יחידה אחת (עד השלמה).\n    *   B נשאר: 1 - 1 = 0 יחידות. **B מסיים.**\n    *   `global_counter` הופך ל-1. **פלט:** `B: 1`\n    *   תור מוכנים: [C, A]\n6.  המתזמן בוחר את **C**. C רץ למשך 4 יחידות זמן.\n    *   C נשאר: 11 - 4 = 7 יחידות.\n    *   תור מוכנים: [A, C]\n7.  המתזמן בוחר את **A**. A רץ למשך 2 יחידות זמן (עד השלמה).\n    *   A נשאר: 2 - 2 = 0 יחידות. **A מסיים.**\n    *   `global_counter` הופך ל-2. **פלט:** `A: 2`\n    *   תור מוכנים: [C]\n8.  המתזמן בוחר את **C**. C רץ למשך 4 יחידות זמן.\n    *   C נשאר: 7 - 4 = 3 יחידות.\n    *   תור מוכנים: [C] (C חוזר לסוף התור, אך הוא היחיד)\n9.  המתזמן בוחר את **C**. C רץ למשך 3 יחידות זמן (עד השלמה).\n    *   C נשאר: 3 - 3 = 0 יחידות. **C מסיים.**\n    *   `global_counter` הופך ל-3. **פלט:** `C: 3`\n    *   תור מוכנים: []\n\n**פלט מלא:**\nMain: Starting threads...\nB: 1\nA: 2\nC: 3\nMain: Final counter value: 3",
+      "code_snippet": null
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

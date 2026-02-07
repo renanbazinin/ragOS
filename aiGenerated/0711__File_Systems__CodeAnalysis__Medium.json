@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "File Systems",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 23:47:59",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2680,
+      "output_tokens": 1547,
+      "total_tokens": 7774
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "File Systems",
+      "Processes",
+      "System Calls",
+      "File Descriptors"
+    ],
+    "content": {
+      "text": "נתונה תוכנית ה-C הבאה המבצעת פעולות על קובץ באמצעות קריאות מערכת. יש לנתח את התוכנית ולהסביר מה יהיה התוכן הסופי של הקובץ `test_file.txt` לאחר סיום ריצת התוכנית.\n\nיש להסביר את השלבים המובילים לתוצאה הסופית, תוך התייחסות לאופן שבו מזהי קבצים (file descriptors) ו-offsets משותפים או מופרדים בין תהליכים שונים.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <fcntl.h>\n#include <sys/wait.h>\n#include <string.h>\n\nint main() {\n    int fd;\n    char *filename = \"test_file.txt\";\n\n    // 1. Create and open the file\n    fd = open(filename, O_CREAT | O_TRUNC | O_RDWR, 0644);\n    if (fd == -1) {\n        perror(\"open\");\n        exit(EXIT_FAILURE);\n    }\n\n    // 2. Parent writes \"HELLO\"\n    write(fd, \"HELLO\", 5);\n\n    // 3. Parent forks\n    pid_t pid = fork();\n\n    if (pid == -1) {\n        perror(\"fork\");\n        exit(EXIT_FAILURE);\n    }\n\n    if (pid == 0) { // Child process\n        // 4. Child writes \"WORLD\"\n        write(fd, \"WORLD\", 5);\n        // 5. Child seeks to beginning\n        lseek(fd, 0, SEEK_SET);\n        // 6. Child writes \"OS\"\n        write(fd, \"OS\", 2);\n        close(fd);\n        exit(EXIT_SUCCESS);\n    } else { // Parent process\n        // 7. Parent waits for child to finish\n        wait(NULL);\n        // 8. Parent seeks to offset 5\n        lseek(fd, 5, SEEK_SET);\n        // 9. Parent writes \"SYS\"\n        write(fd, \"SYS\", 3);\n        close(fd);\n    }\n\n    // Clean up: Delete the file (not part of the question's analyzed behavior)\n    unlink(filename);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "התוכן הסופי של הקובץ `test_file.txt` יהיה: \"OSLLO SYSWORLD\"\n\nההסבר המפורט הוא כדלקמן:\n1.  **פתיחת הקובץ ופעולות תהליך ההורה הראשוניות:**\n    *   התוכנית פותחת את הקובץ `test_file.txt` במצב יצירה, מחיקה (אם קיים) וקריאה/כתיבה. ה-offset ההתחלתי של הקובץ הוא 0.\n    *   התהליך ההורה כותב \"HELLO\" לקובץ. תוכן הקובץ: `\"HELLO\"`. ה-offset של הקובץ מתקדם ל-5.\n\n2.  **יצירת תהליך הבן (`fork`):**\n    *   לאחר קריאת ה-`fork()`, נוצר תהליך בן. חשוב להבין שמזהי קבצים (file descriptors) משוכפלים בתהליך ה-`fork`, כלומר גם להורה וגם לבן יש מזהה קובץ `fd` שמצביע על אותה 'תיאור קובץ פתוח' (open file description) בטבלת הקבצים של המערכת. המשמעות היא שה-offset של הקובץ משותף בין ההורה לבן. כל שינוי ב-offset על ידי אחד מהתהליכים משפיע על שניהם.\n    *   בשלב זה, ה-offset המשותף הוא 5.\n\n3.  **פעולות תהליך הבן:**\n    *   הבן כותב \"WORLD\" לקובץ. הכתיבה מתחילה מה-offset הנוכחי, שהוא 5. תוכן הקובץ הופך להיות: `\"HELLOWORLD\"`. ה-offset המשותף מתקדם ל-10.\n    *   הבן מבצע `lseek(fd, 0, SEEK_SET)`, שמזיז את ה-offset המשותף לתחילת הקובץ (0).\n    *   הבן כותב \"OS\" לקובץ. הכתיבה מתחילה מה-offset 0, ולכן דורסת את שני התווים הראשונים. תוכן הקובץ הופך להיות: `\"OSLLOWORLD\"`. ה-offset המשותף מתקדם ל-2.\n    *   הבן סוגר את מזהה הקובץ שלו ויוצא.\n\n4.  **פעולות תהליך ההורה:**\n    *   ההורה ממתין שהבן יסיים באמצעות `wait(NULL)`. לאחר שהבן מסיים, ההורה ממשיך לפעול.\n    *   ה-offset המשותף של הקובץ נשאר 2 (הוא הוגדר כך בפעולה האחרונה של הבן).\n    *   ההורה מבצע `lseek(fd, 5, SEEK_SET)`, שמזיז את ה-offset המשותף ל-5.\n    *   ההורה כותב \"SYS\" לקובץ. הכתיבה מתחילה מה-offset 5, ודורסת חלק מהתווים הקיימים. תוכן הקובץ הופך להיות: `\"OSLLO SYSWORLD\"`.\n    *   ההורה סוגר את מזהה הקובץ שלו. (השורה `unlink(filename);` בסוף התוכנית מוחקת את הקובץ לאחר קבלת התוצאה, ואינה משפיעה על התוכן הסופי ברגע שהתוכנית מסיימת את פעולות הכתיבה)."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

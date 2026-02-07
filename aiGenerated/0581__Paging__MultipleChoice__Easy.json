@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Paging",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 22:52:10",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1024,
+      "output_tokens": 376,
+      "total_tokens": 2388
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Paging",
+      "Memory Management",
+      "Virtual Memory"
+    ],
+    "content": {
+      "text": "מהו תפקידה העיקרי של טבלת הדפים (Page Table) במערכת Paging?",
+      "code_snippet": null,
+      "options": [
+        "א. לאחסן את הקוד הבינארי של תהליכים.",
+        "ב. לאחסן את המיפוי בין כתובות וירטואליות לכתובות פיזיות בזיכרון.",
+        "ג. לתזמן את ביצוע התהליכים על ידי המעבד.",
+        "ד. לנהל את קבצי המשתמשים על הדיסק הקשיח.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב'. כפי שנלמד, טבלת הדפים היא מבנה נתונים קריטי במנגנון ה-Paging, ותפקידה העיקרי הוא לאחסן את המיפוי (mapping) בין דפים וירטואליים (הנראים לתהליך) למסגרות דף פיזיות (היכן שהנתונים נמצאים בפועל בזיכרון הפיזי)."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

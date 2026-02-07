@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "CPU Scheduling",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 23:54:05",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1126,
+      "output_tokens": 340,
+      "total_tokens": 2226
+    }
+  },
+  "question": {
+    "id": 6,
+    "type": "MultipleChoice",
+    "topic": [
+      "CPU Scheduling"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של מתזמן (scheduler) במערכת הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. לנהל את הזיכרון הפיזי של המערכת.",
+        "ב. להחליט איזה תהליך יקבל את המעבד ויתבצע הלאה.",
+        "ג. לטפל בפעולות קלט/פלט של התקנים.",
+        "ד. לסנכרן גישה למשאבים משותפים בין תהליכים."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב'. המטרה העיקרית של מתזמן המעבד היא לבחור מבין התהליכים המוכנים לביצוע, איזה תהליך יקבל את המעבד ויתבצע. שאר התשובות מתארות תפקידים אחרים של מערכת ההפעלה או מנגנוניה (ניהול זיכרון, טיפול בקלט/פלט, סינכרון)."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

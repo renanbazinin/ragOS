@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "CPU Scheduling",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 23:57:56",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 910,
+      "total_tokens": 5674
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "CPU Scheduling",
+      "Preemptive Priority Scheduling",
+      "Process States"
+    ],
+    "content": {
+      "text": "שקול מערכת המשתמשת באלגוריתם תזמון עדיפויות מונע (preemptive priority scheduling), כאשר מספר עדיפות נמוך יותר מציין עדיפות גבוהה יותר. כל התהליכים מגיעים לתור המוכנים בזמני ההגעה שצוינו. המתזמן תמיד בוחר את התהליך בעל העדיפות הגבוהה ביותר מבין אלו שמוכנים. אם למספר תהליכים יש אותה עדיפות, נעשה שימוש ב-Round Robin עם קוונטום של 1ms (אך ייתכן שזה לא יידרש לשאלה זו בהינתן עדיפויות שונות). תקורה של החלפת הקשר (context switch) ניתנת להזנחה.\n\nהתהליכים הבאים נתונים:\nP1: זמן הגעה = 0ms, עדיפות = 1, פרץ מעבד = 4ms, פרץ I/O = 6ms, פרץ מעבד = 2ms.\nP2: זמן הגעה = 1ms, עדיפות = 2, פרץ מעבד = 8ms.\nP3: זמן הגעה = 2ms, עדיפות = 3, פרץ מעבד = 10ms.\n\nמהו מצבו של תהליך P2 בזמן T=10ms?",
+      "code_snippet": null,
+      "options": [
+        "א. P2 רץ.",
+        "ב. P2 חסום ב-I/O.",
+        "ג. P2 מוכן ובעל 2ms זמן מעבד נותר.",
+        "ד. P2 מוכן ובעל 4ms זמן מעבד נותר.",
+        "ה. P2 סיים את ריצתו."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "בזמן T=0: P1 מגיע ומתחיל לרוץ (עדיפות 1).\nבזמן T=1: P2 מגיע (עדיפות 2). P1 ממשיך לרוץ.\nבזמן T=2: P3 מגיע (עדיפות 3). P1 ממשיך לרוץ.\nבזמן T=4: P1 מסיים את פרץ המעבד הראשון (4ms). P1 עובר למצב חסום (I/O) למשך 6ms (ישתחרר ב-T=10). זמן המעבד הנותר ל-P1 הוא 2ms.\nבתור המוכנים יש כעת את P2 ו-P3. P2 (עדיפות 2) נבחר לרוץ.\nמ-T=4 עד T=10: P2 רץ למשך 6ms.\nבזמן T=10: P1 מסיים את פעולת ה-I/O שלו וחוזר למצב מוכן. P1 (עדיפות 1) עדיף על P2 (עדיפות 2) שרץ כעת. לכן, המתזמן מבצע דריסה (preemption) ל-P2. P2 עובר ממצב ריצה למצב מוכן.\nמצבו של P2 בזמן T=10ms הוא מוכן, מכיוון שנדרס. זמן המעבד הנותר ל-P2 הוא 8ms (סה\"כ) - 6ms (שבוצעו) = 2ms.\nלכן, התשובה הנכונה היא ג'."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

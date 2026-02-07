@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "CPU Scheduling",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 00:02:35",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2314,
+      "output_tokens": 544,
+      "total_tokens": 6271
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "CPU Scheduling",
+      "FCFS",
+      "SJF"
+    ],
+    "content": {
+      "text": "הסבירו בקצרה את ההבדל העיקרי בין אלגוריתמי תזמון המעבד First-Come, First-Served (FCFS) ו-Shortest-Job-First (SJF) (לא פרמפטיבי). תארו חיסרון אחד לכל אחד מהאלגוריתמים.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הבדל עיקרי:\n*   **FCFS (First-Come, First-Served)**: תהליכים מתוזמנים לפי סדר הגעתם לתור. התהליך הראשון שמגיע, הוא הראשון שמקבל את המעבד, ורץ עד לסיום או לחסימה.\n*   **SJF (Shortest-Job-First) (לא פרמפטיבי)**: מבין כל התהליכים הממתינים בתור, האלגוריתם בוחר את התהליך בעל זמן הריצה (burst time) הקצר ביותר. תהליך שנבחר רץ עד לסיום או לחסימה.\n\nחיסרון של FCFS:\n*   **אפקט השיירה (Convoy Effect)**: תהליך ארוך שמגיע ראשון יכול לגרום לתהליכים קצרים רבים שהגיעו אחריו להמתין זמן רב, ובכך להעלות את זמן ההמתנה הממוצע ואת זמן המחזור הממוצע באופן משמעותי.\n\nחיסרון של SJF (לא פרמפטיבי):\n*   **קושי במימוש**: SJF דורש ידע מוקדם על זמן הריצה (burst time) של כל תהליך, מידע שבדרך כלל אינו זמין במערכת הפעלה אמיתית. במציאות, יש צורך להעריך את זמני הריצה, מה שמוסיף מורכבות ואי-דיוק."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

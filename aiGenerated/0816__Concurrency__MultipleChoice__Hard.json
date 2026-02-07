@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 00:35:35",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 959,
+      "total_tokens": 7294
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Concurrency",
+      "Synchronization",
+      "Condition Variables",
+      "Race Conditions"
+    ],
+    "content": {
+      "text": "נתון קטע קוד בשפת C המשתמש ב-pthreads לתיאום בין שני תהליכונים (threads): יצרן (producer) וצרכן (consumer). היצרן מייצר נתונים וקובע דגל `ready_flag`, ולאחר מכן מאותת לצרכן. הצרכן ממתין לדגל זה כדי להתחיל לעבד נתונים.\n\nהקוד של הפונקציה `producer` נראה כך:\n```c\nvoid* producer(void* arg) {\n    sleep(1); // מדמה עבודה כלשהי\n    pthread_mutex_lock(&mtx);\n    ready_flag = 1;\n    pthread_mutex_unlock(&mtx);\n    pthread_cond_signal(&cond);\n    return NULL;\n}\n```\n\nהקוד של הפונקציה `consumer` נראה כך:\n```c\nvoid* consumer(void* arg) {\n    pthread_mutex_lock(&mtx);\n    while (ready_flag == 0) {\n        pthread_cond_wait(&cond, &mtx);\n    }\n    // ... עיבוד הנתונים ...\n    pthread_mutex_unlock(&mtx);\n    return NULL;\n}\n```\n(ההצהרות על `mtx`, `cond`, ו-`ready_flag` כגלובליות עם אתחול מתאים מובנות).\n\nמהי הבעיה הפוטנציאלית החמורה ביותר ביישום פונקציית ה-`producer` כפי שהיא מוצגת?",
+      "code_snippet": null,
+      "options": [
+        "א. קיים מצב של Deadlock (קיפאון) בין התהליכונים.",
+        "ב. קיים תנאי מירוץ (race condition) שעלול להוביל לאיבוד איתות (missed wakeup) ולכך שהצרכן ימתין ללא סוף.",
+        "ג. קיימת תקורה ביצועית גבוהה עקב ריבוי החלפות הקשר (context switches) מיותרות.",
+        "ד. התהליכון `producer` עלול לסיים את פעולתו לפני שהספיק לאותת, ולהשאיר את הצרכן תקוע."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "הבעיה העיקרית היא תנאי מירוץ שעלול לגרום ל-missed wakeup (איבוד איתות). נניח שהתהליכון `consumer` בודק את `ready_flag` ומוצא אותו 0, ואז מתזמן החוצה (preempted) רגע לפני שהוא קורא ל-`pthread_cond_wait`. כעת, התהליכון `producer` מתזמן, קובע את `ready_flag` ל-1, משחרר את המנעול, וקורא ל-`pthread_cond_signal`. מכיוון שה-`consumer` עדיין לא נכנס למצב המתנה (wait state) כאשר האות נשלח, האות נשלח אך לא נתפס על ידי אף אחד והוא \"הולך לאיבוד\". כאשר ה-`consumer` מתזמן בחזרה ומגיע לקריאה ל-`pthread_cond_wait`, הוא ייכנס למצב המתנה, אך האות שהיה אמור להעיר אותו כבר נשלח ואבד. כתוצאה מכך, ה-`consumer` ימתין ללא סוף, למרות שהתנאי (`ready_flag == 1`) כבר התקיים. התיקון הנכון הוא לבצע את הקריאה ל-`pthread_cond_signal` כאשר המנעול עדיין תפוס."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 00:29:04",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1024,
+      "output_tokens": 342,
+      "total_tokens": 2127
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Concurrency",
+      "Synchronization",
+      "Mutual Exclusion",
+      "Race Condition"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של שימוש במנגנוני סנכרון (כמו מנעולים או סמפורים) בקטע קריטי?",
+      "code_snippet": null,
+      "options": [
+        "א. להבטיח שחוטים יתבצעו לפי סדר מסוים.",
+        "ב. למנוע מצב מרוץ על משאבים משותפים.",
+        "ג. לשפר את ביצועי התוכנית על ידי הפחתת זמן ההמתנה.",
+        "ד. לאפשר לחוטים שונים לגשת למשאבים פרטיים."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב'. המטרה העיקרית של שימוש במנגנוני סנכרון בקטע קריטי היא להבטיח מניעה הדדית (mutual exclusion), ובכך למנוע מצבי מרוץ ולוודא שרק חוט אחד ניגש למשאב משותף בכל רגע נתון."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "File Systems",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 23:31:35",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3477,
+      "output_tokens": 502,
+      "total_tokens": 5290
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "Open",
+    "topic": [
+      "File Systems"
+    ],
+    "content": {
+      "text": "הסבר בקצרה את תפקידה העיקרי של מערכת קבצים במערכת הפעלה. ציין שני רכיבים מרכזיים במערכת קבצים ותאר בקצרה את תפקידו של כל אחד מהם.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "תפקידה העיקרי של מערכת קבצים הוא לנהל את אחסון הנתונים הקבוע (persistent storage) על גבי אמצעי אחסון כגון דיסק קשיח. היא מספקת שיטה לארגון קבצים ותיקיות, מאפשרת גישה לנתונים בצורה מופשטת ונוחה למשתמשים וליישומים, ומטפלת בהקצאה ושחרור של מקום בדיסק.\n\nשני רכיבים מרכזיים במערכת קבצים הם:\n1.  **Inode (אינוד)**: מבנה נתונים המכיל את כל המידע (metadata) על קובץ או תיקייה, למעט שמו ותוכנו בפועל. מידע זה כולל הרשאות גישה, בעלות, גודל הקובץ, זמני יצירה ושינוי, ומצביעים לבלוקי הנתונים המכילים את תוכן הקובץ.\n2.  **בלוק נתונים (Data Block)**: יחידת האחסון הבסיסית ביותר בה נשמרים הנתונים בפועל של הקובץ. כל בלוק נתונים מכיל חלק מתוכן הקובץ (או את כולו, אם הקובץ קטן מספיק), והם מקושרים לקובץ באמצעות המצביעים שב-inode שלו."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

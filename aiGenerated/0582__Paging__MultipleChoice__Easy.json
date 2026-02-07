@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Paging",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 22:52:17",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1024,
+      "output_tokens": 356,
+      "total_tokens": 2225
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Paging",
+      "Virtual Memory",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "כיצד מחולקת כתובת וירטואלית במערכת דפדוף (Paging)?",
+      "code_snippet": null,
+      "options": [
+        "א. למספר עמוד (page number) והיסט (offset).",
+        "ב. למספר מקטע (segment number) והיסט (offset).",
+        "ג. לכתובת בסיס (base address) וגודל (limit).",
+        "ד. לכתובת פיזית (physical address) וכתובת וירטואלית (virtual address).",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "א'. כפי שנלמד, במערכת דפדוף, כתובת וירטואלית מחולקת לשני חלקים: מספר העמוד (page number), המציין את העמוד הווירטואלי, והיסט (offset) בתוך העמוד, המציין את המיקום הספציפי בתוך אותו עמוד."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

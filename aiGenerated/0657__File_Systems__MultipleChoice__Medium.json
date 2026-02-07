@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "File Systems",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 23:26:46",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1032,
+      "output_tokens": 454,
+      "total_tokens": 3400
+    }
+  },
+  "question": {
+    "id": 6,
+    "type": "MultipleChoice",
+    "topic": [
+      "File Systems",
+      "System Calls"
+    ],
+    "content": {
+      "text": "במערכת קבצים מסוג יוניקס (כמו VSFS), כאשר קובץ נמחק באמצעות קריאת המערכת `unlink()`, איזה מהבאים משוחרר או מסומן כפנוי באופן מיידי *ללא תלות במספר הקישורים הקשיחים (hard links) לקובץ*?",
+      "code_snippet": null,
+      "options": [
+        "א. הבלוקים המכילים את נתוני הקובץ.",
+        "ב. ה-inode של הקובץ.",
+        "ג. רשומת התיקייה (directory entry) המפנה לקובץ.",
+        "ד. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "קריאת המערכת `unlink()` מסירה באופן מיידי את רשומת התיקייה (directory entry) המפנה לקובץ מהתיקייה ההורית. לאחר מכן, היא מפחיתה את מונה הקישורים הקשיחים (link count) ב-inode של הקובץ. רק אם מונה הקישורים מגיע לאפס (ואין תהליכים שעדיין מחזיקים את הקובץ פתוח), אז ה-inode והבלוקים המכילים את נתוני הקובץ מסומנים כפנויים וניתנים לשימוש חוזר. לכן, הפעולה המיידית והבלתי תלויה במספר הקישורים היא הסרת רשומת התיקייה."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "File Systems",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 23:44:57",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2680,
+      "output_tokens": 1263,
+      "total_tokens": 7126
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "CodeAnalysis",
+    "topic": [
+      "File Systems",
+      "Processes",
+      "System Calls",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתונה תוכנית ה-C הבאה המבצעת פעולות קבצים באמצעות קריאות מערכת. התוכנית יוצרת קובץ בשם `output.txt`, כותבת אליו נתונים, מבצעת `fork`, ולאחר מכן גם תהליך האב וגם תהליך הבן כותבים לאותו קובץ. נתחו את הקוד וציינו מה יהיה התוכן הסופי של הקובץ `output.txt` לאחר סיום ריצת התוכנית. הסבירו את הנימוק לתוכן הסופי.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <fcntl.h>\n#include <sys/wait.h>\n#include <string.h>\n\nint main() {\n    int fd;\n    char *filename = \"output.txt\";\n\n    // 1. Open file\n    fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0644);\n    if (fd == -1) {\n        perror(\"open\");\n        exit(1);\n    }\n\n    // 2. Parent writes \"PARENT1\"\n    write(fd, \"PARENT1\", 7);\n\n    // 3. Fork\n    pid_t pid = fork();\n\n    if (pid == -1) {\n        perror(\"fork\");\n        exit(1);\n    }\n\n    if (pid == 0) { // Child process\n        // Child writes \"CHILD\"\n        write(fd, \"CHILD\", 5);\n        close(fd);\n        exit(0);\n    } else { // Parent process\n        // Parent waits for child\n        wait(NULL);\n        // Parent writes \"PARENT2\"\n        write(fd, \"PARENT2\", 7);\n        close(fd);\n    }\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון דורש הבנה כיצד מתבצע שיתוף של מתארי קבצים (file descriptors) בין תהליך אב לבן לאחר קריאת המערכת `fork()`. \n\n1.  **פתיחת הקובץ וכתיבה ראשונית**: תהליך האב פותח את הקובץ `output.txt` במצב כתיבה (`O_WRONLY | O_CREAT | O_TRUNC`). בשלב זה, מתאר הקובץ `fd` מצביע על קובץ חדש וריק, ומצביע הכתיבה (file offset) נמצא בתחילת הקובץ (offset 0). לאחר מכן, האב כותב את המחרוזת \"PARENT1\". הקובץ מכיל כעת \"PARENT1\", ומצביע הכתיבה מתקדם ל-offset 7.\n\n2.  **קריאת `fork()`**: כאשר מתבצעת קריאת `fork()`, נוצר תהליך בן. מתארי הקבצים (file descriptors) של תהליך האב משוכפלים לתהליך הבן. חשוב לציין ששני מתארי הקבצים (האחד באב והאחד בבן) מצביעים כעת על *אותה כניסה בטבלת הקבצים הגלובלית* של מערכת ההפעלה. כניסה זו מכילה, בין היתר, את מצביע הכתיבה הנוכחי של הקובץ. לכן, מצביע הכתיבה משותף בין האב לבן. בשלב זה, מצביע הכתיבה המשותף הוא 7.\n\n3.  **כתיבת הבן**: תהליך הבן רץ וכותב את המחרוזת \"CHILD\". הכתיבה מתחילה מה-offset המשותף הנוכחי, שהוא 7. הקובץ מכיל כעת \"PARENT1CHILD\", ומצביע הכתיבה המשותף מתקדם ל-offset 7 + 5 = 12.\n\n4.  **המתנת האב וכתיבה נוספת**: תהליך האב ממתין לסיום הבן באמצעות `wait(NULL)`. רק לאחר שהבן מסיים את כתיבתו ויוצא, האב ממשיך. כעת, האב כותב את המחרוזת \"PARENT2\". הכתיבה מתחילה מה-offset המשותף הנוכחי, שהוא 12 (כפי שקודם על ידי הבן). הקובץ מכיל כעת \"PARENT1CHILDPARENT2\", ומצביע הכתיבה המשותף מתקדם ל-offset 12 + 7 = 19.\n\n5.  **סגירת הקבצים**: שני התהליכים סוגרים את מתאר הקובץ `fd`.\n\nלכן, התוכן הסופי של הקובץ `output.txt` יהיה \"PARENT1CHILDPARENT2\"."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

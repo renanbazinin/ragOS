@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 00:30:44",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 939,
+      "output_tokens": 526,
+      "total_tokens": 3307
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Concurrency",
+      "Race Conditions",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "בהינתן קטע הקוד הבא, שבו מספר תהליכונים (threads) מריצים את הפונקציה `increment_function` במקביל ומנסים להגדיל את המונה הגלובלי `global_counter`:\n\nהאם המונה הגלובלי `global_counter` יגיע תמיד לערך המצופה (מספר התהליכונים * 10000) בסיום ריצת כל התהליכונים, גם ללא שימוש במנגנוני סנכרון?",
+      "code_snippet": "int global_counter = 0;\n\nvoid increment_function() {\n    for (int i = 0; i < 10000; ++i) {\n        global_counter++; // פעולה לא אטומית\n    }\n}",
+      "options": [
+        "נכון",
+        "לא נכון"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "לא נכון",
+      "explanation": "לא נכון. הפעולה `global_counter++` אינה אטומית. היא מורכבת ממספר שלבים (קריאת הערך הנוכחי, הגדלה, וכתיבת הערך החדש). כאשר מספר תהליכונים מנסים לבצע פעולה זו במקביל ללא מנגנון סנכרון (כמו mutex), עלולה להתרחש תחרות (race condition). במצב כזה, ייתכן שתהליכון אחד יקרא ערך, יתבצע מיתוג הקשר (context switch) לתהליכון אחר שיקרא את אותו ערך, ושניהם יגדילו ויכתבו בחזרה את הערך המוגדל, מה שיגרום לאיבוד עדכונים. כתוצאה מכך, הערך הסופי של `global_counter` יהיה לרוב נמוך מהערך המצופה."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

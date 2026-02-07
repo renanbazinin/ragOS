@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "File Systems",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 23:43:11",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2852,
+      "output_tokens": 798,
+      "total_tokens": 5624
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "CodeAnalysis",
+    "topic": [
+      "File Systems",
+      "System Calls",
+      "File I/O",
+      "lseek"
+    ],
+    "content": {
+      "text": "נתונה תוכנית ה-C הבאה, המבצעת פעולות כתיבה ומיקום (seek) על קובץ. מה יהיה התוכן הסופי של הקובץ 'testfile.txt' לאחר הרצת התוכנית? הסבר את תשובתך.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <fcntl.h>\n#include <unistd.h>\n#include <string.h>\n\nint main() {\n    int fd;\n    char buffer1[] = \"Hello\";\n    char buffer2[] = \"World\";\n    char filename[] = \"testfile.txt\";\n\n    fd = open(filename, O_CREAT | O_TRUNC | O_RDWR, 0644);\n    if (fd == -1) {\n        perror(\"open\");\n        return 1;\n    }\n\n    write(fd, buffer1, strlen(buffer1));\n    lseek(fd, 2, SEEK_SET);\n    write(fd, buffer2, strlen(buffer2));\n\n    close(fd);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": 10,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "התוכנית פותחת את הקובץ 'testfile.txt' במצב יצירה, קיטום (trunc) וכתיבה/קריאה (RDWR). מצביע הקובץ (file offset) מאותחל ל-0.\n\n1.  הקריאה הראשונה ל-`write` כותבת את המחרוזת \"Hello\" (5 בתים) החל ממיקום 0 בקובץ. תוכן הקובץ: \"Hello\". מצביע הקובץ מתקדם למיקום 5.\n2.  הקריאה ל-`lseek(fd, 2, SEEK_SET)` מעבירה את מצביע הקובץ למיקום 2 מההתחלה.\n3.  הקריאה השנייה ל-`write` כותבת את המחרוזת \"World\" (5 בתים) החל ממיקום 2. פעולה זו דורסת חלק מהתוכן הקיים:\n    *   התווים 'H' ו-'e' במיקומים 0 ו-1 נשארים ללא שינוי.\n    *   התווים 'l', 'l', 'o' במיקומים 2, 3, 4 נדרסים על ידי 'W', 'o', 'r' בהתאמה.\n    *   התווים 'l', 'd' מהמחרוזת \"World\" נכתבים במיקומים 5 ו-6, ומרחיבים את הקובץ מעבר לגודלו המקורי של 5 בתים.\n\nלכן, התוכן הסופי של הקובץ יהיה \"HeWorld\".",
+      "code_snippet": null
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

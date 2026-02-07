@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "File Systems",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 23:25:55",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1088,
+      "output_tokens": 421,
+      "total_tokens": 2738
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "File Systems",
+      "Inodes",
+      "Metadata"
+    ],
+    "content": {
+      "text": "איזה מהבאים מאוחסן בדרך כלל ב-inode במערכת קבצים?",
+      "code_snippet": null,
+      "options": [
+        "א. שם הקובץ ותוכן הקובץ.",
+        "ב. הרשאות גישה, מזהה בעלים, גודל הקובץ וכתובות לבלוקי הנתונים.",
+        "ג. הנתיב המלא לקובץ וזמן יצירתו.",
+        "ד. שם הקובץ, מספר הקישורים הקשיחים וזמן הגישה האחרונה.",
+        "ה. אף אחת מהתשובות האחרות אינה נכונה."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב. ב-inode מאוחסנים מטא-נתונים אודות הקובץ, כגון הרשאות גישה (permissions), מזהה הבעלים (owner ID), גודל הקובץ (file size), זמני גישה/שינוי/יצירה (timestamps), מספר הקישורים הקשיחים (hard links count), וחשוב מכל - מצביעים (pointers) לבלוקי הנתונים המכילים את תוכן הקובץ. שם הקובץ והנתיב המלא אליו מאוחסנים ברשומות התיקיות (directory entries), ולא ב-inode עצמו."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

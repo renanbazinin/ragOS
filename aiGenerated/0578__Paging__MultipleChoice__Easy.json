@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Paging",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 22:51:48",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1024,
+      "output_tokens": 398,
+      "total_tokens": 2717
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Memory Management",
+      "Paging",
+      "Virtual Memory"
+    ],
+    "content": {
+      "text": "במערכת דפדוף (paging), לאילו יחידות בגודל קבוע מחולקים הזיכרון הלוגי והזיכרון הפיזי, בהתאמה?",
+      "code_snippet": null,
+      "options": [
+        "א. זיכרון לוגי לדפים (pages), וזיכרון פיזי למסגרות (frames).",
+        "ב. זיכרון לוגי למסגרות (frames), וזיכרון פיזי לדפים (pages).",
+        "ג. זיכרון לוגי לסגמנטים (segments), וזיכרון פיזי לדפים (pages).",
+        "ד. זיכרון לוגי לבלוקים (blocks), וזיכרון פיזי למסגרות (frames).",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "א'. כפי שנלמד, במערכת דפדוף (paging), הזיכרון הלוגי של תהליך מחולק ליחידות בגודל קבוע הנקראות דפים (pages), והזיכרון הפיזי מחולק ליחידות בגודל קבוע הנקראות מסגרות (frames)."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

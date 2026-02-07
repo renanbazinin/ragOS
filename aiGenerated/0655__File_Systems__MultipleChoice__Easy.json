@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "File Systems",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 23:26:28",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1088,
+      "output_tokens": 403,
+      "total_tokens": 2807
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "File Systems"
+    ],
+    "content": {
+      "text": "במערכת קבצים מסוג UNIX-like, מהו התפקיד העיקרי של ה-inode?",
+      "code_snippet": null,
+      "options": [
+        "א. לאחסן את שם הקובץ ואת הנתיב המלא אליו.",
+        "ב. להצביע על בלוקי הנתונים המכילים את תוכן הקובץ ולשמור מטה-נתונים (metadata) עליו.",
+        "ג. לשמש כטבלת המרה מכתובות לוגיות לכתובות פיזיות בדיסק.",
+        "ד. לארגן את כל התיקיות והקבצים בצורה היררכית."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "התשובה הנכונה היא ב'. ה-inode הוא מבנה נתונים המכיל את כל המידע (מטה-נתונים) אודות קובץ או תיקייה, למעט שמו בפועל ותוכנו. הוא כולל מידע כמו הרשאות, בעלות, זמני שינוי, גודל, ורשימת כתובות של בלוקי הנתונים המכילים את תוכן הקובץ. שם הקובץ מאוחסן בתוך רשומת התיקייה המצביעה על ה-inode המתאים."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

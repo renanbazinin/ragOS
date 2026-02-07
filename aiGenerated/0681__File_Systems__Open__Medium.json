@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "File Systems",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 23:32:04",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2275,
+      "output_tokens": 1520,
+      "total_tokens": 6051
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "File Systems",
+      "Links"
+    ],
+    "content": {
+      "text": "נתונה מערכת קבצים מסוג ext4. משתמש יוצר קובץ בשם original.txt עם תוכן כלשהו. לאחר מכן, הוא יוצר קישור קשיח (hard link) בשם hardlink.txt המצביע על original.txt. לבסוף, הוא יוצר קישור רך (soft link / symbolic link) בשם softlink.txt המצביע גם הוא על original.txt.\n\nא. תארו במפורט כיצד מערכת הקבצים מתייחסת לכל אחד מהאובייקטים הללו (original.txt, hardlink.txt, softlink.txt) מבחינת inodes, בלוקי נתונים ורשומות ספריות (directory entries) לאחר כל הפעולות.\nב. לאחר מכן, המשתמש מוחק את הקובץ original.txt. תארו מה קורה למערכת הקבצים (לרבות inodes, בלוקי נתונים, רשומות ספריות) ומה מצבם של hardlink.txt ו-softlink.txt.\nג. לאחר מכן (בהמשך לסעיף ב'), המשתמש מוחק את hardlink.txt. תארו מה קורה למערכת הקבצים ומה מצבו של softlink.txt.\nד. לאחר מכן (בהמשך לסעיף ג'), המשתמש מוחק את softlink.txt. תארו מה קורה למערכת הקבצים.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "א. לאחר יצירת original.txt:\n    - נוצר inode חדש עבור הקובץ. ה-inode מכיל מטא-דאטה (בעלים, הרשאות, גודל, זמנים) ומצביעים לבלוקי הנתונים של הקובץ.\n    - נוצרים בלוקי נתונים עבור תוכן הקובץ.\n    - נוצרת רשומת ספרייה בתיקייה הנוכחית המקשרת את השם original.txt ל-inode מספר X.\n    - מונה הקישורים (link count) ב-inode X מוגדר ל-1.\n\n    לאחר יצירת hardlink.txt:\n    - לא נוצר inode חדש ולא נוצרים בלוקי נתונים חדשים. קישור קשיח הוא פשוט שם נוסף לאותו inode.\n    - נוצרת רשומת ספרייה חדשה בתיקייה הנוכחית המקשרת את השם hardlink.txt לאותו inode מספר X.\n    - מונה הקישורים (link count) ב-inode X עולה ל-2.\n\n    לאחר יצירת softlink.txt:\n    - נוצר inode חדש (נניח inode Y) עבור הקישור הרך עצמו. ה-inode Y הוא מסוג 'קישור סימבולי'.\n    - נוצר בלוק נתונים אחד (או יותר, תלוי באורך הנתיב) המכיל את הנתיב המלא לקובץ המקורי (original.txt).\n    - נוצרת רשומת ספרייה חדשה בתיקייה הנוכחית המקשרת את השם softlink.txt ל-inode Y.\n    - מונה הקישורים ב-inode Y מוגדר ל-1. מונה הקישורים ב-inode X נשאר 2.\n\nב. מחיקת original.txt:\n    - רשומת הספרייה עבור original.txt נמחקת מהתיקייה.\n    - מונה הקישורים (link count) ב-inode X יורד מ-2 ל-1.\n    - ה-inode X ובלוקי הנתונים שלו לא משוחררים עדיין, מכיוון שמונה הקישורים עדיין גדול מ-0 (בגלל hardlink.txt).\n    - hardlink.txt עדיין קיים ונגיש, ומצביע לאותו inode X. הקובץ ותוכנו עדיין קיימים ונגישים דרך hardlink.txt.\n    - softlink.txt עדיין קיים, אך הוא מצביע על נתיב שכבר לא קיים (original.txt). לכן, הקישור הופך ל'קישור שבור' (dangling link). ניסיון לגשת דרך softlink.txt ייכשל עם שגיאה (למשל, \"No such file or directory\").\n\nג. מחיקת hardlink.txt (לאחר מחיקת original.txt):\n    - רשומת הספרייה עבור hardlink.txt נמחקת מהתיקייה.\n    - מונה הקישורים (link count) ב-inode X יורד מ-1 ל-0.\n    - מכיוון שמונה הקישורים של inode X הגיע ל-0, ה-inode X מסומן כפנוי, ובלוקי הנתונים שהוא הצביע עליהם מסומנים גם הם כפנויים וזמינים לשימוש חוזר.\n    - הקובץ ותוכנו נמחקו סופית ממערכת הקבצים.\n    - softlink.txt עדיין קיים ומצביע על נתיב שכבר לא קיים, והוא נשאר קישור שבור. לא חל שינוי במצבו של softlink.txt כתוצאה ממחיקת hardlink.txt.\n\nד. מחיקת softlink.txt (לאחר מחיקת original.txt ו-hardlink.txt):\n    - רשומת הספרייה עבור softlink.txt נמחקת מהתיקייה.\n    - מונה הקישורים (link count) ב-inode Y (של הקישור הרך) יורד מ-1 ל-0.\n    - מכיוון שמונה הקישורים של inode Y הגיע ל-0, ה-inode Y מסומן כפנוי, ובלוקי הנתונים שהוא הצביע עליהם (שכבר הכילו את הנתיב original.txt) מסומנים גם הם כפנויים וזמינים לשימוש חוזר.\n    - הקישור הרך נמחק סופית ממערכת הקבצים.\n",
+      "difficulty_estimation": "Medium"
+    }
+  }
+}

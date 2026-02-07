@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Paging",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 23:15:04",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3180,
+      "output_tokens": 2283,
+      "total_tokens": 14802
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Paging",
+      "TLB",
+      "Memory Management",
+      "Cache Performance"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C הבאה המבצעת איתחול של מטריצה דו-ממדית:\n```c\n#include <stdio.h>\n#include <stdlib.h>\n\n#define MATRIX_SIZE 256 // N x N matrix\n#define INT_SIZE_BYTES 4 // Size of an integer in bytes\n\nint main() {\n    // Allocate a 2D array (MATRIX_SIZE x MATRIX_SIZE) of integers\n    int (*matrix)[MATRIX_SIZE] = (int (*)[MATRIX_SIZE])malloc(sizeof(int) * MATRIX_SIZE * MATRIX_SIZE);\n    if (matrix == NULL) {\n        perror(\"Failed to allocate matrix\");\n        return 1;\n    }\n\n    // Access pattern: Row-major\n    for (int i = 0; i < MATRIX_SIZE; ++i) {\n        for (int j = 0; j < MATRIX_SIZE; ++j) {\n            matrix[i][j] = i * MATRIX_SIZE + j;\n        }\n    }\n\n    free(matrix);\n    return 0;\n}\n```\nהמערכת עליה רצה התוכנית משתמשת בזיכרון וירטואלי עם מנגנון Paging. נתונים הפרטים הבאים:\n*   גודל דף (Page Size) הוא 4KB (4096 בתים).\n*   TLB (Translation Lookaside Buffer) הינו בגודל 16 כניסות (entries) ומשתמש במדיניות החלפה LRU (Least Recently Used).\n*   ההקצאה `malloc` מצליחה ומחזירה בלוק זיכרון רציף במרחב הווירטואלי.\n*   התהליך מקבל מספיק מסגרות פיזיות (physical frames) כדי להכיל את כל המטריצה.\n*   אין TLB hits ראשוניים (כלומר ה-TLB ריק בתחילת הריצה של הלולאות).\n*   התעלמו מגישות לזיכרון שאינן קשורות למטריצה (למשל, קוד התוכנית עצמו, משתנים מקומיים).\n\n**שאלה:**\nכמה TLB Misses יתרחשו במהלך ביצוע הלולאה החיצונית (הלולאה של `i`) בגישה לזיכרון של המטריצה `matrix`? נמקו את תשובתכם בפירוט.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": 20,
+    "solution": {
+      "is_present_in_file": false,
+      "correct_option": null,
+      "explanation": "הבה ננתח את הפרמטרים והגישה לזיכרון:\n1.  **גודל המטריצה:** `MATRIX_SIZE = 256`. כל איבר הוא `int` (4 בתים).\n    גודל המטריצה הכולל: `256 * 256 * 4 בתים = 262,144 בתים = 256KB`.\n2.  **גודל דף:** `4KB = 4096 בתים`.\n3.  **מספר איברים בדף:** `4096 בתים / 4 בתים/איבר = 1024 איברים`.\n4.  **מספר דפים למטריצה:** `262,144 בתים / 4096 בתים/דף = 64 דפים`.\n5.  **TLB Size:** 16 כניסות.\n6.  **מדיניות החלפה:** LRU (Least Recently Used).\n\n**ניתוח הגישה לזיכרון (Row-major):**\nהלולאה החיצונית עוברת על `i` מ-0 עד `MATRIX_SIZE-1` (כלומר 0 עד 255).\nהלולאה הפנימית עוברת על `j` מ-0 עד `MATRIX_SIZE-1` (כלומר 0 עד 255) עבור כל `i`.\nבכל איטרציה של הלולאה החיצונית (עבור `i` מסוים), אנו ניגשים לכל האיברים בשורה `i` (`matrix[i][0]` עד `matrix[i][255]`).\n\n**כמה שורות נכנסות לדף אחד?**\nאורך שורה אחת: `256 איברים * 4 בתים/איבר = 1024 בתים`.\nמכיוון שגודל דף הוא `4096 בתים`, דף אחד מכיל בדיוק `4096 / 1024 = 4` שורות שלמות.\n\nלכן, הגישה לזיכרון מתרחשת באופן הבא:\n*   שורות `0, 1, 2, 3` נמצאות בדף 0.\n*   שורות `4, 5, 6, 7` נמצאות בדף 1.\n*   ... וכן הלאה, עד שורות `252, 253, 254, 255` שנמצאות בדף 63.\n\n**חישוב TLB Misses:**\nהתוכנית ניגשת לדפים בסדר עוקב: דף 0, לאחר מכן דף 1, לאחר מכן דף 2, וכן הלאה, עד דף 63. כל דף נגיש למשך 4 איטרציות של הלולאה החיצונית (לדוגמה, דף 0 נגיש עבור `i=0,1,2,3`).\n\n*   **עבור `i = 0`:** הגישה הראשונה ל-`matrix[0][0]` היא הגישה הראשונה לדף 0. ה-TLB ריק, ולכן מתרחש TLB Miss. דף 0 נטען ל-TLB. כל שאר הגישות לאיברים בשורה 0 יהיו TLB Hits.\n*   **עבור `i = 1, 2, 3`:** ניגשים לשורות 1, 2, ו-3, שנמצאות כולן בדף 0. דף 0 כבר ב-TLB, ולכן כל הגישות יהיו TLB Hits.\n    (סה\"כ TLB Misses עד כה: 1)\n\n*   **עבור `i = 4`:** הגישה הראשונה ל-`matrix[4][0]` היא הגישה הראשונה לדף 1. דף 1 אינו ב-TLB (הוא חדש). מתרחש TLB Miss. דף 1 נטען ל-TLB.\n*   **עבור `i = 5, 6, 7`:** ניגשים לדף 1. דף 1 כבר ב-TLB, ולכן כל הגישות יהיו TLB Hits.\n    (סה\"כ TLB Misses עד כה: 2)\n\nדפוס זה ממשיך. בכל פעם שהלולאה החיצונית מגיעה ל-`i` שהוא כפולה של 4 (כלומר, `i = 0, 4, 8, ...`), אנו מתחילים לגשת לדף חדש במטריצה. ישנם `256 / 4 = 64` דפים ייחודיים במטריצה.\n\n**השפעת גודל ה-TLB (16 כניסות) ומדיניות LRU:**\nמכיוון שהגישה לדפים היא סדרתית (P0, P1, P2, ..., P63) וגודל ה-TLB הוא 16 כניסות (קטן ממספר הדפים הכולל 64):\n1.  הגישות הראשונות לדפים 0 עד 15 יגרמו ל-16 TLB Misses. ה-TLB יתמלא בדפים אלו. דף 0 יהיה ה-LRU.\n2.  כאשר נגשים לדף 16 (עבור `i = 64`), מתרחש TLB Miss. דף 16 נטען ל-TLB ומחליף את דף 0 (שהוא ה-LRU).\n3.  כאשר נגשים לדף 17 (עבור `i = 68`), מתרחש TLB Miss. דף 17 נטען ל-TLB ומחליף את דף 1 (שהוא ה-LRU החדש).\n4.  דפוס זה חוזר על עצמו. כל גישה לדף חדש, לאחר שה-TLB התמלא, תגרום ל-TLB Miss, שכן הדף הנדרש אינו ב-TLB (הוא הודח בעבר, או שהוא חדש לגמרי) והוא יחליף את הדף ה-LRU.\n\nמכיוון שיש 64 דפים ייחודיים במטריצה, וכל גישה ראשונה לדף חדש תגרום ל-TLB Miss, סך ה-TLB Misses יהיה 64.\n\n**תשובה סופית:** 64 TLB Misses.",
+      "code_snippet": null
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

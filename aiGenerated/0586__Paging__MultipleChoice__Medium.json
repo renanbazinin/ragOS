@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Paging",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 22:52:56",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 909,
+      "output_tokens": 760,
+      "total_tokens": 4002
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Paging",
+      "Memory Management",
+      "Virtual Memory"
+    ],
+    "content": {
+      "text": "נתונה מערכת הפעלה המשתמשת במנגנון Paging לניהול זיכרון וירטואלי. גודל דף (page size) הוא 4KB. תהליך מנסה לגשת לכתובת וירטואלית `0xABCD1234`. נניח כי עבור הדף הווירטואלי הרלוונטי, רשומת טבלת הדפים (Page Table Entry - PTE) מצביעה על מספר מסגרת פיזית (Physical Frame Number - PFN) השווה ל-`0x000F`. מהי הכתובת הפיזית (Physical Address) אליה יתורגם הגישה?",
+      "code_snippet": null,
+      "options": [
+        "א. 0xABCD234",
+        "ב. 0x000F1234",
+        "ג. 0x000F234",
+        "ד. 0xABCD000F"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "גודל דף הוא 4KB, כלומר 2 בחזקת 12 בתים. לכן, 12 הביטים הפחות משמעותיים (LSB) של הכתובת הווירטואלית מייצגים את ההיסט בתוך הדף (page offset).\nהכתובת הווירטואלית היא `0xABCD1234`.\nהיסט הדף (page offset) הוא 12 הביטים הימניים ביותר: `0x234` (שכן 12 הביטים האחרונים של 0x1234 הם 0010 0011 0100).\nמספר הדף הווירטואלי (VPN) הוא הביטים הנותרים: `0xABCD1`.\nעל פי הנתון, מספר המסגרת הפיזית (PFN) עבור דף זה הוא `0x000F`.\nכדי לקבל את הכתובת הפיזית, אנו מחברים את מספר המסגרת הפיזית עם ההיסט בתוך הדף.\nהכתובת הפיזית = (PFN << מספר_ביטים_היסט_דף) | היסט_דף\nהכתובת הפיזית = (`0x000F` << 12) | `0x234`\n`0x000F` << 12 = `0xF000` (הזזה של 0x000F ב-12 ביטים שמאלה)\n`0xF000` | `0x234` = `0xF234`.\nלכן, הכתובת הפיזית היא `0x000F234`."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

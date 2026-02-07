@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 00:36:22",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1926,
+      "output_tokens": 673,
+      "total_tokens": 3365
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Concurrency",
+      "Race Conditions",
+      "Synchronization",
+      "Mutex"
+    ],
+    "content": {
+      "text": "מהו מצב מירוץ (race condition) בקונקרנטיות? תאר/י מצב כזה והסבר/י כיצד ניתן למנוע אותו באמצעות שימוש ב-mutex.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "מצב מירוץ (race condition) מתרחש כאשר שני תהליכים או יותר ניגשים למשאב משותף בו-זמנית, ולפחות אחד מהם משנה את המשאב, כאשר סדר הגישה יכול להשפיע על התוצאה הסופית. לדוגמה, שני חוטים (threads) מנסים להגדיל מונה גלובלי. אם חוט אחד קורא את הערך (למשל, 5), השני קורא את אותו הערך (5), שניהם מגדילים אותו ל-6, ושניהם כותבים 6 בחזרה, המונה הסופי יהיה 6 במקום 7 (הוגדל רק באחד במקום בשניים). הסיבה לכך היא שהפעולות 'קריאה', 'הגדלה', 'כתיבה' אינן אטומיות. \n\nניתן למנוע מצב מירוץ באמצעות שימוש במנגנוני סנכרון כמו mutex (מנעול הדדי). Mutex מבטיח שרק תהליך אחד יכול להיכנס לקטע קריטי (critical section) בו נמצא המשאב המשותף בכל רגע נתון. \n\nכדי להשתמש ב-mutex:\n1. לפני הגישה למשאב המשותף, התהליך מנסה לנעול את ה-mutex (למשל, באמצעות `pthread_mutex_lock` ב-C/C++). \n2. אם ה-mutex זמין, התהליך נועל אותו וממשיך לבצע את הפעולות על המשאב המשותף. \n3. אם ה-mutex כבר נעול על ידי תהליך אחר, התהליך הנוכחי נחסם וממתין עד שה-mutex ישוחרר. \n4. לאחר סיום הפעולות על המשאב המשותף, התהליך משחרר את ה-mutex (למשל, באמצעות `pthread_mutex_unlock`), ובכך מאפשר לתהליכים אחרים לגשת למשאב. פעולה זו מבטיחה בלעדיות (mutual exclusion) על הקטע הקריטי ומונעת מצבי מירוץ."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

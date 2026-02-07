@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-07 22:45:23",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3180,
+      "output_tokens": 2567,
+      "total_tokens": 12457
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Virtual Memory",
+      "Copy-On-Write",
+      "Processes",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C הבאה. יש להניח שמערכת ההפעלה משתמשת בזיכרון וירטואלי עם מנגנון Copy-On-Write (COW) וגודל דף הוא 4KB. המערך הגלובלי `global_array` מתחיל בכתובת מיושרת לדף.\n\nתאר והסבר באופן מפורט:\n1.  מה יהיה הפלט המודפס למסך על ידי תהליך האב ועל ידי תהליך הבן?\n2.  כמה דפים פיזיים לכל היותר יהיו בשימוש עבור המערך `global_array` הכולל של שני התהליכים (אב ובן) לאחר ששניהם סיימו את פעולות הכתיבה שלהם? נמק את תשובתך תוך התייחסות למנגנון ה-COW.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\n#define PAGE_SIZE 4096 // Assume 4KB page size\n#define ARRAY_PAGES 4\n#define ARRAY_SIZE (PAGE_SIZE * ARRAY_PAGES) // Array spanning 4 pages\n\nchar global_array[ARRAY_SIZE]; // This will be in the data segment, initialized to 'A's\n\nint main() {\n    // Initialize the array (this ensures all pages are touched and mapped in parent initially)\n    for (int i = 0; i < ARRAY_SIZE; ++i) {\n        global_array[i] = 'A';\n    }\n\n    printf(\"Initial: global_array[0]=%c, global_array[%d]=%c\\n\", global_array[0], ARRAY_SIZE-1, global_array[ARRAY_SIZE-1]);\n\n    pid_t pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        exit(1);\n    } else if (pid == 0) { // Child process\n        // Child modifies the first half (pages 0 and 1)\n        for (int i = 0; i < ARRAY_SIZE / 2; ++i) {\n            global_array[i] = 'C';\n        }\n        printf(\"Child (PID: %d): global_array[0]=%c, global_array[%d]=%c\\n\", getpid(), global_array[0], ARRAY_SIZE-1, global_array[ARRAY_SIZE-1]);\n        exit(0);\n    } else { // Parent process\n        // Parent waits to ensure child finishes its modifications\n        wait(NULL);\n        // Parent modifies the second half (pages 2 and 3)\n        for (int i = ARRAY_SIZE / 2; i < ARRAY_SIZE; ++i) {\n            global_array[i] = 'P';\n        }\n        printf(\"Parent (PID: %d): global_array[0]=%c, global_array[%d]=%c\\n\", getpid(), global_array[0], ARRAY_SIZE-1, global_array[ARRAY_SIZE-1]);\n    }\n\n    return 0;\n}"
+    },
+    "sub_questions": null,
+    "points": 20,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.  **פלט התוכנית:**\n    *   **פלט ראשוני (מהתהליך האב לפני ה-fork):**\n        `Initial: global_array[0]=A, global_array[16383]=A`\n    *   **פלט מתהליך הבן:**\n        תהליך הבן משנה את החצי הראשון של המערך (אינדקסים 0 עד `ARRAY_SIZE/2 - 1`, כלומר דפים 0 ו-1) ל-'C'. את החצי השני (דפים 2 ו-3) הוא אינו משנה. לכן, התו במיקום 0 יהיה 'C', והתו במיקום `ARRAY_SIZE-1` (שהוא 16383) יישאר 'A' (הערך המקורי ששותף עם האב ולא שונה על ידי הבן).\n        `Child (PID: <child_pid>): global_array[0]=C, global_array[16383]=A`\n    *   **פלט מתהליך האב:**\n        תהליך האב ממתין שהבן יסיים את פעולותיו. לאחר מכן, הוא משנה את החצי השני של המערך (אינדקסים `ARRAY_SIZE/2` עד `ARRAY_SIZE - 1`, כלומר דפים 2 ו-3) ל-'P'. את החצי הראשון (דפים 0 ו-1) הוא אינו משנה. בזכות מנגנון ה-COW, הגישה של הבן לדפים 0 ו-1 יצרה עותקים נפרדים עבורו, ולכן השינויים של הבן אינם משפיעים על האב. התו במיקום 0 של האב יישאר 'A'. התו במיקום `ARRAY_SIZE-1` (שהוא 16383) ישתנה ל-'P'.\n        `Parent (PID: <parent_pid>): global_array[0]=A, global_array[16383]=P`\n\n2.  **מספר הדפים הפיזיים בשימוש:**\n    *   **שלב 1: אתחול המערך ע\"י האב:** לפני קריאת ה-`fork()`, תהליך האב מאתחל את כל המערך `global_array`. מכיוון שגודל המערך הוא `4 * PAGE_SIZE`, האב משתמש ב-4 דפים פיזיים. נסמן אותם P0, P1, P2, P3. טבלת הדפים של האב מפנה לדפים אלו.\n    *   **שלב 2: קריאת `fork()`:** כאשר מתבצעת קריאת `fork()`, נוצר תהליך הבן. מערכת ההפעלה, המשתמשת ב-COW, אינה מעתיקה את כל מרחב הזיכרון של האב. במקום זאת, טבלת הדפים של הבן מועתקת, וכל הדפים המכילים נתונים ניתנים לכתיבה (כמו `global_array`) מסומנים כ-read-only הן בטבלת הדפים של האב והן בטבלת הדפים של הבן, ומפנים לאותם דפים פיזיים (P0, P1, P2, P3).\n    *   **שלב 3: כתיבה של תהליך הבן:** תהליך הבן כותב לחצי הראשון של המערך, אשר מכסה את דפים וירטואליים 0 ו-1. כאשר הבן מנסה לכתוב לדף 0, מתרחשת תקלת דף (page fault). מערכת ההפעלה מזהה שהדף מסומן ל-COW, מעתיקה את התוכן של דף פיזי P0 לדף פיזי חדש (נסמן אותו C0), מעדכנת את טבלת הדפים של הבן כך שדף וירטואלי 0 יפנה ל-C0 ויהיה ניתן לכתיבה. דף P0 נשאר כפי שהוא וממשיך להיות ממופה עבור האב. אותו תהליך מתרחש עבור דף 1: P1 מועתק ל-C1, וטבלת הדפים של הבן מתעדכנת. דפים 2 ו-3 אינם משתנים על ידי הבן, ולכן הבן והאב ממשיכים לשתף את P2 ו-P3 (כפי שהיו לאחר ה-fork).\n        בשלב זה ישנם 4 (מקוריים) + 2 (חדשים עבור הבן) = 6 דפים פיזיים בשימוש (P0, P1, P2, P3, C0, C1).\n    *   **שלב 4: כתיבה של תהליך האב:** תהליך האב כותב לחצי השני של המערך, אשר מכסה את דפים וירטואליים 2 ו-3. כאשר האב מנסה לכתוב לדף 2, מתרחשת תקלת דף. מערכת ההפעלה מעתיקה את התוכן של דף פיזי P2 לדף פיזי חדש (נסמן אותו PA2), ומעדכנת את טבלת הדפים של האב. דף P2 נשאר כפי שהוא וממשיך להיות ממופה עבור הבן (שמעולם לא כתב אליו). אותו תהליך מתרחש עבור דף 3: P3 מועתק ל-PA3.\n    *   **סיכום:** בסיום ריצת שני התהליכים, יהיו בשימוש 8 דפים פיזיים בסך הכל עבור המערך `global_array`:\n        *   P0 (ממופה לדף וירטואלי 0 של האב)\n        *   P1 (ממופה לדף וירטואלי 1 של האב)\n        *   PA2 (דף פיזי חדש, ממופה לדף וירטואלי 2 של האב)\n        *   PA3 (דף פיזי חדש, ממופה לדף וירטואלי 3 של האב)\n        *   C0 (דף פיזי חדש, ממופה לדף וירטואלי 0 של הבן)\n        *   C1 (דף פיזי חדש, ממופה לדף וירטואלי 1 של הבן)\n        *   P2 (ממופה לדף וירטואלי 2 של הבן)\n        *   P3 (ממופה לדף וירטואלי 3 של הבן)\n        כל אחד מ-4 הדפים המקוריים (P0, P1, P2, P3) שותף בתחילה, ולאחר מכן מועתק פעם אחת כאשר אחד מהתהליכים (האב או הבן) כותב אליו. לכן, עבור כל דף וירטואלי שהיה קיים במקור, יהיו בסופו של דבר 2 דפים פיזיים (הדף המקורי והעותק שלו), כל אחד ממופה לתהליך אחר. סה\"כ `4 * 2 = 8` דפים פיזיים."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "File Systems",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-07 23:28:30",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 712,
+      "total_tokens": 3323
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "File Systems",
+      "Inode Structure",
+      "Disk I/O"
+    ],
+    "content": {
+      "text": "נתון מערכת קבצים עם גודל בלוק של 4KB וגודל מצביע לבלוק (block pointer) של 4 בתים. לכל Inode יש 12 מצביעים ישירים (direct pointers), מצביע עקיף יחיד (single indirect), מצביע עקיף כפול (double indirect) ומצביע עקיף משולש (triple indirect).\nמהו המספר המינימלי של פעולות קריאה מהדיסק (disk I/Os) הנדרשות כדי לגשת לבית בודד בתוך קובץ שגודלו 100GB, בהנחה שה-Inode של הקובץ וכל בלוקי המצביעים העקיפים הרלוונטיים אינם נמצאים בזיכרון המטמון (cache)?",
+      "code_snippet": null,
+      "options": [
+        "א. 3",
+        "ב. 4",
+        "ג. 5",
+        "ד. 6",
+        "ה. 7"
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "הסבר: כדי לגשת לבית בודד בקובץ שגודלו 100GB, נצטרך בוודאות להשתמש במצביע העקיף המשולש (triple indirect pointer), מכיוון שגודל הקובץ (100GB) גדול בהרבה מהיכולת של מצביעים ישירים (12 * 4KB = 48KB), עקיפים בודדים (1 * (4KB/4B) * 4KB = 4MB) או כפולים (1 * (4KB/4B)^2 * 4KB = 4GB).\n\nה-I/Os הנדרשים הם:\n1. קריאת ה-Inode עצמו מהדיסק. (1 I/O)\n2. קריאת בלוק המצביעים העקיף הראשון (ה-single indirect block) שה-Inode מפנה אליו דרך המצביע המשולש. (1 I/O)\n3. קריאת בלוק המצביעים העקיף השני (ה-double indirect block) שהבלוק הקודם מפנה אליו. (1 I/O)\n4. קריאת בלוק המצביעים העקיף השלישי (ה-triple indirect block) שהבלוק הקודם מפנה אליו. (1 I/O)\n5. קריאת בלוק הנתונים (data block) שמכיל את הבית המבוקש, שהבלוק הקודם מפנה אליו. (1 I/O)\n\nסה\"כ 5 פעולות קריאה מהדיסק."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 00:31:06",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 939,
+      "output_tokens": 325,
+      "total_tokens": 2263
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Concurrency",
+      "Deadlock"
+    ],
+    "content": {
+      "text": "איזה מהתנאים הבאים אינו הכרחי להתרחשות Deadlock במערכת?",
+      "code_snippet": null,
+      "options": [
+        "מניעה הדדית (Mutual Exclusion)",
+        "החזקה והמתנה (Hold and Wait)",
+        "המתנה מעגלית (Circular Wait)",
+        "שחרור משאבים (Resource Release)"
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "שחרור משאבים (Resource Release)",
+      "explanation": "ארבעת התנאים ההכרחיים להתרחשות Deadlock הם: מניעה הדדית (Mutual Exclusion), החזקה והמתנה (Hold and Wait), אי-פקיעה (No Preemption), והמתנה מעגלית (Circular Wait). 'שחרור משאבים' אינו תנאי הכרחי ל-Deadlock; להיפך, היכולת לכפות שחרור משאבים (Preemption) היא אסטרטגיה למניעת Deadlock."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}
