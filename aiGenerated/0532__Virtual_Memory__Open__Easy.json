@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-07 22:30:27",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1615,
+      "output_tokens": 591,
+      "total_tokens": 3335
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Virtual Memory",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "הסבירו מהן הסיבות העיקריות לכך שמערכות הפעלה משתמשות בזיכרון וירטואלי. ציינו לפחות שני יתרונות מרכזיים.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "זיכרון וירטואלי מספק מספר יתרונות מרכזיים למערכות הפעלה:\n1.  **הפרדה והגנה (Isolation and Protection)**: כל תהליך מקבל מרחב כתובות וירטואלי משלו, מה שמונע מתהליך אחד לגשת בטעות או בזדון לזיכרון של תהליך אחר או של מערכת ההפעלה. זה משפר את יציבות ואבטחת המערכת.\n2.  **גודל זיכרון גדול יותר מהפיזי (Memory Larger Than Physical)**: מאפשר לתהליכים להשתמש במרחב כתובות וירטואלי גדול יותר מהזיכרון הפיזי הזמין במערכת. חלקים מהזיכרון הוירטואלי שאינם בשימוש פעיל יכולים להישלח לדיסק (swapping/paging), ובכך לאפשר הרצת תוכניות גדולות יותר ממה שהזיכרון הפיזי יכול להכיל.\n3.  **שיתוף זיכרון (Memory Sharing)**: מאפשר למספר תהליכים לשתף בקלות קטעי קוד או נתונים משותפים (כמו ספריות דינמיות) על ידי מיפויים לאותו אזור בזיכרון הפיזי ממרחבי כתובות וירטואליים שונים.\n4.  **פישוט תכנות (Simplified Programming)**: מתכנתים אינם צריכים לדאוג לגבי כתובות פיזיות או ניהול זיכרון מפורט, אלא עובדים עם מרחב כתובות לוגי רציף ופשוט יותר לניהול.\n(נדרש לציין לפחות שניים מהיתרונות הללו.)"
+    },
+    "difficulty_estimation": "Easy"
+  }
+}
