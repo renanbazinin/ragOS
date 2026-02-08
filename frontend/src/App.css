@@ -372,6 +372,18 @@ body {
   direction: ltr;
 }
 
+.inline-code {
+  background: #1e2533;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.1rem 0.35rem;
+  font-family: 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 0.85em;
+  direction: ltr;
+  display: inline;
+  unicode-bidi: embed;
+}
+
 .options-list {
   list-style: none;
   padding: 0;
