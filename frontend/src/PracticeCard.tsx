@@ -61,7 +61,7 @@ export default function PracticeCard({ question, index, source }: Props) {
       )}
 
       <div className="card-body" dir="auto">
-        <p className="question-text">{content.text}</p>
+        <FormattedText text={content.text} className="question-text" />
 
         {content.code_snippet && (
           <pre className="code-block"><code>{content.code_snippet}</code></pre>
@@ -121,7 +121,7 @@ export default function PracticeCard({ question, index, source }: Props) {
             <strong>Sub-questions:</strong>
             {question.sub_questions.map((sq, i) => (
               <div key={i} className="sub-question" dir="auto">
-                <p>{typeof sq === 'object' && 'text' in sq ? sq.text : String(sq)}</p>
+                <FormattedText text={typeof sq === 'object' && 'text' in sq ? sq.text : String(sq)} />
                 {typeof sq === 'object' && sq.code_snippet && (
                   <pre className="code-block"><code>{sq.code_snippet}</code></pre>
                 )}
