@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "File Systems",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 06:53:01",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2852,
+      "output_tokens": 1069,
+      "total_tokens": 7615
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "CodeAnalysis",
+    "topic": [
+      "File Systems",
+      "System Calls",
+      "lseek",
+      "write",
+      "read"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המשתמשת בקריאות מערכת לטיפול בקבצים. מה יהיה הפלט של התוכנית הנתונה?",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <fcntl.h> // For open, O_RDWR, O_CREAT, O_TRUNC\n#include <unistd.h> // For write, read, close, lseek, unlink\n\nint main() {\n    int fd;\n    char buffer[20];\n    char *filename = \"test_file.txt\";\n\n    // Open file for read/write, create if not exists, truncate if exists\n    fd = open(filename, O_RDWR | O_CREAT | O_TRUNC, 0644);\n    if (fd == -1) {\n        perror(\"open failed\");\n        exit(1);\n    }\n\n    // Write \"HELLO\"\n    write(fd, \"HELLO\", 5);\n\n    // Seek to offset 2 from current position\n    lseek(fd, 2, SEEK_CUR);\n\n    // Write \"WORLD\"\n    write(fd, \"WORLD\", 5);\n\n    // Seek to the beginning of the file\n    lseek(fd, 0, SEEK_SET);\n\n    // Read up to 20 bytes\n    read(fd, buffer, 20);\n\n    // Null-terminate for printing\n    buffer[12] = '\\0'; \n\n    printf(\"File content: %s\\n\", buffer);\n\n    close(fd);\n    unlink(filename); // Clean up the created file\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "התוכנית פותחת קובץ בשם `test_file.txt` במצב קריאה/כתיבה, יוצרת אותו אם אינו קיים וחותכת אותו אם קיים.\nראשית, נכתבת המחרוזת \"HELLO\" לקובץ. מצביע הקובץ (file pointer) נמצא כעת במיקום 5.\nלאחר מכן, קריאת `lseek(fd, 2, SEEK_CUR)` מזיזה את מצביע הקובץ ב-2 בתים קדימה מהמיקום הנוכחי (5), כך שהוא מגיע למיקום 7.\nכאשר נכתבת המחרוזת \"WORLD\" החל ממיקום 7, התוכן במיקומים 5 ו-6 אינו נכתב במפורש. מכיוון שהקובץ נוצר עם `O_TRUNC` והיה ריק, בתים אלה יתמלאו בתווי אפס (null bytes) כאשר הכתיבה מתבצעת מעבר למיקום הנוכחי. לכן, תוכן הקובץ יהיה \"HELLO\\0\\0WORLD\".\nלאחר מכן, התוכנית מזיזה את מצביע הקובץ חזרה לתחילת הקובץ (מיקום 0) באמצעות `lseek(fd, 0, SEEK_SET)`.\nקריאת `read(fd, buffer, 20)` קוראת 12 בתים (אורך הקובץ בפועל) לתוך המערך `buffer`. תוכן המערך יהיה `H E L L O \\0 \\0 W O R L D` (כלומר, 5 תווים של HELLO, שני תווי NULL, 5 תווים של WORLD).\nהשורה `buffer[12] = '\\0';` מוסיפה תו NULL בסוף הנתונים שנקראו.\nלבסוף, `printf(\"File content: %s\\n\", buffer);` מדפיסה את המחרוזת. פונקציית `printf` עם פורמט `%s` מדפיסה תווים עד שהיא נתקלת בתו ה-NULL הראשון.\nבמקרה זה, תו ה-NULL הראשון נמצא במיקום `buffer[5]`. לכן, הפלט יהיה רק \"HELLO\".",
+      "code_snippet": null
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

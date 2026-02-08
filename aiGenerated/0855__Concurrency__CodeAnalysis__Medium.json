@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 00:51:06",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2942,
+      "output_tokens": 1757,
+      "total_tokens": 8970
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Concurrency",
+      "Synchronization",
+      "Race Conditions",
+      "Mutexes",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המשתמשת בחוטים (threads) ובמנגנון סנכרון mutex. התוכנית יוצרת מספר חוטים, חלקם מבצעים פעולת הגדלה (increment) על משתנה גלובלי משותף תוך שימוש ב-mutex, וחלקם מבצעים את אותה פעולה ללא שימוש ב-mutex. יש לנתח את הקוד ולקבוע את טווח הערכים האפשריים של המשתנה הגלובלי `counter` בסיום ריצת התוכנית.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\n#define NUM_THREADS 4 // מספר החוטים הכולל\n#define INCREMENTS_PER_THREAD 100000 // מספר ההגדלות שכל חוט מבצע\n\nint counter = 0; // המונה הגלובלי המשותף\npthread_mutex_t mutex; // אובייקט ה-mutex לסנכרון\n\n// פונקציית חוט המבצעת הגדלה בטוחה (עם mutex)\nvoid* thread_func_safe(void* arg) {\n    for (int i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n        pthread_mutex_lock(&mutex); // נעל את ה-mutex\n        counter++; // הגדל את המונה\n        pthread_mutex_unlock(&mutex); // שחרר את ה-mutex\n    }\n    return NULL;\n}\n\n// פונקציית חוט המבצעת הגדלה לא בטוחה (ללא mutex)\nvoid* thread_func_unsafe(void* arg) {\n    for (int i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n        counter++; // הגדל את המונה - מצב מרוץ!\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS]; // מערך לטיפול בחוטים\n    pthread_mutex_init(&mutex, NULL); // אתחל את ה-mutex\n\n    // צור חצי מהחוטים כחוטים בטוחים (עם mutex)\n    for (int i = 0; i < NUM_THREADS / 2; ++i) {\n        pthread_create(&threads[i], NULL, thread_func_safe, NULL);\n    }\n    // צור את החצי השני כחוטים לא בטוחים (ללא mutex)\n    for (int i = NUM_THREADS / 2; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, thread_func_unsafe, NULL);\n    }\n\n    // המתן לסיום כל החוטים\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final counter value: %d\\n\", counter); // הדפס את הערך הסופי של המונה\n\n    pthread_mutex_destroy(&mutex); // השמד את ה-mutex\n    return 0;\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "התוכנית יוצרת 4 חוטים, כאשר כל חוט מנסה להגדיל את המונה הגלובלי `counter` ב-100,000 פעמים. סך ההגדלות המצופות הוא 4 * 100,000 = 400,000.\n\nשני חוטים ( `thread_func_safe` ) משתמשים ב-mutex כדי להגן על פעולת ההגדלה של `counter`. שימוש זה מבטיח שפעולת `counter++` היא אטומית עבורם, ולכן כל 100,000 ההגדלות של כל אחד מהם יבוצעו בהצלחה. סך התרומה של שני החוטים הבטוחים הוא 2 * 100,000 = 200,000. ערך זה מובטח.\n\nשני החוטים הנותרים ( `thread_func_unsafe` ) מבצעים את פעולת ההגדלה `counter++` ללא הגנת mutex. פעולה זו אינה אטומית ומורכבת בדרך כלל משלוש פקודות מכונה: טעינת הערך של `counter` לתוך אוגר, הגדלת האוגר, ושמירת הערך החדש של האוגר בחזרה ל-`counter`. כאשר שני חוטים או יותר מבצעים זאת במקביל, עלול להיווצר מצב מרוץ (race condition) שבו הגדלות מסוימות נאבדות.\n\n**ערך מקסימלי:** במקרה הטוב ביותר (והלא סביר במיוחד, אך אפשרי תיאורטית) בו מתזמן המערכת (scheduler) מריץ את החוטים הלא בטוחים ברצף מושלם כך שאין איבוד של הגדלות, או שהאינטרליבינג (interleaving) של הפעולות לא גורם לאיבוד, שני החוטים הלא בטוחים יתרמו 2 * 100,000 = 200,000 הגדלות. במקרה זה, הערך הסופי של `counter` יהיה 200,000 (בטוחים) + 200,000 (לא בטוחים) = 400,000.\n\n**ערך מינימלי:** במקרה הגרוע ביותר, חוטים לא בטוחים עלולים לאבד כמעט את כל ההגדלות שלהם. אם חוט A קורא את `counter`, חוט B קורא את `counter` (אותו ערך), שניהם מגדילים את הערך באוגר מקומי, ואז שניהם כותבים אותו בחזרה, תתרחש אובדן של הגדלה אחת. במצב הקיצוני ביותר, כל אחד משני החוטים הלא בטוחים יצליח לתרום הגדלה אחת בלבד (הגדלה אחרונה מוצלחת, כאשר כל שאר 99,999 ההגדלות שלו ושל החוט הלא בטוח השני אבדו עקב כתיבה מחדש של השני). לכן, שני החוטים הלא בטוחים יתרמו מינימום של 2 הגדלות (1 מכל חוט).\nהערך המינימלי הסופי של `counter` יהיה: 200,000 (מחוטים בטוחים) + 2 (מחוטים לא בטוחים) = 200,002.\n\nלכן, טווח הערכים האפשריים של `counter` בסיום ריצת התוכנית הוא בין 200,002 ל-400,000."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

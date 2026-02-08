@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 00:51:32",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2942,
+      "output_tokens": 1283,
+      "total_tokens": 8818
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Concurrency",
+      "Semaphores",
+      "Mutexes"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C הבאה המשתמשת בחוטים (threads), מנעולים (mutexes) וסמפורים (semaphores). נתחו את הקוד וענו על השאלה:\nבהנחה שכל קריאות המערכת מצליחות, מה יהיה הערך הסופי של המשתנה הגלובלי `shared_counter` לאחר שכל החוטים יסיימו את ריצתם?",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <semaphore.h>\n#include <unistd.h>\n\n#define NUM_THREADS 5\n#define MAX_INCREMENTS 3 // Semaphore initial value\n\nint shared_counter = 0;\npthread_mutex_t mutex;\nsem_t limit_sem; // Limits how many times shared_counter can be incremented\n\nvoid* thread_func(void* arg) {\n    long thread_id = (long)arg;\n    \n    printf(\"Thread %ld trying to increment...\\n\", thread_id);\n    \n    // Try to acquire permission to increment\n    if (sem_trywait(&limit_sem) == 0) { // Non-blocking attempt\n        pthread_mutex_lock(&mutex);\n        shared_counter++;\n        printf(\"Thread %ld successfully incremented counter to %d\\n\", thread_id, shared_counter);\n        pthread_mutex_unlock(&mutex);\n        // The semaphore is not released by this thread, as it limits total increments\n    } else {\n        printf(\"Thread %ld failed to acquire increment permission.\\n\", thread_id);\n    }\n    \n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n    \n    pthread_mutex_init(&mutex, NULL);\n    sem_init(&limit_sem, 0, MAX_INCREMENTS); // Initialize semaphore to MAX_INCREMENTS\n    \n    for (long i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, thread_func, (void*)i);\n    }\n    \n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n    \n    printf(\"Final shared_counter value: %d\\n\", shared_counter);\n    \n    pthread_mutex_destroy(&mutex);\n    sem_destroy(&limit_sem);\n    \n    return 0;\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "התוכנית יוצרת 5 חוטים שונים (NUM_THREADS = 5). המשתנה הגלובלי shared_counter מאותחל ל-0. קיים מנעול (mutex) המבטיח גישה אקסקלוסיבית למשתנה shared_counter בעת העדכון.\n\nהנקודה המרכזית בשאלה היא השימוש בסמפור limit_sem אשר מאותחל ל-3 (MAX_INCREMENTS = 3). הסמפור משמש כאן כדי להגביל את מספר הפעמים הכולל שהמונה shared_counter יכול להיות מוגדל.\n\nבתוך פונקציית החוט, thread_func, כל חוט מנסה לבצע sem_trywait(&limit_sem). פונקציה זו מנסה להוריד את ערך הסמפור באופן לא חוסם. אם ערך הסמפור גדול מ-0, הוא יורד ב-1 והקריאה מצליחה (מחזירה 0). אם ערך הסמפור הוא 0, הקריאה נכשלת (מחזירה -1) והחוט לא נחסם, אלא ממשיך לבלוק ה-else.\n\nמכיוון ש-limit_sem מאותחל ל-3, רק 3 חוטים מתוך 5 יוכלו לבצע sem_trywait בהצלחה. כל אחד משלושת החוטים הללו יוריד את ערך הסמפור ב-1. לאחר ששלושה חוטים יבצעו זאת בהצלחה, ערך הסמפור יהיה 0. שני החוטים הנותרים ינסו לבצע sem_trywait, אך ייכשלו מכיוון שהסמפור כבר הגיע ל-0.\n\nהחוטים שהצליחו לבצע sem_trywait יכנסו לקטע הקריטי המוגן על ידי המנעול (pthread_mutex_lock/unlock) ויגדילו את shared_counter ב-1. חשוב לציין שאין קריאה ל-sem_post(&limit_sem) בתוך thread_func, מה שאומר שערך הסמפור לא עולה בחזרה לאחר שהחוט מסיים את עבודתו. זה מה שגורם לסמפור לתפקד כמגבלה על המספר הכולל של הגדלות.\n\nלכן, רק 3 חוטים יצליחו להגדיל את shared_counter. הערך הסופי של shared_counter יהיה 3."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

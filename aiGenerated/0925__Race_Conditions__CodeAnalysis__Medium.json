@@ -1,0 +1,63 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 01:20:43",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2675,
+      "output_tokens": 1973,
+      "total_tokens": 8955
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Race Conditions",
+      "Concurrency",
+      "Threads",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה, המשתמשת ב-pthreads. עיין בקוד וענה על השאלות הבאות:",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\n#define NUM_THREADS 5\n#define INCREMENTS_PER_THREAD 100000\n\nint counter = 0; // Shared global variable\n\nvoid* increment_counter(void* arg) {\n    for (int i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n        counter++; // Race condition here\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    printf(\"Initial counter value: %d\\n\", counter);\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, increment_counter, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    return 0;\n}"
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "האם קיים מצב מרוץ (Race Condition) בתוכנית? אם כן, תאר היכן הוא מתרחש ומדוע.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "מהו הערך הסופי *הצפוי* של המונה `counter` לאחר שכל ה-threads יסיימו את ריצתם?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.3",
+        "text": "מהו טווח הערכים *האפשרי* לערך הסופי של `counter` בפועל? נמק.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.4",
+        "text": "כיצד ניתן לתקן את מצב המרוץ כדי להבטיח שהמונה יגיע לערכו הצפוי? הצג דוגמה לתיקון באמצעות פקודות סינכרון מתאימות.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.  כן, קיים מצב מרוץ (Race Condition) בתוכנית בשורה `counter++;` בתוך הפונקציה `increment_counter`.\n    מצב מרוץ מתרחש מכיוון שפעולת ההגדלה `counter++` אינה אטומית. היא מורכבת למעשה משלוש פעולות בסיסיות ברמת המעבד:\n    א. קריאת הערך הנוכחי של `counter` מהזיכרון לתוך רגיסטר.\n    ב. הגדלת הערך ברגיסטר באחד.\n    ג. כתיבת הערך המעודכן מהרגיסטר בחזרה לזיכרון של `counter`.\n    כאשר מספר threads מנסים לבצע פעולה זו בו-זמנית, ייתכן שתזמון הריצה שלהם יגרום לכך ש-thread אחד יקרא את הערך הנוכחי, וטרם יספיק לכתוב את הערך המעודכן, thread אחר יקרא גם הוא את אותו הערך הישן. כתוצאה מכך, כאשר שני ה-threads יכתבו בחזרה את הערך שהם חישבו (בהתבסס על אותו ערך ישן), רק אחד מהעדכונים יבוא לידי ביטוי סופי בזיכרון, והעדכון השני 'יאבד'.\n\n2.  הערך הסופי הצפוי של המונה `counter` הוא סך כל ההגדלות שכל ה-threads אמורים לבצע.\n    `NUM_THREADS * INCREMENTS_PER_THREAD = 5 * 100000 = 500000`.\n\n3.  טווח הערכים האפשרי לערך הסופי של `counter` בפועל הוא `[1, 500000]`.\n    *   הערך המקסימלי האפשרי הוא `500000`. זה יקרה אם, במקרה, אף מצב מרוץ לא יתרחש (לדוגמה, אם המתזמן (scheduler) יאפשר ל-thread אחד לסיים את כל עבודתו לפני ש-thread אחר מתחיל, או אם כל פעולות ה-`counter++` יתבצעו באופן אטומי כל פעם).\n    *   הערך המינימלי האפשרי הוא `1`. זהו מקרה תיאורטי קיצוני שבו כל ה-threads קוראים את הערך `0` (הערך ההתחלתי) לרגיסטרים שלהם בו-זמנית. לאחר מכן, אחד מהם מצליח לכתוב את הערך `1` בחזרה לזיכרון. שאר ה-threads, שעדיין מחזיקים את הערך `0` ברגיסטרים שלהם (מכיוון שהם לא קראו את העדכון של ה-thread הראשון), כותבים גם הם `1` בחזרה לזיכרון. כך, למרות שבוצעו 500,000 פעולות הגדלה, רק אחת מהן באה לידי ביטוי סופי בזיכרון המשותף. בפועל, סביר להניח שהערך יהיה קטן מ-500,000 אך גדול בהרבה מ-1.\n\n4.  כדי לתקן את מצב המרוץ ולהבטיח שהמונה יגיע לערכו הצפוי, יש להשתמש במנגנון סינכרון, כגון Mutex (מנעול). ה-Mutex יבטיח שרק thread אחד יוכל לגשת לקטע הקריטי (הפעולה `counter++`) בכל רגע נתון. כך, פעולת ההגדלה תהפוך לאטומית מבחינת הגישה למשתנה המשותף `counter`.\n    להלן דוגמה לתיקון:\n    ```c\n    #include <stdio.h>\n    #include <pthread.h>\n\n    #define NUM_THREADS 5\n    #define INCREMENTS_PER_THREAD 100000\n\n    int counter = 0;\n    pthread_mutex_t counter_mutex; // Declare a mutex\n\n    void* increment_counter_safe(void* arg) {\n        for (int i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n            pthread_mutex_lock(&counter_mutex);   // Lock before critical section\n            counter++;                             // Critical section\n            pthread_mutex_unlock(&counter_mutex); // Unlock after critical section\n        }\n        return NULL;\n    }\n\n    int main() {\n        pthread_t threads[NUM_THREADS];\n\n        pthread_mutex_init(&counter_mutex, NULL); // Initialize the mutex\n\n        printf(\"Initial counter value: %d\\n\", counter);\n\n        for (int i = 0; i < NUM_THREADS; ++i) {\n            pthread_create(&threads[i], NULL, increment_counter_safe, NULL);\n        }\n\n        for (int i = 0; i < NUM_THREADS; ++i) {\n            pthread_join(threads[i], NULL);\n        }\n\n        printf(\"Final counter value: %d\\n\", counter);\n\n        pthread_mutex_destroy(&counter_mutex); // Destroy the mutex\n\n        return 0;\n    }\n    ```"
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

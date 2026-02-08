@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 06:58:59",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5728,
+      "output_tokens": 1361,
+      "total_tokens": 15071
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Race Conditions",
+      "Concurrency",
+      "Threads",
+      "Shared Memory"
+    ],
+    "content": {
+      "text": "נתונים שני משתנים גלובליים `x` ו-`y` המאותחלים לערכים `10` ו-`5` בהתאמה. שני חוטים (threads) מריצים במקביל את קטעי הקוד הבאים. ניתן להניח שכל שורת קוד מתבצעת באופן אטומי (כלומר, מרגע שחוט מתחיל לבצע שורה, הוא מסיים אותה לפני שחוט אחר יכול להתערב). פרט את כל זוגות הערכים האפשריים עבור המשתנים `x, y` אשר יכולים להתקבל לאחר ששני החוטים מסיימים את הריצה שלהם. לכל זוג ערכים יש לפרט ולהסביר בקצרה את ריצת החוטים המובילה אליו.",
+      "code_snippet": "int x = 10;\nint y = 5;\n\nvoid* thread1_func(void* arg) {\n    x = x - 5;\n    y = y + x;\n    return NULL;\n}\n\nvoid* thread2_func(void* arg) {\n    y = y * 2;\n    x = x + y;\n    return NULL;\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הערכים ההתחלתיים הם: x = 10, y = 5.\nנסמן את הפעולות של thread1 כ-T1_1 (x = x - 5) ו-T1_2 (y = y + x).\nנסמן את הפעולות של thread2 כ-T2_1 (y = y * 2) ו-T2_2 (x = x + y).\n\nקיימות 6 ריצות אפשריות של החוטים (אינטרליבינגס), המובילות ל-3 זוגות ערכים סופיים אפשריים:\n\n1.  **זוג ערכים: (x = 25, y = 20)**\n    *   **תיאור ריצה לדוגמה**: T1_1 -> T1_2 -> T2_1 -> T2_2\n    *   **הסבר**: \n        *   thread1 מבצע את כל פעולותיו:\n            *   T1_1: `x = 10 - 5;` -> `x = 5`\n            *   T1_2: `y = 5 + 5;` -> `y = 10`\n            *   (המצב כעת: x=5, y=10)\n        *   thread2 מבצע את כל פעולותיו:\n            *   T2_1: `y = 10 * 2;` -> `y = 20`\n            *   T2_2: `x = 5 + 20;` -> `x = 25`\n            *   (המצב הסופי: x=25, y=20)\n\n2.  **זוג ערכים: (x = 20, y = 15)**\n    *   **תיאור ריצה לדוגמה**: T1_1 -> T2_1 -> T1_2 -> T2_2\n    *   **הסבר**: \n        *   thread1 מבצע את T1_1: `x = 10 - 5;` -> `x = 5`\n            *   (המצב כעת: x=5, y=5)\n        *   thread2 מבצע את T2_1: `y = 5 * 2;` -> `y = 10`\n            *   (המצב כעת: x=5, y=10)\n        *   thread1 מבצע את T1_2: `y = 10 + 5;` -> `y = 15`\n            *   (המצב כעת: x=5, y=15)\n        *   thread2 מבצע את T2_2: `x = 5 + 15;` -> `x = 20`\n            *   (המצב הסופי: x=20, y=15)\n\n3.  **זוג ערכים: (x = 15, y = 25)**\n    *   **תיאור ריצה לדוגמה**: T1_1 -> T2_1 -> T2_2 -> T1_2\n    *   **הסבר**: \n        *   thread1 מבצע את T1_1: `x = 10 - 5;` -> `x = 5`\n            *   (המצב כעת: x=5, y=5)\n        *   thread2 מבצע את T2_1: `y = 5 * 2;` -> `y = 10`\n            *   (המצב כעת: x=5, y=10)\n        *   thread2 מבצע את T2_2: `x = 5 + 10;` -> `x = 15`\n            *   (המצב כעת: x=15, y=10)\n        *   thread1 מבצע את T1_2: `y = 10 + 15;` -> `y = 25`\n            *   (המצב הסופי: x=15, y=25)"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

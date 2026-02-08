@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 01:00:36",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 901,
+      "output_tokens": 1048,
+      "total_tokens": 5299
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "Race Conditions",
+      "Concurrency",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתונה תוכנית ה-C הבאה המשתמשת בתהליכונים (threads). מהו הערך הסופי האפשרי של המשתנה `counter` לאחר סיום כל התהליכונים?",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\nint counter = 0; // Shared global variable\n\nvoid* increment(void* arg) {\n    for (int i = 0; i < 1000; i++) {\n        counter++; // Race condition here\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t tid1, tid2;\n\n    pthread_create(&tid1, NULL, increment, NULL);\n    pthread_create(&tid2, NULL, increment, NULL);\n\n    pthread_join(tid1, NULL);\n    pthread_join(tid2, NULL);\n\n    printf(\"Final counter value: %d\\n\", counter);\n    return 0;\n}",
+      "options": [
+        "תמיד 2000",
+        "תמיד פחות מ-2000",
+        "כל ערך בין 0 ל-2000 (כולל)",
+        "כל ערך בין 1000 ל-2000 (כולל)",
+        "כל ערך בין 2 ל-2000 (כולל), אך לא 0 או 1"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "כל ערך בין 1000 ל-2000 (כולל)",
+      "explanation": "זוהי דוגמה קלאסית לתנאי מירוץ (Race Condition). המשתנה הגלובלי `counter` משותף לשני התהליכונים, ופעולת ה-`counter++` אינה אטומית. היא מורכבת משלוש פעולות בסיסיות: קריאת הערך מהזיכרון, הגדלתו, וכתיבת הערך החדש לזיכרון. חוסר סנכרון בין התהליכונים מאפשר מצב שבו שני תהליכונים קוראים את אותו ערך, מגדילים אותו, אך רק אחד מהם כותב את התוצאה הסופית, או שפעולת הכתיבה של אחד מהם נדרסת על ידי האחר. לכן, חלק מההגדלות יכולות ללכת לאיבוד.\n\nהערך המקסימלי האפשרי הוא 2000. זה יקרה אם לא יתרחשו תנאי מירוץ כלל (למשל, אם תזמון המעבד יאפשר לתהליכון אחד לסיים את כל 1000 פעולותיו לפני שהשני מתחיל, ואז השני יסיים את כל 1000 פעולותיו). במקרה זה, 1000 + 1000 = 2000.\n\nהערך המינימלי האפשרי הוא 1000. זה יקרה במקרה הקיצוני ביותר של תנאי מירוץ. לדוגמה, אם תהליכון אחד מצליח לבצע את כל 1000 ההגדלות שלו בהצלחה (ומביא את המונה ל-1000), ואילו כל 1000 ההגדלות של התהליכון השני \"נאבדות\" עקב תנאי מירוץ. כלומר, בכל פעם שהתהליכון השני מנסה להגדיל, הערך שהוא כותב נדרס מיד על ידי כתיבה אחרת (או שהוא קורא ערך ישן). בפועל, לפחות אחד התהליכונים יצליח להשלים את ספירתו ל-1000, ואין פעולות שמפחיתות את המונה. לכן, המונה לעולם לא יהיה נמוך מ-1000.\n\nלכן, הערך הסופי יכול להיות כל מספר שלם בין 1000 ל-2000 (כולל)."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

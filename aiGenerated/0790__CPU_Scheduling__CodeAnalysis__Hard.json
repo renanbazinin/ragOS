@@ -1,0 +1,58 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "CPU Scheduling",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 06:55:07",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4397,
+      "output_tokens": 2645,
+      "total_tokens": 14773
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "CPU Scheduling",
+      "Processes",
+      "System Calls",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה:\nיש להניח מעבד יחיד ופלט סטנדרטי ללא חוצץ (setbuf(stdout, NULL) פעיל). קריאות המערכת מצליחות תמיד.\n",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\n// Function to simulate CPU-bound work\nvoid do_cpu_work(long iterations) {\n    volatile long i; // volatile to prevent aggressive compiler optimization\n    for (i = 0; i < iterations; ++i);\n}\n\nvoid child_task(int id) {\n    for (int i = 0; i < 3; ++i) {\n        printf(\"Child %d: Step %d\\n\", id, i);\n        do_cpu_work(50000000); // More significant CPU work\n    }\n    exit(0);\n}\n\nint main() {\n    setbuf(stdout, NULL); // Unbuffered output\n\n    pid_t p1, p2, p3;\n\n    printf(\"Parent: Starting\\n\");\n    do_cpu_work(10000000); // Parent initial work\n\n    p1 = fork();\n    if (p1 == 0) { // Child 1\n        child_task(1);\n    } else {\n        p2 = fork();\n        if (p2 == 0) { // Child 2\n            char *args[] = {\"echo\", \"Child 2 execs: Hello from exec!\", NULL};\n            execvp(args[0], args);\n            perror(\"execvp failed\"); // Should not reach here\n            exit(1);\n        } else {\n            p3 = fork();\n            if (p3 == 0) { // Child 3\n                child_task(3);\n            } else { // Parent\n                do_cpu_work(10000000); // Parent work after forks\n                printf(\"Parent: All children forked.\\n\");\n\n                // Parent waits for children\n                waitpid(p1, NULL, 0);\n                waitpid(p2, NULL, 0);\n                waitpid(p3, NULL, 0);\n                printf(\"Parent: All children finished.\\n\");\n            }\n        }\n    }\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "8.1",
+        "text": "מהו פלט אפשרי אחד של התוכנית אם מתזמן המעבד הוא FCFS (First-Come, First-Served) בלתי-פולשני (non-preemptive)? הסבירו את נימוקיכם.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.2",
+        "text": "תארו באופן מהותי כיצד הפלט ישתנה אם מתזמן המעבד הוא Round Robin (RR) עם קוונטום זמן של 10ms, בהשוואה למצב של FCFS. ספקו דוגמה קצרה לרצף הדפסות המדגים שינוי זה, ללא צורך בפלט המלא.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.3",
+        "text": "כמה תהליכים נפרדים (כולל תהליך האב המקורי) נוצרים במהלך ריצת התוכנית? הסבירו את תשובתכם.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "8.1: במתזמן FCFS בלתי-פולשני, ברגע שתהליך מקבל את המעבד, הוא רץ עד שהוא מסיים את פרץ המעבד שלו או נחסם (למשל, בקריאת I/O או המתנה לתהליך אחר).\nסדר הפעולות האפשרי במקרה זה (בהנחה שקריאות fork מוסיפות תהליכים לתור המוכנים בסדר יצירתם, והאב ממשיך לרוץ לאחר fork): \n1. תהליך האב מתחיל: מדפיס \"Parent: Starting\".\n2. תהליך האב מבצע do_cpu_work(10000000). מכיוון ש-FCFS הוא בלתי-פולשני, האב יסיים עבודה זו לפני שכל תהליך אחר יקבל את המעבד.\n3. האב יוצר את Child 1, Child 2, Child 3 באמצעות fork. תהליכים אלו נכנסים לתור המוכנים (נניח בסדר: Child 1, Child 2, Child 3).\n4. האב מבצע do_cpu_work(10000000) נוסף. גם עבודה זו תסתיים לפני שמתזמן המעבד יעבור לתהליך אחר.\n5. האב מדפיס \"Parent: All children forked.\"\n6. האב קורא ל-waitpid(p1, NULL, 0) ונתקע בהמתנה ל-Child 1. כעת, תהליך האב חסום, והמתזמן יבחר את התהליך הראשון בתור המוכנים.\n7. Child 1 מקבל את המעבד. הוא יבצע את child_task(1) במלואו, כולל 3 הדפסות ו-3 פרצי CPU ארוכים, מכיוון ש-FCFS הוא בלתי-פולשני. פלט: \"Child 1: Step 0\", \"Child 1: Step 1\", \"Child 1: Step 2\". Child 1 מסיים ויוצא.\n8. תהליך האב (שהיה חסום) הופך למוכן שוב (כי Child 1 סיים). המתזמן בוחר את התהליך הבא בתור המוכנים.\n9. Child 2 מקבל את המעבד. הוא מבצע execvp לתוכנית 'echo'. פעולה זו מהירה מאוד. פלט: \"Child 2 execs: Hello from exec!\". Child 2 מסיים ויוצא.\n10. תהליך האב הופך למוכן שוב. המתזמן בוחר את התהליך הבא בתור המוכנים.\n11. Child 3 מקבל את המעבד. הוא יבצע את child_task(3) במלואו, כולל 3 הדפסות ו-3 פרצי CPU ארוכים. פלט: \"Child 3: Step 0\", \"Child 3: Step 1\", \"Child 3: Step 2\". Child 3 מסיים ויוצא.\n12. תהליך האב הופך למוכן שוב. כעת כל הילדים סיימו, אז קריאות waitpid(p1), waitpid(p2), waitpid(p3) חוזרות מיד.\n13. האב מדפיס \"Parent: All children finished.\".\n14. האב מסיים ויוצא.\n\nפלט אפשרי:\nParent: Starting\nParent: All children forked.\nChild 1: Step 0\nChild 1: Step 1\nChild 1: Step 2\nChild 2 execs: Hello from exec!\nChild 3: Step 0\nChild 3: Step 1\nChild 3: Step 2\nParent: All children finished.\n\n8.2: במתזמן Round Robin, תהליכים מקבלים קוונטום זמן קבוע לריצה. אם תהליך לא מסיים את פרץ המעבד שלו בתוך הקוונטום, הוא נקטע (preempted) והמעבד עובר לתהליך הבא בתור המוכנים. כתוצאה מכך, הפלט יהיה משולב (interleaved) בין התהליכים השונים, בניגוד ל-FCFS שבו תהליך אחד מסיים את כל פרץ המעבד שלו לפני שהמעבד עובר לאחר.\nהמאפיינים העיקריים של השינוי:\n1. **שילוב פלטים**: ההדפסות מתהליכי Child 1, Child 3 ותהליך האב (בקטעי העבודה שלו) יופיעו לסירוגין, במקום רצפים ארוכים של הדפסות מתהליך יחיד.\n2. **הופעה מוקדמת של Child 2**: מכיוון שפעולת execvp והתוכנית 'echo' הן מהירות מאוד, Child 2 צפוי לסיים את ריצתו ולהדפיס את הודעתו מוקדם יחסית, אולי אפילו לפני ש-Child 1 או Child 3 יסיימו את הצעד הראשון שלהם, או בין צעדים של תהליכים אחרים.\n\nדוגמה קצרה לרצף הדפסות אפשרי המדגים את השילוב:\nParent: Starting\nChild 1: Step 0\nChild 2 execs: Hello from exec!\nChild 3: Step 0\nParent: All children forked.\nChild 1: Step 1\nChild 3: Step 1\nParent: All children finished.\nChild 1: Step 2\nChild 3: Step 2\n(הערה: הסדר המדויק יכול להשתנות בהתאם לסדר בתור המוכנים וזמני הריצה בפועל, אך השילוב הוא המאפיין הקריטי).\n\n8.3: במהלך ריצת התוכנית נוצרים 4 תהליכים נפרדים:\n1. **תהליך האב המקורי**: זהו התהליך שמתחיל את ריצת התוכנית (main).\n2. **Child 1**: נוצר כתוצאה מהקריאה הראשונה ל-fork (בשורה 21). הוא ממשיך לבצע את הפונקציה child_task.\n3. **Child 2**: נוצר כתוצאה מהקריאה השנייה ל-fork (בשורה 24). תהליך זה מבצע execvp, אשר **מחליף** את תמונת הזיכרון שלו בתוכנית 'echo'. הוא אינו יוצר תהליך חדש, אלא הופך להיות תהליך ה-'echo'.\n4. **Child 3**: נוצר כתוצאה מהקריאה השלישית ל-fork (בשורה 27). הוא ממשיך לבצע את הפונקציה child_task.\n\nסה\"כ נוצרים 4 תהליכים נפרדים."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

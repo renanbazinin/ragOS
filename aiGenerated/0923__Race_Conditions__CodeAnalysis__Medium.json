@@ -1,0 +1,59 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 01:20:02",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2675,
+      "output_tokens": 2037,
+      "total_tokens": 7689
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Concurrency",
+      "Race Conditions",
+      "Synchronization",
+      "Pthreads",
+      "System Calls"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המשתמשת בספריית pthreads. התוכנית יוצרת מספר תהליכונים (threads) שכל אחד מהם מגדיל מונה גלובלי משותף ללא מנגנוני סנכרון. קרא את קטע הקוד וענה על השאלות הבאות:",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <stdlib.h> // For exit\n\n#define NUM_THREADS 5\n#define INCREMENTS_PER_THREAD 1000000\n\nint counter = 0; // Shared global variable\n\nvoid* increment_counter(void* arg) {\n    for (int i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n        counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    printf(\"Starting counter value: %d\\n\", counter);\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        if (pthread_create(&threads[i], NULL, increment_counter, NULL) != 0) {\n            perror(\"Failed to create thread\");\n            exit(EXIT_FAILURE);\n        }\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        if (pthread_join(threads[i], NULL) != 0) {\n            perror(\"Failed to join thread\");\n            exit(EXIT_FAILURE);\n        }\n    }\n\n    printf(\"Final counter value: %d\\n\", counter);\n    printf(\"Expected counter value: %d\\n\", NUM_THREADS * INCREMENTS_PER_THREAD);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "8.1",
+        "text": "מהו הערך הסופי ה**צפוי** של המונה (counter)? מהו ערך סופי **אפשרי** של המונה בפועל בזמן ריצה? הסבר מדוע ייתכן שהערכים שונים.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.2",
+        "text": "כיצד ניתן לתקן את בעיית מרוץ התנאים בקוד זה באמצעות מנגנוני סנכרון של pthreads (לדוגמה, mutexes)? הצג את קטע הקוד המתוקן.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.3",
+        "text": "לאחר תיקון מרוץ התנאים, מהן ההשלכות (יתרונות וחסרונות) של הפתרון על ביצועי התוכנית ועל התנהגותה?",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "8.1. הערך הסופי הצפוי של המונה הוא NUM_THREADS * INCREMENTS_PER_THREAD, כלומר 5 * 1,000,000 = 5,000,000.\nעם זאת, הערך הסופי בפועל יהיה כמעט תמיד נמוך מהערך הצפוי, למשל 4,234,567 או כל מספר אחר הנמוך מ-5,000,000.\nהסיבה לכך היא מרוץ תנאים (Race Condition). הפעולה counter++ אינה אטומית. היא מורכבת משלוש פעולות בסיסיות:\n1. קריאת הערך הנוכחי של counter לתוך אוגר.\n2. הגדלת הערך באוגר ב-1.\n3. כתיבת הערך החדש מהאוגר חזרה לזיכרון של counter.\nכאשר מספר תהליכונים מנסים לבצע את הפעולה בו-זמנית, ייתכן ששני תהליכונים יקראו את אותו ערך של counter, שניהם יגדילו אותו ב-1, ושניהם יכתבו את הערך המוגדל חזרה. במקרה כזה, הגדלה אחת 'נאבדת' והמונה לא משקף את כלל ההגדלות שבוצעו.\n\n8.2. ניתן לתקן את מרוץ התנאים באמצעות שימוש ב-mutex (מנעול הדדי). ה-mutex יבטיח שרק תהליכון אחד יוכל לגשת ולשנות את המונה בכל רגע נתון.\nלהלן קטע הקוד המתוקן:\n```c\n#include <stdio.h>\n#include <pthread.h>\n#include <stdlib.h>\n\n#define NUM_THREADS 5\n#define INCREMENTS_PER_THREAD 1000000\n\nint counter = 0;\npthread_mutex_t mutex; // Declare a mutex\n\nvoid* increment_counter(void* arg) {\n    for (int i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n        pthread_mutex_lock(&mutex);   // Lock the mutex before accessing shared resource\n        counter++;\n        pthread_mutex_unlock(&mutex); // Unlock the mutex after accessing shared resource\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    pthread_mutex_init(&mutex, NULL); // Initialize the mutex\n\n    printf(\"Starting counter value: %d\\n\", counter);\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        if (pthread_create(&threads[i], NULL, increment_counter, NULL) != 0) {\n            perror(\"Failed to create thread\");\n            pthread_mutex_destroy(&mutex); // Clean up mutex on error\n            exit(EXIT_FAILURE);\n        }\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        if (pthread_join(threads[i], NULL) != 0) {\n            perror(\"Failed to join thread\");\n            pthread_mutex_destroy(&mutex); // Clean up mutex on error\n            exit(EXIT_FAILURE);\n        }\n    }\n\n    printf(\"Final counter value: %d\\n\", counter);\n    printf(\"Expected counter value: %d\\n\", NUM_THREADS * INCREMENTS_PER_THREAD);\n\n    pthread_mutex_destroy(&mutex); // Destroy the mutex\n\n    return 0;\n}\n```\n\n8.3. השלכות התיקון:\n*   **יתרונות:**\n    *   **נכונות (Correctness):** הפתרון מבטיח שהמונה יגיע לערכו הצפוי והנכון (5,000,000 במקרה זה), מכיוון שפעולת ההגדלה הופכת לאטומית.\n    *   **עקביות (Consistency):** הנתונים המשותפים נשמרים עקביים לאורך כל זמן הריצה.\n*   **חסרונות:**\n    *   **ביצועים (Performance):** נעילת ופתיחת ה-mutex כרוכה בתקורה (overhead). עבור מספר רב של פעולות קריטיות קצרות, התקורה של ה-mutex עלולה להאט משמעותית את ביצועי התוכנית. למרות שהתוכנית פועלת במקביל, הגישה למשתנה counter הופכת לסדרתית (רק תהליכון אחד בכל פעם יכול לשנותו), מה שמקטין את רמת המקביליות האמיתית במקטע הקריטי.\n    *   **המתנה (Waiting):** תהליכונים אחרים ייאלצו להמתין אם ה-mutex נעול, מה שיכול להוביל לעיכובים. במקרים מסוימים (לא בקוד זה), שימוש לא נכון ב-mutexes עלול לגרום ל-Deadlock."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

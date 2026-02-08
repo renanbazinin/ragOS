@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 01:09:59",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2154,
+      "output_tokens": 1658,
+      "total_tokens": 5849
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Race Conditions",
+      "Synchronization",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתון קטע קוד בשפת C המשתמש בתהליכונים (threads) כדי לעדכן משתנה גלובלי משותף. קרא את הקוד בעיון וענה על השאלות הבאות:\n\n1. האם קטע הקוד עלול לסבול ממצב מרוץ (Race Condition)? אם כן, הסבר מדוע וציין מהו הערך הסופי הצפוי של המשתנה `shared_counter` אם לא היה קיים מצב מרוץ.\n2. הצע פתרון לקטע הקוד כדי למנוע מצב מרוץ, באמצעות מנגנוני סנכרון מתאימים (לדוגמה: mutexes). הצג את קטע הקוד המתוקן.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\nint shared_counter = 0; // Global shared resource\n\nvoid* incrementer(void* arg) {\n    for (int i = 0; i < 100000; i++) {\n        shared_counter++;\n    }\n    return NULL;\n}\n\nvoid* decrementer(void* arg) {\n    for (int i = 0; i < 100000; i++) {\n        shared_counter--;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t tid1, tid2;\n\n    pthread_create(&tid1, NULL, incrementer, NULL);\n    pthread_create(&tid2, NULL, decrementer, NULL);\n\n    pthread_join(tid1, NULL);\n    pthread_join(tid2, NULL);\n\n    printf(\"Final value of shared_counter: %d\\n\", shared_counter);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1. **זיהוי מצב מרוץ:** כן, קטע הקוד סובל ממצב מרוץ (Race Condition). הפעולות `shared_counter++` ו-`shared_counter--` אינן אטומיות. כל אחת מהן מורכבת משלושה שלבים:\n    א. קריאת הערך הנוכחי של `shared_counter` מהזיכרון.\n    ב. ביצוע פעולת החיבור/חיסור על הערך שנשמר באוגר (CPU register).\n    ג. כתיבת הערך המעודכן בחזרה לזיכרון.\n\n    כאשר שני תהליכונים מבצעים פעולות אלו במקביל, סדר הביצוע של השלבים הללו יכול להשתנות (interleaving), מה שעלול לגרום לאיבוד עדכונים. לדוגמה, אם `shared_counter` הוא 0:\n    *   תהליכון A קורא 0.\n    *   תהליכון B קורא 0.\n    *   תהליכון A מגדיל את הערך באוגר שלו ל-1.\n    *   תהליכון B מקטין את הערך באוגר שלו ל-1-.\n    *   תהליכון A כותב 1 ל-`shared_counter`.\n    *   תהליכון B כותב 1- ל-`shared_counter`.\n    במקרה זה, העדכון של תהליכון A אבד. הערך הסופי שיתקבל יהיה בלתי צפוי ולא בהכרח 0.\n\n    הערך הסופי הצפוי של `shared_counter` אם לא היה קיים מצב מרוץ הוא **0**, מכיוון שיש 100,000 הגדלות ו-100,000 הקטנות, אשר אמורות לבטל זו את זו.\n\n2. **פתרון עם Mutex:** כדי למנוע מצב מרוץ, יש להגן על הגישה למשתנה המשותף `shared_counter` באמצעות מנגנון סנכרון, כגון mutex (מנעול הדדי). Mutex מבטיח שרק תהליכון אחד יוכל להיכנס לקטע קריטי (Critical Section) בכל רגע נתון ולגשת למשאב המשותף.\n\n    הפתרון המוצע הוא להשתמש ב-`pthread_mutex_t` ובפונקציות `pthread_mutex_lock()` ו-`pthread_mutex_unlock()` סביב הגישה למשתנה `shared_counter`:\n\n    ```c\n#include <stdio.h>\n#include <pthread.h>\n\nint shared_counter = 0; // Global shared resource\npthread_mutex_t counter_mutex; // Mutex for protecting shared_counter\n\nvoid* incrementer(void* arg) {\n    for (int i = 0; i < 100000; i++) {\n        pthread_mutex_lock(&counter_mutex); // Lock before accessing shared_counter\n        shared_counter++;\n        pthread_mutex_unlock(&counter_mutex); // Unlock after accessing shared_counter\n    }\n    return NULL;\n}\n\nvoid* decrementer(void* arg) {\n    for (int i = 0; i < 100000; i++) {\n        pthread_mutex_lock(&counter_mutex); // Lock before accessing shared_counter\n        shared_counter--;\n        pthread_mutex_unlock(&counter_mutex); // Unlock after accessing shared_counter\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t tid1, tid2;\n\n    pthread_mutex_init(&counter_mutex, NULL); // Initialize the mutex\n\n    pthread_create(&tid1, NULL, incrementer, NULL);\n    pthread_create(&tid2, NULL, decrementer, NULL);\n\n    pthread_join(tid1, NULL);\n    pthread_join(tid2, NULL);\n\n    printf(\"Final value of shared_counter: %d\\n\", shared_counter);\n\n    pthread_mutex_destroy(&counter_mutex); // Destroy the mutex\n\n    return 0;\n}\n    ```\n    בקוד המתוקן, כל גישה (קריאה ועדכון) ל-`shared_counter` מתבצעת בתוך קטע קריטי המוגן על ידי ה-mutex. זה מבטיח שרק תהליכון אחד יוכל לבצע את פעולת ה-`shared_counter++` או `shared_counter--` בכל רגע נתון, ובכך נמנעים מצבי מרוץ ואיבוד עדכונים. הערך הסופי שיודפס יהיה 0, כצפוי."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

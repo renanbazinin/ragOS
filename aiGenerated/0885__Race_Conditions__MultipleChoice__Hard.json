@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 01:04:31",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 1001,
+      "total_tokens": 5290
+    }
+  },
+  "question": {
+    "id": 6,
+    "type": "MultipleChoice",
+    "topic": [
+      "Race Conditions",
+      "Synchronization",
+      "Concurrency",
+      "Mutex"
+    ],
+    "content": {
+      "text": "נתונה פיסת קוד C המשתמשת בתהליכונים (threads) ובמנגנוני סנכרון. שני תהליכונים מנסים להגדיל מונה גלובלי (g_counter) מאות אלפי פעמים כל אחד. בהנחה שהקוד הנ\"ל מורץ על מערכת עם שני מעבדים (או ליבות), ושכל תהליכון מסיים את לולאת ה-for שלו, מהי הטענה הנכונה ביותר לגבי הערך הסופי של `g_counter`?",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\nlong g_counter = 0;\npthread_mutex_t g_mutex;\n\nvoid* thread_func(void* arg) {\n    for (int i = 0; i < 100000; ++i) {\n        long current_val;\n        pthread_mutex_lock(&g_mutex);\n        current_val = g_counter;\n        pthread_mutex_unlock(&g_mutex); // Mutex released here\n\n        // Simulate some processing time or complex operation\n        current_val = current_val + 1; // This is the 'modification'\n\n        pthread_mutex_lock(&g_mutex);\n        g_counter = current_val;\n        pthread_mutex_unlock(&g_mutex); // Mutex released again\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t tids[2];\n    pthread_mutex_init(&g_mutex, NULL);\n\n    pthread_create(&tids[0], NULL, thread_func, NULL);\n    pthread_create(&tids[1], NULL, thread_func, NULL);\n\n    pthread_join(tids[0], NULL);\n    pthread_join(tids[1], NULL);\n\n    printf(\"Final counter value: %ld\\n\", g_counter);\n    pthread_mutex_destroy(&g_mutex);\n    return 0;\n}",
+      "options": [
+        "א. הערך הסופי של `g_counter` יהיה תמיד 200,000, מכיוון שתפיסת ושחרור המנעול (mutex) מבטיחים סנכרון מלא.",
+        "ב. הערך הסופי של `g_counter` יהיה תמיד 0, מכיוון שהמנעול מונע מכל התהליכונים לשנות את המונה.",
+        "ג. הערך הסופי של `g_counter` יהיה נמוך מ-200,000, מכיוון שקיים תנאי מירוץ (race condition) בתהליך העדכון.",
+        "ד. הערך הסופי של `g_counter` יהיה גבוה מ-200,000, עקב כפילויות בפעולות ההגדלה.",
+        "ה. הקוד יגרום לקיפאון (deadlock) ולא יסיים את ריצתו."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג. למרות השימוש במנעול (mutex), פעולת העדכון של `g_counter` אינה אטומית. המנעול משוחרר בין קריאת הערך הנוכחי (`current_val = g_counter;`) לבין כתיבת הערך המעודכן (`g_counter = current_val;`). בחלון זמן זה, תהליכון אחר יכול לקרוא את אותו ערך ישן של `g_counter`, להגדיל אותו, ולכתוב אותו בחזרה, ובכך 'לדרוס' את העדכון של התהליכון הראשון. כתוצאה מכך, חלק מההגדלות יאבדו, והערך הסופי יהיה נמוך מ-200,000."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

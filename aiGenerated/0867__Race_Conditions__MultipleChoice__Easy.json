@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 00:58:57",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1028,
+      "output_tokens": 605,
+      "total_tokens": 2633
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Race Conditions",
+      "Concurrency",
+      "Synchronization",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתבונן בקטע הקוד הבא:\n\n```c\nint counter = 0;\n\nvoid *increment_counter(void *arg) {\n    for (int i = 0; i < 100000; i++) {\n        counter++; // פעולה לא אטומית\n    }\n    return NULL;\n}\n```\n\nמה יקרה אם שני חוטים (threads) שונים יקראו לפונקציה `increment_counter` במקביל, ללא כל מנגנון סנכרון?",
+      "code_snippet": null,
+      "options": [
+        "א. המונה `counter` תמיד יגיע לערך 200,000.",
+        "ב. המונה `counter` תמיד יגיע לערך 100,000.",
+        "ג. המונה `counter` יגיע לרוב לערך שקטן מ-200,000, עקב מצב מרוץ (race condition).",
+        "ד. התוכנית תקרוס עקב גישה לא חוקית לזיכרון.",
+        "ה. התוכנית תיכנס לקיפאון (deadlock)."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג'. הפעולה `counter++` אינה אטומית. היא מורכבת למעשה משלוש פעולות: קריאת הערך של `counter` לתוך אוגר, הגדלת הערך באוגר, וכתיבת הערך המוגדל בחזרה לזיכרון. כאשר שני חוטים מבצעים פעולה זו במקביל ללא סנכרון, ייתכן ששני החוטים יקראו את אותו ערך של `counter`, יגדילו אותו כל אחד בנפרד, ואז יכתבו את הערך המוגדל בחזרה. במקרה כזה, הגדלה אחת 'נאבדת'. לכן, הערך הסופי של `counter` יהיה לרוב קטן מהערך הצפוי של 200,000 (100,000 מכל חוט)."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

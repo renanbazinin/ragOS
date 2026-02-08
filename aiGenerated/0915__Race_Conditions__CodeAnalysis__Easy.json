@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 01:17:37",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5728,
+      "output_tokens": 1427,
+      "total_tokens": 10689
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Race Conditions",
+      "Concurrency",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המשתמשת במשתנה גלובלי משותף `shared_var` המאותחל ל-0. שני חוטים (`thread_func_1` ו-`thread_func_2`) מריצים פונקציות שונות במקביל, ללא כל סנכרון. כל חוט מבצע סדרת פעולות של קריאה, שינוי וכתיבה מחדש למשתנה המשותף. מהם כל הערכים האפשריים הסופיים של המשתנה הגלובלי `shared_var` לאחר ששני החוטים מסיימים את ריצתם? עבור כל ערך אפשרי, תארו בקצרה תזמון ריצה אחד המוביל אליו.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\nint shared_var = 0; // Global shared variable\n\nvoid* thread_func_1(void* arg) {\n    int temp;\n    temp = shared_var; // T1_L1: Read shared_var\n    temp = temp + 1;   // T1_L2: Increment temp\n    shared_var = temp; // T1_L3: Write back to shared_var\n    return NULL;\n}\n\nvoid* thread_func_2(void* arg) {\n    int temp;\n    temp = shared_var; // T2_L1: Read shared_var\n    temp = temp + 2;   // T2_L2: Add 2 to temp\n    shared_var = temp; // T2_L3: Write back to shared_var\n    return NULL;\n}\n\nint main() {\n    pthread_t tid1, tid2;\n\n    pthread_create(&tid1, NULL, thread_func_1, NULL);\n    pthread_create(&tid2, NULL, thread_func_2, NULL);\n\n    pthread_join(tid1, NULL);\n    pthread_join(tid2, NULL);\n\n    printf(\"Final value of shared_var: %d\\n\", shared_var);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הערכים האפשריים הסופיים של `shared_var` הם 1, 2 ו-3.\n\n*   **ערך סופי 1:**\n    *   חוט 1 קורא את `shared_var` (שערכו 0) ומגדיל אותו ל-1 במשתנה זמני (T1_L1, T1_L2).\n    *   לפני שחוט 1 כותב בחזרה את הערך ל-`shared_var`, חוט 2 מתחיל לרוץ.\n    *   חוט 2 קורא את `shared_var` (שעדיין 0), מגדיל אותו ל-2 במשתנה זמני, וכותב אותו ל-`shared_var` (T2_L1, T2_L2, T2_L3). כעת `shared_var` הוא 2.\n    *   לאחר מכן, חוט 1 ממשיך את ריצתו וכותב את הערך 1 (שחישב קודם) ל-`shared_var` (T1_L3), ודורס את ערכו ל-1.\n\n*   **ערך סופי 2:**\n    *   חוט 2 קורא את `shared_var` (שערכו 0) ומגדיל אותו ל-2 במשתנה זמני (T2_L1, T2_L2).\n    *   לפני שחוט 2 כותב בחזרה את הערך ל-`shared_var`, חוט 1 מתחיל לרוץ.\n    *   חוט 1 קורא את `shared_var` (שעדיין 0), מגדיל אותו ל-1 במשתנה זמני, וכותב אותו ל-`shared_var` (T1_L1, T1_L2, T1_L3). כעת `shared_var` הוא 1.\n    *   לאחר מכן, חוט 2 ממשיך את ריצתו וכותב את הערך 2 (שחישב קודם) ל-`shared_var` (T2_L3), ודורס את ערכו ל-2.\n\n*   **ערך סופי 3:**\n    *   **אפשרות 1 (חוט 1 מסיים לפני חוט 2):** חוט 1 מסיים את כל פעולותיו (T1_L1, T1_L2, T1_L3). `shared_var` הופך ל-1. לאחר מכן, חוט 2 מסיים את כל פעולותיו (T2_L1, T2_L2, T2_L3). הוא קורא את 1, משנה ל-3, וכותב 3. `shared_var` הופך ל-3.\n    *   **אפשרות 2 (חוט 2 מסיים לפני חוט 1):** חוט 2 מסיים את כל פעולותיו (T2_L1, T2_L2, T2_L3). `shared_var` הופך ל-2. לאחר מכן, חוט 1 מסיים את כל פעולותיו (T1_L1, T1_L2, T1_L3). הוא קורא את 2, משנה ל-3, וכותב 3. `shared_var` הופך ל-3."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

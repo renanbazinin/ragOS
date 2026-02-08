@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 01:07:06",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3457,
+      "output_tokens": 1043,
+      "total_tokens": 5633
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Race Conditions",
+      "Concurrency",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "הסבירו בקצרה מהו תנאי מרוץ (Race Condition) במערכות הפעלה. תארו דוגמה פשוטה למצב בו עלול להיווצר תנאי מרוץ, והסבירו מדוע הוא מתרחש בהקשר של הקוד הבא:",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\nint counter = 0; // Shared global variable\n\nvoid* increment_counter(void* arg) {\n    for (int i = 0; i < 100000; i++) {\n        counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t tid1, tid2;\n\n    pthread_create(&tid1, NULL, increment_counter, NULL);\n    pthread_create(&tid2, NULL, increment_counter, NULL);\n\n    pthread_join(tid1, NULL);\n    pthread_join(tid2, NULL);\n\n    printf(\"Final counter value: %d\\n\", counter);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "תנאי מרוץ (Race Condition) הוא מצב שבו מספר תהליכונים (threads) או תהליכים (processes) ניגשים ומשנים נתונים משותפים במקביל, והתוצאה הסופית של הפעולות תלויה בסדר הלא-דטרמיניסטי שבו הגישות מתרחשות.\n\nבקוד הנתון, המשתנה הגלובלי `counter` הוא משתנה משותף ששני תהליכונים (`tid1` ו-`tid2`) מנסים להגדיל (increment) אותו 100,000 פעמים כל אחד. התוצאה הסופית הצפויה היא 200,000.\n\nתנאי מרוץ מתרחש מכיוון שהפעולה `counter++` אינה אטומית. כלומר, היא אינה מתבצעת כפעולה אחת בלתי ניתנת להפרעה. במציאות, היא מורכבת בדרך כלל משלוש הוראות מכונה:\n1.  טעינת הערך הנוכחי של `counter` לתוך רגיסטר במעבד.\n2.  הגדלת הערך ברגיסטר.\n3.  שמירת הערך המעודכן מהרגיסטר בחזרה לזיכרון בכתובת של `counter`.\n\nכאשר שני תהליכונים מבצעים פעולה זו במקביל, סדר ההוראות שלהם יכול להשתלב באופן שגוי. לדוגמה:\n*   תהליכון 1 טוען את `counter` (נניח 0) לרגיסטר שלו.\n*   המתזמן (scheduler) מעביר את השליטה לתהליכון 2.\n*   תהליכון 2 טוען את `counter` (שעדיין 0) לרגיסטר שלו.\n*   תהליכון 2 מגדיל את הערך ברגיסטר שלו (ל-1).\n*   תהליכון 2 שומר את 1 בחזרה ל-`counter` בזיכרון.\n*   המתזמן מעביר את השליטה בחזרה לתהליכון 1.\n*   תהליכון 1 מגדיל את הערך ברגיסטר שלו (ל-1, מכיוון שהוא טען 0 במקור).\n*   תהליכון 1 שומר את 1 בחזרה ל-`counter` בזיכרון.\n\nבמקרה זה, למרות ששתי פעולות הגדלה בוצעו, הערך הסופי של `counter` הוא 1 במקום 2. כתוצאה מכך, הערך הסופי המודפס יהיה בדרך כלל נמוך מ-200,000 ולא דטרמיניסטי, מכיוון שהוא תלוי בסדר המדויק של ביצוע ההוראות על ידי המעבד."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

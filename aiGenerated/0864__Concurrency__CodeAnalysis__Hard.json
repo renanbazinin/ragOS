@@ -1,0 +1,53 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 00:58:27",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5571,
+      "output_tokens": 2860,
+      "total_tokens": 20756
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Concurrency",
+      "Synchronization",
+      "Deadlocks",
+      "Mutexes",
+      "Lock Ordering"
+    ],
+    "content": {
+      "text": "נתונה מערכת המנהלת N משאבים מסוג `long`, המיוצגים על ידי המערך `resources[N]`. כל משאב `resources[i]` מוגן על ידי מנעול ייעודי `resource_mutexes[i]`. בנוסף, קיים משתנה גלובלי `global_total_value` המייצג את סכום כל המשאבים במערכת (כלומר, `global_total_value == sum(resources[i])`). משתנה זה מוגן על ידי המנעול `total_value_mutex`.\n\nלהלן שתי פונקציות המבצעות פעולות על המערכת:\n\n1.  `update_resource(int id, long new_value)`: מעדכנת את הערך של משאב בודד `resources[id]` ל-`new_value` ומתאימה את `global_total_value` בהתאם.\n2.  `transfer_value(int from_id, int to_id, long amount)`: מעבירה `amount` מ-`resources[from_id]` ל-`resources[to_id]`. הפונקציה אינה אמורה לשנות את `global_total_value`.\n\n```c\n#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n\n#define NUM_RESOURCES 5\n\nlong resources[NUM_RESOURCES];\npthread_mutex_t resource_mutexes[NUM_RESOURCES];\nlong global_total_value = 0;\npthread_mutex_t total_value_mutex;\n\nvoid initialize_system() {\n    for (int i = 0; i < NUM_RESOURCES; ++i) {\n        resources[i] = i * 100;\n        global_total_value += resources[i];\n        pthread_mutex_init(&resource_mutexes[i], NULL);\n    }\n    pthread_mutex_init(&total_value_mutex, NULL);\n}\n\n// Function A: Updates a single resource and reflects change in global_total_value\nvoid update_resource(int id, long new_value) {\n    if (id < 0 || id >= NUM_RESOURCES) return;\n\n    pthread_mutex_lock(&resource_mutexes[id]); // Lock M_id\n    pthread_mutex_lock(&total_value_mutex);    // Lock M_total\n\n    long old_value = resources[id];\n    resources[id] = new_value;\n    global_total_value = global_total_value - old_value + new_value;\n\n    pthread_mutex_unlock(&total_value_mutex);\n    pthread_mutex_unlock(&resource_mutexes[id]);\n}\n\n// Function B: Transfers value between two resources.\nvoid transfer_value(int from_id, int to_id, long amount) {\n    if (from_id == to_id || from_id < 0 || from_id >= NUM_RESOURCES || to_id < 0 || to_id >= NUM_RESOURCES) {\n        return;\n    }\n\n    pthread_mutex_lock(&total_value_mutex);            // Lock M_total\n    pthread_mutex_lock(&resource_mutexes[from_id]);    // Lock M_from_id\n    pthread_mutex_lock(&resource_mutexes[to_id]);      // Lock M_to_id\n\n    resources[from_id] -= amount;\n    resources[to_id] += amount;\n\n    pthread_mutex_unlock(&resource_mutexes[to_id]);\n    pthread_mutex_unlock(&resource_mutexes[from_id]);\n    pthread_mutex_unlock(&total_value_mutex);\n}\n```",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "תארו ריצה ספציפית (רצף של פעולות מחוטים שונים) המובילה למצב של קיפאון (Deadlock) במערכת, תוך התייחסות למנעולים ספציפיים ולסדר תפיסתם.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "תקנו את שתי הפונקציות `update_resource` ו-`transfer_value` כך שהמערכת תפעל באופן תקין וללא קיפאון. יש להבטיח ש-`global_total_value` תמיד ייצג את סכום המשאבים ושלא ייווצרו בעיות עקביות אחרות. ניתן לשנות את סדר תפיסת המנעולים ואת הלוגיקה בתוך הפונקציות.",
+        "code_snippet": "void update_resource(int id, long new_value) {\n    // Your corrected code here\n}\n\nvoid transfer_value(int from_id, int to_id, long amount) {\n    // Your corrected code here\n}",
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.1: תרחיש קיפאון:\nהקיפאון מתרחש עקב סדר שונה של תפיסת מנעולים בשתי הפונקציות:\n*   `update_resource`: תופסת תחילה `resource_mutexes[id]` ולאחר מכן `total_value_mutex`.\n*   `transfer_value`: תופסת תחילה `total_value_mutex` ולאחר מכן `resource_mutexes[from_id]` ו-`resource_mutexes[to_id]`.\n\nתרחיש קיפאון לדוגמה (נניח `NUM_RESOURCES >= 1`):\n1.  **חוט A** מפעיל `update_resource(0, 100)`:\n    *   תופס את `resource_mutexes[0]`.\n    *   מנסה לתפוס את `total_value_mutex` (ונחסם אם חוט B תפס אותו).\n2.  **חוט B** מפעיל `transfer_value(0, 1, 10)`:\n    *   תופס את `total_value_mutex`.\n    *   מנסה לתפוס את `resource_mutexes[0]` (ונחסם אם חוט A תפס אותו).\n\nבמצב זה, אם חוט A תפס את `resource_mutexes[0]` וחוט B תפס את `total_value_mutex` בו-זמנית, נוצר מעגל המתנה: חוט A מחזיק ב-`resource_mutexes[0]` וממתין ל-`total_value_mutex` (המוחזק על ידי חוט B), בעוד חוט B מחזיק ב-`total_value_mutex` וממתין ל-`resource_mutexes[0]` (המוחזק על ידי חוט A). נוצר קיפאון.\n\n1.2: תיקון הפונקציות:\nכדי למנוע קיפאון, יש להבטיח סדר עקבי של תפיסת מנעולים בכל הפונקציות. נבחר בסדר הבא: `total_value_mutex` תחילה, ולאחר מכן `resource_mutexes` לפי מזהה עולה.\n\n```c\n// Function A: Corrected update_resource\nvoid update_resource(int id, long new_value) {\n    if (id < 0 || id >= NUM_RESOURCES) return;\n\n    pthread_mutex_lock(&total_value_mutex);    // Lock M_total (first)\n    pthread_mutex_lock(&resource_mutexes[id]); // Lock M_id (second)\n\n    long old_value = resources[id];\n    resources[id] = new_value;\n    global_total_value = global_total_value - old_value + new_value;\n\n    pthread_mutex_unlock(&resource_mutexes[id]);\n    pthread_mutex_unlock(&total_value_mutex);\n}\n\n// Function B: Corrected transfer_value\nvoid transfer_value(int from_id, int to_id, long amount) {\n    if (from_id == to_id || from_id < 0 || from_id >= NUM_RESOURCES || to_id < 0 || to_id >= NUM_RESOURCES) {\n        return;\n    }\n\n    pthread_mutex_lock(&total_value_mutex); // Lock M_total (first)\n\n    // Acquire resource mutexes in a consistent, ascending ID order.\n    // This prevents deadlocks between two transfer_value calls (e.g., A->B vs B->A)\n    int first_lock_id = (from_id < to_id) ? from_id : to_id;\n    int second_lock_id = (from_id < to_id) ? to_id : from_id;\n\n    pthread_mutex_lock(&resource_mutexes[first_lock_id]);\n    pthread_mutex_lock(&resource_mutexes[second_lock_id]);\n    \n    // Perform transfer\n    resources[from_id] -= amount;\n    resources[to_id] += amount;\n\n    // Release resource mutexes in reverse order of acquisition\n    pthread_mutex_unlock(&resource_mutexes[second_lock_id]);\n    pthread_mutex_unlock(&resource_mutexes[first_lock_id]);\n    pthread_mutex_unlock(&total_value_mutex);\n}\n```\n\n**הסבר לתיקון:**\n1.  **סדר עקבי:** בשתי הפונקציות, `total_value_mutex` נתפס ראשון. זה מבטיח שלא ייווצר מצב שבו חוט אחד מחזיק ב-`resource_mutex` וממתין ל-`total_value_mutex`, בזמן שחוט אחר מחזיק ב-`total_value_mutex` וממתין ל-`resource_mutex`. בכך נשבר תנאי ההמתנה המעגלית (Circular Wait).\n2.  **סדר פנימי ב-`transfer_value`:** בתוך `transfer_value`, לאחר תפיסת `total_value_mutex`, מנעולי המשאבים `resource_mutexes[from_id]` ו-`resource_mutexes[to_id]` נתפסים תמיד בסדר עולה של המזהים שלהם (`first_lock_id` ואז `second_lock_id`). זה מונע קיפאון אם שני חוטים ינסו לבצע העברה הפוכה (לדוגמה, חוט אחד `(0,1)` וחוט שני `(1,0)`), שכן שניהם ינסו לתפוס את המנעולים באותו הסדר.\n3.  **עקביות `global_total_value`:** מכיוון ש-`total_value_mutex` נתפס תמיד בתחילת הפעולה ומשוחרר בסופה, הוא מגן על שלמות `global_total_value` ועל העקביות בין `global_total_value` לבין סכום המשאבים. פונקציית `transfer_value` לא משנה את `global_total_value` באופן מפורש (כי סכום המשאבים נשאר קבוע), אך היא מבצעת את השינוי במשאבים תחת המנעול הגלובלי, מה שמונע מ-`update_resource` לראות מצב ביניים לא עקבי של המערכת."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

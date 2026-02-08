@@ -1,0 +1,58 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 00:55:50",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5571,
+      "output_tokens": 3227,
+      "total_tokens": 15874
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Concurrency",
+      "Synchronization",
+      "Deadlocks",
+      "Semaphores"
+    ],
+    "content": {
+      "text": "נתונה תוכנית המדמה מערכת של N עובדים (חוטים) ו-M עמדות עבודה (משאבים). כל עובד (חוט) נדרש לבצע משימה הדורשת גישה לשתי עמדות עבודה סמוכות. לדוגמה, עובד בעל מזהה `worker_id` זקוק לעמדה `worker_id` ולעמדה `(worker_id + 1) % NUM_STATIONS`. כל עמדת עבודה מוגנת על ידי סמפור (mutex) נפרד. הקוד הבא מציג את פונקציית המשימה של העובד (`worker_task`) ואת פונקציית `main` המאתחלת את המערכת. ניתן להניח ש-`NUM_WORKERS = NUM_STATIONS` ו-`NUM_WORKERS >= 2`.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <semaphore.h>\n#include <unistd.h> // For usleep\n\n#define NUM_WORKERS 5 \n#define NUM_STATIONS 5 \n\nsem_t station_mutex[NUM_STATIONS]; // One mutex per station\n\nvoid* worker_task(void* arg) {\n    long worker_id = (long)arg;\n    int station1_idx = worker_id;\n    int station2_idx = (worker_id + 1) % NUM_STATIONS;\n\n    printf(\"Worker %ld trying to acquire station %d and %d\\n\", worker_id, station1_idx, station2_idx);\n\n    // Acquire resources\n    sem_wait(&station_mutex[station1_idx]);\n    printf(\"Worker %ld acquired station %d\\n\", worker_id, station1_idx);\n\n    // Simulate some delay between acquisitions to increase deadlock probability\n    usleep(1000 * ((worker_id + 1) % 3)); \n\n    sem_wait(&station_mutex[station2_idx]);\n    printf(\"Worker %ld acquired station %d and %d. Performing task...\\n\", worker_id, station1_idx, station2_idx);\n\n    // Simulate task execution\n    usleep(50000);\n\n    printf(\"Worker %ld releasing station %d and %d\\n\", worker_id, station1_idx, station2_idx);\n    sem_post(&station_mutex[station2_idx]);\n    sem_post(&station_mutex[station1_idx]);\n\n    return NULL;\n}\n\nint main() {\n    // Initialize semaphores\n    for (int i = 0; i < NUM_STATIONS; ++i) {\n        sem_init(&station_mutex[i], 0, 1); // 0 for shared between threads in same process, 1 for initial value\n    }\n\n    pthread_t workers[NUM_WORKERS];\n\n    // Create worker threads\n    for (long i = 0; i < NUM_WORKERS; ++i) {\n        pthread_create(&workers[i], NULL, worker_task, (void*)i);\n    }\n\n    // Join worker threads\n    for (int i = 0; i < NUM_WORKERS; ++i) {\n        pthread_join(workers[i], NULL);\n    }\n\n    printf(\"All workers finished.\\n\");\n\n    // Destroy semaphores\n    for (int i = 0; i < NUM_STATIONS; ++i) {\n        sem_destroy(&station_mutex[i]);\n    }\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "101.1",
+        "text": "תארו תזמון ריצה ספציפי (לדוגמה: Worker 0 תופס X, Worker 1 תופס Y, וכו') המוביל למצב של קיפאון (Deadlock) במערכת.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "101.2",
+        "text": "הסבירו מדוע הקוד הנתון עלול להגיע למצב קיפאון, תוך התייחסות לארבעת התנאים ההכרחיים לקיפאון.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "101.3",
+        "text": "תקנו את הקוד של הפונקציה `worker_task` כך שימנע קיפאון. הפתרון שלכם צריך גם למנוע מצבי רעב (Starvation) או חסימה חיה (Livelock). ניתן להוסיף משתנים גלובליים ואובייקטי סנכרון לפי הצורך. יש לפרט בקצרה את אסטרטגיית התיקון ולצרף את הקוד המתוקן.",
+        "code_snippet": "void* worker_task(void* arg) {\n    long worker_id = (long)arg;\n    int station1_idx = worker_id;\n    int station2_idx = (worker_id + 1) % NUM_STATIONS;\n\n    // Your corrected code here\n\n    return NULL;\n}",
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "101.1: תזמון ריצה המוביל לקיפאון:\nנניח ש-NUM_WORKERS = NUM_STATIONS = 3.\n1. Worker 0 מבצע `sem_wait(&station_mutex[0])` ומצליח. (תפס עמדה 0)\n2. Worker 1 מבצע `sem_wait(&station_mutex[1])` ומצליח. (תפס עמדה 1)\n3. Worker 2 מבצע `sem_wait(&station_mutex[2])` ומצליח. (תפס עמדה 2)\n4. כעת, Worker 0 מנסה לבצע `sem_wait(&station_mutex[1])` אך נחסם, מכיוון שעמדה 1 תפוסה על ידי Worker 1.\n5. Worker 1 מנסה לבצע `sem_wait(&station_mutex[2])` אך נחסם, מכיוון שעמדה 2 תפוסה על ידי Worker 2.\n6. Worker 2 מנסה לבצע `sem_wait(&station_mutex[0])` אך נחסם, מכיוון שעמדה 0 תפוסה על ידי Worker 0.\nכל שלושת העובדים חסומים בהמתנה למשאב שמוחזק על ידי עובד אחר בשרשרת מעגלית, ולכן המערכת נמצאת בקיפאון.\n\n101.2: הסבר לקיפאון על בסיס ארבעת התנאים:\nהקוד הנתון מקיים את כל ארבעת התנאים ההכרחיים לקיפאון:\n1.  **הדדיות (Mutual Exclusion)**: כל עמדת עבודה (משאב) מוגנת על ידי סמפור `station_mutex[i]` בערך 1, כלומר, רק חוט אחד יכול להחזיק בעמדה מסוימת בזמן נתון. תנאי זה מתקיים.\n2.  **החזקה והמתנה (Hold and Wait)**: כל חוט תופס עמדה אחת (לדוגמה, `station_mutex[station1_idx]`) וממשיך להחזיק בה תוך כדי שהוא ממתין לתפוס את העמדה השנייה (`station_mutex[station2_idx]`). תנאי זה מתקיים.\n3.  **אי-הפקעה (No Preemption)**: לא ניתן להפקיע עמדת עבודה מחוט שמחזיק בה בכוח. חוט משחרר את העמדות רק לאחר שסיים את המשימה. תנאי זה מתקיים.\n4.  **המתנה מעגלית (Circular Wait)**: כפי שתואר בסעיף 101.1, יכול להיווצר תזמון שבו חוט 0 ממתין למשאב שמוחזק על ידי חוט 1, חוט 1 ממתין למשאב שמוחזק על ידי חוט 2, וחוט 2 ממתין למשאב שמוחזק על ידי חוט 0 (במקרה של 3 עובדים/עמדות). שרשרת המתנה מעגלית זו מובילה לקיפאון. תנאי זה מתקיים.\nמכיוון שכל ארבעת התנאים מתקיימים, קיים סיכון לקיפאון.\n\n101.3: תיקון הקוד למניעת קיפאון, רעב וחסימה חיה:\n**אסטרטגיית התיקון**: כדי למנוע קיפאון, נשבור את תנאי ההמתנה המעגלית על ידי אכיפת סדר קבוע לרכישת המשאבים. כל העובדים ינסו לתפוס את העמדות לפי סדר האינדקסים שלהן – תמיד יתפסו קודם את העמדה בעלת האינדקס הקטן יותר, ורק אחר כך את העמדה בעלת האינדקס הגדול יותר. במקרה של העובד האחרון שצריך את עמדה `NUM_STATIONS-1` ואת עמדה `0`, הוא יתפוס קודם את עמדה `0` ואז את `NUM_STATIONS-1`.\n\n**הסבר למניעת רעב/חסימה חיה**: שימוש ב-`sem_wait` (במקום `sem_trywait` עם לוגיקת ניסיון חוזר) מבטיח שחוטים שנחסמים ימתינו בתור (לרוב FIFO או הוגן במידה מסוימת על ידי מערכת ההפעלה) ובסופו של דבר יקבלו את המשאבים שלהם כאשר הם משוחררים. אכיפת סדר רכישה קבוע מונעת קיפאון מבלי להכניס מנגנונים מורכבים שעלולים לגרום לחסימה חיה (כמו ניסיונות חוזרים ונשנים שמתנגשים) או רעב (כמו העדפת חוטים מסוימים). כל חוט יקבל את תורו לגשת למשאבים. התיקון מתמקד במניעת המתנה מעגלית בלבד, והוא מספיק למנוע קיפאון במקרה זה. לכן, אין צורך בתוספות ייעודיות למניעת רעב או חסימה חיה עם פתרון זה.\n\n**הקוד המתוקן**: \n```c\nvoid* worker_task(void* arg) {\n    long worker_id = (long)arg;\n    int station1_idx = worker_id;\n    int station2_idx = (worker_id + 1) % NUM_STATIONS;\n\n    // Determine the order of acquisition based on station indices\n    int first_to_acquire;\n    int second_to_acquire;\n\n    // Special case for the last worker (e.g., Worker N-1 needs N-1 and 0)\n    // This worker needs to acquire station 0 first, then station N-1\n    if (worker_id == NUM_STATIONS - 1) {\n        first_to_acquire = 0; // Station 0\n        second_to_acquire = NUM_STATIONS - 1; // Station N-1\n    } else {\n        // For all other workers, acquire the lower indexed station first\n        first_to_acquire = station1_idx;\n        second_to_acquire = station2_idx;\n    }\n\n    printf(\"Worker %ld trying to acquire station %d and %d (ordered: %d then %d)\\n\", \n           worker_id, station1_idx, station2_idx, first_to_acquire, second_to_acquire);\n\n    sem_wait(&station_mutex[first_to_acquire]);\n    printf(\"Worker %ld acquired station %d\\n\", worker_id, first_to_acquire);\n\n    // Simulate some delay between acquisitions (optional, for demonstration)\n    usleep(1000 * ((worker_id + 1) % 2));\n\n    sem_wait(&station_mutex[second_to_acquire]);\n    printf(\"Worker %ld acquired station %d and %d. Performing task...\\n\", \n           worker_id, first_to_acquire, second_to_acquire);\n\n    // Simulate task execution\n    usleep(50000);\n\n    printf(\"Worker %ld releasing station %d and %d\\n\", \n           worker_id, first_to_acquire, second_to_acquire);\n    sem_post(&station_mutex[second_to_acquire]);\n    sem_post(&station_mutex[first_to_acquire]);\n\n    return NULL;\n}\n```"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

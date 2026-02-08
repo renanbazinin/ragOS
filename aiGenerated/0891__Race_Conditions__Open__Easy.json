@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 01:06:39",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3457,
+      "output_tokens": 1565,
+      "total_tokens": 7085
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Race Conditions",
+      "Concurrency",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתונה פיסת קוד בשפת C המשתמשת ב-pthreads. קוד זה יוצר שני תהליכונים שמטרתם להגדיל משתנה גלובלי משותף בשם `counter`.\n\n```c\n#include <stdio.h>\n#include <pthread.h>\n\nint counter = 0; // Shared global variable\n\nvoid* increment_counter(void* arg) {\n    for (int i = 0; i < 100000; ++i) {\n        counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t tid1, tid2;\n\n    pthread_create(&tid1, NULL, increment_counter, NULL);\n    pthread_create(&tid2, NULL, increment_counter, NULL);\n\n    pthread_join(tid1, NULL);\n    pthread_join(tid2, NULL);\n\n    printf(\"Final counter value: %d\\n\", counter);\n    return 0;\n}\n```\n\n1.  זהו והסבירו את הבעיה העיקרית בקוד זה בהקשר של מערכות הפעלה מרובות תהליכונים.\n2.  הציעו פתרון לבעיה זו על ידי שינוי הקוד הנתון, והסבירו מדוע הפתרון שלכם עובד.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.  **זיהוי והסבר הבעיה**: הבעיה העיקרית בקוד היא \"תנאי מרוץ\" (Race Condition). תנאי מרוץ מתרחש כאשר מספר תהליכונים (או תהליכים) ניגשים למשאב משותף (במקרה זה, המשתנה `counter`) בו-זמנית, ולפחות אחד מהם מבצע שינוי במשאב. סדר הגישה והביצוע של הפעולות אינו מוגדר, והתוצאה הסופית תלויה בסדר הלא-דטרמיניסטי שבו התהליכונים מתזמנים. הפעולה `counter++` אינה אטומית. היא מורכבת למעשה משלוש פעולות ברמת המכונה: א. קריאת הערך הנוכחי של `counter` לתוך אוגר. ב. הגדלת הערך באוגר באחד. ג. כתיבת הערך מהאוגר בחזרה ל-`counter`. אם שני תהליכונים מנסים להגדיל את המונה בו-זמנית, ייתכן ששניהם יקראו את אותו ערך ישן של `counter`, יגדילו אותו, ויכתבו בחזרה את הערך המוגדל, וכך אחת ההגדלות \"תאבד\" והמונה לא ישקף את המספר הנכון של ההגדלות שבוצעו. במקרה זה, הערך הסופי של `counter` יהיה כמעט תמיד נמוך מ-200,000.\n\n2.  **פתרון והסבר**: כדי לפתור את תנאי המרוץ, עלינו להבטיח שרק תהליכון אחד יוכל לגשת לקטע הקריטי (הפעולה `counter++`) בכל רגע נתון. ניתן לעשות זאת באמצעות מנגנוני סנכרון כמו מיוטקס (mutex).\n\n    **קוד פתרון:**\n    ```c\n#include <stdio.h>\n#include <pthread.h>\n\nint counter = 0; // Shared global variable\npthread_mutex_t mutex; // Declare a mutex\n\nvoid* increment_counter(void* arg) {\n    for (int i = 0; i < 100000; ++i) {\n        pthread_mutex_lock(&mutex); // Acquire the lock\n        counter++; // Critical section\n        pthread_mutex_unlock(&mutex); // Release the lock\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t tid1, tid2;\n\n    pthread_mutex_init(&mutex, NULL); // Initialize the mutex\n\n    pthread_create(&tid1, NULL, increment_counter, NULL);\n    pthread_create(&tid2, NULL, increment_counter, NULL);\n\n    pthread_join(tid1, NULL);\n    pthread_join(tid2, NULL);\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    pthread_mutex_destroy(&mutex); // Destroy the mutex\n    return 0;\n}\n    ```\n\n    **הסבר הפתרון**: הוספנו משתנה מיוטקס (`pthread_mutex_t mutex`) ואת הפעולות `pthread_mutex_init`, `pthread_mutex_lock`, `pthread_mutex_unlock`, ו-`pthread_mutex_destroy`. `pthread_mutex_init(&mutex, NULL)`: מאתחל את המיוטקס לפני יצירת התהליכונים. `pthread_mutex_lock(&mutex)`: לפני שכל תהליכון ניגש ל-`counter++`, הוא מנסה לנעול את המיוטקס. אם המיוטקס כבר נעול על ידי תהליכון אחר, התהליכון הנוכחי ייחסם עד שהמיוטקס ישוחרר. `pthread_mutex_unlock(&mutex)`: לאחר שהתהליכון סיים את הפעולה בקטע הקריטי (הגדלת `counter`), הוא משחרר את המיוטקס, ובכך מאפשר לתהליכונים אחרים לגשת לקטע הקריטי. `pthread_mutex_destroy(&mutex)`: משחרר את המשאבים של המיוטקס בסיום התוכנית. מנגנון זה מבטיח \"הדרה הדדית\" (Mutual Exclusion) – רק תהליכון אחד יכול להיות בקטע הקריטי בכל רגע נתון. כתוצאה מכך, הפעולה `counter++` תתבצע באופן אטומי מבחינת הגישה למשתנה המשותף, וכל ההגדלות ייספרו כראוי. הערך הסופי המודפס יהיה 200,000."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

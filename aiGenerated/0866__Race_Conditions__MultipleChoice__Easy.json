@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 00:58:49",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1028,
+      "output_tokens": 482,
+      "total_tokens": 2995
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Race Conditions",
+      "Concurrency",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא, כאשר הפונקציה `increment_shared_variable` נקראת במקביל על ידי מספר חוטים. איזה מהבאים מתאר נכון את הבעיה שעלולה להתרחש?",
+      "code_snippet": "int shared_variable = 0;\n\nvoid increment_shared_variable() {\n    shared_variable++;\n}",
+      "options": [
+        "א. הקוד ירוץ ללא בעיות מכיוון ש-`shared_variable` הוא משתנה גלובלי.",
+        "ב. ייתכן מצב מרוץ (race condition) אשר יגרום לערך הסופי של `shared_variable` להיות שגוי.",
+        "ג. יתרחש קיפאון (deadlock) מכיוון שאין מנגנוני נעילה.",
+        "ד. יתרחש הרעבה (starvation) מכיוון שחוטים מסוימים לא יצליחו לגשת למשתנה."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב'. כאשר מספר חוטים ניגשים למשתנה משותף (`shared_variable`) ומבצעים עליו פעולות כתיבה (כמו ++), ובפרט כאשר הפעולה אינה אטומית (כמו ++ המורכבת מקריאה, שינוי וכתיבה), ייתכן מצב מרוץ. במצב זה, סדר הביצוע של הפעולות על ידי החוטים אינו מובטח, והתוצאה הסופית של המשתנה עלולה להיות שגויה או בלתי צפויה."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

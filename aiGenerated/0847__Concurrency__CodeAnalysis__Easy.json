@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 00:47:59",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5571,
+      "output_tokens": 1256,
+      "total_tokens": 9956
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Concurrency",
+      "Race Conditions",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה המשתמשת בשני חוטים (threads) כדי לעדכן משתנה גלובלי משותף `shared_value`. שני החוטים מריצים את אותה פונקציה `my_thread_func`. מהם כל הערכים האפשריים של `shared_value` שיכולים להיות מודפסים בסוף הריצה? פרט בקצרה את תזמוני הריצות שמובילים לכל אחד מהערכים.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\nint shared_value = 0; // משתנה גלובלי משותף\n\nvoid* my_thread_func(void* arg) {\n    int local_val = shared_value; // קריאה של הערך המשותף\n    local_val = local_val + 1;    // הגדלה מקומית\n    shared_value = local_val;     // כתיבה חזרה לערך המשותף\n    return NULL;\n}\n\nint main() {\n    pthread_t t1, t2;\n\n    pthread_create(&t1, NULL, my_thread_func, NULL);\n    pthread_create(&t2, NULL, my_thread_func, NULL);\n\n    pthread_join(t1, NULL);\n    pthread_join(t2, NULL);\n\n    printf(\"Final shared_value: %d\\n\", shared_value);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הערכים האפשריים של `shared_value` שיכולים להיות מודפסים בסוף הריצה הם **1** ו-**2**.\n\nהסבר:\nהמשתנה הגלובלי `shared_value` מאותחל ל-0. כל חוט מבצע סדרה של שלוש פעולות לא אטומיות: קריאה של `shared_value` למשתנה מקומי (`local_val`), הגדלה של `local_val` ב-1, וכתיבה של `local_val` חזרה ל-`shared_value`.\n\n**תרחיש 1: `shared_value` = 2**\nתרחיש זה מתרחש כאשר אין מצב מרוץ (race condition) בין פעולות הכתיבה והקריאה של החוטים. לדוגמה:\n1.  חוט T1 מבצע את כל הפעולות שלו ברצף לפני שחוט T2 מתחיל או מסיים:\n    *   T1: `local_val` = `shared_value` (0)\n    *   T1: `local_val` = 0 + 1 (1)\n    *   T1: `shared_value` = 1\n2.  לאחר מכן, חוט T2 מבצע את כל הפעולות שלו:\n    *   T2: `local_val` = `shared_value` (1)\n    *   T2: `local_val` = 1 + 1 (2)\n    *   T2: `shared_value` = 2\nבמקרה זה, כל אחד מהחוטים קידם את המונה פעם אחת, והערך הסופי הוא 2.\n\n**תרחיש 2: `shared_value` = 1**\nתרחיש זה מתרחש עקב מצב מרוץ שבו עדכון אחד אובד. לדוגמה:\n1.  חוט T1 קורא את `shared_value` (שהוא 0) למשתנה המקומי שלו. (T1_local = 0).\n2.  מתרחשת החלפת הקשר (context switch) לחוט T2.\n3.  חוט T2 קורא את `shared_value` (שהוא עדיין 0) למשתנה המקומי שלו. (T2_local = 0).\n4.  T2 ממשיך לבצע את פעולותיו:\n    *   T2: `local_val` = 0 + 1 (1)\n    *   T2: `shared_value` = 1\n5.  מתרחשת החלפת הקשר בחזרה לחוט T1.\n6.  T1 ממשיך מאיפה שהפסיק:\n    *   T1: `local_val` = 0 + 1 (1) (T1 עדיין עובד עם הערך 0 שקרא בהתחלה)\n    *   T1: `shared_value` = 1 (T1 דורס את הערך ש-T2 כתב, או כותב את אותו ערך).\nבמקרה זה, למרות ששני החוטים ביצעו הגדלה, רק אחד מהם השפיע בפועל על הערך הסופי של `shared_value`, ולכן הערך הסופי הוא 1."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

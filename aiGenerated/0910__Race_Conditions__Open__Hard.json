@@ -1,0 +1,57 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 01:15:16",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4708,
+      "output_tokens": 2207,
+      "total_tokens": 10629
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Race Conditions",
+      "Synchronization",
+      "Threads"
+    ],
+    "content": {
+      "text": "מערכת בנקאית מנהלת חשבונות באמצעות תוכנת C++. נתון קטע הקוד הבא המטפל בהפקדה או משיכה מחשבון משותף. המערכת מריצה מספר רב של תהליכונים (threads) במקביל, שכל אחד מהם מבצע פעולות הפקדה או משיכה לחשבון זה.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h> // Assume pthreads are used for concurrency\n\nint balance = 1000; // יתרה התחלתית\n\nvoid deposit(int amount) {\n    balance = balance + amount;\n}\n\nvoid withdraw(int amount) {\n    balance = balance - amount;\n}\n\n// פונקציית תהליכון לדוגמה המבצעת פעולות על היתרה\nvoid* client_thread_func(void* arg) {\n    int operation_type = *((int*)arg); // 0 for deposit, 1 for withdraw\n    int amount = 100; // לדוגמה\n\n    if (operation_type == 0) {\n        deposit(amount);\n    } else {\n        withdraw(amount);\n    }\n    return NULL;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "האם קטע הקוד הנתון חשוף למצב מרוץ (Race Condition) כאשר מספר תהליכונים ניגשים במקביל לפעולות `deposit` ו-`withdraw`? נמקו את תשובתכם והסבירו מדוע.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "הדגימו רצף פעולות אפשרי של שני תהליכונים (interleaving) אשר יוביל לתוצאה שגויה של היתרה בחשבון, כתוצאה ממצב המרוץ שזיהיתם. הניחו ששני תהליכונים, T1 ו-T2, מבצעים הפקדה של 100 ש\"ח כל אחד, כאשר היתרה ההתחלתית היא 1000 ש\"ח.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.3",
+        "text": "כיצד ניתן לתקן את מצב המרוץ? הציעו פתרון מלא באמצעות מנגנוני סנכרון מתאימים (לדוגמה: mutexes). צרפו את קטע הקוד המתוקן והסבירו מדוע הפתרון שלכם מבטיח נכונות.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "10.1:\nכן, קטע הקוד חשוף למצב מרוץ. הפעולות `balance = balance + amount;` ו-`balance = balance - amount;` אינן אטומיות. הן מורכבות ממספר פעולות מכונה: קריאת הערך של `balance` לתוך רגיסטר, ביצוע פעולת החיבור/חיסור, וכתיבת הערך המעודכן חזרה ל-`balance`. כאשר מספר תהליכונים מבצעים פעולות אלו במקביל, סדר ביצוע הוראות המכונה שלהם יכול להשתלב באופן שגוי (interleave) ולגרום לאובדן עדכונים, מה שמוביל ליתרה שגויה.\n\n10.2:\nנניח יתרה התחלתית `balance = 1000`. שני תהליכונים, T1 ו-T2, מבצעים `deposit(100)` כל אחד.\nהתוצאה הצפויה היא `1000 + 100 + 100 = 1200`.\n\nרצף פעולות שיוביל לתוצאה שגויה (לדוגמה, 1100):\n1.  **T1**: קורא את `balance` (ערך: 1000) לתוך רגיסטר R1.\n2.  **T2**: קורא את `balance` (ערך: 1000) לתוך רגיסטר R2.\n3.  **T1**: מחשב `R1 + 100` (תוצאה: 1100).\n4.  **T2**: מחשב `R2 + 100` (תוצאה: 1100).\n5.  **T1**: כותב את 1100 לתוך `balance`. (`balance` כעת: 1100).\n6.  **T2**: כותב את 1100 לתוך `balance`. (`balance` כעת: 1100).\n\nבמקרה זה, ההפקדה של T1 'נדרסה' על ידי ההפקדה של T2, והתוצאה הסופית היא 1100 במקום 1200.\n\n10.3:\nכדי לתקן את מצב המרוץ, יש להגן על הגישה למשתנה המשותף `balance` באמצעות מנגנון סנכרון כגון mutex. ה-mutex יבטיח שרק תהליכון אחד יוכל לבצע את הפעולות הקריטיות (הפקדה או משיכה) בכל רגע נתון, ובכך למנוע שילוב שגוי של הוראות.\n\n**קטע קוד מתוקן:**\n```c\n#include <stdio.h>\n#include <pthread.h>\n\nint balance = 1000; // יתרה התחלתית\npthread_mutex_t balance_mutex = PTHREAD_MUTEX_INITIALIZER; // אתחול mutex\n\nvoid deposit(int amount) {\n    pthread_mutex_lock(&balance_mutex); // נעל את ה-mutex\n    balance = balance + amount;\n    pthread_mutex_unlock(&balance_mutex); // שחרר את ה-mutex\n}\n\nvoid withdraw(int amount) {\n    pthread_mutex_lock(&balance_mutex); // נעל את ה-mutex\n    balance = balance - amount;\n    pthread_mutex_unlock(&balance_mutex); // שחרר את ה-mutex\n}\n\n// פונקציית תהליכון לדוגמה\nvoid* client_thread_func(void* arg) {\n    int operation_type = *((int*)arg); // 0 for deposit, 1 for withdraw\n    int amount = 100;\n\n    if (operation_type == 0) {\n        deposit(amount);\n    } else {\n        withdraw(amount);\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t tid[4];\n    int op_types[4] = {0, 0, 1, 1}; // שתי הפקדות, שתי משיכות\n    int i;\n\n    printf(\"Initial balance: %d\\n\", balance);\n\n    for (i = 0; i < 4; i++) {\n        pthread_create(&tid[i], NULL, client_thread_func, &op_types[i]);\n    }\n\n    for (i = 0; i < 4; i++) {\n        pthread_join(tid[i], NULL);\n    }\n\n    printf(\"Final balance: %d\\n\", balance); // צפוי: 1000 + 100 + 100 - 100 - 100 = 1000\n\n    pthread_mutex_destroy(&balance_mutex); // השמד את ה-mutex\n    return 0;\n}\n```\n\n**הסבר:**\nהוספנו משתנה מסוג `pthread_mutex_t` בשם `balance_mutex` ואתחלנו אותו. לפני כל גישה למשתנה `balance` בפונקציות `deposit` ו-`withdraw`, אנו נועלים את ה-mutex באמצעות `pthread_mutex_lock()`. לאחר שהפעולה על `balance` מסתיימת, אנו משחררים את ה-mutex באמצעות `pthread_mutex_unlock()`. ה-mutex מבטיח שרק תהליכון אחד יכול להחזיק בו את הנעילה בכל רגע נתון. אם תהליכון מנסה לנעול mutex שכבר נעול, הוא ייחסם עד שהתהליכון המחזיק בנעילה ישחרר אותה. באופן זה, אנו יוצרים 'אזור קריטי' (critical section) שבו גישה למשתנה `balance` מוגנת, ובכך מונעים מצבי מרוץ ואובדן נתונים."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 01:02:02",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 901,
+      "output_tokens": 474,
+      "total_tokens": 2428
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Race Conditions",
+      "Concurrency",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "בהינתן קטע הקוד הבא, ובהנחה ששני תהליכונים (threads) מריצים את הפונקציה `increment_thread` במקביל ללא כל מנגנון סנכרון, הערך הסופי של `counter` תמיד יהיה 200000.",
+      "code_snippet": "int counter = 0;\n\nvoid *increment_thread(void *arg) {\n    for (int i = 0; i < 100000; i++) {\n        counter++;\n    }\n    return NULL;\n}",
+      "options": [
+        "נכון",
+        "לא נכון"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "לא נכון",
+      "explanation": "לא נכון. קיימת כאן תופעת מרוץ (Race Condition) על המשתנה המשותף `counter`. פעולת `counter++` אינה אטומית וכוללת מספר הוראות מכונה (קריאת הערך, הגדלתו, כתיבת הערך חזרה). כאשר שני תהליכונים מנסים לבצע פעולה זו במקביל, ייתכן שתהליכון אחד יקרא את הערך, יבוצע מיתוג הקשר (context switch) לתהליכון השני שיבצע גם הוא את הפעולה, ואז התהליכון הראשון יכתוב את הערך המוגדל שלו (שכבר אינו עדכני). כתוצאה מכך, חלק מההגדלות עלולות ללכת לאיבוד, והערך הסופי של `counter` יהיה לרוב קטן מ-200000."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

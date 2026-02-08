@@ -1,0 +1,58 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 01:19:42",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2675,
+      "output_tokens": 2029,
+      "total_tokens": 6899
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Race Conditions",
+      "Concurrency",
+      "Threads",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C הבאה המשתמשת ב-pthreads. עברו על הקוד וענו על השאלות הבאות:",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\n#define NUM_THREADS 5\n#define ITERATIONS_PER_THREAD 100000\n\nint counter = 0;\n\nvoid* increment_counter(void* arg) {\n    for (int i = 0; i < ITERATIONS_PER_THREAD; ++i) {\n        counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, increment_counter, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "8.1",
+        "text": "מהו הערך הסופי ה_אידיאלי_ של המשתנה `counter` לאחר שכל ה-threads סיימו את ריצתם, בהנחה שאין בעיות סנכרון? נמקו.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.2",
+        "text": "האם ייתכן שהערך המודפס בפועל יהיה שונה מהערך האידיאלי? אם כן, הסבירו מדוע ומהו טווח הערכים האפשריים שעלולים להתקבל.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.3",
+        "text": "כיצד ניתן לתקן את התוכנית כדי להבטיח שהערך המודפס יהיה תמיד הערך האידיאלי? הציגו את השינויים הנדרשים בקוד או תארו אותם בפירוט.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.  **הערך האידיאלי:**\n    הערך הסופי האידיאלי של המשתנה `counter` הוא 500,000.\n    נימוק: ישנם 5 threads, וכל thread מבצע הגדלה של המונה 100,000 פעמים. לכן, בסך הכל, המונה אמור להיות מוגדל 5 * 100,000 = 500,000 פעמים.\n\n2.  **האם ייתכן שהערך בפועל יהיה שונה?**\n    כן, בהחלט ייתכן שהערך המודפס בפועל יהיה שונה מהערך האידיאלי, ובדרך כלל הוא יהיה נמוך יותר.\n    **הסבר:** קיימת כאן תופעת 'מרוץ תנאים' (Race Condition). הפעולה `counter++` אינה פעולה אטומית (Atomic operation). היא מורכבת למעשה משלוש פעולות בסיסיות ברמת המעבד:\n    א. קריאת ערך המונה מהזיכרון לרגיסטר.\n    ב. הגדלת הערך ברגיסטר.\n    ג. כתיבת הערך המוגדל מהרגיסטר בחזרה לזיכרון.\n\n    כאשר מספר threads מנסים לבצע פעולה זו במקביל ללא מנגנון סנכרון מתאים, ייתכנו תרחישים שבהם שני threads או יותר קוראים את אותו ערך ישן של `counter` לפני שאחד מהם הספיק לכתוב את הערך החדש. לדוגמה, אם `counter` הוא 10:\n    *   Thread A קורא 10. (רגיסטר A מכיל 10)\n    *   Thread B קורא 10. (רגיסטר B מכיל 10)\n    *   Thread A מגדיל את הרגיסטר שלו ל-11 וכותב 11 בחזרה לזיכרון (`counter` הופך ל-11).\n    *   Thread B מגדיל את הרגיסטר שלו ל-11 (עדיין מבוסס על הקריאה המקורית של 10) וכותב 11 בחזרה לזיכרון (`counter` נשאר 11).\n\n    במקרה זה, שתי פעולות הגדלה בוצעו, אך המונה גדל רק באחד במקום בשניים. כתוצאה מכך, הערך הסופי יהיה נמוך מהערך האידיאלי.\n\n    **טווח הערכים האפשריים:** הערך המודפס בפועל יהיה בין 1 (במקרה קיצוני תיאורטי שבו כל ההגדלות 'נדרסות' זו על ידי זו כך שרק הגדלה אחת נספרת בסוף) לבין 500,000 (הערך האידיאלי, אם במקרה לא נוצר אף מרוץ). בפועל, סביר להניח שהערך יהיה קרוב ל-500,000 אך נמוך ממנו, תלוי בתזמון המדויק של ה-threads.\n\n3.  **כיצד לתקן את התוכנית:**\n    כדי לתקן את בעיית מרוץ התנאים ולהבטיח שהערך המודפס יהיה תמיד הערך האידיאלי (500,000), יש להשתמש במנגנון סנכרון, כגון Mutex (ראשי תיבות של Mutual Exclusion).\n    התיקון יכלול את השלבים הבאים:\n    א.  הצהרה על משתנה מסוג `pthread_mutex_t`.\n    ב.  אתחול ה-mutex לפני יצירת ה-threads.\n    ג.  נעילת ה-mutex לפני כל גישה למשתנה המשותף `counter` (כלומר, לפני `counter++`).\n    ד.  שחרור ה-mutex מיד לאחר הגישה למשתנה המשותף.\n    ה.  השמדת ה-mutex בסיום התוכנית, לאחר שכל ה-threads סיימו את ריצתם.\n\n    **הקוד המתוקן:**\n    ```c\n    #include <stdio.h>\n    #include <pthread.h>\n\n    #define NUM_THREADS 5\n    #define ITERATIONS_PER_THREAD 100000\n\n    int counter = 0;\n    pthread_mutex_t mutex; // 1. הצהרה על mutex\n\n    void* increment_counter(void* arg) {\n        for (int i = 0; i < ITERATIONS_PER_THREAD; ++i) {\n            pthread_mutex_lock(&mutex);   // 3. נעילת mutex לפני גישה למשתנה המשותף\n            counter++;\n            pthread_mutex_unlock(&mutex); // 4. שחרור mutex לאחר הגישה\n        }\n        return NULL;\n    }\n\n    int main() {\n        pthread_t threads[NUM_THREADS];\n        pthread_mutex_init(&mutex, NULL); // 2. אתחול mutex\n\n        for (int i = 0; i < NUM_THREADS; ++i) {\n            pthread_create(&threads[i], NULL, increment_counter, NULL);\n        }\n\n        for (int i = 0; i < NUM_THREADS; ++i) {\n            pthread_join(threads[i], NULL);\n        }\n\n        printf(\"Final counter value: %d\\n\", counter);\n\n        pthread_mutex_destroy(&mutex); // 5. השמדת mutex\n        return 0;\n    }\n    ```",
+      "difficulty_estimation": "Medium"
+    }
+  }
+}

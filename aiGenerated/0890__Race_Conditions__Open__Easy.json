@@ -1,0 +1,50 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 01:06:23",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3457,
+      "output_tokens": 1043,
+      "total_tokens": 5875
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "Open",
+    "topic": [
+      "Race Conditions",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "מהו תנאי מירוץ (Race Condition) במערכות הפעלה? הסבירו בקצרה.\n\nנתון קטע הקוד הבא ב-C:\n",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\nlong long counter = 0; // Shared global variable\n\nvoid* increment_counter(void* arg) {\n    for (int i = 0; i < 100000; i++) {\n        counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t tid1, tid2;\n\n    pthread_create(&tid1, NULL, increment_counter, NULL);\n    pthread_create(&tid2, NULL, increment_counter, NULL);\n\n    pthread_join(tid1, NULL);\n    pthread_join(tid2, NULL);\n\n    printf(\"Final counter value: %lld\\n\", counter);\n\n    return 0;\n}\n",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "7.1",
+        "text": "זהו והסבירו היכן קיים תנאי מירוץ בקטע הקוד הנתון.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "7.2",
+        "text": "מהי התוצאה הצפויה של המשתנה counter בסיום ריצת התוכנית? האם תוצאה זו מובטחת? הסבירו מדוע.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "תנאי מירוץ מתרחש כאשר מספר תהליכונים או תהליכים ניגשים למשאב משותף (כמו משתנה גלובלי) בו-זמנית, ולפחות אחד מהם משנה את המשאב. סדר הגישה אינו מוגדר, והתוצאה הסופית תלויה בסדר הלא צפוי של פעולות התהליכונים.\n\n7.1. בקטע הקוד הנתון, תנאי המירוץ קיים סביב המשתנה הגלובלי `counter`. שני התהליכונים `tid1` ו-`tid2` מנסים להגדיל את המשתנה `counter` ב-100,000 פעמים כל אחד. פעולת ה-`counter++` אינה אטומית; היא מורכבת ממספר הוראות מכונה:\n1. קריאת ערך `counter` מהזיכרון.\n2. הגדלת הערך באחד.\n3. כתיבת הערך החדש בחזרה לזיכרון.\nאם שני תהליכונים מנסים לבצע את הפעולה בו-זמנית, ייתכן שתהליכון אחד יקרא את הערך, יבוצע מיתוג הקשר (context switch), התהליכון השני יקרא את אותו ערך, יגדיל אותו ויכתוב אותו, ואז התהליכון הראשון ימשיך עם הערך הישן שהוא קרא, יגדיל אותו ויכתוב אותו. במקרה כזה, הגדלה אחת תאבד.\n\n7.2. התוצאה הצפויה אם כל ההגדלות היו מתבצעות כהלכה היא 200,000 (100,000 מכל תהליכון).\nתוצאה זו אינה מובטחת. עקב תנאי המירוץ שהוסבר לעיל, סביר להניח שהתוצאה בפועל תהיה נמוכה מ-200,000. המעבד יכול לעבור בין התהליכונים בכל שלב של פעולת ה-`counter++`, מה שיכול לגרום לאובדן עדכונים ולתוצאה שגויה. כדי להבטיח את התוצאה הנכונה, יש צורך במנגנון סנכרון כמו mutex."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

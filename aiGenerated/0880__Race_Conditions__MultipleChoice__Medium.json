@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 01:02:42",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 901,
+      "output_tokens": 682,
+      "total_tokens": 4660
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Race Conditions",
+      "Concurrency",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתונה פיסת הקוד הבאה המופעלת על ידי שני תהליכונים (threads) במקביל. האם ייתכן שהערך הסופי של המשתנה `counter` יהיה פחות מ-20000 לאחר ששני התהליכונים סיימו את ריצתם?",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\nint counter = 0;\n\nvoid *increment(void *arg) {\n    for (int i = 0; i < 10000; i++) {\n        counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t tid1, tid2;\n    pthread_create(&tid1, NULL, increment, NULL);\n    pthread_create(&tid2, NULL, increment, NULL);\n    pthread_join(tid1, NULL);\n    pthread_join(tid2, NULL);\n    // The main thread would typically print counter here\n    // printf(\"Final counter: %d\\n\", counter);\n    return 0;\n}",
+      "options": [
+        "נכון",
+        "לא נכון"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "נכון",
+      "explanation": "נכון. קיים מצב תחרות (race condition) על המשתנה המשותף `counter`. פעולת `counter++` אינה אטומית ומורכבת ממספר הוראות מכונה (קריאה של הערך הנוכחי, הגדלת הערך, וכתיבת הערך החדש בחזרה לזיכרון). כאשר שני תהליכונים מנסים להגדיל את המונה במקביל ללא מנגנון סנכרון (כמו mutex), ייתכן שעדכונים ילכו לאיבוד. לדוגמה, אם תהליכון A קורא את `counter` (נניח 100), מתרחש מיתוג הקשר ותהליכון B קורא גם הוא את `counter` (עדיין 100), מגדיל אותו ל-101 וכותב בחזרה. כשחוזרים לתהליכון A, הוא מגדיל את הערך שקרא (100) ל-101 וכותב בחזרה. במקרה כזה, שתי פעולות הגדלה הביאו רק להגדלה אחת בפועל של המונה, וערך סופי נמוך מ-20000 הוא תוצאה אפשרית ולעיתים קרובות אף סבירה."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

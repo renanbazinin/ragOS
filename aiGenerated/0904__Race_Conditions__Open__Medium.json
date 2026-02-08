@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 01:10:35",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2154,
+      "output_tokens": 1890,
+      "total_tokens": 6411
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Race Conditions",
+      "Synchronization",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתונה פיסת קוד C הבאה המשתמשת בתהליכונים (threads) כדי להגדיל מונה משותף. עיין בקוד וענה על השאלות הבאות:\n\n1.  זהה את תנאי המרוץ (race condition) הקיים בקוד. הסבר מדוע הוא מתרחש ומהן ההשלכות האפשריות שלו על ערך המונה הסופי.\n2.  הצע פתרון לקוד הנתון על ידי שימוש במנגנוני סנכרון מתאימים (לדוגמה, mutex), שימנע את תנאי המרוץ ויבטיח שהמונה יגיע לערכו הצפוי. הצג את הקוד המתוקן במלואו.\n3.  הסבר כיצד הפתרון שהצעת מונע את תנאי המרוץ ומבטיח נכונות.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <stdlib.h>\n\n#define NUM_THREADS 5\n#define INCREMENTS_PER_THREAD 100000\n\nlong long shared_counter = 0;\n\nvoid* increment_counter(void* arg) {\n    for (int i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n        shared_counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    printf(\"Initial counter value: %lld\\n\", shared_counter);\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        if (pthread_create(&threads[i], NULL, increment_counter, NULL) != 0) {\n            perror(\"Failed to create thread\");\n            return 1;\n        }\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        if (pthread_join(threads[i], NULL) != 0) {\n            perror(\"Failed to join thread\");\n            return 1;\n        }\n    }\n\n    printf(\"Final counter value: %lld\\n\", shared_counter);\n    printf(\"Expected value: %lld\\n\", (long long)NUM_THREADS * INCREMENTS_PER_THREAD);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.  **זיהוי תנאי המרוץ והסבר**: תנאי המרוץ מתרחש בשורת `shared_counter++;`. פעולה זו, למרות שהיא נראית אטומית ברמת קוד המקור, מורכבת למעשה ממספר פעולות ברמת המעבד: קריאת ערך המונה מהזיכרון לרג'יסטר, הגדלת הערך ברג'יסטר, וכתיבת הערך המוגדל בחזרה לזיכרון. כאשר מספר תהליכונים מבצעים פעולה זו במקביל ללא סנכרון, ייתכן שתהליכון אחד יקרא את ערך המונה, ואז לפני שיספיק לכתוב את הערך המוגדל חזרה לזיכרון, תהליכון אחר יקרא גם הוא את אותו הערך המקורי מהזיכרון. במצב כזה, שני התהליכונים יגדילו את אותו ערך ויכתבו אותו בחזרה, וכך אחת ההגדלות \"תאבד\" (lost update). התוצאה הסופית של `shared_counter` תהיה נמוכה מהערך הצפוי.\n\n2.  **קוד מתוקן**: כדי למנוע את תנאי המרוץ, יש להגן על הגישה למשתנה `shared_counter` באמצעות מנעול הדדי (mutex). הקוד המתוקן ייראה כך:\n\n    ```c\n    #include <stdio.h>\n    #include <pthread.h>\n    #include <stdlib.h>\n\n    #define NUM_THREADS 5\n    #define INCREMENTS_PER_THREAD 100000\n\n    long long shared_counter = 0;\n    pthread_mutex_t counter_mutex; // הכרזת על mutex\n\n    void* increment_counter(void* arg) {\n        for (int i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n            pthread_mutex_lock(&counter_mutex); // נעילת ה-mutex לפני הגישה למשאב המשותף\n            shared_counter++;\n            pthread_mutex_unlock(&counter_mutex); // שחרור ה-mutex לאחר הגישה\n        }\n        return NULL;\n    }\n\n    int main() {\n        pthread_t threads[NUM_THREADS];\n\n        // אתחול ה-mutex\n        if (pthread_mutex_init(&counter_mutex, NULL) != 0) {\n            perror(\"Failed to initialize mutex\");\n            return 1;\n        }\n\n        printf(\"Initial counter value: %lld\\n\", shared_counter);\n\n        for (int i = 0; i < NUM_THREADS; ++i) {\n            if (pthread_create(&threads[i], NULL, increment_counter, NULL) != 0) {\n                perror(\"Failed to create thread\");\n                // יש לשחרר את ה-mutex לפני יציאה במקרה של כשל\n                pthread_mutex_destroy(&counter_mutex);\n                return 1;\n            }\n        }\n\n        for (int i = 0; i < NUM_THREADS; ++i) {\n            if (pthread_join(threads[i], NULL) != 0) {\n                perror(\"Failed to join thread\");\n                // יש לשחרר את ה-mutex לפני יציאה במקרה של כשל\n                pthread_mutex_destroy(&counter_mutex);\n                return 1;\n            }\n        }\n\n        printf(\"Final counter value: %lld\\n\", shared_counter);\n        printf(\"Expected value: %lld\\n\", (long long)NUM_THREADS * INCREMENTS_PER_THREAD);\n\n        // השמדת ה-mutex בסיום השימוש\n        pthread_mutex_destroy(&counter_mutex);\n\n        return 0;\n    }\n    ```\n\n3.  **הסבר הפתרון**: הפתרון מונע את תנאי המרוץ על ידי יצירת אזור קריטי (critical section) סביב הפעולה `shared_counter++;`. כאשר תהליכון רוצה לבצע את ההגדלה, הוא מנסה לנעול את ה-`counter_mutex` באמצעות `pthread_mutex_lock()`. אם ה-mutex אינו נעול, התהליכון נועל אותו וממשיך לבצע את הפעולה. אם ה-mutex כבר נעול על ידי תהליכון אחר, התהליכון הנוכחי נחסם ונכנס למצב המתנה עד שה-mutex ישוחרר. לאחר שהתהליכון מסיים את הפעולה הקריטית (הגדלת המונה), הוא משחרר את ה-mutex באמצעות `pthread_mutex_unlock()`. מנגנון זה מבטיח שרק תהליכון אחד יוכל לגשת למשתנה `shared_counter` ולשנות אותו בכל רגע נתון, ובכך מונע את הבעיה של עדכונים אבודים ומבטיח את נכונות התוצאה הסופית (שהמונה יגיע לערך הצפוי)."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

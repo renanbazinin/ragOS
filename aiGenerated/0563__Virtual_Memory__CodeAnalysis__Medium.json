@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 06:46:37",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3180,
+      "output_tokens": 1720,
+      "total_tokens": 9784
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Virtual Memory",
+      "Paging",
+      "Page Faults",
+      "Memory Access Patterns"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המבצעת אתחול של מטריצה גדולה. יש לנתח את קטע הקוד ולענות על השאלה. \n\nנניח כי:\n- גודל דף במערכת ההפעלה הוא 4KB.\n- גודל של `int` הוא 4 בתים.\n- המטריצה מוקצית באופן רציף בזיכרון הווירטואלי.\n- טבלת הדפים ו-TLB ריקים בתחילת הריצה.\n- מדיניות החלפת הדפים היא LRU, אך יש מספיק זיכרון פיזי כדי להחזיק את כל המטריצה, כך שאין דפים שמוחלפים החוצה (swapping).\n- זמן הגישה ל-TLB וזמן הגישה לטבלת הדפים זניחים. השאלה מתמקדת במספר ה-page faults בלבד.\n\nמהו המספר הכולל של Page Faults שיגרמו כתוצאה מהלולאה המקננת המאתחלת את המטריצה (בלבד)? פרט את חישוביך והסבר.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n\n#define ROWS 1024\n#define COLS 1024\n\nint main() {\n    int (*matrix)[COLS] = (int (*)[COLS])malloc(ROWS * COLS * sizeof(int));\n    if (matrix == NULL) {\n        perror(\"malloc failed\");\n        return 1;\n    }\n\n    // Access pattern: Row-major access\n    for (int i = 0; i < ROWS; ++i) {\n        for (int j = 0; j < COLS; ++j) {\n            matrix[i][j] = i * COLS + j;\n        }\n    }\n\n    free(matrix);\n    return 0;\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "ראשית, נחשב את גודל המטריצה הכולל ואת מספר הדפים הנדרשים עבורה:\n- מספר שורות (ROWS) = 1024\n- מספר עמודות (COLS) = 1024\n- גודל של `int` = 4 בתים\n- גודל דף = 4KB = 4 * 1024 בתים = 4096 בתים\n\nגודל כולל של המטריצה בבתים = `ROWS * COLS * sizeof(int)` = `1024 * 1024 * 4` = `2^10 * 2^10 * 2^2` = `2^22` בתים.\n\nמספר הדפים שהמטריצה תופסת = `גודל כולל / גודל דף` = `2^22 / 2^12` = `2^10` = 1024 דפים.\n\nכעת ננתח את דפוס הגישה לזיכרון (row-major):\nהלולאה החיצונית עוברת על השורות (`i`), והלולאה הפנימית עוברת על העמודות (`j`).\nגישה ל-`matrix[i][j]` פירושה שהאלמנטים בשורה נתונה `i` (כלומר `matrix[i][0]`, `matrix[i][1]`, ..., `matrix[i][COLS-1]`) נמצאים בזיכרון רציף.\n\nגודל של שורה אחת במטריצה = `COLS * sizeof(int)` = `1024 * 4` = 4096 בתים = 4KB.\n\nמכיוון שגודל של שורה אחת שווה בדיוק לגודל של דף אחד (4KB), כל שורה תתפרס על דף יחיד בזיכרון הווירטואלי.\n\nכאשר הלולאה החיצונית מתחילה עם `i=0`:\nהגישה הראשונה היא ל-`matrix[0][0]`. דף 0 (המכיל את השורה הראשונה) אינו נמצא בזיכרון, ולכן יתרחש Page Fault אחד. דף 0 יוטען לזיכרון הפיזי.\nכל הגישות הבאות בשורה זו (`matrix[0][1]` עד `matrix[0][1023]`) ימצאו את הדף כבר בזיכרון, ולכן לא יתרחשו Page Faults נוספים עבור שורה זו.\n\nאותו תהליך יחזור על עצמו עבור כל שורה:\nעבור `i=1` (השורה השנייה), הגישה ל-`matrix[1][0]` תגרום ל-Page Fault נוסף עבור דף 1. דף 1 יוטען לזיכרון הפיזי.\n\nמכיוון שיש `ROWS` שורות, וכל שורה גורמת ל-Page Fault אחד (כאשר ניגשים לאלמנט הראשון שלה), המספר הכולל של Page Faults יהיה שווה למספר השורות.\n\nמספר Page Faults כולל = `ROWS` = 1024.\n\n**הסבר להשוואה (למידע נוסף, לא נדרש בשאלה):**\nאילו דפוס הגישה היה מסוג column-major (כלומר, הלולאה החיצונית על `j` והפנימית על `i`): \n`for (int j = 0; j < COLS; ++j) { for (int i = 0; i < ROWS; ++i) { matrix[i][j] = ...; } }`\nבמקרה זה, הגישה ל-`matrix[i][j]` ואז ל-`matrix[i+1][j]` הייתה מתרחשת. האלמנטים `matrix[i][j]` ו-`matrix[i+1][j]` מרוחקים בזיכרון הווירטואלי ב-`COLS * sizeof(int)` בתים, כלומר 4096 בתים (4KB). מכיוון שזהו בדיוק גודל הדף, כל גישה לאלמנט הבא בעמודה תהיה לדף זיכרון שונה. לכן, כמעט כל גישה לזיכרון (פרט לאלמנט הראשון מכל דף) הייתה גורמת ל-Page Fault. המספר הכולל של Page Faults היה `ROWS * COLS` = `1024 * 1024` = 1,048,576. הבדל דרמטי המדגיש את חשיבות דפוסי הגישה לזיכרון במערכות עם זיכרון וירטואלי."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

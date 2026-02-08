@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 06:57:02",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4697,
+      "output_tokens": 2524,
+      "total_tokens": 23393
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Concurrency",
+      "Synchronization",
+      "Threads",
+      "Mutexes",
+      "Condition Variables",
+      "Starvation Prevention"
+    ],
+    "content": {
+      "text": "נתונה מערכת המנהלת מאגר של `total_resources` משאבים זהים. מספר חוטים (threads) שונים ניגשים למנהל המשאבים הזה על מנת לבקש ולהחזיר משאבים.\nכל חוט יכול לבקש מספר שרירותי של משאבים (עד למספר המשאבים הכולל במאגר) בבת אחת, או להחזיר משאבים שכבר קיבל.\nהמטרה היא לממש את הפעולות `request_resources` ו-`release_resources` תוך שימוש באובייקטי סנכרון (כגון mutexes ו-condition variables) כך שיתקיימו התנאים הבאים:\n\n1.  **בטיחות (Safety)**: לעולם לא יוקצו יותר משאבים ממה שקיימים במאגר הכולל.\n2.  **חיות (Liveness)**: חוט המבקש משאבים יקבל אותם בסופו של דבר, בתנאי שהם הופכים זמינים. יש למנוע קיפאון (deadlock) ורעב (starvation). במיוחד, חוטים המבקשים מספר גדול של משאבים לא יסבלו מרעב בגלל בקשות קטנות וחוזרות ונשנות.\n3.  **אטומיות (Atomicity)**: בקשה למשאבים חייבת להתממש במלואה. חוט שמבקש `N` משאבים יקבל את כולם בבת אחת, או ימתין עד שכולם יהיו זמינים.\n4.  **יעילות (Efficiency)**: יש לשחרר חוטים ממתינים בהקדם האפשרי כאשר משאבים הופכים זמינים, תוך שמירה על עקרונות מניעת הרעב.\n\nיש להשלים את מבנה ה-`ResourceManager` ולממש את הפונקציות `init_resource_manager`, `destroy_resource_manager`, `request_resources`, ו-`release_resources`.\nהניחו ש-`num_resources` תמיד חיובי ובטווח סביר (קטן או שווה ל-`total_resources`).",
+      "code_snippet": "```c\n#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n\ntypedef struct {\n    // Add members here\n    int total_resources;\n    int available_resources;\n    pthread_mutex_t mutex;\n    pthread_cond_t cond;\n    // Potentially more for fairness/starvation prevention\n    long next_ticket;\n    long current_turn;\n} ResourceManager;\n\nvoid init_resource_manager(ResourceManager *manager, int total_res) {\n    manager->total_resources = total_res;\n    manager->available_resources = total_res;\n    pthread_mutex_init(&manager->mutex, NULL);\n    pthread_cond_init(&manager->cond, NULL);\n    manager->next_ticket = 0;\n    manager->current_turn = 0;\n}\n\nvoid destroy_resource_manager(ResourceManager *manager) {\n    pthread_mutex_destroy(&manager->mutex);\n    pthread_cond_destroy(&manager->cond);\n}\n\nvoid request_resources(ResourceManager *manager, int num_resources) {\n    pthread_mutex_lock(&manager->mutex);\n\n    // Implementation here\n\n    pthread_mutex_unlock(&manager->mutex);\n}\n\nvoid release_resources(ResourceManager *manager, int num_resources) {\n    pthread_mutex_lock(&manager->mutex);\n\n    // Implementation here\n\n    pthread_mutex_unlock(&manager->mutex);\n}\n```",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון מבוסס על מנגנון \"כרטיסים\" (ticket system) בשילוב עם mutex ו-condition variable. המטרה העיקרית של שיטה זו היא להבטיח מניעת רעב (starvation) ולשמור על סדר הוגן (FIFO - First-In, First-Out) בין הבקשות, תוך התחשבות בדרישת היעילות על ידי שימוש ב-`pthread_cond_broadcast`.\n\n**מבנה ResourceManager:**\n*   `total_resources`: סך המשאבים הכולל במאגר.\n*   `available_resources`: מספר המשאבים הזמינים כרגע.\n*   `mutex`: מנעול להגנה על המצב המשותף (available_resources, next_ticket, current_turn).\n*   `cond`: משתנה תנאי שעליו חוטים ממתינים.\n*   `next_ticket`: מונה שנותן \"מספר כרטיס\" עולה לכל בקשה חדשה. זהו מונה אטומי תחת המוטקס.\n*   `current_turn`: מונה שמציין את מספר הכרטיס של התור הנוכחי, כלומר מי רשאי להמשיך.\n\n**פונקציה `init_resource_manager(ResourceManager *manager, int total_res)`:**\nאתחול פשוט של כל השדות, כולל המוטקס ומשתנה התנאי, וכן את מונים הכרטיסים לאפס.\n\n**פונקציה `destroy_resource_manager(ResourceManager *manager)`:**\nשחרור המוטקס ומשתנה התנאי.\n\n**פונקציה `request_resources(ResourceManager *manager, int num_resources)`:**\n```c\nvoid request_resources(ResourceManager *manager, int num_resources) {\n    pthread_mutex_lock(&manager->mutex);\n\n    // 1. Assign a unique ticket to this thread.\n    long my_ticket = manager->next_ticket++;\n\n    // 2. Wait until both conditions are met:\n    //    a. Enough resources are available.\n    //    b. It's this thread's turn (ensures FIFO and prevents starvation).\n    while (manager->available_resources < num_resources || my_ticket != manager->current_turn) {\n        pthread_cond_wait(&manager->cond, &manager->mutex);\n    }\n\n    // 3. Acquire resources.\n    manager->available_resources -= num_resources;\n\n    // 4. It's this thread's turn, and it has acquired resources.\n    //    Increment current_turn to allow the next thread in line to proceed.\n    manager->current_turn++;\n\n    // 5. Broadcast to wake up ALL waiting threads.\n    //    This is crucial for the ticket system: The thread with the new `current_turn` will check if\n    //    resources are available for it, and other threads will re-evaluate if it's their turn yet.\n    //    Using broadcast helps with efficiency as multiple threads might be able to proceed if resources allow\n    //    (e.g., if several small requests are next in line and enough resources become available).\n    pthread_cond_broadcast(&manager->cond);\n\n    pthread_mutex_unlock(&manager->mutex);\n}\n```\n\n**פונקציה `release_resources(ResourceManager *manager, int num_resources)`:**\n```c\nvoid release_resources(ResourceManager *manager, int num_resources) {\n    pthread_mutex_lock(&manager->mutex);\n\n    // 1. Release resources.\n    manager->available_resources += num_resources;\n\n    // 2. Broadcast to wake up ALL waiting threads.\n    //    New resources might allow some threads (especially the one whose turn it is) to proceed.\n    pthread_cond_broadcast(&manager->cond);\n\n    pthread_mutex_unlock(&manager->mutex);\n}\n```\n\n**עמידה בדרישות:**\n*   **בטיחות (Safety)**: ה-mutex מבטיח גישה מונופולית למצב המשותף, ומערכת ההמתנה מבטיחה שלעולם לא יוקצו יותר משאבים ממה שזמינים.\n*   **חיות (Liveness) ומניעת רעב (Starvation)**: מערכת הכרטיסים מבטיחה שכל חוט יקבל את תורו בסופו של דבר. התנאי `my_ticket != manager->current_turn` בתוך לולאת ה-`while` הוא המפתח למניעת רעב – הוא מונע מחוטים חדשים או קטנים יותר לדלג על פני חוטים שממתינים זמן רב יותר, ובכך מבטיח שכל בקשה תקבל את המשאבים בסופו של דבר לפי סדר הגעתה (FIFO). זה מונע במיוחד מצב בו בקשות גדולות נדחקות הצידה על ידי זרם קבוע של בקשות קטנות.\n*   **אטומיות (Atomicity)**: חוט מקבל את כל המשאבים המבוקשים בבת אחת, או ממתין. זה מובטח על ידי התנאי `manager->available_resources < num_resources` בלולאת ה-`while`.\n*   **יעילות (Efficiency)**: למרות שמנגנון הכרטיסים מבטיח FIFO ומניעת רעב על ידי שמירה על סדר, הוא עשוי להיות פחות יעיל במקרים מסוימים מאשר פתרונות שמאפשרים לחוטים לדלג על התור אם המשאבים זמינים עבורם באופן מיידי וזה לא מפריע לחוטים קודמים. עם זאת, שימוש ב-`pthread_cond_broadcast` במקום `pthread_cond_signal` תורם ליעילות במערכת הכרטיסים בכך שהוא מעיר את כל החוטים, ובכך מאפשר לחוט עם `current_turn` החדש להתקדם מיד, ואף לחוטים נוספים לבדוק אם כעת זה תורם והם יכולים להמשיך (אם למשל, חוט עם כרטיס 5 משוחרר ומשאבים רבים זמינים, חוטים 0-4 כבר התקדמו או לא היו רלוונטיים, וחוט 5 יכול להתקדם). זוהי פשרה מקובלת וחשובה להבטחת מניעת רעב, והיא נחשבת למימוש יעיל מספיק עבור דרישות אלו."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 01:02:25",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 901,
+      "output_tokens": 1017,
+      "total_tokens": 6188
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Race Conditions",
+      "Concurrency",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא המורץ על ידי שני תהליכונים (threads) במקביל, ללא כל מנגנון סנכרון:",
+      "code_snippet": "int shared_value = 0;\n\nvoid *worker(void *arg) {\n    for (int i = 0; i < 100000; i++) {\n        shared_value++;\n    }\n    return NULL;\n}\n\n// בפונקציה הראשית, שני תהליכונים מפעילים את worker, לדוגמה:\n// pthread_t tid1, tid2;\n// pthread_create(&tid1, NULL, worker, NULL);\n// pthread_create(&tid2, NULL, worker, NULL);\n// pthread_join(tid1, NULL);\n// pthread_join(tid2, NULL);\n",
+      "options": [
+        "א. תמיד 200,000.",
+        "ב. תמיד 0.",
+        "ג. תמיד ערך קטן מ-200,000.",
+        "ד. ערך שאינו ניתן לחיזוי מראש, אך יהיה בין 0 ל-200,000 (כולל).",
+        "ה. ערך שאינו ניתן לחיזוי מראש, אך יהיה בין 1 ל-200,000 (כולל)."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ה. ערך שאינו ניתן לחיזוי מראש, אך יהיה בין 1 ל-200,000 (כולל).",
+      "explanation": "הבעיה היא תנאי מרוץ (Race Condition). הפעולה `shared_value++` אינה אטומית. היא מורכבת בדרך כלל משלוש פעולות מכונה ברמה נמוכה:\n1. טעינת הערך של `shared_value` לתוך אוגר (register).\n2. הגדלת הערך באוגר.\n3. שמירת הערך החדש מהאוגר חזרה ל-`shared_value`.\n\nכאשר שני תהליכונים מנסים לבצע פעולה זו במקביל ללא מנגנון סנכרון, ייתכן מצב שבו תהליכון אחד טוען את הערך, ותהליכון שני טוען את אותו הערך לפני שהראשון הספיק לשמור את ערכו המוגדל. במקרה כזה, שני התהליכונים יבצעו הגדלה באופן לוגי, אך רק אחד מהם ישמור את התוצאה הסופית, ובכך 'יאבד' הגדלה אחת.\n\nלדוגמה:\n- `shared_value` = 0\n- Thread 1 טוען 0\n- Thread 2 טוען 0\n- Thread 1 מגדיל ל-1 באוגר שלו\n- Thread 2 מגדיל ל-1 באוגר שלו\n- Thread 1 שומר 1 ל-`shared_value` (shared_value = 1)\n- Thread 2 שומר 1 ל-`shared_value` (shared_value נשאר 1)\nבמקרה זה, שתי הגדלות לוגיות הביאו להגדלה אחת בפועל.\n\nלכן, הערך הסופי של `shared_value` יהיה בלתי צפוי. הוא יכול להיות 200,000 (במקרה נדיר של מזל מושלם ללא התנגשויות), אך לרוב יהיה ערך נמוך יותר. הערך הנמוך ביותר האפשרי הוא 1, מכיוון שהערך ההתחלתי הוא 0 ומתבצעות רק פעולות הגדלה. אם לפחות פעולת שמירה אחת מצליחה, הערך יהיה לפחות 1. לכן, הערך יהיה בין 1 ל-200,000 (כולל)."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

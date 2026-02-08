@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 01:03:52",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 1057,
+      "total_tokens": 6215
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Race Conditions",
+      "Concurrency",
+      "Synchronization",
+      "Double-Checked Locking"
+    ],
+    "content": {
+      "text": "נתון קטע קוד בשפת C המנסה לממש אתחול עצל (lazy initialization) של משאב משותף באמצעות מנעול ובדיקה כפולה (Double-Checked Locking). איזו טענה לגבי תקינות המימוש *אינה נכונה*?",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <pthread.h>\n\ntypedef struct {\n    int value;\n} MyResource;\n\nMyResource* shared_resource = NULL;\npthread_mutex_t init_mutex = PTHREAD_MUTEX_INITIALIZER;\n\nvoid* thread_func(void* arg) {\n    if (shared_resource == NULL) { // First check\n        pthread_mutex_lock(&init_mutex);\n        if (shared_resource == NULL) { // Second check\n            shared_resource = (MyResource*)malloc(sizeof(MyResource));\n            if (shared_resource == NULL) {\n                pthread_mutex_unlock(&init_mutex);\n                return NULL;\n            }\n            shared_resource->value = 100; // Initialize data\n        }\n        pthread_mutex_unlock(&init_mutex);\n    }\n    return NULL;\n}",
+      "options": [
+        "א. המימוש מבטיח ש-`shared_resource` יאותחל פעם אחת בלבד.",
+        "ב. קיים תנאי מירוץ (Race Condition) שעלול לגרום לחוט לקרוא מ-`shared_resource->value` ערך שאינו מאותחל.",
+        "ג. המימוש עלול להוביל לקיפאון (Deadlock) אם מספר חוטים ינסו לאתחל בו זמנית.",
+        "ד. כדי לפתור את תנאי המירוץ, נדרש שימוש במחסום זיכרון (memory barrier) או במשתנה אטומי (atomic variable) עבור `shared_resource`."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "התשובה הנכונה היא ג'.\n\nא. נכון. מנגנון הבדיקה הכפולה (Double-Checked Locking) בשילוב עם המנעול מבטיח שבלוק האתחול הפנימי יבוצע פעם אחת בלבד, ובכך המשאב יאותחל רק פעם אחת.\n\nב. נכון. זוהי הבעיה המרכזית במימוש DCL ללא מחסומי זיכרון (memory barriers). ייתכן שחוט אחד יסיים את הקצאת הזיכרון ויכתוב את כתובת המשאב ל-`shared_resource`, אך לפני שהאתחול של `shared_resource->value = 100;` הושלם, חוט אחר יראה ש-`shared_resource` אינו NULL (כתוצאה מסידור מחדש של פקודות על ידי המהדר או המעבד) וינסה לגשת ל-`shared_resource->value` הלא מאותחל.\n\nג. לא נכון. המימוש משתמש במנעול `pthread_mutex_t` בצורה נכונה כדי להגן על הקטע הקריטי של האתחול. מנעולים מתוכננים למנוע מצבי מירוץ ולסדר גישה למשאבים משותפים, ולא ליצור קיפאונות בסיטואציה כזו. אין כאן תנאים לקיפאון כגון תלות מעגלית במשאבים.\n\nד. נכון. כדי למנוע את תנאי המירוץ המתואר בסעיף ב', יש צורך להבטיח שכל פעולות האתחול של המשאב יסתיימו לפני שהמצביע `shared_resource` הופך גלוי לחוטים אחרים. ניתן לעשות זאת באמצעות מחסומי זיכרון (memory barriers) או על ידי שימוש במשתנים אטומיים (atomic variables) עבור המצביע `shared_resource` (לדוגמה, `std::atomic<MyResource*>` ב-C++)."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

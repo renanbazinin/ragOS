@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 01:23:01",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5728,
+      "output_tokens": 2361,
+      "total_tokens": 29220
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Race Conditions",
+      "Concurrency",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C עם שני חוטים המריצים במקביל את הפונקציות `thread_producer` ו-`thread_consumer` בהתאמה. המשתנים הגלובליים `data` ו-`state` מאותחלים ל-0. יש להניח שכל שורת קוד (הכוללת גישה למשתנה גלובלי) מבוצעת באופן אטומי (כלומר, לא ניתן להחליף קונטקסט באמצע ביצוע שורה כזו). פרטו את כל זוגות הערכים האפשריים הסופיים עבור המשתנים `data` ו-`state` לאחר ששני החוטים סיימו את ריצתם. לכל זוג ערכים יש לפרט ולהסביר בקצרה את תזמון הריצה המוביל אליו.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\nint data = 0; // shared data, initialized to 0\nint state = 0; // shared state flag, initialized to 0\n\nvoid* thread_producer(void* arg) {\n    // Thread P operations:\n    // P1\n    state = 1;\n    // P2\n    data = data + 5;\n    // P3\n    state = 2;\n    return NULL;\n}\n\nvoid* thread_consumer(void* arg) {\n    // Thread C operations:\n    // C_branch_check_1\n    if (state == 1) {\n        // C_data_op_1\n        data = data * 2;\n    } \n    // C_branch_check_2\n    else if (state == 2) {\n        // C_data_op_2\n        data = data - 3;\n    } \n    // C_branch_else\n    else { // state == 0\n        // C_data_op_3\n        data = data + 1;\n    }\n    // C_state_reset\n    state = 0;\n    return NULL;\n}\n\n// main function (not part of the analysis, just for context)\n// int main() {\n//     pthread_t tid_p, tid_c;\n//     pthread_create(&tid_p, NULL, thread_producer, NULL);\n//     pthread_create(&tid_c, NULL, thread_consumer, NULL);\n//     pthread_join(tid_p, NULL);\n//     pthread_join(tid_c, NULL);\n//     printf(\"Final data: %d, Final state: %d\\n\", data, state);\n//     return 0;\n// }\n",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "נסמן את המשתנים הגלובליים כ-D (עבור data) ו-S (עבור state). ערכי אתחול: D=0, S=0.\n\nהפעולות של חוט היצרן (P):\nP1: `state = 1;`\nP2: `data = data + 5;`\nP3: `state = 2;`\n\nהפעולות של חוט הצרכן (C):\nC_branch_check_1: `if (state == 1)`\nC_data_op_1: `data = data * 2;`\nC_branch_check_2: `else if (state == 2)`\nC_data_op_2: `data = data - 3;`\nC_data_op_3: `data = data + 1;` (מתבצע אם C_branch_check_1 ו-C_branch_check_2 נכשלו)\nC_state_reset: `state = 0;`\n\nלהלן כל זוגות הערכים האפשריים הסופיים (D, S) ותזמוני ריצה לדוגמה המובילים אליהם:\n\n1.  **(2, 0)**\n    *   תזמון: כל P רץ במלואו, ואז כל C רץ במלואו.\n    *   P1 (S=1) -> P2 (D=5) -> P3 (S=2)\n    *   C מתחיל: C_branch_check_1 (S=2, false) -> C_branch_check_2 (S=2, true) -> C_data_op_2 (D=5-3=2)\n    *   C_state_reset (S=0)\n    *   תוצאה סופית: D=2, S=0.\n\n2.  **(6, 2)**\n    *   תזמון: כל C רץ במלואו, ואז כל P רץ במלואו.\n    *   C מתחיל: C_branch_check_1 (S=0, false) -> C_branch_check_2 (S=0, false) -> C_data_op_3 (D=0+1=1)\n    *   C_state_reset (S=0)\n    *   P מתחיל: P1 (S=1) -> P2 (D=1+5=6) -> P3 (S=2)\n    *   תוצאה סופית: D=6, S=2.\n\n3.  **(5, 2)**\n    *   תזמון: `P1 -> C_branch_check_1 (S=1) -> C_data_op_1 (D=0) -> P2 (D=5) -> C_state_reset (S=0) -> P3 (S=2)`\n    *   P1 (S=1)\n    *   C מתחיל: C_branch_check_1 (רואה S=1, true) -> C_data_op_1 (D=0*2=0)\n    *   P2 (D=0+5=5)\n    *   C_state_reset (S=0)\n    *   P3 (S=2)\n    *   תוצאה סופית: D=5, S=2.\n\n4.  **(10, 2)**\n    *   תזמון: `P1 -> P2 (D=5) -> C_branch_check_1 (S=1) -> C_data_op_1 (D=10) -> C_state_reset (S=0) -> P3 (S=2)`\n    *   P1 (S=1)\n    *   P2 (D=0+5=5)\n    *   C מתחיל: C_branch_check_1 (רואה S=1, true) -> C_data_op_1 (D=5*2=10)\n    *   C_state_reset (S=0)\n    *   P3 (S=2)\n    *   תוצאה סופית: D=10, S=2.\n\n5.  **(6, 0)**\n    *   תזמון: `C_branch_check_1 (S=0) -> C_branch_check_2 (S=0) -> C_data_op_3 (D=1) -> P1 (S=1) -> P2 (D=6) -> P3 (S=2) -> C_state_reset (S=0)`\n    *   C מתחיל: C_branch_check_1 (רואה S=0, false) -> C_branch_check_2 (רואה S=0, false) -> C_data_op_3 (D=0+1=1)\n    *   P1 (S=1)\n    *   P2 (D=1+5=6)\n    *   P3 (S=2)\n    *   C_state_reset (S=0)\n    *   תוצאה סופית: D=6, S=0.\n\n6.  **(5, 0)**\n    *   תזמון: `P1 (S=1) -> C_branch_check_1 (S=1) -> C_data_op_1 (D=0) -> P2 (D=5) -> P3 (S=2) -> C_state_reset (S=0)`\n    *   P1 (S=1)\n    *   C מתחיל: C_branch_check_1 (רואה S=1, true) -> C_data_op_1 (D=0*2=0)\n    *   P2 (D=0+5=5)\n    *   P3 (S=2)\n    *   C_state_reset (S=0)\n    *   תוצאה סופית: D=5, S=0.\n\n7.  **(10, 0)**\n    *   תזמון: `P1 (S=1) -> P2 (D=5) -> C_branch_check_1 (S=1) -> C_data_op_1 (D=10) -> P3 (S=2) -> C_state_reset (S=0)`\n    *   P1 (S=1)\n    *   P2 (D=0+5=5)\n    *   C מתחיל: C_branch_check_1 (רואה S=1, true) -> C_data_op_1 (D=5*2=10)\n    *   P3 (S=2)\n    *   C_state_reset (S=0)\n    *   תוצאה סופית: D=10, S=0.\n"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

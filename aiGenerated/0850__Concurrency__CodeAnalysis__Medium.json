@@ -1,0 +1,46 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 00:49:01",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2942,
+      "output_tokens": 1254,
+      "total_tokens": 7115
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Concurrency",
+      "Race Conditions",
+      "Threads",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המשתמשת ב-pthreads ליצירת מספר חוטים המגדילים מונה משותף. נתחו את הקוד וענו על השאלה הבאה:\n\nמהו הערך הסופי של המשתנה `counter` שיוצג על המסך בסוף ריצת התוכנית? (הניחו סביבת לינוקס טיפוסית וכי הקוד רץ בהצלחה ללא שגיאות מערכת)",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\n#define NUM_THREADS 5\n#define ITERATIONS_PER_THREAD 100000\n\nint counter = 0;\npthread_mutex_t mutex;\n\nvoid* thread_func(void* arg) {\n    for (int i = 0; i < ITERATIONS_PER_THREAD; ++i) {\n        counter++; \n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n    pthread_mutex_init(&mutex, NULL);\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, thread_func, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    pthread_mutex_destroy(&mutex);\n\n    printf(\"Final counter value: %d\\n\", counter);\n    return 0;\n}",
+      "options": [
+        "א. 0",
+        "ב. 500000",
+        "ג. ערך כלשהו בין 1 ל-500000 (כולל), אך לא בהכרח 500000.",
+        "ד. ערך כלשהו בין 0 ל-500000 (כולל), אך לא בהכרח 500000.",
+        "ה. ערך כלשהו בין 500000 ל-1000000 (כולל)."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "התוכנית מנסה להגדיל מונה משותף `counter` באמצעות מספר חוטים במקביל. כל חוט מבצע 100,000 הגדלות. בסך הכל, ציפינו שהמונה יגיע לערך 5 * 100,000 = 500,000.\n\nעם זאת, הפעולה `counter++` אינה אטומית. היא מורכבת משלושה שלבים: קריאת הערך של `counter`, הגדלתו, וכתיבת הערך החדש בחזרה ל-`counter`. כאשר מספר חוטים ניגשים למשתנה `counter` במקביל ללא מנגנון סנכרון מתאים (כמו מנעול - mutex), עלולה להיווצר תופעת Race Condition.\n\nלדוגמה, חוט אחד יכול לקרוא את `counter` (נניח 100), ואז לפני שהוא מספיק לכתוב בחזרה (101), חוט אחר קורא גם הוא את `counter` (עדיין 100). שני החוטים יגדילו את הערך ל-101 ויכתבו אותו בחזרה, ובכך 'אבדה' הגדלה אחת.\n\nלכן, הערך הסופי של `counter` לא יהיה בהכרח 500,000, אלא יהיה נמוך יותר בדרך כלל, ויהיה לא דטרמיניסטי (ישנה בין הרצות שונות). הערך המקסימלי האפשרי הוא 500,000 (אם במקרה לא תתרחש אף התנגשות), והערך המינימלי החיובי הוא 1 (לפחות אחת מההגדלות תצליח לסיים את כל שלושת שלביה). לכן, התשובה הנכונה היא שיוצג ערך כלשהו בין 1 ל-500,000 (כולל), אך לא בהכרח 500,000.\n\nכדי לתקן זאת ולמנוע את תנאי המרוץ, יש להגן על פעולת ההגדלה באמצעות מנעול (mutex) כך:\n```c\npthread_mutex_lock(&mutex);\ncounter++;\npthread_mutex_unlock(&mutex);\n```",
+      "code_snippet": "void* thread_func(void* arg) {\n    for (int i = 0; i < ITERATIONS_PER_THREAD; ++i) {\n        pthread_mutex_lock(&mutex);\n        counter++; \n        pthread_mutex_unlock(&mutex);\n    }\n    return NULL;\n}"
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

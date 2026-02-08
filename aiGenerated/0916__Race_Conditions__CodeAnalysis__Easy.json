@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 01:17:56",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5728,
+      "output_tokens": 1255,
+      "total_tokens": 10097
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Race Conditions",
+      "Concurrency",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המשתמשת בחוטים (threads) לקידום משתנה גלובלי משותף ללא מנגנוני סנכרון. שני חוטים מריצים את הפונקציה `increment_thread`, אשר מקדמת את המונה הגלובלי `shared_counter` עשרת אלפים (10,000) פעמים כל אחד. המשתנה `shared_counter` מאותחל ל-0.\n\nמהו טווח הערכים האפשריים עבור `shared_counter` שיודפס בסוף התוכנית לאחר ששני החוטים סיימו את ריצתם? הסבר מדוע ערך זה יכול להתקבל, וציין את הערך המינימלי והמקסימלי האפשריים.",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n\nint shared_counter = 0; // Global shared variable\n\nvoid* increment_thread(void* arg) {\n    for (int i = 0; i < 10000; ++i) {\n        shared_counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t tid1, tid2;\n\n    // Create two threads\n    pthread_create(&tid1, NULL, increment_thread, NULL);\n    pthread_create(&tid2, NULL, increment_thread, NULL);\n\n    // Wait for both threads to finish\n    pthread_join(tid1, NULL);\n    pthread_join(tid2, NULL);\n\n    printf(\"Final counter value: %d\\n\", shared_counter);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "טווח הערכים האפשריים עבור `shared_counter` הוא בין 1 ל-20,000 (כולל).\n\n**הסבר:**\nהפעולה `shared_counter++` אינה אטומית. היא מורכבת משלוש פעולות בסיסיות:\n1.  קריאת הערך הנוכחי של `shared_counter` לתוך אוגר (register).\n2.  הגדלת הערך באוגר.\n3.  כתיבת הערך החדש מהאוגר בחזרה ל-`shared_counter` בזיכרון.\n\nכאשר שני חוטים מבצעים פעולה זו במקביל ללא סנכרון, עלול להתרחש מצב מרוץ (Race Condition) שבו עדכונים של אחד החוטים נדרסים על ידי עדכונים של חוט אחר, מה שמוביל לאובדן עדכונים.\n\n**ערך מקסימלי אפשרי:** 20,000.\nערך זה יתקבל אם החוטים ירוצו באופן סדרתי לחלוטין (לדוגמה, חוט אחד מסיים את כל 10,000 הקידומים שלו, ורק אז החוט השני מתחיל ומסיים את כל 10,000 הקידומים שלו), או אם פעולות הקריאה-הגדלה-כתיבה שלהם משתלבות באופן שאינו גורם לאובדן נתונים (לדוגמה, חוט אחד קורא, מגדיל וכותב בהצלחה לפני שחוט אחר עושה זאת). במקרה כזה, כל 20,000 הקידומים יתבצעו בהצלחה.\n\n**ערך מינימלי אפשרי:** 1.\nתרחיש לדוגמה שיוביל לערך 1:\n1.  חוט 1 קורא את `shared_counter` (ערך 0) לתוך אוגר משלו.\n2.  מתרחש מיתוג הקשר (context switch) לחוט 2.\n3.  חוט 2 מבצע את כל 10,000 הקידומים שלו בהצלחה. `shared_counter` מגיע לערך 10,000.\n4.  מתרחש מיתוג הקשר בחזרה לחוט 1.\n5.  חוט 1 ממשיך מהנקודה שבה עצר: הוא מגדיל את הערך שבאוגר שלו (שהיה 0) ל-1.\n6.  חוט 1 כותב את הערך 1 בחזרה ל-`shared_counter` (דורס את הערך 10,000).\nבמקרה זה, הערך הסופי של `shared_counter` יהיה 1, שכן כל הקידומים של חוט 2 (למעט אלו שנדרסו על ידי חוט 1) ורוב הקידומים של חוט 1 (למעט הקידום האחרון שבוצע על ידי חוט 1) אבדו."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

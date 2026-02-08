@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 01:03:29",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 836,
+      "total_tokens": 5269
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Race Conditions",
+      "Memory Model",
+      "Volatile Keyword",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתון קטע קוד C++ הבא המשתמש במשתנים גלובליים מסוג `volatile`. מהם כל הפלטים האפשריים של התוכנית כאשר היא מורצת?",
+      "code_snippet": "#include <iostream>\n#include <thread>\n\n// Shared variables\nvolatile int shared_value = 0;\nvolatile bool ready_flag = false;\n\nvoid producer_thread() {\n    shared_value = 42; // (1) Write to shared_value\n    ready_flag = true;  // (2) Set flag\n}\n\nvoid consumer_thread() {\n    while (!ready_flag) {\n        // Busy-wait until flag is set\n    }\n    // (3) Read shared_value\n    std::cout << \"Observed value: \" << shared_value << std::endl;\n}\n\nint main() {\n    std::thread p(producer_thread);\n    std::thread c(consumer_thread);\n    p.join();\n    c.join();\n    return 0;\n}",
+      "options": [
+        "א. רק \"Observed value: 0\"",
+        "ב. רק \"Observed value: 42\"",
+        "ג. \"Observed value: 0\" או \"Observed value: 42\"",
+        "ד. התוכנית תקרוס עקב Race Condition.",
+        "ה. התוכנית תיכנס ללולאה אינסופית."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג. \"Observed value: 0\" או \"Observed value: 42\"",
+      "explanation": "הסבר: למרות השימוש ב-`volatile`, מילה שמורה זו מונעת מהמהדר (compiler) לבצע אופטימיזציות שכוללות שינוי סדר פעולות או שמירת המשתנים באוגרים (registers). עם זאת, `volatile` אינה מספקת ערובות לסנכרון זיכרון (memory synchronization) בין תהליכונים (threads) ואינה מונעת מהמעבד (CPU) או מתת-מערכת הזיכרון לבצע שינוי סדר לפעולות כתיבה (store reordering). לכן, ייתכן שהתהליכון הצרכן (consumer_thread) יראה ש-`ready_flag` הפך ל-`true` (פעולה (2)) לפני שהערך החדש של `shared_value` (פעולה (1)) נכתב לזיכרון הראשי או הפך גלוי לתהליכון הצרכן. במקרה כזה, התהליכון הצרכן יקרא את הערך ההתחלתי של `shared_value`, שהוא `0`. במקרים אחרים, אם הסדר נשמר והערך הופץ כראוי, התהליכון יקרא `42`. לפיכך, שני הפלטים אפשריים. כדי למנוע מצב מירוץ זה, יש להשתמש במנגנוני סנכרון מתאימים כגון `std::atomic` עם `memory_order` מפורש או מנעולים (mutexes)."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

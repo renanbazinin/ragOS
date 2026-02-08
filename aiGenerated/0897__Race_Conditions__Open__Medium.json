@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 01:08:20",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2154,
+      "output_tokens": 1713,
+      "total_tokens": 6699
+    }
+  },
+  "question": {
+    "id": 9,
+    "type": "Open",
+    "topic": [
+      "Race Conditions",
+      "Synchronization",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתון קטע קוד בשפת C המשתמש בספריית pthreads ליצירת שני תהליכונים (threads) המנסים להגדיל מונה גלובלי משותף. עיין בקוד המצורף וענה על השאלות הבאות:\n1. זהה והסבר את תנאי המירוץ (Race Condition) בקטע הקוד הנתון. מדוע הוא מתרחש, וכיצד הוא משפיע על ערכו הסופי של המונה?\n2. הצע פתרון לקטע הקוד באמצעות מנגנון סנכרון מתאים (לדוגמה, mutex), והצג את קטע הקוד המתוקן.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\nvolatile int counter = 0; // משאב משותף\n\nvoid* increment_counter(void* arg) {\n    for (int i = 0; i < 100000; ++i) {\n        counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t tid1, tid2;\n\n    pthread_create(&tid1, NULL, increment_counter, NULL);\n    pthread_create(&tid2, NULL, increment_counter, NULL);\n\n    pthread_join(tid1, NULL);\n    pthread_join(tid2, NULL);\n\n    printf(\"Final counter value: %d\\n\", counter); // מצפים ל-200000, אך בדרך כלל יהיה פחות\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": 15,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "חלק 1: זיהוי והסבר תנאי המירוץ\nתנאי מירוץ (Race Condition) מתרחש כאשר מספר תהליכונים (או תהליכים) ניגשים למשאב משותף (במקרה זה, המונה הגלובלי counter) ומנסים לשנות אותו, כאשר סדר הגישה אינו מוגדר ועלול להשפיע על התוצאה הסופית.\n\nהבעיה בקוד המצורף היא בפעולה counter++. למרות שהיא נראית כפעולה אטומית אחת בשפת C, בפועל היא מתורגמת לשלוש פעולות ברמת המעבד:\n1. קריאת ערכו הנוכחי של counter לתוך אוגר.\n2. הגדלת הערך באוגר ב-1.\n3. כתיבת הערך המוגדל מהאוגר בחזרה לזיכרון בכתובת של counter.\n\nכאשר שני תהליכונים מבצעים את הפעולה הזו במקביל, ייתכן שסדר הפעולות ישתבש. לדוגמה:\n* תהליכון A קורא את counter (נניח 0).\n* תהליכון B קורא את counter (גם 0).\n* תהליכון A מגדיל את הערך באוגר שלו ל-1.\n* תהליכון B מגדיל את הערך באוגר שלו ל-1.\n* תהליכון A כותב 1 ל-counter.\n* תהליכון B כותב 1 ל-counter.\n\nבמקרה זה, למרות ששני התהליכונים ביצעו הגדלה, המונה הסופי יהיה 1 במקום 2. פעולה אחת \"נאבדה\" מכיוון שעדכון של תהליכון אחד דרס את העדכון של האחר. כתוצאה מכך, ערכו הסופי של המונה יהיה נמוך מהערך הצפוי (200,000 במקרה זה), מכיוון שחלק מההגדלות יאבדו עקב גישה לא מסונכרנת.\n\nחלק 2: פתרון באמצעות Mutex\nכדי לפתור את תנאי המירוץ, עלינו להבטיח שרק תהליכון אחד יוכל לגשת לקטע הקוד הקריטי (Critical Section) המכיל את הגישה למשאב המשותף (המונה counter) בכל רגע נתון. ניתן לעשות זאת באמצעות מנעול הדדי (Mutex).\n\nהפתרון כולל:\n1. הכרזה ואתחול של אובייקט pthread_mutex_t.\n2. נעילת המוטקס לפני הכניסה לקטע הקריטי (pthread_mutex_lock).\n3. שחרור המוטקס לאחר היציאה מהקטע הקריטי (pthread_mutex_unlock).\n4. השמדת המוטקס בסיום השימוש בו.\n\nקטע הקוד המתוקן:\n```c\n#include <stdio.h>\n#include <pthread.h>\n\nvolatile int counter = 0;\npthread_mutex_t mutex; // הכרזה על אובייקט mutex\n\nvoid* increment_counter_fixed(void* arg) {\n    for (int i = 0; i < 100000; ++i) {\n        pthread_mutex_lock(&mutex);   // נעל את המוטקס לפני הגישה למשאב המשותף\n        counter++;                    // קטע קריטי: גישה למונה המשותף\n        pthread_mutex_unlock(&mutex); // שחרר את המוטקס לאחר הגישה\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t tid1, tid2;\n\n    pthread_mutex_init(&mutex, NULL); // אתחל את המוטקס\n\n    pthread_create(&tid1, NULL, increment_counter_fixed, NULL);\n    pthread_create(&tid2, NULL, increment_counter_fixed, NULL);\n\n    pthread_join(tid1, NULL);\n    pthread_join(tid2, NULL);\n\n    printf(\"Final counter value (fixed): %d\\n\", counter); // כעת יציג 200000\n\n    pthread_mutex_destroy(&mutex); // השמד את המוטקס בסיום השימוש\n\n    return 0;\n}\n```\n\nהסבר הפתרון:\nהשימוש במוטקס מבטיח בלעדיות הדדית (Mutual Exclusion) בקטע הקריטי. כאשר תהליכון אחד נועל את המוטקס, כל תהליכון אחר שינסה לנעול אותו יחסם (ייכנס למצב המתנה) עד שהמוטקס ישוחרר. באופן זה, מובטח שרק תהליכון אחד יבצע את הפעולות קריאה-הגדלה-כתיבה על המונה בכל רגע נתון, ובכך נמנע אובדן עדכונים והמונה יגיע לערכו הצפוי (200,000)."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

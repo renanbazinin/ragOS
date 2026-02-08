@@ -1,0 +1,60 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 00:55:08",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5571,
+      "output_tokens": 3886,
+      "total_tokens": 26250
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Concurrency",
+      "Synchronization",
+      "Threads",
+      "Deadlock",
+      "Starvation",
+      "Condition Variables"
+    ],
+    "content": {
+      "text": "נתונה בעיית \"גשר חד-סטרי\" (One-Way Bridge): גשר צר יכול להכיל עד `MAX_CAPACITY` מכוניות בו-זמנית. מכוניות יכולות לחצות את הגשר בכיוון צפון (NORTH) או דרום (SOUTH). כדי למנוע התנגשויות, מותר למכוניות לחצות את הגשר רק אם כל המכוניות הנמצאות כרגע על הגשר נוסעות באותו כיוון. כאשר הגשר ריק, המכונית הראשונה הנכנסת קובעת את הכיוון. יש לזכור כי יש למנוע הרעבה (starvation) של מכוניות הממתינות בכיוון הנגדי.\n\nלהלן מימוש חלקי לפתרון הבעיה באמצעות mutexes ו-condition variables של pthreads.\n",
+      "code_snippet": "1 #include <pthread.h>\n2 #include <stdio.h>\n3 #include <unistd.h>\n4\n5 #define MAX_CAPACITY 3\n6 #define NONE_DIR 0\n7 #define NORTH_DIR 1\n8 #define SOUTH_DIR 2\n9\n10 pthread_mutex_t bridge_mutex = PTHREAD_MUTEX_INITIALIZER;\n11 pthread_cond_t north_cond = PTHREAD_COND_INITIALIZER;\n12 pthread_cond_t south_cond = PTHREAD_COND_INITIALIZER;\n13\n14 int current_direction = NONE_DIR;\n15 int cars_on_bridge = 0;\n16 int north_waiting_count = 0; // מספר חוטים שממתינים לעבור צפונה\n17 int south_waiting_count = 0; // מספר חוטים שממתינים לעבור דרומה\n18\n19 void enter_north() {\n20     pthread_mutex_lock(&bridge_mutex);\n21     north_waiting_count++; // (א)\n22     while (current_direction == SOUTH_DIR || // הגשר תפוס ע\"י מכוניות דרום\n23            (current_direction == NONE_DIR && south_waiting_count > 0) || // יש מכוניות דרום שממתינות, תן להן קדימות\n24            cars_on_bridge == MAX_CAPACITY) { // הגשר מלא\n25         pthread_cond_wait(&north_cond, &bridge_mutex);\n26     }\n27     north_waiting_count--; // (ב)\n28     current_direction = NORTH_DIR;\n29     cars_on_bridge++;\n30     pthread_mutex_unlock(&bridge_mutex);\n31 }\n32\n33 void exit_north() {\n34     pthread_mutex_lock(&bridge_mutex);\n35     cars_on_bridge--;\n36     if (cars_on_bridge == 0) {\n37         current_direction = NONE_DIR;\n38         pthread_cond_broadcast(&south_cond); // (ג)\n39     } else {\n40         pthread_cond_signal(&north_cond); // (ד)\n41     }\n42     pthread_mutex_unlock(&bridge_mutex);\n43 }\n44\n45 void enter_south() {\n46     pthread_mutex_lock(&bridge_mutex);\n47     south_waiting_count++;\n48     while (current_direction == NORTH_DIR ||\n49            (current_direction == NONE_DIR && north_waiting_count > 0) ||\n50            cars_on_bridge == MAX_CAPACITY) {\n51         pthread_cond_wait(&south_cond, &bridge_mutex);\n52     }\n53     south_waiting_count--;\n54     current_direction = SOUTH_DIR;\n55     cars_on_bridge++;\n56     pthread_mutex_unlock(&bridge_mutex);\n57 }\n58\n59 void exit_south() {\n60     pthread_mutex_lock(&bridge_mutex);\n61     cars_on_bridge--;\n62     if (cars_on_bridge == 0) {\n63         current_direction = NONE_DIR;\n64         pthread_cond_broadcast(&north_cond); // (ה)\n65     } else {\n66         pthread_cond_signal(&south_cond); // (ו)\n67     }\n68     pthread_mutex_unlock(&bridge_mutex);\n69 }",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "8.1",
+        "text": "תארו תרחיש ספציפי (רצף אירועים/פעולות של חוטים) המוביל למצב של הרעבה (starvation) עבור חוטים המנסים להיכנס לכיוון מסוים (למשל, צפון), והסבירו מדוע הוא מתרחש במימוש הנתון.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.2",
+        "text": "ציינו שני ליקויים מהותיים (קונספטואליים) במימוש הנתון, והסבירו בקצרה מדוע הם בעייתיים. יש להתייחס גם לשימוש ב-`north_waiting_count`/`south_waiting_count` ולוגיקת האיתות (signaling).",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.3",
+        "text": "תקנו את הקוד כך שיפתור את בעיית הגשר החד-סטרי באופן תקין, ללא קיפאון (deadlock) או הרעבה (starvation). ניתן לשנות את הפונקציות `enter_north`, `exit_north`, `enter_south`, `exit_south` בלבד. אין צורך להוסיף משתנים גלובליים חדשים או להשתמש באובייקטי סנכרון נוספים מעבר לאלה הקיימים. יש להסביר בקצרה את עיקרון התיקון.",
+        "code_snippet": "void enter_north() {\n    pthread_mutex_lock(&bridge_mutex);\n    north_waiting_count++;\n    while (current_direction == SOUTH_DIR || \n           cars_on_bridge == MAX_CAPACITY || \n           (current_direction == NONE_DIR && south_waiting_count > 0)) {\n        pthread_cond_wait(&north_cond, &bridge_mutex);\n    }\n    north_waiting_count--;\n    current_direction = NORTH_DIR;\n    cars_on_bridge++;\n    pthread_mutex_unlock(&bridge_mutex);\n}\n\nvoid exit_north() {\n    pthread_mutex_lock(&bridge_mutex);\n    cars_on_bridge--;\n    if (cars_on_bridge == 0) {\n        current_direction = NONE_DIR;\n        pthread_cond_broadcast(&south_cond);\n        pthread_cond_broadcast(&north_cond);\n    } else {\n        pthread_cond_broadcast(&north_cond);\n    }\n    pthread_mutex_unlock(&bridge_mutex);\n}\n\nvoid enter_south() {\n    pthread_mutex_lock(&bridge_mutex);\n    south_waiting_count++;\n    while (current_direction == NORTH_DIR || \n           cars_on_bridge == MAX_CAPACITY || \n           (current_direction == NONE_DIR && north_waiting_count > 0)) {\n        pthread_cond_wait(&south_cond, &bridge_mutex);\n    }\n    south_waiting_count--;\n    current_direction = SOUTH_DIR;\n    cars_on_bridge++;\n    pthread_mutex_unlock(&bridge_mutex);\n}\n\nvoid exit_south() {\n    pthread_mutex_lock(&bridge_mutex);\n    cars_on_bridge--;\n    if (cars_on_bridge == 0) {\n        current_direction = NONE_DIR;\n        pthread_cond_broadcast(&north_cond);\n        pthread_cond_broadcast(&south_cond);\n    }\n     else {\n        pthread_cond_broadcast(&south_cond);\n    }\n    pthread_mutex_unlock(&bridge_mutex);\n}",
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "8.1: תרחיש הרעבה (Starvation):\nנניח שהגשר ריק. מכונית צפון N1 נכנסת לגשר. `current_direction` הופך ל-`NORTH_DIR`. `cars_on_bridge` הופך ל-1 (שורות 28-29).\nמכוניות צפון נוספות (N2, N3) מגיעות ונכנסות לגשר (עד `MAX_CAPACITY`, למשל 3 מכוניות). `current_direction` נשאר `NORTH_DIR` ו-`cars_on_bridge` הופך ל-`MAX_CAPACITY`.\nכעת, מכונית דרום S1 מגיעה ומנסה להיכנס (`enter_south`). היא רואה ש-`current_direction == NORTH_DIR` (שורה 48), ולכן נכנסת למצב המתנה על `south_cond`. `south_waiting_count` הופך ל-1 (שורות 47, 51).\nמכוניות צפון נוספות (N_new) מגיעות. הן מנסות להיכנס (`enter_north`). הן רואות ש-`current_direction == NORTH_DIR` (תנאי שורה 22 שגוי) וש-`cars_on_bridge == MAX_CAPACITY` (תנאי שורה 24 נכון), ולכן הן נכנסות למצב המתנה על `north_cond`. `north_waiting_count` גדל (שורות 21, 25).\nבשלב זה, הגשר מלא במכוניות צפון (`MAX_CAPACITY`). S1 ממתינה על `south_cond`, ומכוניות N_new ממתינות על `north_cond`.\nכעת, אחת ממכוניות הצפון שעל הגשר יוצאת (`exit_north`). `cars_on_bridge` יורד (שורה 35). בגלל ש-`cars_on_bridge > 0`, הקוד נכנס לבלוק ה-`else` וקורא ל-`pthread_cond_signal(&north_cond)` (סעיף ד, שורה 40). אחת ממכוניות N_new (שהמתינה על `north_cond` בגלל שהגשר היה מלא) מתעוררת ונכנסת מיד לגשר, וממלאת אותו מחדש.\nאם זרם מכוניות הצפון ממשיך, הגשר לעולם לא יתרוקן ממכוניות צפון. לכן, `current_direction` לעולם לא יהפוך ל-`NONE_DIR`. כתוצאה מכך, מכונית S1, ומכוניות דרום אחרות שיגיעו, יישארו חסומות על `south_cond` לנצח, שכן אף פעם לא יתבצע `pthread_cond_broadcast(&south_cond)` (סעיף ג, שורה 38) כל עוד הגשר לא מתרוקן ממכוניות צפון.\n\n8.2: ליקויים מהותיים:\n1.  **אי-דיוק במוני ההמתנה (`north_waiting_count`, `south_waiting_count`)**: המונים `north_waiting_count` ו-`south_waiting_count` גדלים בתחילת הפונקציה (סעיף א, שורה 21) ויורדים רק לאחר היציאה מהלולאת `while` (סעיף ב, שורה 27). אם חוט נכנס לפונקציה, מגדיל את המונה, אך תנאי ה-`while` אינו מתקיים והוא ממשיך מיד ללא המתנה (למשל, אם הגשר ריק ואין חוטים בכיוון הנגדי), המונה נשאר גבוה באופן שגוי. זה פוגע בלוגיקת ההוגנות (fairness) בתנאי הכניסה של הכיוון הנגדי (לדוגמה, שורה 23) שסומכת על מונים אלו.\n2.  **אסטרטגיית איתות (Signaling) לקויה**: כאשר הגשר מתרוקן (ב-`exit_north` סעיף ג, שורה 38, וב-`exit_south` סעיף ה, שורה 64), הקוד מבצע `pthread_cond_broadcast` רק עבור הכיוון הנגדי. לדוגמה, `exit_north` מאותת רק ל-`south_cond`. אם יש חוטים הממתינים להיכנס בכיוון הצפון (למשל כי הגשר היה מלא קודם לכן), הם לא יתעוררו כלל, מה שמוביל להרעבה עבורם. בנוסף, כאשר הגשר אינו ריק (`cars_on_bridge > 0`), נעשה שימוש ב-`pthread_cond_signal` (סעיפים ד, שורה 40, ו-ו, שורה 66) במקום `pthread_cond_broadcast`. אם מספר חוטים ממתינים להיכנס לאותו כיוון (למשל אם `MAX_CAPACITY > 1`), `pthread_cond_signal` יתעורר רק חוט אחד, שעלול למלא את הגשר ולהשאיר את שאר הממתינים באותו כיוון חסומים שלא לצורך.\n\n8.3: תיקון הקוד והסבר:\nעיקרון התיקון הוא להבטיח איתות מקיף יותר כדי למנוע הרעבה, ולתקן את דיוק מנגנון ספירת הממתינים.\n\n**הסבר לתיקונים:**\n1.  **איתות מקיף (Comprehensive Signaling)**: כאשר הגשר מתרוקן לחלוטין (`cars_on_bridge == 0`), מבוצע `pthread_cond_broadcast` לשני ה-condition variables (`north_cond` ו-`south_cond`). זה מבטיח שכל החוטים הממתינים משני הכיוונים יתעוררו. לולאות ה-`while` ב-`enter_north` וב-`enter_south` יבחנו מחדש את התנאים ויחליטו מי רשאי להיכנס ראשון (בהתאם ללוגיקת ההוגנות המוגדרת, למשל, לתת קדימות לכיוון הנגדי אם הגשר ריק והם ממתינים). זה פותר את בעיית ההרעבה שבה חוטים בכיוון מסוים לא התעוררו כלל.\n2.  **שימוש ב-`pthread_cond_broadcast` גם כשהגשר אינו ריק**: כאשר `cars_on_bridge > 0`, במקום `pthread_cond_signal`, נעשה שימוש ב-`pthread_cond_broadcast`. זה מאפשר למספר חוטים להיכנס בו-זמנית אם יש מקום פנוי בגשר (עד `MAX_CAPACITY`) ואין חוטים מהכיוון הנגדי הממתינים (או שהגשר אינו ריק). זה מונע מצב שבו רק חוט אחד מתעורר וממלא את הגשר, וחוטים אחרים באותו כיוון נשארים חסומים שלא לצורך.\n3.  **דיוק מנגנוני ספירת הממתינים**: המונים `north_waiting_count` ו-`south_waiting_count` נשארים במקומם המקורי (הגדלה לפני ה-`while` והקטנה אחריו). בהקשר זה, הם מייצגים חוטים שרוצים להיכנס, וזה תקין כל עוד תנאי ה-`while` נבדקים היטב. התיקון העיקרי הוא בלוגיקת האיתות.\n"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

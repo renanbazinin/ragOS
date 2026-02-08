@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 01:19:04",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5728,
+      "output_tokens": 1134,
+      "total_tokens": 10018
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Race Conditions",
+      "Concurrency",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המשתמשת בשני חוטים (threads) לקידום מונה משותף. כל אחד מהחוטים מבצע לולאה המקדמת את המשתנה הגלובלי `counter` מספר קבוע של פעמים (`NUM_INCREMENTS`). נתח את הקוד וענה על השאלה הבאה:",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\n#define NUM_INCREMENTS 100000\n\nint counter = 0; // משתנה גלובלי משותף\n\nvoid* increment_counter(void* arg) {\n    for (int i = 0; i < NUM_INCREMENTS; ++i) {\n        counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t thread1, thread2;\n\n    // יצירת שני חוטים\n    pthread_create(&thread1, NULL, increment_counter, NULL);\n    pthread_create(&thread2, NULL, increment_counter, NULL);\n\n    // המתנה לסיום ריצת החוטים\n    pthread_join(thread1, NULL);\n    pthread_join(thread2, NULL);\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    return 0;\n}"
+    },
+    "sub_questions": [
+      {
+        "id": "101.1",
+        "text": "מהם הערכים האפשריים של המשתנה הגלובלי `counter` בסיום ריצת התוכנית? הסבר מדוע הערך הסופי יכול להיות שונה מהערך הצפוי.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הערך הצפוי של המונה `counter` בסיום ריצת התוכנית הוא `2 * NUM_INCREMENTS` (כלומר, 200,000 במקרה זה), מכיוון שכל אחד משני החוטים מבצע `NUM_INCREMENTS` קידומים.\n\nעם זאת, עקב תנאי מירוץ (Race Condition), הערך הסופי של `counter` יהיה לרוב קטן מ-`2 * NUM_INCREMENTS`, אך גדול או שווה ל-`1` (אם `NUM_INCREMENTS` > 0). טווח הערכים האפשריים הוא בין `1` ל-`2 * NUM_INCREMENTS`.\n\nהבעיה נובעת מכך שהפעולה `counter++` אינה אטומית. היא מורכבת משלושה שלבים ברמה נמוכה יותר:\n1. קריאת הערך הנוכחי של `counter` לתוך אוגר.\n2. הגדלת הערך באוגר.\n3. כתיבת הערך המעודכן מהאוגר בחזרה ל-`counter`.\n\nכאשר שני חוטים מנסים לבצע פעולה זו במקביל ללא סנכרון, עלולה להתרחש סיטואציה שבה קידומים \"נאבדים\". לדוגמה:\n*   `counter` הוא 0.\n*   חוט A קורא את `counter` (ערך 0) לאוגר שלו.\n*   מערכת ההפעלה מבצעת החלפת הקשר (context switch) לחוט B.\n*   חוט B קורא את `counter` (עדיין ערך 0) לאוגר שלו.\n*   חוט B מגדיל את הערך באוגר שלו ל-1 וכותב אותו בחזרה ל-`counter`. כעת `counter` הוא 1.\n*   מערכת ההפעלה מבצעת החלפת הקשר לחוט A.\n*   חוט A מגדיל את הערך באוגר שלו (שעדיין מכיל 0) ל-1 וכותב אותו בחזרה ל-`counter`. כעת `counter` הוא עדיין 1.\n\nבמקרה זה, בוצעו שני קידומים לוגיים, אך בפועל `counter` גדל רק ב-1. קידום אחד \"אבד\". מצבים כאלה יכולים להתרחש פעמים רבות, ולכן הערך הסופי יהיה בלתי צפוי ותלוי בתזמון הריצה, אך כמעט תמיד נמוך מהערך האידיאלי של `2 * NUM_INCREMENTS`."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

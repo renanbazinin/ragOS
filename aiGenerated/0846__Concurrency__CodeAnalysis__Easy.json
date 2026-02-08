@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 00:47:39",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5571,
+      "output_tokens": 1115,
+      "total_tokens": 12053
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Concurrency",
+      "Race Conditions",
+      "Threads",
+      "Shared Memory"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C הבאה המשתמשת בחוטים כדי להגדיל מונה גלובלי משותף ללא סנכרון. קמפלו והריצו את התוכנית. מהם הערך המינימלי והערך המקסימלי האפשריים שניתן להדפיס עבור המשתנה `counter` בסיום הריצה? יש להסביר בקצרה מדוע ערכים אלו אפשריים.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\n#define NUM_THREADS 2\n#define INCREMENTS_PER_THREAD 5\n\nint counter = 0;\n\nvoid* thread_func(void* arg) {\n    for (int i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n        // זוהי פעולה לא אטומית המורכבת מקריאה, הגדלה וכתיבה.\n        counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, thread_func, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הערך המיועד (הנכון) של המונה `counter` בסיום הריצה הוא `NUM_THREADS * INCREMENTS_PER_THREAD = 2 * 5 = 10`. עם זאת, מכיוון שהפעולה `counter++` אינה אטומית, מתרחש מצב מרוץ (race condition). פעולה זו מורכבת משלושה שלבים: קריאת הערך הנוכחי של `counter` לתוך אוגר, הגדלת הערך באוגר, וכתיבת הערך החדש בחזרה ל-`counter`. חוטים שונים יכולים לשלב את הפעולות הללו באופן לא צפוי, מה שמוביל ל\"אובדן\" של הגדלות.\n\n**ערך מקסימלי אפשרי: 10**\nהסבר: הערך המקסימלי (10) מתקבל כאשר אין מצב מרוץ בפועל, או כאשר שלבי הקריאה/הגדלה/כתיבה משתלבים באופן שכל הגדלה נשמרת. לדוגמה, חוט 1 מבצע את כל 5 ההגדלות שלו ברצף, ואז חוט 2 מבצע את כל 5 ההגדלות שלו ברצף. במקרה זה, כל 10 ההגדלות מתבצעות בהצלחה, והמונה מגיע לערכו המלא.\n\n**ערך מינימלי אפשרי: 5**\nהסבר: הערך המינימלי (5) מתקבל במצב מרוץ חמור. תרחיש לדוגמה:\n1.  חוט 1 קורא את ערך המונה `counter`, שהוא 0. לפני שהוא מספיק להגדיל ולכתוב בחזרה, הוא נקטע.\n2.  חוט 2 מתחיל לרוץ ומבצע את כל 5 ההגדלות שלו ברצף. המונה `counter` מגיע לערך 5.\n3.  חוט 1 חוזר לרוץ. הוא מגדיל את הערך שקרא (0) ב-1, ומחזיר את 1 ל-`counter`. בכך, הוא \"מאפס\" את כל העבודה שחוט 2 עשה.\n4.  חוט 1 ממשיך ומבצע את 4 ההגדלות הנותרות שלו. המונה `counter` מגיע לערך `1 + 4 = 5`.\nבמצב זה, כל ההגדלות של חוט 2 למעשה אבדו, ורק ההגדלות של חוט 1 נשמרו. לכן, הערך הסופי הוא 5, שהוא `INCREMENTS_PER_THREAD`."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

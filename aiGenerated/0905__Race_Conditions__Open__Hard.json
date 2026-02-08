@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 01:10:59",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4708,
+      "output_tokens": 2144,
+      "total_tokens": 10287
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Race Conditions",
+      "Concurrency",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתונה המחלקה `SharedResource` הממומשת בשפת C++ ותפקידה לנהל מונה משותף וכן לתעד את כל הפעולות עליו ביומן (log). מספר תהליכונים (threads) ניגשים למחלקה זו במקביל. עיין בקוד המצורף:\n\n1.  זהה והסבר בפירוט את תנאי המרוץ (Race Condition) הקיים בקוד, וכיצד הוא יכול להוביל לחוסר עקביות ביומן הרישום (log) ביחס לערך המונה. תאר סדר פעולות ספציפי (interleaving) בין שני תהליכונים שידגים את הבעיה.\n2.  הצע פתרון מתוקן לקוד, המבטיח עקביות בין ערך המונה לבין יומן הרישום, תוך שימוש במנגנוני סנכרון מתאימים. הסבר מדוע הפתרון שלך פותר את הבעיה.",
+      "code_snippet": "#include <iostream>\n#include <vector>\n#include <string>\n#include <thread>\n#include <mutex>\n#include <sstream>\n\nstruct SharedResource {\n    int counter;\n    std::vector<std::string> operationsLog;\n    std::mutex counter_mutex; // Mutex for 'counter'\n    std::mutex log_mutex;     // Mutex for 'operationsLog'\n\n    SharedResource() : counter(0) {}\n\n    void increment(int thread_id) {\n        // Update counter\n        counter_mutex.lock();\n        counter++;\n        counter_mutex.unlock();\n\n        // Log the operation\n        std::ostringstream oss;\n        oss << \"Thread \" << thread_id << \" incremented. Current value: \" << counter;\n\n        log_mutex.lock();\n        operationsLog.push_back(oss.str());\n        log_mutex.unlock();\n    }\n\n    void decrement(int thread_id) {\n        // Update counter\n        counter_mutex.lock();\n        counter--;\n        counter_mutex.unlock();\n\n        // Log the operation\n        std::ostringstream oss;\n        oss << \"Thread \" << thread_id << \" decremented. Current value: \" << counter;\n\n        log_mutex.lock();\n        operationsLog.push_back(oss.str());\n        log_mutex.unlock();\n    }\n};",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.  **זיהוי והסבר תנאי המרוץ (Race Condition):**\n    הבעיה המרכזית בקוד היא שפעולת עדכון המונה (`counter`) ופעולת הרישום ליומן (`operationsLog`) אינן אטומיות כיחידה לוגית אחת. למרות שכל אחת מהפעולות מוגנת על ידי mutex נפרד (`counter_mutex` עבור `counter` ו-`log_mutex` עבור `operationsLog`), אין מנגנון סנכרון יחיד המבטיח ששתי הפעולות יבוצעו ברצף ללא הפרעה מתהליכון אחר.\n\n    **סדר פעולות ספציפי המדגים את הבעיה (interleaving):**\n    נניח ששני תהליכונים, `Thread 1` ו-`Thread 2`, מפעילים את הפונקציה `increment()`:\n    *   **שלב 1:** `Thread 1` קורא ל-`increment(1)`:\n        *   `counter_mutex.lock()`\n        *   `counter` גדל מ-0 ל-1.\n        *   `counter_mutex.unlock()`\n    *   **שלב 2:** `Thread 1` נקטע (preempted) רגע לפני שהוא בונה את הודעת ה-log שלו.\n    *   **שלב 3:** `Thread 2` קורא ל-`increment(2)`:\n        *   `counter_mutex.lock()`\n        *   `counter` גדל מ-1 ל-2.\n        *   `counter_mutex.unlock()`\n        *   `Thread 2` בונה את הודעת ה-log שלו: \"Thread 2 incremented. Current value: 2\".\n        *   `log_mutex.lock()`\n        *   `operationsLog.push_back(\"Thread 2 incremented. Current value: 2\")`\n        *   `log_mutex.unlock()`\n    *   **שלב 4:** `Thread 2` מסיים את פעולתו.\n    *   **שלב 5:** `Thread 1` ממשיך מנקודת הקיטעון:\n        *   `Thread 1` בונה את הודעת ה-log שלו: \"Thread 1 incremented. Current value: 2\". (זוהי הבעיה! כאשר `Thread 1` הגדיל את המונה, ערכו היה 1, אך הוא רושם כעת את הערך לאחר העדכון של `Thread 2`).\n        *   `log_mutex.lock()`\n        *   `operationsLog.push_back(\"Thread 1 incremented. Current value: 2\")`\n        *   `log_mutex.unlock()`\n\n    **חוסר העקביות כתוצאה מכך:** היומן יכיל שתי כניסות המצביעות על \"Current value: 2\" עבור שתי פעולות הגדלה נפרדות, למרות שאחת מהן הייתה אמורה לרשום \"Current value: 1\". הדבר יוצר היסטוריה מטעה ולא עקבית של הפעולות.\n\n2.  **פתרון מתוקן והסבר:**\n    הפתרון הוא להשתמש ב-mutex יחיד שיגן על כל היחידה הלוגית של הפעולה, הכוללת גם את עדכון המונה וגם את יצירת וכתיבת ה-log המתאים. זה מבטיח שאף תהליכון אחר לא יוכל להתערב בין שתי הפעולות הללו.\n\n    **קוד מתוקן:**\n    ```cpp\n    #include <iostream>\n    #include <vector>\n    #include <string>\n    #include <thread>\n    #include <mutex>\n    #include <sstream>\n\n    struct SharedResource {\n        int counter;\n        std::vector<std::string> operationsLog;\n        std::mutex global_mutex; // Mutex יחיד עבור המונה והיומן\n\n        SharedResource() : counter(0) {}\n\n        void increment(int thread_id) {\n            std::lock_guard<std::mutex> lock(global_mutex); // נעל את כל הפעולה\n\n            counter++; // עדכן מונה\n\n            std::ostringstream oss;\n            oss << \"Thread \" << thread_id << \" incremented. Current value: \" << counter;\n            operationsLog.push_back(oss.str()); // רשום את הפעולה ליומן\n        }\n\n        void decrement(int thread_id) {\n            std::lock_guard<std::mutex> lock(global_mutex); // נעל את כל הפעולה\n\n            counter--; // עדכן מונה\n\n            std::ostringstream oss;\n            oss << \"Thread \" << thread_id << \" decremented. Current value: \" << counter;\n            operationsLog.push_back(oss.str()); // רשום את הפעולה ליומן\n        }\n    };\n    ```\n\n    **הסבר הפתרון:**\n    על ידי שימוש ב-`global_mutex` יחיד ורכישתו בתחילת הפונקציה `increment` (או `decrement`) ושחרורו בסיומה (באופן אוטומטי באמצעות `std::lock_guard`), אנו מבטיחים שאף תהליכון אחר לא יוכל לגשת או לשנות את המונה (`counter`) או את יומן הרישום (`operationsLog`) עד שהתהליכון הנוכחי ישלים הן את עדכון המונה והן את רישום ה-log התואם. פעולה זו הופכת את כל היחידה הלוגית (עדכון מונה + רישום ל-log) לאטומית, ובכך מובטחת עקביות בין ערך המונה לבין הרישום התואם ביומן. ערך המונה שיופיע ביומן תמיד ישקף את מצבו המדויק של המונה ברגע השלמת הפעולה."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

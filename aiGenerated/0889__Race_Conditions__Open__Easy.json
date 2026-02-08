@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 01:06:12",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3457,
+      "output_tokens": 1685,
+      "total_tokens": 8183
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Race Conditions",
+      "Concurrency",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "הסבירו מהו מצב מרוץ (Race Condition) במערכות הפעלה. תארו כיצד הוא עלול להתרחש בהקשר של גישה למשאב משותף על ידי מספר תהליכים/תהליכונים. נתון קטע הקוד הבא ב-C++:\n\n```cpp\n#include <iostream>\n#include <thread>\n#include <vector>\n\nint shared_counter = 0; // משאב משותף\n\nvoid increment_counter() {\n    for (int i = 0; i < 100000; ++i) {\n        shared_counter++; // נקודת מרוץ פוטנציאלית\n    }\n}\n```\n\nבמצב אידיאלי, אם שני תהליכונים יריצו את הפונקציה `increment_counter` כל אחד בנפרד, מהו הערך הסופי הצפוי של `shared_counter`? הסבירו מדוע בפועל הערך הסופי עלול להיות שונה מהערך הצפוי. הציעו פתרון אחד לקטע הקוד הנתון כדי למנוע את מצב המרוץ, והסבירו כיצד הפתרון עובד.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "מצב מרוץ (Race Condition) מתרחש כאשר שני תהליכים או יותר (או תהליכונים) ניגשים לאותו משאב משותף (לדוגמה, משתנה בזיכרון, קובץ, או התקן חומרה) בו-זמנית, ולפחות אחד מהם מבצע פעולת כתיבה. התוצאה הסופית של הגישה למשאב תלויה בסדר הלא-דטרמיניסטי שבו התהליכים/תהליכונים מבצעים את פעולותיהם. במילים אחרות, מי ש\"מנצח במירוץ\" לקבלת גישה אחרונה למשאב, קובע את מצבו הסופי.\n\nבקוד הנתון, ישנם שני תהליכונים שכל אחד מהם מנסה להגדיל את המשתנה המשותף `shared_counter` 100,000 פעמים. באופן אידיאלי, הערך הסופי הצפוי של `shared_counter` צריך להיות 200,000 (100,000 * 2). \n\nבפועל, הערך הסופי עלול להיות נמוך מ-200,000. הסיבה לכך היא שהפעולה `shared_counter++` אינה פעולה אטומית בודדת. היא מורכבת משלושה שלבים ברמת המעבד:\n1. קריאת הערך הנוכחי של `shared_counter` לתוך אוגר.\n2. הגדלת הערך באוגר באחד.\n3. כתיבת הערך המעודכן מהאוגר בחזרה ל-`shared_counter` בזיכרון.\n\nכאשר שני תהליכונים מבצעים את הפעולה בו-זמנית, ייתכן שיתרחש התרחיש הבא:\n- תהליכון 1 קורא את `shared_counter` (נניח 0).\n- תהליכון 2 קורא את `shared_counter` (גם 0, מכיוון שתהליכון 1 עדיין לא כתב את הערך המעודכן).\n- תהליכון 1 מגדיל את הערך באוגר שלו ל-1.\n- תהליכון 2 מגדיל את הערך באוגר שלו ל-1.\n- תהליכון 1 כותב את 1 ל-`shared_counter`.\n- תהליכון 2 כותב את 1 ל-`shared_counter` (דורס את הכתיבה של תהליכון 1).\nבמקרה זה, למרות שבוצעו שתי פעולות הגדלה, המונה גדל רק באחד במקום בשניים.\n\n**פתרון למניעת מצב המרוץ - שימוש ב-Mutex:**\nכדי למנוע מצב מרוץ, עלינו להבטיח שרק תהליכון אחד יוכל לגשת למשאב המשותף (ה-critical section) בכל רגע נתון. ניתן לעשות זאת באמצעות מנגנוני סינכרון כמו Mutex (Mutual Exclusion).\n\n**דוגמת קוד מתוקנת:**\n```cpp\n#include <iostream>\n#include <thread>\n#include <vector>\n#include <mutex> // הוספת ספריית mutex\n\nstd::mutex mtx; // יצירת אובייקט mutex גלובלי\nint shared_counter = 0;\n\nvoid increment_counter_safe() {\n    for (int i = 0; i < 100000; ++i) {\n        mtx.lock(); // נעילת ה-mutex לפני גישה למשאב המשותף\n        shared_counter++; \n        mtx.unlock(); // שחרור ה-mutex לאחר סיום הגישה\n    }\n}\n\nint main() {\n    std::vector<std::thread> threads;\n    for (int i = 0; i < 2; ++i) {\n        threads.emplace_back(increment_counter_safe);\n    }\n\n    for (std::thread& t : threads) {\n        t.join();\n    }\n\n    std::cout << \"Final counter value: \" << shared_counter << std::endl;\n    return 0;\n}\n```\n\n**הסבר הפתרון:**\nהוספנו אובייקט `std::mutex` בשם `mtx`. לפני שכל תהליכון ניגש ל-`shared_counter` כדי להגדיל אותו, הוא קורא ל-`mtx.lock()`. אם ה-mutex כבר נעול על ידי תהליכון אחר, התהליכון הנוכחי ימתין עד שה-mutex ישוחרר. לאחר שהתהליכון מסיים את פעולת ההגדלה (כלומר, סיים את ה-critical section שלו), הוא קורא ל-`mtx.unlock()` כדי לשחרר את ה-mutex, ובכך לאפשר לתהליכונים אחרים לגשת למשאב. בדרך זו, מובטח שרק תהליכון אחד בכל פעם יבצע את פעולת `shared_counter++`, וכך הערך הסופי של `shared_counter` יהיה 200,000 באופן עקבי."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

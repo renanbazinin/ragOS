@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 00:47:12",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5571,
+      "output_tokens": 926,
+      "total_tokens": 8837
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Concurrency",
+      "Race Conditions",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה המשתמשת בחוטים (threads) לקידום מונה גלובלי משותף `counter`. כל חוט מבצע מספר קבוע של קידומים. מהו הערך הסופי *הצפוי* של המונה `counter` לאחר שכל החוטים סיימו את ריצתם? האם תמיד נקבל ערך זה? בחר את התשובה הנכונה והסבר.",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n\n#define NUM_THREADS 5\n#define INCREMENTS_PER_THREAD 100000\n\nint counter = 0;\n\nvoid* thread_func(void* arg) {\n    for (int i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n        counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, thread_func, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    return 0;\n}",
+      "options": [
+        "NUM_THREADS * INCREMENTS_PER_THREAD, וערך זה מובטח תמיד.",
+        "NUM_THREADS * INCREMENTS_PER_THREAD, אך ערך זה אינו מובטח תמיד עקב תנאי מירוץ.",
+        "0, מכיוון שהחוטים עובדים במקביל.",
+        "INCREMENTS_PER_THREAD, מכיוון שרק חוט אחד מצליח לעדכן את המונה."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "2",
+      "explanation": "הערך הצפוי של המונה הוא `NUM_THREADS * INCREMENTS_PER_THREAD` (במקרה זה 5 * 100,000 = 500,000) מכיוון שכל חוט מבצע `INCREMENTS_PER_THREAD` קידומים, וישנם `NUM_THREADS` חוטים.\nעם זאת, פעולת הקידום `counter++` אינה פעולה אטומית. היא מורכבת בדרך כלל משלושה שלבים: 1. קריאת ערך המונה לתוך רגיסטר. 2. הגדלת הערך ברגיסטר. 3. כתיבת הערך המוגדל חזרה לזיכרון.\nכאשר מספר חוטים מנסים לבצע פעולה זו במקביל ללא מנגנוני סנכרון (כמו mutex), עלול להיווצר תנאי מירוץ (race condition). לדוגמה, חוט אחד קורא את ערך המונה (נניח 100), ולפני שהוא מספיק לכתוב את הערך המוגדל (101), חוט אחר גם קורא את הערך הישן (100). שני החוטים יכתבו בסופו של דבר 101, ובכך אבד קידום אחד.\nלכן, הערך הסופי של המונה יהיה לרוב *קטן מהערך הצפוי*, והוא אינו מובטח להיות הערך הצפוי. התשובה הנכונה היא אופציה 2."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

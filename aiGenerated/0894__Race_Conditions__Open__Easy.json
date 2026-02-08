@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 01:07:19",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3457,
+      "output_tokens": 1269,
+      "total_tokens": 6435
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Race Conditions",
+      "Concurrency",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתונה פיסת קוד בשפת C בה מספר תהליכונים (threads) מנסים לעדכן משתנה גלובלי משותף. עיין בקוד וענה על השאלות הבאות:\n\nא. האם קיימת תחרות (Race Condition) בקוד הנתון? אם כן, הסבר מדוע וכיצד היא עלולה להתבטא.\nב. הצע פתרון לבעיה זו באמצעות מנגנון סנכרון מתאים, וכתוב את הקוד המתוקן.",
+      "code_snippet": "#include <stdio.>\n#include <pthread.h>\n\nint counter = 0; // Shared global variable\n\nvoid* increment_counter(void* arg) {\n    for (int i = 0; i < 100000; i++) {\n        counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t tid1, tid2;\n\n    pthread_create(&tid1, NULL, increment_counter, NULL);\n    pthread_create(&tid2, NULL, increment_counter, NULL);\n\n    pthread_join(tid1, NULL);\n    pthread_join(tid2, NULL);\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "א. כן, קיימת תחרות (Race Condition) בקוד הנתון. הסיבה לכך היא ששני תהליכונים (tid1 ו-tid2) ניגשים ומשנים את המשתנה הגלובלי המשותף `counter` בו-זמנית ללא כל מנגנון סנכרון. פעולת ה-`counter++` אינה אטומית; היא מורכבת משלוש פעולות בסיסיות: קריאת ערך המונה לתוך רגיסטר, הגדלת הרגיסטר באחד, וכתיבת הערך המעודכן חזרה לזיכרון. אם שני תהליכונים יבצעו את הפעולות הללו במקביל, ייתכן ששניהם יקראו את אותו ערך ישן, יגדילו אותו, ואז יכתבו אותו חזרה, מה שיגרום לאחת מההגדלות \"להיאבד\". לדוגמה, אם `counter` הוא 0, תהליכון A קורא 0, תהליכון B קורא 0. תהליכון A מגדיל ל-1 וכותב 1. תהליכון B מגדיל ל-1 וכותב 1. התוצאה הסופית תהיה 1 במקום 2.\n\nב. כדי לפתור את בעיית התחרות, יש להגן על הגישה למשתנה המשותף `counter` באמצעות מנגנון סנכרון, כגון מנעול הדדי (mutex). מנעול יבטיח שרק תהליכון אחד יוכל לגשת לקטע הקריטי (הקוד שמשנה את `counter`) בכל רגע נתון. הנה הקוד המתוקן:\n\n```c\n#include <stdio.h>\n#include <pthread.h>\n\nint counter = 0; // Shared global variable\npthread_mutex_t mutex; // Mutex for synchronization\n\nvoid* increment_counter(void* arg) {\n    for (int i = 0; i < 100000; i++) {\n        pthread_mutex_lock(&mutex); // Acquire the lock\n        counter++; // Critical section\n        pthread_mutex_unlock(&mutex); // Release the lock\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t tid1, tid2;\n\n    pthread_mutex_init(&mutex, NULL); // Initialize the mutex\n\n    pthread_create(&tid1, NULL, increment_counter, NULL);\n    pthread_create(&tid2, NULL, increment_counter, NULL);\n\n    pthread_join(tid1, NULL);\n    pthread_join(tid2, NULL);\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    pthread_mutex_destroy(&mutex); // Destroy the mutex\n\n    return 0;\n}\n```\nבפתרון זה, לפני שכל תהליכון ניגש ל-`counter`, הוא מנסה לנעול את המוטקס. אם המוטקס כבר נעול על ידי תהליכון אחר, התהליכון הנוכחי ממתין עד שהמוטקס ישוחרר. לאחר שהתהליכון מסיים לעדכן את `counter`, הוא משחרר את המוטקס, ומאפשר לתהליכון הבא לגשת לקטע הקריטי. זה מבטיח שכל הגדלה תתבצע באופן אטומי, והערך הסופי של `counter` יהיה נכון (200000 במקרה זה)."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}
