@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 01:05:51",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 1376,
+      "total_tokens": 7116
+    }
+  },
+  "question": {
+    "id": 6,
+    "type": "MultipleChoice",
+    "topic": [
+      "Race Conditions",
+      "Concurrency",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתון קטע קוד בשפת C++ המשתמש במשתנה גלובלי `counter` ובשני תהליכונים (threads) המריצים פונקציה `increment_five_times` במקביל. המשתנה `counter` מאותחל ל-0. הפונקציה `increment_five_times` מבצעת חמש פעולות הגדלה על `counter`, כאשר כל פעולת הגדלה כוללת קריאה של הערך הנוכחי, הגדלתו באחד, וכתיבתו חזרה למשתנה.\n\nלאחר ששני התהליכונים סיימו את ריצתם, מהו טווח הערכים האפשריים עבור המשתנה `counter`?",
+      "code_snippet": "#include <iostream>\n#include <thread>\n#include <vector>\n\n// משתנה גלובלי משותף\nint counter = 0;\n\n// פונקציה המגדילה את המונה חמש פעמים\nvoid increment_five_times() {\n    for (int i = 0; i < 5; ++i) {\n        int temp = counter; // קריאת הערך הנוכחי\n        // הדמיית עיכוב או החלפת קונטקסט (לא חובה לקיום המרוץ)\n        // std::this_thread::sleep_for(std::chrono::milliseconds(1));\n        temp = temp + 1;    // הגדלת הערך\n        counter = temp;     // כתיבת הערך החדש\n    }\n}\n\nint main() {\n    // אתחול המונה\n    counter = 0;\n\n    // יצירת שני תהליכונים\n    std::thread t1(increment_five_times);\n    std::thread t2(increment_five_times);\n\n    // המתנה לסיום התהליכונים\n    t1.join();\n    t2.join();\n\n    // הערך הסופי של counter ייקבע בהתאם לתנאי המרוץ\n    // std::cout << \"Final counter value: \" << counter << std::endl;\n\n    return 0;\n}",
+      "options": [
+        "א. [0, 10]",
+        "ב. [1, 10]",
+        "ג. [5, 10]",
+        "ד. [0, 5]",
+        "ה. [10, 10]"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "הבעיה המתוארת היא תנאי מרוץ (race condition) קלאסי. כל פעולת הגדלה (increment) של המונה מורכבת משלוש פעולות לא אטומיות: קריאה (read), שינוי (modify) וכתיבה (write). כאשר שני תהליכונים מנסים לבצע פעולות אלו במקביל ללא מנגנוני סנכרון, ייתכן שעדכונים ילכו לאיבוד.\n\nהערך המקסימלי האפשרי הוא 10. זה יקרה כאשר התהליכונים רצים באופן סדרתי (לדוגמה, תהליכון אחד מסיים את כל 5 ההגדלות שלו, ולאחר מכן התהליכון השני מבצע את 5 ההגדלות שלו), או כאשר אין חפיפה בין פעולות הקריאה/כתיבה שלהם, כך שכל 10 ההגדלות הלוגיות נרשמות בהצלחה.\n\nהערך המינימלי האפשרי הוא 5. תרחיש זה מתרחש כאשר בכל איטרציה של לולאת ההגדלה, שני התהליכונים קוראים את אותו ערך של `counter`, שניהם מגדילים את העותק המקומי שלהם, ואז שניהם כותבים את הערך החדש (אך השווה) ל-`counter`. לדוגמה:\n1. `counter` = 0.\n2. תהליכון 1 קורא `counter` (ערך = 0) לתוך `temp_T1`.\n3. תהליכון 2 קורא `counter` (ערך = 0) לתוך `temp_T2`.\n4. תהליכון 1 מגדיל `temp_T1` ל-1.\n5. תהליכון 2 מגדיל `temp_T2` ל-1.\n6. תהליכון 1 כותב `temp_T1` (ערך = 1) לתוך `counter`. כעת `counter` = 1.\n7. תהליכון 2 כותב `temp_T2` (ערך = 1) לתוך `counter`. `counter` נשאר 1.\nבתרחיש זה, שתי פעולות הגדלה לוגיות הביאו לעלייה של 1 בלבד במונה, כלומר, אחת ההגדלות אבדה. אם דפוס זה חוזר על עצמו עבור כל אחת מחמשת ההגדלות של כל תהליכון, כלומר, 5 פעמים עבור כל תהליכון, סך הכל 10 הגדלות לוגיות, אך רק 5 מהן יירשמו בפועל, ו-`counter` יגיע ל-5.\n\nלכן, טווח הערכים האפשריים הוא בין 5 ל-10 (כולל)."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

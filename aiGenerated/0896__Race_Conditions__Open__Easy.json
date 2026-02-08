@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 01:08:01",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3457,
+      "output_tokens": 1547,
+      "total_tokens": 8240
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Race Conditions",
+      "Concurrency",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתונה פיסת הקוד הבאה בשפת C, המשתמשת בספריות pthread ליצירת תהליכונים. הקוד נועד להגדיל משתנה גלובלי משותף (counter) באמצעות שני תהליכונים:\n\n```c\n#include <stdio.h>\n#include <pthread.h>\n\nint counter = 0; // Shared global variable\n\nvoid* incrementer(void* arg) {\n    for (int i = 0; i < 100000; i++) {\n        counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t tid1, tid2;\n\n    pthread_create(&tid1, NULL, incrementer, NULL);\n    pthread_create(&tid2, NULL, incrementer, NULL);\n\n    pthread_join(tid1, NULL);\n    pthread_join(tid2, NULL);\n\n    printf(\"Final counter value: %d\\n\", counter);\n    return 0;\n}\n```\n\nא. זהו והסבירו את הבעיה המרכזית בקוד זה בהקשר של מערכות הפעלה מקביליות. נמקו מדוע היא מתרחשת.\nב. הציעו פתרון לבעיה שהצגתם בסעיף א' באמצעות שימוש במנגנון סנכרון מתאים, וכתבו את הקוד המתוקן.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "א. הבעיה המרכזית בקוד היא תנאי מרוץ (Race Condition). תנאי מרוץ מתרחש כאשר מספר תהליכונים (threads) ניגשים למשאב משותף (במקרה זה, המשתנה הגלובלי `counter`) ומנסים לשנות אותו בו-זמנית, כאשר התוצאה הסופית תלויה בסדר הלא-דטרמיניסטי של פעולותיהם. הפעולה `counter++` אינה אטומית; היא מורכבת משלוש פעולות ברמת המעבד:\n1. קריאת ערך `counter` מהזיכרון.\n2. הגדלת הערך ב-1 (בתוך רגיסטר של המעבד).\n3. כתיבת הערך החדש בחזרה ל-`counter` בזיכרון.\n\nכאשר שני תהליכונים מבצעים את הפעולה הזו במקביל ללא סנכרון, ייתכן שפעולותיהם ישתלבו באופן שגוי. לדוגמה, אם `counter` הוא 0:\n* תהליכון A קורא את `counter` (ערך 0).\n* מתבצע מיתוג הקשר (context switch).\n* תהליכון B קורא את `counter` (ערך 0).\n* תהליכון B מגדיל את הערך שקרא ל-1 וכותב אותו בחזרה לזיכרון (`counter` הופך ל-1).\n* מתבצע מיתוג הקשר.\n* תהליכון A מגדיל את הערך שקרא (0) ל-1 וכותב אותו בחזרה לזיכרון (`counter` נשאר 1).\nבמצב כזה, למרות ששני תהליכונים ניסו להגדיל את המונה, הוא גדל רק באחד במקום בשניים, וכך אבד אחד העדכונים. בסיום ריצת הקוד, הערך הסופי של `counter` יהיה כנראה נמוך מהערך הצפוי (200,000).\n\nב. כדי לפתור את תנאי המרוץ, יש להגן על הגישה למשתנה המשותף `counter` באמצעות מנגנון סנכרון, כגון מנעול (mutex). מנעול מבטיח שרק תהליכון אחד יוכל לגשת לקטע הקריטי (הקוד שמשנה את `counter`) בכל רגע נתון. להלן הקוד המתוקן:\n\n```c\n#include <stdio.h>\n#include <pthread.h>\n\npthread_mutex_t lock; // Mutex variable\nint counter = 0;      // Shared global variable\n\nvoid* incrementer(void* arg) {\n    for (int i = 0; i < 100000; i++) {\n        pthread_mutex_lock(&lock);   // Acquire the lock\n        counter++;                   // Critical section\n        pthread_mutex_unlock(&lock); // Release the lock\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t tid1, tid2;\n\n    pthread_mutex_init(&lock, NULL); // Initialize the mutex\n\n    pthread_create(&tid1, NULL, incrementer, NULL);\n    pthread_create(&tid2, NULL, incrementer, NULL);\n\n    pthread_join(tid1, NULL);\n    pthread_join(tid2, NULL);\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    pthread_mutex_destroy(&lock); // Destroy the mutex\n    return 0;\n}\n```\n\nבפתרון זה:\n*   `pthread_mutex_t lock;` מצהיר על משתנה מנעול. יש לאתחל אותו לפני השימוש (`pthread_mutex_init`) ולשחרר משאבים בסיום (`pthread_mutex_destroy`).\n*   `pthread_mutex_lock(&lock);` מבטיח שתהליכון ימתין אם המנעול תפוס על ידי תהליכון אחר. רק כאשר יצליח לרכוש את המנעול, הוא יוכל להיכנס לקטע הקריטי.\n*   `counter++;` הוא כעת הקטע הקריטי, כיוון שהוא מוגן על ידי המנעול.\n*   `pthread_mutex_unlock(&lock);` משחרר את המנעול לאחר שהתהליכון סיים את עבודתו בקטע הקריטי, ומאפשר לתהליכונים אחרים לנסות לרכוש אותו."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

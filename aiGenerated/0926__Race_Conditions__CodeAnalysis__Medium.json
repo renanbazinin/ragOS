@@ -1,0 +1,63 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 06:58:04",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2675,
+      "output_tokens": 1985,
+      "total_tokens": 8212
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Race Conditions",
+      "Concurrency",
+      "Threads",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה המשתמשת בספריות pthreads ליצירת מספר תהליכונים (threads):\n",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n\n#define NUM_THREADS 5\n#define ITERATIONS_PER_THREAD 100000\n\nint counter = 0;\n\nvoid* thread_func(void* arg) {\n    for (int i = 0; i < ITERATIONS_PER_THREAD; ++i) {\n        counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        if (pthread_create(&threads[i], NULL, thread_func, NULL) != 0) {\n            perror(\"Failed to create thread\");\n            return 1;\n        }\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        if (pthread_join(threads[i], NULL) != 0) {\n            perror(\"Failed to join thread\");\n            return 1;\n        }\n    }\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    return 0;\n}"
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "מהו הערך הסופי *הצפוי* של המשתנה הגלובלי `counter` לאחר שכל התהליכונים סיימו את ריצתם?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "מהו ערך סופי *אפשרי* של המשתנה `counter` שיוצג בפועל בהרצה של התוכנית? הסבר מדוע הוא עשוי להיות שונה מהערך הצפוי.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.3",
+        "text": "זהה את מרוץ התנאים (race condition) בתוכנית והסבר כיצד הוא מתרחש ברמה של פעולות קריאה/כתיבה לזיכרון (read-modify-write).",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.4",
+        "text": "הצע פתרון לקוד כדי למנוע את מרוץ התנאים ולהבטיח שהערך הסופי של `counter` יהיה תמיד כפי שצפוי. הצג את השינויים הנדרשים בקוד.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.1. הערך הסופי הצפוי של המשתנה `counter` הוא `NUM_THREADS * ITERATIONS_PER_THREAD`. כלומר, 5 תהליכונים * 100,000 איטרציות = 500,000.\n\n1.2. הערך הסופי האפשרי בפועל יהיה בדרך כלל *נמוך* מ-500,000 (לדוגמה, 450,123 או כל מספר אחר בין 0 ל-500,000, אך בדרך כלל קרוב ל-500,000 אך פחות ממנו). הסיבה לכך היא מרוץ תנאים (race condition).\n\n1.3. מרוץ התנאים מתרחש בשורה `counter++;`. פעולה זו, למרות שהיא נראית אטומית בקוד C, אינה כזו ברמת המעבד. היא מורכבת משלוש פעולות בסיסיות:\n    1. קריאה (Read): קריאת הערך הנוכחי של `counter` מהזיכרון לתוך אוגר במעבד.\n    2. שינוי (Modify): הגדלת הערך באוגר ב-1.\n    3. כתיבה (Write): כתיבת הערך החדש מהאוגר בחזרה לזיכרון בכתובת של `counter`.\n\n    כאשר מספר תהליכונים מבצעים את הפעולה במקביל ללא מנגנון סנכרון, ייתכן שהאינטרליבינג (interleaving) הבא יתרחש:\n    *   תהליכון 1 קורא את `counter` (נניח 100).\n    *   (מתג החלפה) תהליכון 2 קורא את `counter` (עדיין 100, מכיוון שתהליכון 1 עדיין לא כתב את הערך החדש).\n    *   תהליכון 1 מגדיל את הערך שלו ל-101.\n    *   תהליכון 1 כותב 101 ל`counter`.\n    *   תהליכון 2 מגדיל את הערך שלו ל-101.\n    *   תהליכון 2 כותב 101 ל`counter`.\n\n    במקרה זה, שתי פעולות הגדלה בוצעו, אך הערך הסופי של `counter` גדל רק ב-1 (מ-100 ל-101) במקום ב-2. זהו 'עדכון אבוד' (lost update).\n\n1.4. כדי למנוע את מרוץ התנאים, יש להגן על הגישה למשתנה המשותף `counter` באמצעות מנגנון סנכרון, כגון mutex. יש לאתחל את ה-mutex, לנעול אותו לפני הגישה למשתנה ולשחרר אותו לאחר מכן. לבסוף, יש להרוס את ה-mutex.\n\n    **שינויים נדרשים בקוד:**\n\n    ```c\n    #include <pthread.h>\n    #include <stdio.h>\n    #include <stdlib.h>\n\n    #define NUM_THREADS 5\n    #define ITERATIONS_PER_THREAD 100000\n\n    int counter = 0;\n    pthread_mutex_t mutex; // הצהרה על mutex\n\n    void* thread_func(void* arg) {\n        for (int i = 0; i < ITERATIONS_PER_THREAD; ++i) {\n            pthread_mutex_lock(&mutex);   // נעילת ה-mutex לפני גישה ל-counter\n            counter++;\n            pthread_mutex_unlock(&mutex); // שחרור ה-mutex לאחר הגישה ל-counter\n        }\n        return NULL;\n    }\n\n    int main() {\n        pthread_t threads[NUM_THREADS];\n        pthread_mutex_init(&mutex, NULL); // אתחול ה-mutex\n\n        for (int i = 0; i < NUM_THREADS; ++i) {\n            if (pthread_create(&threads[i], NULL, thread_func, NULL) != 0) {\n                perror(\"Failed to create thread\");\n                pthread_mutex_destroy(&mutex); // חשוב לנקות במקרה של כשל\n                return 1;\n            }\n        }\n\n        for (int i = 0; i < NUM_THREADS; ++i) {\n            if (pthread_join(threads[i], NULL) != 0) {\n                perror(\"Failed to join thread\");\n                pthread_mutex_destroy(&mutex); // חשוב לנקות במקרה של כשל\n                return 1;\n            }\n        }\n\n        printf(\"Final counter value: %d\\n\", counter);\n\n        pthread_mutex_destroy(&mutex); // הרס ה-mutex בסיום השימוש\n        return 0;\n    }\n    ```"
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

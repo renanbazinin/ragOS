@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 01:03:10",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 1515,
+      "total_tokens": 7140
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Race Conditions",
+      "Concurrency",
+      "Shared Data Structures",
+      "Linked Lists"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא המנסה להוסיף צמתים לראש רשימה מקושרת משותפת באמצעות מספר תהליכונים (threads) במקביל:\n\n```c++\n#include <iostream>\n#include <thread>\n#include <vector>\n#include <atomic>\n\nstruct Node {\n    int data;\n    Node* next;\n    Node(int d) : data(d), next(nullptr) {}\n};\n\nNode* shared_list_head = nullptr; // ראש הרשימה המשותפת\nstd::atomic<int> shared_node_count(0); // מונה אטומי של צמתים\n\nvoid add_to_list(int value) {\n    Node* new_node = new Node(value);\n\n    // קטע קריטי אפשרי\n    new_node->next = shared_list_head; \n    shared_list_head = new_node;       \n    \n    shared_node_count++; \n}\n\nint main() {\n    std::vector<std::thread> threads;\n    const int NUM_THREADS = 5;\n    const int NODES_PER_THREAD = 10; // כל תהליכון מוסיף 10 צמתים\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        threads.emplace_back(add_to_list, i * NODES_PER_THREAD + 1);\n    }\n\n    for (auto& t : threads) {\n        t.join();\n    }\n\n    // לאחר סיום כל התהליכונים, נבדוק את מצב הרשימה\n    // (הקוד לבדיקה לא מוצג כאן אך יש להניח שהוא קיים וסופר את הצמתים ברשימה בפועל)\n    \n    return 0;\n}\n```\n\nאיזו טענה נכונה בהכרח לגבי הרצת הקוד הנ\"ל עם מספר תהליכונים במקביל?",
+      "code_snippet": null,
+      "options": [
+        "א. ערכו הסופי של `shared_node_count` יהיה שגוי (לא שווה למספר הצמתים הכולל שהוכנסו).",
+        "ב. הקוד יגרום בהכרח לקריסה (crash) עקב גישה לזיכרון לא חוקי.",
+        "ג. הרשימה המקושרת `shared_list_head` תכיל בהכרח את כל הצמתים שהוכנסו, אך סדרם עשוי להיות שגוי.",
+        "ד. הרשימה המקושרת `shared_list_head` עשויה לכלול פחות צמתים מהמספר הכולל שהוכנסו, למרות ש-`shared_node_count` יהיה נכון.",
+        "ה. אף אחת מהטענות האחרות אינה נכונה."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ד",
+      "explanation": "הבעיה בקוד טמונה בתנאי מרוץ (race condition) בשתי השורות שמעדכנות את ראש הרשימה:\n`new_node->next = shared_list_head;`\n`shared_list_head = new_node;`\n\nנניח ששני תהליכונים, T1 ו-T2, מנסים להוסיף צומת כמעט בו-זמנית:\n1. T1 קורא את `shared_list_head` (נניח שהוא מצביע על `H_old`).\n2. מתבצע החלפת הקשר (context switch) ל-T2.\n3. T2 קורא את `shared_list_head` (שעדיין מצביע על `H_old`).\n4. T2 יוצר צומת חדש `new_node_T2` ומגדיר את `new_node_T2->next = H_old`.\n5. T2 מעדכן את `shared_list_head = new_node_T2`.\n6. מתבצע החלפת הקשר חזרה ל-T1.\n7. T1 יוצר צומת חדש `new_node_T1` ומגדיר את `new_node_T1->next = H_old` (שימו לב, T1 עדיין משתמש בערך שקרא בשלב 1, ולא ב-`new_node_T2` ש-T2 הכניס).\n8. T1 מעדכן את `shared_list_head = new_node_T1`.\n\nבמקרה כזה, `new_node_T2` אבד מראש הרשימה. הוא עדיין קיים בזיכרון, ואולי אפילו מצביע על `H_old`, אך אין דרך להגיע אליו מ-`shared_list_head` כי `shared_list_head` עודכן על ידי T1 והוא מצביע כעת על `new_node_T1`. לכן, הרשימה בפועל (אם נסרוק אותה מ-`shared_list_head`) תכיל פחות צמתים מאשר הוכנסו בפועל.\n\nלעומת זאת, המשתנה `shared_node_count` הוא מסוג `std::atomic<int>`, מה שמבטיח שפעולת `shared_node_count++` היא אטומית. כלומר, כל קריאה לפונקציה `add_to_list` תגרום לעדכון נכון של המונה, ולכן ערכו הסופי של `shared_node_count` יהיה שווה למספר הכולל של הצמתים שנוצרו (NUM_THREADS * NODES_PER_THREAD).\n\nלכן, הטענה הנכונה היא ש`shared_list_head` עשויה לכלול פחות צמתים מהמספר הכולל שהוכנסו, למרות ש-`shared_node_count` יהיה נכון."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

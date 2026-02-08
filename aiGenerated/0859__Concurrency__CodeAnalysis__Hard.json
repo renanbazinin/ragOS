@@ -1,0 +1,51 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 00:53:46",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5571,
+      "output_tokens": 2715,
+      "total_tokens": 15054
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Concurrency",
+      "Deadlocks",
+      "Synchronization",
+      "Mutexes"
+    ],
+    "content": {
+      "text": "נתונה מערכת המנהלת N חדרים, המיוצגים על ידי מערך של N מנעולים הדדיים (mutexes). במערכת פועלים שני סוגי חוטים: מנקים (cleaners) ופקחים (inspectors).\n\nחוט מנקה: אחראי על ניקוי שני חדרים סמוכים. מנקה שמקבל אינדקס חדר `i` ינקה את חדר `i` ואת חדר `(i+1)%N`. כדי לבצע את הניקוי, המנקה חייב לתפוס את המנעולים של שני החדרים בו-זמנית.\n\nחוט פקח: אחראי על בדיקת חדר בודד. פקח שמקבל אינדקס חדר `i` יבדוק את חדר `i`. כדי לבצע את הבדיקה, הפקח חייב לתפוס את המנעול של חדר `i`.\n\nלהלן הקוד הממומש עבור פונקציות המנקה והפקח. הנח ש-N הוא קבוע גדול מ-1.\n\n",
+      "code_snippet": "pthread_mutex_t room_mutex[N]; // N mutexes, one for each room, initialized (e.g., pthread_mutex_init for each)\n\nvoid* cleaner_thread(void* arg) {\n    int room_idx = *(int*)arg;\n    int next_room_idx = (room_idx + 1) % N;\n\n    // Acquire locks for both rooms\n    pthread_mutex_lock(&room_mutex[room_idx]);\n    // Simulate some work or context switch opportunity\n    // usleep(100);\n    pthread_mutex_lock(&room_mutex[next_room_idx]);\n\n    printf(\"Cleaner %d is cleaning rooms %d and %d\\n\", room_idx, room_idx, next_room_idx);\n    // Simulate cleaning work\n\n    pthread_mutex_unlock(&room_mutex[next_room_idx]);\n    pthread_mutex_unlock(&room_mutex[room_idx]);\n    return NULL;\n}\n\nvoid* inspector_thread(void* arg) {\n    int room_idx = *(int*)arg;\n\n    // Acquire lock for the single room\n    pthread_mutex_lock(&room_mutex[room_idx]);\n\n    printf(\"Inspector %d is inspecting room %d\\n\", room_idx, room_idx);\n    // Simulate inspection work\n\n    pthread_mutex_unlock(&room_mutex[room_idx]);\n    return NULL;\n}\n\n// main function would create threads, some cleaners, some inspectors"
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "האם המימוש הנתון יכול להוביל למצב של קיפאון (Deadlock)? אם כן, תאר תרחיש מינימלי (כלומר, עם מספר החוטים והחדרים המועט ביותר) שמוביל לקיפאון, ופרט את סדר הפעולות של החוטים המוביל למצב זה.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "אם התשובה לשאלה 1.1 היא חיובית (קיים קיפאון), תקן את פונקציית ה-`cleaner_thread` כך שתמנע קיפאונות, אך עדיין תאפשר למנקים שונים לנקות חדרים שאינם חופפים במקביל. הפתרון צריך למנוע גם קיפאון חי (Livelock) והרעבה (Starvation) עבור המנקים. אין צורך לשנות את פונקציית ה-`inspector_thread`. פרט בקצרה את עיקרון התיקון.",
+        "code_snippet": "void* cleaner_thread(void* arg) {\n    int room_idx = *(int*)arg;\n    int next_room_idx = (room_idx + 1) % N;\n\n    // Your corrected code here\n\n    return NULL;\n}",
+        "options": null
+      }
+    ],
+    "points": 25,
+    "solution": {
+      "is_present_in_file": false,
+      "correct_option": null,
+      "explanation": "1.1: כן, המימוש הנתון יכול להוביל לקיפאון.\nתרחיש מינימלי לקיפאון: כאשר N=2, ושני חוטים מנקים (Cleaner 0 ו-Cleaner 1) מנסים לנקות חדרים סמוכים.\n\nCleaner 0 (מנקה חדרים 0 ו-1) ו-Cleaner 1 (מנקה חדרים 1 ו-0, שכן (1+1)%2 = 0):\n\n1.  **Cleaner 0** תופס את המנעול עבור `room_mutex[0]`. (שורת `pthread_mutex_lock(&room_mutex[room_idx]);` עם `room_idx=0`)\n2.  **Cleaner 1** תופס את המנעול עבור `room_mutex[1]`. (שורת `pthread_mutex_lock(&room_mutex[room_idx]);` עם `room_idx=1`)\n3.  **Cleaner 0** מנסה לתפוס את המנעול עבור `room_mutex[1]`. הוא נחסם מכיוון ש-Cleaner 1 מחזיק בו. (שורת `pthread_mutex_lock(&room_mutex[next_room_idx]);` עם `next_room_idx=1`)\n4.  **Cleaner 1** מנסה לתפוס את המנעול עבור `room_mutex[0]`. הוא נחסם מכיוון ש-Cleaner 0 מחזיק בו. (שורת `pthread_mutex_lock(&room_mutex[next_room_idx]);` עם `next_room_idx=0`)\n\nבשלב זה, שני המנקים חסומים זה לזה, כל אחד מחזיק במשאב שהשני דורש, ואינם יכולים להמשיך. זהו מצב של קיפאון.\n\n1.2: כדי למנוע קיפאון במצב של תפיסת מספר משאבים (מנעולים) בו-זמנית, יש להקצות אותם בסדר קנוני (קבוע). במקרה זה, תמיד נתפוס את המנעול של החדר עם האינדקס הנמוך יותר קודם, ולאחר מכן את המנעול של החדר עם האינדקס הגבוה יותר. זה מפר את תנאי ה'המתנה מעגלית' (Circular Wait).\n\nתיקון פונקציית ה-`cleaner_thread`:\n\n```c\nvoid* cleaner_thread(void* arg) {\n    int room_idx = *(int*)arg;\n    int next_room_idx = (room_idx + 1) % N;\n\n    int lock1_idx, lock2_idx;\n\n    // Establish a canonical order for locking: always lock the numerically smaller index first.\n    // Handle the special wrap-around case (N-1, 0) where 0 is conceptually 'smaller' than N-1.\n    if (room_idx == N - 1 && next_room_idx == 0) {\n        lock1_idx = 0; // Lock room 0 first\n        lock2_idx = N - 1; // Then lock room N-1\n    } else { \n        // For all other cases (e.g., (0,1), (1,2), ..., (N-2, N-1)), lock the numerically smaller index first\n        lock1_idx = (room_idx < next_room_idx) ? room_idx : next_room_idx;\n        lock2_idx = (room_idx < next_room_idx) ? next_room_idx : room_idx;\n    }\n\n    // Acquire locks in canonical order\n    pthread_mutex_lock(&room_mutex[lock1_idx]);\n    pthread_mutex_lock(&room_mutex[lock2_idx]);\n\n    printf(\"Cleaner %d is cleaning rooms %d and %d\\n\", room_idx, room_idx, next_room_idx);\n    // Simulate cleaning work\n\n    pthread_mutex_unlock(&room_mutex[lock2_idx]);\n    pthread_mutex_unlock(&room_mutex[lock1_idx]);\n    return NULL;\n}\n```\n\n**הסבר לתיקון:**\n*   **מניעת קיפאון:** על ידי הקצאת המנעולים בסדר עולה של האינדקסים (או בסדר קבוע אחר, כל עוד הוא עקבי לכל החוטים), אנו מבטיחים שלא תיווצר שרשרת המתנה מעגלית. לדוגמה, אם Cleaner A תמיד תופס `min(R1, R2)` ואז `max(R1, R2)`, ו-Cleaner B תמיד תופס `min(R3, R4)` ואז `max(R3, R4)`, לעולם לא יקרה מצב ש-A ממתין ל-B ו-B ממתין ל-A על אותם מנעולים.\n*   **מקרה קצה N-1 ו-0:** כאשר `room_idx = N-1`, אז `next_room_idx = 0`. במקרה זה, `room_idx` (N-1) גדול מ-`next_room_idx` (0). לכן, יש לתפוס את מנעול חדר 0 קודם, ולאחר מכן את מנעול חדר N-1. התיקון שהוסף מטפל במקרה זה במפורש כדי להבטיח עקביות בסדר התפיסה (0 ואז N-1), ובכך שובר את תנאי ההמתנה המעגלית.\n*   **מניעת Livelock/Starvation:** פתרון זה מבוסס על תפיסת מנעולים פשוטה בסדר קבוע באמצעות `pthread_mutex_lock`. אין בו לולאות ניסיון-כישלון (try-lock loops) או מנגנוני המתנה מורכבים שיכולים להוביל ל-livelock. כמו כן, מכיוון ש-`pthread_mutex_lock` הוא בדרך כלל הוגן (fair) או לפחות לא מבטיח הרעבה שיטתית על פני זמן רב, פתרון זה מונע הרעבה של מנקים.\n*   **מקביליות:** מנקים שונים עדיין יכולים לנקות חדרים שאינם חופפים במקביל (למשל, מנקה חדרים 0 ו-1 יכול לפעול במקביל למנקה חדרים 2 ו-3, אם N מספיק גדול), מכיוון שהם תופסים מנעולים שונים לחלוטין. מנקה חדר 0 ו-1 ומנקה חדר 1 ו-2 לא יכולים לפעול במקביל כמובן, אבל הם יתייגו באופן בטוח וצפוי."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

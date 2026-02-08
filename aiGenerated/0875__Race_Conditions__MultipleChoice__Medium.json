@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 01:01:01",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 901,
+      "output_tokens": 895,
+      "total_tokens": 6610
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Race Conditions",
+      "Concurrency",
+      "Synchronization",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא המורץ על ידי שני תהליכונים (threads) במקביל. כל תהליכון קורא לפונקציה `increment`.\nמהו הערך הסופי האפשרי הנמוך ביותר של המשתנה `counter` לאחר ששני התהליכונים סיימו את ריצתם, בהינתן שקיימת תחרות (race condition) על המשתנה `counter`?",
+      "code_snippet": "```c\n#include <stdio.h>\n#include <pthread.h>\n\nint counter = 0; // משתנה גלובלי משותף\n\nvoid* increment(void* arg) {\n    for (int i = 0; i < 100000; i++) {\n        counter++;\n    }\n    return NULL;\n}\n\n// קטע קוד לדוגמה של הפונקציה הראשית (main) המשתמשת בפונקציה increment:\n// int main() {\n//     pthread_t tid1, tid2;\n//     pthread_create(&tid1, NULL, increment, NULL);\n//     pthread_create(&tid2, NULL, increment, NULL);\n//     pthread_join(tid1, NULL);\n//     pthread_join(tid2, NULL);\n//     printf(\"Final counter: %d\\n\", counter);\n//     return 0;\n// }\n```",
+      "options": [
+        "1",
+        "100000",
+        "150000",
+        "200000"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "1",
+      "explanation": "התשובה הנכונה היא 1.\nהפעולה `counter++` אינה אטומית. היא מורכבת משלוש פעולות בסיסיות:\n1. קריאת הערך של `counter` לתוך אוגר (register).\n2. הגדלת הערך באוגר.\n3. כתיבת הערך מהאוגר בחזרה ל`counter`.\n\nבמצב של תחרות (race condition), ייתכן התרחיש הבא:\n1. תהליכון A קורא את `counter` (שערכו ההתחלתי הוא 0) לתוך אוגר. כעת, האוגר של A מכיל 0.\n2. מתרחש מעבר הקשר (context switch) לתהליכון B.\n3. תהליכון B מבצע את כל 100,000 ההגדלות שלו ללא הפרעה. בסיום, המשתנה הגלובלי `counter` יהיה שווה ל-100,000.\n4. מתרחש מעבר הקשר בחזרה לתהליכון A.\n5. תהליכון A ממשיך את פעולת ה`counter++` שלו, תוך שימוש בערך שקרא קודם לכן (0). הוא מגדיל אותו ל-1 באוגר שלו, ולאחר מכן כותב 1 בחזרה למשתנה `counter`.\n\nבמקרה זה, כל 100,000 ההגדלות שבוצעו על ידי תהליכון B אבדו למעשה (נמחקו על ידי הכתיבה של A), והערך הסופי של `counter` יהיה 1. זהו הערך האפשרי הנמוך ביותר במצב של תחרות."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

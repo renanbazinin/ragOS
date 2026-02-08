@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 01:01:52",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 901,
+      "output_tokens": 738,
+      "total_tokens": 3746
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Race Conditions",
+      "Concurrency",
+      "Threads",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא בשפת C:\n\n```c\n#include <stdio.h>\n#include <pthread.h>\n\nint counter = 0; // Shared global variable\n\nvoid* increment(void* arg) {\n    for (int i = 0; i < 100000; i++) {\n        counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t tid1, tid2;\n\n    pthread_create(&tid1, NULL, increment, NULL);\n    pthread_create(&tid2, NULL, increment, NULL);\n\n    pthread_join(tid1, NULL);\n    pthread_join(tid2, NULL);\n\n    printf(\"Final counter value: %d\\n\", counter);\n    return 0;\n}\n```\n\nשני תהליכונים (threads) מריצים את הפונקציה `increment` במקביל. מהו הערך הסופי הסביר ביותר שיוצג עבור המשתנה `counter`?",
+      "code_snippet": null,
+      "options": [
+        "א. תמיד 200,000",
+        "ב. תמיד 100,000",
+        "ג. לרוב פחות מ-200,000",
+        "ד. לרוב יותר מ-200,000",
+        "ה. תמיד שונה מ-200,000, אך לא ניתן לדעת אם יותר או פחות"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג. לרוב פחות מ-200,000",
+      "explanation": "הפעולה `counter++` אינה אטומית. היא מורכבת משלושה שלבים: 1. קריאת הערך הנוכחי של `counter`. 2. הגדלת הערך. 3. כתיבת הערך החדש חזרה ל-`counter`. כאשר שני תהליכונים מבצעים פעולה זו במקביל ללא סנכרון, מתרחש תנאי מירוץ (race condition). לדוגמה, אם תהליכון A קורא את `counter` (נניח 0), ותהליכון B קורא גם הוא את `counter` (עדיין 0) לפני שתהליכון A הספיק לכתוב את ערכו החדש, אז שניהם יגדילו את הערך ל-1 ויכתבו אותו בחזרה, ובכך אחת ההגדלות תאבד. מצב זה מוביל לאיבוד עדכונים, ולכן הערך הסופי יהיה בדרך כלל נמוך מהערך הצפוי של 200,000."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 06:55:44",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1930,
+      "output_tokens": 1773,
+      "total_tokens": 11286
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "Open",
+    "topic": [
+      "Concurrency",
+      "Synchronization",
+      "Producer-Consumer",
+      "Semaphores",
+      "Mutexes"
+    ],
+    "content": {
+      "text": "בעיית יצרן-צרכן (Producer-Consumer Problem) היא בעיית סנכרון קלאסית במערכות הפעלה. נתון מאגר מעגלי (bounded buffer) בגודל N, אליו יצרנים מכניסים נתונים וצרכנים מוציאים נתונים. ישנם מספר יצרנים ומספר צרכנים הפועלים במקביל. עליכם לממש את פונקציות ה-`produce` וה-`consume` עבור מאגר זה, תוך שימוש במנעולים (mutexes) ובסמפורים (semaphores) בלבד. יש להבטיח סנכרון נכון, כך שיצרן לא ינסה להכניס נתונים למאגר מלא, וצרכן לא ינסה להוציא נתונים ממאגר ריק. כמו כן, יש לוודא גישה בטוחה למאגר המשותף. הנה מבנה הנתונים ופונקציות האתחול וההשמדה:",
+      "code_snippet": "#include <semaphore.h>\n#include <pthread.h>\n#include <stdlib.h>\n\n#define BUFFER_SIZE 10 \n\ntypedef struct {\n    int buffer[BUFFER_SIZE];\n    int in;  \n    int out; \n\n    sem_t empty; \n    sem_t full;  \n    pthread_mutex_t mutex; \n} BoundedBuffer;\n\nvoid init_buffer(BoundedBuffer *bb) {\n    bb->in = 0;\n    bb->out = 0;\n    sem_init(&bb->empty, 0, BUFFER_SIZE); \n    sem_init(&bb->full, 0, 0);            \n    pthread_mutex_init(&bb->mutex, NULL);\n}\n\nvoid destroy_buffer(BoundedBuffer *bb) {\n    sem_destroy(&bb->empty);\n    sem_destroy(&bb->full);\n    pthread_mutex_destroy(&bb->mutex);\n}\n\nvoid produce(BoundedBuffer *bb, int item) {\n    // השלימו את המימוש כאן\n}\n\nint consume(BoundedBuffer *bb) {\n    // השלימו את המימוש כאן\n    return -1; \n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון לבעיית היצרן-צרכן עם מאגר מעגלי משתמש בשני סמפורים ובמנעול אחד:\n1.  **`empty` (סמפור):** סמפור זה מתחיל עם ערך השווה לגודל המאגר (`BUFFER_SIZE`). הוא מייצג את מספר המקומות הריקים במאגר. יצרן מבצע `sem_wait` עליו לפני הכנסת פריט, וצרכן מבצע `sem_post` עליו לאחר הוצאת פריט.\n2.  **`full` (סמפור):** סמפור זה מתחיל עם ערך 0. הוא מייצג את מספר המקומות המלאים במאגר. צרכן מבצע `sem_wait` עליו לפני הוצאת פריט, ויצרן מבצע `sem_post` עליו לאחר הכנסת פריט.\n3.  **`mutex` (מנעול):** מנעול בינארי זה משמש להגנה על הקטע הקריטי, כלומר, הגישה למאגר המשותף ולמשתני האינדקסים (`in`, `out`). הוא מבטיח שרק חוט אחד (יצרן או צרכן) יוכל לגשת למאגר בו-זמנית, ובכך מונע תנאי מירוץ (race conditions) בעת עדכון המאגר והאינדקסים.\n\nהנה המימוש המלא של פונקציות ה-`produce` וה-`consume`:\n\nvoid produce(BoundedBuffer *bb, int item) {\n    sem_wait(&bb->empty); // Wait for an empty slot\n    pthread_mutex_lock(&bb->mutex); // Acquire mutex for critical section\n\n    bb->buffer[bb->in] = item;\n    bb->in = (bb->in + 1) % BUFFER_SIZE;\n\n    pthread_mutex_unlock(&bb->mutex); // Release mutex\n    sem_post(&bb->full); // Signal that a slot is now full\n}\n\nint consume(BoundedBuffer *bb) {\n    sem_wait(&bb->full); // Wait for a full slot\n    pthread_mutex_lock(&bb->mutex); // Acquire mutex for critical section\n\n    int item = bb->buffer[bb->out];\n    bb->out = (bb->out + 1) % BUFFER_SIZE;\n\n    pthread_mutex_unlock(&bb->mutex); // Release mutex\n    sem_post(&bb->empty); // Signal that a slot is now empty\n\n    return item;\n}\n\n**פונקציית `produce`:**\n*   **`sem_wait(&bb->empty);`**: היצרן ממתין שיהיה מקום ריק במאגר. אם המאגר מלא, הוא ייחסם כאן עד שצרכן יפנה מקום.\n*   **`pthread_mutex_lock(&bb->mutex);`**: היצרן נועל את המנעול כדי להיכנס לקטע הקריטי ולגשת למאגר בבטחה.\n*   **הכנסת פריט למאגר ועדכון `in`**: הפריט מוכנס למאגר, והאינדקס `in` מקודם (במודולו `BUFFER_SIZE` כדי לשמור על מעגליות).\n*   **`pthread_mutex_unlock(&bb->mutex);`**: היצרן משחרר את המנעול.\n*   **`sem_post(&bb->full);`**: היצרן מאותת שהוכנס פריט למאגר, ובכך מגדיל את מספר המקומות המלאים.\n\n**פונקציית `consume`:**\n*   **`sem_wait(&bb->full);`**: הצרכן ממתין שיהיה פריט זמין במאגר. אם המאגר ריק, הוא ייחסם כאן עד שיצרן יכניס פריט.\n*   **`pthread_mutex_lock(&bb->mutex);`**: הצרכן נועל את המנעול כדי להיכנס לקטע הקריטי ולגשת למאגר בבטחה.\n*   **הוצאת פריט מהמאגר ועדכון `out`**: הפריט מוצא מהמאגר, והאינדקס `out` מקודם (במודולו `BUFFER_SIZE` כדי לשמור על מעגליות).\n*   **`pthread_mutex_unlock(&bb->mutex);`**: הצרכן משחרר את המנעול.\n*   **`sem_post(&bb->empty);`**: הצרכן מאותת שפונה מקום במאגר, ובכך מגדיל את מספר המקומות הריקים."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

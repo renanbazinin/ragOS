@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 01:05:26",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 1105,
+      "total_tokens": 7236
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "Race Conditions",
+      "Synchronization",
+      "Critical Sections"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המשתמשת ב-pthreads ומנסה להגדיל מונה משותף (`shared_counter`) עד לערך מקסימלי מסוים (`MAX_VALUE`). המטרה היא לוודא שהמונה לעולם לא יעבור את `MAX_VALUE`. קטע הקוד הרלוונטי מוצג מטה. האם קטע קוד זה מבטיח ש-`shared_counter` לעולם לא יעלה על `MAX_VALUE`?",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\n#define MAX_VALUE 10\nint shared_counter = 0;\npthread_mutex_t m;\n\nvoid* thread_func(void* arg) {\n    for (int i = 0; i < 100000; ++i) {\n        pthread_mutex_lock(&m); // Lock 1\n        int current_value = shared_counter; // Read shared_counter\n        pthread_mutex_unlock(&m); // Unlock 1 - DANGER ZONE\n\n        // At this point, current_value holds a potentially stale value.\n        // Another thread could increment shared_counter between the unlock and the next lock.\n\n        if (current_value < MAX_VALUE) { // Check based on potentially stale value\n            pthread_mutex_lock(&m); // Lock 2\n            // The condition (shared_counter < MAX_VALUE) might no longer be true\n            // but this thread will increment regardless because it passed the check outside the critical section.\n            shared_counter++; // Act\n            pthread_mutex_unlock(&m); // Unlock 2\n        }\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t t1, t2;\n    pthread_mutex_init(&m, NULL);\n    pthread_create(&t1, NULL, thread_func, NULL);\n    pthread_create(&t2, NULL, thread_func, NULL);\n    pthread_join(t1, NULL);\n    pthread_join(t2, NULL);\n    printf(\"Final counter: %d\\n\", shared_counter);\n    pthread_mutex_destroy(&m);\n    return 0;\n}",
+      "options": [
+        "א. כן, מכיוון שהמנעול (mutex) מבטיח אטומיות של פעולות הגישה למונה.",
+        "ב. לא, מכיוון שקיים תנאי מירוץ (race condition) המאפשר ל-`shared_counter` לעבור את `MAX_VALUE`.",
+        "ג. כן, אך ורק אם `MAX_VALUE` הוא ערך גדול מאוד.",
+        "ד. לא, מכיוון שקיים סיכון לקיפאון (deadlock)."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "התשובה הנכונה היא ב'. קטע הקוד מכיל תנאי מירוץ קלאסי מסוג 'check-then-act' שאינו מוגן באופן מלא. למרות שהקריאה לערך המונה (`shared_counter`) והפעולה של ההגדלה (`shared_counter++`) מוגנות כל אחת בנפרד על ידי מנעול, שחרור המנעול בין שלב הבדיקה (`if (current_value < MAX_VALUE)`) לשלב הפעולה (`shared_counter++`) מאפשר לתהליכים אחרים לשנות את `shared_counter` בפרק הזמן הזה. כתוצאה מכך, ייתכן שתהליך יקרא את `shared_counter` (למשל, 9), ישחרר את המנעול, ותהליך אחר יספיק לבצע את כל הבדיקה וההגדלה (וכך `shared_counter` יהפוך ל-10). כשהתהליך הראשון יחזור ויבצע את ההגדלה, הוא יוסיף למונה שכבר הגיע ל-`MAX_VALUE`, ויגרום לו לעבור את הגבול (ל-11 במקרה זה). כדי למנוע את תנאי המירוץ, יש להחזיק את המנעול לכל אורך פעולת הבדיקה וההגדלה, כלומר, קטע הקוד כולו החל מהבדיקה ועד ההגדלה צריך להיות בתוך הקטע הקריטי."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

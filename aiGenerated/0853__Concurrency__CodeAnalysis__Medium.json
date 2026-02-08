@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 00:50:09",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2942,
+      "output_tokens": 1073,
+      "total_tokens": 7154
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Concurrency",
+      "Race Conditions",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה, המשתמשת בחוטים (threads) כדי להגדיל מונה גלובלי משותף. בתוכנית מופעלים 5 חוטים, וכל חוט מבצע 100,000 הגדלות של המונה. התוכנית אינה משתמשת במנגנוני סנכרון כלשהם.\n\nמהו הטווח האפשרי של הערכים הסופיים שיכולים להתקבל עבור המשתנה `shared_counter` לאחר שכל החוטים סיימו את פעולתם?",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\n#define NUM_THREADS 5\n#define INCREMENTS_PER_THREAD 100000\n\nint shared_counter = 0;\n\nvoid* thread_function(void* arg) {\n    for (int i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n        shared_counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, thread_function, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final counter value: %d\\n\", shared_counter);\n    return 0;\n}",
+      "options": [
+        "א. 0 עד 500000",
+        "ב. 1 עד 500000",
+        "ג. 250000 עד 500000",
+        "ד. 500000 בלבד (אין תנאי מרוץ)",
+        "ה. 1 עד 250000"
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "הבעיה המרכזית בתוכנית היא תנאי מרוץ (race condition) על המשתנה המשותף `shared_counter`. פעולת ההגדלה `shared_counter++` אינה אטומית, אלא מורכבת משלושה שלבים: קריאת הערך, הגדלתו, וכתיבת הערך החדש. כאשר מספר חוטים מנסים לבצע פעולה זו במקביל ללא סנכרון, ייתכנו מקרים שבהם חוט אחד קורא את הערך, חוט שני קורא את אותו ערך לפני שהחוט הראשון הספיק לכתוב את ערכו המוגדל, וכך שני החוטים כותבים את אותו ערך מוגדל, מה שגורם לאיבוד של אחת ההגדלות.\n\nהערך המקסימלי האפשרי הוא 500,000 (5 חוטים * 100,000 הגדלות לחוט). זה יקרה אם, במקרה, אף הגדלה לא תאבד עקב תנאי מרוץ (לדוגמה, אם החוטים ירוצו באופן סידרתי מאוד מסוים).\n\nהערך המינימלי האפשרי הוא 1. תרחיש קיצוני שבו זה יקרה הוא שכל 500,000 פעולות הקריאה של `shared_counter` יבוצעו על ידי כל החוטים לפני שפעולת כתיבה כלשהי הושלמה. במצב כזה, כל החוטים יקראו את הערך 0. לאחר מכן, כל חוט יגדיל את הערך שקרא ל-1, וינסה לכתוב 1 ל-`shared_counter`. לבסוף, `shared_counter` יכיל את הערך 1, מכיוון שכל הכתיבות ישימו את הערך 1.\n\nלכן, הטווח האפשרי הוא בין 1 ל-500,000."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

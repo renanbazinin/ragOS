@@ -1,0 +1,53 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 00:53:07",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5571,
+      "output_tokens": 1838,
+      "total_tokens": 12900
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Concurrency",
+      "Deadlocks",
+      "Synchronization",
+      "Mutexes",
+      "Starvation"
+    ],
+    "content": {
+      "text": "נתונה מערכת המנהלת N משאבים מסוג `int` במערך `resources`, כאשר כל משאב מוגן על ידי מנעול `pthread_mutex_t` משלו במערך `mutexes`. כל המשאבים מאותחלים לערך חיובי כלשהו, וכל המנעולים מאותחלים כרגיל. הפונקציה `transfer` מיועדת להעביר כמות `amount` ממשאב `from` למשאב `to`. להלן מימוש הפונקציה `transfer`:",
+      "code_snippet": "1 #include <pthread.h>\n2 #include <stdio.h>\n3 \n4 #define N 5 // דוגמה ל-N\n5 \n6 int resources[N];\n7 pthread_mutex_t mutexes[N];\n8 \n9 void transfer(int from, int to, int amount) {\n10    pthread_mutex_lock(&mutexes[from]);\n11    pthread_mutex_lock(&mutexes[to]);\n12    \n13    resources[from] -= amount;\n14    resources[to] += amount;\n15    \n16    pthread_mutex_unlock(&mutexes[to]);\n17    pthread_mutex_unlock(&mutexes[from]);\n18}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "8.1",
+        "text": "תארו תרחיש ספציפי (כולל מספר חוטים, קריאות לפונקציה `transfer` וסדר פעולות אפשרי) שיוביל למצב של קיפאון (deadlock) במימוש הנתון. יש להסביר בקצרה מדוע זה קיפאון.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.2",
+        "text": "תקנו את הפונקציה `transfer` כך שתמנע מצבי קיפאון והרעבה (starvation) עבור כל קריאה חוקית לפונקציה (כלומר, `from` ו-`to` הם אינדקסים חוקיים, `amount` חיובי). ניתן לשנות את הקוד הנתון באופן חופשי, להוסיף משתנים גלובליים או להשתמש בפונקציות סנכרון נוספות לפי הצורך (למעט קריאות אטומיות). יש להסביר בקצרה את הפתרון שלכם.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "8.1: תרחיש קיפאון קלאסי מתרחש כאשר שני חוטים מנסים לתפוס מנעולים בסדר הפוך. נניח שיש לנו שני חוטים:\n*   **חוט 1:** קורא ל-`transfer(0, 1, 10)`\n*   **חוט 2:** קורא ל-`transfer(1, 0, 5)`\n\n**סדר פעולות שמוביל לקיפאון:**\n1.  **חוט 1:** תופס את `mutexes[0]` (שורת `pthread_mutex_lock(&mutexes[from]);` עם `from=0`).\n2.  **חוט 2:** תופס את `mutexes[1]` (שורת `pthread_mutex_lock(&mutexes[from]);` עם `from=1`).\n3.  **חוט 1:** מנסה לתפוס את `mutexes[1]` (שורת `pthread_mutex_lock(&mutexes[to]);` עם `to=1`). הוא נחסם מכיוון ש-`mutexes[1]` כבר תפוס על ידי חוט 2.\n4.  **חוט 2:** מנסה לתפוס את `mutexes[0]` (שורת `pthread_mutex_lock(&mutexes[to]);` עם `to=0`). הוא נחסם מכיוון ש-`mutexes[0]` כבר תפוס על ידי חוט 1.\nשני החוטים חסומים וממתינים זה לזה לשחרור מנעול שהשני מחזיק, וכך נוצר קיפאון.\n\n8.2: כדי למנוע קיפאון, יש להבטיח שכל החוטים יתפסו את המנעולים בסדר עקבי וקבוע. פתרון נפוץ הוא לתפוס את המנעול של המשאב עם האינדקס הקטן יותר (`lock1_idx`) קודם, ולאחר מכן את המנעול של המשאב עם האינדקס הגדול יותר (`lock2_idx`). גישה זו מפרה את תנאי ה'המתנה מעגלית' (Circular Wait) מבין ארבעת תנאי הקיפאון של Coffman, ובכך מונעת קיפאון.\nבמקרה שבו `from == to`, פעולת ההעברה עצמה מבטלת את עצמה (מורידה ומוסיפה את אותה כמות לאותו משאב, לכן אין שינוי נטו). כמו כן, ניסיון לתפוס את אותו מנעול פעמיים (עבור `from` ועבור `to` שהם זהים) באותו חוט, כאשר המנעול אינו מסוג רקורסיבי, יוביל לקיפאון עצמי. לכן, במקרה זה, הפונקציה יכולה פשוט לחזור מבלי לבצע פעולה כלשהי.\nהשימוש ב-`pthread_mutex_lock` ו-`pthread_mutex_unlock` מבטיח הוגנות סבירה עבור מנעולים בודדים, ובשילוב עם סדר תפיסת מנעולים עקבי, מונע גם הרעבה במצבים אלו.\n\n**הקוד המתוקן:**\n```c\nvoid transfer_fixed(int from, int to, int amount) {\n    if (from == to) {\n        // אם המקור והיעד זהים, האפקט נטו הוא אפס. \n        // כדי למנוע קיפאון עצמי אם pthread_mutex_lock נקרא פעמיים על מנעול לא רקורסיבי, \n        // וכדי להימנע מפעולות מיותרות, אנו יכולים פשוט לחזור.\n        return;\n    }\n\n    // הבטחת סדר עקבי של תפיסת מנעולים כדי למנוע קיפאון.\n    // תמיד תופסים את המנעול עם האינדקס הקטן יותר ראשון.\n    int lock1_idx = (from < to) ? from : to;\n    int lock2_idx = (from < to) ? to : from;\n\n    // תפיסת מנעולים בסדר קבוע וגלובלי\n    pthread_mutex_lock(&mutexes[lock1_idx]);\n    pthread_mutex_lock(&mutexes[lock2_idx]);\n    \n    // ביצוע העברת המשאבים\n    resources[from] -= amount;\n    resources[to] += amount;\n    \n    // שחרור מנעולים (סדר השחרור פחות קריטי מסדר התפיסה)\n    pthread_mutex_unlock(&mutexes[lock2_idx]);\n    pthread_mutex_unlock(&mutexes[lock1_idx]);\n}\n```"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

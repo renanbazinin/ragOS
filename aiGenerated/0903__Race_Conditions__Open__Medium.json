@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 01:10:16",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2154,
+      "output_tokens": 1641,
+      "total_tokens": 6094
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Race Conditions",
+      "Synchronization",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתונה פיסת קוד ב-C המשתמשת בתהליכונים (threads) כדי להגדיל מונה משותף (`shared_counter`). עיין בקוד המצורף וענה על השאלות הבאות:\n1. האם הקוד המצורף סובל מתנאי מרוץ (Race Condition)? אם כן, הסבר מדוע וזהה את הקטע הקריטי (Critical Section).\n2. איזו תוצאה לא צפויה עלולה להתקבל בהפעלת הקוד, ומדוע היא מתרחשת?\n3. הצע פתרון לקוד המצורף על מנת למנוע את תנאי המרוץ, תוך שימוש במנגנוני סנכרון מתאימים (לדוגמה: mutex או semaphore). כתוב את הקוד המתוקן.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <pthread.h>\n\n#define NUM_THREADS 5\n#define ITERATIONS_PER_THREAD 100000\n\nlong long shared_counter = 0;\n\nvoid *increment_counter(void *arg) {\n    for (int i = 0; i < ITERATIONS_PER_THREAD; i++) {\n        shared_counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    printf(\"Initial shared_counter value: %lld\\n\", shared_counter);\n\n    for (int i = 0; i < NUM_THREADS; i++) {\n        pthread_create(&threads[i], NULL, increment_counter, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; i++) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final shared_counter value: %lld\\n\", shared_counter);\n    printf(\"Expected value: %lld\\n\", (long long)NUM_THREADS * ITERATIONS_PER_THREAD);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": 15,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.  **זיהוי תנאי מרוץ וקטע קריטי**: כן, הקוד סובל מתנאי מרוץ (Race Condition). הקטע הקריטי הוא הפעולה `shared_counter++`. הסיבה לכך היא שפעולה זו אינה אטומית. ברמת המעבד, היא מורכבת בדרך כלל משלוש פקודות נפרדות:\n    א.  קריאת ערך המונה מהזיכרון לתוך רגיסטר.\n    ב.  הגדלת הערך ברגיסטר.\n    ג.  כתיבת הערך המוגדל מהרגיסטר בחזרה לזיכרון.\n    כאשר מספר תהליכונים מנסים לבצע את הפעולה הזו בו-זמנית ללא סנכרון, ייתכן שתהליכון אחד יקרא את הערך, יבוצע מיתוג הקשר (context switch) לתהליכון אחר שיקרא גם הוא את אותו הערך (לפני שהתהליכון הראשון הספיק לכתוב בחזרה), ושניהם יגדילו ויכתבו בחזרה את אותו ערך מוגדל. בכך, למרות שבוצעו שתי פעולות הגדלה, המונה גדל בפועל רק באחד.\n\n2.  **תוצאה לא צפויה**: התוצאה הלא צפויה היא שהערך הסופי של `shared_counter` יהיה נמוך מהערך הצפוי (`NUM_THREADS * ITERATIONS_PER_THREAD`). במקום לקבל סכום מדויק של כל ההגדלות, חלק מההגדלות 'ילכו לאיבוד' עקב התנגשויות בין התהליכונים על הגישה למשתנה המשותף.\n\n3.  **פתרון עם Mutex**: כדי למנוע את תנאי המרוץ, יש להגן על הקטע הקריטי באמצעות מנגנון סנכרון כמו Mutex (מיוטקס). כל תהליכון יצטרך לנעול את המיוטקס לפני הכניסה לקטע הקריטי (`pthread_mutex_lock`), ולשחרר אותו בסיום הפעולה (`pthread_mutex_unlock`). זה מבטיח שרק תהליכון אחד יוכל לבצע את פעולות הקריאה, ההגדלה והכתיבה של המונה בכל רגע נתון, ובכך הופך את פעולת ההגדלה לאטומית.\n\n    **הקוד המתוקן:**\n    ```c\n    #include <stdio.h>\n    #include <stdlib.h>\n    #include <pthread.h>\n\n    #define NUM_THREADS 5\n    #define ITERATIONS_PER_THREAD 100000\n\n    long long shared_counter = 0;\n    pthread_mutex_t counter_mutex; // הצהרה על מיוטקס\n\n    void *increment_counter(void *arg) {\n        for (int i = 0; i < ITERATIONS_PER_THREAD; i++) {\n            pthread_mutex_lock(&counter_mutex); // נעל את המיוטקס לפני הקטע הקריטי\n            shared_counter++; // הקטע הקריטי\n            pthread_mutex_unlock(&counter_mutex); // שחרר את המיוטקס אחרי הקטע הקריטי\n        }\n        return NULL;\n    }\n\n    int main() {\n        pthread_t threads[NUM_THREADS];\n\n        // אתחל את המיוטקס\n        pthread_mutex_init(&counter_mutex, NULL);\n\n        printf(\"Initial shared_counter value: %lld\\n\", shared_counter);\n\n        for (int i = 0; i < NUM_THREADS; i++) {\n            pthread_create(&threads[i], NULL, increment_counter, NULL);\n        }\n\n        for (int i = 0; i < NUM_THREADS; i++) {\n            pthread_join(threads[i], NULL);\n        }\n\n        printf(\"Final shared_counter value: %lld\\n\", shared_counter);\n        printf(\"Expected value: %lld\\n\", (long long)NUM_THREADS * ITERATIONS_PER_THREAD);\n\n        // השמד את המיוטקס\n        pthread_mutex_destroy(&counter_mutex);\n\n        return 0;\n    }\n    ```"
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

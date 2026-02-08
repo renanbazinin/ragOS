@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 01:09:00",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2154,
+      "output_tokens": 1639,
+      "total_tokens": 5860
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Race Conditions",
+      "Synchronization",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המשתמשת בשני תהליכונים (threads) כדי להגדיל מונה גלובלי (global counter) משותף. כל תהליכון מגדיל את המונה 100,000 פעמים. הקוד נראה כך:\n\n1. מהי הבעיה הפוטנציאלית בתוכנית זו? הסבר מדוע היא מתרחשת.\n2. הצע פתרון לקוד הנתון באמצעות מנגנון סנכרון מתאים (לדוגמה, mutex), והצג את הקוד המתוקן.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\nlong long counter = 0;\n\nvoid* increment_counter(void* arg) {\n    for (int i = 0; i < 100000; i++) {\n        counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t tid1, tid2;\n\n    pthread_create(&tid1, NULL, increment_counter, NULL);\n    pthread_create(&tid2, NULL, increment_counter, NULL);\n\n    pthread_join(tid1, NULL);\n    pthread_join(tid2, NULL);\n\n    printf(\"Final counter value: %lld\\n\", counter);\n\n    return 0;\n}"
+    },
+    "sub_questions": null,
+    "points": 15,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1. **הבעיה הפוטנציאלית**: בתוכנית זו קיימת תנאי מרוץ (Race Condition). כאשר שני התהליכונים מנסים לגשת ולשנות את המשתנה המשותף `counter` בו זמנית, אין ערובה לסדר הפעולות. פעולת ה-\"increment\" (`counter++`) אינה אטומית; היא מורכבת למעשה משלוש פעולות ברמה נמוכה יותר:\n    א. קריאת הערך הנוכחי של `counter` לתוך אוגר.\n    ב. הגדלת הערך באוגר ב-1.\n    ג. כתיבת הערך החדש מהאוגר בחזרה ל-`counter`.\n    אם תהליכון אחד קורא את הערך (לדוגמה, 0), ותהליכון שני קורא את אותו ערך (0) לפני שהתהליכון הראשון הספיק לכתוב בחזרה את הערך המוגדל (1), שניהם יגדילו את אותו ערך (0) ל-1 ויכתבו אותו בחזרה, וכך אחת ההגדלות \"תאבד\". התוצאה הסופית של `counter` תהיה לרוב נמוכה מהערך הצפוי (200,000).\n\n2. **הפתרון המוצע (באמצעות mutex)**:\n    כדי למנוע את תנאי המרוץ, יש להגן על הקטע הקריטי (Critical Section) שבו המשתנה המשותף `counter` משתנה. נשתמש במנעול (mutex) כדי להבטיח שרק תהליכון אחד יוכל לגשת לקטע קריטי זה בכל רגע נתון.\n\n    **קוד מתוקן**:\n    ```c\n    #include <stdio.h>\n    #include <pthread.h>\n\n    long long counter = 0;\n    pthread_mutex_t mutex; // הצהרה על mutex\n\n    void* increment_counter(void* arg) {\n        for (int i = 0; i < 100000; i++) {\n            pthread_mutex_lock(&mutex); // נעילת ה-mutex לפני הגישה לקטע הקריטי\n            counter++;\n            pthread_mutex_unlock(&mutex); // שחרור ה-mutex לאחר סיום הקטע הקריטי\n        }\n        return NULL;\n    }\n\n    int main() {\n        pthread_t tid1, tid2;\n\n        pthread_mutex_init(&mutex, NULL); // אתחול ה-mutex\n\n        pthread_create(&tid1, NULL, increment_counter, NULL);\n        pthread_create(&tid2, NULL, increment_counter, NULL);\n\n        pthread_join(tid1, NULL);\n        pthread_join(tid2, NULL);\n\n        printf(\"Final counter value: %lld\\n\", counter);\n\n        pthread_mutex_destroy(&mutex); // שחרור משאבי ה-mutex\n\n        return 0;\n    }\n    ```\n    **הסבר לפתרון**:\n    *   הצהרנו על משתנה מסוג `pthread_mutex_t` בשם `mutex` מחוץ לפונקציות, כך שיהיה גלובלי ונגיש לכל התהליכונים.\n    *   אתחלנו את ה-mutex באמצעות `pthread_mutex_init(&mutex, NULL)` בפונקציית `main` לפני יצירת התהליכונים. זה מכין את המנעול לשימוש.\n    *   בתוך הפונקציה `increment_counter`, לפני הפעולה `counter++`, קראנו ל-`pthread_mutex_lock(&mutex)`. קריאה זו מבטיחה שרק תהליכון אחד יכול לעבור נקודה זו בכל רגע. אם תהליכון אחר כבר מחזיק את המנעול, התהליכון הנוכחי ייחסם (ימתין) עד שהמנעול ישוחרר על ידי התהליכון שמחזיק אותו.\n    *   לאחר הפעולה `counter++` (שכעת מתבצעת באופן בטוח, בתוך הקטע הקריטי המוגן), קראנו ל-`pthread_mutex_unlock(&mutex)` כדי לשחרר את המנעול. פעולה זו מאפשרת לתהליכונים אחרים (שאולי ממתינים) לנסות ולרכוש את המנעול ולהיכנס לקטע הקריטי.\n    *   בסיום התוכנית, הרסנו את ה-mutex באמצעות `pthread_mutex_destroy(&mutex)` כדי לשחרר משאבי מערכת שהוקצו לו.\n    פתרון זה מבטיח שהפעולה `counter++` תתבצע באופן אטומי (כאילו הייתה פעולה יחידה ובלתי ניתנת להפרעה) עבור כל תהליכון, ובכך ימנע איבוד עדכונים והתוצאה הסופית תהיה תמיד 200,000."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

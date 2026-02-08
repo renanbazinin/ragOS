@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 00:59:18",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1028,
+      "output_tokens": 479,
+      "total_tokens": 2723
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Race Conditions",
+      "Concurrency",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "מהו התנאי העיקרי שחייב להתקיים כדי שמצב מרוץ (race condition) יתרחש בתוכנית המכילה חוטים או תהליכים מקבילים?",
+      "code_snippet": null,
+      "options": [
+        "א. מספר חוטים/תהליכים רצים במקביל.",
+        "ב. מספר חוטים/תהליכים ניגשים למשאב משותף לקריאה בלבד.",
+        "ג. מספר חוטים/תהליכים ניגשים ומשנים משאב משותף, והתוצאה הסופית של המשאב תלויה בסדר הספציפי שבו הפעולות מתרחשות.",
+        "ד. מספר חוטים/תהליכים משתמשים בפונקציות מערכת הפעלה (system calls)."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג'. מצב מרוץ מתרחש כאשר מספר חוטים או תהליכים ניגשים לאותו משאב משותף, ולפחות אחד מהם מבצע פעולת כתיבה (שינוי) על המשאב. בנוסף, התוצאה הסופית של המשאב תלויה בסדר הלא-דטרמיניסטי שבו מתבצעות הפעולות הללו. אם רק קוראים ממשאב משותף, לא יתרחש מצב מרוץ. אם אין משאב משותף, גם לא יתרחש. האפשרות שמספר חוטים/תהליכים רצים במקביל היא תנאי הכרחי אך לא מספיק."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

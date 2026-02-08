@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 00:49:34",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2942,
+      "output_tokens": 1250,
+      "total_tokens": 10874
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Concurrency",
+      "Race Conditions",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C מרובת חוטים המשתמשת בספריית pthreads. התוכנית יוצרת מספר חוטים שכל אחד מהם מגדיל מונה גלובלי משותף. מהו טווח הערכים האפשריים עבור `shared_counter` שיוצג בפלט התוכנית בסיום ריצתה?\n(התעלמו מבעיות של גלישה/חריגה של טיפוסים - integer overflow).",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\n#define NUM_THREADS 5\n#define INCREMENTS_PER_THREAD 100000\n\nint shared_counter = 0; // מונה גלובלי משותף\n\nvoid *thread_function(void *arg) {\n    for (int i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n        shared_counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, thread_function, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final counter value: %d\\n\", shared_counter);\n    return 0;\n}",
+      "options": [
+        "א. 0 עד 500000",
+        "ב. 1 עד 500000",
+        "ג. 5 עד 500000",
+        "ד. 500000 בלבד",
+        "ה. 500000 או 0 בלבד"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "התוכנית סובלת מתנאי מירוץ (race condition) על המשתנה הגלובלי `shared_counter`. הפעולה `shared_counter++` אינה אטומית, אלא מורכבת משלוש פעולות בסיסיות: 1. קריאת הערך הנוכחי של `shared_counter` לרג'יסטר של המעבד. 2. הגדלת הערך ברג'יסטר. 3. כתיבת הערך החדש מהרג'יסטר חזרה לזיכרון בכתובת של `shared_counter`.\n\nכאשר מספר חוטים מבצעים פעולה זו במקביל ללא מנגנון סנכרון (כגון mutex), ייתכן שחוט אחד יקרא את הערך, חוט שני יקרא את *אותו* ערך לפני שהחוט הראשון הספיק לכתוב את ערכו המעודכן, ושניהם יגדילו את הערך שקראו ויכתבו אותו בחזרה. במצב כזה, אחת מההגדלות תאבד כי שתי כתיבות התבססו על אותו ערך קריאה ישן, ובכך \"יתחרשו\" חלק מההגדלות.\n\nהערך המקסימלי האפשרי הוא 500,000 (NUM_THREADS * INCREMENTS_PER_THREAD = 5 * 100,000). זה יקרה במצב אידיאלי (אך נדיר ביותר ללא סנכרון) שבו כל הפעולות יתבצעו בסדר סריאלי ללא חפיפה שתגרום לאובדן עדכונים, או אם המהדר והחומרה יבצעו אופטימיזציות שימנעו את תנאי המירוץ (דבר שאינו מובטח). עם זאת, בהקשר של שאלות על תנאי מירוץ, אנו מניחים שאין אופטימיזציות כאלה המונעות את הבעיה.\n\nהערך המינימלי האפשרי הוא 1. זה יכול לקרות בתרחיש קיצוני שבו כל החוטים (פרט אולי לאחד) קוראים את הערך ההתחלתי 0, מגדילים אותו ל-1 ברג'יסטר שלהם, ולאחר מכן הכתיבות שלהם נדרסות על ידי כתיבות של חוטים אחרים שגם הם כתבו 1. בסופו של דבר, לפחות אחד מפעולות הכתיבה של 1 חייבת להישאר בזיכרון, שכן כל החוטים מסיימים את ריצתם ו-`pthread_join` ממתין להם. לכן, המונה לא יכול להישאר 0.\n\nלסיכום, טווח הערכים האפשריים עבור `shared_counter` הוא בין 1 ל-500,000 (כולל).",
+      "code_snippet": null
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

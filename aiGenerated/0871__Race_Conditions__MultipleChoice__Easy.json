@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 00:59:50",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1028,
+      "output_tokens": 773,
+      "total_tokens": 3742
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Race Conditions",
+      "Concurrency",
+      "Synchronization",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתבונן בקטע הקוד הבא, שבו שני חוטים (threads) מנסים להגדיל משתנה גלובלי משותף `counter` ללא מנגנוני סנכרון. כל חוט מבצע 100,000 הגדלות:\n\n```c\n// Shared global variable\nint counter = 0;\n\nvoid* incrementer(void* arg) {\n    for (int i = 0; i < 100000; i++) {\n        counter++; // This operation is not atomic\n    }\n    return NULL;\n}\n\n// assume two threads are created, each running incrementer, and then joined.\n```\n\nלאחר ששני החוטים יסיימו את ריצתם, מה צפוי להיות הערך הסופי של `counter`?",
+      "code_snippet": null,
+      "options": [
+        "א. תמיד 200,000, מכיוון שכל חוט מבצע 100,000 הגדלות.",
+        "ב. תמיד 0, מכיוון שהחוטים עובדים על עותקים נפרדים של המשתנה.",
+        "ג. ערך כלשהו שקטן או שווה ל-200,000, אך לרוב קטן מ-200,000, עקב מצב מרוץ.",
+        "ד. הקוד יגרום לשגיאת ריצה (runtime error) או קריסת התוכנית."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג'. הפעולה `counter++` אינה אטומית. היא מורכבת משלושה שלבים: קריאת ערך המשתנה (`counter`), הגדלתו באחד (`counter + 1`), וכתיבת הערך החדש חזרה לזיכרון (`counter = ...`). כאשר שני חוטים מבצעים פעולה זו במקביל ללא סנכרון, ייתכן שחוט אחד יקרא את הערך, וטרם יספיק לכתוב אותו בחזרה, חוט אחר יקרא את אותו ערך ישן. במקרה זה, אחת ההגדלות \"תאבד\", והערך הסופי יהיה קטן מהצפוי (200,000). לכן, מצב מרוץ זה יגרום לרוב לערך סופי נמוך מהמצופה, אם כי תיאורטית, בלוח זמנים מסוים, הוא יכול להגיע גם ל-200,000 (אך זה לא המצב הצפוי). התשובה המדויקת ביותר היא שיהיה ערך כלשהו שקטן או שווה ל-200,000, אך לרוב קטן מ-200,000."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

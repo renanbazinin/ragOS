@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 01:21:34",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2675,
+      "output_tokens": 1843,
+      "total_tokens": 7342
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Race Conditions",
+      "Concurrency",
+      "Threads",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה ב-C, המשתמשת בספריית `pthreads`. התוכנית יוצרת מספר תהליכונים (threads) שכל אחד מהם מנסה להגדיל מונה גלובלי משותף (`shared_counter`) מספר רב של פעמים. נתח את הקוד וענה על השאלות הבאות:\n\n1.  מהו הערך הסופי הצפוי של `shared_counter` אם התוכנית תרוץ ללא בעיות סנכרון?\n2.  האם הערך הסופי המודפס על ידי התוכנית תמיד יהיה זהה לערך הצפוי? אם לא, הסבר מדוע, מהי הבעיה שמתרחשת, וכיצד היא באה לידי ביטוי בערך הסופי.\n3.  הצע פתרון לקטע הקוד באמצעות מנגנון סנכרון מתאים (כגון mutex) כדי להבטיח שהתוכנית תדפיס תמיד את הערך הסופי הנכון. הצג את השינויים הנדרשים בקוד.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\nint shared_counter = 0;\n#define NUM_THREADS 5\n#define ITERATIONS_PER_THREAD 100000\n\nvoid *increment_counter(void *arg) {\n    for (int i = 0; i < ITERATIONS_PER_THREAD; ++i) {\n        shared_counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        if (pthread_create(&threads[i], NULL, increment_counter, NULL) != 0) {\n            perror(\"Failed to create thread\");\n            return 1;\n        }\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        if (pthread_join(threads[i], NULL) != 0) {\n            perror(\"Failed to join thread\");\n            return 1;\n        }\n    }\n\n    printf(\"Final counter value: %d\\n\", shared_counter);\n    return 0;\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.  הערך הסופי הצפוי של `shared_counter` הוא `NUM_THREADS * ITERATIONS_PER_THREAD`. במקרה זה, `5 * 100000 = 500000`.\n\n2.  לא, הערך הסופי המודפס על ידי התוכנית לא יהיה תמיד זהה לערך הצפוי, וברוב המקרים הוא יהיה נמוך יותר. הבעיה שמתרחשת היא 'מרוץ תנאים' (Race Condition).\n    הפעולה `shared_counter++` אינה פעולה אטומית. היא מורכבת משלושה שלבים:\n    א.  קריאת הערך הנוכחי של `shared_counter` לתוך אוגר.\n    ב.  הגדלת הערך באוגר באחד.\n    ג.  כתיבת הערך החדש מהאוגר בחזרה ל-`shared_counter`.\n    כאשר מספר תהליכונים מבצעים פעולה זו במקביל ללא סנכרון, ייתכן שתהליכון אחד יקרא את הערך של `shared_counter`, ואז לפני שהוא מספיק לכתוב את הערך המוגדל בחזרה, תהליכון אחר יקרא גם הוא את אותו ערך ישן. במקרה זה, שני התהליכונים יגדילו את אותו ערך ישן ויכתבו אותו בחזרה, ובכך 'ידרסו' אחד את העבודה של השני, מה שגורם לאיבוד חלק מההגדלות.\n    לדוגמה: נניח ש-`shared_counter` הוא 10.\n    -   Thread A קורא 10.\n    -   Thread B קורא 10.\n    -   Thread A מגדיל ל-11 וכותב 11.\n    -   Thread B מגדיל ל-11 וכותב 11.\n    במצב זה, במקום ש-`shared_counter` יהיה 12, הוא נשאר 11, והגדלה אחת אבדה.\n\n3.  כדי לפתור את בעיית מרוץ התנאים ולהבטיח שהמונה יגיע לערך הנכון, יש להשתמש במנגנון סנכרון, כגון Mutex (מנעול הדדי). Mutex יבטיח שרק תהליכון אחד יוכל לגשת לקטע הקוד הקריטי (הגדלת המונה) בכל רגע נתון.\n\n    **שינויים נדרשים בקוד:**\n\n    ```c\n    #include <stdio.h>\n    #include <pthread.h>\n\n    int shared_counter = 0;\n    pthread_mutex_t counter_mutex; // הגדרת mutex\n    #define NUM_THREADS 5\n    #define ITERATIONS_PER_THREAD 100000\n\n    void *increment_counter(void *arg) {\n        for (int i = 0; i < ITERATIONS_PER_THREAD; ++i) {\n            pthread_mutex_lock(&counter_mutex); // נעל את ה-mutex לפני גישה לקטע הקריטי\n            shared_counter++;\n            pthread_mutex_unlock(&counter_mutex); // שחרר את ה-mutex לאחר סיום הקטע הקריטי\n        }\n        return NULL;\n    }\n\n    int main() {\n        pthread_t threads[NUM_THREADS];\n\n        pthread_mutex_init(&counter_mutex, NULL); // אתחל את ה-mutex\n\n        for (int i = 0; i < NUM_THREADS; ++i) {\n            if (pthread_create(&threads[i], NULL, increment_counter, NULL) != 0) {\n                perror(\"Failed to create thread\");\n                pthread_mutex_destroy(&counter_mutex); // נקה את ה-mutex במקרה של כשל\n                return 1;\n            }\n        }\n\n        for (int i = 0; i < NUM_THREADS; ++i) {\n            if (pthread_join(threads[i], NULL) != 0) {\n                perror(\"Failed to join thread\");\n                pthread_mutex_destroy(&counter_mutex); // נקה את ה-mutex במקרה של כשל\n                return 1;\n            }\n        }\n\n        printf(\"Final counter value: %d\\n\", shared_counter);\n\n        pthread_mutex_destroy(&counter_mutex); // נקה את ה-mutex בסיום\n        return 0;\n    }\n    ```\n    על ידי שימוש ב-mutex, אנו מבטיחים שכל פעולת הגדלה תתבצע בצורה אטומית, וכל התהליכונים יסיימו את עבודתם בצורה נכונה, כך שהערך הסופי של `shared_counter` יהיה תמיד 500000."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

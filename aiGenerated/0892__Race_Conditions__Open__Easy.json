@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 01:06:55",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3457,
+      "output_tokens": 1328,
+      "total_tokens": 7274
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Race Conditions",
+      "Concurrency",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתונה פיסת קוד C המשתמשת במשתנה גלובלי משותף (counter) ומופעלת על ידי שני תהליכונים (threads) במקביל, כאשר כל תהליכון מבצע לולאה של 100,000 הגדלות של המשתנה. מהי הבעיה העלולה להתרחש בקוד זה? הסבירו מדוע היא מתרחשת וכיצד ניתן לתקן אותה כדי להבטיח שהתוצאה הסופית תהיה 200,000.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\nint counter = 0; // משתנה גלובלי משותף\n\nvoid *incrementer(void *arg) {\n    for (int i = 0; i < 100000; i++) {\n        counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t tid1, tid2;\n\n    pthread_create(&tid1, NULL, incrementer, NULL);\n    pthread_create(&tid2, NULL, incrementer, NULL);\n\n    pthread_join(tid1, NULL);\n    pthread_join(tid2, NULL);\n\n    printf(\"Final counter value: %d\\n\", counter);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הבעיה בקוד זה היא 'מצב מרוץ' (Race Condition). מצב מרוץ מתרחש כאשר מספר תהליכונים ניגשים למשאב משותף (במקרה זה, המשתנה `counter`) ומנסים לשנות אותו בו זמנית, כאשר סדר הפעולות אינו מוגדר או צפוי, והתוצאה הסופית תלויה בסדר הביצוע הספציפי. במקרה זה, הפעולה `counter++` אינה פעולה אטומית. היא מורכבת בדרך כלל משלושה שלבים ברמת המעבד: 1. טעינת ערך `counter` לתוך אוגר. 2. הגדלת ערך האוגר. 3. שמירת ערך האוגר המעודכן בחזרה ל-`counter`. אם שני תהליכונים יבצעו את הפעולות הללו במקביל ללא סנכרון, ייתכן ששניהם יטענו את אותו ערך של `counter`, יגדילו אותו באוגרים שלהם, ואז שניהם ישמרו את הערך המוגדל, וכתוצאה מכך אחת ההגדלות 'תאבד'. לדוגמה, אם `counter` הוא 0, תהליכון A טוען 0, תהליכון B טוען 0. תהליכון A מגדיל לאוגר 1, תהליכון B מגדיל לאוגר 1. תהליכון A שומר 1 ל-`counter`, תהליכון B שומר 1 ל-`counter`. התוצאה הסופית היא 1 במקום 2. לכן, התוצאה הסופית של `counter` תהיה כמעט תמיד פחות מ-200,000.\n\nכדי לתקן את הבעיה ולהבטיח שהתוצאה הסופית תהיה 200,000, יש להשתמש במנגנון סנכרון כגון 'מנעול' (mutex). מנעול מבטיח שרק תהליכון אחד יוכל להיכנס לקטע קריטי (Critical Section) בו מתבצעת הגישה למשאב המשותף, בכל רגע נתון. יש לאתחל את המנעול לפני יצירת התהליכונים, לנעול אותו לפני גישה ל-`counter++` ולשחרר אותו מיד לאחר מכן. בסוף התוכנית, יש להשמיד את המנעול. הנה דוגמה לקוד מתוקן:\n```c\n#include <stdio.h>\n#include <pthread.h>\n\nint counter = 0;\npthread_mutex_t mutex;\n\nvoid *incrementer(void *arg) {\n    for (int i = 0; i < 100000; i++) {\n        pthread_mutex_lock(&mutex);\n        counter++;\n        pthread_mutex_unlock(&mutex);\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t tid1, tid2;\n\n    pthread_mutex_init(&mutex, NULL);\n\n    pthread_create(&tid1, NULL, incrementer, NULL);\n    pthread_create(&tid2, NULL, incrementer, NULL);\n\n    pthread_join(tid1, NULL);\n    pthread_join(tid2, NULL);\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    pthread_mutex_destroy(&mutex);\n\n    return 0;\n}\n```\nקוד זה מבטיח שכל הגדלה של `counter` תתבצע בצורה אטומית, וכך התוצאה הסופית תהיה תמיד 200,000."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

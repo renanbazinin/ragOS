@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 01:18:45",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5728,
+      "output_tokens": 1239,
+      "total_tokens": 8082
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Race Conditions",
+      "Concurrency",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המשתמשת בחוטים מרובים כדי להגדיל מונה גלובלי משותף. קראו את הקוד וזהו האם קיימת תופעת Race Condition. אם כן, הסבירו מדוע ומהן ההשלכות האפשריות על ערכו הסופי של המונה. מה יהיה הערך המקסימלי האפשרי של המונה, ומה הערך המינימלי האפשרי?",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\n#define NUM_THREADS 2\n#define ITERATIONS  5\n\nint counter = 0; // Global shared variable\n\nvoid* thread_func(void* arg) {\n    for (int i = 0; i < ITERATIONS; ++i) {\n        counter++; // Increment the shared counter\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, thread_func, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "כן, קיימת תופעת Race Condition. המשתנה הגלובלי `counter` משותף לכל החוטים ומוגדל על ידם ללא כל מנגנון סנכרון. פעולת `counter++` אינה אטומית; היא מורכבת משלושה שלבים עיקריים:\n1. קריאת הערך הנוכחי של `counter` לתוך אוגר.\n2. הגדלת הערך באוגר.\n3. כתיבת הערך החדש מהאוגר בחזרה ל-`counter`.\n\nכאשר מספר חוטים מנסים לבצע פעולה זו במקביל, ייתכנו תזמונים שבהם חוט אחד קורא את ערך המונה, חוט אחר משלים את פעולת ההגדלה שלו (כולל כתיבה), ואז החוט הראשון כותב בחזרה ערך מיושן (כי הוא לא ראה את ההגדלה של החוט השני). כתוצאה מכך, חלק מההגדלות עלולות ללכת לאיבוד, וערכו הסופי של `counter` יהיה בלתי צפוי.\n\nההשלכות האפשריות על ערכו הסופי של המונה הן:\n*   **ערך מקסימלי**: הערך המקסימלי האפשרי הוא `NUM_THREADS * ITERATIONS` = 2 * 5 = 10. זה יקרה אם כל הגידולים יתרחשו בסדר סריאלי לחלוטין, למשל, חוט אחד משלים את כל 5 ההגדלות שלו, ואז החוט השני משלים את כל 5 ההגדלות שלו, או כל סדר אחר שבו כל פעולת `counter++` של כל חוט מתבצעת באופן אטומי ושלם לפני שחוט אחר ניגש למונה.\n*   **ערך מינימלי**: הערך המינימלי האפשרי הוא 1. זה יקרה אם כל החוטים קוראים את הערך הראשוני של `counter` (שהוא 0) בערך באותו זמן, ואז כל אחד מהם מגדיל את הערך באוגר שלו ל-1, וכולם כותבים 1 חזרה ל-`counter`. בסופו של דבר, רק ההגדלה האחרונה שנכתבה בפועל לזיכרון תישמר. לדוגמה, חוט 1 קורא 0, חוט 2 קורא 0. חוט 1 מגדיל ל-1 וכותב למונה. חוט 2 מגדיל ל-1 וכותב למונה. המונה יהיה 1. זה יכול לקרות גם בכל איטרציה של הלולאה, כלומר, כל שני החוטים קוראים את אותו ערך, מגדילים אותו, ורק אחד מהם מצליח לכתוב את הערך המוגדל, בעוד השני דורס אותו עם אותו ערך מוגדל (או ערך מיושן). במקרה הקיצוני, כל 10 הגידולים הופכים לגידול אחד בפועל. מכיוון שהמונה מאותחל ל-0, וכל חוט מבצע לפחות קריאה אחת, הגדלה אחת וכתיבה אחת (גם אם היא נדרסת מיד), הערך הסופי חייב להיות לפחות 1."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

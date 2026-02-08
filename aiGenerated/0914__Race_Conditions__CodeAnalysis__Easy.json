@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 01:17:17",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5728,
+      "output_tokens": 1303,
+      "total_tokens": 11817
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Race Conditions",
+      "Concurrency",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C הבאה שבה שני חוטים מנסים לקדם מונה גלובלי משותף (counter) ללא מנגנוני סנכרון מתאימים. כל חוט מבצע 100,000 פעולות קידום. מהו טווח הערכים האפשריים של המשתנה counter בסיום ריצת התוכנית? הסבר מדוע.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\n// משתנה גלובלי משותף\nint counter = 0;\n\n// פונקציה לקידום המונה\nvoid* increment_counter(void* arg) {\n    for (int i = 0; i < 100000; ++i) {\n        counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t thread1, thread2;\n\n    // יצירת שני חוטים\n    pthread_create(&thread1, NULL, increment_counter, NULL);\n    pthread_create(&thread2, NULL, increment_counter, NULL);\n\n    // המתנה לסיום ריצת החוטים\n    pthread_join(thread1, NULL);\n    pthread_join(thread2, NULL);\n\n    // הדפסת הערך הסופי של המונה\n    printf(\"Final counter value: %d\\n\", counter);\n\n    return 0;\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הטווח האפשרי של הערכים עבור המשתנה counter הוא בין 100,000 ל-200,000.\n\nההסבר:\nפעולת הקידום `counter++` אינה אטומית. היא מורכבת בדרך כלל משלושה שלבים ברמת המעבד:\n1.  קריאת הערך הנוכחי של `counter` לתוך אוגר (register).\n2.  הגדלת הערך באוגר.\n3.  כתיבת הערך החדש מהאוגר בחזרה לזיכרון (ל-`counter`).\n\nכאשר שני חוטים מבצעים פעולה זו במקביל ללא מנגנוני סנכרון, עלול להיווצר Race Condition (מצב מרוץ), שבו סדר ביצוע הפעולות משפיע על התוצאה הסופית.\n\n*   **הערך המקסימלי (200,000):**\n    זהו המצב האידיאלי שבו אין איבוד עדכונים. לדוגמה, חוט אחד מבצע את כל 100,000 הקידומים שלו ברצף (כלומר, הוא מסיים את הלולאה שלו), ולאחר מכן החוט השני מבצע את כל 100,000 הקידומים שלו ברצף. לחלופין, גם אם הפעולות מתבצעות לסירוגין אך באופן שבו כל קריאה, הגדלה וכתיבה של חוט אחד מסתיימת לפני שהחוט השני מתחיל את פעולתו הבאה, לא יאבדו עדכונים. במקרה זה, 100,000 + 100,000 = 200,000.\n\n*   **הערך המינימלי (100,000):**\n    זהו המצב שבו מתרחש איבוד עדכונים מקסימלי. לדוגמה:\n    1.  `counter` מאותחל ל-0.\n    2.  חוט 1 קורא את `counter` (ערך 0).\n    3.  חוט 2 קורא את `counter` (גם הוא קורא ערך 0).\n    4.  חוט 1 מגדיל את הערך שבאוגר שלו ל-1.\n    5.  חוט 2 מגדיל את הערך שבאוגר שלו ל-1.\n    6.  חוט 1 כותב את הערך 1 ל-`counter`.\n    7.  חוט 2 כותב את הערך 1 ל-`counter`.\n    במקרה זה, שתי פעולות קידום לוגיות התרחשו, אך `counter` גדל רק ב-1. אחת מההגדלות אבדה.\n    תרחיש זה יכול לחזור על עצמו 100,000 פעמים: עבור כל צמד פעולות קידום (אחת מכל חוט), מתרחש מצב שבו שני החוטים קוראים את אותו ערך, מגדילים אותו, ואז הראשון כותב והשני כותב אחריו את אותו ערך מוגדל. במקרה כזה, מתוך 200,000 פעולות קידום בסך הכל, רק 100,000 יבואו לידי ביטוי במונה הסופי. לכן, הערך המינימלי האפשרי הוא 100,000."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

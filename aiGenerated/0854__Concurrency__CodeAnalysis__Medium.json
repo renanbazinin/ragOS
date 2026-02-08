@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 00:50:41",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2942,
+      "output_tokens": 1203,
+      "total_tokens": 10103
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Concurrency",
+      "Synchronization",
+      "Deadlock",
+      "Semaphores"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה המשתמשת בספריות pthreads ו-semaphore. מה יהיה ערכו הסופי של המשתנה הגלובלי `counter` לאחר הרצת התוכנית? נמקו את תשובתכם.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <semaphore.h>\n#include <unistd.h> // For sleep\n\nsem_t sem_A;\nsem_t sem_B;\nint counter = 0;\n\nvoid* thread_func_1(void* arg) {\n    printf(\"Thread 1: Trying to acquire sem_A\\n\");\n    sem_wait(&sem_A);\n    printf(\"Thread 1: Acquired sem_A. Sleeping...\\n\");\n    sleep(1); // Simulate work and force context switch\n    printf(\"Thread 1: Trying to acquire sem_B\\n\");\n    sem_wait(&sem_B);\n    printf(\"Thread 1: Acquired sem_B. Incrementing counter.\\n\");\n    counter++;\n    sem_post(&sem_B);\n    sem_post(&sem_A);\n    printf(\"Thread 1: Finished.\\n\");\n    return NULL;\n}\n\nvoid* thread_func_2(void* arg) {\n    printf(\"Thread 2: Trying to acquire sem_B\\n\");\n    sem_wait(&sem_B);\n    printf(\"Thread 2: Acquired sem_B. Sleeping...\\n\");\n    sleep(1); // Simulate work and force context switch\n    printf(\"Thread 2: Trying to acquire sem_A\\n\");\n    sem_wait(&sem_A);\n    printf(\"Thread 2: Acquired sem_A. Incrementing counter.\\n\");\n    counter++;\n    sem_post(&sem_A);\n    sem_post(&sem_B);\n    printf(\"Thread 2: Finished.\\n\n\");\n    return NULL;\n}\n\nint main() {\n    pthread_t t1, t2;\n\n    sem_init(&sem_A, 0, 1); // Initialize sem_A to 1\n    sem_init(&sem_B, 0, 1); // Initialize sem_B to 1\n\n    pthread_create(&t1, NULL, thread_func_1, NULL);\n    pthread_create(&t2, NULL, thread_func_2, NULL);\n\n    pthread_join(t1, NULL);\n    pthread_join(t2, NULL);\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    sem_destroy(&sem_A);\n    sem_destroy(&sem_B);\n    return 0;\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "ערכו הסופי של המשתנה `counter` יהיה 0. התוכנית תיכנס למצב של קיפאון (deadlock).\n\nההסבר הוא כדלקמן:\n1.  **תהליכון 1** (thread_func_1) מתחיל את ריצתו ומבצע `sem_wait(&sem_A)`, רוכש את המנעול `sem_A`. כעת `sem_A` שווה ל-0.\n2.  במקביל, **תהליכון 2** (thread_func_2) מתחיל את ריצתו ומבצע `sem_wait(&sem_B)`, רוכש את המנעול `sem_B`. כעת `sem_B` שווה ל-0.\n3.  לאחר מכן, תהליכון 1 מנסה לבצע `sem_wait(&sem_B)` אך נחסם, מכיוון ש-`sem_B` כבר נרכש על ידי תהליכון 2 (ערכו 0).\n4.  במקביל, תהליכון 2 מנסה לבצע `sem_wait(&sem_A)` אך נחסם, מכיוון ש-`sem_A` כבר נרכש על ידי תהליכון 1 (ערכו 0).\n\nשני התהליכונים מחזיקים במשאב שנדרש על ידי האחר, וממתינים למשאב המוחזק על ידי האחר. מצב זה מוביל לקיפאון (deadlock) – אף אחד מהתהליכונים לא יוכל להמשיך בריצתו, לשחרר את המנעולים שברשותו, או להגיע לשורת `counter++`. לכן, ערכו הסופי של `counter` יישאר 0."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

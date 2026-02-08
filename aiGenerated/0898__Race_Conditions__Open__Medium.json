@@ -1,0 +1,57 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 01:08:44",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2154,
+      "output_tokens": 2328,
+      "total_tokens": 8064
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Race Conditions",
+      "Synchronization",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C++ המשתמשת בספריית pthreads ליצירת שני תהליכונים (threads) המנסים לעדכן משתנה גלובלי משותף. עיין בקוד ותאר את הבעיות הפוטנציאליות העלולות להתעורר:",
+      "code_snippet": "#include <iostream>\n#include <pthread.h>\n#include <unistd.h> // For sleep, though not strictly necessary for the race condition itself\n\nint shared_counter = 0;\nconst int ITERATIONS = 100000;\n\nvoid* increment_thread(void* arg) {\n    for (int i = 0; i < ITERATIONS; ++i) {\n        shared_counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t tid1, tid2;\n\n    pthread_create(&tid1, NULL, increment_thread, NULL);\n    pthread_create(&tid2, NULL, increment_thread, NULL);\n\n    pthread_join(tid1, NULL);\n    pthread_join(tid2, NULL);\n\n    std::cout << \"Final counter value: \" << shared_counter << std::endl;\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "זהה והסבר את תנאי המירוץ (Race Condition) בתוכנית זו, תוך פירוט הפעולות הלא-אטומיות המעורבות ברמת המעבד (CPU).",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "הצג והסבר דוגמה קונקרטית לרצף פעולות אפשרי בין שני התהליכונים שיוביל לתוצאה שגויה (כלומר, ערך סופי שאינו 200000). נניח ש-`shared_counter` מתחיל ב-0.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.3",
+        "text": "הצע פתרון קוד ב-C/C++ לתיקון תנאי המירוץ באמצעות מנגנוני סנכרון מתאימים (לדוגמה, mutexes), והסבר כיצד הפתרון שלך מונע את תנאי המירוץ ומבטיח תוצאה נכונה.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "פתרון:\n\n**1.1. זיהוי והסבר תנאי המירוץ (Race Condition):**\nתנאי המירוץ מתרחש סביב המשתנה הגלובלי המשותף `shared_counter`. שני התהליכונים ניגשים למשתנה זה ומבצעים עליו פעולת הגדלה (`shared_counter++`) ללא כל מנגנון סנכרון. פעולת ההגדלה אינה אטומית ברמת המעבד (CPU), אלא מורכבת מכמה שלבים:\nא. קריאת הערך הנוכחי של `shared_counter` מהזיכרון לרגיסטר של המעבד.\nב. הגדלת הערך ברגיסטר באחד.\nג. כתיבת הערך המעודכן מהרגיסטר בחזרה לזיכרון.\nכאשר שני תהליכונים מבצעים את הרצף הזה במקביל, סדר הפעולות יכול להשתנות באופן לא-דטרמיניסטי, מה שעלול להוביל לאובדן עדכונים ולתוצאה שגויה.\n\n**1.2. דוגמה לרצף פעולות שגוי:**\nנניח ש-`shared_counter` שווה ל-0. התוצאה הצפויה לאחר ששני התהליכונים יסיימו את כל האיטרציות היא 2 * 100,000 = 200,000.\nהנה רצף פעולות אפשרי שיוביל לתוצאה שגויה:\n\n*   **תהליכון 1:** קורא את `shared_counter` (ערך = 0) לרגיסטר שלו.\n*   **תהליכון 2:** קורא את `shared_counter` (ערך = 0) לרגיסטר שלו.\n*   **תהליכון 1:** מגדיל את הערך ברגיסטר שלו (0 + 1 = 1).\n*   **תהליכון 2:** מגדיל את הערך ברגיסטר שלו (0 + 1 = 1).\n*   **תהליכון 1:** כותב את הערך המעודכן (1) בחזרה ל-`shared_counter`. כעת `shared_counter = 1`.\n*   **תהליכון 2:** כותב את הערך המעודכן (1) בחזרה ל-`shared_counter`. כעת `shared_counter = 1`.\n\nבמקרה זה, למרות ששני התהליכונים ביצעו פעולת הגדלה, המונה הוגדל רק פעם אחת בפועל במקום פעמיים, וכך אבד עדכון אחד. רצף כזה יתרחש פעמים רבות במהלך 200,000 ההגדלות, ולכן התוצאה הסופית של `shared_counter` תהיה נמוכה מ-200,000.\n\n**1.3. פתרון קוד באמצעות Mutexes:**\n\n```c\n#include <iostream>\n#include <pthread.h>\n\nint shared_counter = 0;\nconst int ITERATIONS = 100000;\npthread_mutex_t counter_mutex; // הצהרה על mutex\n\nvoid* increment_thread_safe(void* arg) {\n    for (int i = 0; i < ITERATIONS; ++i) {\n        pthread_mutex_lock(&counter_mutex);   // נעילת ה-mutex\n        shared_counter++;                     // קטע קריטי - גישה למשתנה המשותף\n        pthread_mutex_unlock(&counter_mutex); // שחרור ה-mutex\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t tid1, tid2;\n\n    pthread_mutex_init(&counter_mutex, NULL); // אתחול ה-mutex\n\n    pthread_create(&tid1, NULL, increment_thread_safe, NULL);\n    pthread_create(&tid2, NULL, increment_thread_safe, NULL);\n\n    pthread_join(tid1, NULL);\n    pthread_join(tid2, NULL);\n\n    std::cout << \"Final counter value: \" << shared_counter << std::endl;\n\n    pthread_mutex_destroy(&counter_mutex); // השמדת ה-mutex\n\n    return 0;\n}\n```\n\n**הסבר הפתרון:**\nהפתרון מונע את תנאי המירוץ על ידי הגנה על הקטע הקריטי (הגישה למשתנה `shared_counter`) באמצעות `mutex` (קיצור של Mutual Exclusion).\n1.  **`pthread_mutex_t counter_mutex;`**: מצהירים על משתנה מסוג `pthread_mutex_t` שישמש כמנעול.\n2.  **`pthread_mutex_init(&counter_mutex, NULL);`**: מאתחלים את ה-mutex לפני יצירת התהליכונים. זה מכין את המנעול לשימוש.\n3.  **`pthread_mutex_lock(&counter_mutex);`**: לפני שכל תהליכון ניגש למשתנה המשותף `shared_counter` (כלומר, לפני הקטע הקריטי), הוא מנסה לנעול את ה-mutex. אם ה-mutex כבר נעול על ידי תהליכון אחר, התהליכון הנוכחי נחסם וממתין עד שה-mutex ישוחרר. רק תהליכון אחד יכול להחזיק במנעול בכל רגע נתון.\n4.  **`shared_counter++;`**: זוהי הפעולה בקטע הקריטי. מכיוון שהיא מוגנת על ידי ה-mutex, מובטח שרק תהליכון אחד יבצע אותה בכל רגע נתון. זה מבטיח שאף אובדן עדכונים לא יתרחש כתוצאה מהפרעות של תהליכונים אחרים.\n5.  **`pthread_mutex_unlock(&counter_mutex);`**: לאחר שחרור ה-mutex, תהליכונים אחרים שממתינים יכולים כעת לנסות לנעול אותו ולהיכנס לקטע הקריטי.\n6.  **`pthread_mutex_destroy(&counter_mutex);`**: משחרר את המשאבים שהוקצו ל-mutex בסיום התוכנית.\n\nעל ידי שימוש ב-mutex, אנו מבטיחים שכל פעולת `shared_counter++` תתבצע באופן בלעדי על ידי תהליכון אחד בכל פעם, וכך נמנעים תנאי המירוץ ואובדן עדכונים. התוצאה הסופית של `shared_counter` תהיה תמיד 200,000."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

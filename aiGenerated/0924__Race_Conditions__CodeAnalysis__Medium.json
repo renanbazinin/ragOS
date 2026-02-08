@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 01:20:17",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2675,
+      "output_tokens": 1382,
+      "total_tokens": 6019
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Race Conditions",
+      "Concurrency",
+      "Threads",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה, המשתמשת בתהליכונים (threads) כדי להגדיל משתנה גלובלי משותף. נתח את הקוד והסבר: א. מהו הערך הסופי הצפוי של המשתנה `counter`, ומדוע ייתכן שהערך בפועל יהיה שונה מערך זה? ב. הצע פתרון לקוד על מנת למנוע את מצב המרוץ (Race Condition) ולהבטיח שהערך הסופי של `counter` יהיה תמיד כצפוי. כלול את קטע הקוד המתוקן כחלק מההסבר.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\n#define NUM_THREADS 5\n#define ITERATIONS_PER_THREAD 100000\n\nint counter = 0;\n\nvoid* increment_counter(void* arg) {\n    for (int i = 0; i < ITERATIONS_PER_THREAD; i++) {\n        counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    for (int i = 0; i < NUM_THREADS; i++) {\n        pthread_create(&threads[i], NULL, increment_counter, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; i++) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "א. הערך הסופי הצפוי של המשתנה `counter` הוא `NUM_THREADS * ITERATIONS_PER_THREAD = 5 * 100000 = 500000`.\nהערך בפועל עשוי להיות שונה (בדרך כלל נמוך יותר) מערך זה עקב מצב מרוץ (Race Condition). הפעולה `counter++` אינה אטומית. היא מורכבת משלושה שלבים:\n1. קריאת הערך הנוכחי של `counter` לתוך אוגר.\n2. הגדלת הערך באוגר.\n3. כתיבת הערך המוגדל בחזרה ל-`counter` בזיכרון.\nכאשר מספר תהליכונים מנסים לבצע את הפעולה הזו בו זמנית, הפעולות שלהם יכולות להתערבב. לדוגמה, תהליכון A קורא את `counter` (נניח 10), ואז לפני שתהליכון A כותב את 11, תהליכון B קורא גם הוא את `counter` (עדיין 10). לאחר מכן, שני התהליכונים כותבים 11 בחזרה לזיכרון, ובכך אובדת הגדלה אחת.\n\nב. כדי למנוע את מצב המרוץ ולהבטיח שהערך הסופי של `counter` יהיה תמיד 500000, יש להשתמש במנגנון סנכרון, כגון mutex (מנעול הדדי). ה-mutex יבטיח שרק תהליכון אחד יוכל לגשת לקטע הקריטי (הפעולה `counter++`) בכל רגע נתון. הנה קטע הקוד המתוקן:\n\n```c\n#include <stdio.h>\n#include <pthread.h>\n\n#define NUM_THREADS 5\n#define ITERATIONS_PER_THREAD 100000\n\nint counter = 0;\npthread_mutex_t mutex; // הצהרה על mutex\n\nvoid* increment_counter(void* arg) {\n    for (int i = 0; i < ITERATIONS_PER_THREAD; i++) {\n        pthread_mutex_lock(&mutex);   // נעילת ה-mutex לפני הגישה למשתנה המשותף\n        counter++;\n        pthread_mutex_unlock(&mutex); // שחרור ה-mutex לאחר הגישה למשתנה המשותף\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n    pthread_mutex_init(&mutex, NULL); // אתחול ה-mutex\n\n    for (int i = 0; i < NUM_THREADS; i++) {\n        pthread_create(&threads[i], NULL, increment_counter, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; i++) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    pthread_mutex_destroy(&mutex); // שחרור משאבי ה-mutex\n    return 0;\n}\n```\n\nהשימוש ב-`pthread_mutex_lock` וב-`pthread_mutex_unlock` מבטיח שכל פעולת הגדלה על `counter` תתבצע בצורה אטומית, מכיוון שרק תהליכון אחד יכול להחזיק במנעול בכל זמן נתון. זה מונע את התערבבות הפעולות ומבטיח שהערך הסופי של `counter` יהיה תמיד 500000."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

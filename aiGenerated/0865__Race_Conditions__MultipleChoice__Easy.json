@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 00:58:39",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1028,
+      "output_tokens": 550,
+      "total_tokens": 3718
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Race Conditions",
+      "Concurrency",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא. אם שני חוטים (threads) שונים מריצים במקביל את הפונקציה `modify_shared_value` ללא כל מנגנון סנכרון, האם קיים מצב מרוץ (race condition)? אם כן, מדוע?",
+      "code_snippet": "int shared_value = 0;\n\nvoid modify_shared_value() {\n    shared_value = shared_value + 1;\n}",
+      "options": [
+        "א. לא, מכיוון שהפעולה `shared_value = shared_value + 1` היא פעולה אטומית.",
+        "ב. כן, מכיוון ששני החוטים ניגשים ומשנים משתנה גלובלי משותף ללא סנכרון, והתוצאה תלויה בסדר הביצוע.",
+        "ג. לא, מכיוון שכל חוט יבצע את הפעולה באופן עצמאי והערך הסופי תמיד יהיה 2.",
+        "ד. כן, מכיוון שהמשתנה `shared_value` הוא מסוג `int`."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "כן, קיים מצב מרוץ. הפעולה `shared_value = shared_value + 1` אינה אטומית ומורכבת ממספר פעולות מכונה (לדוגמה: קריאה מהזיכרון, הגדלה, כתיבה לזיכרון). כאשר שני חוטים ניגשים ומשנים את המשתנה המשותף `shared_value` במקביל וללא מנגנון סנכרון מתאים, סדר ביצוע הפעולות עלול להשתנות באופן בלתי צפוי, מה שיוביל לאובדן עדכונים ולתוצאה שגויה (לדוגמה, במקום שהערך הסופי יהיה 2, הוא עשוי להיות 1)."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

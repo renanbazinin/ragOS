@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 01:01:40",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 901,
+      "output_tokens": 1075,
+      "total_tokens": 10058
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Race Conditions",
+      "Concurrency",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "בהינתן קטע הקוד הבא המורץ ע\"י שני תהליכונים (threads) במקביל, מהו טווח הערכים האפשריים עבור המשתנה הגלובלי `counter` בסיום ריצתם?",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\nint counter = 0; // משתנה גלובלי\n\nvoid* increment_counter(void* arg) {\n    for (int i = 0; i < 1000; ++i) {\n        counter++; // פעולה לא אטומית\n    }\n    return NULL;\n}\n\n// בפונקציה הראשית (main) יבוצעו הפעולות הבאות:\n// pthread_t tid1, tid2;\n// pthread_create(&tid1, NULL, increment_counter, NULL);\n// pthread_create(&tid2, NULL, increment_counter, NULL);\n// pthread_join(tid1, NULL);\n// pthread_join(tid2, NULL);\n// printf(\"Final counter: %d\\n\", counter);",
+      "options": [
+        "א. תמיד 2000.",
+        "ב. ערך כלשהו בין 1 ל-2000 (כולל).",
+        "ג. ערך כלשהו בין 2 ל-2000 (כולל).",
+        "ד. ערך כלשהו בין 1000 ל-2000 (כולל)."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ד",
+      "explanation": "הסבר: קיימת כאן תופעת מרוץ (Race Condition) מכיוון שהפעולה `counter++` אינה אטומית. היא מורכבת בדרך כלל משלושה שלבים: קריאה (read), שינוי (modify) וכתיבה (write).\nאם שני תהליכונים קוראים את אותו ערך של `counter`, שניהם מגדילים את העותק המקומי שלהם, ואז שניהם כותבים בחזרה את הערך המוגדל, אזי אחת העדכונים \"אובדת\" והמונה גדל רק באחד במקום בשניים.\nהערך המקסימלי האפשרי הוא 2000. זה יקרה אם לא תהיה תופעת מרוץ שתגרום לאובדן עדכונים, לדוגמה, אם תהליכון אחד יסיים את כל 1000 העדכונים שלו לפני שהתהליכון השני יתחיל, או אם מתזמן המערכת יבצע את הפעולות באופן שימנע אובדן.\nהערך המינימלי האפשרי הוא 1000. זה יקרה במצב הגרוע ביותר של תופעת מרוץ, שבו בכל פעם ששני התהליכונים מנסים לבצע `counter++`, אחד העדכונים נאבד. לדוגמה, אם בכל פעם:\n1. תהליכון A קורא את ערך `counter` (נניח K).\n2. תהליכון B קורא את ערך `counter` (גם K).\n3. תהליכון A מגדיל את הערך המקומי שלו ל-K+1.\n4. תהליכון B מגדיל את הערך המקומי שלו ל-K+1.\n5. תהליכון A כותב את K+1 ל-`counter`.\n6. תהליכון B כותב את K+1 ל-`counter`.\nבמקרה כזה, שתי פעולות הגדלה הביאו לכך ש-`counter` גדל רק ב-1. אם תרחיש זה יקרה עבור כל 1000 זוגות הפעולות (1000 מ-A ו-1000 מ-B), אז בסך הכל יתבצעו 1000 עדכונים מוצלחים, והערך הסופי יהיה 1000.\nלכן, טווח הערכים האפשריים הוא בין 1000 ל-2000 (כולל)."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 01:19:23",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2675,
+      "output_tokens": 1302,
+      "total_tokens": 7221
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Race Conditions",
+      "Concurrency",
+      "Threads",
+      "Shared Memory"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C הבאה המשתמשת ב-pthreads. התוכנית יוצרת מספר תהליכונים (threads) שכל אחד מהם אמור להגדיל מונה גלובלי (global counter) מספר רב של פעמים.\n\nקראו את קטע הקוד וענו: מהו הערך הסופי הצפוי של המונה `counter` לאחר שכל התהליכונים סיימו את ריצתם, ומהו טווח הערכים האפשריים בפועל שעלולים להתקבל בריצות שונות של התוכנית? הסבירו מדוע טווח זה עשוי להיות שונה מהערך הצפוי, תוך התייחסות למושג 'מרוץ תחרות' (Race Condition) והשפעותיו על המונה הגלובלי.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\n#define NUM_THREADS 5\n#define ITERATIONS_PER_THREAD 100000\n\nint counter = 0; // Shared resource\n\nvoid* increment_counter(void* arg) {\n    for (int i = 0; i < ITERATIONS_PER_THREAD; ++i) {\n        counter++; // Race condition here\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, increment_counter, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    return 0;\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הערך הסופי הצפוי של המונה `counter` הוא סך כל ההגדלות מכל התהליכונים. מכיוון שישנם 5 תהליכונים וכל אחד מבצע 100,000 הגדלות, הערך הצפוי הוא: 5 * 100,000 = 500,000.\n\nעם זאת, בפועל, טווח הערכים האפשריים עבור `counter` יהיה בין 1 ל-500,000 (כולל), אך כמעט בוודאות הוא יהיה נמוך מ-500,000. הסיבה לכך היא 'מרוץ תחרות' (Race Condition).\n\n**הסבר למרוץ תחרות:**\nהפעולה `counter++` אינה פעולה אטומית (atomic operation). היא מורכבת למעשה משלושה שלבים ברמת המעבד:\n1.  **קריאה (Read):** המעבד קורא את הערך הנוכחי של `counter` מהזיכרון לתוך רגיסטר פנימי.\n2.  **שינוי (Modify):** המעבד מגדיל את הערך ברגיסטר באחד.\n3.  **כתיבה (Write):** המעבד כותב את הערך החדש מהרגיסטר בחזרה למיקום של `counter` בזיכרון.\n\nכאשר מספר תהליכונים מנסים לבצע את הפעולה הזו בו זמנית (concurrently) ללא מנגנון סנכרון מתאים (כמו mutex), סדר הפעולות ביניהם יכול להתערבב. לדוגמה:\n*   `counter` מתחיל ב-0.\n*   תהליכון A קורא את `counter` (ערך 0).\n*   **לפני שתהליכון A מספיק לכתוב בחזרה**, תהליכון B קורא גם הוא את `counter` (עדיין רואה ערך 0).\n*   תהליכון A מגדיל את הערך שלו ל-1 וכותב אותו ל-`counter`. כעת `counter` שווה 1.\n*   תהליכון B מגדיל את הערך שלו ל-1 (כי קרא 0) וכותב אותו ל-`counter`. כעת `counter` שווה 1.\n\nבמקרה זה, בוצעו שתי פעולות הגדלה, אך הערך הסופי של `counter` גדל רק באחד. הגדלה אחת \"אבדה\". איבוד עדכונים כזה מוביל לכך שהערך הסופי של `counter` יהיה נמוך מהערך הצפוי. ככל שמספר התהליכונים והאיטרציות גדול יותר, כך גדל הסיכוי לאיבוד עדכונים והערך המתקבל יהיה רחוק יותר מהערך הצפוי. הטווח המינימלי התיאורטי הוא 1 (אם כל ההגדלות פרט לאחת אובדות), והמקסימלי הוא 500,000 (שמתקבל במקרה נדיר מאוד שבו אין כלל התנגשויות)."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

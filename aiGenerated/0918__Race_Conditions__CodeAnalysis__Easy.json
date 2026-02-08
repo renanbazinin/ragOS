@@ -1,0 +1,50 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 01:18:33",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5728,
+      "output_tokens": 1290,
+      "total_tokens": 9864
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Race Conditions",
+      "Concurrency",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C הבאה, המשתמשת במספר חוטים (threads) כדי להגדיל מונה גלובלי משותף. אין שימוש במנגנוני סנכרון. ענו על השאלות הבאות:",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\n#define NUM_THREADS 5\n#define INCREMENTS_PER_THREAD 100000\n\nint counter = 0;\n\nvoid* thread_function(void* arg) {\n    for (int i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n        counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, thread_function, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    return 0;\n}"
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "מהו הערך הסופי התיאורטי הצפוי של המונה (`counter`) אם לא היו מתרחשות בעיות תזמון (race conditions)?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "בפועל, עקב היעדר סנכרון, מהו טווח הערכים האפשריים עבור `counter` שיוכלו להיות מודפסים בסוף התוכנית? הסבירו מדוע טווח זה קיים.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.1: הערך התיאורטי הצפוי הוא סך כל הקידומים שכל החוטים מבצעים. כל חוט מבצע INCREMENTS_PER_THREAD קידומים, ויש NUM_THREADS חוטים. לכן, הערך הצפוי הוא: NUM_THREADS * INCREMENTS_PER_THREAD = 5 * 100000 = 500000.\n\n1.2: עקב תנאי מירוץ (race condition), הערך הסופי של `counter` יהיה בטווח שבין 1 (מינימום תיאורטי) לבין 500000 (מקסימום תיאורטי). הטווח הנפוץ בפועל יהיה בדרך כלל בין ערך קטן מ-500000 לבין 500000.\n\nההסבר: הפעולה `counter++` אינה אטומית. היא מורכבת בדרך כלל משלושה שלבים ברמת המעבד: קריאת ערך המונה מהזיכרון, הגדלת הערך ברגיסטר של המעבד, וכתיבת הערך החדש חזרה לזיכרון. כאשר מספר חוטים מבצעים פעולה זו בו-זמנית ללא סנכרון, הם עלולים להפריע זה לזה. לדוגמה:\n1. חוט A קורא את `counter` (נניח 0).\n2. חוט B קורא את `counter` (גם הוא קורא 0, כי חוט A עדיין לא שינה את הערך בזיכרון).\n3. חוט A מגדיל את הערך שברגיסטר שלו ל-1 וכותב אותו חזרה ל`counter`. כעת `counter` שווה 1.\n4. חוט B מגדיל את הערך שברגיסטר שלו ל-1 (מבוסס על ה-0 שקרא קודם) וכותב אותו חזרה ל`counter`. כעת `counter` עדיין שווה 1.\nבמקרה זה, שני קידומים בוצעו בפועל על ידי החוטים, אך ערך המונה בזיכרון עלה רק באחד. איבוד עדכונים כזה מוביל לכך שהערך הסופי של `counter` יהיה נמוך מהערך התיאורטי הצפוי. הערך המינימלי האפשרי הוא 1 (בתרחיש קיצוני שבו כל החוטים קוראים את 0, מגדילים אותו ל-1, ורק אחד מהם מצליח לכתוב את ה-1 הסופי לזיכרון לאחר שכל האחרים כבר כתבו את 1). הערך המקסימלי האפשרי הוא 500000, אם לוח הזמנים של מערכת ההפעלה מריץ את החוטים באופן סדרתי לחלוטין או בצורה שלא גורמת לחפיפה קריטית שמובילה לאיבוד עדכונים (אך זה נדיר מאוד ללא סנכרון מפורש)."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

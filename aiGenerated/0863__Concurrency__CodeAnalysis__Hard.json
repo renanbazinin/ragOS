@@ -1,0 +1,70 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 00:57:28",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5571,
+      "output_tokens": 2852,
+      "total_tokens": 20649
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Concurrency",
+      "Semaphores",
+      "Race Conditions",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה, המנסה לעדכן מונה גלובלי משותף `global_counter` באמצעות `NUM_THREADS` חוטים. כל חוט מבצע `INCREMENTS_PER_THREAD` פעולות קידום. מטרת התוכנית היא להבטיח שבאופן מירבי `MAX_CONCURRENT_ACCESSORS` חוטים יוכלו לגשת לקטע הקריטי (הכולל את קידום המונה) בו-זמנית, וכן שערכו הסופי של המונה יהיה נכון.\nהקבועים `NUM_THREADS`, `INCREMENTS_PER_THREAD` ו-`MAX_CONCURRENT_ACCESSORS` הם בעלי ערכים גדולים מ-1. ניתן להניח שכל קריאות המערכת הצליחו.",
+      "code_snippet": "1 #include <pthread.h>\n2 #include <semaphore.h>\n3 #include <stdio.h>\n4 #include <unistd.h>\n5 \n6 #define NUM_THREADS 4\n7 #define INCREMENTS_PER_THREAD 100000\n8 #define MAX_CONCURRENT_ACCESSORS 2 // At most 2 threads can be in the \"critical section\" simultaneously\n9 \n10 int global_counter = 0;\n11 sem_t access_limit; // Limits the number of concurrent threads in the critical section\n12 \n13 void* worker_thread(void* arg) {\n14     int tid = *(int*)arg;\n15     for (int i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n16         sem_wait(&access_limit); // Acquire a \"slot\" to enter the critical section\n17 \n18         // Critical section: increment global_counter\n19         global_counter++; \n20 \n21         sem_post(&access_limit); // Release the \"slot\"\n22     }\n23     return NULL;\n24 }\n25 \n26 int main() {\n27     sem_init(&access_limit, 0, MAX_CONCURRENT_ACCESSORS);\n28 \n29     pthread_t threads[NUM_THREADS];\n30     int tids[NUM_THREADS];\n31 \n32     for (int i = 0; i < NUM_THREADS; ++i) {\n33         tids[i] = i + 1;\n34         pthread_create(&threads[i], NULL, worker_thread, &tids[i]);\n35     }\n36 \n37     for (int i = 0; i < NUM_THREADS; ++i) {\n38         pthread_join(threads[i], NULL);\n39     }\n40 \n41     printf(\"Final global_counter = %d (Expected: %d)\\n\", global_counter, NUM_THREADS * INCREMENTS_PER_THREAD);\n42 \n43     sem_destroy(&access_limit);\n44     return 0;\n45 }",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "מהו הערך הסופי של `global_counter` שיוצג בסיום התוכנית? נמקו.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "האם התוכנית מבטיחה שבאופן מירבי `MAX_CONCURRENT_ACCESSORS` חוטים ייגשו לקטע הקריטי בו-זמנית? נמקו.",
+        "code_snippet": null,
+        "options": [
+          "כן",
+          "לא"
+        ]
+      },
+      {
+        "id": "1.3",
+        "text": "האם התוכנית מבטיחה שערכו הסופי של המונה יהיה נכון (כלומר, שווה ל-`NUM_THREADS * INCREMENTS_PER_THREAD`)? אם לא, תארו תרחיש ריצה לדוגמה שמוביל לערך שגוי והסבירו מדוע הוא מתרחש.",
+        "code_snippet": null,
+        "options": [
+          "כן",
+          "לא"
+        ]
+      },
+      {
+        "id": "1.4",
+        "text": "תקנו את התוכנית כך שתעבוד באופן תקין, כלומר, תבטיח שערכו הסופי של המונה יהיה נכון, תוך שמירה על העיקרון של הגבלת הגישה לקטע הקריטי (הכולל את קידום המונה) ל-`MAX_CONCURRENT_ACCESSORS` חוטים בלבד. אין להשתמש באובייקטי סנכרון נוספים מעבר לסמפורים, ואין לשנות את הגדרת הקבועים. ניתן להוסיף משתנים גלובליים, ויש לציין את ערכי האתחול שלהם בהערה.",
+        "code_snippet": "void* worker_thread(void* arg) {\n    int tid = *(int*)arg;\n    for (int i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n        // Your code here\n    }\n    return NULL;\n}",
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.1: הערך הסופי של `global_counter` יהיה לרוב נמוך מ-`NUM_THREADS * INCREMENTS_PER_THREAD`. הסיבה לכך היא תנאי מרוץ (Race Condition) על המשתנה `global_counter`. למרות שהסמפור `access_limit` מגביל את מספר החוטים שיכולים להיכנס לקטע הקריטי (שורה 19) ל-`MAX_CONCURRENT_ACCESSORS`, פעולת הקידום `global_counter++` אינה אטומית. היא מורכבת מקריאה של הערך, קידומו ברגיסטר, וכתיבת הערך חזרה לזיכרון. אם `MAX_CONCURRENT_ACCESSORS` גדול מ-1 (כמו בדוגמה, כאשר הוא 2), ייתכן ששני חוטים או יותר ייכנסו לקטע הקריטי בו-זמנית, יקראו את אותו ערך של `global_counter`, יקדמו אותו בנפרד, ויכתבו את אותו ערך חדש. במצב כזה, קידום אחד אובד. לדוגמה, אם `global_counter` הוא 0, חוט A וחוט B נכנסים: חוט A קורא 0, חוט B קורא 0. חוט A מקדם ל-1 וכותב 1. חוט B מקדם ל-1 וכותב 1. במקום שערך המונה יהיה 2, הוא נשאר 1. מכיוון שהתופעה מתרחשת פעמים רבות, הערך הסופי יהיה נמוך מהצפוי.\n\n1.2: כן, התוכנית מבטיחה שבאופן מירבי `MAX_CONCURRENT_ACCESSORS` חוטים ייגשו לקטע הקריטי בו-זמנית. הסמפור `access_limit` מאותחל ל-`MAX_CONCURRENT_ACCESSORS`. כל חוט מבצע `sem_wait(&access_limit)` לפני הכניסה לקטע הקריטי ו-`sem_post(&access_limit)` לאחר היציאה ממנו. זהו השימוש הסטנדרטי בסמפור סופר (counting semaphore) כדי להגביל את מספר הגישות המקבילות למשאב.\n\n1.3: לא, התוכנית אינה מבטיחה שערכו הסופי של המונה יהיה נכון. כפי שהוסבר בסעיף 1.1, קיימת תחרות (Race Condition) על המשתנה `global_counter`. תרחיש לדוגמה: נניח `global_counter = 0`, ו-`MAX_CONCURRENT_ACCESSORS = 2`. \n1. חוט 1 מבצע `sem_wait(&access_limit)`. `access_limit` יורד ל-1. \n2. חוט 2 מבצע `sem_wait(&access_limit)`. `access_limit` יורד ל-0. כעת שני חוטים נמצאים בקטע הקריטי. \n3. חוט 1 קורא את `global_counter` (ערך 0). \n4. חוט 2 קורא את `global_counter` (ערך 0). \n5. חוט 1 מקדם את הערך שקרא (0+1=1) וכותב אותו ל-`global_counter`. `global_counter` = 1. \n6. חוט 2 מקדם את הערך שקרא (0+1=1) וכותב אותו ל-`global_counter`. `global_counter` = 1. \nבמקום שהמונה יתקדם ב-2, הוא התקדם רק ב-1, וקידום אחד אבד. תרחיש כזה יכול לחזור על עצמו פעמים רבות לאורך הריצה.\n\n1.4: כדי לתקן את התוכנית, עלינו להבטיח את אטומיות פעולת הקידום של `global_counter` תוך שמירה על הגבלת הגישה המקבילה ל-`MAX_CONCURRENT_ACCESSORS` חוטים. ניתן לעשות זאת על ידי שימוש בסמפור בינארי נוסף (שמתנהג כמו מנעול - mutex) שיגן באופן בלעדי על פעולת הקידום עצמה.\n\nמשתנים גלובליים (יש לציין ערכי אתחול בהערה):\n```c\nsem_t count_mutex; // Initialized: 1\n```\n\nבפונקציה `worker_thread`, יש לשנות את הקטע הקריטי באופן הבא:\n```c\nvoid* worker_thread(void* arg) {\n    int tid = *(int*)arg;\n    for (int i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n        sem_wait(&access_limit); // Acquire a \"slot\" to enter the broader critical section\n\n        sem_wait(&count_mutex); // Acquire mutex for global_counter (ensures atomicity)\n        global_counter++;       // Atomic increment\n        sem_post(&count_mutex); // Release mutex for global_counter\n\n        sem_post(&access_limit); // Release the \"slot\"\n    }\n    return NULL;\n}\n```\n\nהסבר לתיקון:\nהוספנו סמפור בינארי `count_mutex` המאותחל ל-1 (בפונקציה `main` יש להוסיף `sem_init(&count_mutex, 0, 1);` לאחר אתחול `access_limit`). סמפור זה משמש כ-mutex המגן באופן אקסקלוסיבי על פעולת הקידום `global_counter++`. כך, בכל רגע נתון רק חוט אחד יוכל לבצע את פעולת הקידום, מה שמבטיח את אטומיותה ונכונותה. הסמפור `access_limit` ממשיך לתפקד כמגביל את מספר החוטים המקסימלי שיכולים להימצא ב\"אזור הרחב\" של הקטע הקריטי (בין `sem_wait(&access_limit)` לבין `sem_post(&access_limit)`), ובכך הוא עונה על הדרישה להגבלת הגישה ל-`MAX_CONCURRENT_ACCESSORS` חוטים. השילוב של שני הסמפורים מאפשר לממש את שתי הדרישות במקביל."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

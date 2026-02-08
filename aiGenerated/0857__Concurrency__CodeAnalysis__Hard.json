@@ -1,0 +1,59 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 00:52:35",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5571,
+      "output_tokens": 3331,
+      "total_tokens": 21704
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Concurrency",
+      "Threads",
+      "Synchronization",
+      "Race Conditions",
+      "Condition Variables"
+    ],
+    "content": {
+      "text": "נתונה מערכת המורכבת מ-N חוטי עובד (workers) וחוט מתאם (coordinator) יחיד. חוטי העובד מבצעים משימות, כאשר כל משימה מקדמת מונה גלובלי `task_count`. כאשר `task_count` מגיע לערך סף `BATCH_SIZE`, חוט המתאם אמור להתעורר, לבצע עיבוד אצווה (batch processing) ולאפס את `task_count`. חוטי העובד צריכים להמתין שהמתאם יסיים את עיבוד האצווה לפני שימשיכו לבצע משימות נוספות עבור האצווה הבאה.\nלהלן קוד C המממש את המערכת, אך הוא מכיל שגיאות תזמון (concurrency bugs):\n\n```c\n#include <stdio.h>\n#include <pthread.h>\n#include <unistd.h> // for sleep\n\n#define NUM_WORKERS 3\n#define TASKS_PER_WORKER 2 // כל עובד מבצע 2 משימות\n#define BATCH_SIZE 5      // מתאם מעבד כאשר task_count מגיע לערך זה\n\nint task_count = 0;\npthread_mutex_t mutex;\npthread_cond_t workers_cond;     // עובדים ממתינים על משתנה תנאי זה\npthread_cond_t coordinator_cond; // מתאם ממתין על משתנה תנאי זה\n\nint coordinator_is_processing = 0; // דגל המציין אם המתאם עסוק בעיבוד\n\nvoid* worker_thread(void* arg) {\n    long id = (long)arg;\n    for (int i = 0; i < TASKS_PER_WORKER; ++i) {\n        pthread_mutex_lock(&mutex);\n\n        // BUG: חוטים לא ממתינים אם task_count כבר הגיע ל-BATCH_SIZE\n        // או אם המתאם כבר בעיצומו של עיבוד, והם עלולים לקדם את המונה מעבר ל-BATCH_SIZE.\n\n        task_count++;\n        printf(\"Worker %ld: task_count = %d\\n\", id, task_count);\n\n        if (task_count == BATCH_SIZE) {\n            coordinator_is_processing = 1; // סמן שהמתאם עסוק\n            printf(\"Worker %ld: Signalling coordinator to process batch.\\n\", id);\n            pthread_cond_signal(&coordinator_cond); // אותת למתאם להתחיל בעיבוד\n        }\n        \n        pthread_mutex_unlock(&mutex);\n        usleep(100000 + (id * 10000)); // הדמיית עבודה\n    }\n    return NULL;\n}\n\nvoid* coordinator_thread(void* arg) {\n    int batches_processed = 0;\n    int total_tasks = NUM_WORKERS * TASKS_PER_WORKER;\n    int max_expected_batches = (total_tasks + BATCH_SIZE - 1) / BATCH_SIZE; // חישוב מספר האצוות המקסימלי\n    if (max_expected_batches == 0) max_expected_batches = 1;\n\n    while (batches_processed < max_expected_batches + NUM_WORKERS) { // +NUM_WORKERS למרווח ביטחון\n        pthread_mutex_lock(&mutex);\n\n        // המתאם ממתין עד ש-task_count מגיע ל-BATCH_SIZE ודגל העיבוד מסומן\n        while (task_count < BATCH_SIZE || !coordinator_is_processing) {\n            pthread_cond_wait(&coordinator_cond, &mutex);\n        }\n\n        printf(\"Coordinator: BATCH_SIZE reached, processing batch %d...\\n\", batches_processed + 1);\n        pthread_mutex_unlock(&mutex); // שחרר מנעול בזמן עיבוד ארוך\n        sleep(1); // הדמיית עיבוד אצווה\n        pthread_mutex_lock(&mutex);\n\n        task_count = 0; // אפס את מונה המשימות\n        coordinator_is_processing = 0; // המתאם סיים עיבוד\n        batches_processed++;\n        printf(\"Coordinator: Batch %d processing finished, task_count reset.\\n\", batches_processed);\n\n        pthread_cond_broadcast(&workers_cond); // העיר את כל חוטי העובד הממתינים\n        pthread_mutex_unlock(&mutex);\n        usleep(50000); // השהייה קלה לפני בדיקת המחזור הבא\n    }\n    printf(\"Coordinator: Finished all expected batches and exiting.\\n\");\n    return NULL;\n}\n\nint main() {\n    pthread_t workers[NUM_WORKERS];\n    pthread_t coordinator;\n\n    pthread_mutex_init(&mutex, NULL);\n    pthread_cond_init(&workers_cond, NULL);\n    pthread_cond_init(&coordinator_cond, NULL);\n\n    for (long i = 0; i < NUM_WORKERS; ++i) {\n        pthread_create(&workers[i], NULL, worker_thread, (void*)i);\n    }\n    pthread_create(&coordinator, NULL, coordinator_thread, NULL);\n\n    for (int i = 0; i < NUM_WORKERS; ++i) {\n        pthread_join(workers[i], NULL);\n    }\n    pthread_join(coordinator, NULL); // המתן למתאם שיסיים\n\n    printf(\"Main: All threads finished. Final task_count = %d\\n\", task_count);\n\n    pthread_mutex_destroy(&mutex);\n    pthread_cond_destroy(&workers_cond);\n    pthread_cond_destroy(&coordinator_cond);\n\n    return 0;\n}\n```",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "101.1",
+        "text": "תארו תרחיש ריצה (timing sequence) שבו המונה `task_count` עלול לעבור את הערך `BATCH_SIZE`. הסבירו מדוע תרחיש זה מתאפשר בקוד הנתון.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "101.2",
+        "text": "תארו תרחיש ריצה שבו חוט עובד מסוים יתחיל לבצע את המשימה הבאה שלו (כלומר, יקדם את `task_count` עבור האצווה הבאה) *לפני* שחוט המתאם סיים לעבד את האצווה הנוכחית. הסבירו מדוע תרחיש זה מתאפשר בקוד הנתון.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "101.3",
+        "text": "תקנו את פונקציית `worker_thread` כך שהמערכת תפעל באופן תקין, תוך עמידה בדרישות הבאות:\nא. המונה `task_count` לעולם לא יעבור את `BATCH_SIZE`.\nב. חוטי העובד ימתינו לחוט המתאם שיסיים לעבד את האצווה הנוכחית לפני שימשיכו לבצע משימות נוספות (כלומר, יקדמו את `task_count` עבור האצווה הבאה).\nג. לא יתרחשו קיפאונות (deadlocks) או הרעבות (livelocks).\nיש לשנות רק את פונקציית `worker_thread`. ניתן להוסיף משתנים גלובליים במידת הצורך (יש לציין את ערכי האתחול שלהם).",
+        "code_snippet": "void* worker_thread(void* arg) {\n    long id = (long)arg;\n    for (int i = 0; i < TASKS_PER_WORKER; ++i) {\n        pthread_mutex_lock(&mutex);\n\n        // יש לתקן את הקוד כאן\n\n        task_count++;\n        printf(\"Worker %ld: task_count = %d\\n\", id, task_count);\n\n        if (task_count == BATCH_SIZE) {\n            coordinator_is_processing = 1;\n            printf(\"Worker %ld: Signalling coordinator to process batch.\\n\", id);\n            pthread_cond_signal(&coordinator_cond);\n        }\n        \n        pthread_mutex_unlock(&mutex);\n        usleep(100000 + (id * 10000));\n    }\n    return NULL;\n}",
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "101.1: תרחיש לדוגמה שבו `task_count` עובר את `BATCH_SIZE`:\nנניח ש-`task_count` שווה ל-`BATCH_SIZE - 1`. חוט עובד A מבצע `pthread_mutex_lock(&mutex)`, ואז מקדם את `task_count` ל-`BATCH_SIZE`. כעת, חוט עובד A משחרר את המנעול (בלי להמתין שהמתאם יסיים). מיד לאחר מכן, חוט עובד B תופס את המנעול. חוט B רואה ש-`coordinator_is_processing` עדיין 0 (כי המתאם טרם התחיל לרוץ או לטפל בדגל), ואין שום תנאי נוסף המונע ממנו לקדם את `task_count`. לכן, חוט עובד B יקדם את `task_count` ל-`BATCH_SIZE + 1`. תרחיש דומה יכול להתרחש עם מספר רב יותר של חוטים, מה שיוביל את `task_count` לערכים גבוהים יותר מ-`BATCH_SIZE`.\n\n101.2: תרחיש לדוגמה שבו חוט עובד מתחיל משימה חדשה לפני שהמתאם מסיים:\nנניח ש-`task_count` מגיע ל-`BATCH_SIZE` על ידי חוט עובד A. חוט A מציב את `coordinator_is_processing = 1` ומאותת ל-`coordinator_cond`. לאחר מכן, חוט A משחרר את המנעול וממשיך מיד לביצוע האיטרציה הבאה של הלולאה שלו (כלומר, הוא לא ממתין לסימן מהמתאם). חוט A תופס שוב את המנעול ומקדם את `task_count` עבור המשימה הבאה, בעוד שחוט המתאם רק עכשיו מתעורר ומתחיל את פעולת ה-`sleep(1)` שלו (הדמיית עיבוד האצווה). מכיוון שחוטי העובד אינם כוללים קריאה ל-`pthread_cond_wait` לאחר איתות למתאם, הם אינם ממתינים לסיום העיבוד.\n\n101.3: תיקון פונקציית `worker_thread`:\nיש להוסיף תנאי המתנה לחוטי העובד לפני קידום `task_count`. הם צריכים להמתין אם:\n1.  המתאם עסוק כרגע בעיבוד אצווה (`coordinator_is_processing == 1`).\n2.  האצווה הנוכחית מלאה (`task_count == BATCH_SIZE`) והיא ממתינה לעיבוד על ידי המתאם.\n\n```c\nvoid* worker_thread(void* arg) {\n    long id = (long)arg;\n    for (int i = 0; i < TASKS_PER_WORKER; ++i) {\n        pthread_mutex_lock(&mutex);\n\n        // חוטי העובד ממתינים אם המתאם עסוק בעיבוד אצווה,\n        // או אם האצווה הנוכחית מלאה וממתינה לעיבוד.\n        while (coordinator_is_processing || task_count == BATCH_SIZE) {\n            // שימוש בלולאת while חיוני לטיפול בהתעוררויות שווא (spurious wakeups)\n            pthread_cond_wait(&workers_cond, &mutex);\n        }\n\n        task_count++;\n        printf(\"Worker %ld: task_count = %d\\n\", id, task_count);\n\n        if (task_count == BATCH_SIZE) {\n            coordinator_is_processing = 1; // סמן שהמתאם עסוק\n            printf(\"Worker %ld: Signalling coordinator to process batch.\\n\", id);\n            pthread_cond_signal(&coordinator_cond); // אותת למתאם להתחיל בעיבוד\n        }\n        \n        pthread_mutex_unlock(&mutex);\n        usleep(100000 + (id * 10000)); // הדמיית עבודה\n    }\n    return NULL;\n}\n```\nאין צורך להוסיף משתנים גלובליים חדשים. המשתנים הקיימים מספיקים. פתרון זה מונע מ-`task_count` לעבור את `BATCH_SIZE` ומבטיח שחוטי העובד ימתינו לסיום עיבוד האצווה לפני שימשיכו. כמו כן, הוא מונע קיפאונות והרעבות על ידי שימוש נכון במנעולים ומשתני תנאי (כולל `pthread_cond_broadcast` מצד המתאם)."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

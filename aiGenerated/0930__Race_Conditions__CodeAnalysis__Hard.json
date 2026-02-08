@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 01:23:34",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5728,
+      "output_tokens": 1158,
+      "total_tokens": 14336
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Race Conditions",
+      "Concurrency",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתונים שני משתנים גלובליים, `A` ו-`B`, המאותחלים ל-0. שני חוטים (threads) רצים במקביל, כאשר כל חוט מבצע את קטע הקוד הייעודי לו פעם אחת. ניתן להניח שכל שורת קוד היא אטומית (כלומר, מובטח שכל שורת קוד מתבצעת בשלמותה ללא הפרעה מחוט אחר). יש לפרט את כל זוגות הערכים האפשריים עבור המשתנים `A` ו-`B` אשר יכולים להתקבל לאחר ששני החוטים מסיימים את ריצתם. לכל זוג ערכים, יש לפרט ולהסביר בקצרה את תזמון הריצה (Interleaving) המוביל אליו.",
+      "code_snippet": "int A = 0;\nint B = 0;\n\nvoid* thread1_func(void* arg) {\n    A = 1;\n    B = A + 1;\n    return NULL;\n}\n\nvoid* thread2_func(void* arg) {\n    B = 1;\n    A = B + 1;\n    return NULL;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "ישנם 4 זוגות ערכים אפשריים עבור המשתנים A ו-B בסיום ריצת שני החוטים. נניח ש-T1.1 ו-T1.2 הן שורות הקוד של thread1, ו-T2.1 ו-T2.2 הן שורות הקוד של thread2. המצב ההתחלתי הוא A=0, B=0.\n\n1.  **זוג ערכים: (A=2, B=1)**\n    **תזמון לדוגמה:** T1.1 -> T1.2 -> T2.1 -> T2.2\n    **הסבר:**\n    *   T1.1: `A = 1;` (A=1, B=0)\n    *   T1.2: `B = A + 1;` (A=1, B=2)\n    *   T2.1: `B = 1;` (A=1, B=1)\n    *   T2.2: `A = B + 1;` (A=2, B=1)\n\n2.  **זוג ערכים: (A=3, B=2)**\n    **תזמון לדוגמה:** T1.1 -> T2.1 -> T1.2 -> T2.2\n    **הסבר:**\n    *   T1.1: `A = 1;` (A=1, B=0)\n    *   T2.1: `B = 1;` (A=1, B=1)\n    *   T1.2: `B = A + 1;` (A=1, B=2)\n    *   T2.2: `A = B + 1;` (A=3, B=2)\n\n3.  **זוג ערכים: (A=2, B=3)**\n    **תזמון לדוגמה:** T1.1 -> T2.1 -> T2.2 -> T1.2\n    **הסבר:**\n    *   T1.1: `A = 1;` (A=1, B=0)\n    *   T2.1: `B = 1;` (A=1, B=1)\n    *   T2.2: `A = B + 1;` (A=2, B=1)\n    *   T1.2: `B = A + 1;` (A=2, B=3)\n\n4.  **זוג ערכים: (A=1, B=2)**\n    **תזמון לדוגמה:** T2.1 -> T2.2 -> T1.1 -> T1.2\n    **הסבר:**\n    *   T2.1: `B = 1;` (A=0, B=1)\n    *   T2.2: `A = B + 1;` (A=2, B=1)\n    *   T1.1: `A = 1;` (A=1, B=1)\n    *   T1.2: `B = A + 1;` (A=1, B=2)"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

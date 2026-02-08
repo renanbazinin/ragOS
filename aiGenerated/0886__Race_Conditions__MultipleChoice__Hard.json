@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 01:04:58",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 1645,
+      "total_tokens": 6961
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Race Conditions",
+      "Synchronization",
+      "Double-Checked Locking"
+    ],
+    "content": {
+      "text": "נתון קטע קוד ב-C המשתמש בדפוס Double-Checked Locking (DCL) לאתחול משאב גלובלי יחיד. מספר תהליכונים (threads) מנסים לאתחל ולגשת למשאב זה. נתחו את הקוד והצביעו על הטענה הנכונה ביותר לגביו.\n\nהערה: המשתנים הגלובליים `g_initialized` ו-`g_resource_ptr` מוכרזים כ-`volatile` כדי למנוע אופטימיזציות מסוימות של הקומפיילר, אך לא נועדו להחליף מחסומי זיכרון מלאים.",
+      "code_snippet": "```c\n#include <stdio.h>\n#include <stdlib.h> // For malloc\n#include <pthread.h>\n#include <stdbool.h>\n#include <unistd.h> // For usleep\n\nvolatile bool g_initialized = false;\nvolatile int* g_resource_ptr = NULL;\npthread_mutex_t mutex;\n\nvoid initialize_global_resource() {\n    // הדמיית לוגיקת אתחול מורכבת ואיטית\n    usleep(100000); // 100ms\n    int* temp_ptr = (int*)malloc(sizeof(int));\n    if (temp_ptr != NULL) {\n        *temp_ptr = 123; // אתחול הערך\n    }\n    g_resource_ptr = temp_ptr; // השמת המצביע למשאב הגלובלי\n    // פה טמונה הבעיה הפוטנציאלית: g_initialized יכול להיכתב לפני ש-g_resource_ptr\n    // באמת מצביע לזיכרון תקין באופן גלוי לכל התהליכונים, עקב אופטימיזציות מעבד/קומפיילר.\n    g_initialized = true;\n}\n\nvoid* worker_thread(void* arg) {\n    // בדיקה ראשונה מחוץ למנעול\n    if (!g_initialized) {\n        pthread_mutex_lock(&mutex);\n        // בדיקה כפולה בתוך המנעול\n        if (!g_initialized) {\n            initialize_global_resource();\n        }\n        pthread_mutex_unlock(&mutex);\n    }\n\n    // ניגשים למשאב\n    // יש כאן פוטנציאל ל-race condition אם g_initialized הפך ל-true לפני ש-g_resource_ptr\n    // קיבל ערך תקין באופן גלוי לכל התהליכונים (בגלל אופטימיזציה של קומפיילר/מעבד).\n    if (g_resource_ptr != NULL) {\n        printf(\"Thread %ld: Resource value: %d\\n\", (long)pthread_self(), *g_resource_ptr);\n    } else {\n        printf(\"Thread %ld: Error - g_resource_ptr is NULL or not fully initialized!\\n\", (long)pthread_self());\n    }\n    return NULL;\n}\n\n// פונקציית main תיצור מספר תהליכונים שיקראו ל-worker_thread\n// ... (הקוד המלא של main לא מוצג אך הוא סטנדרטי ליצירה וצירוף תהליכונים)\n```",
+      "options": [
+        "א. הקוד נכון לחלוטין ויבטיח אתחול יחיד ובטוח של המשאב, בזכות השימוש ב-`volatile` ובמנעול.",
+        "ב. קיים Race Condition שיכול לגרום למשאב להיות מאותחל מספר פעמים על ידי תהליכונים שונים.",
+        "ג. קיים Race Condition שיכול לגרום לתהליכון לגשת למצביע `g_resource_ptr` לפני שהוא מאותחל באופן מלא ותקין, מה שיוביל ל-Undefined Behavior או קריסה.",
+        "ד. הקוד עלול לגרום ל-Deadlock כאשר מספר תהליכונים מנסים לאתחל את המשאב בו זמנית.",
+        "ה. למרות שקיים Race Condition, הוא ישפיע רק על ביצועים ולא על נכונות המשאב או בטיחות הגישה אליו."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "התשובה הנכונה היא ג'. דפוס ה-Double-Checked Locking (DCL), כפי שמוצג כאן ללא שימוש במחסומי זיכרון (memory barriers) מפורשים או אופרציות אטומיות (כמו `std::atomic` ב-C++11 ואילך), סובל מ-Race Condition עדין. למרות השימוש ב-`volatile` ובמנעול, הבעיה טמונה בכך שהקומפיילר או המעבד רשאים לשנות את סדר הפעולות בתוך `initialize_global_resource()`. בפרט, ההשמה `g_initialized = true;` עשויה להתבצע ולהיות גלויה לתהליכונים אחרים *לפני* שההשמה `g_resource_ptr = temp_ptr;` ו-*`temp_ptr = 123;` הושלמו באופן מלא או שתוצאותיהן נראות בזיכרון הראשי (כלומר, המצביע `g_resource_ptr` עוד לא קיבל את הכתובת הנכונה או שהזיכרון שאליו הוא מצביע טרם אותחל). \n\nכתוצאה מכך, תהליכון אחר עלול לראות ש-`g_initialized` הוא `true` (בבדיקה הראשונה מחוץ למנעול), לדלג על קטע הקוד המוגן במנעול, ולנסות לגשת ל-`*g_resource_ptr` בעוד ש-`g_resource_ptr` עדיין `NULL` או מצביע לזיכרון לא חוקי/לא מאותחל במלואו. מצב זה יוביל ל-Undefined Behavior, קריסה של התוכנית (segmentation fault) או קריאת ערך שגוי. ה-`volatile` אמנם מונע מהקומפיילר לבצע אופטימיזציות על הגישה למשתנה עצמו, אך אינו מספק אחריות על סדר הנראות של פעולות זיכרון בין תהליכונים שונים, במיוחד כשמדובר באופטימיזציות של המעבד (CPU reordering)."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

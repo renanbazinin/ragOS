@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 00:59:36",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1028,
+      "output_tokens": 582,
+      "total_tokens": 4928
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Race Conditions",
+      "Concurrency",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא. אם שני חוטים (threads) יריצו את הפונקציה `incrementer` במקביל, ויבצעו `pthread_join` בסיום, איזו טענה נכונה לגבי הערך הסופי של `shared_value`?",
+      "code_snippet": "int shared_value = 0;\n\nvoid *incrementer(void *arg) {\n    for (int i = 0; i < 100000; i++) {\n        shared_value++;\n    }\n    return NULL;\n}",
+      "options": [
+        "א. הערך הסופי יהיה תמיד 200000.",
+        "ב. הערך הסופי יהיה תמיד 0.",
+        "ג. הערך הסופי יהיה תמיד 100000.",
+        "ד. הערך הסופי יהיה לרוב קטן מ-200000, והוא אינו מובטח להיות 200000 עקב תנאי מרוץ.",
+        "ה. הערך הסופי יהיה תמיד גדול מ-200000."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ד",
+      "explanation": "ד'. הפעולה `shared_value++` אינה אטומית. היא מורכבת מקריאת הערך, הגדלתו, וכתיבתו חזרה. כאשר שני חוטים מבצעים אותה במקביל ללא סנכרון, ייתכנו \"עדכונים אבודים\" (lost updates) שבהם חוט אחד קורא ערך, חוט שני קורא את אותו ערך, שניהם מגדילים אותו, ואז שניהם כותבים אותו בחזרה, ובכך אחד העדכונים נעלם. כתוצאה מכך, הערך הסופי יהיה לרוב קטן מ-200000 (הסכום הצפוי של 100000+100000), והוא אינו מובטח להיות ערך מסוים."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

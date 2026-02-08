@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 00:49:50",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2942,
+      "output_tokens": 1051,
+      "total_tokens": 6705
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Concurrency",
+      "Race Conditions",
+      "Threads",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C הבאה המשתמשת בחוטים (threads) לטיפול במשתנה גלובלי משותף.\nהתוכנית יוצרת מספר חוטים, וכל חוט מגדיל מונה גלובלי מספר מסוים של פעמים.\n\nמהו הערך הסופי ה *צפוי* של המשתנה `counter` לאחר שכל החוטים יסיימו את ריצתם?\nהאם ערך זה מובטח? אם לא, הסבר מדוע ומהם הערכים הסופיים ה *אפשריים* של `counter`.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\n#define NUM_THREADS 5\n#define ITERATIONS 100000\n\nint counter = 0; // Global shared variable\n\nvoid* increment_counter(void* arg) {\n    for (int i = 0; i < ITERATIONS; ++i) {\n        counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, increment_counter, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הערך הסופי ה *צפוי* של המשתנה `counter` הוא סך כל ההגדלות שכל החוטים מבצעים: NUM_THREADS * ITERATIONS = 5 * 100000 = 500000.\n\nערך זה *אינו מובטח* וסביר להניח שיהיה נמוך יותר בפועל.\n\nהסיבה לכך היא תנאי מרוץ (Race Condition). הפעולה `counter++` אינה פעולה אטומית. היא מתורגמת למספר פעולות מכונה ברמה נמוכה יותר:\n1. קריאת הערך הנוכחי של `counter` מהזיכרון.\n2. הגדלת הערך (בדרך כלל באוגר).\n3. כתיבת הערך החדש בחזרה לזיכרון.\n\nכאשר מספר חוטים מנסים לבצע את הפעולות הללו במקביל, ייתכן שסדר הביצוע שלהן יגרום לאיבוד עדכונים. לדוגמה:\n- חוט A קורא את `counter` (נניח 0).\n- חוט B קורא את `counter` (גם 0).\n- חוט A מגדיל את הערך שקרא ל-1 וכותב אותו בחזרה לזיכרון (`counter` הופך ל-1).\n- חוט B מגדיל את הערך שקרא (שעדיין היה 0 עבורו) ל-1 וכותב אותו בחזרה לזיכרון (`counter` נשאר 1).\nבמקרה זה, שתי פעולות הגדלה הביאו רק להגדלה אחת בפועל של המונה הגלובלי.\n\nהערכים הסופיים ה *אפשריים* של `counter` יהיו בטווח שבין 1 (במקרה הקיצוני שבו כל ההגדלות, למעט אחת, נאבדות) לבין 500000 (הערך הצפוי, במקרה נדיר של מזל רב ללא איבוד עדכונים). בפועל, ברוב המקרים, הערך יהיה נמוך מ-500000 אך גבוה מ-1, תלוי בלוח הזמנים של מערכת ההפעלה ובמספר הליבות במעבד.",
+      "code_snippet": null
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

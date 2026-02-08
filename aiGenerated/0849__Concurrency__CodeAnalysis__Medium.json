@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 00:48:43",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2942,
+      "output_tokens": 1173,
+      "total_tokens": 7537
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Concurrency",
+      "Race Conditions",
+      "Threads",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המשתמשת ב-pthreads. התוכנית יוצרת מספר חוטים, כאשר כל חוט מגדיל את המונה הגלובלי `counter` מספר מוגדר של פעמים. לאחר שכל החוטים סיימו את פעולתם, התוכנית הראשית מדפיסה את ערכו הסופי של המונה.\n\nעיין בקטע הקוד הבא. מהו הערך *הנכון* (הצפוי ללא בעיות סנכרון) של המונה `counter` בסיום ריצת התוכנית? האם קטע הקוד מבטיח שהערך הזה יודפס? אם לא, הסבר מדוע ומהי הבעיה המרכזית הגורמת לכך, וכיצד ניתן לפתור אותה (אין צורך לממש את הפתרון בקוד, רק להסביר את העיקרון).",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\n#define NUM_THREADS 5\n#define NUM_ITERATIONS 100000\n\nint counter = 0;\n\nvoid* thread_func(void* arg) {\n    for (int i = 0; i < NUM_ITERATIONS; ++i) {\n        counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, thread_func, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    return 0;\n}"
+    },
+    "sub_questions": null,
+    "points": 10,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הערך הנכון והצפוי של המונה `counter` בסיום ריצת התוכנית הוא `NUM_THREADS * NUM_ITERATIONS`, כלומר `5 * 100000 = 500000`.\n\nקטע הקוד *אינו* מבטיח שהערך הזה יודפס. הבעיה המרכזית היא תנאי מירוץ (Race Condition) בגישה למשתנה הגלובלי `counter`.\n\nהפעולה `counter++` אינה פעולה אטומית. היא מורכבת משלושה שלבים עיקריים ברמת המעבד:\n1. קריאת הערך הנוכחי של `counter` מהזיכרון.\n2. הגדלת הערך ב-1.\n3. כתיבת הערך החדש בחזרה לזיכרון.\n\nכאשר מספר חוטים מנסים לבצע את הפעולה הזו בו-זמנית, ייתכן שחוט אחד יקרא את הערך של `counter`, וטרם יספיק לכתוב את הערך המוגדל בחזרה, חוט אחר יקרא גם הוא את אותו הערך הישן. במקרה כזה, שני החוטים יגדילו את אותו ערך ויכתבו את התוצאה, ובכך 'ידרסו' אחד את עבודתו של השני, וספירה אחת תאבד. לדוגמה, אם `counter` הוא `0`:\n* חוט A קורא `counter` (ערך = 0).\n* חוט B קורא `counter` (ערך = 0).\n* חוט A מגדיל את הערך ל-1.\n* חוט B מגדיל את הערך ל-1.\n* חוט A כותב `counter = 1`.\n* חוט B כותב `counter = 1`.\nבסופו של דבר, למרות שבוצעו שתי פעולות הגדלה, ערך `counter` הוא `1` במקום `2`.\n\nכדי לפתור בעיה זו ולהבטיח שהמונה יגיע לערכו הנכון, יש להגן על הגישה למשתנה `counter` באמצעות מנגנון סנכרון. הפתרון הנפוץ ביותר הוא שימוש במנעול הדדי (Mutex). יש לאתחל `pthread_mutex_t`, לנעול אותו לפני `counter++` ולשחרר אותו מיד לאחר מכן, ובכך להבטיח שרק חוט אחד יוכל לבצע את פעולת ההגדלה בכל רגע נתון (Critical Section).",
+      "code_snippet": null
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

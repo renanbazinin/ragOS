@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 01:00:04",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1028,
+      "output_tokens": 618,
+      "total_tokens": 4165
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Race Conditions",
+      "Concurrency",
+      "Synchronization",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא. שני חוטים (threads) מריצים את הפונקציה `my_thread_func` במקביל. איזה מהבאים מתאר נכונה את המצב לגבי הערך הסופי של `counter`?",
+      "code_snippet": "int counter = 0;\n\nvoid *my_thread_func(void *arg) {\n    for (int i = 0; i < 100000; i++) {\n        counter++; \n    }\n    return NULL;\n}",
+      "options": [
+        "א. `counter` יהיה שווה בדיוק ל-200000.",
+        "ב. `counter` יהיה שווה בדיוק ל-100000.",
+        "ג. `counter` יהיה קטן מ-200000, וערכו הסופי אינו ודאי.",
+        "ד. `counter` יהיה גדול מ-200000, וערכו הסופי אינו ודאי.",
+        "ה. תמיד תתרחש שגיאת זמן ריצה (runtime error) או קריסת תוכנה."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג'. פעולת `counter++` אינה אטומית. היא מורכבת משלוש פעולות בסיסיות: קריאת הערך הנוכחי של `counter`, הגדלת הערך, וכתיבת הערך החדש בחזרה ל-`counter`. כאשר שני חוטים מריצים פעולה זו במקביל ללא סנכרון (מנעול), ייתכן מצב של מרוץ (race condition). לדוגמה, שני החוטים עלולים לקרוא את אותו ערך של `counter`, שניהם יגדילו אותו, ואז שניהם יכתבו בחזרה את אותו ערך מוגדל. במקרה כזה, אחד מהעדכונים \"נאבד\". כתוצאה מכך, הערך הסופי של `counter` יהיה לרוב קטן מהערך הצפוי (200000), והוא אינו ודאי ותלוי בתזמון המדויק של המתזמן (scheduler)."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

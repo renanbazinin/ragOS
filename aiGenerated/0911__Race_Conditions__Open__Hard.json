@@ -1,0 +1,50 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 01:15:55",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4708,
+      "output_tokens": 2373,
+      "total_tokens": 14575
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Race Conditions",
+      "Synchronization",
+      "Mutexes"
+    ],
+    "content": {
+      "text": "מערכת מרובת תהליכונים (multi-threaded) מנהלת רשימה מקושרת גלובלית ומונה גלובלי המייצג את מספר האיברים ברשימה. המטרה היא שהמונה הגלובלי (global_count) תמיד ישקף במדויק את מספר האיברים בפועל ברשימה. לצורך הגנה על המשאבים המשותפים, נעשה שימוש בשני מנעולים הדדיים (mutexes) נפרדים: אחד לרשימה המקושרת (list_mutex) ואחד למונה הגלובלי (count_mutex).\n\nלהלן מימוש חלקי של הפונקציות add_item ו-remove_item, יחד עם מבני הנתונים הגלובליים:\n",
+      "code_snippet": "typedef struct Node {\n    int data;\n    struct Node* next;\n} Node;\n\nNode* head = NULL;\nint global_count = 0;\n\npthread_mutex_t list_mutex;\npthread_mutex_t count_mutex;\n\nvoid add_item(int value) {\n    pthread_mutex_lock(&count_mutex);\n    global_count++;\n    pthread_mutex_unlock(&count_mutex);\n\n    pthread_mutex_lock(&list_mutex);\n    Node* new_node = (Node*)malloc(sizeof(Node));\n    if (new_node == NULL) {\n        perror(\"Failed to allocate new node\");\n        exit(EXIT_FAILURE);\n    }\n    new_node->data = value;\n    new_node->next = head;\n    head = new_node;\n    pthread_mutex_unlock(&list_mutex);\n}\n\nvoid remove_item(int value) {\n    pthread_mutex_lock(&list_mutex);\n    Node* current = head;\n    Node* prev = NULL;\n\n    while (current != NULL && current->data != value) {\n        prev = current;\n        current = current->next;\n    }\n\n    if (current != NULL) {\n        if (prev == NULL) {\n            head = current->next;\n        } else {\n            prev->next = current->next;\n        }\n        free(current);\n        pthread_mutex_unlock(&list_mutex);\n\n        pthread_mutex_lock(&count_mutex);\n        global_count--;\n        pthread_mutex_unlock(&count_mutex);\n    } else {\n        pthread_mutex_unlock(&list_mutex);\n    }\n}"
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "זהו והסבירו בפירוט תנאי מירוץ (race condition) אחד לפחות שעלול להתרחש בקוד הנתון, וכיצד הוא יכול להוביל למצב של אי-עקביות (inconsistency) בין global_count לבין מספר האיברים בפועל ברשימה. ציינו במפורש האם global_count יהיה גדול או קטן ממספר האיברים בפועל במקרה שתתארו.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "הציעו תיקון לקוד הנתון שימנע את תנאי המירוץ שתיארתם בסעיף הקודם, והסבירו מדוע התיקון שלכם פותר את הבעיה. הציגו את הקוד המתוקן עבור הפונקציות add_item ו-remove_item.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": false,
+      "correct_option": null,
+      "explanation": "1.1: תנאי מירוץ המוביל לאי-עקביות (global_count גדול ממספר האיברים בפועל):\nתנאי המירוץ מתרחש בפונקציה `add_item` כאשר העדכון של `global_count` והוספת הצומת לרשימה אינם מהווים פעולה אטומית אחת. למרות שכל אחת מהפעולות מוגנת על ידי מנעול נפרד (`count_mutex` ו-`list_mutex`), הסדר וההפרדה ביניהן מאפשרים מצב ביניים לא עקבי.\n\nתרחיש לדוגמה:\n1.  `global_count` = 0, הרשימה ריקה.\n2.  **תהליך A** קורא ל-`add_item(5)`.\n3.  תהליך A נועל את `count_mutex`, מגדיל את `global_count` ל-1, ומשחרר את `count_mutex`.\n4.  **מתרחשת החלפת הקשר (context switch).** תהליך B קורא לפונקציה `get_actual_list_count()` (נניח שפונקציה זו, בדומה ל-`remove_item`, נועלת את `list_mutex` וסופרת את האיברים ברשימה).\n5.  תהליך B נועל את `list_mutex`, עובר על הרשימה (שעדיין ריקה כיוון שתהליך A לא הספיק להוסיף את הצומת בפועל), ומקבל `actual_count` = 0. תהליך B משחרר את `list_mutex` ומחזיר 0.\n6.  **מתרחשת החלפת הקשר.** תהליך A ממשיך.\n7.  תהליך A נועל את `list_mutex`, מוסיף את הצומת 5 לראש הרשימה, ומשחרר את `list_mutex`.\n\nבנקודה זו, `global_count` שווה 1, אך תהליך B צפה ברשימה כשהייתה ריקה ודיווח על 0 איברים. מצב זה מפר את האינווריאנט, ו-`global_count` יהיה גדול ממספר האיברים בפועל ברגע ש-`get_actual_list_count()` נשלפה. גם אם נבדוק את המצב לאחר ששני התהליכים סיימו, תהליך B דיווח על אי-עקביות בעת ריצתו.\n\n1.2: תיקון הקוד:\nהבעיה נובעת מכך שעדכון המונה ועדכון מבנה הנתונים של הרשימה אינם אטומים יחד. הפתרון הנכון הוא להגן על שתי הפעולות באמצעות מנעול יחיד ומשותף, המבטיח ששום תהליך אחר לא יוכל לצפות במצב ביניים לא עקבי. במקרה זה, המנעול שמגן על הרשימה (`list_mutex`) יכול לשמש גם להגנה על `global_count`, מכיוון ש-`global_count` הוא מטא-דאטה שקשור ישירות למצב הרשימה.\n\nקוד מתוקן:\n```c\nvoid add_item(int value) {\n    pthread_mutex_lock(&list_mutex); // נועלים את המנעול המשותף לשתי הפעולות\n    \n    // שלב 1: הוספת הצומת לרשימה\n    Node* new_node = (Node*)malloc(sizeof(Node));\n    if (new_node == NULL) {\n        perror(\"Failed to allocate new node\");\n        exit(EXIT_FAILURE);\n    }\n    new_node->data = value;\n    new_node->next = head;\n    head = new_node;\n    \n    // שלב 2: עדכון המונה\n    global_count++; // מעדכנים את המונה תחת אותו מנעול\n    \n    pthread_mutex_unlock(&list_mutex); // משחררים את המנעול\n}\n\nvoid remove_item(int value) {\n    pthread_mutex_lock(&list_mutex); // נועלים את המנעול המשותף לשתי הפעולות\n    \n    Node* current = head;\n    Node* prev = NULL;\n\n    while (current != NULL && current->data != value) {\n        prev = current;\n        current = current->next;\n    }\n\n    if (current != NULL) { // הצומת נמצא\n        if (prev == NULL) {\n            head = current->next;\n        } else {\n            prev->next = current->next;\n        }\n        free(current);\n        \n        // שלב 2: עדכון המונה\n        global_count--; // מעדכנים את המונה תחת אותו מנעול\n    }\n    // אם הצומת לא נמצא, אין צורך לעדכן את המונה או לשחרר זיכרון\n    \n    pthread_mutex_unlock(&list_mutex); // משחררים את המנעול\n}\n```\n\n**הסבר לתיקון:**\nעל ידי שימוש במנעול יחיד (`list_mutex`) המקיף את כל הפעולות שמשנות הן את מבנה הרשימה והן את המונה `global_count`, אנו מבטיחים ששתי הפעולות הללו יבוצעו כאטום אחד מבחינת כל תהליך אחר. כלומר, אף תהליך לא יוכל לצפות ברשימה או במונה במצב ביניים שבו אחד מהם עודכן אך השני עדיין לא. תהליך שירצה לגשת למונה או לרשימה יצטרך להמתין עד שהמנעול ישוחרר, ובכך יראה תמיד מצב עקבי של שניהם. אין צורך ב-`count_mutex` נפרד יותר, וניתן להסירו."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

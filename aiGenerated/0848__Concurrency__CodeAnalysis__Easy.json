@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 00:48:22",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5571,
+      "output_tokens": 1417,
+      "total_tokens": 11336
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Concurrency",
+      "Race Conditions",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה המשתמשת בשני חוטים לשינוי משתנה גלובלי משותף `counter`. חוט אחד מגדיל את המונה, והשני מקטין אותו. אין שימוש במנגנוני סנכרון. קמפלו והריצו את התוכנית. מהם הערכים המינימלי והמקסימלי האפשריים שיודפסו עבור `counter` בסוף הריצה? יש לפרט בקצרה ובבהירות את תזמוני הריצות שמובילים לכל אחת מהתשובות.",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n\n#define ITERATIONS 10000\n\nint counter = 0;\n\nvoid* incrementer(void* arg) {\n    for (int i = 0; i < ITERATIONS; ++i) {\n        counter++;\n    }\n    return NULL;\n}\n\nvoid* decrementer(void* arg) {\n    for (int i = 0; i < ITERATIONS; ++i) {\n        counter--;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t tid1, tid2;\n\n    pthread_create(&tid1, NULL, incrementer, NULL);\n    pthread_create(&tid2, NULL, decrementer, NULL);\n\n    pthread_join(tid1, NULL);\n    pthread_join(tid2, NULL);\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הערך הסופי של `counter` יכול לנוע בין -ITERATIONS ל-ITERATIONS (כולל). במקרה זה, בין -10000 ל-10000. הערך הצפוי ללא תנאי מרוץ הוא 0.\n\n**הערך המקסימלי האפשרי (ITERATIONS):**\nתרחיש שמוביל לערך ITERATIONS (כלומר 10000):\nנניח ששני החוטים (incrementer ו-decrementer) מתחילים לרוץ במקביל. עבור כל זוג פעולות (אחת של הגדלה ואחת של הקטנה) מתרחש התזמון הבא:\n1.  חוט ה-decrementer קורא את ערך `counter` (לדוגמה, 0).\n2.  חוט ה-incrementer קורא את אותו ערך של `counter` (לדוגמה, 0).\n3.  חוט ה-decrementer מבצע את החיסור (מחשב 1- = 0-1).\n4.  חוט ה-incrementer מבצע את ההוספה (מחשב 1 = 0+1).\n5.  חוט ה-decrementer כותב את התוצאה שלו (`-1`) ל-`counter`. כעת `counter` שווה ל-1-.\n6.  חוט ה-incrementer כותב את התוצאה שלו (`1`) ל-`counter`. כעת `counter` שווה ל-1.\nבמקרה כזה, פעולת ההקטנה של ה-decrementer \"נאבדת\" מכיוון שערכה נדרס על ידי פעולת ההגדלה של ה-incrementer שקראה את אותו ערך ראשוני. אם תרחיש זה חוזר על עצמו עבור כל 10000 הפעולות, כל הקידומים של ה-incrementer יתבצעו בפועל, וכל ההקטנות של ה-decrementer יאבדו, מה שיוביל לערך סופי של ITERATIONS (10000).\n\n**הערך המינימלי האפשרי (-ITERATIONS):**\nתרחיש שמוביל לערך -ITERATIONS (כלומר -10000):\nזהו תרחיש סימטרי לתרחיש המקסימלי. עבור כל זוג פעולות (אחת של הגדלה ואחת של הקטנה) מתרחש התזמון הבא:\n1.  חוט ה-incrementer קורא את ערך `counter` (לדוגמה, 0).\n2.  חוט ה-decrementer קורא את אותו ערך של `counter` (לדוגמה, 0).\n3.  חוט ה-incrementer מבצע את ההוספה (מחשב 1 = 0+1).\n4.  חוט ה-decrementer מבצע את החיסור (מחשב 1- = 0-1).\n5.  חוט ה-incrementer כותב את התוצאה שלו (`1`) ל-`counter`. כעת `counter` שווה ל-1.\n6.  חוט ה-decrementer כותב את התוצאה שלו (`-1`) ל-`counter`. כעת `counter` שווה ל-1-.\nבמקרה כזה, פעולת ההגדלה של ה-incrementer \"נאבדת\" מכיוון שערכה נדרס על ידי פעולת ההקטנה של ה-decrementer שקראה את אותו ערך ראשוני. אם תרחיש זה חוזר על עצמו עבור כל 10000 הפעולות, כל ההקטנות של ה-decrementer יתבצעו בפועל, וכל הקידומים של ה-incrementer יאבדו, מה שיוביל לערך סופי של -ITERATIONS (-10000)."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

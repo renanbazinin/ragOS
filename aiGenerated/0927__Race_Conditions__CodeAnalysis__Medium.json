@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 06:58:21",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2675,
+      "output_tokens": 1704,
+      "total_tokens": 6453
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Concurrency",
+      "Race Conditions",
+      "Threads",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C++ המשתמשת בספריית pthreads. התוכנית יוצרת מספר תהליכונים (threads) שכל אחד מהם מנסה להגדיל משתנה גלובלי משותף בשם `counter` מספר רב של פעמים.\n\nקראו את הקוד וענו על השאלות הבאות:\n1. מהו הפלט הסופי *הצפוי* של התוכנית?\n2. מהו פלט סופי *אפשרי* של התוכנית בפועל? האם הפלט יהיה דטרמיניסטי? הסבירו מדוע.\n3. איזו בעיה קיימת בקוד וכיצד ניתן לתקן אותה כדי להבטיח שהמונה יגיע תמיד לערך הצפוי?",
+      "code_snippet": "#include <iostream>\n#include <pthread.h> // For pthreads\n#include <vector>    // For std::vector<pthread_t>\n\n#define NUM_THREADS 5\n#define INCREMENTS_PER_THREAD 100000\n\nint counter = 0; // Global shared variable\n\nvoid* increment_thread(void* arg) {\n    for (int i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n        // This operation is not atomic and causes a race condition\n        counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    std::vector<pthread_t> tids(NUM_THREADS);\n\n    // Create threads\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        if (pthread_create(&tids[i], NULL, increment_thread, NULL) != 0) {\n            std::cerr << \"Error creating thread \" << i << std::endl;\n            return 1;\n        }\n    }\n\n    // Wait for threads to finish\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        if (pthread_join(tids[i], NULL) != 0) {\n            std::cerr << \"Error joining thread \" << i << std::endl;\n            return 1;\n        }\n    }\n\n    std::cout << \"Final counter value: \" << counter << std::endl;\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.  **הפלט הצפוי:** כל אחד מ-5 התהליכונים מגדיל את המונה `counter` 100,000 פעמים. לכן, הפלט הצפוי הוא `5 * 100,000 = 500,000`.\n\n2.  **פלט אפשרי בפועל והסבר:** הפלט בפועל יהיה כמעט בוודאות *נמוך* מ-500,000, וגם יהיה *לא דטרמיניסטי* (כלומר, ישתנה בין הרצות שונות של התוכנית). הסיבה לכך היא **מרוץ תחרות (Race Condition)**.\n    הפעולה `counter++` אינה אטומית. היא מורכבת למעשה משלושה שלבים ברמה נמוכה יותר:\n    *   קריאת הערך הנוכחי של `counter` מהזיכרון לתוך אוגר במעבד.\n    *   הגדלת הערך באוגר.\n    *   כתיבת הערך החדש מהאוגר בחזרה ל`counter` בזיכרון.\n    כאשר מספר תהליכונים מבצעים פעולה זו בו זמנית, הם עלולים להפריע זה לזה. לדוגמה, תהליכון A קורא את `counter` (נניח 100), ואז לפני שהוא מספיק לכתוב בחזרה, תהליכון B גם קורא את `counter` (עדיין 100). שניהם מגדילים את הערך באוגרים שלהם ל-101 וכותבים בחזרה לזיכרון. התוצאה הסופית ב`counter` תהיה 101, למרות שבוצעו שתי הגדלות, וכך אבדה אחת מהן. זה מוביל ל\"עדכונים אבודים\" (Lost Updates) ולערך סופי נמוך מהצפוי.\n\n3.  **תיקון הבעיה:** כדי לתקן את מרוץ התחרות ולהבטיח שהמונה יגיע לערך הצפוי, יש להשתמש במנגנון סנכרון כמו **mutex (mutual exclusion lock)**. Mutex מבטיח שרק תהליכון אחד יוכל לגשת לקטע קריטי (Critical Section) של הקוד, במקרה זה הפעולה `counter++`, בכל רגע נתון. כך, הפעולות על `counter` הופכות להיות אטומיות מבחינה לוגית.\n    \n    **דוגמת קוד מתוקנת:**\n    ```c++\n    #include <iostream>\n    #include <pthread.h>\n    #include <vector>\n\n    #define NUM_THREADS 5\n    #define INCREMENTS_PER_THREAD 100000\n\n    int counter = 0;\n    pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER; // Initialize mutex\n\n    void* increment_thread(void* arg) {\n        for (int i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n            pthread_mutex_lock(&mutex); // Acquire lock before critical section\n            counter++;                 // Critical section\n            pthread_mutex_unlock(&mutex); // Release lock after critical section\n        }\n        return NULL;\n    }\n\n    int main() {\n        std::vector<pthread_t> tids(NUM_THREADS);\n\n        for (int i = 0; i < NUM_THREADS; ++i) {\n            if (pthread_create(&tids[i], NULL, increment_thread, NULL) != 0) {\n                std::cerr << \"Error creating thread \" << i << std::endl;\n                return 1;\n            }\n        }\n\n        for (int i = 0; i < NUM_THREADS; ++i) {\n            if (pthread_join(tids[i], NULL) != 0) {\n                std::cerr << \"Error joining thread \" << i << std::endl;\n                return 1;\n            }\n        }\n\n        pthread_mutex_destroy(&mutex); // Destroy mutex at the end\n        std::cout << \"Final counter value: \" << counter << std::endl;\n\n        return 0;\n    }\n    ```",
+      "difficulty_estimation": "Medium"
+    }
+  }
+}

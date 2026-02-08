@@ -1,0 +1,58 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 00:56:28",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5571,
+      "output_tokens": 2607,
+      "total_tokens": 14650
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Concurrency",
+      "Deadlock",
+      "Synchronization",
+      "Mutexes"
+    ],
+    "content": {
+      "text": "נתונה מערכת בנקאית המנהלת N חשבונות. לכל חשבון יש יתרה (balance) ומנעול (mutex) משלו, המגן על גישה ליתרה זו. להלן פונקציית העברה `transfer` המאפשרת להעביר סכום כסף בין שני חשבונות. ניתן להניח ש-`from_idx` ו-`to_idx` הם אינדקסים חוקיים ושונים זה מזה, וכן שהכמות `amount` תמיד חיובית.",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n\n#define NUM_ACCOUNTS 5 // N accounts (לצורך הדוגמה)\n\ntypedef struct {\n    int balance;\n    pthread_mutex_t mutex;\n} Account;\n\nAccount accounts[NUM_ACCOUNTS];\n\nvoid init_accounts() {\n    for (int i = 0; i < NUM_ACCOUNTS; ++i) {\n        accounts[i].balance = 1000; // יתרה התחלתית\n        pthread_mutex_init(&accounts[i].mutex, NULL);\n    }\n}\n\n// הפונקציה לבחינה\nvoid transfer(int from_idx, int to_idx, int amount) {\n    // תפיסת מנעול לחשבון המקור\n    pthread_mutex_lock(&accounts[from_idx].mutex);\n    // תפיסת מנעול לחשבון היעד\n    pthread_mutex_lock(&accounts[to_idx].mutex);\n\n    // בדיקה והעברה\n    if (accounts[from_idx].balance >= amount) {\n        accounts[from_idx].balance -= amount;\n        accounts[to_idx].balance += amount;\n    }\n\n    // שחרור מנעולים\n    pthread_mutex_unlock(&accounts[to_idx].mutex);\n    pthread_mutex_unlock(&accounts[from_idx].mutex);\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "8.1",
+        "text": "תארו תרחיש ריצה ספציפי (כולל פירוט החוטים, החשבונות המעורבים וסדר פעולות ה-`lock`/`unlock`) שיוביל למצב של קיפאון (Deadlock) בעת שימוש בפונקציה `transfer` הנתונה. יש להניח שיש לפחות שני חוטים המבצעים העברות.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.2",
+        "text": "הסבירו מדוע הפתרון הנתון עלול להוביל לקיפאון, תוך התייחסות לתנאי הקיפאון של Coffman (הדרה הדדית, החזקה והמתנה, אי-נשללות, המתנה מעגלית).",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.3",
+        "text": "תקנו את פונקציית `transfer` כך שתמנע קיפאון (deadlock) ותשמור על נכונות הפעולה. ניתן להוסיף משתנים גלובליים או אובייקטי סנכרון כרצונכם, אך אין להשתמש בפעולות אטומיות.",
+        "code_snippet": "void transfer(int from_idx, int to_idx, int amount) {\n    // תפיסת מנעול לחשבון המקור\n    // ... קוד מתוקן כאן ...\n}",
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "8.1: נניח שני חוטים, T1 ו-T2, ושני חשבונות A ו-B (אינדקסים 0 ו-1 בהתאמה). חוט T1 מנסה להעביר כסף מ-A ל-B (`transfer(0, 1, ...)`), וחוט T2 מנסה להעביר כסף מ-B ל-A (`transfer(1, 0, ...)`).\n\nתרחיש קיפאון:\n1. חוט T1 קורא ל-`transfer(0, 1, ...)`.\n2. T1 מבצע `pthread_mutex_lock(&accounts[0].mutex)` – תופס את מנעול A.\n3. מתרחש מיתוג הקשר (context switch) לחוט T2.\n4. חוט T2 קורא ל-`transfer(1, 0, ...)`.\n5. T2 מבצע `pthread_mutex_lock(&accounts[1].mutex)` – תופס את מנעול B.\n6. מתרחש מיתוג הקשר לחוט T1.\n7. T1 מנסה לבצע `pthread_mutex_lock(&accounts[1].mutex)` – חסום, מכיוון שמנעול B מוחזק ע\"י T2.\n8. מתרחש מיתוג הקשר לחוט T2.\n9. T2 מנסה לבצע `pthread_mutex_lock(&accounts[0].mutex)` – חסום, מכיוון שמנעול A מוחזק ע\"י T1.\n\nבנקודה זו, T1 מחזיק במנעול A וממתין למנעול B, ו-T2 מחזיק במנעול B וממתין למנעול A. נוצר מעגל המתנה, ושני החוטים חסומים לצמיתות – זהו מצב קיפאון.\n\n8.2: הפתרון הנתון עלול להוביל לקיפאון מכיוון שהוא מקיים את ארבעת תנאי הקיפאון של Coffman:\n1.  **הדרה הדדית (Mutual Exclusion):** לכל חשבון יש מנעול (mutex) משלו, מה שמבטיח שרק חוט אחד יכול לגשת ליתרה שלו בו-זמנית. זהו תנאי הכרחי לקיפאון.\n2.  **החזקה והמתנה (Hold and Wait):** חוט T1 תופס את מנעול חשבון המקור (A) ולאחר מכן מנסה לתפוס את מנעול חשבון היעד (B). אם מנעול B כבר מוחזק על ידי חוט T2, חוט T1 ממתין למנעול B תוך כדי שהוא ממשיך להחזיק במנעול A. באופן דומה, T2 מחזיק ב-B וממתין ל-A.\n3.  **אי-נשללות (No Preemption):** המנעולים אינם ניתנים לשלילה בכוח. חוט שרכש מנעול חייב לשחרר אותו מרצון; המערכת לא יכולה לקחת ממנו את המנעול.\n4.  **המתנה מעגלית (Circular Wait):** זהו התנאי המרכזי שממומש בתרחיש הקיפאון שתואר בסעיף 8.1. חוט T1 ממתין למשאב (מנעול B) שמוחזק על ידי חוט T2, בעוד חוט T2 ממתין למשאב (מנעול A) שמוחזק על ידי חוט T1. נוצרת שרשרת מעגלית של המתנה למשאבים.\n\n8.3:\nכדי למנוע קיפאון, יש לשבור את תנאי ההמתנה המעגלית. הדרך הנפוצה והיעילה ביותר לעשות זאת במצב זה היא להבטיח שכל החוטים תמיד תופסים את המנעולים בסדר קנוני (לדוגמה, לפי סדר עולה של האינדקסים שלהם).\n\n```c\nvoid transfer(int from_idx, int to_idx, int amount) {\n    // קביעת סדר קנוני לתפיסת המנעולים\n    // תמיד נתפוס את המנעול בעל האינדקס הנמוך יותר קודם.\n    int lock1_idx = (from_idx < to_idx) ? from_idx : to_idx;\n    int lock2_idx = (from_idx < to_idx) ? to_idx : from_idx;\n\n    // תפיסת המנעולים בסדר קנוני\n    pthread_mutex_lock(&accounts[lock1_idx].mutex);\n    pthread_mutex_lock(&accounts[lock2_idx].mutex);\n\n    // ביצוע ההעברה בתוך ה-critical section\n    // נשים לב ש-from_idx ו-to_idx המקוריים הם אלו שקובעים מאיפה לאיפה ההעברה\n    if (accounts[from_idx].balance >= amount) {\n        accounts[from_idx].balance -= amount;\n        accounts[to_idx].balance += amount;\n    }\n\n    // שחרור המנעולים בסדר הפוך מסדר התפיסה (גם קנוני)\n    pthread_mutex_unlock(&accounts[lock2_idx].mutex);\n    pthread_mutex_unlock(&accounts[lock1_idx].mutex);\n}\n```\n\n**הסבר לתיקון:**\nהתיקון מבטיח שכל חוט המבצע העברה בין שני חשבונות `i` ו-`j` תמיד ינסה לתפוס את המנעול של החשבון בעל האינדקס הנמוך יותר (לדוגמה, `min(i, j)`) לפני שינסה לתפוס את המנעול של החשבון בעל האינדקס הגבוה יותר (`max(i, j)`). על ידי אכיפת סדר תפיסה גלובלי זה, מונעים את האפשרות להמתנה מעגלית. לדוגמה, חוט T1 שמעביר מ-A ל-B (0 -> 1) יתפוס `mutex[0]` ואז `mutex[1]`. חוט T2 שמעביר מ-B ל-A (1 -> 0) גם הוא יתפוס `mutex[0]` ואז `mutex[1]`. אם `mutex[0]` תפוס על ידי T1, אז T2 יחסם בניסיון לתפוס אותו, ובכך לא יוכל לתפוס את `mutex[1]` לפני T1. זה מונע את המצב שבו T1 מחזיק ב-`mutex[0]` וממתין ל-`mutex[1]`, בעוד T2 מחזיק ב-`mutex[1]` וממתין ל-`mutex[0]`."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

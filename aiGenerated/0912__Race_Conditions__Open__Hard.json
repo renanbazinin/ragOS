@@ -1,0 +1,52 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 01:16:38",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4708,
+      "output_tokens": 2867,
+      "total_tokens": 15322
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "Open",
+    "topic": [
+      "Race Conditions",
+      "Concurrency",
+      "Synchronization",
+      "Pthreads"
+    ],
+    "content": {
+      "text": "נתון קוד C++ המממש רשימה מקושרת פשוטה ומשתמש במספר תהליכונים (threads) כדי להוסיף איברים לרשימה באופן מקבילי. מטרת הקוד היא להוסיף 5000 איברים (1000 מכל אחד מ-5 התהליכונים) לראש הרשימה המקושרת. יש לפרט ולנמק את כל התשובות.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <pthread.h>\n\n// מבנה צומת ברשימה המקושרת\ntypedef struct Node {\n    int data;\n    struct Node* next;\n} Node;\n\n// ראש הרשימה המקושרת הגלובלי\nNode* head = NULL;\n\n// פונקציה להוספת צומת חדש לראש הרשימה\nvoid add_to_list(int value) {\n    Node* new_node = (Node*)malloc(sizeof(Node));\n    if (new_node == NULL) {\n        perror(\"Failed to allocate new node\");\n        exit(EXIT_FAILURE);\n    }\n    new_node->data = value;\n    new_node->next = head;\n    head = new_node;\n}\n\n// פונקציית התהליכון\nvoid* thread_func(void* arg) {\n    int id = *(int*)arg;\n    for (int i = 0; i < 1000; ++i) {\n        add_to_list(id * 1000 + i);\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[5];\n    int thread_ids[5];\n\n    for (int i = 0; i < 5; ++i) {\n        thread_ids[i] = i + 1;\n        if (pthread_create(&threads[i], NULL, thread_func, &thread_ids[i]) != 0) {\n            perror(\"Failed to create thread\");\n            return 1;\n        }\n    }\n\n    for (int i = 0; i < 5; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    // קטע קוד לשחרור זיכרון הרשימה (לא חלק מהניתוח הנדרש)\n    Node* current = head;\n    while (current != NULL) {\n        Node* temp = current;\n        current = current->next;\n        free(temp);\n    }\n\n    printf(\"Program finished.\\n\");\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "101.1",
+        "text": "זהו את תנאי המירוץ (race condition) הקיים בקוד הנתון. הסבירו מדוע הוא מתרחש ומהן ההשלכות האפשריות שלו על מצב הרשימה המקושרת בסיום ריצת התוכנית.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "101.2",
+        "text": "הציעו פתרון לקוד הנתון על ידי שימוש בפרימיטיבי סנכרון מתאימים מתוך ספריית pthreads, על מנת למנוע את תנאי המירוץ. צרפו את קטע הקוד המתוקן והסבירו את הפתרון.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "101.1:\nתנאי המירוץ מתרחש בפונקציה `add_to_list`, בפרט בשתי השורות הבאות:\n```c\n    new_node->next = head;\n    head = new_node;\n```\nהאזור הקריטי הוא העדכון של ראש הרשימה (head) והצבעה של הצומת החדש (new_node) לאיבר הבא. כאשר מספר תהליכונים מנסים לבצע פעולות אלו בו-זמנית, ייתכן מצב של שזירת פעולות (interleaving) באופן שגוי.\n\n**הסבר:**\nנניח ששני תהליכונים, Thread A ו-Thread B, קוראים לפונקציה `add_to_list` כמעט באותו זמן.\n1.  Thread A מקצה `new_node_A` וקורא את הערך הנוכחי של `head` (לדוגמה, `H_old`) ומציב אותו ב-`new_node_A->next`.\n2.  לפני ש-Thread A מספיק לעדכן את `head` ל-`new_node_A`, מתבצע מיתוג הקשר (context switch) ל-Thread B.\n3.  Thread B מקצה `new_node_B` וקורא גם הוא את הערך הנוכחי של `head`. מכיוון ש-Thread A טרם עדכן את `head`, Thread B גם הוא קורא את `H_old` ומציב אותו ב-`new_node_B->next`.\n4.  Thread B ממשיך ומעדכן את `head` ל-`new_node_B`. כעת, `head` מצביע על `new_node_B`.\n5.  מתבצע מיתוג הקשר חזרה ל-Thread A.\n6.  Thread A ממשיך מהיכן שהפסיק ומעדכן את `head` ל-`new_node_A`.\n\nבסיום התרחיש הזה, `head` מצביע על `new_node_A`. ה-`new_node_A->next` מצביע על `H_old`. ה-`new_node_B->next` מצביע גם הוא על `H_old`. אבל `new_node_B` עצמו כבר אינו נגיש דרך `head` או דרך שום צומת אחר ברשימה, ולמעשה \"אבד\".\nהתוצאה היא שהרשימה המקושרת תכיל פחות איברים מהצפוי (פחות מ-5000 במקרה זה), וחלק מהאיברים שהתהליכונים ניסו להוסיף פשוט ילכו לאיבוד. בנוסף, ייתכנו מצבי שחיתות אחרים של הרשימה, אם כי \"איבוד\" צמתים הוא התוצאה הסבירה ביותר במקרה זה.\n\n101.2:\nכדי למנוע את תנאי המירוץ, יש להגן על האזור הקריטי באמצעות מנעול (mutex). רק תהליכון אחד יוכל להיכנס לאזור הקריטי בכל רגע נתון.\n\n**קוד מתוקן:**\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <pthread.h>\n\n// מבנה צומת ברשימה המקושרת\ntypedef struct Node {\n    int data;\n    struct Node* next;\n} Node;\n\n// ראש הרשימה המקושרת הגלובלי\nNode* head = NULL;\n\n// מנעול להגנה על הרשימה המקושרת\npthread_mutex_t list_mutex;\n\n// פונקציה להוספת צומת חדש לראש הרשימה\nvoid add_to_list(int value) {\n    Node* new_node = (Node*)malloc(sizeof(Node));\n    if (new_node == NULL) {\n        perror(\"Failed to allocate new node\");\n        exit(EXIT_FAILURE);\n    }\n    new_node->data = value;\n\n    // הגנה על האזור הקריטי באמצעות מנעול\n    pthread_mutex_lock(&list_mutex);\n    new_node->next = head;\n    head = new_node;\n    pthread_mutex_unlock(&list_mutex);\n}\n\n// פונקציית התהליכון\nvoid* thread_func(void* arg) {\n    int id = *(int*)arg;\n    for (int i = 0; i < 1000; ++i) {\n        add_to_list(id * 1000 + i);\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[5];\n    int thread_ids[5];\n\n    // אתחול המנעול\n    if (pthread_mutex_init(&list_mutex, NULL) != 0) {\n        perror(\"Failed to initialize mutex\");\n        return 1;\n    }\n\n    for (int i = 0; i < 5; ++i) {\n        thread_ids[i] = i + 1;\n        if (pthread_create(&threads[i], NULL, thread_func, &thread_ids[i]) != 0) {\n            perror(\"Failed to create thread\");\n            pthread_mutex_destroy(&list_mutex);\n            return 1;\n        }\n    }\n\n    for (int i = 0; i < 5; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    // שחרור זיכרון הרשימה\n    Node* current = head;\n    while (current != NULL) {\n        Node* temp = current;\n        current = current->next;\n        free(temp);\n    }\n\n    // שחרור המנעול\n    pthread_mutex_destroy(&list_mutex);\n\n    printf(\"Program finished. All elements should be present in the list.\\n\");\n    return 0;\n}\n```\n\n**הסבר הפתרון:**\n1.  הוספנו משתנה גלובלי מסוג `pthread_mutex_t` בשם `list_mutex`.\n2.  בפונקציית `main`, אתחלנו את המנעול באמצעות `pthread_mutex_init(&list_mutex, NULL)`.\n3.  בתוך פונקציית `add_to_list`, לפני הכניסה לאזור הקריטי (השורות שמעדכנות את `new_node->next` ואת `head`), קראנו לפונקציה `pthread_mutex_lock(&list_mutex)`. קריאה זו גורמת לתהליכון שמבצע אותה לנסות \"לתפוס\" את המנעול. אם המנעול כבר תפוס על ידי תהליכון אחר, התהליכון הנוכחי ייחסם עד שהמנעול ישוחרר.\n4.  לאחר ביצוע הפעולות הקריטיות ועדכון `head`, קראנו לפונקציה `pthread_mutex_unlock(&list_mutex)` כדי לשחרר את המנעול. שחרור המנעול מאפשר לתהליכונים אחרים שהיו חסומים להיכנס לאזור הקריטי.\n5.  בסיום התוכנית, בפונקציית `main`, שחררנו את המשאבים של המנעול באמצעות `pthread_mutex_destroy(&list_mutex)`.\n\nפתרון זה מבטיח שרק תהליכון אחד יוכל לבצע את פעולות העדכון של ראש הרשימה בכל רגע נתון. בכך, אנו מונעים את שזירת הפעולות הבעייתית ומבטיחים שכל הצמתים שנוספו על ידי התהליכונים יישארו ברשימה המקושרת באופן תקין."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

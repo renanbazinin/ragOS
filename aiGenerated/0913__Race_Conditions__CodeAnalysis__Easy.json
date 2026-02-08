@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 01:16:52",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5728,
+      "output_tokens": 1077,
+      "total_tokens": 8477
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Race Conditions",
+      "Concurrency",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C הבאה המשתמשת בחוטים (threads) כדי להגדיל מונה גלובלי משותף ללא סנכרון. עיין בקוד וענה על השאלות הבאות:\n\n1. מהו הערך הסופי הצפוי של המונה `counter` לאחר שכל החוטים מסיימים את ריצתם, בהנחה שאין בעיות סנכרון?\n2. האם הערך הסופי המודפס של `counter` תמיד יהיה שווה לערך הצפוי? אם לא, הסבר מדוע ואיזה סוג של בעיה מתרחשת. תאר תרחיש אפשרי שבו הערך הסופי שונה מהצפוי.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\n#define NUM_THREADS 5\n#define INCREMENTS_PER_THREAD 100000\n\nint counter = 0;\n\nvoid* increment_counter(void* arg) {\n    for (int i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n        counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, increment_counter, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1. הערך הסופי הצפוי של המונה `counter` הוא `NUM_THREADS * INCREMENTS_PER_THREAD = 5 * 100000 = 500000`.\n\n2. לא, הערך הסופי המודפס של `counter` לא תמיד יהיה שווה לערך הצפוי. כאן מתרחש `Race Condition` (מצב מרוץ).\n   פעולת הקידום `counter++` אינה אטומית. היא מורכבת למעשה משלושה שלבים ברמת המעבד:\n   א. קריאת הערך הנוכחי של `counter` לתוך רגיסטר (LOAD).\n   ב. הגדלת הערך ברגיסטר (INCREMENT).\n   ג. כתיבת הערך המעודכן מהרגיסטר בחזרה ל`counter` (STORE).\n\n   כאשר מספר חוטים מריצים את הפעולה הזו במקביל ללא סנכרון, ייתכן תזמון שבו פעולות של חוטים שונים משתלבות זו בזו (interleave), מה שמוביל לאיבוד עדכונים. לדוגמה:\n   *   `counter` שווה 0.\n   *   חוט A קורא את `counter` (ערך 0) לרגיסטר שלו.\n   *   חוט B קורא את `counter` (ערך 0, כי חוט A עדיין לא עדכן את הזיכרון הראשי) לרגיסטר שלו.\n   *   חוט A מגדיל את הערך שברגיסטר שלו ל-1 וכותב אותו בחזרה ל`counter`. כעת `counter` שווה 1.\n   *   חוט B מגדיל את הערך שברגיסטר שלו ל-1 (מכיוון שהוא קרא 0) וכותב אותו בחזרה ל`counter`. כעת `counter` עדיין שווה 1.\n   בתרחיש זה, שתי פעולות קידום בוצעו על ידי שני חוטים, אך המונה הגלובלי גדל רק באחד. עדכון אחד \"אבד\". תרחיש כזה יכול לקרות פעמים רבות לאורך ריצת התוכנית, ולכן הערך הסופי של `counter` יהיה בדרך כלל נמוך מהערך הצפוי (500000)."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

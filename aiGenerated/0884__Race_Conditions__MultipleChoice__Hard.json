@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 06:57:41",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 1442,
+      "total_tokens": 9768
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Race Conditions",
+      "Synchronization",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא ב-C, המשתמש בספריית `pthread`. המטרה היא להגדיל משתנה גלובלי משותף `shared_data` באופן אטומי על ידי מספר תהליכונים. אם 5 תהליכונים (threads) יפעילו את הפונקציה `process_data` במקביל, מהו הערך המקסימלי האפשרי עבור `shared_data` בסיום ריצת התוכנית, ומהו הערך המינימלי האפשרי?",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h> // For usleep\n\nint shared_data = 0;\npthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;\n\nvoid* process_data(void* arg) {\n    int local_copy;\n\n    // קטע א'\n    pthread_mutex_lock(&mtx);\n    local_copy = shared_data;\n    pthread_mutex_unlock(&mtx);\n\n    // הדמיית עבודה שאינה דורשת מנעול\n    usleep(100); // Simulate work outside critical section\n\n    local_copy = local_copy + 1; // שינוי הנתון המקומי\n\n    // קטע ב'\n    pthread_mutex_lock(&mtx);\n    shared_data = local_copy;\n    pthread_mutex_unlock(&mtx);\n\n    return NULL;\n}\n\nint main() {\n    pthread_t tids[5]; // 5 תהליכונים\n    for (int i = 0; i < 5; ++i) {\n        pthread_create(&tids[i], NULL, process_data, NULL);\n    }\n\n    for (int i = 0; i < 5; ++i) {\n        pthread_join(tids[i], NULL);\n    }\n\n    printf(\"Final shared_data: %d\\n\", shared_data);\n    return 0;\n}",
+      "options": [
+        "א. מקסימלי: 5, מינימלי: 1",
+        "ב. מקסימלי: 5, מינימלי: 5",
+        "ג. מקסימלי: 1, מינימלי: 1",
+        "ד. מקסימלי: 4, מינימלי: 0",
+        "ה. אף אחת מהתשובות אינה נכונה."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "קיימת כאן תצורת מרוץ (Race Condition) מכיוון שהפעולה של הגדלת `shared_data` אינה אטומית. הפעולה מחולקת לשלושה שלבים: קריאה ל-`shared_data` (קטע א'), שינוי הערך בעותק מקומי, וכתיבת הערך המעודכן בחזרה ל-`shared_data` (קטע ב'). המנעול `mtx` מגן רק על שלבי הקריאה והכתיבה בנפרד, אך לא על כל רצף הפעולות (קריאה-שינוי-כתיבה) כי הוא משוחרר באמצע.\n\n*   **ערך מקסימלי**: הערך המקסימלי האפשרי הוא 5. זה יקרה אם כל התהליכונים יבצעו את הפעולה ברצף, אחד אחרי השני, כך שכל תהליכון יקרא את הערך המעודכן שכתב התהליכון הקודם. לדוגמה, תהליכון 1 מגדיל ל-1, תהליכון 2 מגדיל ל-2, וכן הלאה, עד 5. זהו התרחיש האידיאלי.\n\n*   **ערך מינימלי**: הערך המינימלי האפשרי הוא 1. זה יקרה בתרחיש הגרוע ביותר של תצורת מרוץ: כל 5 התהליכונים יצליחו לקרוא את הערך ההתחלתי של `shared_data` (שהוא 0) לפני שאחד מהם יספיק לכתוב ערך חדש. לדוגמה:\n    1.  תהליכון 1 נועל את `mtx`, קורא `shared_data = 0`, ומשחרר את `mtx`. `local_copy` שלו הוא 0.\n    2.  מיד לאחר מכן (לפני שתהליכון 1 יספיק לכתוב בחזרה), תהליכונים 2, 3, 4, 5 מבצעים פעולה דומה, וכל אחד מהם קורא `shared_data = 0` (כי אף אחד עדיין לא כתב ערך חדש), ומשחרר את `mtx`. כעת לכל חמשת התהליכונים יש `local_copy = 0`.\n    3.  כל התהליכונים ממשיכים לבצע את החישוב `local_copy = local_copy + 1`, כך שלכל אחד מהם `local_copy` הופך להיות 1.\n    4.  כעת, כל אחד מהתהליכונים בתורו נועל את `mtx`, כותב `shared_data = 1`, ומשחרר את `mtx`. מכיוון שכל התהליכונים כותבים את הערך 1, הערך הסופי של `shared_data` יהיה 1, למרות שהפעולה בוצעה 5 פעמים.\n\nלכן, הערך המקסימלי הוא 5 והמינימלי הוא 1."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

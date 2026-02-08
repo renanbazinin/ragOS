@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 01:07:40",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3457,
+      "output_tokens": 1609,
+      "total_tokens": 8357
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Race Conditions",
+      "Concurrency",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "הסבירו מהו Race Condition (מצב מרוץ) במערכות הפעלה. תנו דוגמת קוד פשוטה בשפת C/C++ המדגימה מצב מרוץ, והסבירו מדוע הוא מתרחש וכיצד ניתן לפתור אותו.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\n// משתנה גלובלי משותף שיושפע ממצב מרוץ\nint counter = 0;\n\nvoid* increment_counter(void* arg) {\n    for (int i = 0; i < 100000; ++i) {\n        // פעולה זו אינה אטומית ומהווה קטע קריטי\n        counter++;\n    }\n    return NULL;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "**הסבר על Race Condition (מצב מרוץ):**\nמצב מרוץ מתרחש במערכות הפעלה כאשר שני תהליכים (או יותר) או תהליכונים (threads) ניגשים לאותו משאב משותף (כמו משתנה גלובלי, קובץ) בו זמנית, ולפחות אחד מהם משנה את המשאב. התוצאה הסופית של הפעולות תלויה בסדר הלא צפוי שבו התהליכים/תהליכונים מבצעים את הגישה למשאב המשותף. מצב זה עלול להוביל לתוצאות שגויות או לא עקביות.\n\n**הסבר לדוגמת הקוד:**\nבדוגמת הקוד הנתונה, המשתנה הגלובלי `counter` משותף למספר תהליכונים (threads) שיקראו לו ויעדכנו אותו. הפעולה `counter++` נראית כפעולה אחת, אך למעשה היא מורכבת משלושה שלבים ברמת המעבד:\n1. קריאת הערך הנוכחי של `counter` לתוך אוגר.\n2. הגדלת הערך באוגר ב-1.\n3. כתיבת הערך החדש מהאוגר בחזרה ל-`counter`.\n\nכאשר מספר תהליכונים מנסים לבצע את `counter++` במקביל, סדר הביצוע של שלבים אלו יכול להתערבב. לדוגמה:\n- תהליכון A קורא את `counter` (נניח 0).\n- תהליכון B קורא את `counter` (גם הוא קורא 0, כי A עדיין לא כתב בחזרה).\n- תהליכון A מגדיל את הערך שקרא ל-1 וכותב אותו בחזרה ל-`counter` (כעת `counter` שווה 1).\n- תהליכון B מגדיל את הערך שקרא (0) ל-1 וכותב אותו בחזרה ל-`counter` (כעת `counter` עדיין שווה 1).\nבמקרה זה, שתי פעולות הגדלה בוצעו, אך המונה גדל באחד בלבד במקום בשניים. אם כל תהליכון מיועד להגדיל את המונה 100,000 פעמים, וקיימים לדוגמה 5 תהליכונים, אנו מצפים שהערך הסופי יהיה 500,000. אולם, עקב מצב המרוץ, הערך הסופי יהיה כמעט תמיד נמוך יותר.\n\n**פתרון מצב המרוץ (באמצעות Mutex):**\nכדי למנוע מצב מרוץ, יש להבטיח שרק תהליכון אחד יכול לגשת לקטע הקריטי (הקוד שבו מתבצעת גישה למשאב המשותף) בכל זמן נתון. ניתן לעשות זאת באמצעות מנגנוני סנכרון כמו Mutex (קיצור של Mutual Exclusion).\nמוטקס הוא מנעול המאפשר רק לתהליכון אחד לרכוש אותו. תהליכון שרוכש את המוטקס יכול להיכנס לקטע הקריטי. אם תהליכון אחר מנסה לרכוש את המוטקס כשהוא כבר נעול, הוא ימתין עד שהמוטקס ישוחרר.\n\n**דוגמת קוד עם מוטקס לפתרון:**\n```c\n#include <stdio.h>\n#include <pthread.h>\n\n#define NUM_THREADS 5\n#define ITERATIONS_PER_THREAD 100000\n\nint counter = 0;\npthread_mutex_t mutex; // הצהרה על מוטקס\n\nvoid* increment_counter_safe(void* arg) {\n    for (int i = 0; i < ITERATIONS_PER_THREAD; ++i) {\n        pthread_mutex_lock(&mutex);   // נעל את המוטקס לפני כניסה לקטע הקריטי\n        counter++;                    // קטע קריטי מוגן\n        pthread_mutex_unlock(&mutex); // שחרר את המוטקס לאחר היציאה מהקטע הקריטי\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n    pthread_mutex_init(&mutex, NULL); // אתחול המוטקס\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, increment_counter_safe, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final counter value: %d\\n\", counter); // כעת הערך יהיה 500,000 (NUM_THREADS * ITERATIONS_PER_THREAD)\n    pthread_mutex_destroy(&mutex); // ניקוי המוטקס\n    return 0;\n}\n```\nעל ידי שימוש ב-`pthread_mutex_lock` וב-`pthread_mutex_unlock`, אנו מבטיחים שרק תהליכון אחד יבצע את הפעולה `counter++` בכל רגע נתון, ובכך נמנע את מצב המרוץ ונקבל תוצאה נכונה."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

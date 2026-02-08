@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 00:59:09",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1028,
+      "output_tokens": 461,
+      "total_tokens": 3340
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Race Conditions",
+      "Concurrency",
+      "Synchronization",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא המופעל על ידי שני חוטים במקביל. מה הבעיה העיקרית שקטע קוד זה מדגים?",
+      "code_snippet": "int shared_value = 0;\n\n// פונקציה המופעלת על ידי מספר חוטים במקביל\nvoid *worker(void *arg) {\n    for (int i = 0; i < 100000; i++) {\n        shared_value++; // גישה למשתנה משותף ללא סנכרון\n    }\n    return NULL;\n}",
+      "options": [
+        "א. קיפאון (Deadlock)",
+        "ב. הרעבה (Starvation)",
+        "ג. מצב מרוץ (Race Condition)",
+        "ד. דליפת זיכרון (Memory Leak)",
+        "ה. כל התשובות נכונות"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג'. קטע הקוד מדגים מצב מרוץ (Race Condition) מכיוון ששני חוטים ניגשים למשתנה משותף (shared_value) ומשנים אותו ללא מנגנון סנכרון. פעולת ה-increment (++) אינה אטומית, והסדר שבו החוטים מבצעים את הפעולות יכול להוביל לתוצאה שגויה ובלתי צפויה, שאינה 200,000."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}
