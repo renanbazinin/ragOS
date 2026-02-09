@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Processes and Memory Management",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 20:05:21",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1034,
+      "output_tokens": 489,
+      "total_tokens": 2684
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Processes",
+      "Memory Management",
+      "Virtual Memory"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של זיכרון וירטואלי (Virtual Memory) במערכת הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. לאפשר לתוכניות להשתמש בזיכרון פיזי רב יותר ממה שזמין בפועל.",
+        "ב. להגן על תהליכים מפני גישה לזיכרון של תהליכים אחרים.",
+        "ג. לספק לכל תהליך מרחב כתובות פרטי ועצמאי.",
+        "ד. כל התשובות נכונות.",
+        "ה. אף אחת מהתשובות אינה נכונה."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ד",
+      "explanation": "ד. זיכרון וירטואלי משרת מספר מטרות חשובות: הוא מאפשר לתוכניות להשתמש במרחב כתובות גדול יותר מהזיכרון הפיזי הזמין (על ידי שימוש בדיסק כהרחבה), הוא מבודד תהליכים זה מזה על ידי מתן מרחב כתובות פרטי לכל אחד, ובכך מגן עליהם מפני הפרעות הדדיות. בנוסף, הוא מאפשר שיתוף קוד ונתונים בין תהליכים בצורה בטוחה ויעילה.",
+      "explanation_english": "D. Virtual memory serves several important purposes: it allows programs to use a larger address space than the available physical memory (by using disk as an extension), it isolates processes from each other by providing a private address space for each, thereby protecting them from mutual interference. Additionally, it allows safe and efficient sharing of code and data between processes."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

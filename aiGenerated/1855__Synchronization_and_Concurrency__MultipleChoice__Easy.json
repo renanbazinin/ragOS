@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Synchronization and Concurrency",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 21:12:52",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 998,
+      "output_tokens": 278,
+      "total_tokens": 1923
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Synchronization",
+      "Concurrency",
+      "Mutex"
+    ],
+    "content": {
+      "text": "מנגנון Mutex משמש בעיקר להבטחת גישה בלעדית למשאב משותף (critical section) על ידי חוט חישוב אחד בלבד בכל רגע נתון.",
+      "code_snippet": null,
+      "options": [
+        "נכון",
+        "לא נכון"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "נכון",
+      "explanation": "נכון. מטרתו העיקרית של Mutex היא למנוע תנאי מרוץ (race conditions) על ידי הגנה על קטעים קריטיים של קוד שבהם ניגשים למשאבים משותפים. הוא מבטיח שרק חוט אחד יכול להיכנס לקטע הקריטי בכל זמן נתון, ובכך שומר על עקביות הנתונים המשותפים."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

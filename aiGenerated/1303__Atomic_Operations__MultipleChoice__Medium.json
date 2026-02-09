@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Atomic Operations",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 09:25:03",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1758,
+      "output_tokens": 1008,
+      "total_tokens": 9958
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Atomic Operations",
+      "Concurrency",
+      "Synchronization",
+      "Consistency"
+    ],
+    "content": {
+      "text": "נתונה פונקציה אטומית compareAndSet (CAS) עם החתימה:\nBOOL compareAndSet(int* ptr, int expected, int new_val);\nהפונקציה מחזירה true אם הערך בכתובת ptr היה שווה ל-expected לפני ההחלפה, ומעדכנת את *ptr ל-new_val. אחרת, היא מחזירה false ולא מבצעת שינוי.\n\nסטודנט כתב את הפונקציה הבאה במטרה לקדם באופן אטומי שני מונים נפרדים, counter1 ו-counter2, כך ששניהם יקודמו יחד, או שאף אחד מהם לא יקודם:",
+      "code_snippet": "BOOL compareAndSet(int* ptr, int expected, int new_val);\n\nvoid increment_two_counters_atomically(int* counter1, int* counter2) {\n    int old_c1, new_c1;\n    int old_c2, new_c2;\n    bool success = false;\n\n    while (!success) {\n        old_c1 = *counter1;\n        old_c2 = *counter2;\n\n        new_c1 = old_c1 + 1;\n        new_c2 = old_c2 + 1;\n\n        // Try to increment counter1\n        if (compareAndSet(counter1, old_c1, new_c1)) {\n            // counter1 was successfully incremented by this thread.\n            // Now try to increment counter2.\n            if (compareAndSet(counter2, old_c2, new_c2)) {\n                // Both succeeded.\n                success = true;\n            } else {\n                // counter2 failed. What should happen here to maintain atomicity?\n                // The student missed a crucial step. This code simply continues the loop without fixing counter1.\n            }\n        }\n        // If first CAS fails, loop continues (success is false)\n    }\n}",
+      "options": [
+        "א. המימוש תקין, ושני המונים תמיד יקודמו באופן אטומי (שניהם או אף אחד מהם).",
+        "ב. המימוש לא תקין, הוא עלול לגרום לקיפאון (deadlock).",
+        "ג. המימוש לא תקין, הוא עלול לגרום להרעבה (starvation).",
+        "ד. המימוש לא תקין, הוא עלול להשאיר את המערכת במצב לא עקבי (inconsistent state), כאשר רק אחד המונים קודם.",
+        "ה. המימוש לא תקין, הוא עלול לגרום לקידום שגוי של אחד המונים (לדוגמה, קידום כפול)."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ד",
+      "explanation": "ד'. המימוש אינו תקין מכיוון שפעולת compareAndSet מבטיחה אטומיות רק עבור מיקום זיכרון יחיד. כאשר מנסים לקדם שני מונים באופן אטומי, נדרש מנגנון המבטיח ששתי הפעולות יצליחו יחד, או שאף אחת מהן לא תצליח. בקוד הנתון, אם compareAndSet עבור counter1 מצליח, אך compareAndSet עבור counter2 נכשל (כי counter2 השתנה על ידי חוט אחר), counter1 כבר קודם על ידי החוט הנוכחי. הקוד אינו מבצע \"החזרה לאחור\" (rollback) של counter1 למצבו הקודם במקרה של כישלון ה-CAS השני. כתוצאה מכך, המערכת עלולה להישאר במצב לא עקבי שבו counter1 קודם אך counter2 לא, מה שמפר את הדרישה ש\"שניהם יקודמו יחד, או שאף אחד מהם לא יקודם\"."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

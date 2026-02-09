@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Scheduling",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 09:06:33",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1023,
+      "output_tokens": 498,
+      "total_tokens": 3213
+    }
+  },
+  "question": {
+    "id": 6,
+    "type": "MultipleChoice",
+    "topic": [
+      "Scheduling",
+      "CPU Scheduling",
+      "Starvation"
+    ],
+    "content": {
+      "text": "איזה מאלגוריתמי תזמון המעבד הבאים עלול לסבול מהרעבה (starvation) ללא מנגנונים נוספים למניעתה (כמו aging)?",
+      "code_snippet": null,
+      "options": [
+        "א. FCFS (First-Come, First-Served)",
+        "ב. Round Robin (RR)",
+        "ג. Shortest Remaining Time First (SRTF)",
+        "ד. אף אחת מהתשובות אינה נכונה."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג. Shortest Remaining Time First (SRTF)",
+      "explanation": "הסבר:\nא. FCFS: תזמון FCFS אינו סובל מהרעבה מכיוון שתהליכים מבוצעים לפי סדר הגעתם, וכל תהליך יקבל את המעבד בסופו של דבר.\nב. Round Robin (RR): תזמון RR אינו סובל מהרעבה מכיוון שכל תהליך מקבל קוונטת זמן קצובה, ועם מספר סופי של תהליכים, כל תהליך יקבל את המעבד בפרק זמן סופי.\nג. Shortest Remaining Time First (SRTF): תזמון SRTF, שהוא גרסה פרמטיבית של SJF, עלול לסבול מהרעבה. אם יש זרם קבוע של תהליכים קצרים חדשים המגיעים למערכת, תהליך ארוך יותר שכבר נמצא בתור עשוי להידחק שוב ושוב ולא לזכות אף פעם במעבד, או שיזכה בו רק לאחר זמן רב מאוד."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

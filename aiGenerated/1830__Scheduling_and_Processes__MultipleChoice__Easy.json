@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Scheduling and Processes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 21:05:40",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1031,
+      "output_tokens": 298,
+      "total_tokens": 2242
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Scheduling",
+      "Processes"
+    ],
+    "content": {
+      "text": "מהו תהליך (process) במערכת הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. תוכנית מחשב בזיכרון הראשי שאינה מורצת.",
+        "ב. מופע של תוכנית מחשב בזמן ריצה.",
+        "ג. קטע קוד האחראי על ניהול משאבי חומרה.",
+        "ד. אוסף של קבצים בינאריים המאוחסנים על הדיסק הקשיח."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב'. תהליך הוא מופע של תוכנית מחשב בזמן ריצה, הכולל את הקוד, הנתונים, המחסנית, ומשאבים נוספים שהוקצו לו על ידי מערכת ההפעלה לצורך ביצוע."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

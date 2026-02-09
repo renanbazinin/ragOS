@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory and Paging",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 20:48:57",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2075,
+      "output_tokens": 751,
+      "total_tokens": 5746
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Virtual Memory",
+      "Paging",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "נתונה מערכת עם זיכרון וירטואלי של 1GB, גודל דף של 8KB, וזיכרון פיזי של 128MB.\nכל כניסה בטבלת הדפים (PTE) מכילה את מספר המסגרת הפיזית (PFN) ו-6 ביטים נוספים לניהול (כגון Valid, Dirty, Accessed, והרשאות).\nא. מהם הגדלים של ה-VPN וה-PFN?\nב. כמה זיכרון פיזי תתפוס טבלת דפים (לינארית) של תהליך, במינימום?",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "א.\nגודל זיכרון וירטואלי הוא 1GB, כלומר 2^30 בתים. לכן, כתובת וירטואלית היא באורך 30 ביטים.\nגודל דף הוא 8KB, כלומר 2^13 בתים. לכן, ההיסט (offset) הוא באורך 13 ביטים.\nVPN = גודל כתובת וירטואלית - גודל היסט = 30 - 13 = 17 ביטים.\n\nגודל זיכרון פיזי הוא 128MB, כלומר 2^27 בתים. לכן, כתובת פיזית היא באורך 27 ביטים.\nPFN = גודל כתובת פיזית - גודל היסט = 27 - 13 = 14 ביטים.\n\nב.\nכל כניסה בטבלת הדפים (PTE) צריכה להכיל את ה-PFN (14 ביטים) ועוד 6 ביטים נוספים לניהול.\nסה\"כ ביטים ל-PTE = 14 (PFN) + 6 (ביטים נוספים) = 20 ביטים.\nכדי לאחסן 20 ביטים, אנחנו צריכים 3 בתים (24 ביטים). אך לרוב, כניסות בטבלת דפים מעוגלות לגודל סטנדרטי של 4 בתים לצורך יישור (alignment) ויעילות. לכן, נניח שגודל PTE הוא 4 בתים.\n\nמספר הכניסות בטבלת דפים לינארית הוא 2^VPN = 2^17.\nטבלת הדפים כולה תתפוס: 2^17 כניסות * 4 בתים/כניסה = 131,072 * 4 בתים = 524,288 בתים.\n524,288 בתים הם 512KB."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

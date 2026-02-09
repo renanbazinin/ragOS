@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Signals",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 08:39:41",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 968,
+      "output_tokens": 2213,
+      "total_tokens": 9087
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "Signals",
+      "Process Management",
+      "fork",
+      "execve"
+    ],
+    "content": {
+      "text": "נתון הקוד הבא:\n\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <signal.h>\n#include <sys/wait.h>\n\nvoid handler(int sig) {\n    printf(\"Signal %d received in handler.\\n\", sig);\n}\n\nint main() {\n    struct sigaction sa;\n    sigset_t block_mask;\n    pid_t pid;\n\n    // הגדרת מטפל לאות SIGUSR1\n    sa.sa_handler = handler;\n    sigemptyset(&sa.sa_mask);\n    sa.sa_flags = 0;\n    if (sigaction(SIGUSR1, &sa, NULL) == -1) {\n        perror(\"sigaction\");\n        exit(EXIT_FAILURE);\n    }\n    printf(\"Parent: Handler for SIGUSR1 set.\\n\");\n\n    // חסימת SIGUSR1\n    sigemptyset(&block_mask);\n    sigaddset(&block_mask, SIGUSR1);\n    if (sigprocmask(SIG_BLOCK, &block_mask, NULL) == -1) {\n        perror(\"sigprocmask block\");\n        exit(EXIT_FAILURE);\n    }\n    printf(\"Parent: SIGUSR1 blocked.\\n\");\n\n    // שליחת SIGUSR1 לעצמו (יהיה ממתין)\n    if (kill(getpid(), SIGUSR1) == -1) {\n        perror(\"kill\");\n        exit(EXIT_FAILURE);\n    }\n    printf(\"Parent: Sent SIGUSR1 to self. It should be pending.\\n\");\n\n    pid = fork();\n\n    if (pid == -1) {\n        perror(\"fork\");\n        exit(EXIT_FAILURE);\n    }\n\n    if (pid == 0) { // תהליך הבן\n        printf(\"Child: Starting... PID: %d\\n\", getpid());\n        // ביצוע execve לתוכנית child_exec\n        char *args[] = {\"./child_exec\", NULL};\n        printf(\"Child: Executing new program...\\n\");\n        if (execve(\"./child_exec\", args, NULL) == -1) {\n            perror(\"execve\");\n            exit(EXIT_FAILURE);\n        }\n    } else { // תהליך האב\n        printf(\"Parent: Child forked with PID %d.\\n\", pid);\n        int status;\n        wait(&status);\n        printf(\"Parent: Child exited.\\n\");\n\n        // ביטול חסימת SIGUSR1 באב כדי לראות את המטפל מופעל\n        if (sigprocmask(SIG_UNBLOCK, &block_mask, NULL) == -1) {\n            perror(\"sigprocmask unblock parent\");\n            exit(EXIT_FAILURE);\n        }\n        printf(\"Parent: SIGUSR1 unblocked. Handler should be called now.\\n\");\n    }\n\n    return 0;\n}\n```\n\nקוד לתוכנית `child_exec.c`:\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <signal.h>\n\nint main() {\n    printf(\"child_exec: New program started. PID: %d\\n\", getpid());\n\n    // בדיקת מסכת האותות הנוכחית\n    sigset_t current_mask;\n    sigprocmask(SIG_BLOCK, NULL, &current_mask);\n    if (sigismember(&current_mask, SIGUSR1)) {\n        printf(\"child_exec: SIGUSR1 is BLOCKED.\\n\");\n    } else {\n        printf(\"child_exec: SIGUSR1 is NOT BLOCKED.\\n\");\n    }\n\n    // ביטול חסימת SIGUSR1\n    sigset_t unblock_mask;\n    sigemptyset(&unblock_mask);\n    sigaddset(&unblock_mask, SIGUSR1);\n    if (sigprocmask(SIG_UNBLOCK, &unblock_mask, NULL) == -1) {\n        perror(\"child_exec: sigprocmask unblock\");\n        exit(EXIT_FAILURE);\n    }\n    printf(\"child_exec: SIGUSR1 unblocked.\\n\");\n\n    sleep(1); // המתנה קצרה לוודא שכל מסירת אות תתרחש\n\n    printf(\"child_exec: Exiting.\\n\");\n    return 0;\n}\n```\n\nתהליך האב מגדיר מטפל לאות SIGUSR1, חוסם את האות, ושולח לעצמו את SIGUSR1. לאחר מכן הוא יוצר תהליך בן באמצעות fork. תהליך הבן מבצע execve לתוכנית child_exec. תוכנית child_exec בודקת את מסכת האותות הנוכחית, ואז מבטלת את חסימת SIGUSR1. איזו מהטענות הבאות מתארת נכונה את ההתנהגות של תהליך `child_exec` ביחס לאות `SIGUSR1` שנשלח בתהליך האב?",
+      "code_snippet": null,
+      "options": [
+        "א. תהליך `child_exec` יקבל את `SIGUSR1` מיד עם ביטול החסימה ויודפס \"Signal 10 received in handler.\".",
+        "ב. תהליך `child_exec` יקבל את `SIGUSR1` מיד עם ביטול החסימה ויסיים את פעולתו (פעולת ברירת המחדל).",
+        "ג. תהליך `child_exec` לא יקבל את `SIGUSR1` כלל, וימשיך לרוץ כרגיל עד לסיום.",
+        "ד. תהליך `child_exec` יקבל את `SIGUSR1` רק אם יישלח אליו `SIGUSR1` נוסף לאחר ביטול החסימה, ואז יודפס \"Signal 10 received in handler.\"."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "הסבר: \n1.  **לפני `fork` (תהליך האב):** האות `SIGUSR1` נשלח ונמצא במצב 'ממתין' (pending) עבור תהליך האב, מכיוון שהוא חסום. המטפל המוגדר עבור `SIGUSR1` הוא `handler`.\n2.  **לאחר `fork` (תהליך הבן):** תהליך הבן יורש עותק של מסכת האותות של האב (כלומר, `SIGUSR1` חסום) ועותק של הגדרות המטפלים (כלומר, `handler` מוגדר עבור `SIGUSR1`). עם זאת, **אותות ממתינים אינם עוברים בירושה לתהליך הבן**; הם נמחקים.\n3.  **לאחר `execve` (תהליך `child_exec`):**\n    *   **מסכת האותות:** נשמרת. לכן, `SIGUSR1` נשאר חסום בתוך `child_exec` מיד לאחר `execve`.\n    *   **הגדרות מטפלים:** מטפלי אותות שהוגדרו על ידי המשתמש (כמו `handler` שלנו) **מאופסים לפעולת ברירת המחדל (`SIG_DFL`)** בעת קריאה ל-`execve`. מטפלים שנקבעו ל-`SIG_IGN` נשארים `SIG_IGN`, ומטפלים שנקבעו ל-`SIG_DFL` נשארים `SIG_DFL`.\n    *   **אותות ממתינים:** נמחקים שוב על ידי `execve` (אם היו כאלה, אך במקרה זה הם כבר נמחקו על ידי `fork`).\n\nלכן, כאשר תוכנית `child_exec` מבטלת את חסימת `SIGUSR1`:\n*   אין אות `SIGUSR1` ממתין שיימסר, מכיוון שהאות שנשלח באב נמחק על ידי `fork` (ולאחר מכן גם על ידי `execve`).\n*   גם אם היה נשלח `SIGUSR1` חדש ל-`child_exec` לאחר ביטול החסימה, הוא היה גורם לסיום התהליך (פעולת ברירת המחדל), ולא היה מפעיל את המטפל המקורי, מכיוון שהמטפל אופס ל-`SIG_DFL` על ידי `execve`.\n\nלכן, תהליך `child_exec` ימשיך לרוץ כרגיל עד לסיום, מבלי לקבל את האות `SIGUSR1` שנשלח באב."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

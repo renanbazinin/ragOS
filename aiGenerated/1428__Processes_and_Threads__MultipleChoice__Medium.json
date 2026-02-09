@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Processes and Threads",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 10:14:19",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1710,
+      "output_tokens": 803,
+      "total_tokens": 6428
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Processes",
+      "Threads",
+      "Memory Sharing"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המכילה משתנה גלובלי `int counter = 0;`.\nהתוכנית הראשית יוצרת 3 ישויות (Entities) חדשות. כל ישות, עם יצירתה, מקדמת את המשתנה `counter` באחד.\nלאחר שכל 3 הישויות סיימו את פעולתן, התוכנית הראשית מדפיסה את הערך הסופי של `counter`.\n\nבהנחה שכל הגישות למשתנה `counter` מסונכרנות כראוי כדי למנוע תנאי מירוץ (במקרה של תהליכונים), איזה מהבאים נכון לגבי הערך הסופי המודפס של `counter`?",
+      "code_snippet": "int counter = 0; // משתנה גלובלי\n\n// פונקציה המקדמת את המשתנה counter\nvoid increment_counter() {\n    counter++;\n}",
+      "options": [
+        "א. אם הישויות הן תהליכים (processes), הערך הסופי יהיה 3. אם הישויות הן תהליכונים (threads), הערך הסופי יהיה 0.",
+        "ב. אם הישויות הן תהליכים (processes), הערך הסופי יהיה 0. אם הישויות הן תהליכונים (threads), הערך הסופי יהיה 3.",
+        "ג. בשני המקרים (תהליכים או תהליכונים), הערך הסופי יהיה 3.",
+        "ד. בשני המקרים (תהליכים או תהליכונים), הערך הסופי יהיה 0.",
+        "ה. הערך הסופי תלוי בלוח הזמנים של מערכת ההפעלה ואינו ניתן לחיזוי."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "כאשר תהליכים (processes) נוצרים באמצעות `fork()`, כל תהליך בן מקבל עותק משלו של מרחב הזיכרון של תהליך האב, כולל עותק נפרד של המשתנה הגלובלי `counter`. לכן, כאשר תהליך בן מקדם את `counter`, הוא מקדם את העותק שלו בלבד, וערך ה-`counter` של תהליך האב נשאר ללא שינוי, כלומר 0.\n\nכאשר תהליכונים (threads) נוצרים באמצעות `pthread_create()`, כל התהליכונים חולקים את אותו מרחב זיכרון של התהליך האב, כולל את המשתנים הגלובליים. לכן, כאשר תהליכון מקדם את `counter`, הוא מקדם את אותו משתנה גלובלי משותף. מכיוון שהונח שכל הגישות מסונכרנות כראוי, כל אחד משלושת התהליכונים יבצע קידום מוצלח אחד למשתנה המשותף, והערך הסופי של `counter` יהיה 3."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

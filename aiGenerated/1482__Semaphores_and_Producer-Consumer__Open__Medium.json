@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Producer-Consumer",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 10:42:57",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1649,
+      "output_tokens": 1631,
+      "total_tokens": 7046
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "Open",
+    "topic": [
+      "Synchronization",
+      "Semaphores",
+      "Producer-Consumer",
+      "Deadlocks"
+    ],
+    "content": {
+      "text": "סטודנט כתב קוד ב-C לפתרון בעיית המפיק-צרכן באמצעות סמפורים, כפי שמוצג להלן. הסטודנט טוען שהקוד שלו נכון ויעיל.\nעיין בקוד וקבע האם הוא אכן נכון. אם לא, זהה את הבעיה (או הבעיות) בקוד, הסבר מדוע היא מתרחשת, והצע תיקון לקוד שיפתור אותה. יש לפרט את השינויים הנדרשים.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <pthread.h>\n#include <semaphore.h>\n\n#define BUFFER_SIZE 5\n\nint buffer[BUFFER_SIZE];\nint in = 0;\nint out = 0;\n\nsem_t mutex;    // For mutual exclusion to buffer\nsem_t full;     // Counts number of items in buffer\nsem_t empty;    // Counts number of empty slots in buffer\n\nvoid *producer(void *param) {\n    int item;\n    for (int i = 0; i < 10; i++) {\n        item = rand() % 100; // Produce a random item\n\n        sem_wait(&empty);\n        sem_wait(&mutex);\n\n        buffer[in] = item;\n        printf(\"Producer produced: %d at %d\\n\", item, in);\n        in = (in + 1) % BUFFER_SIZE;\n\n        sem_post(&mutex);\n        sem_post(&full);\n    }\n    pthread_exit(0);\n}\n\nvoid *consumer(void *param) {\n    int item;\n    for (int i = 0; i < 10; i++) {\n        // --- Potential BUG here ---\n        sem_wait(&mutex); \n        sem_wait(&full);\n\n        item = buffer[out];\n        printf(\"Consumer consumed: %d from %d\\n\", item, out);\n        out = (out + 1) % BUFFER_SIZE;\n\n        sem_post(&mutex);\n        sem_post(&empty);\n    }\n    pthread_exit(0);\n}\n\nint main() {\n    pthread_t prod_tid, cons_tid;\n\n    sem_init(&mutex, 0, 1);\n    sem_init(&full, 0, 0);\n    sem_init(&empty, 0, BUFFER_SIZE);\n\n    pthread_create(&prod_tid, NULL, producer, NULL);\n    pthread_create(&cons_tid, NULL, consumer, NULL);\n\n    pthread_join(prod_tid, NULL);\n    pthread_join(cons_tid, NULL);\n\n    sem_destroy(&mutex);\n    sem_destroy(&full);\n    sem_destroy(&empty);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הקוד אינו נכון. קיימת בו בעיה של קיפאון (Deadlock) אפשרי בפונקציית הצרכן (consumer).\n\n**הסבר הבעיה:**\nנניח שהחוצץ המשותף (buffer) ריק לחלוטין. כאשר חוט צרכן מנסה לצרוך פריט, הוא יבצע קודם כל `sem_wait(&mutex)`. פעולה זו תצליח, והצרכן ירכוש את מנעול ההדדיות (mutex).\nלאחר מכן, הצרכן ינסה לבצע `sem_wait(&full)`. מכיוון שהחוצץ ריק, הסמפור `full` מאותחל ל-0, והצרכן יחסם וימתין שפריט יהיה זמין בחוצץ (כלומר, ש-`full` יעלה מעל 0).\nבשלב זה, הצרכן מחזיק את מנעול ה-`mutex` והוא חסום בהמתנה לפריט.\nכעת, נניח שחוט מפיק מנסה לייצר פריט. הוא יבצע בהצלחה `sem_wait(&empty)` (בהנחה שיש מקום פנוי בחוצץ). לאחר מכן, הוא ינסה לבצע `sem_wait(&mutex)`. מכיוון שמנעול ה-`mutex` מוחזק כעת על ידי הצרכן החסום, המפיק ייחסם גם הוא בהמתנה ל-`mutex`.\nנוצר מצב של קיפאון: הצרכן ממתין ל-`full` (שניתן להעלות אותו רק על ידי מפיק), תוך כדי שהוא מחזיק את ה-`mutex` (שהמפיק זקוק לו). המפיק ממתין ל-`mutex` (שמוחזק על ידי הצרכן). אף אחד מהם לא יכול להתקדם, והמערכת נכנסת לקיפאון.\n\n**התיקון המוצע:**\nכדי למנוע את הקיפאון, יש להחליף את הסדר של קריאות ה-`sem_wait` בפונקציית הצרכן. הצרכן צריך להמתין קודם כל שפריט יהיה זמין (`sem_wait(&full)`) ורק אז לרכוש את מנעול ההדדיות (`sem_wait(&mutex)`) כדי לגשת לחוצץ המשותף.\n\n**קוד הצרכן המתוקן:**\n```c\nvoid *consumer(void *param) {\n    int item;\n    for (int i = 0; i < 10; i++) {\n        sem_wait(&full);  // 1. Wait for an item to be available\n        sem_wait(&mutex); // 2. Acquire mutex to access shared buffer\n\n        item = buffer[out];\n        printf(\"Consumer consumed: %d from %d\\n\", item, out);\n        out = (out + 1) % BUFFER_SIZE;\n\n        sem_post(&mutex); // 3. Release mutex\n        sem_post(&empty); // 4. Signal that an empty slot is available\n    }\n    pthread_exit(0);\n}\n```\nשינוי זה מבטיח שהצרכן ינסה לרכוש את ה-`mutex` רק כאשר ידוע שיש פריט לצרוך, ובכך מונע את מצב הקיפאון."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

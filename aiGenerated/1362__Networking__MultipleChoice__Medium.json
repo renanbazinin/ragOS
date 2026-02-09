@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "Networking",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 09:40:28",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 893,
+      "output_tokens": 394,
+      "total_tokens": 2228
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Networking",
+      "Protocols",
+      "TCP/UDP"
+    ],
+    "content": {
+      "text": "איזו מהאפשרויות הבאות מתארת נכון מאפיין של פרוטוקול UDP (User Datagram Protocol)?",
+      "code_snippet": null,
+      "options": [
+        "א. מבטיח מסירה מהימנה (reliable delivery) של נתונים.",
+        "ב. הוא פרוטוקול ללא יצירת חיבור (connectionless) ואינו מבטיח סדר מסירה.",
+        "ג. משתמש במנגנון \"לחיצת יד משולשת\" (three-way handshake) ליצירת חיבור.",
+        "ד. מספק בקרת גודש (congestion control) כדי למנוע הצפת הרשת."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "הסבר: פרוטוקול UDP הוא פרוטוקול ללא חיבור (connectionless) ואינו מבטיח מסירה מהימנה, סדר מובטח או בקרת גודש. הוא משמש ליישומים שבהם מהירות וזמן אמת חשובים יותר מאשר אמינות מלאה, כמו שיחות וידאו או סטרימינג קולי. אפשרויות א', ג' ו-ד' מתארות מאפיינים של פרוטוקול TCP."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

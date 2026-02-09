@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Condition Variables",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 07:25:05",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 873,
+      "output_tokens": 385,
+      "total_tokens": 2153
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Synchronization",
+      "Condition Variables"
+    ],
+    "content": {
+      "text": "כאשר תהליך קורא לפונקציה `wait` על משתנה תנאי (condition variable), מה קורה?",
+      "code_snippet": null,
+      "options": [
+        "א. התהליך נכנס למצב המתנה (blocked) ומחזיק את המנעול (mutex) המשויך.",
+        "ב. התהליך משחרר את המנעול (mutex) המשויך ונכנס למצב המתנה (blocked).",
+        "ג. התהליך ממשיך לרוץ אך מסמן שהוא ממתין לתנאי מסוים.",
+        "ד. התהליך משחרר את המנעול (mutex) ומיד מנסה לרכוש אותו מחדש."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב. כאשר תהליך קורא ל-`wait` על משתנה תנאי, הוא משחרר באופן אטומי את המנעול המשויך לו ונכנס למצב המתנה (blocked). הוא יתעורר רק כאשר תהליך אחר יבצע `signal` או `broadcast` על אותו משתנה תנאי, ואז ינסה לרכוש מחדש את המנעול לפני שימשיך בביצוע."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

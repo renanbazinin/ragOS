@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Processes and Memory Management",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 20:07:28",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1726,
+      "output_tokens": 1792,
+      "total_tokens": 6976
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Processes",
+      "Memory Management",
+      "Copy-on-Write",
+      "Paging",
+      "Page Faults"
+    ],
+    "content": {
+      "text": "נתונה מערכת הפעלה התומכת במנגנון Copy-on-Write (CoW) עבור יצירת תהליכים (fork). גודל דף במערכת הוא 4KB. נתון קטע הקוד הבא:\n\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\n#define PAGE_SIZE 4096 // 4KB\n#define NUM_PAGES 1000 // Total 4MB\n\nint main() {\n    int *data = (int *)malloc(NUM_PAGES * PAGE_SIZE);\n    if (data == NULL) {\n        perror(\"malloc failed\");\n        return 1;\n    }\n\n    // Initialize some data in specific pages\n    data[0] = 10; // Accesses the first page\n    data[NUM_PAGES * (PAGE_SIZE / sizeof(int) - 1)] = 20; // Accesses the last page\n\n    pid_t pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        return 1;\n    } else if (pid == 0) { // Child process\n        // Child modifies its own copy of the first page\n        data[0] = 100;\n        // Child modifies its own copy of the last page\n        data[NUM_PAGES * (PAGE_SIZE / sizeof(int) - 1)] = 200;\n        printf(\"Child: data[0]=%d, data[last_page]=%d\\n\", data[0], data[NUM_PAGES * (PAGE_SIZE / sizeof(int) - 1)]);\n        exit(0);\n    } else { // Parent process\n        wait(NULL); // Wait for child to finish\n        printf(\"Parent: data[0]=%d, data[last_page]=%d\\n\", data[0], data[NUM_PAGES * (PAGE_SIZE / sizeof(int) - 1)]);\n    }\n\n    free(data);\n    return 0;\n}\n```\n\nבהנחה שכל הזיכרון שהוקצה באמצעות `malloc` ממופה לדפים בזיכרון הפיזי רק כאשר ניגשים אליו לראשונה (demand paging), ענה על השאלות הבאות:\n1.  כמה דפי זיכרון פיזיים (physical pages/frames) יוקצו עבור המערך `data` *לאחר* ביצוע ה-`malloc` ו*לפני* ה-`fork`, ו*לאחר* שורות האתחול (`data[0] = 10;` וכו')? נמק.\n2.  מיד *לאחר* קריאת ה-`fork` (ולפני שהילד או ההורה משנים ערכים), כמה דפים פיזיים משותפים יהיו בין ההורה לילד עבור המערך `data`? נמק.\n3.  כמה Page Faults יתרחשו *בסה\"כ* כתוצאה מהשמת הערכים על ידי תהליך הילד (`data[0] = 100;` וכו')? נמק.\n4.  מה יהיה הפלט המודפס למסך על ידי תהליך ההורה והילד? נמק.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.   **לפני ה-fork, לאחר ה-malloc והאתחול:**\n    `malloc` מקצה זיכרון וירטואלי בלבד. בגלל מנגנון ה-demand paging, דפים פיזיים מוקצים רק כאשר ניגשים אליהם בפועל. שתי שורות האתחול: `data[0] = 10;` ו-`data[NUM_PAGES * (PAGE_SIZE / sizeof(int) - 1)] = 20;` ניגשות לשני דפים שונים בזיכרון (הדף הראשון והדף האחרון של המערך, בהתאמה, מאחר ו-`NUM_PAGES` הוא 1000, הדף האחרון הוא דף מספר 999). לכן, יוקצו 2 דפים פיזיים בלבד עבור המערך `data` בשלב זה.\n\n2.   **מיד לאחר ה-fork:**\n    מנגנון ה-Copy-on-Write (CoW) גורם לכך שמיד לאחר ה-`fork`, טבלת הדפים של הילד היא העתק של טבלת הדפים של ההורה. כל הדפים הפיזיים שהיו ממופים להורה (במקרה זה, 2 הדפים שאותחלו) נשארים בזיכרון הפיזי, וגם ההורה וגם הילד מפנים אליהם. דפים אלו מסומנים כקריאה בלבד (read-only) בשתי טבלאות הדפים. לכן, יהיו 2 דפים פיזיים משותפים בין ההורה לילד עבור המערך `data`.\n\n3.   **Page Faults כתוצאה משינויי הילד:**\n    תהליך הילד מבצע שתי פעולות כתיבה:\n    *   `data[0] = 100;`: הילד מנסה לכתוב לדף הראשון. מאחר והדף מסומן כ-read-only (בגלל CoW), תתרחש כאן Page Fault. מערכת ההפעלה תזהה זאת, תשכפל את הדף הפיזי המשותף לדף פיזי חדש, תעדכן את טבלת הדפים של הילד כדי שתצביע לדף החדש עם הרשאות כתיבה, ותאפשר לילד לכתוב לדף הפרטי שלו. זהו Page Fault אחד.\n    *   `data[NUM_PAGES * (PAGE_SIZE / sizeof(int) - 1)] = 200;`: הילד מנסה לכתוב לדף האחרון. באותו אופן, תתרחש כאן Page Fault נוסף. מערכת ההפעלה תשכפל את הדף הפיזי המשותף השני, תעדכן את טבלת הדפים של הילד ותאפשר כתיבה. זהו Page Fault נוסף.\n    בסה\"כ יתרחשו 2 Page Faults כתוצאה משינויי הילד.\n\n4.   **פלט מודפס:**\n    *   **פלט הילד:** הילד שינה את הערכים בדפים הפרטיים שלו. לכן, הפלט יהיה:\n        `Child: data[0]=100, data[last_page]=200`\n    *   **פלט ההורה:** ההורה לא שינה את הערכים בדפים שלו, ולכן הם נשארים עם הערכים המקוריים. הפלט יהיה:\n        `Parent: data[0]=10, data[last_page]=20`"
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "Security",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 09:43:39",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1204,
+      "output_tokens": 449,
+      "total_tokens": 3068
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "Security",
+      "Memory Protection",
+      "Exploit Mitigation"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של טכניקת Address Space Layout Randomization (ASLR) במערכות הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. להצפין נתונים המאוחסנים בזיכרון הראשי.",
+        "ב. למנוע גלישות חוצץ (buffer overflows) על ידי בדיקת גבולות מערכים.",
+        "ג. להקשות על תוקפים לנחש את מיקומי הקוד הניתן להרצה והנתונים בזיכרון.",
+        "ד. לוודא שכל בקשות הגישה לזיכרון מאומתות."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ASLR (Address Space Layout Randomization) היא טכניקת אבטחה שמטרתה להקשות על ניצול פרצות אבטחה, כגון גלישות חוצץ (buffer overflows) והזרקת קוד. היא עושה זאת על ידי רנדומיזציה של מיקומי הזיכרון של אזורים מרכזיים בתהליך (כמו קוד, מחסנית, ערימה וספריות משותפות) בכל פעם שהתהליך נטען. רנדומיזציה זו מקשה על תוקפים לחזות כתובות זיכרון ספציפיות, ובכך מסכלת או מקשה על ביצוע התקפות הדורשות ידע על מיקומי זיכרון קבועים."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

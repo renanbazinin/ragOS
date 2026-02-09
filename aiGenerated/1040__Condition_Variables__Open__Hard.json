@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Condition Variables",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 07:35:19",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3816,
+      "output_tokens": 2424,
+      "total_tokens": 10185
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Condition Variables",
+      "Synchronization",
+      "Concurrency",
+      "Mutexes"
+    ],
+    "content": {
+      "text": "נתונה מערכת המנהלת מספר מוגבל של משאבים (אסימונים - tokens). ישנם N אסימונים זמינים במערכת. תהליכים (או תהליכונים) צריכים לרכוש אסימון כדי לבצע פעולה מסוימת, ולאחר מכן לשחרר אותו בחזרה למאגר. \nלהלן מימוש ב-C/C++ של פונקציות לרכישת אסימון (acquire_token) ולשחרורו (release_token) באמצעות מנעול (mutex) ומשתנה תנאי (condition variable).\nהפונקציה init_resource מאתחלת את המשאבים.\n\n1. האם קטע הקוד הנתון נכון מבחינה סמנטית ובטיחותית? אם לא, פרט והסבר מדוע הוא עלול להיכשל או להוביל להתנהגות לא צפויה (כגון deadlocks, race conditions, או אי-נכונות).\n2. תקן את הקוד על מנת לפתור את הבעיות שזיהית.\n3. הסבר מדוע התיקונים שלך פותרים את הבעיות ומבטיחים פעולה נכונה ובטוחה של המערכת.",
+      "code_snippet": "#include <pthread.h>\n\n// מספר האסימונים הזמינים כרגע במערכת\nint available_tokens;\n\n// מנעול להגנה על המשאב המשותף available_tokens\npthread_mutex_t mutex;\n\n// משתנה תנאי לתזמון תהליכים הממתינים לאסימון\npthread_cond_t cond;\n\n// פונקציית אתחול המשאבים\nvoid init_resource(int max_tokens) {\n    available_tokens = max_tokens;\n    pthread_mutex_init(&mutex, NULL);\n    pthread_cond_init(&cond, NULL);\n}\n\n// פונקציה לרכישת אסימון\nvoid acquire_token() {\n    pthread_mutex_lock(&mutex);\n    if (available_tokens == 0) {\n        pthread_cond_wait(&cond, &mutex);\n    }\n    available_tokens--;\n    pthread_mutex_unlock(&mutex);\n}\n\n// פונקציה לשחרור אסימון\nvoid release_token() {\n    pthread_mutex_lock(&mutex);\n    available_tokens++;\n    pthread_cond_signal(&cond); \n    pthread_mutex_unlock(&mutex);\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.  **זיהוי הבעיה בקוד המקורי:**\n    הקוד הנתון אינו נכון מבחינה סמנטית ובטיחותית ועלול להוביל להתנהגות לא צפויה ואף לקריסת המערכת. הבעיה העיקרית נמצאת בפונקציה `acquire_token`, בשורת ה-`if`:\n    `if (available_tokens == 0)`\n    במקום `while (available_tokens == 0)`.\n\n    הסיבות לכך הן:\n    *   **התעוררויות שווא (Spurious Wakeups):** פונקציית `pthread_cond_wait` יכולה לחזור (כלומר, התהליך מתעורר) גם מבלי שנקראה `pthread_cond_signal` או `pthread_cond_broadcast`. אם זה קורה, והתהליך משתמש ב-`if` במקום ב-`while`, הוא לא יבדוק שוב את התנאי (`available_tokens == 0`) לפני המשך הביצוע. כתוצאה מכך, הוא ימשיך לבצע `available_tokens--`, מה שיוביל את `available_tokens` לערך שלילי, ובכך יופרו מגבלות המשאבים (יותר אסימונים נרכשו מהזמינים במערכת).\n    *   **התעוררות מרובת תהליכים על אסימון יחיד:** נניח ש-`available_tokens` הוא 0, וכמה תהליכים ממתינים על משתנה התנאי. כאשר תהליך אחד משחרר אסימון (`release_token`) וקורא ל-`pthread_cond_signal`, הוא מעיר תהליך אחד בלבד. אם התהליך שהתעורר משתמש ב-`if` ולא בודק מחדש את התנאי לאחר שרכש את המנעול, הוא יניח שהאסימון זמין ויקטין את `available_tokens`. אם תהליך אחר (שאולי קיבל התעוררות שווא, או שהיה תורו להתעורר) גם הוא יצא מ-`pthread_cond_wait` וישתמש ב-`if`, הוא יקטין גם הוא את `available_tokens` למרות שהוא כבר 0, שוב תוך הפרת מגבלות המשאבים. כלומר, מספר תהליכים יכולים לחשוב שהם רכשו אסימון כאשר בפועל היה זמין רק אחד (או אף אחד).\n\n2.  **הקוד המתוקן:**\n\n    ```c\n    #include <pthread.h>\n\n    // מספר האסימונים הזמינים כרגע במערכת\n    int available_tokens;\n\n    // מנעול להגנה על המשאב המשותף available_tokens\n    pthread_mutex_t mutex;\n\n    // משתנה תנאי לתזמון תהליכים הממתינים לאסימון\n    pthread_cond_t cond;\n\n    // פונקציית אתחול המשאבים\n    void init_resource(int max_tokens) {\n        available_tokens = max_tokens;\n        pthread_mutex_init(&mutex, NULL);\n        pthread_cond_init(&cond, NULL);\n    }\n\n    // פונקציה לרכישת אסימון\n    void acquire_token() {\n        pthread_mutex_lock(&mutex);\n        // תיקון: שימוש בלולאת while במקום if\n        while (available_tokens == 0) { \n            pthread_cond_wait(&cond, &mutex);\n        }\n        available_tokens--;\n        pthread_mutex_unlock(&mutex);\n    }\n\n    // פונקציה לשחרור אסימון\n    void release_token() {\n        pthread_mutex_lock(&mutex);\n        available_tokens++;\n        // pthread_cond_signal מספיק במקרה זה, כיוון שרק אסימון אחד משתחרר בכל פעם\n        // ורק תהליך אחד צריך להתעורר כדי לנסות לרכוש אותו. \n        // אם מספר אסימונים היה משתחרר בבת אחת, או שהיו תנאי המתנה מורכבים יותר, \n        // pthread_cond_broadcast היה עדיף.\n        pthread_cond_signal(&cond); \n        pthread_mutex_unlock(&mutex);\n    }\n    ```\n\n3.  **הסבר התיקונים:**\n    התיקון העיקרי הוא שינוי ה-`if` ל-`while` בפונקציה `acquire_token`:\n    `while (available_tokens == 0)`\n\n    שינוי זה מבטיח את הדברים הבאים:\n    *   **בדיקת תנאי מחדש (Predicate Re-evaluation):** בכל פעם שתהליך מתעורר מ-`pthread_cond_wait` (בין אם כתוצאה מ-`signal` או מ-`broadcast` או התעוררות שווא), הוא רוכש מחדש את המנעול ומיד בודק שוב את התנאי (`available_tokens == 0`). אם התנאי עדיין מתקיים (כלומר, `available_tokens` עדיין 0), התהליך יחזור להמתין. זה מונע ממנו להמשיך בביצוע ולהקטין את `available_tokens` לערך שלילי.\n    *   **עמידות בפני התעוררויות שווא:** הדבר מבטיח שהתהליך ימשיך רק כאשר התנאי באמת מתקיים (`available_tokens > 0`), ובכך מונע את הבעיות הנובעות מהתעוררויות שווא.\n    *   **נכונות במקרה של מספר מעירים:** גם אם מספר תהליכים מתעוררים מ-`pthread_cond_wait` בו-זמנית (למשל, כתוצאה מ-`pthread_cond_broadcast`, או אם `signal` מעיר תהליך אחד והוא מתעורר ואז קורה משהו אחר שמעיר תהליך נוסף), רק התהליך הראשון שיצליח לרכוש את המנעול ולמצוא את התנאי מתקיים ימשיך. שאר התהליכים, כשיגיע תורם לרכוש את המנעול, יגלו שהתנאי כבר לא מתקיים (`available_tokens` הפך ל-0 שוב), ויחזרו להמתין בלולאת ה-`while`.\n\n    השימוש ב-`pthread_cond_signal` בפונקציה `release_token` הוא בדרך כלל מספיק ויעיל יותר במקרה זה, מכיוון שכל קריאה ל-`release_token` משחררת רק אסימון אחד. לכן, רק תהליך אחד צריך להתעורר כדי לנסות לרכוש את האסימון. אם היה צורך להעיר מספר תהליכים בו-זמנית (למשל, אם משחררים יותר מאסימון אחד, או שיש תנאי המתנה מורכבים יותר), `pthread_cond_broadcast` היה נחוץ."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

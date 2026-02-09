@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "System Calls",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 07:14:07",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1165,
+      "output_tokens": 492,
+      "total_tokens": 3340
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "System Calls",
+      "Kernel",
+      "User Mode",
+      "Protection"
+    ],
+    "content": {
+      "text": "מדוע תהליך משתמש נדרש לבצע קריאת מערכת (system call) כדי לבצע פעולות מסוימות, כגון קריאה מקובץ?",
+      "code_snippet": null,
+      "options": [
+        "א. פעולות אלו דורשות גישה מיוחסת (privileged access) למשאבי חומרה או לנתוני ליבה (kernel data) מוגנים.",
+        "ב. תהליכי משתמש אינם יכולים לתקשר עם מערכת ההפעלה באופן ישיר בשום צורה.",
+        "ג. כדי לשפר את ביצועי המערכת על ידי העברת משימות כבדות לליבת מערכת ההפעלה.",
+        "ד. כדי לאפשר לתהליכים אחרים לשתף את אותם משאבים בצורה יעילה יותר.",
+        "ה. קריאות מערכת נחוצות רק עבור פעולות רשת ולא עבור קבצים."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "א. פעולות כמו קריאה מקובץ דורשות גישה ישירה לחומרה (כונן דיסק), לניהול זיכרון (buﬀers), ולמבני נתונים של מערכת ההפעלה (טבלאות קבצים, הרשאות). גישה זו מוגבלת למצב ליבה (kernel mode) מטעמי אבטחה ויציבות. קריאת מערכת היא המנגנון המבוקר שמאפשר לתהליך משתמש לבקש ממערכת ההפעלה לבצע פעולות אלו בשמו, תוך מעבר ממצב משתמש למצב ליבה."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

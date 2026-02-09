@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Scheduling and Processes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 21:06:10",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1031,
+      "output_tokens": 318,
+      "total_tokens": 2295
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Scheduling",
+      "Processes"
+    ],
+    "content": {
+      "text": "באיזה מצב נמצא תהליך שמוכן לרוץ אך ממתין למעבד?",
+      "code_snippet": null,
+      "options": [
+        "א. ריצה",
+        "ב. מוכן",
+        "ג. חוסם",
+        "ד. חדש"
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב. מצב 'מוכן' (Ready) הוא המצב בו תהליך סיים את כל פעולות הקלט/פלט הנדרשות ומוכן להרצה על המעבד, אך ממתין שהמעבד יתפנה או שהמתזמן (Scheduler) יבחר בו. תהליך במצב 'ריצה' רץ כעת על המעבד. תהליך ב'חוסם' ממתין לאירוע חיצוני (כמו סיום קלט/פלט). תהליך 'חדש' הוא תהליך שזה עתה נוצר."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

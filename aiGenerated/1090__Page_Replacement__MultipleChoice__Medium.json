@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Page Replacement",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 07:52:48",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1059,
+      "output_tokens": 530,
+      "total_tokens": 2728
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Page Replacement",
+      "Virtual Memory",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "איזו מהטענות הבאות לגבי אלגוריתמי החלפת דפים *אינה נכונה*?",
+      "code_snippet": null,
+      "options": [
+        "אלגוריתם FIFO עלול לסבול מאנומליית בלאדי (Belady's Anomaly).",
+        "אלגוריתם LRU תמיד יספק ביצועים טובים יותר או שווים לאלגוריתם FIFO עבור אותה סדרת גישות.",
+        "אלגוריתם Optimal הוא האלגוריתם בעל מספר כשלונות הדף (page faults) הנמוך ביותר האפשרי.",
+        "אלגוריתם Clock הוא קירוב טוב לאלגוריתם LRU ומבטיח שלעולם לא יסבול מאנומליית בלאדי."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ד",
+      "explanation": "התשובה הנכונה היא ד'. אלגוריתם Clock, למרות היותו קירוב ל-LRU, אינו אלגוריתם מחסנית (stack algorithm) ולכן *עלול* לסבול מאנומליית בלאדי. אנומליית בלאדי מתרחשת כאשר הגדלת מספר מסגרות הזיכרון (frames) גורמת לעלייה במספר כשלונות הדף (page faults). רק אלגוריתמי מחסנית, כמו LRU, אינם סובלים מאנומליה זו. טענות א', ב', וג' נכונות: FIFO ידוע כסובל מאנומליית בלאדי; LRU, כאלגוריתם מחסנית, תמיד יהיה טוב יותר או שווה ל-FIFO (או כל אלגוריתם שאינו מחסנית) עבור אותה סדרת גישות; ואלגוריתם Optimal הוא אכן התיאורטי הטוב ביותר."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

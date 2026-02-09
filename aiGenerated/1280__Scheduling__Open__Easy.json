@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Scheduling",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 09:10:04",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1598,
+      "output_tokens": 442,
+      "total_tokens": 2910
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "Open",
+    "topic": [
+      "Scheduling",
+      "CPU Scheduling"
+    ],
+    "content": {
+      "text": "מהו המאפיין העיקרי של אלגוריתם התזמון First-Come, First-Served (FCFS)? הסבירו את יתרונו ואת חסרונו העיקריים.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "המאפיין העיקרי של אלגוריתם FCFS הוא שהוא אינו דורסני (non-preemptive) ותהליכים מבוצעים לפי סדר הגעתם לתור. ברגע שתהליך מתחיל לרוץ, הוא ממשיך עד לסיום ביצועו או עד שהוא נחסם (לדוגמה, ממתין לקלט/פלט).\n\nיתרון עיקרי: פשטות יישום והבנה. הוא הוגן במובן שתהליכים מקבלים שירות לפי סדר הגעתם, ואין מורכבות של קביעת עדיפויות או דריסה.\n\nחיסרון עיקרי: הוא עלול לגרום לזמני המתנה ארוכים מאוד לתהליכים קצרים אם תהליך ארוך מגיע ראשון (אפקט השיירה - convoy effect). מצב זה מפחית את ניצולת המעבד ומגדיל את זמן התגובה הממוצע של המערכת, מכיוון שתהליכים רבים נאלצים להמתין שתהליך יחיד וארוך יסיים את ריצתו."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

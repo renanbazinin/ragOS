@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "CPU Scheduling and Context Switching",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 11:44:22",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1035,
+      "output_tokens": 446,
+      "total_tokens": 2946
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "CPU Scheduling",
+      "Context Switching"
+    ],
+    "content": {
+      "text": "במערכת הפעלה עם תזמון מעבד פרסמפטיבי (preemptive CPU scheduling), מתי מתרחשת בדרך כלל החלפת הקשר (context switch)?",
+      "code_snippet": null,
+      "options": [
+        "א. כאשר תהליך מסיים את ריצתו.",
+        "ב. כאשר תהליך מבצע קריאת מערכת (system call) שגורמת לו לחכות (למשל, קלט/פלט).",
+        "ג. כאשר פסיקת שעון (timer interrupt) מצביעה על כך שתם זמן המעבד שהוקצה לתהליך הנוכחי.",
+        "ד. כאשר תהליך מבצע פעולה מתמטית מורכבת.",
+        "ה. אף אחת מהתשובות אינה נכונה."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג'. בתזמון מעבד פרסמפטיבי, מערכת ההפעלה יכולה להפסיק תהליך שרץ כרגע ולבחור תהליך אחר להרצה, גם אם התהליך הנוכחי לא סיים את ריצתו או נכנס למצב המתנה. הסיבה הנפוצה ביותר לכך היא פסיקת שעון, המאותתת כי חלף זמן המעבד שהוקצה לתהליך הנוכחי (זמן קוונטום), וכי יש להחליף תהליכים כדי לתת למעבד לרוץ על תהליך אחר."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

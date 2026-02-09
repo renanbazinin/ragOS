@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Context Switching and Threads",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 21:55:46",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 985,
+      "output_tokens": 421,
+      "total_tokens": 2757
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Context Switching",
+      "Threads"
+    ],
+    "content": {
+      "text": "מדוע החלפת הקשר (context switch) בין שני חוטים (threads) באותו תהליך (process) היא בדרך כלל מהירה יותר מהחלפת הקשר בין שני תהליכים שונים?",
+      "code_snippet": null,
+      "options": [
+        "א. חוטים באותו תהליך חולקים את מרחב הכתובות ולכן נדרשת שמירה וטעינה של פחות מידע הקשור לזיכרון.",
+        "ב. חוטים אינם דורשים שמירה של רגיסטרי המעבד.",
+        "ג. החלפת הקשר בין חוטים מתבצעת תמיד במרחב המשתמש וללא מעורבות מערכת ההפעלה.",
+        "ד. חוטים רצים אך ורק על מעבד אחד בכל פעם, בניגוד לתהליכים."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "א. חוטים באותו תהליך חולקים את אותו מרחב כתובות (code, data, heap), ולכן בהחלפת קשר בין חוטים באותו תהליך, אין צורך לשנות את מיפוי הזיכרון (למשל, לטעון מחדש את ה-TLB) בניגוד להחלפת קשר בין תהליכים שונים. זה חוסך זמן רב בתהליך ההחלפה."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Scheduling and Deadlocks",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 20:00:23",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3383,
+      "output_tokens": 3117,
+      "total_tokens": 14283
+    }
+  },
+  "question": {
+    "id": 9,
+    "type": "Open",
+    "topic": [
+      "Scheduling",
+      "Deadlocks",
+      "Concurrency",
+      "Synchronization",
+      "Resource Management"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא המדמה שני חוטים (threads) המנסים לגשת למשאבים משותפים (mutexes).",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h> // For sleep\n\npthread_mutex_t mutex1 = PTHREAD_MUTEX_INITIALIZER;\npthread_mutex_t mutex2 = PTHREAD_MUTEX_INITIALIZER;\n\nvoid* thread_func1(void* arg) {\n    printf(\"Thread 1: Trying to acquire mutex1...\\n\");\n    pthread_mutex_lock(&mutex1);\n    printf(\"Thread 1: Acquired mutex1. Waiting...\\n\");\n    sleep(1); // Simulate work or context switch\n    printf(\"Thread 1: Trying to acquire mutex2...\\n\");\n    pthread_mutex_lock(&mutex2);\n    printf(\"Thread 1: Acquired mutex2. Critical section.\\n\");\n    // Critical section\n    pthread_mutex_unlock(&mutex2);\n    pthread_mutex_unlock(&mutex1);\n    printf(\"Thread 1: Released both mutexes.\\n\");\n    return NULL;\n}\n\nvoid* thread_func2(void* arg) {\n    printf(\"Thread 2: Trying to acquire mutex2...\\n\");\n    pthread_mutex_lock(&mutex2);\n    printf(\"Thread 2: Acquired mutex2. Waiting...\\n\");\n    sleep(1); // Simulate work or context switch\n    printf(\"Thread 2: Trying to acquire mutex1...\\n\");\n    pthread_mutex_lock(&mutex1);\n    printf(\"Thread 2: Acquired mutex1. Critical section.\\n\");\n    // Critical section\n    pthread_mutex_unlock(&mutex1);\n    pthread_mutex_unlock(&mutex2);\n    printf(\"Thread 2: Released both mutexes.\\n\");\n    return NULL;\n}"
+    },
+    "sub_questions": [
+      {
+        "id": "a",
+        "text": "תאר במפורט, בהתבסס על ארבעת התנאים ההכרחיים לקיפאון (deadlock), כיצד קיפאון יכול להתרחש בקטע קוד זה. הצג דוגמה לסדר הרצה (interleaving) של הפעולות שיוביל לקיפאון.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "b",
+        "text": "שנה את קטע הקוד כדי למנוע קיפאון, תוך שימוש באחת משיטות המניעה המקובלות. הסבר מדוע השינוי מונע קיפאון.",
+        "code_snippet": "void* thread_func2_fixed(void* arg) {\n    printf(\"Thread 2: Trying to acquire mutex1...\\n\"); // Changed order\n    pthread_mutex_lock(&mutex1);\n    printf(\"Thread 2: Acquired mutex1. Waiting...\\n\");\n    sleep(1); // Simulate work or context switch\n    printf(\"Thread 2: Trying to acquire mutex2...\\n\");\n    pthread_mutex_lock(&mutex2);\n    printf(\"Thread 2: Acquired mutex2. Critical section.\\n\");\n    // Critical section\n    pthread_mutex_unlock(&mutex2);\n    pthread_mutex_unlock(&mutex1);\n    printf(\"Thread 2: Released both mutexes.\\n\");\n    return NULL;\n}",
+        "options": null
+      },
+      {
+        "id": "c",
+        "text": "נניח שהמערכת משתמשת במתזמן (scheduler) בשיטת Round Robin עם Quantum קטן (לדוגמה, 10ms), וזמן ה-sleep(1) ארוך משמעותית מה-Quantum. כיצד מדיניות תזמון זו תשפיע על הסבירות להתרחשות קיפאון בהשוואה למתזמן שאינו מונע (non-preemptive scheduler) או מתזמן FCFS ללא הגבלת זמן? נמק.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "פתרון:\n\nא. תנאים לקיפאון ודוגמת סדר הרצה:\nארבעת התנאים ההכרחיים לקיפאון מתקיימים בקטע קוד זה:\n1.  **מניעה הדדית (Mutual Exclusion):** המשאבים (mutex1 ו-mutex2) הם בלעדיים; רק חוט אחד יכול להחזיק ב-mutex מסוים בכל רגע נתון. זה מובטח על ידי פעולת ה-mutex.\n2.  **החזק והמתן (Hold and Wait):** כל חוט מחזיק במשאב אחד (mutex) וממתין למשאב נוסף. לדוגמה, חוט 1 מחזיק ב-mutex1 וממתין ל-mutex2, וחוט 2 מחזיק ב-mutex2 וממתין ל-mutex1.\n3.  **אי-הפקעה (No Preemption):** לא ניתן להפקיע mutex מחוט שמחזיק בו בכוח. חוט חייב לשחרר את ה-mutex מרצונו החופשי (באמצעות pthread_mutex_unlock).\n4.  **המתנה מעגלית (Circular Wait):** נוצרת שרשרת המתנה מעגלית. חוט 1 ממתין ל-mutex2 שמוחזק על ידי חוט 2, וחוט 2 ממתין ל-mutex1 שמוחזק על ידי חוט 1.\n\nדוגמה לסדר הרצה שיוביל לקיפאון:\n1.  **חוט 1:** מבצע `pthread_mutex_lock(&mutex1)`. חוט 1 מחזיק כעת ב-mutex1.\n2.  **חוט 1:** מבצע `printf` ומתחיל `sleep(1)`. המתזמן מעביר את המעבד לחוט 2 (ייתכן עקב סיום קוואנטום או חסימה ב-sleep).\n3.  **חוט 2:** מבצע `pthread_mutex_lock(&mutex2)`. חוט 2 מחזיק כעת ב-mutex2.\n4.  **חוט 2:** מבצע `printf` ומתחיל `sleep(1)`. המתזמן מעביר את המעבד לחוט 1.\n5.  **חוט 1:** מתעורר מ-sleep ומנסה לבצע `pthread_mutex_lock(&mutex2)`. חוט 1 נחסם כיוון ש-mutex2 מוחזק על ידי חוט 2.\n6.  **חוט 2:** מתעורר מ-sleep ומנסה לבצע `pthread_mutex_lock(&mutex1)`. חוט 2 נחסם כיוון ש-mutex1 מוחזק על ידי חוט 1.\nבשלב זה, שני החוטים חסומים וממתינים זה לזה, ונוצר קיפאון.\n\nב. שינוי הקוד למניעת קיפאון:\nניתן למנוע קיפאון על ידי שבירת תנאי ההמתנה המעגלית (Circular Wait) באמצעות קביעת סדר אחיד לרכישת המשאבים. כלומר, כל החוטים ינסו לרכוש את mutex1 תחילה, ורק לאחר מכן את mutex2.\n\nהשינוי המוצע (בקוד של `thread_func2` בלבד, `thread_func1` נשאר ללא שינוי, או ששניהם מקבלים את הסדר החדש):\n\n```c\nvoid* thread_func2_fixed(void* arg) {\n    printf(\"Thread 2: Trying to acquire mutex1...\\n\"); // Changed order\n    pthread_mutex_lock(&mutex1);\n    printf(\"Thread 2: Acquired mutex1. Waiting...\\n\");\n    sleep(1); // Simulate work or context switch\n    printf(\"Thread 2: Trying to acquire mutex2...\\n\");\n    pthread_mutex_lock(&mutex2);\n    printf(\"Thread 2: Acquired mutex2. Critical section.\\n\");\n    // Critical section\n    pthread_mutex_unlock(&mutex2);\n    pthread_mutex_unlock(&mutex1);\n    printf(\"Thread 2: Released both mutexes.\\n\");\n    return NULL;\n}\n```\n\nהסבר: שינוי זה מונע המתנה מעגלית. כעת, שני החוטים מנסים לרכוש את mutex1 לפני mutex2. אם חוט 1 רוכש את mutex1 ראשון, חוט 2 ייחסם בניסיון לרכוש את mutex1. חוט 1 ימשיך לרכוש את mutex2, יבצע את הקטע הקריטי וישחרר את שני ה-mutexes. רק אז חוט 2 יוכל להמשיך. לא יכולה להיווצר סיטואציה שבה חוט 1 מחזיק ב-mutex1 וממתין ל-mutex2, בעוד חוט 2 מחזיק ב-mutex2 וממתין ל-mutex1, מכיוון שחוט 2 לעולם לא ינסה לרכוש את mutex2 לפני שרכש את mutex1 (או יחסם בניסיון לרכוש את mutex1).\n\nג. השפעת מדיניות התזמון:\nמדיניות תזמון Round Robin עם Quantum קטן (10ms) תשפיע על הסבירות להתרחשות קיפאון באופן הבא:\n\n**השוואה למתזמן שאינו מונע (non-preemptive scheduler) או FCFS ללא הגבלת זמן:**\n*   במתזמן שאינו מונע (או FCFS ללא הגבלת זמן, בהנחה שחוט רץ עד שהוא נחסם או מסיים), כאשר חוט 1 מבצע `pthread_mutex_lock(&mutex1)` ואז `sleep(1)`, קריאת ה-`sleep` היא פעולה חוסמת (blocking call) שתגרום למתזמן להעביר את המעבד לחוט 2. באופן דומה, כאשר חוט 2 מבצע `pthread_mutex_lock(&mutex2)` ואז `sleep(1)`, הוא גם יחסם ויאפשר לחוט 1 להמשיך. לכן, גם במתזמן כזה, סדר הרצה כפי שתואר בסעיף א' (T1 לוקח M1, עובר ל-sleep, T2 לוקח M2, עובר ל-sleep, ואז שניהם נחסמים) אפשרי ויוביל לקיפאון.\n\n**השפעת Round Robin עם Quantum קטן:**\n*   מדיניות Round Robin עם Quantum קטן **מגדילה את הסבירות** להתרחשות קיפאון בהשוואה למתזמן שאינו מונע, במיוחד אם הקוואנטום קטן מספיק כדי לאפשר הפקעה (preemption) של חוט *בין* רכישת המשאב הראשון לניסיון לרכוש את המשאב השני, עוד לפני שהחוט מגיע לקריאת ה-`sleep`.\n*   **הסבר:** כאשר חוט 1 מבצע `pthread_mutex_lock(&mutex1)` אך הקוואנטום שלו מסתיים *לפני* שהוא מגיע לקריאת `sleep(1)` (או אפילו לפני שהוא מנסה לרכוש את `mutex2`), המתזמן יפקיע אותו בכוח. אז, חוט 2 יכול לקבל את המעבד ולבצע `pthread_mutex_lock(&mutex2)`. לאחר מכן, גם חוט 2 עלול להיות מופקע. תרחיש זה יוצר בקלות את מצב ה-\"Hold and Wait\" עבור שני החוטים בו-זמנית, שכן כל אחד מהם מחזיק במשאב אחד ומופקע תוך כדי ניסיון להשיג את המשאב השני. ה-`sleep(1)` רק מחזק את תנאי ה-\"Hold and Wait\" על ידי כך שהוא משאיר את ה-mutex תפוס לפרק זמן ארוך.\n*   במתזמן שאינו מונע, חוט 1 היה ממשיך לרוץ ברצף (אלא אם כן הוא נחסם מרצונו) עד `sleep(1)`. ההפקעה הכפויה של Round Robin מגדילה את מספר ה-interleaving's הפוטנציאליים שיכולים להוביל לקיפאון, ובכך מגדילה את הסבירות לקיפאון."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

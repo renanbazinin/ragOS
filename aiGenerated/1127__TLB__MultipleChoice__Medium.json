@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "TLB",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 08:08:16",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1140,
+      "output_tokens": 634,
+      "total_tokens": 3836
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "TLB",
+      "Virtual Memory",
+      "Paging",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "מהי הסדרה הנכונה של פעולות במערכת הפעלה המשתמשת ב-paging וב-TLB, כאשר מתרחש TLB miss עבור כתובת וירטואלית, אך הדף המבוקש *נמצא* בזיכרון הפיזי?",
+      "code_snippet": null,
+      "options": [
+        "א. המערכת תבצע גישה לזיכרון הראשי (RAM) על מנת למצוא את רשומת טבלת הדפים (PTE), ולאחר מכן תבצע גישה נוספת לזיכרון הראשי (RAM) על מנת לגשת לנתונים המבוקשים.",
+        "ב. המערכת תפעיל page fault, מכיוון שה-TLB לא הכיל את הרשומה.",
+        "ג. המערכת תבצע גישה לזיכרון הראשי (RAM) על מנת למצוא את רשומת טבלת הדפים (PTE), ולאחר מכן תטען את הנתונים ישירות מה-TLB.",
+        "ד. המערכת תבצע גישה לזיכרון הראשי (RAM) פעם אחת בלבד, על מנת למצוא את רשומת טבלת הדפים (PTE), ותסיים את הגישה."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "א. כאשר מתרחש TLB miss, המעבד מחפש את התרגום של הכתובת הווירטואלית בטבלת הדפים (Page Table). טבלת הדפים נמצאת בזיכרון הראשי (RAM), ולכן מתבצעת גישה ראשונה ל-RAM כדי לאחזר את רשומת טבלת הדפים (PTE). לאחר מכן, ה-PTE נטען ל-TLB (כדי למנוע miss נוסף בעתיד הקרוב לאותו דף), והמעבד משתמש בכתובת הפיזית שחולצה מה-PTE כדי לגשת לנתונים בפועל בזיכרון הראשי (RAM). זוהי הגישה השנייה ל-RAM. לכן, בסך הכל מתבצעות שתי גישות ל-RAM: אחת ל-PTE ואחת לנתונים."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

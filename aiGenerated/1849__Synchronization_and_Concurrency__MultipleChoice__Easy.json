@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Synchronization and Concurrency",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 21:12:06",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 998,
+      "output_tokens": 526,
+      "total_tokens": 2194
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Synchronization",
+      "Concurrency",
+      "Mutex"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של שימוש ב-mutex (מנעול הדדי) בתכנות מקבילי?",
+      "code_snippet": null,
+      "options": [
+        "א. למנוע מצב של Deadlock.",
+        "ב. להבטיח שרק חוט אחד ייכנס לקטע קריטי בכל רגע נתון.",
+        "ג. לסנכרן את קריאת הזיכרון בין תהליכים שונים.",
+        "ד. לשפר את ביצועי התוכנית על ידי הקטנת עומס המעבד."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "המטרה העיקרית של mutex היא להבטיח מניעה הדדית (mutual exclusion), כלומר, שרק חוט ביצוע אחד יוכל להיכנס לקטע קריטי (קוד הניגש למשאב משותף) בכל רגע נתון. זה מונע מצבי מרוץ (race conditions) ושומר על עקביות הנתונים המשותפים. אפשרות א' אינה נכונה מכיוון ששימוש לא נכון ב-mutexים עלול דווקא לגרום ל-deadlock. אפשרות ג' אינה מדויקת; בעוד ש-mutexים מסייעים לסנכרן גישה לזיכרון משותף, הם עושים זאת בעיקר בתוך תהליכים (בין חוטים) או למשאבים משותפים ספציפיים, ולאו דווקא לסנכרון כללי בין תהליכים שונים. אפשרות ד' אינה נכונה; שימוש ב-mutexים מוסיף תקורה ועלול להפחית את רמת המקביליות, ולכן בדרך כלל אינו משפר ביצועים באופן ישיר אלא מבטיח נכונות."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

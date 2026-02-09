@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Context Switching and Threads",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 21:55:20",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 985,
+      "output_tokens": 457,
+      "total_tokens": 2724
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Context Switching",
+      "Threads"
+    ],
+    "content": {
+      "text": "מהי הסיבה העיקרית לכך שהחלפת הקשר (context switch) בין שני חוטים (threads) באותו תהליך (process) היא לרוב מהירה יותר מהחלפת הקשר בין שני תהליכים שונים?",
+      "code_snippet": null,
+      "options": [
+        "א. חוטים אינם דורשים שמירה של אוגרי המעבד (CPU registers).",
+        "ב. חוטים חולקים את אותו מרחב כתובות (address space), ולכן אין צורך לעדכן את מיפוי הזיכרון.",
+        "ג. החלפת הקשר בין חוטים אינה דורשת מעורבות של מערכת ההפעלה.",
+        "ד. חוטים תמיד קטנים יותר בגודלם הפיזי מתהליכים."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב'. הסיבה העיקרית לכך שהחלפת הקשר בין חוטים באותו תהליך מהירה יותר היא שחוטים חולקים את אותו מרחב כתובות. המשמעות היא שאין צורך להחליף את טבלאות הדפים (page tables) או לעדכן את מיפוי הזיכרון, פעולות שהן יקרות יחסית בהחלפת הקשר בין תהליכים שונים. בעוד שגם מצב אוגרי המעבד נשמר, מדובר בפעולה יחסית מהירה יותר מהחלפת מרחב כתובות שלם."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

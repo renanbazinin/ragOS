@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "System Calls",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 07:15:12",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 632,
+      "total_tokens": 3890
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "System Calls",
+      "Process Management",
+      "File Descriptors"
+    ],
+    "content": {
+      "text": "תהליך אב פותח קובץ ומקבל את מתאר הקובץ (file descriptor) fd. לאחר מכן, הוא יוצר תהליך בן באמצעות fork(). תהליך הבן מנסה לבצע תוכנית חדשה באמצעות execve(). בהנחה שקריאת המערכת execve() נכשלת (לדוגמה, כי התוכנית אינה קיימת או אין הרשאות), מהו המצב הנכון לגבי מתאר הקובץ fd בתהליך הבן מיד לאחר כישלון execve()?",
+      "code_snippet": null,
+      "options": [
+        "א. מתאר הקובץ fd נסגר אוטומטית בתהליך הבן כתוצאה מכישלון execve().",
+        "ב. מתאר הקובץ fd נשאר פתוח בתהליך הבן, אך כל ניסיון לבצע פעולות I/O דרכו (כמו כתיבה) ייכשל.",
+        "ג. מתאר הקובץ fd נשאר פתוח בתהליך הבן וניתן להשתמש בו באופן רגיל לביצוע פעולות I/O (כמו כתיבה לקובץ).",
+        "ד. תהליך הבן מסיים את פעולתו באופן מיידי עם כישלון execve(), ולכן אין משמעות למצב של fd בתהליך הבן."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "כאשר קריאת המערכת execve() נכשלת, תהליך הבן *ממשיך את פעולתו* מההוראה מיד לאחר הקריאה ל-execve(). מרחב הזיכרון של התהליך, כולל המחסנית, הערימה ומתארי הקבצים הפתוחים (אשר שוכפלו במהלך fork()), נשארים שלמים ותקפים. לפיכך, מתאר הקובץ fd בתהליך הבן נשאר פתוח ותקף, והתהליך הבן יכול להמשיך להשתמש בו באופן רגיל לביצוע פעולות I/O. חשוב שתהליך הבן יטפל בשגיאה ויסגור במפורש את fd אם אינו נחוץ יותר, כדי למנוע דליפת משאבים."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

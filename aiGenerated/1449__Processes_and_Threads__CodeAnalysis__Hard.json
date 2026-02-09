@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Processes and Threads",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 10:20:59",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2789,
+      "output_tokens": 2785,
+      "total_tokens": 12970
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Processes",
+      "Threads",
+      "Concurrency",
+      "System Calls"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה בשפת C:\n\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <pthread.h>\n#include <sys/wait.h>\n\n// Shared global counter - subject to race conditions within a process\nint global_counter = 0;\n\nvoid* thread_func(void* arg) {\n    long thread_id = (long)arg;\n    pid_t current_pid = getpid();\n\n    // Increment global_counter - this is a race condition\n    int current_val_before_inc = global_counter;\n    global_counter++;\n    int current_val_after_inc = global_counter;\n\n    usleep(10000 + (rand() % 10000)); // Simulate work, increase interleaving chances\n\n    printf(\"PID: %d, Thread_arg: %ld, Counter_snapshot_before_inc: %d, Counter_snapshot_after_inc: %d\\n\",\n           current_pid, thread_id, current_val_before_inc, current_val_after_inc);\n\n    return NULL;\n}\n\nint main() {\n    pthread_t tids[2];\n    int i;\n\n    srand(getpid());\n\n    printf(\"Main Process (PID: %d) starting. Initial global_counter: %d\\n\", getpid(), global_counter);\n\n    // Main process creates 2 threads\n    for (i = 0; i < 2; ++i) {\n        pthread_create(&tids[i], NULL, thread_func, (void*)(long)i);\n    }\n    for (i = 0; i < 2; ++i) {\n        pthread_join(tids[i], NULL);\n    }\n\n    printf(\"Main Process (PID: %d) after initial threads. global_counter: %d\\n\", getpid(), global_counter);\n\n    pid_t child_pid = fork();\n\n    if (child_pid < 0) {\n        perror(\"fork failed\");\n        exit(1);\n    }\n\n    if (child_pid == 0) { // Child process\n        srand(getpid()); // Re-seed for child\n        printf(\"Child Process (PID: %d) starting. Parent PID: %d. global_counter (after fork): %d\\n\", getpid(), getppid(), global_counter);\n        // Child creates 2 new threads\n        for (i = 0; i < 2; ++i) {\n            pthread_create(&tids[i], NULL, thread_func, (void*)(long)(i + 10));\n        }\n        for (i = 0; i < 2; ++i) {\n            pthread_join(tids[i], NULL);\n        }\n        printf(\"Child Process (PID: %d) finished. Final global_counter: %d\\n\", getpid(), global_counter);\n        exit(0);\n    } else { // Parent process\n        printf(\"Parent Process (PID: %d) after fork. Child PID: %d. global_counter (after fork): %d\\n\", getpid(), child_pid, global_counter);\n        // Parent creates 2 new threads\n        for (i = 0; i < 2; ++i) {\n            pthread_create(&tids[i], NULL, thread_func, (void*)(long)(i + 20));\n        }\n        for (i = 0; i < 2; ++i) {\n            pthread_join(tids[i], NULL);\n        }\n        printf(\"Parent Process (PID: %d) waiting for child...\\n\", getpid());\n        wait(NULL);\n        printf(\"Parent Process (PID: %d) finished. Final global_counter: %d\\n\", getpid(), global_counter);\n    }\n\n    return 0;\n}\n```\n\n**שאלות:**\n\n1.  כמה תהליכים ייחודיים (Processes) וכמה תהליכונים (Threads) ייחודיים נוצרים סך הכל במהלך ריצת התוכנית (לא כולל התהליכון הראשי של כל תהליך)? פרט את סוגי התהליכים והתהליכונים.\n2.  מהם ערכי המינימום והמקסימום האפשריים של המשתנה `global_counter` כאשר התהליך הראשי (Original Parent Process) מדפיס את השורה \"Parent Process ... finished. Final global_counter: %d\"? נמקו במפורט את התשובה, תוך התייחסות למצב מרוץ (Race Condition) בתוך תהליכים שונים.\n3.  הסבר מדוע ערכו של `global_counter` בתהליך הבן (Child Process) מיד לאחר קריאת ה-`fork()` שונה (או יכול להיות שונה) מערכו בתהליך האב (Parent Process) באותו רגע, וכיצד זה משפיע על המשך ריצת התוכנית.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "**פתרון:**\n\n1.  **מספר תהליכים ותהליכונים:**\n    *   **תהליכים ייחודיים:** נוצרים 2 תהליכים בסך הכל.\n        *   התהליך הראשי (Original Parent Process) – תהליך ה-`main`.\n        *   תהליך בן (Child Process) – נוצר על ידי קריאת ה-`fork()`.\n    *   **תהליכונים ייחודיים (לא כולל התהליכון הראשי של כל תהליך):** נוצרים 6 תהליכונים בסך הכל.\n        *   התהליך הראשי יוצר בתחילה 2 תהליכונים (עם `Thread_arg` 0 ו-1).\n        *   לאחר ה-`fork()`, התהליך הראשי יוצר 2 תהליכונים נוספים (עם `Thread_arg` 20 ו-21).\n        *   התהליך הבן יוצר 2 תהליכונים (עם `Thread_arg` 10 ו-11).\n\n2.  **ערכי מינימום ומקסימום של `global_counter` בתהליך האב בסיום הריצה:**\n    המשתנה `global_counter` הוא משתנה גלובלי, אך לאחר קריאת ה-`fork()` כל תהליך מקבל עותק משלו של המשתנה במרחב הכתובות שלו. לכן, שינויים ב-`global_counter` בתהליך אחד אינם משפיעים על העותק של המשתנה בתהליך אחר. עם זאת, בתוך כל תהליך, מספר תהליכונים ניגשים למשתנה `global_counter` ומשנים אותו ללא סנכרון (מצב מרוץ – Race Condition).\n    הפעולה `global_counter++` אינה אטומית ומורכבת משלושה שלבים: קריאה, הגדלה וכתיבה. במצב מרוץ, ייתכן ששני תהליכונים יקראו את אותו ערך, יגדילו אותו, ויכתבו אותו בחזרה, ובכך תלך לאיבוד הגדלה אחת.\n\n    נבחן את ערכו של `global_counter` בתהליך האב:\n    *   **לפני ה-`fork()`:** התהליך הראשי יוצר 2 תהליכונים. כל אחד מהם מנסה להגדיל את `global_counter` באחד.\n        *   **מקסימום:** אם אין אובדן הגדלות, הערך יהיה 2.\n        *   **מינימום:** אם מתרחש מצב מרוץ שגורם לאובדן הגדלה אחת, הערך יהיה 1 (לדוגמה: שניהם קוראים 0, שניהם מגדילים ל-1, שניהם כותבים 1).\n    *   **לאחר ה-`fork()`:** התהליך האב ממשיך עם ערכו הנוכחי של `global_counter` (שהוא בין 1 ל-2). הוא יוצר 2 תהליכונים נוספים, שגם הם ינסו להגדיל את המשתנה.\n        *   **מקסימום תוספת:** 2 הגדלות (אם אין אובדן).\n        *   **מינימום תוספת:** 1 הגדלה (אם יש אובדן עקב מרוץ).\n\n    **חישוב הערך הסופי של `global_counter` בתהליך האב:**\n    *   **ערך מינימלי אפשרי:** (מינימום הגדלות לפני fork) + (מינימום הגדלות אחרי fork) = 1 + 1 = 2.\n    *   **ערך מקסימלי אפשרי:** (מקסימום הגדלות לפני fork) + (מקסימום הגדלות אחרי fork) = 2 + 2 = 4.\n\n    לכן, כאשר התהליך הראשי מדפיס את השורה האחרונה, ערכו של `global_counter` יהיה בין 2 ל-4 (כולל).\n\n3.  **הבדל בערך `global_counter` בין אב לבן לאחר `fork()`:**\n    מיד לאחר קריאת ה-`fork()`, לתהליך הבן נוצר עותק *נפרד ועצמאי* של מרחב הכתובות של האב. המשמעות היא שכל המשתנים הגלובליים, כולל `global_counter`, מועתקים מהאב לבן. בשלב זה, ערכו של `global_counter` בתהליך הבן זהה לערכו בתהליך האב ברגע ביצוע ה-`fork()`.\n\n    עם זאת, מכיוון שמדובר בעותקים נפרדים, כל שינוי שיבוצע ב-`global_counter` בתהליך האב לאחר ה-`fork()` לא ישפיע על העותק של `global_counter` בתהליך הבן, ולהיפך. הם הופכים להיות משתנים עצמאיים לחלוטין. לדוגמה, אם ערך `global_counter` בתהליך האב היה 2 בזמן ה-`fork()`:\n    *   `global_counter` בתהליך הבן יתחיל מ-2.\n    *   `global_counter` בתהליך האב ימשיך מ-2.\n    *   התהליכונים של הבן יגדילו את העותק של הבן (לדוגמה, ל-3 או 4). \n    *   התהליכונים של האב יגדילו את העותק של האב (לדוגמה, ל-3 או 4).\n\n    לכן, למרות שהערך ההתחלתי שלהם זהה ברגע הפיצול, הם הופכים להיות \"שונים\" מבחינה פונקציונלית בכך שהם אינם חולקים את אותו מיקום זיכרון ומתפתחים באופן בלתי תלוי."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

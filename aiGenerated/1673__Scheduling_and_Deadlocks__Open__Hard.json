@@ -1,0 +1,58 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Scheduling and Deadlocks",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 19:59:34",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3383,
+      "output_tokens": 2810,
+      "total_tokens": 11234
+    }
+  },
+  "question": {
+    "id": 9,
+    "type": "Open",
+    "topic": [
+      "Scheduling",
+      "Deadlocks",
+      "Concurrency",
+      "Resource Management"
+    ],
+    "content": {
+      "text": "נתונה מערכת מולטי-תהליכית עם N תהליכים (חוטים) ו-M משאבים זהים, כאשר כל משאב מוגן על ידי מנעול (pthread_mutex_t). כל תהליך זקוק לשני משאבים שונים מתוך M המשאבים הקיימים כדי לבצע את משימתו. התהליכים מריצים את קטע הקוד הבא, כאשר `resource_index_1` ו-`resource_index_2` הם אינדקסים שונים עבור שני המשאבים שהתהליך זקוק להם (בין 0 ל-M-1), ומועברים לחוט כפרמטרים.\nהמערכת משתמשת בלוח זמנים מסוג Round Robin עם קוונטום זמן קבוע וקטן יחסית לזמן שלוקח לתהליך לסיים את הקטע הקריטי שלו לאחר רכישת שני המשאבים.\n\n```c\n// Global resources\npthread_mutex_t resources[M];\n\nvoid* process_task(void* arg) {\n    int* indices = (int*)arg;\n    int r1_idx = indices[0];\n    int r2_idx = indices[1];\n\n    // Assume some work before acquiring resources\n    // ...\n\n    pthread_mutex_lock(&resources[r1_idx]);\n    // Do some work with resource 1\n    // ...\n    pthread_mutex_lock(&resources[r2_idx]);\n    // Do work with both resources\n    // ...\n    pthread_mutex_unlock(&resources[r2_idx]);\n    pthread_mutex_unlock(&resources[r1_idx]);\n\n    // Assume some work after releasing resources\n    // ...\n    return NULL;\n}\n```\n\nבנוסף, ידוע כי קיימים תהליכים המנסים לרכוש את המשאבים בסדר הפוך, לדוגמה, תהליך אחד מנסה לרכוש משאב `A` ואז משאב `B`, ותהליך אחר מנסה לרכוש משאב `B` ואז משאב `A`.\n\nענה על השאלות הבאות:",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "a",
+        "text": "האם קיפאון (Deadlock) אפשרי במערכת כזו? הסבר ונמק לפי ארבעת התנאים ההכרחיים לקיפאון.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "b",
+        "text": "כיצד לוח הזמנים מסוג Round Robin והקוונטום שלו משפיעים על הסיכוי להתרחשות קיפאון או על זיהויו?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "c",
+        "text": "הצע פתרון למניעת קיפאון במערכת זו. הצג את השינויים בקוד הנדרשים והסבר כיצד הפתרון שלך מונע את הקיפאון תוך התייחסות לתנאים ההכרחיים לקיפאון.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "א) האם קיפאון (Deadlock) אפשרי במערכת כזו? הסבר ונמק לפי ארבעת התנאים ההכרחיים לקיפאון.\nכן, קיפאון אפשרי במערכת כזו. נבחן את ארבעת התנאים ההכרחיים לקיפאון:\n1.  **מניעה הדדית (Mutual Exclusion):** מתקיימת. כל משאב מוגן על ידי מנעול (pthread_mutex_t), מה שמבטיח שרק תהליך אחד יכול להחזיק במשאב נתון בכל רגע נתון.\n2.  **החזקה והמתנה (Hold and Wait):** מתקיימת. תהליך רוכש את המשאב הראשון (r1_idx) ולאחר מכן ממתין לרוכש את המשאב השני (r2_idx) בזמן שהוא עדיין מחזיק במשאב הראשון.\n3.  **אי-הפקעה (No Preemption):** מתקיימת. המנעולים אינם ניתנים להפקעה; תהליך חייב לשחרר אותם באופן יזום. המערכת אינה יכולה להפקיע משאב מתהליך המחזיק בו.\n4.  **המתנה מעגלית (Circular Wait):** מתקיימת. תיאור השאלה מציין במפורש כי \"קיימים תהליכים המנסים לרכוש את המשאבים בסדר הפוך, לדוגמה, תהליך אחד מנסה לרכוש משאב A ואז משאב B, ותהליך אחר מנסה לרכוש משאב B ואז משאב A\". מצב זה יוצר מעגל המתנה: תהליך P1 מחזיק במשאב A וממתין למשאב B, בעוד תהליך P2 מחזיק במשאב B וממתין למשאב A. שני התהליכים חסומים ואינם יכולים להתקדם.\nמכיוון שכל ארבעת התנאים מתקיימים, קיפאון אפשרי.\n\nב) כיצד לוח הזמנים מסוג Round Robin והקוונטום שלו משפיעים על הסיכוי להתרחשות קיפאון או על זיהויו?\nלוח הזמנים מסוג Round Robin (RR) והקוונטום שלו אינם מונעים קיפאון ואינם משנים את עצם האפשרות להתרחשותו. הם משפיעים בעיקר על התזמון (timing) שבו הקיפאון עשוי להיווצר ועל התנהגות המערכת ברגע שהוא נוצר.\n*   **השפעה על הסיכוי להתרחשות:** קוונטום קטן ב-RR גורם למעבר מהיר בין תהליכים. תהליך שעבר החלפת הקשר (context switch) לאחר שרכש רק משאב אחד, מפנה את המעבד לתהליך אחר. אם התהליך השני מצליח לרכוש את המשאב השני הדרוש לו ואז את המשאב שהראשון ממתין לו, זה יכול ליצור את תנאי ההמתנה המעגלית. מצד שני, קוונטום קטן יכול גם לגרום לכך שתהליך יופקע לפני שהוא מספיק לרכוש את המשאב השני, מה שעלול לדחות את היווצרות הקיפאון במקרים מסוימים, אך לא למנוע אותה באופן עקרוני. אם הקוונטום גדול מספיק כדי שתהליך ירכוש את שני המשאבים וישחרר אותם לפני שהוא מופקע, זה יכול למנוע קיפאון *באותו מקרה ספציפי*, אך הפוטנציאל לקיפאון עדיין קיים.\n*   **השפעה על זיהוי:** RR לא מספק מנגנון מובנה לזיהוי קיפאון. מערכת שנמצאת בקיפאון תמשיך לבצע החלפות הקשר בין התהליכים התקועים, מה שעלול לגרום לה להיראות \"פעילה\" למרות שאין התקדמות ממשית. זה יכול להקשות על זיהוי ידני של הקיפאון, כיוון שהמעבד אינו \"תקוע\" על תהליך אחד. זיהוי קיפאון עדיין ידרוש אלגוריתמים ייעודיים (כגון גרף הקצאת משאבים או גרף המתנה).\n\nג) הצע פתרון למניעת קיפאון במערכת זו. הצג את השינויים בקוד הנדרשים והסבר כיצד הפתרון שלך מונע את הקיפאון תוך התייחסות לתנאים ההכרחיים לקיפאון.\nהפתרון הנפוץ והפשוט ביותר למניעת קיפאון במקרה זה הוא למנוע את תנאי ה**המתנה המעגלית** על ידי אכיפת סדר גלובלי לרכישת משאבים.\n**שינויים בקוד:**\nנשנה את פונקציית `process_task` כך שתמיד תרכוש את המשאבים בסדר עולה של האינדקסים שלהם.\n\n```c\n// Global resources (same as before)\npthread_mutex_t resources[M];\n\nvoid* process_task_deadlock_free(void* arg) {\n    int* indices = (int*)arg;\n    int r1_idx = indices[0];\n    int r2_idx = indices[1];\n\n    // Determine the order of resource acquisition\n    int first_res_idx = (r1_idx < r2_idx) ? r1_idx : r2_idx;\n    int second_res_idx = (r1_idx < r2_idx) ? r2_idx : r1_idx;\n\n    // Assume some work before acquiring resources\n    // ...\n\n    // Acquire resources in a fixed, ascending order\n    pthread_mutex_lock(&resources[first_res_idx]);\n    // Do some work with the first resource\n    // ...\n    pthread_mutex_lock(&resources[second_res_idx]);\n    // Do work with both resources\n    // ...\n    // Release resources in reverse order of acquisition\n    pthread_mutex_unlock(&resources[second_res_idx]);\n    pthread_mutex_unlock(&resources[first_res_idx]);\n\n    // Assume some work after releasing resources\n    // ...\n    return NULL;\n}\n```\n\n**הסבר הפתרון:**\nפתרון זה עובד על ידי מניעת תנאי ה**המתנה המעגלית**. על ידי אכיפת סדר גלובלי לרכישת משאבים (לדוגמה, תמיד לרכוש קודם את המשאב בעל האינדקס הנמוך יותר, ורק אחר כך את המשאב בעל האינדקס הגבוה יותר), אנו מבטיחים שלעולם לא ייווצר מעגל המתנה.\nלדוגמה, אם תהליך P1 זקוק למשאבים A ו-B (כאשר A<B), הוא ירכוש קודם את A ואז את B. אם תהליך P2 זקוק למשאבים B ו-A, הוא יצטרך גם כן לרכוש קודם את A ואז את B. אם P1 כבר מחזיק ב-A, אז P2 ינסה לרכוש את A וייחסם עד ש-P1 ישחרר אותו. P2 לא יוכל להחזיק ב-B ולהמתין ל-A, מכיוון שהכלל מחייב אותו לרכוש את A לפני B. בכך, נמנעת האפשרות לתהליכים להמתין זה לזה במעגל.\nשלושת התנאים האחרים (מניעה הדדית, החזקה והמתנה, אי-הפקעה) עדיין מתקיימים, אך מכיוון שתנאי ההמתנה המעגלית נמנע, קיפאון אינו יכול להתרחש."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Producer-Consumer",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 10:28:39",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1632,
+      "output_tokens": 1422,
+      "total_tokens": 7023
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Semaphores",
+      "Producer-Consumer",
+      "Deadlock"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא, המממש את בעיית היצרן-צרכן (Producer-Consumer Problem) באמצעות סמפורים. הבאפר בגודל 5. הסמפורים `mutex`, `full` ו-`empty` מאותחלים כראוי (1, 0, 5 בהתאמה).\n\nבמהלך הרצת התוכנית, סביר להניח שיתרחש:",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <pthread.h>\n#include <semaphore.h>\n#include <unistd.h>\n\n#define BUFFER_SIZE 5\nint buffer[BUFFER_SIZE];\nint in = 0;\nint out = 0;\n\nsem_t mutex;\nsem_t full;\nsem_t empty;\n\nvoid *producer(void *param) {\n    int item = 0;\n    while (1) {\n        item++;\n        usleep(rand() % 100000);\n\n        // Incorrect order: acquire mutex before checking for empty slot\n        sem_wait(&mutex);\n        sem_wait(&empty);\n        \n        buffer[in] = item;\n        printf(\"Producer produced: %d at %d\\n\", item, in);\n        in = (in + 1) % BUFFER_SIZE;\n\n        sem_post(&mutex);\n        sem_post(&full);\n    }\n    return NULL;\n}\n\nvoid *consumer(void *param) {\n    int item;\n    while (1) {\n        usleep(rand() % 100000);\n\n        // Incorrect order: acquire mutex before checking for full slot\n        sem_wait(&mutex);\n        sem_wait(&full);\n\n        item = buffer[out];\n        printf(\"Consumer consumed: %d from %d\\n\", item, out);\n        out = (out + 1) % BUFFER_SIZE;\n\n        sem_post(&mutex);\n        sem_post(&empty);\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t prod_tid, cons_tid;\n\n    sem_init(&mutex, 0, 1);\n    sem_init(&full, 0, 0);\n    sem_init(&empty, 0, BUFFER_SIZE);\n\n    pthread_create(&prod_tid, NULL, producer, NULL);\n    pthread_create(&cons_tid, NULL, consumer, NULL);\n\n    pthread_join(prod_tid, NULL);\n    pthread_join(cons_tid, NULL);\n\n    sem_destroy(&mutex);\n    sem_destroy(&full);\n    sem_destroy(&empty);\n\n    return 0;\n}",
+      "options": [
+        "א. התוכנית תרוץ ללא בעיות ותדפיס פלט של ייצור וצריכה לסירוגין.",
+        "ב. התוכנית תקרוס עקב גישה לא מוגנת למשאב משותף (race condition).",
+        "ג. התוכנית תיכנס למצב של קיפאון (deadlock) כאשר הבאפר יתמלא לחלוטין או יתרוקן לחלוטין.",
+        "ד. התוכנית תיכנס למצב של רעב (starvation) עבור היצרן או הצרכן.",
+        "ה. הבאפר יתמלא באופן שגוי, ופריטים ידרסו או יאבדו."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג'. הבעיה בקוד טמונה בסדר הקריאות ל-`sem_wait` בפונקציות `producer` ו-`consumer`.\nבפונקציית `producer`, הסדר הוא `sem_wait(&mutex)` ואז `sem_wait(&empty)`. אם הבאפר מתמלא לחלוטין, היצרן יצליח לרכוש את ה-`mutex`, אך אז יחסם בניסיון לרכוש את `empty` (שערכו 0). בזמן שהוא חסום, הוא מחזיק ב-`mutex`.\nבאופן דומה, בפונקציית `consumer`, הסדר הוא `sem_wait(&mutex)` ואז `sem_wait(&full)`. אם הבאפר מתרוקן לחלוטין, הצרכן יצליח לרכוש את ה-`mutex`, אך אז יחסם בניסיון לרכוש את `full` (שערכו 0). בזמן שהוא חסום, הוא מחזיק ב-`mutex`.\nבמצב שבו היצרן מחזיק ב-`mutex` וממתין ל-`empty`, והצרכן צריך את ה-`mutex` כדי לפנות מקום בבאפר (על ידי קריאה ל-`sem_post(&empty)`), נוצר קיפאון. הצרכן לא יכול להתקדם כי ה-`mutex` תפוס, והיצרן לא יכול להתקדם כי הוא מחכה ל-`empty` שרק הצרכן יכול לשחרר.\nהסדר הנכון הוא לרכוש את סמפור המשאב (empty/full) *לפני* רכישת סמפור ה-`mutex`.\nלדוגמה, ב-`producer`: `sem_wait(&empty); sem_wait(&mutex); ... sem_post(&mutex); sem_post(&full);`\nוב-`consumer`: `sem_wait(&full); sem_wait(&mutex); ... sem_post(&mutex); sem_post(&empty);`"
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Threads and Synchronization",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 19:51:43",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3826,
+      "output_tokens": 3704,
+      "total_tokens": 23605
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Threads",
+      "Synchronization",
+      "Race Conditions",
+      "Mutexes",
+      "Semaphores"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה, המשתמשת ב-`T_A` חוטי יצרן וב-`T_B` חוטי צרכן. כל חוט יצרן מריץ את הפונקציה `func_A` אשר מגדילה מונה גלובלי `counter` `N` פעמים. כל חוט צרכן מריץ את הפונקציה `func_B` אשר מקטינה את המונה הגלובלי `counter` `N` פעמים. ניתן להניח שכל קריאות המערכת הצליחו. ערכי הקבועים הם `T_A = 2`, `T_B = 2`, `N = 10`. יש לפרט בקצרה ובבירור את תזמוני הריצות שמובילים לכל אחת מהתשובות.",
+      "code_snippet": "#include <pthread.h>\n#include <semaphore.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n\n#define T_A 2 // Number of producer threads\n#define T_B 2 // Number of consumer threads\n#define N 10  // Operations per thread\n\nint counter = 0;\npthread_mutex_t m_inc; // Mutex for increments\npthread_mutex_t m_dec; // Mutex for decrements\nsem_t s_dec;           // Semaphore for decrements (initially 0)\n\nvoid* func_A(void* arg) {\n  for (int i = 0; i < N; ++i) {\n    pthread_mutex_lock(&m_inc);\n    counter++;\n    pthread_mutex_unlock(&m_inc);\n    sem_post(&s_dec);\n    usleep(10); // Simulate work\n  }\n  return NULL;\n}\n\nvoid* func_B(void* arg) {\n  for (int i = 0; i < N; ++i) {\n    sem_wait(&s_dec);\n    pthread_mutex_lock(&m_dec);\n    counter--;\n    pthread_mutex_unlock(&m_dec);\n    usleep(10); // Simulate work\n  }\n  return NULL;\n}\n\nint main() {\n  pthread_t producer_threads[T_A];\n  pthread_t consumer_threads[T_B];\n\n  pthread_mutex_init(&m_inc, NULL);\n  pthread_mutex_init(&m_dec, NULL);\n  sem_init(&s_dec, 0, 0); // Semaphore initialized to 0\n\n  // Create producer threads\n  for (int i = 0; i < T_A; ++i) {\n    pthread_create(&producer_threads[i], NULL, func_A, NULL);\n  }\n\n  // Create consumer threads\n  for (int i = 0; i < T_B; ++i) {\n    pthread_create(&consumer_threads[i], NULL, func_B, NULL);\n  }\n\n  // Join producer threads\n  for (int i = 0; i < T_A; ++i) {\n    pthread_join(producer_threads[i], NULL);\n  }\n\n  // Join consumer threads\n  for (int i = 0; i < T_B; ++i) {\n    pthread_join(consumer_threads[i], NULL);\n  }\n\n  printf(\"Final counter = %d\\n\", counter);\n\n  pthread_mutex_destroy(&m_inc);\n  pthread_mutex_destroy(&m_dec);\n  sem_destroy(&s_dec);\n\n  return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "מהו הערך המינימלי האפשרי של counter שיודפס בסוף התוכנית? (ציין דוגמת תזמון קצרה)",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "מהו הערך המקסימלי האפשרי של counter שיודפס בסוף התוכנית? (ציין דוגמת תזמון קצרה)",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.3",
+        "text": "האם קיימות בעיות סנכרון בקוד? (מצב מרוץ, קיפאון, הרעבה) פרט והסבר.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.4",
+        "text": "תקן את הקוד כך שהמונה `counter` יהיה בסופו של דבר שווה ל-`T_A * N - T_B * N`, וכן שלא תהיה הרעבה או קיפאון (בהנחה ש-`T_A * N >= T_B * N`). יש לכתוב רק את השינויים הנדרשים בפונקציות `func_A` ו-`func_B` ובאתחול המשתנים הגלובליים. אין צורך לכתוב את כל קוד ה-`main` מחדש.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הערכים הנתונים: T_A = 2, T_B = 2, N = 10.\nסה\"כ פעולות הגדלה (I) = T_A * N = 2 * 10 = 20.\nסה\"כ פעולות הקטנה (D) = T_B * N = 2 * 10 = 20.\nהתוצאה הצפויה ללא בעיות סנכרון היא I - D = 0.\n\n10.1: מהו הערך המינימלי האפשרי של counter שיודפס בסוף התוכנית?\nהערך המינימלי הוא `I - D - min(I, D)`.\nעבור I=20, D=20: `20 - 20 - min(20, 20) = -20`.\nההסבר: מצב מרוץ מתרחש על המונה `counter` מכיוון ש-`m_inc` ו-`m_dec` הם מנעולים נפרדים. כלומר, פעולות `counter++` ו-`counter--` אינן אטומיות זו ביחס לזו. כדי להגיע לערך מינימלי, אנו רוצים למקסם את \"אובדן ההגדלות\". תזמון לדוגמה: חוט `func_B` קורא את ערך `counter` (`X`), מיד לאחר מכן חוט `func_A` קורא גם הוא את ערך `counter` (`X`). חוט `func_A` משלים את פעולת ההגדלה וכותב `X+1` ל-`counter`. מיד לאחר מכן, חוט `func_B` משלים את פעולת ההקטנה וכותב `X-1` ל-`counter`. במקרה זה, ערך `X+1` נדרס על ידי `X-1`, ולמעשה פעולת ההגדלה של `func_A` אבדה. אם תרחיש זה חוזר על עצמו עבור כל אחת מ-`min(I, D)` זוגות של פעולות הגדלה והקטנה, אזי `min(I, D)` פעולות הגדלה יאבדו. לכן, הערך הסופי המינימלי יהיה `I - D - min(I, D)` = `20 - 20 - 20 = -20`.\n\n10.2: מהו הערך המקסימלי האפשרי של counter שיודפס בסוף התוכנית?\nהערך המקסימלי הוא `I - D + min(I, D)`.\nעבור I=20, D=20: `20 - 20 + min(20, 20) = 20`.\nההסבר: כדי להגיע לערך מקסימלי, אנו רוצים למקסם את \"אובדן ההקטנות\". תזמון לדוגמה: חוט `func_A` קורא את ערך `counter` (`X`), מיד לאחר מכן חוט `func_B` קורא גם הוא את ערך `counter` (`X`). חוט `func_B` משלים את פעולת ההקטנה וכותב `X-1` ל-`counter`. מיד לאחר מכן, חוט `func_A` משלים את פעולת ההגדלה וכותב `X+1` ל-`counter`. במקרה זה, ערך `X-1` נדרס על ידי `X+1`, ולמעשה פעולת ההקטנה של `func_B` אבדה. אם תרחיש זה חוזר על עצמו עבור כל אחת מ-`min(I, D)` זוגות של פעולות הגדלה והקטנה, אזי `min(I, D)` פעולות הקטנה יאבדו. לכן, הערך הסופי המקסימלי יהיה `I - D + min(I, D)` = `20 - 20 + 20 = 20`.\n\n10.3: האם קיימות בעיות סנכרון בקוד? (מצב מרוץ, קיפאון, הרעבה) פרט והסבר.\n*   **מצב מרוץ (Race Condition)**: כן. המשתנה הגלובלי `counter` נגיש מ-`func_A` ומ-`func_B`. הפונקציות משתמשות במנעולים שונים (`m_inc` ו-`m_dec`) כדי להגן על הגישה ל-`counter`. מכיוון שהמנעולים נפרדים, פעולות ה-`counter++` וה-`counter--` אינן מבצעות את קריאת, שינוי וכתיבת הערך באופן אטומי ביחס זו לזו. זה מוביל לאובדן עדכונים, כפי שהוסבר בסעיפים 10.1 ו-10.2, והערך הסופי של `counter` אינו מובטח.\n*   **קיפאון (Deadlock)**: לא. המנעולים `m_inc` ו-`m_dec` הם בלתי תלויים, ואין תלות מעגלית בהשגתם. גם הסמפור `s_dec` פועל באופן עצמאי.\n*   **הרעבה (Starvation)**: כן, פוטנציאלית. אם `T_B * N > T_A * N` (כלומר, מספר פעולות ההקטנה גדול ממספר פעולות ההגדלה), אזי יהיו יותר קריאות `sem_wait` מאשר קריאות `sem_post`. במקרה זה, `T_B * N - T_A * N` קריאות `sem_wait` יחסמו ללא הגבלת זמן, מה שיוביל להרעבה של אותן פעולות צרכן/חוטים. בפרמטרים הנתונים (I=20, D=20), אין הרעבה מסוג זה מכיוון שכל קריאות ה-`sem_wait` יקבלו אסימון בסופו של דבר.\n\n10.4: תקן את הקוד כך שהמונה `counter` יהיה בסופו של דבר שווה ל-`T_A * N - T_B * N`, וכן שלא תהיה הרעבה או קיפאון (בהנחה ש-`T_A * N >= T_B * N`). יש לכתוב רק את השינויים הנדרשים בפונקציות `func_A` ו-`func_B` ובאתחול המשתנים הגלובליים. אין צורך לכתוב את כל קוד ה-`main` מחדש.\nכדי לתקן את בעיית מצב המרוץ על `counter` ולהבטיח שהערך הסופי יהיה נכון, יש להגן על כל הגישות ל-`counter` באמצעות מנעול יחיד. הסמפור `s_dec` כבר משמש כדלפק של פריטים זמינים, ולכן יש לוודא שחוטי הצרכן ממתינים לאסימון מהסמפור לפני שהם ניגשים ל-`counter` עם המנעול.\n\n**שינויים במשתנים גלובליים (יש לציין ערכי אתחול בהערה):**\n```c\nint counter = 0;\npthread_mutex_t m; // מנעול יחיד עבור 'counter'\nsem_t s_dec;       // סמפור עבור פריטים זמינים (מאותחל ל-0)\n```\n\n**שינויים בפונקציה `func_A`:**\n```c\nvoid* func_A(void* arg) {\n  for (int i = 0; i < N; ++i) {\n    pthread_mutex_lock(&m); // נעילת המנעול היחיד\n    counter++;\n    pthread_mutex_unlock(&m); // שחרור המנעול היחיד\n    sem_post(&s_dec);\n    usleep(10);\n  }\n  return NULL;\n}\n```\n\n**שינויים בפונקציה `func_B`:**\n```c\nvoid* func_B(void* arg) {\n  for (int i = 0; i < N; ++i) {\n    sem_wait(&s_dec);\n    pthread_mutex_lock(&m); // נעילת המנעול היחיד\n    counter--;\n    pthread_mutex_unlock(&m); // שחרור המנעול היחיד\n    usleep(10);\n  }\n  return NULL;\n}\n```\n\n**שינויים באתחול ב-`main`:**\n```c\npthread_mutex_init(&m, NULL); // אתחול המנעול היחיד\nsem_init(&s_dec, 0, 0);       // אתחול הסמפור ל-0\n```\n\n**שינויים בסיום ב-`main`:**\n```c\npthread_mutex_destroy(&m);\nsem_destroy(&s_dec);\n```\nתיקון זה מבטיח שכל שינוי ב-`counter` מוגן על ידי מנעול יחיד, ובכך נמנע מצב המרוץ. בנוסף, ה-`sem_wait` מבטיח ש-`func_B` לא ינסה להקטין את `counter` מתחת ל-0 ביחס למספר ההגדלות שבוצעו, ובכך נמנעת הרעבה וקיפאון בהנחה ש-`T_A * N >= T_B * N`. הערך הסופי של `counter` יהיה `T_A * N - T_B * N`."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

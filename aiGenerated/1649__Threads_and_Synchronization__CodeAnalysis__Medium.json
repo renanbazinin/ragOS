@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Threads and Synchronization",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 19:43:22",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1971,
+      "output_tokens": 1408,
+      "total_tokens": 8887
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Threads",
+      "Synchronization",
+      "Race Conditions",
+      "Mutexes"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה המשתמשת בחוטים (threads) ומנגנוני סנכרון. נתח את הקוד וענה על השאלות הבאות:\nמהם הערכים הסופיים האפשריים של המשתנים g_x ו-g_y לאחר שכל החוטים סיימו את ריצתם? נמק את תשובתך.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\n#define NUM_THREADS 2\n#define INCREMENTS_PER_THREAD 100000\n\nint g_x = 0;\nint g_y = 0;\npthread_mutex_t mutex_x;\n\nvoid *thread_func(void *arg) {\n    for (int i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n        // Protect g_x\n        pthread_mutex_lock(&mutex_x);\n        g_x++;\n        pthread_mutex_unlock(&mutex_x);\n\n        // g_y is not protected\n        g_y++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    pthread_mutex_init(&mutex_x, NULL);\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, thread_func, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    pthread_mutex_destroy(&mutex_x);\n\n    printf(\"Final g_x: %d\\n\", g_x);\n    printf(\"Final g_y: %d\\n\", g_y);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "ניתוח המשתנים g_x ו-g_y:\n\n**עבור המשתנה g_x:**\nהערך הסופי של g_x יהיה תמיד **200,000**.\n**נימוק:** המשתנה g_x מוגן על ידי מנעול (mutex_x). לפני כל פעולת הגדלה של g_x, החוט נועל את המנעול, ולאחר ההגדלה הוא משחרר אותו. מנגנון זה מבטיח שרק חוט אחד יוכל לגשת ולשנות את g_x בכל רגע נתון (Mutual Exclusion). פעולת הקידום `g_x++` הופכת לאטומית בפועל בזכות המנעול, ובכך נמנעים תנאי מרוץ ואף הגדלה אינה הולכת לאיבוד. כל אחד משני החוטים מבצע 100,000 הגדלות, ולכן בסך הכל יבוצעו 2 * 100,000 = 200,000 הגדלות בדיוק.\n\n**עבור המשתנה g_y:**\nהערך הסופי של g_y יכול לנוע בטווח שבין **100,000 ל-200,000** (כולל).\n**נימוק:** המשתנה g_y אינו מוגן על ידי מנגנון סנכרון כלשהו. פעולת הקידום `g_y++` אינה אטומית, והיא מורכבת בדרך כלל משלושה שלבים: קריאת הערך של g_y לתוך רגיסטר, הגדלת הערך ברגיסטר, וכתיבת הערך המוגדל חזרה ל-g_y. כאשר מספר חוטים מבצעים פעולה זו במקביל, ייתכן מצב של תנאי מרוץ (race condition).\n*   **ערך מינימלי (100,000):** זה יקרה אם, במקרה הגרוע ביותר, חוט אחד מבצע את כל 100,000 ההגדלות שלו בהצלחה, וכל ההגדלות של החוט השני נאבדות עקב תנאי מרוץ. לדוגמה, חוט א' קורא את g_y, חוט ב' קורא את אותו g_y, חוט א' כותב את g_y+1, וחוט ב' כותב גם הוא את g_y+1 (לאחר שהגדיל את הערך שקרא בתחילה). במקרה זה, ההגדלה של חוט ב' אבדה. במקרה הקיצוני ביותר, מתוך 200,000 ניסיונות הגדלה, רק 100,000 יצליחו בפועל, כאשר `NUM_THREADS - 1` הגדלות נשמטות על כל הגדלה אפקטיבית.\n*   **ערך מקסימלי (200,000):** זה יקרה אם, במקרה, החוטים ירוצו באופן סדרתי לחלוטין (לדוגמה, חוט אחד מסיים את כל עבודתו, ורק אז החוט השני מתחיל), או אם לוח הזמנים של המעבד ימנע תנאי מרוץ באופן מקרי, כך שכל 200,000 ההגדלות יבוצעו בהצלחה. עם זאת, מצב זה אינו מובטח ויכול להשתנות בין הרצות שונות של התוכנית."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

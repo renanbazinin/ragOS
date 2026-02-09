@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Scheduling",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 09:10:24",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1598,
+      "output_tokens": 855,
+      "total_tokens": 4034
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "Open",
+    "topic": [
+      "Scheduling",
+      "CPU Scheduling",
+      "FCFS"
+    ],
+    "content": {
+      "text": "נתונים שלושה תהליכים עם זמני הגעה וזמני ריצה כדלקמן:\n*   תהליך P1: זמן הגעה = 0, זמן ריצה = 5 יחידות זמן\n*   תהליך P2: זמן הגעה = 2, זמן ריצה = 3 יחידות זמן\n*   תהליך P3: זמן הגעה = 4, זמן ריצה = 2 יחידות זמן\n\nחשבו את זמן ההשלמה (Turnaround Time) הממוצע עבור שלושת התהליכים באמצעות אלגוריתם תזמון FCFS (First-Come, First-Served).",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "אלגוריתם FCFS (First-Come, First-Served) מתזמן תהליכים לפי סדר הגעתם לתור המוכנים.\nנחשב את זמני ההשלמה (Turnaround Time) עבור כל תהליך:\n\n1.  **תהליך P1**:\n    *   זמן הגעה: 0\n    *   זמן ריצה: 5\n    *   P1 מתחיל לרוץ בזמן 0 (הראשון להגיע).\n    *   P1 מסיים לרוץ בזמן 0 + 5 = 5.\n    *   זמן השלמה עבור P1: זמן סיום - זמן הגעה = 5 - 0 = 5 יחידות זמן.\n\n2.  **תהליך P2**:\n    *   זמן הגעה: 2\n    *   זמן ריצה: 3\n    *   P2 מגיע בזמן 2, אך P1 עדיין רץ. P2 ממתין.\n    *   P2 מתחיל לרוץ בזמן 5 (לאחר ש-P1 סיים).\n    *   P2 מסיים לרוץ בזמן 5 + 3 = 8.\n    *   זמן השלמה עבור P2: זמן סיום - זמן הגעה = 8 - 2 = 6 יחידות זמן.\n\n3.  **תהליך P3**:\n    *   זמן הגעה: 4\n    *   זמן ריצה: 2\n    *   P3 מגיע בזמן 4, אך P2 עדיין רץ. P3 ממתין.\n    *   P3 מתחיל לרוץ בזמן 8 (לאחר ש-P2 סיים).\n    *   P3 מסיים לרוץ בזמן 8 + 2 = 10.\n    *   זמן השלמה עבור P3: זמן סיום - זמן הגעה = 10 - 4 = 6 יחידות זמן.\n\n**חישוב זמן ההשלמה הממוצע**:\n(זמן השלמה P1 + זמן השלמה P2 + זמן השלמה P3) / מספר התהליכים\n= (5 + 6 + 6) / 3\n= 17 / 3\n≈ 5.67 יחידות זמן.\n\nלכן, זמן ההשלמה הממוצע הוא כ-5.67 יחידות זמן."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

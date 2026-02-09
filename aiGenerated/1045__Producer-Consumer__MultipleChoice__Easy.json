@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Producer-Consumer",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 07:38:13",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1101,
+      "output_tokens": 362,
+      "total_tokens": 2701
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Producer-Consumer",
+      "Concurrency",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של המאגר המשותף (shared buffer) בתבנית היצרן-צרכן?",
+      "code_snippet": null,
+      "options": [
+        "א. למנוע גישה של היצרן לזיכרון המוקצה לצרכן.",
+        "ב. לספק מקום אחסון זמני לפריטים, ולאפשר ליצרן ולצרכן לפעול באופן אסינכרוני.",
+        "ג. להבטיח שהיצרן והצרכן יפעלו תמיד באותו קצב.",
+        "ד. לאפשר ליצרן לשלוח אותות קלט/פלט ישירות לצרכן."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב. המאגר המשותף (buffer) משמש כמחסן זמני לפריטים המיוצרים על ידי היצרן ונצרכים על ידי הצרכן. הוא מאפשר לשני התהליכים (או החוטים) לפעול באופן בלתי תלוי ובקצבים שונים, ובכך מפריד ביניהם (decoupling)."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

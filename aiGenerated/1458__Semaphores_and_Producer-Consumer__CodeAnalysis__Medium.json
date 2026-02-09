@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Producer-Consumer",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 10:27:14",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1632,
+      "output_tokens": 1450,
+      "total_tokens": 7047
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Semaphores",
+      "Producer-Consumer",
+      "Concurrency",
+      "Deadlock"
+    ],
+    "content": {
+      "text": "נתונה בעיית המפיק-צרכן (Producer-Consumer) קלאסית עם חיץ מעגלי (circular buffer) בגודל BUFFER_SIZE. הבעיה ממומשת באמצעות סמפורים כפי שמוצג בקטע הקוד הבא:\n\nבהנחה ש-BUFFER_SIZE מוגדר ל-5, NUM_PRODUCERS ל-1, ו-NUM_CONSUMERS ל-1, וכל קריאות המערכת מצליחות, איזו טענה נכונה לגבי הרצת התוכנית?",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <pthread.h>\n#include <semaphore.h>\n#include <unistd.h> // For sleep\n\n#define BUFFER_SIZE 5\n#define NUM_PRODUCERS 1\n#define NUM_CONSUMERS 1\n#define MAX_ITEMS 10\n\nint buffer[BUFFER_SIZE];\nint in = 0;\nint out = 0;\n\nsem_t mutex;    // Controls access to the buffer\nsem_t empty;    // Counts empty slots in the buffer\nsem_t full;     // Counts full slots in the buffer\n\nvoid *producer(void *arg) {\n    int item;\n    for (int i = 0; i < MAX_ITEMS; i++) {\n        item = i + 1; // Produce an item\n\n        // INTENTIONAL BUG: mutex acquired before checking empty slots\n        sem_wait(&mutex); // Acquire mutex for buffer access\n        sem_wait(&empty); // Wait for an empty slot\n\n        buffer[in] = item;\n        printf(\"Producer produced: %d at index %d\\n\", item, in);\n        in = (in + 1) % BUFFER_SIZE;\n\n        sem_post(&full);  // Signal that a slot is full\n        sem_post(&mutex); // Release mutex\n        \n        sleep(1); // Simulate work\n    }\n    return NULL;\n}\n\nvoid *consumer(void *arg) {\n    int item;\n    for (int i = 0; i < MAX_ITEMS; i++) {\n        sem_wait(&full);  // Wait for a full slot\n        sem_wait(&mutex); // Acquire mutex for buffer access\n\n        item = buffer[out];\n        printf(\"Consumer consumed: %d from index %d\\n\", item, out);\n        out = (out + 1) % BUFFER_SIZE;\n\n        sem_post(&mutex); // Release mutex\n        sem_post(&empty); // Signal that a slot is empty\n        \n        sleep(2); // Simulate work\n    }\n    return NULL;\n}\n\nint main() {\n    sem_init(&mutex, 0, 1);\n    sem_init(&empty, 0, BUFFER_SIZE);\n    sem_init(&full, 0, 0);\n\n    pthread_t prod_tid[NUM_PRODUCERS];\n    pthread_t cons_tid[NUM_CONSUMERS];\n\n    for (int i = 0; i < NUM_PRODUCERS; i++) {\n        pthread_create(&prod_tid[i], NULL, producer, NULL);\n    }\n    for (int i = 0; i < NUM_CONSUMERS; i++) {\n        pthread_create(&cons_tid[i], NULL, consumer, NULL);\n    }\n\n    for (int i = 0; i < NUM_PRODUCERS; i++) {\n        pthread_join(prod_tid[i], NULL);\n    }\n    for (int i = 0; i < NUM_CONSUMERS; i++) {\n        pthread_join(cons_tid[i], NULL);\n    }\n\n    sem_destroy(&mutex);\n    sem_destroy(&empty);\n    sem_destroy(&full);\n\n    return 0;\n}",
+      "options": [
+        "א. התוכנית תרוץ ללא בעיות ותייצר ותצרוך את כל הפריטים בהצלחה.",
+        "ב. התוכנית תיכנס למצב של Deadlock כאשר החיץ יהיה מלא, מכיוון שהמפיק יחזיק את ה-mutex וימתין לתא פנוי.",
+        "ג. התוכנית תיכנס למצב של Deadlock כאשר החיץ יהיה ריק, מכיוון שהצרכן יחזיק את ה-mutex וימתין לפריט.",
+        "ד. התוכנית תרוץ, אך ייתכנו תנאי מרוץ (Race Conditions) בגישה לחיץ.",
+        "ה. התוכנית תקרוס עקב ניסיון גישה לא חוקית לזיכרון."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב'. בתוך פונקציית ה-'producer', הסדר של קריאות ה-'sem_wait' שגוי. המפיק קודם כל מבצע 'sem_wait(&mutex)' ואז 'sem_wait(&empty)'. אם החיץ מלא (כלומר, סמפור 'empty' הוא 0), המפיק יחסם על 'sem_wait(&empty)' אך יחזיק בינתיים את ה-'mutex'. הצרכן, כדי לצרוך פריט ולפנות מקום (ובכך לאפשר ל-'empty' לעלות), יצטרך לבצע 'sem_wait(&mutex)' אך הוא לא יוכל מכיוון שהמפיק מחזיק בו. מצב זה יוצר Deadlock. הסדר הנכון עבור המפיק צריך להיות 'sem_wait(&empty)' ואז 'sem_wait(&mutex)'."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

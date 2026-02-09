@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Deadlocks and Synchronization",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 11:50:05",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1163,
+      "output_tokens": 912,
+      "total_tokens": 3690
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Deadlocks",
+      "Synchronization",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "בהינתן קטע הקוד הבא המשתמש בשני Mutexים ושני חוטים, מהי הטענה הנכונה ביותר לגבי התנהגות המערכת?",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h>\n\npthread_mutex_t mutexA;\npthread_mutex_t mutexB;\n\nvoid* thread1_func(void* arg) {\n    pthread_mutex_lock(&mutexA);\n    printf(\"Thread 1 acquired Mutex A\\n\");\n    sleep(1); // מדמה עבודה או החלפת הקשר\n    pthread_mutex_lock(&mutexB);\n    printf(\"Thread 1 acquired Mutex B\\n\");\n    // בצע עבודה קריטית\n    pthread_mutex_unlock(&mutexB);\n    pthread_mutex_unlock(&mutexA);\n    return NULL;\n}\n\nvoid* thread2_func(void* arg) {\n    pthread_mutex_lock(&mutexB);\n    printf(\"Thread 2 acquired Mutex B\\n\");\n    sleep(1); // מדמה עבודה או החלפת הקשר\n    pthread_mutex_lock(&mutexA);\n    printf(\"Thread 2 acquired Mutex A\\n\");\n    // בצע עבודה קריטית\n    pthread_mutex_unlock(&mutexA);\n    pthread_mutex_unlock(&mutexB);\n    return NULL;\n}\n\nint main() {\n    pthread_mutex_init(&mutexA, NULL);\n    pthread_mutex_init(&mutexB, NULL);\n\n    pthread_t tid1, tid2;\n    pthread_create(&tid1, NULL, thread1_func, NULL);\n    pthread_create(&tid2, NULL, thread2_func, NULL);\n\n    pthread_join(tid1, NULL);\n    pthread_join(tid2, NULL);\n\n    pthread_mutex_destroy(&mutexA);\n    pthread_mutex_destroy(&mutexB);\n    return 0;\n}",
+      "options": [
+        "א. המערכת תמיד תעבוד ותסיים בהצלחה ללא קיפאון.",
+        "ב. המערכת תמיד תיכנס למצב של קיפאון.",
+        "ג. המערכת עלולה להיכנס למצב של קיפאון.",
+        "ד. המערכת לא יכולה להיכנס למצב של קיפאון מכיוון שאין תלות מעגלית."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "הקוד מדגים מצב קלאסי של פוטנציאל לקיפאון (Deadlock). חוט 1 מנסה לרכוש את Mutex A ולאחר מכן את Mutex B. חוט 2 מנסה לרכוש את Mutex B ולאחר מכן את Mutex A. אם חוט 1 רוכש את Mutex A וחוט 2 רוכש את Mutex B לפני שאחד מהם מספיק לרכוש את שני ה-Mutexים, שניהם יחסמו בניסיון לרכוש את ה-Mutex השני, מה שיוביל לקיפאון. עם זאת, אם אחד החוטים יצליח לרכוש את שני ה-Mutexים ברצף לפני שהשני ירכוש אחד מהם, לא יתרחש קיפאון. לכן, המערכת עלולה להיכנס למצב של קיפאון, אך זה לא מובטח."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

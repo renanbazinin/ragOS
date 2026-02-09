@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Producer-Consumer",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 10:27:32",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1632,
+      "output_tokens": 1293,
+      "total_tokens": 5377
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Semaphores",
+      "Producer-Consumer",
+      "Concurrency",
+      "Deadlock"
+    ],
+    "content": {
+      "text": "נתון קטע קוד המממש את בעיית היצרן-צרכן (Producer-Consumer) תוך שימוש בסמפורים ובמאגר מעגלי. המתכנת ביצע שינוי קטן בקוד של היצרן (producer) בהשוואה לפתרון הסטנדרטי.\n\nאיזו מהטענות הבאות מתארת נכונה את ההתנהגות האפשרית של התוכנית במקרה של עומס גבוה (יצרן מהיר, צרכן איטי)?",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <semaphore.h>\n#include <unistd.h> // For sleep\n\n#define N 5 // Buffer size\n\nint buffer[N];\nint in = 0;\nint out = 0;\n\nsem_t empty; // Number of empty slots\nsem_t full;  // Number of filled slots\nsem_t mutex; // For mutual exclusion on buffer access\n\nvoid *producer(void *arg) {\n    int item;\n    for (int i = 0; i < 10; ++i) { // Produce 10 items\n        item = i + 1;\n\n        // INTENTIONAL ERROR: mutex acquired before checking empty slots\n        sem_wait(&mutex);  // Acquire mutex\n        sem_wait(&empty);  // Wait for an empty slot\n\n        buffer[in] = item;\n        in = (in + 1) % N;\n        printf(\"Producer produced: %d\\n\", item);\n        sleep(1);\n\n        sem_post(&full);   // Signal that a slot is full\n        sem_post(&mutex);  // Release mutex\n    }\n    return NULL;\n}\n\nvoid *consumer(void *arg) {\n    int item;\n    for (int i = 0; i < 10; ++i) { // Consume 10 items\n        sem_wait(&full);   // Wait for a filled slot\n        sem_wait(&mutex);  // Acquire mutex\n\n        item = buffer[out];\n        out = (out + 1) % N;\n        printf(\"Consumer consumed: %d\\n\", item);\n        sleep(2);\n\n        sem_post(&mutex);  // Release mutex\n        sem_post(&empty);  // Signal that a slot is empty\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t prod_tid, cons_tid;\n\n    sem_init(&empty, 0, N);    // N empty slots initially\n    sem_init(&full, 0, 0);     // 0 full slots initially\n    sem_init(&mutex, 0, 1);    // Mutex for critical section\n\n    pthread_create(&prod_tid, NULL, producer, NULL);\n    pthread_create(&cons_tid, NULL, consumer, NULL);\n\n    pthread_join(prod_tid, NULL);\n    pthread_join(cons_tid, NULL);\n\n    sem_destroy(&empty);\n    sem_destroy(&full);\n    sem_destroy(&mutex);\n\n    return 0;\n}",
+      "options": [
+        "א. התוכנית תרוץ ללא בעיות ותייצר ותצרוך את כל הפריטים בהצלחה.",
+        "ב. התוכנית עלולה להיכנס למצב של קיפאון (deadlock) כאשר המאגר יתמלא.",
+        "ג. התוכנית עלולה לסבול מתנאי מרוץ (race condition) בגישה למאגר המשותף.",
+        "ד. הצרכן (consumer) יצרוך פריטים לא תקינים (garbage values) מהמאגר.",
+        "ה. היצרן (producer) עלול לכתוב מחוץ לגבולות המאגר (buffer overflow)."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב. בקוד היצרן (producer), הסדר של פעולות ה-sem_wait שונה מהפתרון הסטנדרטי. היצרן קודם מנסה להשיג את סמפור ה-mutex ולאחר מכן מנסה להמתין לסמפור 'empty' (מקום פנוי). אם המאגר המשותף יתמלא והיצרן יצליח להשיג את ה-mutex, הוא ינסה להמתין ל-'empty' וייחסם, אך הוא עדיין יחזיק את ה-mutex. הצרכן, שצריך לצרוך פריט כדי לפנות מקום (ובכך להגדיל את 'empty'), יצטרך להשיג את ה-mutex לפני הגישה למאגר. מכיוון שה-mutex נמצא כבר אצל היצרן החסום, הצרכן לא יוכל להמשיך, וכתוצאה מכך אף אחד מהם לא יוכל להתקדם והתוכנית תיכנס למצב של קיפאון (deadlock)."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

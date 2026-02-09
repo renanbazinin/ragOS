@@ -1,0 +1,63 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 07:02:43",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5728,
+      "output_tokens": 3532,
+      "total_tokens": 16672
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Race Conditions",
+      "Concurrency",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C++ המשתמשת בשני משתנים גלובליים `global_val` ו-`global_sum`, המאותחלים ל-0. התוכנית יוצרת `N_THREADS` חוטים, כאשר כל חוט מריץ את הפונקציה `thread_func` למשך `ITERS_PER_THREAD` איטרציות. בכל איטרציה, חוט קורא את הערך הנוכחי של `global_val` למשתנה לוקאלי `local_val`, מגדיל את `global_val` ב-1, ולאחר מכן מוסיף את `local_val` ל-`global_sum`. יש להניח שכל שורת קוד בפני עצמה היא אטומית, אך רצף השורות בתוך הלולאה אינו אטומי וניתן לשזירה בין חוטים בכל נקודה. בהינתן `N_THREADS = 2` ו-`ITERS_PER_THREAD = 2`:",
+      "code_snippet": "#include <iostream>\n#include <pthread.h>\n#include <vector>\n\nint global_val = 0;\nint global_sum = 0;\n\nconst int N_THREADS = 2;\nconst int ITERS_PER_THREAD = 2;\n\nvoid* thread_func(void* arg) {\n    for (int i = 0; i < ITERS_PER_THREAD; ++i) {\n        // These three lines are not atomic as a block.\n        // Each line itself is atomic.\n        int local_val = global_val; // Line X\n        global_val = local_val + 1; // Line Y\n        global_sum = global_sum + local_val; // Line Z\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[N_THREADS];\n    for (int i = 0; i < N_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, thread_func, NULL);\n    }\n    for (int i = 0; i < N_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n    // printf(\"global_val = %d, global_sum = %d\\n\", global_val, global_sum);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "מהו הערך המינימלי האפשרי עבור `global_val` בסיום התוכנית? נמקו את תשובתכם ותארו תזמון ריצה לדוגמה שיוביל לערך זה.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "מהו הערך המקסימלי האפשרי עבור `global_val` בסיום התוכנית? נמקו את תשובתכם ותארו תזמון ריצה לדוגמה שיוביל לערך זה.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.3",
+        "text": "מהו הערך המינימלי האפשרי עבור `global_sum` בסיום התוכנית? נמקו את תשובתכם ותארו תזמון ריצה לדוגמה שיוביל לערך זה.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.4",
+        "text": "מהו הערך המקסימלי האפשרי עבור `global_sum` בסיום התוכנית? נמקו את תשובתכם ותארו תזמון ריצה לדוגמה שיוביל לערך זה.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הבהרה: `N_THREADS = 2`, `ITERS_PER_THREAD = 2`. סה\"כ 4 איטרציות. כל איטרציה כוללת 3 פעולות אטומיות: (X) `local_val = global_val;`, (Y) `global_val = local_val + 1;`, (Z) `global_sum = global_sum + local_val;`\n\n1.1. **הערך המינימלי עבור `global_val` הוא 1.**\n   **הסבר:** ערך זה מתקבל כאשר כל החוטים קוראים את הערך ההתחלתי של `global_val` (שהוא 0) לפני שכל חוט מבצע את עדכון `global_val = local_val + 1`. כלומר, כל 4 קריאות שורה X מתרחשות לפני כל 4 כתיבות שורה Y. במקרה זה, כל המשתנים הלוקאליים `local_val` יקבלו את הערך 0. לאחר מכן, כאשר כל החוטים יבצעו את שורה Y, הם יעדכנו את `global_val` ל-`0 + 1 = 1`. מכיוון שכל העדכונים מתחילים מאותו ערך `local_val = 0`, כולם יכתבו 1 ל-`global_val`, וכך `global_val` יסתיים ב-1.\n   **תזמון לדוגמה:**\n   - חוט A, איטרציה 1 (A1.X): `local_val_A1 = global_val (0) -> 0`\n   - חוט B, איטרציה 1 (B1.X): `local_val_B1 = global_val (0) -> 0`\n   - חוט A, איטרציה 2 (A2.X): `local_val_A2 = global_val (0) -> 0`\n   - חוט B, איטרציה 2 (B2.X): `local_val_B2 = global_val (0) -> 0`\n   - חוט A, איטרציה 1 (A1.Y): `global_val = 0 + 1 -> 1`\n   - חוט B, איטרציה 1 (B1.Y): `global_val = 0 + 1 -> 1`\n   - חוט A, איטרציה 2 (A2.Y): `global_val = 0 + 1 -> 1`\n   - חוט B, איטרציה 2 (B2.Y): `global_val = 0 + 1 -> 1`\n   (פעולות Z יבוצעו לאחר מכן, אך אינן משפיעות על `global_val`).\n   **תוצאה סופית:** `global_val = 1`.\n\n1.2. **הערך המקסימלי עבור `global_val` הוא 4.**\n   **הסבר:** ערך זה מתקבל כאשר פעולות ההגדלה של `global_val` מתבצעות באופן סדרתי לחלוטין, כך שאף איטרציה לא מאבדת את העדכון שלה. כלומר, כל חוט קורא את `global_val`, מגדיל אותו ב-1, וכותב אותו בחזרה לפני שחוט אחר קורא את אותו ערך ישן. במצב אידיאלי זה, `global_val` יגדל ב-1 ארבע פעמים (2 חוטים * 2 איטרציות), מ-0 ל-4.\n   **תזמון לדוגמה:**\n   - חוט A, איטרציה 1 (A1.X): `local_val_A1 = global_val (0) -> 0`\n   - חוט A, איטרציה 1 (A1.Y): `global_val = 0 + 1 -> 1`\n   - חוט A, איטרציה 1 (A1.Z): `global_sum = 0 + 0 -> 0`\n   - חוט B, איטרציה 1 (B1.X): `local_val_B1 = global_val (1) -> 1`\n   - חוט B, איטרציה 1 (B1.Y): `global_val = 1 + 1 -> 2`\n   - חוט B, איטרציה 1 (B1.Z): `global_sum = 0 + 1 -> 1`\n   - חוט A, איטרציה 2 (A2.X): `local_val_A2 = global_val (2) -> 2`\n   - חוט A, איטרציה 2 (A2.Y): `global_val = 2 + 1 -> 3`\n   - חוט A, איטרציה 2 (A2.Z): `global_sum = 1 + 2 -> 3`\n   - חוט B, איטרציה 2 (B2.X): `local_val_B2 = global_val (3) -> 3`\n   - חוט B, איטרציה 2 (B2.Y): `global_val = 3 + 1 -> 4`\n   - חוט B, איטרציה 2 (B2.Z): `global_sum = 3 + 3 -> 6`\n   **תוצאה סופית:** `global_val = 4`.\n\n1.3. **הערך המינימלי עבור `global_sum` הוא 0.**\n   **הסבר:** ערך זה מתקבל באותו תזמון ריצה כמו הערך המינימלי של `global_val`. כאשר כל החוטים קוראים את `global_val` כשהוא 0 (לפני כל עדכון שלו), כל המשתנים הלוקאליים `local_val` יקבלו את הערך 0. מכאן, גם אם פעולות הוספה ל-`global_sum` יתבצעו באופן סדרתי, כל אחת מהן תוסיף 0 ל-`global_sum` (`global_sum = global_sum + 0`), ולכן `global_sum` יישאר 0.\n   **תזמון לדוגמה:** (כמו בסעיף 1.1)\n   - חוט A, איטרציה 1 (A1.X): `local_val_A1 = 0`\n   - חוט B, איטרציה 1 (B1.X): `local_val_B1 = 0`\n   - חוט A, איטרציה 2 (A2.X): `local_val_A2 = 0`\n   - חוט B, איטרציה 2 (B2.X): `local_val_B2 = 0`\n   - (לאחר שכל ה-`global_val` יתעדכנו ל-1, כפי שתואר בסעיף 1.1)\n   - חוט A, איטרציה 1 (A1.Z): `global_sum = 0 + 0 -> 0`\n   - חוט B, איטרציה 1 (B1.Z): `global_sum = 0 + 0 -> 0`\n   - חוט A, איטרציה 2 (A2.Z): `global_sum = 0 + 0 -> 0`\n   - חוט B, איטרציה 2 (B2.Z): `global_sum = 0 + 0 -> 0`\n   **תוצאה סופית:** `global_sum = 0`.\n\n1.4. **הערך המקסימלי עבור `global_sum` הוא 6.**\n   **הסבר:** ערך זה מתקבל כאשר גם `global_val` וגם `global_sum` מתעדכנים ללא איבוד פעולות. במצב כזה, `global_val` יגדל באופן סדרתי מ-0 ל-4, והערכים של `local_val` שייקראו יהיו 0, 1, 2, 3. אם גם פעולות ההוספה ל-`global_sum` יתבצעו באופן סדרתי, `global_sum` יצבור את הסכום של כל ה-`local_val` הללו: `0 + 1 + 2 + 3 = 6`.\n   **תזמון לדוגמה:** (כמו בסעיף 1.2)\n   - חוט A, איטרציה 1 (A1.X): `local_val_A1 = 0`\n   - חוט A, איטרציה 1 (A1.Y): `global_val = 1`\n   - חוט A, איטרציה 1 (A1.Z): `global_sum = 0 + 0 -> 0`\n   - חוט B, איטרציה 1 (B1.X): `local_val_B1 = 1`\n   - חוט B, איטרציה 1 (B1.Y): `global_val = 2`\n   - חוט B, איטרציה 1 (B1.Z): `global_sum = 0 + 1 -> 1`\n   - חוט A, איטרציה 2 (A2.X): `local_val_A2 = 2`\n   - חוט A, איטרציה 2 (A2.Y): `global_val = 3`\n   - חוט A, איטרציה 2 (A2.Z): `global_sum = 1 + 2 -> 3`\n   - חוט B, איטרציה 2 (B2.X): `local_val_B2 = 3`\n   - חוט B, איטרציה 2 (B2.Y): `global_val = 4`\n   - חוט B, איטרציה 2 (B2.Z): `global_sum = 3 + 3 -> 6`\n   **תוצאה סופית:** `global_sum = 6`.\n   חשוב לציין שאם פעולות העדכון של `global_sum` עצמן היו מאבדות עדכונים (לדוגמה, שני חוטים קוראים את אותו `global_sum` לפני ששניהם כותבים אותו בחזרה), אז `global_sum` יכול היה להיות נמוך יותר גם אם `global_val` הגיע ל-4. עם זאת, התזמון שהוצג מאפשר את הערך המקסימלי עבור שניהם."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Condition Variables",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 07:26:42",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 983,
+      "output_tokens": 928,
+      "total_tokens": 4226
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Condition Variables",
+      "Synchronization",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "בהינתן קטע הקוד הבא המשתמש במשתנה תנאי (condition variable), איזו מבין הטענות הבאות מתארת בצורה הטובה ביותר את המנגנון הנכון שצריך להיות במקום '/* מה צריך להיות כאן? */' בתוך הפונקציה `wait_for_condition`, ומהי הסיבה לכך?",
+      "code_snippet": "pthread_mutex_t m;\npthread_cond_t cond;\nint condition_met = 0; // The condition we are waiting for\n\nvoid wait_for_condition() {\n    pthread_mutex_lock(&m);\n    /* מה צריך להיות כאן? */\n    pthread_cond_wait(&cond, &m);\n    pthread_mutex_unlock(&m);\n}\n\nvoid signal_condition() {\n    pthread_mutex_lock(&m);\n    condition_met = 1; // Change the condition\n    pthread_cond_signal(&cond);\n    pthread_mutex_unlock(&m);\n}",
+      "options": [
+        "א. `if (!condition_met)` - כיוון ש-`pthread_cond_wait` משחרר את המנעול ורוכש אותו מחדש באופן אטומי, אין צורך בבדיקה חוזרת של התנאי.",
+        "ב. `while (!condition_met)` - כדי לוודא שהתנאי אכן מתקיים לאחר התעוררות, עקב אפשרות להתעוררויות שווא (spurious wakeups) או מצב שבו התנאי השתנה שוב לפני שהחוט רכש מחדש את המנעול.",
+        "ג. `if (condition_met)` - כיוון ש-`pthread_cond_wait` יקפיא את החוט רק אם התנאי כבר התקיים, ובכך ימנע המתנה מיותרת.",
+        "ד. `while (condition_met)` - כדי למנוע מצב של היפוך עדיפויות (priority inversion) שעלול לקרות אם חוט בעדיפות נמוכה יותר יאותת על התנאי."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב'. השימוש בלולאת `while` לבדיקת התנאי לפני קריאה ל-`pthread_cond_wait` ולאחריה הוא קריטי. ישנן שתי סיבות עיקריות לכך:\n1.  **התעוררויות שווא (Spurious Wakeups)**: מערכות הפעלה רבות מאפשרות לחוטים להתעורר מ-`pthread_cond_wait` גם ללא קריאה ל-`pthread_cond_signal` או `pthread_cond_broadcast`. חוט שהתעורר באופן שווא חייב לבדוק מחדש את התנאי ולחזור למצב המתנה אם התנאי עדיין לא מתקיים.\n2.  **מצב מרוץ (Race Condition)**: ייתכן שחוט אחד יאותת על התנאי, אך לפני שהחוט הממתין יצליח לרכוש מחדש את המנעול ולבדוק את התנאי, חוט אחר ישנה את התנאי בחזרה למצב לא נכון. לולאת `while` מבטיחה שהחוט ימשיך לחכות עד שהתנאי יהיה אכן נכון עבורו.\nללא לולאת `while`, חוט עלול להמשיך לרוץ גם כאשר התנאי עדיין לא התקיים או כבר לא מתקיים, מה שיוביל לשגיאות לוגיות בתוכנית."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

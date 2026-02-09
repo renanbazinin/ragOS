@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Processes and Memory Management",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 20:18:45",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3064,
+      "output_tokens": 3181,
+      "total_tokens": 15611
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Processes",
+      "Memory Management",
+      "System Calls",
+      "Copy-on-Write",
+      "Virtual Memory"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה בשם `prog`:\n\nיש להניח את ההנחות הבאות לגבי מערכת ההפעלה והזיכרון:\n*   גודל דף זיכרון (page size) הוא 4KB.\n*   התוכנית `prog` (הקוד המצורף) משתמשת ב:\n    *   מקטע קוד (code segment): 2 דפים.\n    *   מקטע נתונים ו-BSS (כולל `global_data_prog` ו-`global_bss_prog`): 2 דפים.\n    *   מחסנית (stack): כל תהליך מתחיל עם מחסנית בגודל מינימלי של דף אחד.\n*   התוכנית `prog2` (שמופעלת על ידי `execvp`) היא תוכנית מינימלית המשתמשת ב:\n    *   מקטע קוד (code segment): 1 דף.\n    *   מקטעי נתונים, BSS ומחסנית (data, BSS, stack combined): 1 דף.\n*   כל הקצאות הזיכרון באמצעות `malloc` מתבצעות בגודל של כפולה שלמה של דפים (כלומר, הקצאה של N בתים תתפוס `ceil(N/4096)` דפים). כל דפי הזיכרון המוקצים ב-heap נכתבים מיד (הופכים ל-\"dirty\").\n*   מנגנון Copy-On-Write (COW) מיושם על מקטעי נתונים ו-BSS. כאשר תהליך משנה דף COW, מוקצה לו דף פיזי חדש.\n*   מקטעי קוד הם לקריאה בלבד ומשותפים בין תהליכים המריצים את אותה תוכנית.\n*   מקטעי מחסנית ו-heap הם פרטיים לכל תהליך.\n*   המערכת אינה מבצעת החלפת דפים (swapping) ואין תהליכים אחרים במערכת המשתמשים בזיכרון.\n*   יש להניח שכל קריאות המערכת (fork, execvp, malloc) הצליחו.\n\nהתבוננו במצב המערכת בנקודת זמן *לאחר* שכל קריאות `fork()` ו-`execvp()` שבתוכנית הושלמו בהצלחה, ו*לפני* שאף תהליך בן סיים את ריצתו או שחרר זיכרון (פרט לזיכרון שהוחלף על ידי `execvp`).\n\nכמה מסגרות זיכרון פיזיות (physical frames) תפוסות במערכת עבור זיכרון מרחב המשתמש (user space) בנקודת זמן זו? יש לפרט את החישוב עבור כל סוג זיכרון (קוד, נתונים/BSS, מחסנית, heap) עבור כל תהליך.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n#include <string.h>\n\n// Assume prog2.c is a minimal program that just exits.\n// e.g., int main() { return 0; }\n\n// Global variables for prog.c\nint global_data_prog = 10;\nchar global_bss_prog[4096]; // Assume this fits exactly one page for BSS\n\nint main(int argc, char *argv[]) {\n    pid_t pid_c1, pid_c2, pid_c3;\n\n    printf(\"Parent (PID %d) started.\\n\", getpid());\n\n    // Parent allocates some heap memory\n    char* parent_heap = (char*)malloc(4096); // 1 page heap\n    if (parent_heap) {\n        memset(parent_heap, 'A', 4096); // Make it dirty\n    }\n    printf(\"Parent (PID %d) allocated heap.\\n\", getpid());\n    global_data_prog = 20; // Parent modifies global_data_prog\n\n    pid_c1 = fork();\n    if (pid_c1 == 0) { // Child C1\n        printf(\"Child C1 (PID %d) started.\\n\", getpid());\n        global_data_prog = 30; // C1 modifies global_data_prog (COW)\n        char* c1_heap = (char*)malloc(2048); // C1 allocates 0.5 page heap, uses 1 page\n        if (c1_heap) {\n            memset(c1_heap, 'B', 2048); // Make it dirty\n        }\n        printf(\"Child C1 (PID %d) modified global_data_prog and allocated heap.\\n\", getpid());\n        sleep(2); // Simulate work, ensuring it's alive for memory snapshot\n        if (c1_heap) free(c1_heap);\n        exit(0);\n    } else if (pid_c1 > 0) { // Parent\n        pid_c2 = fork();\n        if (pid_c2 == 0) { // Child C2\n            printf(\"Child C2 (PID %d) started, will exec prog2.\\n\", getpid());\n            char* args[] = { \"./prog2\", NULL };\n            execvp(args[0], args);\n            perror(\"execvp failed in C2\"); // Should not reach here\n            exit(1);\n        } else if (pid_c2 > 0) { // Parent\n            pid_c3 = fork();\n            if (pid_c3 == 0) { // Child C3\n                printf(\"Child C3 (PID %d) started.\\n\", getpid());\n                global_data_prog = 40; // C3 modifies global_data_prog (COW)\n                char* c3_heap = (char*)malloc(8192); // C3 allocates 2 pages heap\n                if (c3_heap) {\n                    memset(c3_heap, 'C', 8192); // Make it dirty\n                }\n                printf(\"Child C3 (PID %d) modified global_data_prog and allocated heap.\\n\", getpid());\n                sleep(2); // Simulate work\n                if (c3_heap) free(c3_heap);\n                exit(0);\n            } else if (pid_c3 > 0) { // Parent\n                printf(\"Parent (PID %d) created C1, C2, C3. Waiting for children to progress.\\n\", getpid());\n                sleep(3); // Give time for children to run and C2 to exec\n                printf(\"Parent (PID %d) done with initial phase. global_data_prog = %d\\n\", getpid(), global_data_prog);\n                if (parent_heap) free(parent_heap);\n            } else { perror(\"fork failed for C3\"); exit(1); }\n        } else { perror(\"fork failed for C2\"); exit(1); }\n    } else { perror(\"fork failed for C1\"); exit(1); }\n\n    // Parent waits for all children before exiting\n    while (wait(NULL) != -1);\n    printf(\"Process %d exiting.\\n\", getpid());\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "**חישוב מסגרות הזיכרון הפיזיות בנקודת הזמן הנדרשת:**\n\n**תהליכים פעילים בנקודת הזמן הנדרשת:**\n*   **P (תהליך אב):** מריץ את `prog`.\n*   **C1 (בן 1):** מריץ את `prog`.\n*   **C2 (בן 2):** מריץ את `prog2` (לאחר ביצוע `execvp`).\n*   **C3 (בן 3):** מריץ את `prog`.\n\n**חלוקת הזיכרון לפי סוגים ועקרונות COW:**\n\n1.  **מקטעי קוד (Code Segments):**\n    *   **קוד של `prog`:** משותף בין P, C1 ו-C3. (C2 מריץ את `prog2` ולא משתמש בקוד של `prog`). גודל: 2 דפים.\n    *   **קוד של `prog2`:** בשימוש על ידי C2 בלבד. גודל: 1 דף.\n    *   **סה\"כ קוד:** 2 (ל-prog) + 1 (ל-prog2) = **3 מסגרות**.\n\n2.  **מקטעי נתונים ו-BSS (Data/BSS Segments):**\n    *   **P (תהליך אב):** שינה את `global_data_prog` לפני ה-forkים. לכן, יש לו עותק פרטי של מקטעי הנתונים/BSS. גודל: 2 דפים.\n    *   **C1 (בן 1):** שינה את `global_data_prog`. מנגנון COW יצר עבורו עותק פרטי של מקטעי הנתונים/BSS. גודל: 2 דפים.\n    *   **C3 (בן 3):** שינה את `global_data_prog`. מנגנון COW יצר עבורו עותק פרטי של מקטעי הנתונים/BSS. גודל: 2 דפים.\n    *   **C2 (בן 2):** ביצע `execvp` ל-`prog2`. מקטעי הנתונים/BSS המקוריים של `prog` הוחלפו באלו של `prog2`. הזיכרון של `prog2` data/bss/stack combined הוא דף אחד, ונכלל בסעיף 5.\n    *   **סה\"כ data/BSS (ל-P, C1, C3):** 2 (P) + 2 (C1) + 2 (C3) = **6 מסגרות**.\n\n3.  **מחסניות (Stacks):**\n    *   כל תהליך מקבל מחסנית פרטית בגודל מינימלי של דף אחד.\n    *   P stack: 1 דף.\n    *   C1 stack: 1 דף.\n    *   C3 stack: 1 דף.\n    *   **C2 stack:** נכלל בחישוב של \"prog2 data/bss/stack combined\" בסעיף 5.\n    *   **סה\"כ stacks (ל-P, C1, C3):** 1 (P) + 1 (C1) + 1 (C3) = **3 מסגרות**.\n\n4.  **מקטעי Heap:**\n    *   P heap: `malloc(4096)` -> 1 דף (פרטי, dirty).\n    *   C1 heap: `malloc(2048)` -> 1 דף (פרטי, dirty, שכן `ceil(2048/4096)` = 1).\n    *   C3 heap: `malloc(8192)` -> 2 דפים (פרטי, dirty, שכן `ceil(8192/4096)` = 2).\n    *   **סה\"כ heap:** 1 (P) + 1 (C1) + 2 (C3) = **4 מסגרות**.\n\n5.  **זיכרון של C2 עבור `prog2` (לאחר exec):**\n    *   **קוד `prog2`:** 1 דף (נכלל כבר בסעיף 1).\n    *   **`prog2` data/bss/stack combined:** 1 דף (פרטי ל-C2). זהו כל הזיכרון הנוסף ש-C2 צורך עבור ה-data, BSS והמחסנית שלו לאחר ה-exec.\n    *   **סה\"כ זיכרון ייחודי ל-C2 (מעבר לקוד המשותף):** **1 מסגרת**.\n\n**סיכום כולל של מסגרות זיכרון פיזיות:**\n*   קוד: 3 מסגרות.\n*   נתונים/BSS (P, C1, C3): 6 מסגרות.\n*   מחסניות (P, C1, C3): 3 מסגרות.\n*   Heap (P, C1, C3): 4 מסגרות.\n*   `prog2` data/bss/stack (C2): 1 מסגרת.\n\n**סה\"כ מסגרות זיכרון פיזיות:** 3 + 6 + 3 + 4 + 1 = **17 מסגרות**."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

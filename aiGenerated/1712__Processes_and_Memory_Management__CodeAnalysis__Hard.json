@@ -1,0 +1,51 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Processes and Memory Management",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 20:15:14",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3064,
+      "output_tokens": 2988,
+      "total_tokens": 17240
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Processes",
+      "Memory Management",
+      "Virtual Memory",
+      "Copy-on-Write"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה בשם `prog1` ותוכנית נוספת בשם `prog2`.\n`prog2` היא תוכנית פשוטה המדפיסה הודעה ורצה בלולאה אינסופית (כדי להישאר פעילה).\nהריצו את התוכנית `prog1`. ניתן להניח שכל קריאות המערכת הצליחו, לא נוצרים תהליכים בקטעי קוד אחרים במערכת, וכל תהליך מקבל מזהה תהליך ייחודי.\nיש להניח את פרטי זיכרון הבאים עבור מערכת ההפעלה ומרחב המשתמש:\n- גודל דף זיכרון: 4KB.\n- קוד התוכנית `prog1`: 2 דפים.\n- קטע נתונים מאותחל של `prog1` (לדוגמה `global_var`): 1 דף.\n- קטע נתונים לא מאותחל (BSS) של `prog1` (לדוגמה `global_array`): 2 דפים.\n- מחסנית וערימה התחלתיים של `prog1`: 1 דף.\n- קוד התוכנית `prog2`: 1 דף.\n- קטע נתונים מאותחל של `prog2`: 1 דף (כולל BSS).\n- מחסנית וערימה התחלתיים של `prog2`: 1 דף.\n- ספרייה משותפת `lib_common.so`: 3 דפים. ספרייה זו נטענת על ידי `prog1` וגם על ידי `prog2`.\n- כל קטעי הקוד של התוכניות ושל הספריות המשותפות הינם לקריאה בלבד ומשותפים בין תהליכים שונים המריצים את אותו קוד.\n- קטעי נתונים (מאותחל, BSS, מחסנית, ערימה) ממומשים בשיטת Copy-on-Write (CoW) בעת `fork`. קריאת `execvp` מחליפה את כל מרחב הכתובות של התהליך בקטעי זיכרון חדשים וייחודיים לתוכנית החדשה.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\n// Assume prog2.c exists and compiles to 'prog2'\n// prog2.c could be: #include <stdio.h>\n// int main() { printf(\"Hello from prog2 %d\\n\", getpid()); while(1); return 0; }\n\nint global_var = 10; // Initialized data\nchar global_array[4096 * 2]; // BSS, 2 pages\n\nvoid child_func(int id) {\n    if (id % 2 == 0) { // Even ID children exec prog2\n        printf(\"Process %d (child of %d) execing prog2...\\n\", getpid(), getppid());\n        char *args[] = {\"./prog2\", NULL};\n        execvp(args[0], args);\n        // Should not reach here\n        perror(\"execvp failed\");\n        exit(1);\n    } else { // Odd ID children continue prog1\n        printf(\"Process %d (child of %d) continuing prog1...\\n\", getpid(), getppid());\n        // Simulate some work, but not memory allocation to simplify.\n        sleep(1); // Keep them alive\n    }\n}\n\nint main() {\n    pid_t pids[3];\n    int i;\n\n    printf(\"Main process %d starting...\\n\", getpid());\n\n    for (i = 0; i < 3; ++i) {\n        pids[i] = fork();\n        if (pids[i] == -1) {\n            perror(\"fork failed\");\n            exit(1);\n        } else if (pids[i] == 0) { // Child process\n            child_func(i + 1); // Pass a unique ID to decide exec or not\n            exit(0); // Children will exit after child_func or exec\n        }\n    }\n\n    // Main process waits for all children\n    for (i = 0; i < 3; ++i) {\n        waitpid(pids[i], NULL, 0);\n    }\n\n    printf(\"Main process %d exiting.\\n\", getpid());\n    return 0;\n}"
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "כמה תהליכים בסך הכל (כולל התהליך הראשי) יהיו פעילים במערכת בנקודת הזמן שבה כל קריאות ה-`fork` ו-`execvp` הסתיימו בהצלחה, אך אף תהליך לא סיים את ריצתו?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "בהתבסס על נקודת הזמן המתוארת בסעיף 1.1, כמה מסגרות פיזיות (physical frames) תהיינה תפוסות במערכת עבור זיכרון המשתמש (user space) במקרה המינימלי והמקסימלי?\n- יש להניח שלא נעשה שימוש ב-swapping.\n- במקרה המינימלי, יש להניח שדפי CoW חולקים מסגרות פיזיות עד לביצוע כתיבה (או גישה). \n- במקרה המקסימלי, יש להניח שכל דף CoW מקבל מסגרת פיזית נפרדת מיד לאחר ה-`fork` (או הגישה הראשונה לכתיבה).",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "פתרון מלא:\n\n**סעיף 1.1:**\nהתהליך הראשי (P0) מבצע 3 קריאות `fork` בתוך לולאה. כל קריאת `fork` מוצלחת יוצרת תהליך בן.\nלכן, נוצרים 3 תהליכים בנים: P1, P2, P3.\nבנקודת הזמן המתוארת (לאחר כל ה-`fork` וה-`execvp`, לפני סיום תהליכים), כל ארבעת התהליכים (הראשי ושלושת הבנים) עדיין פעילים.\nסך הכל תהליכים פעילים: 1 (התהליך הראשי) + 3 (תהליכי בן) = **4 תהליכים**.\n\n**סעיף 1.2:**\n**ניתוח תהליכים ומצב זיכרון:**\n- P0: התהליך הראשי, מריץ את `prog1`.\n- P1 (id=1): בן של P0, ממשיך לרוץ את `prog1` (מכיוון ש-`1 % 2 != 0`).\n- P2 (id=2): בן של P0, מבצע `execvp` לתוכנית `prog2` (מכיוון ש-`2 % 2 == 0`).\n- P3 (id=3): בן של P0, ממשיך לרוץ את `prog1` (מכיוון ש-`3 % 2 != 0`).\n\n**מסגרות פיזיות במקרה המינימלי:**\nבמקרה המינימלי, דפי CoW חולקים מסגרות פיזיות עד לביצוע כתיבה. מכיוון שהתוכנית לא מבצעת כתיבה מפורשת לקטעי הנתונים (פרט לאתחול), נניח ש-CoW פעיל לחלוטין עבור דפים אלו.\n- **קוד `prog1`:** 2 דפים. משותף ל-P0, P1, P3. -> **2 מסגרות**. (קוד הוא לקריאה בלבד ומשותף).\n- **קוד `prog2`:** 1 דף. עבור P2. -> **1 מסגרת**.\n- **נתונים מאותחלים של `prog1`:** 1 דף. P0, P1, P3 חולקים מסגרת אחת דרך CoW. -> **1 מסגרת**.\n- **BSS של `prog1`:** 2 דפים. P0, P1, P3 חולקים 2 מסגרות דרך CoW. -> **2 מסגרות**.\n- **נתונים מאותחלים של `prog2` (כולל BSS):** 1 דף. עבור P2 (לאחר `execvp` נוצר מרחב כתובות חדש). -> **1 מסגרת**.\n- **מחסנית וערימה התחלתיים של `prog1`:** 1 דף. P0, P1, P3 חולקים מסגרת אחת דרך CoW. -> **1 מסגרת**.\n- **מחסנית וערימה התחלתיים של `prog2`:** 1 דף. עבור P2 (לאחר `execvp` נוצר מרחב כתובות חדש). -> **1 מסגרת**.\n- **ספרייה משותפת `lib_common.so`:** 3 דפים. משותף לכל 4 התהליכים (P0, P1, P2, P3). -> **3 מסגרות**.\n\nסה\"כ מסגרות פיזיות במקרה המינימלי: 2 (קוד prog1) + 1 (קוד prog2) + 1 (נתונים prog1) + 2 (BSS prog1) + 1 (נתונים prog2) + 1 (מחסנית prog1) + 1 (מחסנית prog2) + 3 (ספרייה משותפת) = **12 מסגרות**.\n\n**מסגרות פיזיות במקרה המקסימלי:**\nבמקרה המקסימלי, כל דף CoW מקבל מסגרת פיזית נפרדת מיד לאחר ה-`fork` (או הגישה הראשונה לכתיבה). כלומר, כל תהליך מקבל עותק נפרד של הדפים הניתנים לכתיבה.\n- **קוד `prog1`:** 2 דפים. משותף ל-P0, P1, P3. -> **2 מסגרות**.\n- **קוד `prog2`:** 1 דף. עבור P2. -> **1 מסגרת**.\n- **נתונים מאותחלים של `prog1`:** 1 דף לכל אחד מ-P0, P1, P3. -> 1 * 3 = **3 מסגרות**.\n- **BSS של `prog1`:** 2 דפים לכל אחד מ-P0, P1, P3. -> 2 * 3 = **6 מסגרות**.\n- **נתונים מאותחלים של `prog2` (כולל BSS):** 1 דף. עבור P2. -> **1 מסגרת**.\n- **מחסנית וערימה התחלתיים של `prog1`:** 1 דף לכל אחד מ-P0, P1, P3. -> 1 * 3 = **3 מסגרות**.\n- **מחסנית וערימה התחלתיים של `prog2`:** 1 דף. עבור P2. -> **1 מסגרת**.\n- **ספרייה משותפת `lib_common.so`:** 3 דפים. משותף לכל 4 התהליכים. -> **3 מסגרות**.\n\nסה\"כ מסגרות פיזיות במקרה המקסימלי: 2 (קוד prog1) + 1 (קוד prog2) + 3 (נתונים prog1) + 6 (BSS prog1) + 1 (נתונים prog2) + 3 (מחסנית prog1) + 1 (מחסנית prog2) + 3 (ספרייה משותפת) = **20 מסגרות**."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Producer-Consumer",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 07:41:16",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 970,
+      "output_tokens": 1087,
+      "total_tokens": 6069
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Producer-Consumer",
+      "Synchronization",
+      "Deadlock",
+      "Semaphores",
+      "Mutexes"
+    ],
+    "content": {
+      "text": "נתונה מימוש בעיית היצרן-צרכן (Producer-Consumer) עבור חיץ חסום (bounded buffer) המשתמש ב-mutex ובשני סמפורים (empty, full). נבחן שינוי בקוד שבו הן היצרן והן הצרכן תופסים את המנעול (mutex) *לפני* שהם מנסים להוריד את ערך הסמפורים המתאימים (sem_wait): סמפור 'empty' עבור היצרן, וסמפור 'full' עבור הצרכן. מה תהיה ההשלכה העיקרית של שינוי זה על פעולת המערכת?",
+      "code_snippet": "pthread_mutex_t mutex;\nsem_t empty; // Number of empty slots\nsem_t full;  // Number of filled slots\n\n// Producer thread function\nvoid *producer(void *arg) {\n    int item;\n    while (1) {\n        item = produce_item(); // Assume this function exists\n        pthread_mutex_lock(&mutex); // Acquire mutex FIRST\n        sem_wait(&empty);          // Then wait for empty slot\n        \n        // Critical section (add item to buffer)\n        // buffer[in] = item;\n        // in = (in + 1) % BUFFER_SIZE;\n        // count++;\n        \n        pthread_mutex_unlock(&mutex);\n        sem_post(&full);\n    }\n    return NULL;\n}\n\n// Consumer thread function\nvoid *consumer(void *arg) {\n    int item;\n    while (1) {\n        pthread_mutex_lock(&mutex); // Acquire mutex FIRST\n        sem_wait(&full);           // Then wait for full slot\n        \n        // Critical section (remove item from buffer)\n        // item = buffer[out];\n        // out = (out + 1) % BUFFER_SIZE;\n        // count--;\n        \n        pthread_mutex_unlock(&mutex);\n        sem_post(&empty);\n        consume_item(item); // Assume this function exists\n    }\n    return NULL;\n}",
+      "options": [
+        "א. המערכת תהיה יעילה יותר מכיוון שה-mutex יגן על כל פעולת הגישה לחיץ.",
+        "ב. ייתכנו מקרים של רעב (starvation) עבור הצרכנים, אך לא עבור היצרנים.",
+        "ג. המערכת עלולה להיכנס למצב של קיפאון (deadlock) כאשר החיץ מלא או ריק.",
+        "ד. לא תהיה כל השפעה על נכונות או ביצועי המערכת, שכן סדר הפעולות אינו משנה.",
+        "ה. ייתכנו מקרים של כתיבה על נתונים לא מעודכנים (race conditions) בתוך החיץ."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "הסבר: במצב זה, אם החיץ מלא (כלומר סמפור 'empty' הוא 0), היצרן ינסה לבצע sem_wait(&empty) בעודו מחזיק את ה-mutex. היצרן ייחסם בהמתנה לסמפור 'empty'. כדי שסמפור 'empty' ישוחרר (באמצעות sem_post(&empty)), הצרכן צריך לצרוך פריט. אבל הצרכן, במקרה זה, מנסה גם הוא לתפוס את ה-mutex *לפני* שהוא מבצע sem_wait(&full). מכיוון שהיצרן מחזיק את ה-mutex, הצרכן ייחסם בהמתנה ל-mutex. נוצר מצב של קיפאון (deadlock): היצרן ממתין לצרכן שישחרר את 'empty', והצרכן ממתין ליצרן שישחרר את ה-mutex. מצב דומה יתרחש אם החיץ ריק (כלומר סמפור 'full' הוא 0), כאשר הצרכן ינסה לבצע sem_wait(&full) בעודו מחזיק את ה-mutex, והיצרן ימתין ל-mutex. לכן, התשובה הנכונה היא ג'."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "System Calls",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 07:14:29",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1165,
+      "output_tokens": 530,
+      "total_tokens": 2668
+    }
+  },
+  "question": {
+    "id": 6,
+    "type": "MultipleChoice",
+    "topic": [
+      "System Calls",
+      "Kernel",
+      "User Mode"
+    ],
+    "content": {
+      "text": "כאשר תוכנית משתמש מבצעת קריאת מערכת (System Call), מהו המנגנון העיקרי המאפשר למערכת ההפעלה לקבל שליטה ולבצע את הפעולה המבוקשת?",
+      "code_snippet": null,
+      "options": [
+        "א. קריאה ישירה לפונקציה בכתובת זיכרון השייכת לליבה.",
+        "ב. יצירת פסיקת חומרה (Hardware Interrupt) על ידי המעבד.",
+        "ג. יצירת מלכודת (Trap) או פסיקת תוכנה (Software Interrupt) המעבירה את השליטה למערכת ההפעלה.",
+        "ד. שימוש בפקודת JMP מיוחדת לכתובת קבועה בזיכרון הליבה.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "כאשר תוכנית משתמש מבצעת קריאת מערכת, היא אינה יכולה לקרוא לפונקציות בקרנל ישירות עקב הגנות זיכרון והרשאות (מצב משתמש לעומת מצב ליבה). במקום זאת, היא מפעילה מנגנון מיוחד (כמו פקודת TRAP או INT ב-x86) שגורם למעבד לעבור ממצב משתמש (User Mode) למצב ליבה (Kernel Mode), לשמור את מצב התהליך הנוכחי, ולקפוץ לכתובת קבועה בקרנל (טבלת וקטורי פסיקות/מלכודות) המטפלת בקריאת המערכת הספציפית. זהו מנגנון מבוקר ובטוח למעבר בין מצבי הרשאות."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

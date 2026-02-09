@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "TLB",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 08:07:12",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1201,
+      "output_tokens": 568,
+      "total_tokens": 2895
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "TLB",
+      "Memory Management",
+      "Paging"
+    ],
+    "content": {
+      "text": "מהו תפקידו העיקרי של ה-TLB (Translation Lookaside Buffer) במערכת הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. לתרגם כתובות לוגיות לכתובות פיזיות עבור כל גישה לזיכרון.",
+        "ב. לאחסן את כל טבלת הדפים (page table) של תהליך בזיכרון מטמון מהיר.",
+        "ג. לשמש כמטמון (cache) עבור ערכי טבלת הדפים (page table entries) הנמצאים בשימוש תכוף, כדי להאיץ את תרגום הכתובות.",
+        "ד. לאחסן נתונים ושורות קוד של התהליך בזיכרון מטמון מהיר, בדומה למטמון L1/L2.",
+        "ה. לנהל את החלפת הדפים (page replacement) בין הזיכרון הראשי לדיסק."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג'. ה-TLB הוא מטמון חומרה מהיר (בדרך כלל חלק מה-MMU) המשמש לאחסון ערכי טבלת דפים (page table entries) שנעשה בהם שימוש תכוף. מטרתו היא להאיץ את תהליך תרגום הכתובות הווירטואליות לכתובות פיזיות על ידי הימנעות מגישה לזיכרון הראשי עבור כל תרגום, ובכך מקטין את זמן הגישה לזיכרון. אפשרות א' מתארת את תפקיד ה-MMU באופן כללי, אך ה-TLB הוא רכיב ספציפי שמאיץ תהליך זה. אפשרות ב' אינה נכונה מכיוון שה-TLB מכיל רק חלק מה-PTEs, לא את כולה. אפשרויות ד' וה' מתארות תפקידים אחרים לחלוטין במערכת."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

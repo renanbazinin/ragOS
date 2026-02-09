@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Scheduling and Processes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 21:05:18",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1031,
+      "output_tokens": 402,
+      "total_tokens": 2184
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "Scheduling",
+      "Processes",
+      "Process States"
+    ],
+    "content": {
+      "text": "מהו המצב הבא שאליו עובר תהליך לאחר שהוא מסיים את פרץ המעבד (CPU burst) שלו וזקוק לפעולת קלט/פלט?",
+      "code_snippet": null,
+      "options": [
+        "א. הוא עובר למצב \"מוכן\" (Ready).",
+        "ב. הוא עובר למצב \"ממתין\" (Waiting/Blocked).",
+        "ג. הוא ממשיך לרוץ על המעבד עד שפעולת הקלט/פלט מסתיימת.",
+        "ד. הוא מסיים את ריצתו ויוצא מהמערכת.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב. כאשר תהליך מסיים את פרץ המעבד שלו וזקוק לפעולת קלט/פלט, הוא עובר למצב \"ממתין\" (Waiting/Blocked). במצב זה, התהליך אינו יכול לרוץ על המעבד עד שפעולת הקלט/פלט מסתיימת. רק לאחר השלמת הפעולה, הוא עובר למצב \"מוכן\" (Ready) וממתין לתורו לריצה על המעבד."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

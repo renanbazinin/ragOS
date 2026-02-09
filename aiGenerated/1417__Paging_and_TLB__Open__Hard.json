@@ -1,0 +1,59 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Paging and TLB",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 10:02:28",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4769,
+      "output_tokens": 3158,
+      "total_tokens": 13692
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Paging",
+      "TLB",
+      "Virtual Memory",
+      "Memory Management",
+      "Performance"
+    ],
+    "content": {
+      "text": "נתונה מערכת זיכרון וירטואלי המשתמשת בטבלת דפים דו-רמתית (Two-Level Page Table) וב-TLB. גודל דף הוא 4KB. גודל כניסה ב-TLB ובטבלת דפים (PTE/PDE) הוא 8 בתים. ה-TLB מכיל 8 כניסות והוא משתמש במדיניות החלפה LRU (Least Recently Used).\n\nזמני גישה:\n- גישה ל-TLB: 10ns\n- גישה לזיכרון פיזי (RAM): 100ns\n- טיפול ב-Page Fault (כולל קריאה מהדיסק, עדכון טבלת הדפים וה-TLB): 10ms (10,000,000ns)\n\nלצורך חישובים, נניח שכל דפי טבלת הדפים (ה-Page Directory וה-Page Tables) תמיד נמצאים בזיכרון הפיזי (RAM) ואינם גורמים ל-Page Faults בעצמם. כמו כן, נניח שאין Cache L1/L2, וכל גישה לזיכרון פיזי היא ישירות ל-RAM. כל הגישות הן גישות קריאה.\nיש לפרט ולנמק את כל החישובים בכל סעיף.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "בהתבסס על הנתונים, מהו גודל מרחב הכתובות הוירטואלי (Virtual Address Space) של תהליך? כמה ביטים מוקצים לכל רכיב בכתובת הוירטואלית (VPN1, VPN2, Offset)?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "נתונה סדרת גישות לכתובות וירטואליות הבאות. עבור כל גישה, יש לקבוע האם זוהי פגיעת TLB (TLB Hit) או החטאה (TLB Miss), האם נדרש מעבר על טבלת הדפים (Page Table Walk), והאם מתרחש Page Fault. בנוסף, יש לחשב את זמן הגישה הכולל עבור כל פעולה. יש להציג את מצב ה-TLB (אילו דפים נמצאים בו ובאיזה סדר LRU – Least Recently Used עד Most Recently Used) לאחר כל גישה.\n\nהערה: נניח שלפני הגישה הראשונה, ה-TLB ריק. דפים 0-2, 4-8 נמצאים בזיכרון הפיזי. דף 3 אינו נמצא בזיכרון הפיזי ויגרום ל-Page Fault.\n\nסדרת גישות לדפים וירטואליים (VPN):",
+        "code_snippet": "VPN 0 (0x00000)\nVPN 1 (0x00100)\nVPN 2 (0x00200)\nVPN 3 (0x00300) -> Page Fault expected\nVPN 4 (0x00400)\nVPN 5 (0x00500)\nVPN 6 (0x00600)\nVPN 7 (0x00700)\nVPN 0 (0x00000)\nVPN 8 (0x00800)\nVPN 1 (0x00100)",
+        "options": null
+      },
+      {
+        "id": "1.3",
+        "text": "בהתבסס על ניתוח סעיף 1.2, מהו זמן הגישה האפקטיבי הממוצע (Effective Access Time - EAT) עבור סדרת הגישות כולה?",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.1: חישוב גודל מרחב הכתובות וחלוקת הביטים:\n*   גודל דף: 4KB = 2^12 בתים. לכן, רכיב ה-Offset הוא **12 ביטים**.\n*   גודל כניסה בטבלת דפים (PTE/PDE): 8 בתים.\n*   מספר כניסות לטבלה/מדריך דפים: כל טבלה/מדריך דפים תופס דף אחד (4KB). לכן, 4KB / 8 בתים לכניסה = 512 כניסות לכל טבלה/מדריך.\n*   512 כניסות = 2^9 כניסות. משמעות הדבר היא שכל רמה של VPN (VPN1 ו-VPN2 במקרה של טבלת דפים דו-רמתית) דורשת **9 ביטים**.\n*   סה\"כ ביטים ל-VPN: VPN1 + VPN2 = 9 + 9 = **18 ביטים**.\n*   גודל כתובת וירטואלית: סה\"כ ביטים ל-VPN + ביטים ל-Offset = 18 + 12 = **30 ביטים**.\n*   גודל מרחב הכתובות הוירטואלי: 2^30 בתים = **1GB**.\n\n1.2: ניתוח סדרת הגישות:\nזמני גישה:\n*   TLB Hit (הדף קיים ב-RAM): 10ns (בדיקת TLB) + 100ns (גישה ל-RAM) = 110ns.\n*   TLB Miss (הדף קיים ב-RAM): 10ns (בדיקת TLB) + 2 * 100ns (מעבר על טבלת דפים דו-רמתית) + 100ns (גישה ל-RAM) = 310ns.\n*   TLB Miss (Page Fault): 10ns (בדיקת TLB) + 2 * 100ns (מעבר על טבלת דפים) + 10,000,000ns (טיפול ב-Page Fault) = 10,000,210ns.\n\nמצב TLB (מסודר מ-LRU ל-MRU):\n\n1.  **VPN 0 (0x00000)**\n    *   TLB: Miss (ריק).\n    *   Page Table Walk: כן (דו-רמתי).\n    *   Page Fault: לא (דף 0 קיים ב-RAM).\n    *   זמן גישה: 310ns.\n    *   מצב TLB: `[0]`\n\n2.  **VPN 1 (0x00100)**\n    *   TLB: Miss.\n    *   Page Table Walk: כן.\n    *   Page Fault: לא (דף 1 קיים ב-RAM).\n    *   זמן גישה: 310ns.\n    *   מצב TLB: `[0, 1]`\n\n3.  **VPN 2 (0x00200)**\n    *   TLB: Miss.\n    *   Page Table Walk: כן.\n    *   Page Fault: לא (דף 2 קיים ב-RAM).\n    *   זמן גישה: 310ns.\n    *   מצב TLB: `[0, 1, 2]`\n\n4.  **VPN 3 (0x00300)**\n    *   TLB: Miss.\n    *   Page Table Walk: כן.\n    *   Page Fault: כן (דף 3 אינו קיים ב-RAM).\n    *   זמן גישה: 10,000,210ns.\n    *   מצב TLB: `[0, 1, 2, 3]` (לאחר ה-Page Fault, המיפוי של דף 3 נוסף ל-TLB כ-MRU).\n\n5.  **VPN 4 (0x00400)**\n    *   TLB: Miss.\n    *   Page Table Walk: כן.\n    *   Page Fault: לא.\n    *   זמן גישה: 310ns.\n    *   מצב TLB: `[0, 1, 2, 3, 4]`\n\n6.  **VPN 5 (0x00500)**\n    *   TLB: Miss.\n    *   Page Table Walk: כן.\n    *   Page Fault: לא.\n    *   זמן גישה: 310ns.\n    *   מצב TLB: `[0, 1, 2, 3, 4, 5]`\n\n7.  **VPN 6 (0x00600)**\n    *   TLB: Miss.\n    *   Page Table Walk: כן.\n    *   Page Fault: לא.\n    *   זמן גישה: 310ns.\n    *   מצב TLB: `[0, 1, 2, 3, 4, 5, 6]`\n\n8.  **VPN 7 (0x00700)**\n    *   TLB: Miss.\n    *   Page Table Walk: כן.\n    *   Page Fault: לא.\n    *   זמן גישה: 310ns.\n    *   מצב TLB: `[0, 1, 2, 3, 4, 5, 6, 7]` (ה-TLB מלא, דף 0 הוא ה-LRU).\n\n9.  **VPN 0 (0x00000)**\n    *   TLB: Hit (דף 0 נמצא ב-TLB).\n    *   Page Table Walk: לא.\n    *   Page Fault: לא.\n    *   זמן גישה: 110ns.\n    *   מצב TLB: `[1, 2, 3, 4, 5, 6, 7, 0]` (דף 0 הופך ל-MRU, דף 1 הופך ל-LRU).\n\n10. **VPN 8 (0x00800)**\n    *   TLB: Miss (דף 8 לא נמצא ב-TLB).\n    *   Page Table Walk: כן.\n    *   Page Fault: לא (דף 8 קיים ב-RAM).\n    *   החלפת TLB (LRU): דף 1 (ה-LRU הנוכחי) מוחלף.\n    *   זמן גישה: 310ns.\n    *   מצב TLB: `[2, 3, 4, 5, 6, 7, 0, 8]` (דף 1 הוחלף, דף 8 נוסף כ-MRU).\n\n11. **VPN 1 (0x00100)**\n    *   TLB: Miss (דף 1 הוחלף קודם לכן).\n    *   Page Table Walk: כן.\n    *   Page Fault: לא (דף 1 קיים ב-RAM).\n    *   זמן גישה: 310ns.\n    *   מצב TLB: `[3, 4, 5, 6, 7, 0, 8, 1]` (דף 2 הוחלף, דף 1 נוסף כ-MRU).\n\n1.3: חישוב זמן הגישה האפקטיבי הממוצע (EAT):\n*   סה\"כ מספר גישות: 11.\n*   סה\"כ זמן גישה:\n    *   9 גישות של TLB Miss ללא Page Fault: 9 * 310ns = 2790ns.\n    *   1 גישה של TLB Miss עם Page Fault: 1 * 10,000,210ns = 10,000,210ns.\n    *   1 גישה של TLB Hit: 1 * 110ns = 110ns.\n    *   סה\"כ זמן כולל: 2790ns + 10,000,210ns + 110ns = 10,003,110ns.\n\n*   זמן גישה אפקטיבי ממוצע (EAT) = סה\"כ זמן כולל / סה\"כ מספר גישות\n*   EAT = 10,003,110ns / 11 = **909,373.636ns** (בערך 0.91 מילישניות)."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Threads and Mutexes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 20:19:17",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1131,
+      "output_tokens": 436,
+      "total_tokens": 2299
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "Threads",
+      "Mutexes",
+      "Synchronization",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של שימוש ב-mutex בעבודה עם מספר חוטים (threads) המשתמשים במשאבים משותפים?",
+      "code_snippet": null,
+      "options": [
+        "א. להבטיח שחוטים ירוצו בסדר מוגדר מראש.",
+        "ב. למנוע מצב של מרוץ נתונים (race condition) בעת גישה למשאבים משותפים.",
+        "ג. להגדיל את המקביליות (parallelism) בביצוע תוכניות.",
+        "ד. לאפשר לחוטים לשלוח הודעות אחד לשני."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "המטרה העיקרית של mutex היא לספק הדרה הדדית (mutual exclusion) עבור קטעים קריטיים של קוד. כאשר חוט רוכש mutex לפני גישה למשאב משותף ומשחרר אותו לאחר מכן, הוא מבטיח שרק חוט אחד יוכל לגשת למשאב זה בכל רגע נתון, ובכך מונע מצבי מרוץ נתונים (race conditions) ופגיעה בעקביות הנתונים. אפשרויות א, ג ו-ד אינן המטרה העיקרית של mutex. mutex דווקא עשוי להפחית מקביליות לפרקי זמן קצרים כדי להבטיח נכונות."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

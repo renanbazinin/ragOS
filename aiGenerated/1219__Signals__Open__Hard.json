@@ -1,0 +1,58 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Signals",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 08:46:18",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3748,
+      "output_tokens": 3485,
+      "total_tokens": 13516
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Signals",
+      "Concurrency",
+      "Async-Signal Safety",
+      "Mutexes"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המשתמשת במונה גלובלי המוגן על ידי mutex. התוכנית הראשית מבצעת לולאה אינסופית המגדילה את המונה ומוציאה אותו לפלט. מותקן מטפל לאות SIGINT המדפיס את ערכו הנוכחי של המונה.\n\nנתון קטע הקוד הבא:\n",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <signal.h>\n#include <pthread.h>\n\nvolatile int global_counter = 0;\npthread_mutex_t counter_mutex;\n\nvoid sigint_handler(int signo) {\n    printf(\"SIGINT received! Counter value from handler: %d\\n\", global_counter);\n    exit(0); // For simplicity, exit after handling\n}\n\nint main() {\n    pthread_mutex_init(&counter_mutex, NULL);\n\n    struct sigaction sa;\n    sa.sa_handler = sigint_handler;\n    sigemptyset(&sa.sa_mask);\n    sa.sa_flags = 0; // Default flags for now\n\n    if (sigaction(SIGINT, &sa, NULL) == -1) {\n        perror(\"sigaction\");\n        exit(EXIT_FAILURE);\n    }\n\n    while (1) {\n        pthread_mutex_lock(&counter_mutex);\n        global_counter++;\n        printf(\"Main loop: Counter = %d\\n\", global_counter);\n        pthread_mutex_unlock(&counter_mutex);\n        sleep(1);\n    }\n\n    pthread_mutex_destroy(&counter_mutex);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "נתחו את הבעיות הפוטנציאליות שעלולות להתעורר בתוכנית זו, במיוחד בהקשר של קבלת אות SIGINT. התייחסו לבעיות בטיחות אסינכרונית (async-signal safety), מצבי מירוץ (race conditions), ושימוש בפונקציות לא בטוחות לאות.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "הציעו שינויים בקוד כדי לפתור את הבעיות שזיהיתם, תוך שמירה על עקרונות תכנות נכונים ובטוחים לאותות. הציגו את הקוד המתוקן והסבירו את הבחירות שלכם.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.3",
+        "text": "הסבירו מה היה משתנה בתוכנית אם היינו משתמשים בדגלים `SA_RESTART` או `SA_NODEFER` עבור `sigaction`.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "### ניתוח ופתרונות:\n\n**1.1. ניתוח הבעיות הפוטנציאליות:**\n\n1.  **שימוש ב-`printf` בתוך מטפל אותות (Async-Signal Safety):** הפונקציה `printf` אינה בטוחה לשימוש אסינכרוני (async-signal safe). אם אות `SIGINT` מגיע בזמן שפונקציית `printf` הראשית ב-`main` נמצאת בעיצומה (למשל, מחזיקה מנעול פנימי או מנהלת באפרים), קריאה נוספת ל-`printf` מתוך מטפל האותות עלולה להוביל להתנהגות בלתי מוגדרת (undefined behavior), קריסות, או הדפסה משובשת. באופן כללי, יש להשתמש רק בפונקציות שהוגדרו כבטוחות לאותות במטפלי אותות.\n2.  **מצב מירוץ בקריאת `global_counter`:** למרות ש-`global_counter` מוגן על ידי mutex בלולאה הראשית, הקריאה שלו בתוך מטפל האותות (`printf(\"... %d\\n\", global_counter);`) מתבצעת ללא הגנה. אם האות מגיע בדיוק כאשר ה-`main` מעדכן את המונה (למשל, לאחר `global_counter++;` אך לפני `pthread_mutex_unlock`), מטפל האותות עלול לקרוא ערך חלקי או לא עקבי של המונה. המונה `volatile` רק מבטיח שהקומפיילר לא יבצע אופטימיזציות בקריאה/כתיבה לזיכרון, אך אינו מספק אטומיות או סנכרון.\n3.  **הפרעה לפעולות המוגנות על ידי Mutex:** אם האות מגיע לאחר ש-`pthread_mutex_lock` נקרא ב-`main` ולפני ש-`pthread_mutex_unlock` נקרא, המטפל לא ינסה לנעול את אותו mutex. אולם, עצם ההפרעה באמצע קטע קריטי מוגן עלולה לבלבל את מצב התוכנית. במקרה זה, הבעיה העיקרית היא הגישה הלא בטוחה ל-`global_counter` והשימוש ב-`printf`.\n4.  **`exit(0)` במטפל:** קריאה ל-`exit(0)` מתוך מטפל האותות מביאה לסיום מיידי של התהליך. זה מונע ביצוע של פעולות ניקוי מסודרות (כמו `pthread_mutex_destroy`) ועלול להשאיר משאבים פתוחים או במצב לא עקבי. עדיף בדרך כלל להגדיר דגל במטפל ולתת ללולאה הראשית לבצע יציאה מסודרת.\n\n**1.2. קוד מתוקן ופתרון הבעיות:**\nכדי לפתור את הבעיות, ננקוט בגישה של חסימת אותות סביב הקטע הקריטי, שימוש בדגל `sig_atomic_t` ליציאה מסודרת, ושימוש בפונקציות בטוחות לאותות במטפל.\n\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <signal.h>\n#include <pthread.h>\n\nvolatile int global_counter = 0;\npthread_mutex_t counter_mutex;\nvolatile sig_atomic_t sigint_received = 0; // דגל ליציאה מסודרת\n\nvoid sigint_handler(int signo) {\n    sigint_received = 1; // קבע את הדגל שהתקבל אות\n    // אין להשתמש ב-printf במטפל אותות. במקום זאת, נשתמש ב-write.\n    const char msg[] = \"SIGINT received! Setting shutdown flag.\\n\";\n    write(STDOUT_FILENO, msg, sizeof(msg) - 1);\n    // אין לצאת מכאן ישירות, אלא לתת ללולאה הראשית לטפל בכך.\n}\n\nint main() {\n    pthread_mutex_init(&counter_mutex, NULL);\n\n    struct sigaction sa;\n    sa.sa_handler = sigint_handler;\n    sigemptyset(&sa.sa_mask);\n    // SA_RESTART: מפעיל מחדש פונקציות מערכת שנקטעו על ידי אות\n    // SA_NODEFER: לא חוסם את האות עצמו בזמן שהמטפל שלו רץ\n    sa.sa_flags = SA_RESTART; // נבחר SA_RESTART לנוחות, הסבר בהמשך\n\n    if (sigaction(SIGINT, &sa, NULL) == -1) {\n        perror(\"sigaction\");\n        exit(EXIT_FAILURE);\n    }\n\n    // הגדרת מסכת אותות לחסימת SIGINT סביב הקטע הקריטי\n    sigset_t block_mask, old_mask;\n    sigemptyset(&block_mask);\n    sigaddset(&block_mask, SIGINT);\n\n    while (1) {\n        // בדוק את הדגל ליציאה מסודרת\n        if (sigint_received) {\n            const char msg[] = \"Main loop detected SIGINT, exiting gracefully.\\n\";\n            write(STDOUT_FILENO, msg, sizeof(msg) - 1);\n            break; // יציאה מהלולאה\n        }\n\n        // חסום את SIGINT לפני הקטע הקריטי\n        if (pthread_sigmask(SIG_BLOCK, &block_mask, &old_mask) == -1) {\n            perror(\"pthread_sigmask BLOCK\");\n            exit(EXIT_FAILURE);\n        }\n\n        // קטע קריטי: גישה ל-global_counter\n        pthread_mutex_lock(&counter_mutex);\n        global_counter++;\n        int current_counter = global_counter; // קריאה מוגנת של הערך\n        pthread_mutex_unlock(&counter_mutex);\n\n        // שחזר את מסכת האותות הקודמת (בטל את חסימת SIGINT אם היה לא חסום)\n        if (pthread_sigmask(SIG_SETMASK, &old_mask, NULL) == -1) {\n            perror(\"pthread_sigmask SETMASK\");\n            exit(EXIT_FAILURE);\n        }\n\n        // כעת בטוח להדפיס באמצעות printf מחוץ לקטע הקריטי המוגן מפני אותות\n        printf(\"Main loop: Counter = %d\\n\", current_counter);\n        sleep(1);\n    }\n\n    pthread_mutex_destroy(&counter_mutex);\n    return 0;\n}\n```\n\n**הסבר לשינויים:**\n*   **`sigint_received` דגל:** הוספנו דגל `volatile sig_atomic_t sigint_received` שמעודכן על ידי מטפל האותות. `sig_atomic_t` מבטיח שהגישה למשתנה זה תהיה אטומית, ו-`volatile` מונע אופטימיזציות של הקומפיילר. הלולאה הראשית בודקת דגל זה ויוצאת בצורה מסודרת.\n*   **`write` במקום `printf` במטפל:** החלפנו את `printf` ב-`write(STDOUT_FILENO, ...)` במטפל האותות, מכיוון ש-`write` היא פונקציה בטוחה לשימוש אסינכרוני, בניגוד ל-`printf`.\n*   **חסימת אותות סביב קטע קריטי:** השתמשנו ב-`pthread_sigmask` כדי לחסום את `SIGINT` לפני הכניסה לקטע הקריטי שבו `global_counter` מעודכן ונקרא, ולבטל את החסימה לאחר מכן. זה מבטיח שמטפל האותות לא יופעל בזמן שהמונה נמצא במצב לא עקבי או שה-mutex נעול, ובכך מונע מצבי מירוץ ובעיות סנכרון. `old_mask` נשמרת ומשוחזרת כדי לא להשפיע על חסימת אותות אחרים.\n*   **הדפסה מוגנת:** הקריאה ל-`global_counter` עבור `printf` בלולאה הראשית נעשית לאחר שהמונה כבר עודכן ונעילת ה-mutex שוחררה, והאות נחסם סביב הקטע הקריטי, מה שהופך את הקריאה ל-`global_counter` בטוחה. ה-`printf` עצמו מתבצע מחוץ לקטע הקריטי המוגן על ידי חסימת אותות.\n\n**1.3. הסבר על דגלי `sigaction`:**\n\n*   **`SA_RESTART`:** דגל זה משנה את התנהגותן של פונקציות מערכת מסוימות (כגון `read`, `write`, `sleep`, `wait`) כאשר הן מופרעות על ידי אות. ללא `SA_RESTART`, אם אות מגיע בזמן שפונקציית מערכת חוסמת פועלת, הפונקציה תיכשל ותחזיר בדרך כלל `-1` ותגדיר את `errno` ל-`EINTR` (interrupted system call). עם `SA_RESTART`, מערכת ההפעלה תנסה להפעיל מחדש את פונקציית המערכת באופן אוטומטי לאחר שמטפל האותות יסיים. בקוד המקורי, `sleep(1)` היה מופרע על ידי `SIGINT` וחוזר מוקדם. עם `SA_RESTART`, ה-`sleep` היה מופעל מחדש או ממשיך לאחר הטיפול באות, כך שההשהיה של שנייה אחת הייתה נשמרת טוב יותר.\n*   **`SA_NODEFER`:** כאשר מטפל אותות מופעל, כברירת מחדל (כלומר, ללא `SA_NODEFER`), האות שגרם להפעלת המטפל נחסם אוטומטית למשך זמן ריצת המטפל. זה מונע כניסה חוזרת לאותו מטפל אותות (reentrancy) אם האות מתקבל שוב בזמן שהמטפל הקודם עדיין פועל. אם משתמשים ב-`SA_NODEFER`, האות לא נחסם, וקבלת אותו אות שוב בזמן שהמטפל רץ עלולה לגרום לכניסה חוזרת למטפל (אם הוא לא נחסם במפורש על ידי `sa_mask`), מה שעלול להוביל לבעיות כמו ערימה (stack) עולה על גדותיה או מצבי מירוץ בתוך המטפל עצמו. בדרך כלל, `SA_NODEFER` אינו מומלץ אלא אם כן יש סיבה ספציפית וברורה לכך שהמטפל מסוגל לטפל בכניסות חוזרות."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

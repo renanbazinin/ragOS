@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Atomic Operations",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 09:25:36",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1758,
+      "output_tokens": 799,
+      "total_tokens": 9033
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Atomic Operations",
+      "Concurrency",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתון מעבד התומך בפעולה האטומית CAS, הניתנת להפעלה ע\"י קריאה לפונקציה:\n`bool compareAndSet (int* ptr, int expected, int new_val);`\nהפונקציה מחזירה `true` אם `*ptr` היה שווה ל-`expected` והוחלף ב-`new_val`, אחרת מחזירה `false`.\n\nסטודנט כתב את הפונקציה הבאה, שמטרתה להקטין ערך של משתנה ב-1 באופן אטומי, *רק אם* הערך המקורי חיובי (גדול מ-0). הפונקציה אמורה להחזיר `true` אם ההקטנה בוצעה בהצלחה ו-`false` אחרת.",
+      "code_snippet": "bool decrementIfPositive(int* val_ptr) {\n    int current_val = *val_ptr;\n    if (current_val <= 0) {\n        return false;\n    }\n    return compareAndSet(val_ptr, current_val, current_val - 1);\n}",
+      "options": [
+        "א. המימוש תקין, והפעולה תמיד תצליח כאשר הערך חיובי.",
+        "ב. המימוש תקין, אך יפגין ביצועים פחות טובים ממימוש ב-LL/SC.",
+        "ג. המימוש לא תקין, שימוש בו עלול לגרום לקיפאון.",
+        "ד. המימוש לא תקין, הפעולה לא תמיד תצליח כאשר היא אמורה, עקב תנאי מירוץ.",
+        "ה. המימוש לא תקין, הערך של val_ptr לא תמיד יעודכן באופן נכון."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ד",
+      "explanation": "ד'. המימוש אינו תקין עקב תנאי מירוץ. חוט קורא את `current_val` (לדוגמה, `1`), מבצע את בדיקת `if (current_val <= 0)` (שנכשלת). אולם, בין קריאת `current_val` לבין ביצוע פעולת `compareAndSet`, חוט אחר יכול להקטין את `*val_ptr` ל-`0`. במקרה כזה, פעולת `compareAndSet(val_ptr, 1, 0)` של החוט המקורי תיכשל (מכיוון ש-`*val_ptr` כבר אינו `1`), והפונקציה תחזיר `false` מבלי לנסות שוב עם הערך המעודכן. בכך, הפעולה לא תצליח להקטין את הערך למרות שהייתה אמורה (אם היינו קוראים את הערך מחדש ומנסים שוב). מימוש נכון היה דורש לולאת `do-while` סביב קריאת הערך ובדיקת התנאי לפני ה-`CAS`."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

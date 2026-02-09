@@ -1,0 +1,58 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Threads and Synchronization",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 19:52:24",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3826,
+      "output_tokens": 2572,
+      "total_tokens": 13218
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Threads",
+      "Synchronization",
+      "Barriers",
+      "Race Conditions"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המממשת מחסום (Barrier) לשימוש חוזר עבור מספר קבוע של חוטים. הקבוע `NUM_THREADS` מייצג את מספר החוטים הכולל שצריכים להגיע למחסום. קוד הפונקציה `barrier_wait` הממומשת מכיל שגיאה המונעת את פעולתו התקינה של המחסום בשימוש חוזר. יש להניח שכל קריאות המערכת מצליחות.\n\nענו על השאלות הבאות בהתבסס על הקוד הנתון:",
+      "code_snippet": "1 #include <pthread.h>\n2 #include <stdio.h>\n3 #include <unistd.h>\n4\n5 #define NUM_THREADS 5 // מספר החוטים שיגיעו למחסום\n6 #define NUM_BARRIER_CYCLES 2 // מספר הפעמים שהמחסום ישמש\n7\n8 pthread_mutex_t barrier_mutex;\n9 pthread_cond_t barrier_cond;\n10 int arrived_count = 0;\n11 int barrier_generation = 0; // מונה דורות המחסום\n12\n13 void barrier_wait() {\n14     pthread_mutex_lock(&barrier_mutex);\n15     \n16     arrived_count++;\n17     if (arrived_count == NUM_THREADS) {\n18         // החוט האחרון שהגיע, מאפס את המונה ומאותת לכולם\n19         arrived_count = 0; \n20         barrier_generation++; // קידום הדור\n21         pthread_cond_broadcast(&barrier_cond);\n22     } else {\n23         // לא החוט האחרון, מחכה\n24         pthread_cond_wait(&barrier_cond, &barrier_mutex);\n25     }\n26     pthread_mutex_unlock(&barrier_mutex);\n27 }\n28\n29 void* thread_func(void* arg) {\n30     int id = *(int*)arg;\n31     for (int i = 0; i < NUM_BARRIER_CYCLES; ++i) {\n32         printf(\"Thread %d (cycle %d) arriving at barrier.\\n\", id, i);\n33         barrier_wait();\n34         printf(\"Thread %d (cycle %d) passed barrier.\\n\", id, i);\n35         usleep(10000 * (id + 1)); // מדמה עבודה לאחר המחסום\n36     }\n37     return NULL;\n38 }\n39\n40 int main() {\n41     pthread_t threads[NUM_THREADS];\n42     int ids[NUM_THREADS];\n43\n44     pthread_mutex_init(&barrier_mutex, NULL);\n45     pthread_cond_init(&barrier_cond, NULL);\n46\n47     for (int i = 0; i < NUM_THREADS; ++i) {\n48         ids[i] = i;\n49         pthread_create(&threads[i], NULL, thread_func, &ids[i]);\n50     }\n51\n52     for (int i = 0; i < NUM_THREADS; ++i) {\n53         pthread_join(threads[i], NULL);\n54     }\n55\n56     pthread_mutex_destroy(&barrier_mutex);\n57     pthread_cond_destroy(&barrier_cond);\n58\n59     printf(\"All threads finished.\\n\");\n60     return 0;\n61 }",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "תארו איזו בעיה עלולה להתרחש בשימוש חוזר במחסום זה, במיוחד כאשר חוטים מסיימים את עבודתם מהר וחוזרים למחסום לפני שכל החוטים מהמחזור הקודם עברו.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "נמקו מדוע הבעיה מתרחשת ומהו התזמון הספציפי שמוביל לכך.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.3",
+        "text": "תקנו את קוד הפונקציה `barrier_wait` כך שהמחסום יעבוד כראוי לשימוש חוזר, תוך שמירה על עקרונות סנכרון נאותים (ללא spinning). יש להגדיר משתנים גלובליים נוספים במידת הצורך ולציין את אתחולם.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": 25,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "10.1: הבעיה העיקרית היא שחוטים מהדור הבא (מחזור מחסום עתידי) עלולים לעבור את המחסום בטרם עת, לפני שכל החוטים מהדור הנוכחי סיימו לעבור. זה מוביל להפרה של דרישת הסנכרון של המחסום, שבה כל החוטים אמורים לעבור יחד.\n\n10.2: הבעיה נובעת מתזמון לא נכון של איפוס המונה `arrived_count` וקידום `barrier_generation` על ידי החוט האחרון שמגיע למחסום. כאשר החוט האחרון מגיע (שורה 17), הוא מאפס את `arrived_count` (שורה 19), מקדם את `barrier_generation` (שורה 20) וקורא ל-`pthread_cond_broadcast` (שורה 21). קריאה זו מעירה את כל החוטים הממתינים על `barrier_cond`. עם זאת, אין ערובה שכל החוטים שהתעוררו יספיקו לרכוש את המנעול, לבדוק את התנאי ולצאת מהפונקציה `barrier_wait` לפני שחוט מהדור הבא (שסיים את עבודתו מהר) יקרא שוב ל-`barrier_wait`.\n\nאם חוט מהדור הבא יגיע לפונקציה `barrier_wait` לאחר שהחוט האחרון איפס את `arrived_count` אך לפני שכל חוטים מהדור הקודם יצאו מה-`pthread_cond_wait`, הוא יגדיל את `arrived_count` ל-1. אם מספיק חוטים מהדור הבא יגיעו במהירות לפני שכל חוטים מהדור הקודם עזבו, ייתכן ש-`arrived_count` יגיע ל-`NUM_THREADS` שוב בטרם עת. במצב זה, חוט מהדור הבא יחשוב שהוא החוט האחרון, יאפס את `arrived_count` שוב, יקדם את `barrier_generation` ויקרא ל-`broadcast`, ובכך יאפשר לחוטים מהדור הבא לעבור את המחסום מוקדם מדי.\n\nהתנאי בשורה 24 (`pthread_cond_wait`) אינו מספיק חזק. חוטים שמתעוררים מה-`wait` צריכים לבדוק לא רק שמישהו אותת, אלא שהדור שלהם אכן עבר, וזאת באמצעות לולאת `while` ובדיקה של `barrier_generation`.\n\n10.3:\n\n```c\n#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h>\n\n#define NUM_THREADS 5 // מספר החוטים שיגיעו למחסום\n#define NUM_BARRIER_CYCLES 2 // מספר הפעמים שהמחסום ישמש\n\npthread_mutex_t barrier_mutex;\npthread_cond_t barrier_cond;\nint arrived_count = 0;\nint barrier_generation = 0; // מונה דורות המחסום\n\nvoid barrier_wait() {\n    pthread_mutex_lock(&barrier_mutex);\n    \n    int my_generation = barrier_generation; // כל חוט זוכר את הדור שאליו הוא שייך\n\n    arrived_count++;\n    if (arrived_count == NUM_THREADS) {\n        // החוט האחרון שהגיע\n        arrived_count = 0;         // איפוס המונה עבור הדור הבא\n        barrier_generation++;      // קידום הדור (משחרר את כל החוטים מהדור הנוכחי)\n        pthread_cond_broadcast(&barrier_cond); // מעיר את כל החוטים הממתינים\n    } else {\n        // לא החוט האחרון, מחכה שהדור שלו יתקדם\n        while (my_generation == barrier_generation) { // תנאי המתנה חזק יותר\n            pthread_cond_wait(&barrier_cond, &barrier_mutex);\n        }\n    }\n    pthread_mutex_unlock(&barrier_mutex);\n}\n\n// שאר הקוד של main ו-thread_func נשאר זהה\n```\n\n**הסבר לתיקון:**\nהתיקון המרכזי הוא הוספת משתנה מקומי `my_generation` בכל קריאה ל-`barrier_wait` (שורה 16 בקוד המתוקן). משתנה זה שומר את ערך `barrier_generation` ברגע שהחוט נכנס למחסום. חוטים שאינם האחרונים להגיע (ה-`else` בשורה 22) ימתינו כעת בלולאת `while` (שורה 24) במקום ב-`if` יחיד. הם יצאו מה-`pthread_cond_wait` רק כאשר `barrier_generation` יתקדם מעבר ל-`my_generation` שלהם, מה שמבטיח שהם אכן עברו לדור הבא של המחסום. החוט האחרון שמגיע אחראי לקדם את `barrier_generation` ובכך לאותת לכל החוטים מהדור הנוכחי שהם יכולים להמשיך. זה מונע מחוטים מהדור הבא להתחיל לספור בטרם עת או לעבור את המחסום לפני שכל החוטים מהדור הקודם יצאו."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

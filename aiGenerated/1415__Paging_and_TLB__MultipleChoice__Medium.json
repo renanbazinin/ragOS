@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Paging and TLB",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 10:01:39",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1143,
+      "output_tokens": 526,
+      "total_tokens": 2551
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Paging",
+      "TLB",
+      "Memory Management",
+      "Virtual Memory"
+    ],
+    "content": {
+      "text": "בהינתן מערכת הפעלה המשתמשת בזיכרון וירטואלי עם מנגנון Paging וב-TLB. נניח שגישה לזיכרון הפיזי אורכת 100ns, וגישה ל-TLB אורכת 10ns. כמה זמן תיקח גישה לכתובת לוגית אם מתרחש TLB Miss ולאחר מכן Page Table Hit (כלומר, הדף נמצא בזיכרון הפיזי)?",
+      "code_snippet": null,
+      "options": [
+        "א. 110ns",
+        "ב. 120ns",
+        "ג. 200ns",
+        "ד. 210ns",
+        "ה. 310ns"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ד",
+      "explanation": "ד. 210ns. במקרה של TLB Miss, המערכת מבצעת גישה ל-TLB (10ns) כדי לבדוק אם הכתובת קיימת בו. מכיוון שזוהי החטאה (Miss), המערכת פונה לאחר מכן לטבלת הדפים בזיכרון הפיזי (100ns) כדי למצוא את הכתובת הפיזית של הדף. לאחר מכן, הכתובת הפיזית נמצאת והיא נטענת ל-TLB (לצורך גישות עתידיות מהירות יותר), ולבסוף מבוצעת גישה לזיכרון הפיזי עצמו (100ns) כדי לקרוא/לכתוב את הנתונים. סך הכל: 10ns (TLB access) + 100ns (Page Table access) + 100ns (Data access) = 210ns."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

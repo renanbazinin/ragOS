@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Context Switching",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 07:07:05",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2777,
+      "output_tokens": 459,
+      "total_tokens": 4331
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Context Switching"
+    ],
+    "content": {
+      "text": "הסבר מהי החלפת הקשר (Context Switch) במערכת הפעלה, ומדוע היא נחוצה.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "החלפת הקשר (Context Switch) היא תהליך שבו מערכת ההפעלה שומרת את מצבו (הקשרו) של תהליך או תהליכון שרץ כרגע על המעבד, וטוענת את מצבו של תהליך או תהליכון אחר שנבחר לרוץ. מצב זה כולל, בין היתר, את ערכי האוגרים של המעבד (כולל אוגר התוכנית - PC ואוגר המחסנית - SP), מידע על מרחב הכתובות של התהליך, ומצב קבצי המערכת הפתוחים.\n\nהחלפת הקשר נחוצה כדי לאפשר ריבוי משימות (multitasking) וחלוקת זמן המעבד בין מספר תהליכים או תהליכונים. היא מאפשרת למערכת ההפעלה להעניק אשליה של הרצה מקבילה של מספר תוכניות בו-זמנית, ובכך לשפר את ניצולת המעבד ואת היענות המערכת למשתמש, גם במערכות בעלות מעבד יחיד. ללא החלפת הקשר, תהליך אחד היה רץ עד לסיומו או עד שימתין לקלט/פלט, מה שהיה מונע מתהליכים אחרים לקבל זמן מעבד."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

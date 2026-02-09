@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "File Systems and I/O",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 10:59:07",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1233,
+      "output_tokens": 659,
+      "total_tokens": 3125
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "File Systems",
+      "I/O",
+      "System Calls",
+      "Caching"
+    ],
+    "content": {
+      "text": "במערכת הפעלה מודרנית, מה נכון לגבי כתיבת נתונים לקובץ באמצעות קריאות מערכת?",
+      "code_snippet": null,
+      "options": [
+        "א. ברגע שקריאת המערכת write() חוזרת בהצלחה, הנתונים נכתבו פיזית לדיסק הקשיח.",
+        "ב. הנתונים נכתבים לדיסק הקשיח רק כאשר הקובץ נסגר באמצעות קריאת המערכת close().",
+        "ג. קריאה מוצלחת ל-fsync() מבטיחה שהנתונים שנכתבו לקובץ, יחד עם המטא-דאטה הרלוונטי, נשמרו באופן עמיד (persistent) על הדיסק הקשיח.",
+        "ד. הנתונים נשמרים תמיד במטמון של התהליך במרחב המשתמש (user-space buffer) ומועברים לקרנל רק בעת סגירת הקובץ.",
+        "ה. אף אחת מהתשובות האחרות אינה נכונה."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג. קריאת המערכת write() מעבירה את הנתונים ממרחב המשתמש למטמון הדפים (page cache) של הקרנל. מערכת ההפעלה עשויה לעכב את הכתיבה בפועל לדיסק כדי לבצע אופטימיזציות I/O. קריאת המערכת fsync() נועדה במפורש לדחוק (flush) את כל הנתונים והמטא-דאטה ה'מלוכלכים' (dirty data and metadata) המשויכים ל-inode של הקובץ מהמטמון של הקרנל אל אמצעי האחסון הקבוע (הדיסק). קריאת המערכת close() עשויה להפעיל דחיקה חלקית או מלאה, אך אינה מבטיחה עמידות (persistence) מיידית של הנתונים על הדיסק. לכן, אפשרות א' שגויה (write() לא מבטיח כתיבה פיזית לדיסק), אפשרות ב' שגויה (close() לא מבטיח כתיבה לדיסק), ואפשרות ד' שגויה (write() מעביר נתונים מה-user-space ל-kernel-space)."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

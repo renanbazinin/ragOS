@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Signals and System Calls",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 11:53:38",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 926,
+      "output_tokens": 1071,
+      "total_tokens": 3819
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Signals",
+      "System Calls",
+      "C/C++"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא:\n```c\n#include <unistd.h>\n#include <signal.h>\n#include <errno.h>\n\nvoid my_handler(int signum) {\n    // מטפל סיגנל פשוט\n}\n\nint main() {\n    struct sigaction sa;\n    sa.sa_handler = my_handler;\n    sigemptyset(&sa.sa_mask);\n    sa.sa_flags = 0; // שימו לב: SA_RESTART אינו מוגדר\n\n    sigaction(SIGUSR1, &sa, NULL);\n\n    char buffer[10];\n    ssize_t bytes_read = read(STDIN_FILENO, buffer, sizeof(buffer));\n\n    // מהו הערך הסביר ביותר של bytes_read ו-errno לאחר קריאת המערכת,\n    // אם התהליך קיבל את הסיגנל SIGUSR1 בזמן ש-read() חסום,\n    // והמטפל סיגנל my_handler סיים את ריצתו?\n    return 0;\n}\n```\nמהו הערך הסביר ביותר של `bytes_read` ו-`errno` לאחר קריאת המערכת `read()`, אם התהליך קיבל את הסיגנל `SIGUSR1` בזמן ש-`read()` חסום, והמטפל סיגנל `my_handler` סיים את ריצתו?",
+      "code_snippet": "#include <unistd.h>\n#include <signal.h>\n#include <errno.h>\n\nvoid my_handler(int signum) {\n    // מטפל סיגנל פשוט\n}\n\nint main() {\n    struct sigaction sa;\n    sa.sa_handler = my_handler;\n    sigemptyset(&sa.sa_mask);\n    sa.sa_flags = 0; // שימו לב: SA_RESTART אינו מוגדר\n\n    sigaction(SIGUSR1, &sa, NULL);\n\n    char buffer[10];\n    ssize_t bytes_read = read(STDIN_FILENO, buffer, sizeof(buffer));\n\n    // מהו הערך הסביר ביותר של bytes_read ו-errno לאחר קריאת המערכת,\n    // אם התהליך קיבל את הסיגנל SIGUSR1 בזמן ש-read() חסום,\n    // והמטפל סיגנל my_handler סיים את ריצתו?\n    return 0;\n}",
+      "options": [
+        "א. `read()` יחזיר את מספר הבתים שנקראו בהצלחה לפני קבלת הסיגנל, ו-`errno` לא ישתנה.",
+        "ב. `read()` יחזיר -1, ו-`errno` יוגדר ל-`EINTR`.",
+        "ג. התהליך יסיים את ריצתו (terminate) באופן מיידי לאחר קבלת הסיגנל.",
+        "ד. `read()` ימשיך לחכות עד שיהיו נתונים זמינים לקריאה, כאילו הסיגנל לא התקבל.",
+        "ה. `read()` יחזיר 0, המציין סוף קובץ (EOF)."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "כאשר קריאת מערכת חוסמת (blocking system call) כמו `read()` מופסקת על ידי סיגנל עבורו מוגדר מטפל, ודגל `SA_RESTART` *אינו* מוגדר ב-`sigaction`, קריאת המערכת נקטעת. היא אינה מופעלת מחדש אוטומטית. במקרה כזה, קריאת המערכת `read()` תחזיר -1, ומשתנה ה-`errno` הגלובלי יוגדר ל-`EINTR` (Interrupted system call), מה שמציין שהפעולה נקטעה על ידי סיגנל. על התוכנית לטפל במקרה זה ולבחור אם לנסות שוב את קריאת המערכת."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

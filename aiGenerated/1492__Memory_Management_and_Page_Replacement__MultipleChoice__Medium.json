@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Memory Management and Page Replacement",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 10:45:46",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 941,
+      "output_tokens": 504,
+      "total_tokens": 3004
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Memory Management",
+      "Page Replacement",
+      "Virtual Memory"
+    ],
+    "content": {
+      "text": "באלגוריתם החלפת דפים \"הזדמנות שנייה\" (Second Chance / Clock), כאשר מצביע ה-Clock מגיע לדף שסומן כ-referenced (כלומר, ה-reference bit שלו הוא 1), ונדרש לפנות דף, מהי הפעולה הראשונה שמתבצעת על דף זה?",
+      "code_snippet": null,
+      "options": [
+        "א. הדף מוחלף מיד במידה ואין דפים אחרים עם reference bit=0.",
+        "ב. ה-reference bit של הדף מאופס ל-0, והמצביע מתקדם לדף הבא.",
+        "ג. הדף נכתב לדיסק אם ה-dirty bit שלו הוא 1, ורק אז הוא מוחלף.",
+        "ד. הדף נשאר בזיכרון ללא שינוי, והמצביע קופץ לדף הבא.",
+        "ה. הדף מועבר לסוף הרשימה (כאילו היה בשימוש לאחרונה)."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "באלגוריתם \"הזדמנות שנייה\" (Clock), כאשר מצביע ה-Clock מגיע לדף שה-reference bit שלו הוא 1, הדף מקבל \"הזדמנות שנייה\". ה-reference bit שלו מאופס ל-0, והמצביע מתקדם לדף הבא בחיפוש אחר דף עם reference bit=0. הדף נשאר בזיכרון באותו רגע, ורק אם המצביע יחזור אליו בסיבוב הבא וה-reference bit שלו עדיין יהיה 0, הוא ייבחר להחלפה."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

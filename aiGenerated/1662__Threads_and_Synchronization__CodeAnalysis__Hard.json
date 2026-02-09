@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Threads and Synchronization",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 19:50:20",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3826,
+      "output_tokens": 2481,
+      "total_tokens": 15637
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Threads",
+      "Synchronization",
+      "Concurrency",
+      "Mutexes",
+      "Condition Variables",
+      "Readers-Writers"
+    ],
+    "content": {
+      "text": "נתונה מערכת מרובת חוטים המנהלת מונה גלובלי משותף `current_value`. חוטים יכולים לבצע שתי פעולות על המונה: הגדלה (increment) ואיפוס (reset).\nהדרישות לפעולות אלו הן כדלקמן:\n1.  **הגדלה (increment)**: פעולה זו מוסיפה 1 למונה `current_value`. מספר חוטים יכולים לבצע פעולות הגדלה בו-זמנית (concurrently).\n2.  **איפוס (reset)**: פעולה זו מאפסת את `current_value` ל-0. פעולה זו חייבת להתבצע באופן בלעדי (exclusively) - כלומר, בזמן שחוט מבצע איפוס, אף חוט אחר (לא הגדלה ולא איפוס) אינו יכול להיות פעיל.\n3.  **מניעת הרעבה (Starvation Prevention)**: אם חוט כלשהו ממתין לבצע פעולת איפוס, הוא צריך בסופו של דבר להצליח לבצע אותה. פעולות הגדלה לא יורשו להרעיב אותו ללא הגבלה.\n\nיש לממש את הפונקציות `increment_value()` ו-`reset_value()` באמצעות מנעולים (mutexes) ומשתני תנאי (condition variables) בלבד. אין להשתמש בפקודות מכונה אטומיות או אובייקטי סנכרון אחרים. יש להימנע מ-spinning על-ידי שימוש נכון במשתני תנאי.\n\n**קוד התחלתי:**",
+      "code_snippet": "void increment_value() {\n    // Implement this function\n}\n\nvoid reset_value() {\n    // Implement this function\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "תיאור הפתרון:\nהפתרון משתמש במנעול אחד (`mutex`) כדי להגן על הגישה למשתני הסנכרון ולמונה המשותף, ובשני משתני תנאי (`can_increment_cond`, `can_reset_cond`) לתיאום בין החוטים. פתרון זה מבוסס על מודל קוראים-כותבים עם עדיפות לכותבים, על מנת למנוע הרעבה של פעולות האיפוס.\n\n**משתנים גלובליים (יש לציין ערכי אתחול בהערה):**\n```c\n#include <pthread.h>\n#include <stdio.h>\n\n// Global shared counter\nint current_value = 0;\n\n// Synchronization variables\npthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;\npthread_cond_t can_increment_cond = PTHREAD_COND_INITIALIZER;\npthread_cond_t can_reset_cond = PTHREAD_COND_INITIALIZER;\n\nint readers_active = 0;  // מספר החוטים המבצעים כעת פעולת הגדלה (אתחול: 0)\nint writers_waiting = 0; // מספר החוטים הממתינים לבצע פעולת איפוס (אתחול: 0)\nint writer_active = 0;   // דגל המציין האם חוט מבצע כעת פעולת איפוס (1 אם כן, 0 אם לא) (אתחול: 0)\n```\n\n**מימוש הפונקציות:**\n```c\nvoid increment_value() {\n    pthread_mutex_lock(&mutex);\n\n    // המתן אם כותב פעיל או שיש כותבים ממתינים (עדיפות לכותבים למניעת הרעבה)\n    while (writer_active || writers_waiting > 0) {\n        pthread_cond_wait(&can_increment_cond, &mutex);\n    }\n\n    readers_active++;\n    // פעולת ההגדלה בפועל. מוגנת על ידי המנעול.\n    current_value++;\n\n    pthread_mutex_unlock(&mutex);\n}\n\nvoid reset_value() {\n    pthread_mutex_lock(&mutex);\n\n    writers_waiting++; // סמן כוונה לכתוב (לאפס)\n\n    // המתן עד שאין קוראים פעילים ואין כותב אחר פעיל\n    while (readers_active > 0 || writer_active) {\n        pthread_cond_wait(&can_reset_cond, &mutex);\n    }\n\n    writers_waiting--;   // כבר לא רק ממתין, עומד להיות פעיל\n    writer_active = 1;   // סמן ככותב פעיל\n\n    // פעולת האיפוס בפועל. מוגנת על ידי המנעול.\n    current_value = 0;\n\n    writer_active = 0; // סמן ככותב סיים\n\n    // אם יש כותבים נוספים הממתינים, אותת לאחד מהם (עדיפות לכותבים)\n    if (writers_waiting > 0) {\n        pthread_cond_signal(&can_reset_cond);\n    } else {\n        // אם אין כותבים ממתינים, אותת לכל הקוראים הפוטנציאליים\n        pthread_cond_broadcast(&can_increment_cond);\n    }\n\n    pthread_mutex_unlock(&mutex);\n}\n```\n\n**הסבר מפורט:**\n\n**פונקציה `increment_value()`:**\n1.  החוט נועל את ה`mutex` כדי להגן על הגישה למשתני הסנכרון ולמונה `current_value`.\n2.  החוט נכנס ללולאת המתנה: הוא ממתין על `can_increment_cond` כל עוד `writer_active` הוא `true` (כלומר, חוט אחר מבצע איפוס) או ש`writers_waiting` גדול מ-0 (כלומר, ישנם חוטים הממתינים לבצע איפוס). תנאי זה מבטיח עדיפות לכותבים (resetters) ומונע הרעבה שלהם – חוטים המבצעים הגדלה לא יורשו להיכנס אם יש כותבים ממתינים.\n3.  כאשר התנאי מתקיים (אין כותב פעיל ואין כותב ממתין), החוט מגדיל את `readers_active` כדי לסמן שהוא פעיל בפעולת ההגדלה.\n4.  החוט מבצע את פעולת ההגדלה `current_value++`. פעולה זו מוגנת על ידי ה`mutex` (שננעל בתחילת הפונקציה), ולכן היא בטוחה ומונעת תנאי מירוץ על `current_value`.\n5.  החוט משחרר את ה`mutex`.\n\n**פונקציה `reset_value()`:**\n1.  החוט נועל את ה`mutex` כדי להגן על הגישה למשתני הסנכרון.\n2.  החוט מגדיל את `writers_waiting` כדי לסמן שהוא ממתין לבצע איפוס. זה יגרום לחוטים המבצעים הגדלה להמתין אם הם ינסו להיכנס בזמן שחוט זה ממתין.\n3.  החוט נכנס ללולאת המתנה: הוא ממתין על `can_reset_cond` כל עוד `readers_active` גדול מ-0 (כלומר, ישנם חוטים המבצעים הגדלה) או ש`writer_active` הוא `true` (כלומר, חוט אחר מבצע איפוס). תנאי זה מבטיח את הבלעדיות של פעולת האיפוס.\n4.  כאשר התנאי מתקיים (אין קוראים פעילים ואין כותב אחר פעיל), החוט מקטין את `writers_waiting` (מכיוון שהוא כבר לא רק ממתין אלא עומד להיות פעיל) ומסמן את עצמו ככותב פעיל באמצעות `writer_active = 1`.\n5.  החוט מבצע את פעולת האיפוס `current_value = 0`. פעולה זו מוגנת על ידי ה`mutex` ונבצעת באופן בלעדי.\n6.  החוט מסמן את עצמו כלא פעיל (`writer_active = 0`).\n7.  החוט בודק אם ישנם כותבים נוספים הממתינים (`writers_waiting > 0`). אם כן, הוא מאותת לאחד מהם (`pthread_cond_signal(&can_reset_cond)`) כדי לתת עדיפות לכותבים אחרים ולמנוע הרעבה של כותבים. זהו חלק מהמנגנון שנותן עדיפות לכותבים.\n8.  אם אין כותבים נוספים הממתינים, החוט מאותת לכל החוטים הממתינים על `can_increment_cond` (`pthread_cond_broadcast(&can_increment_cond)`) כדי לאפשר להם להמשיך לבצע פעולות הגדלה. `broadcast` נחוץ כי ייתכן שיותר מחוט הגדלה אחד יוכל להמשיך.\n9.  החוט משחרר את ה`mutex`.\n\nפתרון זה מבטיח מניעה הדדית (פעולת איפוס בלעדית, ופעולות הגדלה לא יפריעו לאיפוס ממתין), חופש מקיפאון (deadlock-free) ומניעת הרעבה של פעולות האיפוס (כותבים מקבלים עדיפות). ה\"מקביליות\" של פעולות ההגדלה מתבטאת בכך שמספר חוטים יכולים להיות בתוך הפונקציה `increment_value` במקביל (לאחר שעברו את תנאי ההמתנה), אך הגישה ל`current_value` עצמו מסודרת על ידי ה`mutex` המשותף."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

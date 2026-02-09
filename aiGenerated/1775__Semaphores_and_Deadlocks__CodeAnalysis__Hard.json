@@ -1,0 +1,52 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Deadlocks",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 20:46:16",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4285,
+      "output_tokens": 2864,
+      "total_tokens": 10453
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Semaphores",
+      "Deadlocks",
+      "Concurrency",
+      "Resource Management"
+    ],
+    "content": {
+      "text": "נתונה תוכנית המדמה גישה לשני משאבים משותפים, `Resource A` ו-`Resource B`, על ידי שני סוגי תהליכים: `Thread X` ו-`Thread Y`. כל משאב מוגן על ידי סמפור בינארי משלו. `Thread X` מנסה לתפוס את `Resource A` ולאחר מכן את `Resource B`. `Thread Y` מנסה לתפוס את `Resource B` ולאחר מכן את `Resource A`. התוכנית משתמשת בספריות `pthread` וסמפורים סטנדרטיים.\nיש לנתח את הקוד ולענות על השאלות הבאות:",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <semaphore.h>\n#include <unistd.h> // For sleep\n\nsem_t semA; // Semaphore for Resource A\nsem_t semB; // Semaphore for Resource B\n\nvoid* thread_X(void* arg) {\n    printf(\"Thread X: Attempting to acquire Resource A...\\n\");\n    sem_wait(&semA);\n    printf(\"Thread X: Acquired Resource A. Attempting to acquire Resource B...\\n\");\n    sleep(1); // Simulate work or contention\n    sem_wait(&semB);\n    printf(\"Thread X: Acquired Resource B. Working...\\n\");\n    // Critical section\n    sleep(2);\n    printf(\"Thread X: Releasing Resource B...\\n\");\n    sem_post(&semB);\n    printf(\"Thread X: Releasing Resource A...\\n\");\n    sem_post(&semA);\n    printf(\"Thread X: Finished.\\n\");\n    return NULL;\n}\n\nvoid* thread_Y(void* arg) {\n    printf(\"Thread Y: Attempting to acquire Resource B...\\n\");\n    sem_wait(&semB);\n    printf(\"Thread Y: Acquired Resource B. Attempting to acquire Resource A...\\n\");\n    sleep(1); // Simulate work or contention\n    sem_wait(&semA);\n    printf(\"Thread Y: Acquired Resource A. Working...\\n\");\n    // Critical section\n    sleep(2);\n    printf(\"Thread Y: Releasing Resource A...\\n\");\n    sem_post(&semA);\n    printf(\"Thread Y: Releasing Resource B...\\n\");\n    sem_post(&semB);\n    printf(\"Thread Y: Finished.\\n\");\n    return NULL;\n}\n\nint main() {\n    pthread_t tidX, tidY;\n\n    // Initialize semaphores\n    sem_init(&semA, 0, 1); // Binary semaphore, initial value 1\n    sem_init(&semB, 0, 1); // Binary semaphore, initial value 1\n\n    printf(\"Main: Creating Thread X and Thread Y...\\n\");\n\n    pthread_create(&tidX, NULL, thread_X, NULL);\n    pthread_create(&tidY, NULL, thread_Y, NULL);\n\n    pthread_join(tidX, NULL);\n    pthread_join(tidY, NULL);\n\n    printf(\"Main: All threads finished.\\n\");\n\n    // Destroy semaphores\n    sem_destroy(&semA);\n    sem_destroy(&semB);\n\n    return 0;\n}"
+    },
+    "sub_questions": [
+      {
+        "id": "8.1",
+        "text": "האם קיימת בתוכנית הנתונה סכנה לקיפאון (Deadlock)? אם כן, תארו תרחיש ספציפי (סדר פעולות של החוטים) שיוביל לקיפאון זה. נמקו את תשובתכם בהתייחס לתנאים ההכרחיים לקיפאון.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.2",
+        "text": "הציעו תיקון לקוד המונע קיפאון, תוך שימוש בסמפורים בלבד וללא שימוש באובייקטי סנכרון נוספים. הציגו את הקוד המתוקן והסבירו בקצרה מדוע התיקון מונע קיפאון.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "8.1:\nכן, קיימת סכנה לקיפאון בתוכנית הנתונה. קיפאון יתרחש כאשר כל אחד מהתהליכים (Thread X ו-Thread Y) יתפוס משאב אחד וינסה לתפוס את המשאב השני, אך המשאב השני כבר תפוס על ידי התהליך האחר. אף אחד מהתהליכים לא יוכל להמשיך, ושניהם יישארו חסומים לנצח.\n\nתרחיש ספציפי לקיפאון:\n1.  Thread X מתחיל ומבצע `sem_wait(&semA)` בהצלחה. כעת, Thread X מחזיק ב-`semA`.\n2.  Thread Y מתחיל (או מקבל את המעבד) ומבצע `sem_wait(&semB)` בהצלחה. כעת, Thread Y מחזיק ב-`semB`.\n3.  Thread X ממשיך ומנסה לבצע `sem_wait(&semB)`. הוא נחסם מכיוון ש-`semB` תפוס על ידי Thread Y.\n4.  Thread Y ממשיך ומנסה לבצע `sem_wait(&semA)`. הוא נחסם מכיוון ש-`semA` תפוס על ידי Thread X.\n\nבשלב זה, שני התהליכים חסומים וכל אחד מהם מחכה למשאב שהשני מחזיק בו, מה שמוביל לקיפאון.\n\nנימוק בהתייחס לתנאים ההכרחיים לקיפאון:\n*   **הדרה הדדית (Mutual Exclusion)**: מתקיימת. כל סמפור בינארי מאפשר רק לחוט אחד להחזיק בו זמנית (ערכו 0 או 1).\n*   **החזקה והמתנה (Hold and Wait)**: מתקיימת. Thread X מחזיק ב-`semA` וממתין ל-`semB`. Thread Y מחזיק ב-`semB` וממתין ל-`semA`.\n*   **אי-נשללות (No Preemption)**: מתקיימת. משאבים (סמפורים) לא ניתנים לשלילה בכוח מחוט שמחזיק בהם; הם משוחררים רק מרצון על ידי החוט המחזיק.\n*   **המתנה מעגלית (Circular Wait)**: מתקיימת. Thread X ממתין ל-`semB` שמוחזק על ידי Thread Y, ו-Thread Y ממתין ל-`semA` שמוחזק על ידי Thread X. נוצר מעגל המתנה.\n\n8.2:\nהדרך הנפוצה למנוע קיפאון במקרה זה היא על ידי אכיפת סדר היררכי (Ordering) בתפיסת המשאבים. כל התהליכים יתפסו את המשאבים באותו סדר.\n\nקוד מתוקן (Thread Y משנה את סדר תפיסת המשאבים):\n```c\n#include <stdio.h>\n#include <pthread.h>\n#include <semaphore.h>\n#include <unistd.h> // For sleep\n\nsem_t semA; // Semaphore for Resource A\nsem_t semB; // Semaphore for Resource B\n\nvoid* thread_X_fixed(void* arg) {\n    printf(\"Thread X: Attempting to acquire Resource A...\\n\");\n    sem_wait(&semA);\n    printf(\"Thread X: Acquired Resource A. Attempting to acquire Resource B...\\n\");\n    sleep(1);\n    sem_wait(&semB);\n    printf(\"Thread X: Acquired Resource B. Working...\\n\");\n    sleep(2);\n    printf(\"Thread X: Releasing Resource B...\\n\");\n    sem_post(&semB);\n    printf(\"Thread X: Releasing Resource A...\\n\");\n    sem_post(&semA);\n    printf(\"Thread X: Finished.\\n\");\n    return NULL;\n}\n\nvoid* thread_Y_fixed(void* arg) {\n    // Thread Y now acquires resources in the same order as Thread X: A then B\n    printf(\"Thread Y: Attempting to acquire Resource A...\\n\"); // Changed order\n    sem_wait(&semA); // Changed order\n    printf(\"Thread Y: Acquired Resource A. Attempting to acquire Resource B...\\n\"); // Changed order\n    sleep(1);\n    sem_wait(&semB); // Changed order\n    printf(\"Thread Y: Acquired Resource B. Working...\\n\"); // Changed order\n    sleep(2);\n    printf(\"Thread Y: Releasing Resource B...\\n\"); // Changed order\n    sem_post(&semB); // Changed order\n    printf(\"Thread Y: Releasing Resource A...\\n\"); // Changed order\n    sem_post(&semA); // Changed order\n    printf(\"Thread Y: Finished.\\n\");\n    return NULL;\n}\n\nint main() {\n    pthread_t tidX, tidY;\n\n    sem_init(&semA, 0, 1);\n    sem_init(&semB, 0, 1);\n\n    printf(\"Main: Creating Thread X and Thread Y (fixed version)...\\n\");\n\n    pthread_create(&tidX, NULL, thread_X_fixed, NULL);\n    pthread_create(&tidY, NULL, thread_Y_fixed, NULL); // Use fixed version\n\n    pthread_join(tidX, NULL);\n    pthread_join(tidY, NULL);\n\n    printf(\"Main: All threads finished.\\n\");\n\n    sem_destroy(&semA);\n    sem_destroy(&semB);\n\n    return 0;\n}\n```\n\nהסבר מדוע התיקון מונע קיפאון:\nעל ידי אכיפת סדר עקבי בתפיסת המשאבים (לדוגמה, תמיד לתפוס את `semA` לפני `semB`), אנו מונעים את תנאי ה'המתנה המעגלית'. אם Thread X תופס את `semA` ו-Thread Y מנסה גם הוא לתפוס את `semA`, Thread Y ייחסם עד ש-Thread X ישחרר את `semA`. כאשר Thread X ישחרר את `semA` (לאחר שסיים עם `semB`), Thread Y יוכל לתפוס אותו ולהמשיך. לא ייתכן מצב שבו Thread X מחזיק ב-`semA` וממתין ל-`semB`, בעוד Thread Y מחזיק ב-`semB` וממתין ל-`semA`, מכיוון ששניהם ינסו לתפוס את `semA` קודם. מי שיצליח לתפוס את `semA` ראשון ימשיך לתפוס את `semB` וישחרר את שניהם, ובכך יאפשר לחוט השני להתקדם."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

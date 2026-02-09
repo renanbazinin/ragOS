@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Memory Management and TLB",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 21:20:38",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1050,
+      "output_tokens": 648,
+      "total_tokens": 2976
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Memory Management",
+      "TLB",
+      "Paging"
+    ],
+    "content": {
+      "text": "תהליך מבצע גישה לכתובת וירטואלית. מתרחש TLB Miss, אך רשומת טבלת הדפים (PTE) נמצאת בזיכרון הראשי (RAM). מהי סדר הפעולות הנכון לטיפול באירוע זה?",
+      "code_snippet": null,
+      "options": [
+        "א. החומרה ניגשת לטבלת הדפים בזיכרון הראשי, מעדכנת את ה-TLB, ולאחר מכן ממשיכה בתרגום הכתובת.",
+        "ב. מערכת ההפעלה מטפלת ב-TLB Miss באמצעות Interrupt, קוראת את ה-PTE מהזיכרון הראשי, מעדכנת את ה-TLB, ומחזירה שליטה לתהליך.",
+        "ג. החומרה ניגשת לטבלת הדפים בזיכרון הראשי, מעדכנת את ה-TLB, ורק אז התהליך יבצע שוב את הגישה המקורית לכתובת הווירטואלית.",
+        "ד. מערכת ההפעלה מטפלת ב-TLB Miss באמצעות Trap, מחפשת את ה-PTE בדיסק, טוענת אותו לזיכרון הראשי, מעדכנת את ה-TLB, וממשיכה בתרגום הכתובת.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "כאשר מתרחש TLB Miss ורשומת טבלת הדפים (PTE) נמצאת כבר בזיכרון הראשי (RAM), הטיפול באירוע הוא בדרך כלל על ידי החומרה (MMU). החומרה ניגשת ישירות לטבלת הדפים בזיכרון הראשי כדי למצוא את ה-PTE, טוענת אותה ל-TLB, ולאחר מכן משתמשת ברשומה החדשה ב-TLB כדי להשלים את תרגום הכתובת הווירטואלית לכתובת פיזית. אין צורך במעורבות מערכת ההפעלה (למעט במקרים מסוימים של ארכיטקטורות ספציפיות או אם מדובר ב-page fault, מה שלא המצב כאן)."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

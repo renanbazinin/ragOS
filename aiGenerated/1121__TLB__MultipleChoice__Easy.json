@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "TLB",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 08:07:03",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1201,
+      "output_tokens": 381,
+      "total_tokens": 2714
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "TLB",
+      "Memory Management",
+      "Paging"
+    ],
+    "content": {
+      "text": "מהו תפקידו העיקרי של ה-TLB (Translation Lookaside Buffer)?",
+      "code_snippet": null,
+      "options": [
+        "א. אחסון זמני של פקודות מעבד לביצוע מהיר.",
+        "ב. תרגום כתובות לוגיות לכתובות וירטואליות.",
+        "ג. שמירת רשומות מטבלת הדפים (Page Table Entries) לתרגום מהיר של כתובות וירטואליות לכתובות פיזיות.",
+        "ד. ניהול הקצאת זיכרון דינמית (Dynamic Memory Allocation).",
+        "ה. סיוע למערכת ההפעלה בתזמון תהליכים (Process Scheduling)."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג'. ה-TLB הוא מטמון (cache) מיוחד השומר רשומות תרגום כתובות וירטואליות לכתובות פיזיות (Page Table Entries) כדי לזרז את תהליך תרגום הכתובות ולצמצם את הגישות לזיכרון הראשי עבור טבלת הדפים."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

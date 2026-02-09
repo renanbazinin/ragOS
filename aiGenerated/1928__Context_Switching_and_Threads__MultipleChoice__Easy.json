@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Context Switching and Threads",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 21:54:52",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 985,
+      "output_tokens": 419,
+      "total_tokens": 2664
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Context Switching",
+      "Threads"
+    ],
+    "content": {
+      "text": "מהו המשאב העיקרי שאינו מצריך שמירה ושחזור במהלך החלפת הקשר (context switch) בין שני חוטים (threads) השייכים לאותו תהליך, בניגוד להחלפת קשר בין שני תהליכים שונים?",
+      "code_snippet": null,
+      "options": [
+        "א. אוגרי המעבד (CPU registers)",
+        "ב. מונה התוכנית (Program Counter)",
+        "ג. מפתחות הזיכרון (Page Tables / MMU state)",
+        "ד. המחסנית (Stack)",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג'. חוטים (threads) בתוך אותו תהליך חולקים את אותו מרחב כתובות (address space). לכן, בעת החלפת קשר בין חוטים באותו תהליך, אין צורך לשמור ולשחזר את מפתחות הזיכרון (page tables) או את מצב יחידת ניהול הזיכרון (MMU), בניגוד להחלפת קשר בין תהליכים שונים. אוגרי המעבד, מונה התוכנית והמחסנית הם ייחודיים לכל חוט ויש לשמור ולשחזר אותם."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

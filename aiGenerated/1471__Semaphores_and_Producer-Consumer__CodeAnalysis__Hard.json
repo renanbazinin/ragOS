@@ -1,0 +1,55 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Producer-Consumer",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 10:35:06",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4898,
+      "output_tokens": 2421,
+      "total_tokens": 16924
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Semaphores",
+      "Producer-Consumer",
+      "Deadlocks",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "להלן מימוש חלקי של בעיית יצרן-צרכן עם חוצץ חסום בגודל N. הפתרון עושה שימוש בשלושה סמפורים: empty (מאותחל ל-N), full (מאותחל ל-0) ו-mutex (מאותחל ל-1). הפונקציות add_item ו-remove_item מוסיפות ומוציאות פריטים מהחוצץ בהתאמה, והן אינן בטוחות לשימוש מקבילי. הפונקציות produce_item ו-consume_item יוצרות וצורכות פריטים בנפרד ואינן דורשות סנכרון.",
+      "code_snippet": "#define N 1 // גודל החוצץ (לצורך הבעיה, שימו לב לערך)\n\nsem_t empty; // מאותחל ל-N\nsem_t full;  // מאותחל ל-0\nsem_t mutex; // מאותחל ל-1\n\n// מבנה פריט ופונקציות עזר (אין צורך במימושן)\ntypedef struct { int id; } Item;\nvoid add_item(Item item); // מוסיפה פריט לחוצץ, לא בטוחה לשימוש מקבילי\nItem remove_item(); // מוציאה פריט מהחוצץ, לא בטוחה לשימוש מקבילי\nItem produce_item(); // מייצרת פריט חדש\nvoid consume_item(Item item); // צורכת פריט\n\nvoid producer() {\n    Item item = produce_item();\n    sem_wait(&empty);\n    sem_wait(&mutex);\n    add_item(item);\n    sem_post(&mutex);\n    sem_post(&full);\n}\n\nvoid consumer() {\n    sem_wait(&full);\n    sem_wait(&mutex);\n    Item item = remove_item();\n    sem_post(&mutex);\n    sem_post(&empty);\n    consume_item(item);\n}\n\n// פונקציה חדשה שהוצגה במערכת, מטרתה לצרוך שני פריטים באופן אטומי\nvoid consumer_two_items() {\n    sem_wait(&full); // 1\n    sem_wait(&full); // 2\n    sem_wait(&mutex); // 3\n    Item item1 = remove_item(); // 4\n    Item item2 = remove_item(); // 5\n    sem_post(&mutex); // 6\n    sem_post(&empty); // 7\n    sem_post(&empty); // 8\n    consume_item(item1); // 9\n    consume_item(item2); // 10\n}"
+    },
+    "sub_questions": [
+      {
+        "id": "8.1",
+        "text": "האם המימוש של הפונקציה `consumer_two_items` עלול להוביל למצב של קיפאון (deadlock) במערכת? אם כן, תארו תרחיש ריצה ספציפי (כולל מצב הסמפורים) שמוביל לקיפאון, והסבירו מדוע הוא מתרחש. אם לא, הסבירו מדוע המימוש בטוח.",
+        "code_snippet": null,
+        "options": [
+          "כן, עלול להוביל לקיפאון",
+          "לא, בטוח מקיפאון"
+        ]
+      },
+      {
+        "id": "8.2",
+        "text": "תקנו את הפונקציה `consumer_two_items` כך שתעבוד באופן תקין ללא קיפאון או הרעבה (starvation). ניתן לשנות את הקוד באופן חופשי. יש לתאר בקצרה את הפתרון ולכתוב קוד ברור. אם אתם מוסיפים משתנים גלובליים, ציינו אותם עם ערכי אתחול.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "כן, עלול להוביל לקיפאון",
+      "explanation": "8.1: כן, המימוש עלול להוביל לקיפאון. נניח שגודל החוצץ N=1. אף על פי שבדרך כלל N גדול מ-1, תרחיש זה מדגים את הבעיה באופן ברור:\n1.  החוצץ ריק בתחילה (empty=1, full=0).\n2.  יצרן אחד (P1) מייצר פריט אחד:\n    *   `sem_wait(&empty)` (empty הופך ל-0)\n    *   `sem_wait(&mutex)` (mutex הופך ל-0)\n    *   `add_item`\n    *   `sem_post(&mutex)` (mutex הופך ל-1)\n    *   `sem_post(&full)` (full הופך ל-1)\n    כעת יש פריט אחד בחוצץ (`full=1`, `empty=0`).\n3.  צרכן אחד (C1) מריץ את `consumer_two_items()`:\n    *   `sem_wait(&full)` (שורת קוד 1) מצליח, `full` הופך ל-0.\n    *   `sem_wait(&full)` (שורת קוד 2) נחסם, כיוון ש-`full` כעת שווה ל-0.\n4.  כעת C1 חסום על הסמפור `full` ומחכה לפריט נוסף. הוא תפס מקום אחד בחוצץ, אך צריך שניים. הוא לא שחרר את `empty` ולכן המערכת חושבת שהחוצץ עדיין מלא (מנקודת מבט של `empty`).\n5.  יצרן אחר (P2) מנסה לייצר פריט:\n    *   `sem_wait(&empty)` נחסם, כיוון ש-`empty` שווה ל-0.\n6.  מצב קיפאון: C1 חסום על `full` (מחכה ש-`full` יהיה > 0). רק יצרן יכול להעלות את `full`. P2 חסום על `empty` (מחכה ש-`empty` יהיה > 0). רק צרכן יכול להעלות את `empty`. אף אחד לא יכול להתקדם, ונוצר קיפאון מעגלי.\n\n8.2: כדי למנוע קיפאון, יש לתפוס את שני המשאבים (שני פריטים מלאים) באופן אטומי, או להשתמש בגישה של 'נסה-והחזר' (try-and-rollback) עם מנגנון למניעת הרעבה (livelock) במקרה של ניסיונות חוזרים ונשנים. הפתרון הנפוץ הוא להשתמש ב-`sem_trywait` ולחזור אחורה אם לא ניתן לתפוס את כל המשאבים. כדי למנוע הרעבה, נשתמש במנעול גלובלי הוגן (`global_lock`) המגן על הניסיון כולו.\n\nמשתנים גלובליים נוספים:\n`sem_t global_lock; // מאותחל ל-1`\n\n```c\n// פתרון מתוקן עבור consumer_two_items\nvoid consumer_two_items_fixed() {\n    while (true) {\n        sem_wait(&global_lock); // תפוס מנעול גלובלי כדי למנוע livelock בין ניסיונות\n        if (sem_trywait(&full) == 0) { // ניסיון לתפוס פריט 1\n            if (sem_trywait(&full) == 0) { // ניסיון לתפוס פריט 2\n                // הצלחנו לתפוס את שני הפריטים\n                sem_post(&global_lock); // שחרר את המנעול הגלובלי\n                break; // יציאה מהלולאה, ממשיכים לעיבוד הפריטים\n            } else {\n                // נכשל בתפיסת פריט 2, שחרר את פריט 1 וחזור על הניסיון\n                sem_post(&full); // שחרר את הפריט הראשון שתפסת\n            }\n        }\n        sem_post(&global_lock); // שחרר את המנעול הגלובלי כדי לאפשר לחוטים אחרים לנסות\n        yield(); // העבר את המעבד לחוט אחר כדי למנוע busy-waiting מוגזם\n    }\n\n    // הקטע הקריטי: גישה לחוצץ לאחר שתפסנו בהצלחה שני פריטים\n    sem_wait(&mutex); // המוטקס של החוצץ עצמו להגנה על remove_item\n    Item item1 = remove_item();\n    Item item2 = remove_item();\n    sem_post(&mutex); // שחרור המוטקס של החוצץ\n\n    sem_post(&empty); // שחרור מקום אחד בחוצץ\n    sem_post(&empty); // שחרור מקום שני בחוצץ\n\n    consume_item(item1);\n    consume_item(item2);\n}\n```\nהפתרון מבטיח שכל המשאבים הדרושים (שני פריטים מלאים) נתפסים יחד (באופן לוגי) או שאף אחד מהם לא נתפס. השימוש ב-`global_lock` מונע מצב של הרעבה בכך שהוא מבטיח הוגנות בין הניסיונות של חוטים שונים לתפוס את המשאבים, ומונע מחוט בודד לנסות שוב ושוב ללא הצלחה ולחסום אחרים."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

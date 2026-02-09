@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "IPC",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 08:21:42",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1196,
+      "output_tokens": 1052,
+      "total_tokens": 6508
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "IPC",
+      "Pipes",
+      "Process Communication"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא המשתמש ב-pipe לתקשורת בין תהליכים:\n\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <string.h>\n#include <sys/wait.h>\n\nint main() {\n    int pipefd[2]; // pipefd[0] for read, pipefd[1] for write\n    pid_t pid;\n    char buffer[20]; // Buffer to hold read data\n\n    if (pipe(pipefd) == -1) {\n        perror(\"pipe\");\n        exit(EXIT_FAILURE);\n    }\n\n    pid = fork();\n\n    if (pid == -1) {\n        perror(\"fork\");\n        exit(EXIT_FAILURE);\n    }\n\n    if (pid == 0) { // Child process\n        close(pipefd[1]); // Child closes write end\n        ssize_t bytes_read = read(pipefd[0], buffer, sizeof(buffer) - 1);\n        if (bytes_read > 0) {\n            buffer[bytes_read] = '\\0'; // Null-terminate the string\n            printf(\"Child received: %s\\n\", buffer);\n        } else {\n            printf(\"Child received nothing or error.\\n\");\n        }\n        close(pipefd[0]); // Child closes read end\n        exit(EXIT_SUCCESS);\n    } else { // Parent process\n        close(pipefd[0]); // Parent closes read end\n        char *msg1 = \"Hello\";\n        char *msg2 = \"World\";\n\n        write(pipefd[1], msg1, strlen(msg1)); // Write first message\n        sleep(1); // Simulate some delay to ensure both writes happen before child reads\n        write(pipefd[1], msg2, strlen(msg2)); // Write second message\n        close(pipefd[1]); // Parent closes write end\n\n        wait(NULL); // Wait for child to terminate\n        printf(\"Parent finished.\\n\");\n    }\n\n    return 0;\n}\n```\n\nבהנחה שהקוד רץ בהצלחה, מה יהיה הפלט של תהליך הבן (`Child received: ...`)?",
+      "code_snippet": null,
+      "options": [
+        "א. Child received: Hello",
+        "ב. Child received: World",
+        "ג. Child received: HelloWorld",
+        "ד. Child received: Hello World",
+        "ה. Child received: (ריק)"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג. Child received: HelloWorld",
+      "explanation": "הצינור (pipe) מתנהג כזרם של בתים (byte stream). כאשר תהליך האב כותב את המחרוזת \"Hello\" ולאחר מכן את המחרוזת \"World\" לצינור, הנתונים נכתבים בזה אחר זה ללא הפרדה מובנית (כמו רווח או תו סיום) על ידי פעולות ה-write עצמן. תהליך הבן קורא מהצינור באמצעות `read(pipefd[0], buffer, sizeof(buffer) - 1)`. מאחר ששתי ההודעות (\"Hello\" ו-\"World\") נכתבות לצינור לפני שתהליך הבן מבצע את פעולת הקריאה (ה-`sleep` באב עוזר להבטיח זאת), וגודל הבאפר של הבן (20 בתים) מספיק להכיל את שתי ההודעות יחד (10 בתים), פעולת ה-`read` תקרא את כל הנתונים הזמינים בצינור עד לגודל המקסימלי שהוגדר. כתוצאה מכך, הבאפר יכיל את המחרוזת \"HelloWorld\" ברצף. לאחר מכן, הקוד מוסיף תו null לסיום המחרוזת. לכן, הפלט יהיה \"Child received: HelloWorld\"."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

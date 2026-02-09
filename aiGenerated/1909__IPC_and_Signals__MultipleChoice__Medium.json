@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "IPC and Signals",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 21:42:35",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1103,
+      "output_tokens": 868,
+      "total_tokens": 3722
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "IPC",
+      "Signals"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא. תהליך האב מגדיר מטפל לאות SIGUSR1 ולאחר מכן יוצר תהליך בן. תהליך הבן שולח מיד את האות SIGUSR1 לתהליך האב. איזו טענה נכונה לגבי התנהגות תהליך האב?",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <signal.h>\n#include <sys/wait.h>\n\nvoid handler(int signum) {\n    printf(\"Parent caught signal %d\\n\", signum);\n}\n\nint main() {\n    struct sigaction sa;\n    sa.sa_handler = handler;\n    sigemptyset(&sa.sa_mask);\n    sa.sa_flags = 0; \n\n    if (sigaction(SIGUSR1, &sa, NULL) == -1) {\n        perror(\"sigaction\");\n        exit(EXIT_FAILURE);\n    }\n\n    pid_t pid = fork();\n\n    if (pid == -1) {\n        perror(\"fork\");\n        exit(EXIT_FAILURE);\n    } else if (pid == 0) { // Child process\n        printf(\"Child sending SIGUSR1 to parent (%d)\\n\", getppid());\n        kill(getppid(), SIGUSR1);\n        exit(EXIT_SUCCESS);\n    } else { // Parent process\n        printf(\"Parent waiting...\\n\");\n        sleep(2); // Give child time to send signal\n        printf(\"Parent finished waiting.\\n\");\n        wait(NULL); // Wait for child to terminate\n    }\n\n    return 0;\n}",
+      "options": [
+        "א. תהליך האב יבצע את פונקציית המטפל (handler) עבור SIGUSR1.",
+        "ב. תהליך האב יסיים את פעולתו (terminate) מכיוון שזוהי פעולת ברירת המחדל של SIGUSR1.",
+        "ג. תהליך האב יתעלם מהאות מכיוון שהוא נשלח על ידי תהליך בן.",
+        "ד. תהליך האב יכנס למצב של חסימה (block) ויחכה לתהליך הבן שיסיים את פעולתו.",
+        "ה. אף אחת מהטענות אינה נכונה."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "כאשר תהליך האב יוצר תהליך בן באמצעות `fork()`, תהליך הבן יורש את טבלת מטפלי האותות של האב. עם זאת, האות נשלח ישירות לתהליך האב. מכיוון שתהליך האב הגדיר מטפל מותאם אישית עבור `SIGUSR1` באמצעות `sigaction`, הוא יבצע את פונקציית המטפל (handler) כאשר יקבל את האות. פעולת ברירת המחדל של `SIGUSR1` היא לסיים את התהליך, אך היא מוחלפת על ידי המטפל שהוגדר. אין מניעה שתהליך בן ישלח אות לתהליך האב, והאות יטופל כמצופה."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

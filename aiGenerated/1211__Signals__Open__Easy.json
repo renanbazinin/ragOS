@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Signals",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 08:42:43",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4591,
+      "output_tokens": 1352,
+      "total_tokens": 9313
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Signals"
+    ],
+    "content": {
+      "text": "כתבו תוכנית בשפת C אשר מדפיסה הודעה ללא הפסקה כל שנייה. התוכנית צריכה לטפל באות SIGINT (הנשלח, לדוגמה, בלחיצה על Ctrl+C) באופן הבא: במקום לסיים את ריצתה, היא צריכה להדפיס את ההודעה 'קיבלתי SIGINT! ממשיך לרוץ...' ולספור כמה פעמים התקבל האות. אם האות התקבל 3 פעמים, התוכנית צריכה לסיים את ריצתה בצורה מסודרת. בנוסף, התוכנית צריכה לטפל באות SIGTERM (הנשלח, לדוגמה, באמצעות kill <pid>) כך שקבלת אות זה תגרום לתוכנית לסיים את ריצתה בצורה מסודרת מיד.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון כולל הגדרה של שני משתנים גלובליים מסוג `volatile`: מונה לקריאות `SIGINT` ודגל יציאה. שימוש ב-`volatile` הכרחי מכיוון שמשתנים אלה נגישים ומשתנים גם מהפונקציות המטפלות באותות וגם מהלולאה הראשית של התוכנית.\n\nעבור כל אות (`SIGINT` ו-`SIGTERM`), נשתמש בפונקציה `sigaction` כדי להגדיר מטפל אותות (signal handler) ייעודי. `sigaction` עדיפה על `signal()` הישנה יותר מכיוון שהיא מספקת שליטה טובה יותר על התנהגות האותות ומונעת בעיות ניידות.\n\nהמטפל עבור `SIGINT` יגדיל את המונה `sigint_count`, ידפיס הודעה מתאימה, ויבדוק אם המונה הגיע ל-3. אם כן, הוא יגדיר את דגל היציאה `should_exit` ל-1. המטפל עבור `SIGTERM` פשוט יגדיר את `should_exit` ל-1, מה שיגרום לתוכנית לצאת מיד.\n\nבלולאה הראשית, התוכנית תדפיס הודעה כל שנייה ותבדוק את הערך של `should_exit`. כאשר `should_exit` הופך ל-1, הלולאה תסתיים והתוכנית תצא בצורה מסודרת.\n\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <signal.h>\n#include <unistd.h>\n\n// משתנים גלובליים שמשתנים על ידי מטפלי האותות והלולאה הראשית\nvolatile int sigint_count = 0;\nvolatile int should_exit = 0;\n\n// מטפל באות SIGINT\nvoid sigint_handler(int signum) {\n    if (signum == SIGINT) {\n        sigint_count++;\n        printf(\"\\nקיבלתי SIGINT! ממשיך לרוץ... (סה\"כ %d)\\n\", sigint_count);\n        if (sigint_count >= 3) {\n            printf(\"קיבלתי SIGINT 3 פעמים, יוצא מהתוכנית.\\n\");\n            should_exit = 1;\n        }\n    }\n}\n\n// מטפל באות SIGTERM\nvoid sigterm_handler(int signum) {\n    if (signum == SIGTERM) {\n        printf(\"\\nקיבלתי SIGTERM! יוצא מהתוכנית באופן מסודר.\\n\");\n        should_exit = 1;\n    }\n}\n\nint main() {\n    struct sigaction sa_int, sa_term;\n\n    // הגדרת מטפל עבור SIGINT\n    sa_int.sa_handler = sigint_handler;\n    sigemptyset(&sa_int.sa_mask);\n    sa_int.sa_flags = 0; // אין צורך בדגלים מיוחדים למקרה זה\n    if (sigaction(SIGINT, &sa_int, NULL) == -1) {\n        perror(\"Error setting SIGINT handler\");\n        return 1;\n    }\n\n    // הגדרת מטפל עבור SIGTERM\n    sa_term.sa_handler = sigterm_handler;\n    sigemptyset(&sa_term.sa_mask);\n    sa_term.sa_flags = 0; // אין צורך בדגלים מיוחדים למקרה זה\n    if (sigaction(SIGTERM, &sa_term, NULL) == -1) {\n        perror(\"Error setting SIGTERM handler\");\n        return 1;\n    }\n\n    printf(\"התוכנית רצה. PID: %d\\n\", getpid());\n    printf(\"לחץ Ctrl+C (SIGINT) שלוש פעמים כדי לצאת, או שלח SIGTERM כדי לצאת מיד.\\n\");\n\n    while (!should_exit) {\n        printf(\"התוכנית עדיין רצה...\\n\");\n        sleep(1);\n    }\n\n    printf(\"התוכנית הסתיימה בהצלחה.\\n\");\n    return 0;\n}\n```"
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

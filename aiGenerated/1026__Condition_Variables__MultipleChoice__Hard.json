@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Condition Variables",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 07:30:40",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 1517,
+      "total_tokens": 12516
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Condition Variables",
+      "Synchronization",
+      "Concurrency",
+      "Lost Wakeup"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא המשתמש ב-`std::mutex` וב-`std::condition_variable` ב-C++.\n\nשימו לב לסדר יצירת התהליכים ב-`main`: תהליך המפיק (`producer_thread`) נוצר ומתחיל לרוץ לפני תהליך הצרכן (`consumer_thread`). בנוסף, תהליך הצרכן מבצע `std::this_thread::sleep_for(std::chrono::milliseconds(100))` בהתחלה, מה שנותן למפיק מספיק זמן לסיים את פעולתו (כולל קריאה ל-`cv.notify_one()`) *לפני* שהצרכן מגיע לקריאה ל-`cv.wait(lock)`. בהינתן תנאים אלו, מה תהיה התוצאה הסבירה ביותר של הרצת הקוד?",
+      "code_snippet": "#include <iostream>\n#include <thread>\n#include <mutex>\n#include <condition_variable>\n#include <chrono>\n\nstd::mutex mtx;\nstd::condition_variable cv;\nbool data_ready = false;\n\nvoid producer_func() {\n    std::unique_lock<std::mutex> lock(mtx);\n    data_ready = true;\n    std::cout << \"Producer: Data ready, notifying.\" << std::endl;\n    cv.notify_one();\n}\n\nvoid consumer_func() {\n    std::this_thread::sleep_for(std::chrono::milliseconds(100)); // נותן למפיק זמן לרוץ ולסיים\n    std::unique_lock<std::mutex> lock(mtx);\n    std::cout << \"Consumer: Trying to wait.\" << std::endl;\n    \n    // שורת הקוד הבעייתית: המתנה ללא תנאי (פרדיקט)\n    cv.wait(lock);\n    \n    if (data_ready) {\n        std::cout << \"Consumer: Data received.\" << std::endl;\n    } else {\n        std::cout << \"Consumer: Woke up, but data not ready (spurious wakeup or lost signal?).\" << std::endl;\n    }\n}\n\nint main() {\n    std::thread producer_thread(producer_func); // המפיק מתחיל ראשון\n    std::thread consumer_thread(consumer_func); // הצרכן מתחיל שני, אך ישן בהתחלה\n\n    producer_thread.join(); // המפיק מסיים מהר\n    consumer_thread.join(); // קריאה זו תתקע אם הצרכן חסום\n\n    return 0;\n}\n",
+      "options": [
+        "א. הצרכן יודפס \"Consumer: Data received.\" ויתסיים בהצלחה.",
+        "ב. הצרכן יודפס \"Consumer: Woke up, but data not ready...\" ויתסיים בהצלחה.",
+        "ג. הצרכן ימתין ללא הגבלה (deadlock) ולא יתסיים.",
+        "ד. התנהגות בלתי מוגדרת (Undefined Behavior) עקב גישה לא בטוחה למשתנה התנאי.",
+        "ה. הצרכן יתעורר באופן ספורדי (spurious wakeup) מספר פעמים לפני שיקבל את הנתונים."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "הבעיה המרכזית בקטע הקוד היא השימוש ב-`cv.wait(lock)` ללא פרדיקט (תנאי). משתני תנאי מיועדים להמתנה לתנאי מסוים שמתקיים. אם תנאי זה (במקרה שלנו, `data_ready == true`) מתקיים *לפני* שהצרכן מגיע לקריאה ל-`cv.wait`, והמפיק כבר קרא ל-`cv.notify_one()`, האות (signal) הולך לאיבוד.\n\nבמקרה זה, סדר הביצוע הסביר הוא:\n1.  תהליך המפיק (`producer_thread`) מתחיל. הוא נועל את המוטקס, קובע `data_ready = true`, וקורא ל-`cv.notify_one()`. מכיוון שעדיין אין אף תהליך שממתין על משתנה התנאי `cv` (תהליך הצרכן עדיין לא הגיע לנקודה זו, הוא יבצע `sleep_for` לפני ה-`wait`), האות נשלח אך לא נקלט על ידי אף אחד – הוא אובד (lost wakeup). המפיק משחרר את המוטקס ומסיים את פעולתו.\n2.  תהליך הצרכן (`consumer_thread`) מתחיל. הוא נכנס ל-`consumer_func` ומיד מבצע `std::this_thread::sleep_for(std::chrono::milliseconds(100))`. בזמן זה, `data_ready` כבר `true` והמפיק כבר סיים.\n3.  לאחר מכן, הצרכן נועל את המוטקס, מדפיס הודעה, וקורא ל-`cv.wait(lock)`. למרות ש-`data_ready` הוא `true`, הקריאה ל-`cv.wait(lock)` ללא פרדיקט לא בודקת את התנאי. היא פשוט משחררת את המוטקס ונכנסת למצב המתנה לאות. מכיוון שהאות כבר נשלח ואבד, הצרכן ימתין ללא הגבלה לאות שלעולם לא יגיע.\n4.  התוצאה היא שהצרכן יישאר חסום, וקריאת ה-`join()` עבורו ב-`main` תתקע.\n\nהפתרון הנכון היה להשתמש בפרדיקט: `cv.wait(lock, []{ return data_ready; });`. בצורה זו, אם `data_ready` כבר `true` לפני שהצרכן נכנס להמתנה, ה-`wait` יחזור מיד מבלי לחסום."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

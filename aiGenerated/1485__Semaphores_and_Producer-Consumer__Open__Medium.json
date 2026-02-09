@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Producer-Consumer",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 10:44:04",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1649,
+      "output_tokens": 1420,
+      "total_tokens": 6949
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Semaphores",
+      "Producer-Consumer",
+      "Synchronization",
+      "Deadlocks"
+    ],
+    "content": {
+      "text": "סטודנט ניסה לממש את בעיית היצרן-צרכן (Producer-Consumer) עם חוצץ חסום (Bounded Buffer) באמצעות סמפורים. הקוד הבא מציג את ניסיונו עבור פונקציות היצרן והצרכן, יחד עם הגדרת הסמפורים והחוצץ:\n",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <pthread.h>\n#include <semaphore.h>\n\n#define BUFFER_SIZE 5\n\nint buffer[BUFFER_SIZE];\nint in = 0;\nint out = 0;\n\nsem_t mutex;    // For mutual exclusion\nsem_t empty;    // Counts empty slots\nsem_t full;     // Counts full slots\n\nvoid *producer(void *arg) {\n    int item;\n    for (int i = 0; i < 10; i++) {\n        item = i; // Produce an item\n\n        // Potential mistake: mutex acquired before checking 'empty'\n        sem_wait(&mutex);\n        sem_wait(&empty);\n\n        buffer[in] = item;\n        in = (in + 1) % BUFFER_SIZE;\n        printf(\"Producer produced: %d\\n\", item);\n\n        sem_post(&full);\n        sem_post(&mutex);\n    }\n    return NULL;\n}\n\nvoid *consumer(void *arg) {\n    int item;\n    for (int i = 0; i < 10; i++) {\n        sem_wait(&full);\n        sem_wait(&mutex);\n\n        item = buffer[out];\n        out = (out + 1) % BUFFER_SIZE;\n        printf(\"Consumer consumed: %d\\n\", item);\n\n        sem_post(&mutex);\n        sem_post(&empty);\n    }\n    return NULL;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הקוד המוצג אינו נכון ויכול להוביל למצב של קיפאון (deadlock).\n\n**הבעיה:** בפונקציית היצרן (`producer`), סדר הקריאות לסמפורים שגוי: היצרן מבצע `sem_wait(&mutex)` ולאחר מכן `sem_wait(&empty)`. אם החוצץ מלא לחלוטין (כלומר, סמפור `empty` הוא 0), היצרן יצליח לרכוש את `mutex` אך ייתקע מיד לאחר מכן בניסיון לרכוש את `empty`. במצב זה, היצרן מחזיק את `mutex` באופן בלעדי ואינו משחרר אותו. כל צרכן שינסה לגשת לחוצץ (כדי לצרוך פריט ולשחרר מקום, ובכך לאפשר ל-`empty` לעלות) ינסה לבצע `sem_wait(&mutex)` ויתקע, מכיוון שה-`mutex` מוחזק על ידי היצרן. זהו מצב של קיפאון: היצרן מחכה למקום פנוי שהצרכן אמור ליצור, אך הצרכן חסום על ידי ה-`mutex` שהיצרן מחזיק.\n\n**הפתרון והתיקון:** כדי למנוע קיפאון, סדר פעולות ה-`wait` חייב להיות כזה שהסמפורים המגבילים את הגישה למשאב (כמו `empty` ו-`full`) נרכשים לפני סמפור הגישה ההדדית (mutual exclusion) `mutex`. זה מבטיח שאף תהליך לא יחזיק את ה-`mutex` תוך כדי המתנה למשאב אחר שאותו ה-`mutex` אמור להגן עליו, ובכך לא יחסום תהליכים אחרים שיכולים לשחרר את המשאב.\n\nהקוד המתוקן עבור פונקציית היצרן (פונקציית הצרכן כבר נכונה בסדר זה):\n```c\nvoid *producer(void *arg) {\n    int item;\n    for (int i = 0; i < 10; i++) {\n        item = i; // Produce an item\n\n        sem_wait(&empty); // Correct: Wait for an empty slot first\n        sem_wait(&mutex); // Then acquire mutex to enter critical section\n\n        buffer[in] = item;\n        in = (in + 1) % BUFFER_SIZE;\n        printf(\"Producer produced: %d\\n\", item);\n\n        sem_post(&mutex); // Release mutex from critical section\n        sem_post(&full);  // Signal that a slot is now full\n    }\n    return NULL;\n}\n```\n**הסבר לתיקון:** בסדר זה, היצרן ממתין מחוץ למקטע הקריטי עד שיהיה מקום פנוי בחוצץ (`sem_wait(&empty)`). רק לאחר שווידא שיש מקום, הוא רוכש את ה-`mutex` כדי להיכנס למקטע הקריטי ולעדכן את החוצץ בבטחה. בסיום העדכון, הוא משחרר את ה-`mutex` ולאחר מכן מאותת שיש כעת פריט מלא בחוצץ (`sem_post(&full)`). סדר פעולות זה מונע את הקיפאון שהוצג ומבטיח סנכרון נכון בין היצרן לצרכן."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

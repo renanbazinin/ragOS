@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Memory Management and TLB",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 21:20:18",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1050,
+      "output_tokens": 437,
+      "total_tokens": 2512
+    }
+  },
+  "question": {
+    "id": 3,
+    "type": "MultipleChoice",
+    "topic": [
+      "Memory Management",
+      "TLB",
+      "Paging"
+    ],
+    "content": {
+      "text": "במערכת הפעלה המשתמשת בניהול זיכרון בשיטת דפדוף (Paging) חד-שכבתי, וכוללת TLB, מהו מספר גישות הזיכרון הפיזי (RAM) הנדרשות כדי לגשת לנתון מסוים, במקרה של פספוס TLB (TLB miss)? (התעלמו מזמן הגישה ל-TLB עצמו).",
+      "code_snippet": null,
+      "options": [
+        "א. 1",
+        "ב. 2",
+        "ג. 3",
+        "ד. 4",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "במקרה של פספוס TLB (TLB miss), המערכת נדרשת לבצע שתי גישות זיכרון פיזי (RAM): גישה אחת לטבלת הדפים (Page Table) כדי למצוא את המסגרת הפיזית המתאימה לכתובת הווירטואלית, וגישה שנייה לזיכרון הפיזי כדי לקרוא או לכתוב את הנתון בפועל באותה מסגרת. ה-TLB רק מאיץ את התהליך כאשר יש פגיעה (hit), אך במקרה של פספוס, יש צורך לגשת לטבלת הדפים ב-RAM."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

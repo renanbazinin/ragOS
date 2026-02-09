@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Paging and TLB",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 10:00:28",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1143,
+      "output_tokens": 472,
+      "total_tokens": 3977
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Paging",
+      "TLB",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "במקרה של TLB miss (פספוס ב-TLB), ובהנחה שאין Page Fault (כלומר, ה-page נמצא בזיכרון הפיזי), כמה גישות לזיכרון הראשי (RAM) נדרשות בדרך כלל כדי להשלים גישת זיכרון לנתון או לפקודה?",
+      "code_snippet": null,
+      "options": [
+        "א. גישה אחת בלבד.",
+        "ב. שתי גישות: אחת לטבלת הדפים ואחת לנתון/פקודה.",
+        "ג. שלוש גישות: אחת לטבלת הדפים, אחת לטבלת הדפים ברמה שנייה, ואחת לנתון/פקודה.",
+        "ד. ארבע גישות.",
+        "ה. מספר הגישות תלוי בארכיטקטורת המעבד ובגודל ה-TLB."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "כאשר מתרחש TLB miss ואין Page Fault, המערכת נדרשת לבצע שתי גישות לזיכרון הראשי (RAM). הגישה הראשונה היא כדי לאתר את רשומת טבלת הדפים (PTE) בזיכרון הראשי ולקבל ממנה את מספר המסגרת הפיזית (PFN). הגישה השנייה היא כדי לגשת לנתון או לפקודה עצמם בכתובת הפיזית שהתקבלה. לאחר מכן, ה-PTE בדרך כלל מתווסף ל-TLB עבור גישות עתידיות."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

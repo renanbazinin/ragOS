@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Paging and TLB",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 10:01:31",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1143,
+      "output_tokens": 400,
+      "total_tokens": 3206
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Paging",
+      "TLB",
+      "Memory Management",
+      "Virtual Memory"
+    ],
+    "content": {
+      "text": "כמה גישות לזיכרון הפיזי (RAM) נדרשות בסך הכל כדי לגשת לנתון בכתובת וירטואלית מסוימת, במצב שבו מתרחש TLB Miss אך ה-Page Table מכיל את הרשומה הנדרשת (Page Table Hit)?",
+      "code_snippet": null,
+      "options": [
+        "א. 1",
+        "ב. 2",
+        "ג. 3",
+        "ד. 0",
+        "ה. לא ניתן לקבוע"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "במקרה של TLB Miss, המעבד נדרש לגשת לטבלת הדפים (Page Table) הנמצאת בזיכרון הפיזי (RAM) כדי למצוא את ה-Page Table Entry (PTE) המתאים. זוהי הגישה הראשונה ל-RAM. לאחר מציאת ה-PTE וקבלת מספר המסגרת הפיזית (Physical Frame Number), המעבד יכול כעת לגשת למיקום הפיזי של הנתון ב-RAM. זוהי הגישה השנייה ל-RAM. לכן, בסך הכל נדרשות שתי גישות לזיכרון הפיזי."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

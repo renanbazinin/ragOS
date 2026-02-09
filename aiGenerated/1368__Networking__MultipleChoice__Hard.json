@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "Networking",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 09:41:56",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 968,
+      "output_tokens": 1615,
+      "total_tokens": 6010
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Networking",
+      "TCP",
+      "Sockets",
+      "Flow Control"
+    ],
+    "content": {
+      "text": "נתון קוד לקוח TCP המנסה לשלוח מידע לשרת. הלקוח יוצר סוקט TCP חוסם (blocking), מתחבר לשרת, ואז שולח נתונים בלולאה. השרת מוגדר כך שהוא מקבל את החיבור אך *אינו קורא אף פעם* נתונים מהסוקט המחובר אליו. בנוסף, נניח כי גודל ה-send buffer של הסוקט בצד הלקוח קטן משמעותית מכמות הנתונים הכוללת שהלקוח מנסה לשלוח.\n\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n#include <unistd.h>\n#include <arpa/inet.h>\n#include <sys/socket.h>\n\n#define SERVER_IP \"127.0.0.1\"\n#define SERVER_PORT 12345\n#define TOTAL_BYTES_TO_SEND (1024 * 1024) // 1MB\n#define CHUNK_SIZE 4096 // 4KB\n\nint main() {\n    int sock;\n    struct sockaddr_in server_addr;\n    char buffer[CHUNK_SIZE];\n    long bytes_sent = 0;\n    int optval = 8192; // Example send buffer size\n\n    // Create socket\n    sock = socket(AF_INET, SOCK_STREAM, 0);\n    if (sock == -1) { /* error handling */ return 1; }\n\n    // Set send buffer size (optional, for demonstration)\n    setsockopt(sock, SOL_SOCKET, SO_SNDBUF, &optval, sizeof(optval));\n\n    server_addr.sin_family = AF_INET;\n    server_addr.sin_port = htons(SERVER_PORT);\n    inet_pton(AF_INET, SERVER_IP, &server_addr.sin_addr);\n\n    // Connect to server\n    if (connect(sock, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) { /* error handling */ close(sock); return 1; }\n\n    // Fill buffer with some data\n    memset(buffer, 'A', CHUNK_SIZE);\n\n    // Send data in chunks\n    while (bytes_sent < TOTAL_BYTES_TO_SEND) {\n        ssize_t sent_this_chunk = send(sock, buffer, CHUNK_SIZE, 0);\n        if (sent_this_chunk == -1) {\n            perror(\"send failed\");\n            break;\n        }\n        bytes_sent += sent_this_chunk;\n        printf(\"Sent %ld bytes so far.\\n\", bytes_sent);\n    }\n\n    close(sock);\n    return 0;\n}\n```\n\nאיזו מהטענות הבאות מתארת נכונה את התנהגות הקריאה ל-`send()` בתוך הלולאה לאחר שהלקוח שלח כבר כמות מסוימת של נתונים?",
+      "code_snippet": null,
+      "options": [
+        "א. הקריאה ל-`send()` תמיד תחזיר את מספר הבתים המלא שנשלחו (CHUNK_SIZE) ותמשיך לשלוח את כל הנתונים, אך הנתונים יאבדו בדרך מכיוון שהשרת לא קורא אותם.",
+        "ב. הקריאה ל-`send()` תחסום (block) רק כאשר ה-send buffer בצד הלקוח יתמלא לחלוטין.",
+        "ג. הקריאה ל-`send()` תחסום (block) כאשר ה-send buffer בצד הלקוח יתמלא, או כאשר חלון הקבלה (receive window) בצד השרת יגיע לאפס, המוקדם מביניהם.",
+        "ד. הקריאה ל-`send()` תחזיר שגיאה (למשל, EPIPE או ECONNRESET) מכיוון שהשרת אינו קורא את הנתונים, מה שמעיד על חיבור שבור.",
+        "ה. הקריאה ל-`send()` תמיד תחזיר את מספר הבתים המלא שנשלחו (CHUNK_SIZE) ללא חסימה, מכיוון ש-TCP מטפל באמינות באופן שקוף."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "סוקט חוסם (blocking socket) יגרום לקריאה ל-`send()` לחסום אם מערכת ההפעלה לא יכולה לקבל את הנתונים לשליחה באופן מיידי. זה יכול לקרות משתי סיבות עיקריות:\n1.  **מילוי ה-send buffer המקומי**: אם ה-send buffer של הסוקט בצד השולח מלא, כלומר, ישנם נתונים שהלקוח מסר ל-TCP אך טרם נשלחו לרשת או טרם אושרו על ידי השרת, הלקוח ייחסם עד שיתפנה מקום ב-buffer.\n2.  **חלון קבלה (receive window) של השרת הגיע לאפס**: מכיוון שהשרת מקבל את החיבור אך אינו קורא נתונים, ה-receive buffer שלו בצד השרת יתמלא במהירות. כאשר ה-receive buffer של השרת מלא, השרת מפרסם חלון קבלה בגודל אפס ללקוח. המשמעות היא שהשרת אינו יכול לקבל נתונים נוספים. גם אם ה-send buffer בצד הלקוח אינו מלא לחלוטין, מערכת ה-TCP בצד הלקוח תדע שהיא אינה יכולה לשלוח נתונים נוספים לשרת (מכיוון שהשרת לא יכול לקבל אותם), ולכן הקריאה ל-`send()` תחסום.\n\nהקריאה ל-`send()` תחסום כאשר אחד משני התנאים הללו מתקיים, המוקדם מביניהם. במקרה זה, מכיוון שהשרת אינו קורא נתונים כלל, סביר מאוד שחלון הקבלה של השרת יגיע לאפס במהרה, מה שיגרום לחסימה, אלא אם כן ה-send buffer בצד הלקוח יתמלא קודם לכן. לכן, תשובה ג' היא הנכונה ביותר."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

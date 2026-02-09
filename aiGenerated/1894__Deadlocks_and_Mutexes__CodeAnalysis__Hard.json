@@ -1,0 +1,58 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Deadlocks and Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 21:36:37",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4085,
+      "output_tokens": 2399,
+      "total_tokens": 11581
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Deadlocks",
+      "Mutexes",
+      "Synchronization",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתונה מערכת מרובת חוטים המטפלת בשני משאבים משותפים, `resource_A` ו-`resource_B`. כל משאב מוגן על ידי מנעול הדדי (mutex) ייעודי: `mutex_A` מגן על `resource_A` ו-`mutex_B` מגן על `resource_B`.\nקיימות שתי פונקציות עיקריות, `operation_X` ו-`operation_Y`, המבוצעות על ידי חוטים שונים במערכת.\nלהלן מימוש הפונקציות, יחד עם הגדרות המנעולים והמשאבים:",
+      "code_snippet": "```c\n#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h> // For sleep\n\npthread_mutex_t mutex_A;\npthread_mutex_t mutex_B;\n\nint resource_A_data = 0;\nint resource_B_data = 0;\n\nvoid* operation_X(void* arg) {\n    printf(\"Thread %ld: Attempting to lock Mutex A...\\n\", (long)arg);\n    pthread_mutex_lock(&mutex_A);\n    printf(\"Thread %ld: Mutex A locked. Attempting to lock Mutex B...\\n\", (long)arg);\n    sleep(1); // Simulate work or context switch\n    pthread_mutex_lock(&mutex_B);\n    printf(\"Thread %ld: Mutex B locked. Performing operation on A and B.\\n\", (long)arg);\n\n    resource_A_data++;\n    resource_B_data++;\n\n    printf(\"Thread %ld: Unlocking Mutex B.\\n\", (long)arg);\n    pthread_mutex_unlock(&mutex_B);\n    printf(\"Thread %ld: Unlocking Mutex A.\\n\", (long)arg);\n    pthread_mutex_unlock(&mutex_A);\n    printf(\"Thread %ld: Operation X completed.\\n\", (long)arg);\n    return NULL;\n}\n\nvoid* operation_Y(void* arg) {\n    printf(\"Thread %ld: Attempting to lock Mutex B...\\n\", (long)arg);\n    pthread_mutex_lock(&mutex_B);\n    printf(\"Thread %ld: Mutex B locked. Attempting to lock Mutex A...\\n\", (long)arg);\n    sleep(1); // Simulate work or context switch\n    pthread_mutex_lock(&mutex_A);\n    printf(\"Thread %ld: Mutex A locked. Performing operation on B and A.\\n\", (long)arg);\n\n    resource_B_data--;\n    resource_A_data--;\n\n    printf(\"Thread %ld: Unlocking Mutex A.\\n\", (long)arg);\n    pthread_mutex_unlock(&mutex_A);\n    printf(\"Thread %ld: Unlocking Mutex B.\\n\", (long)arg);\n    pthread_mutex_unlock(&mutex_B);\n    printf(\"Thread %ld: Operation Y completed.\\n\", (long)arg);\n    return NULL;\n}\n```",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "האם קיים סיכון לקיפאון (deadlock) במערכת המתוארת כתוצאה מריצה מקבילה של `operation_X` ו-`operation_Y`? נמק את תשובתך.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "אם התשובה לשאלה הקודמת חיובית, תאר תרחיש ריצה ספציפי (רצף פעולות אפשרי של החוטים, כולל מיתוגי הקשר) שיוביל למצב קיפאון.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.3",
+        "text": "הצע פתרון לבעיית הקיפאון שזיהית. יש לתאר את הפתרון בקצרה ולספק קוד C/C++ מתוקן עבור הפונקציות הרלוונטיות, המונע את הקיפאון תוך שמירה על הפונקציונליות המקורית של עדכון המשאבים.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.  **זיהוי קיפאון:**\n    כן, קיים סיכון לקיפאון. הקיפאון יכול להתרחש כיוון ששני החוטים מנסים לתפוס את אותם שני מנעולים (`mutex_A` ו-`mutex_B`) אך בסדר הפוך. חוט המבצע את `operation_X` תופס קודם את `mutex_A` ואז את `mutex_B`, בעוד שחוט המבצע את `operation_Y` תופס קודם את `mutex_B` ואז את `mutex_A`. מצב זה מקיים את ארבעת התנאים ההכרחיים לקיפאון (Mutual Exclusion, Hold and Wait, No Preemption, Circular Wait), ובפרט את תנאי ההמתנה המעגלית.\n\n2.  **תרחיש קיפאון:**\n    נניח שחוט 1 מריץ את `operation_X` וחוט 2 מריץ את `operation_Y`. להלן תרחיש ריצה אפשרי שיוביל לקיפאון:\n    *   **חוט 1 (operation_X):** מבצע `pthread_mutex_lock(&mutex_A);` ותופס בהצלחה את `mutex_A`. (חוט 1 מחזיק ב-`mutex_A`)\n    *   **מִיתוּג הֶקְשֵׁר:** מערכת ההפעלה מעבירה את השליטה לחוט 2.\n    *   **חוט 2 (operation_Y):** מבצע `pthread_mutex_lock(&mutex_B);` ותופס בהצלחה את `mutex_B`. (חוט 2 מחזיק ב-`mutex_B`)\n    *   **מִיתוּג הֶקְשֵׁר:** מערכת ההפעלה מעבירה את השליטה בחזרה לחוט 1.\n    *   **חוט 1 (operation_X):** מנסה לבצע `pthread_mutex_lock(&mutex_B);`. מכיוון ש-`mutex_B` מוחזק על ידי חוט 2, חוט 1 נחסם ונכנס למצב המתנה.\n    *   **מִיתוּג הֶקְשֵׁר:** מערכת ההפעלה מעבירה את השליטה לחוט 2.\n    *   **חוט 2 (operation_Y):** מנסה לבצע `pthread_mutex_lock(&mutex_A);`. מכיוון ש-`mutex_A` מוחזק על ידי חוט 1, חוט 2 נחסם ונכנס למצב המתנה.\n    בשלב זה, חוט 1 ממתין ל-`mutex_B` המוחזק על ידי חוט 2, וחוט 2 ממתין ל-`mutex_A` המוחזק על ידי חוט 1. אף אחד מהם לא יכול להשתחרר מהמנעול שבידיו או להמשיך בביצוע, והמערכת נמצאת במצב קיפאון.\n\n3.  **תיקון והצעה:**\n    הדרך הנפוצה והיעילה ביותר למנוע קיפאון מסוג זה היא באמצעות קביעת סדר קבוע (ordering) לתפיסת המנעולים. אם כל החוטים במערכת יתפסו את אותם המנעולים תמיד באותו סדר מוגדר, לא ייווצר מצב של המתנה מעגלית.\n\n    **תיאור הפתרון:**\n    נשנה את פונקציית `operation_Y` כך שתתפוס את המנעולים באותו סדר כמו `operation_X`, כלומר, קודם את `mutex_A` ואז את `mutex_B`. פעולה זו מבטיחה ששני סוגי הפעולות יצייתו לאותו סדר תפיסת מנעולים, ובכך תמנע המתנה מעגלית.\n\n    **קוד C/C++ מתוקן עבור `operation_Y`:**\n    ```c\nvoid* operation_Y(void* arg) {\n    printf(\"Thread %ld: Attempting to lock Mutex A...\\n\", (long)arg); // Changed order\n    pthread_mutex_lock(&mutex_A); // Changed order\n    printf(\"Thread %ld: Mutex A locked. Attempting to lock Mutex B...\\n\", (long)arg);\n    sleep(1); // Simulate work or context switch\n    pthread_mutex_lock(&mutex_B);\n    printf(\"Thread %ld: Mutex B locked. Performing operation on B and A.\\n\", (long)arg);\n\n    resource_B_data--;\n    resource_A_data--;\n\n    printf(\"Thread %ld: Unlocking Mutex B.\\n\", (long)arg);\n    pthread_mutex_unlock(&mutex_B);\n    printf(\"Thread %ld: Unlocking Mutex A.\\n\", (long)arg);\n    pthread_mutex_unlock(&mutex_A);\n    printf(\"Thread %ld: Operation Y completed.\\n\", (long)arg);\n    return NULL;\n}\n    ```"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

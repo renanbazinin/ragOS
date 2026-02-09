@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "IPC and Signals",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 21:43:25",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1103,
+      "output_tokens": 1180,
+      "total_tokens": 5279
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "IPC",
+      "Signals",
+      "System Calls",
+      "Process Management"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא המשתמש במנגנוני IPC ו-Signals:\n\nלאחר שהתהליך הבן שולח את הסיגנל `SIGUSR1` לתהליך האב, ובהנחה שהאב קולט את הסיגנל ומטפל בו באמצעות `signal_handler`, איזו מהטענות הבאות נכונה לגבי התנהגות קריאת המערכת `wait` בתהליך האב?",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <signal.h>\n#include <sys/wait.h>\n\nvoid signal_handler(int signum) {\n    printf(\"Parent caught signal %d\\n\", signum);\n}\n\nint main() {\n    pid_t pid;\n\n    // Set up signal handler for SIGUSR1\n    struct sigaction sa;\n    sa.sa_handler = signal_handler;\n    sigemptyset(&sa.sa_mask);\n    sa.sa_flags = SA_RESTART; // Key flag for this question\n\n    if (sigaction(SIGUSR1, &sa, NULL) == -1) {\n        perror(\"sigaction\");\n        exit(EXIT_FAILURE);\n    }\n\n    pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        exit(EXIT_FAILURE);\n    } else if (pid == 0) { // Child process\n        printf(\"Child process (PID: %d) sending signal to parent (PID: %d)\\n\", getpid(), getppid());\n        sleep(1); // Give parent time to potentially enter wait()\n        if (kill(getppid(), SIGUSR1) == -1) {\n            perror(\"kill failed\");\n            exit(EXIT_FAILURE);\n        }\n        printf(\"Child sent signal.\\n\");\n        sleep(2); // Wait a bit before exiting\n        exit(EXIT_SUCCESS);\n    } else { // Parent process\n        printf(\"Parent process (PID: %d) waiting for child.\\n\", getpid());\n        int status;\n        pid_t waited_pid = wait(&status);\n        printf(\"Parent finished waiting for child (PID: %d).\\n\", waited_pid);\n        if (WIFEXITED(status)) {\n            printf(\"Child exited with status %d\\n\", WEXITSTATUS(status));\n        } else if (WIFSIGNALED(status)) {\n            printf(\"Child terminated by signal %d\\n\", WTERMSIG(status));\n        }\n    }\n    return 0;\n}",
+      "options": [
+        "א. קריאת המערכת `wait` תופסק באופן מיידי ותחזור עם שגיאה `EINTR`.",
+        "ב. קריאת המערכת `wait` תופסק באופן מיידי ותחזור בהצלחה, אך סטטוס היציאה של הבן לא יהיה זמין עד שהבן יסיים את ריצתו.",
+        "ג. קריאת המערכת `wait` תופסק, המטפל בסיגנל ירוץ, ולאחר מכן קריאת `wait` תופעל מחדש באופן אוטומטי ותמתין לסיום הבן.",
+        "ד. קריאת המערכת `wait` לא תושפע כלל מהסיגנל, והמטפל בסיגנל ירוץ רק לאחר ש-`wait` יסיים את המתנתו.",
+        "ה. אף אחת מהתשובות האחרות אינה נכונה."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "כאשר קריאת המערכת `wait` מופרעת על ידי סיגנל, והמטפל בסיגנל הוגדר עם הדגל `SA_RESTART` (כפי שקורה בקוד הנתון בשורה `sa.sa_flags = SA_RESTART;`), קריאת המערכת `wait` תופסק באופן זמני כדי לאפשר למטפל בסיגנל לרוץ. לאחר שהמטפל בסיגנל מסיים את ריצתו, קריאת המערכת `wait` תופעל מחדש באופן אוטומטי ותמשיך להמתין לסיום התהליך הבן, במקום לחזור עם שגיאה `EINTR`. ללא דגל `SA_RESTART`, קריאת `wait` הייתה חוזרת עם `EINTR`."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

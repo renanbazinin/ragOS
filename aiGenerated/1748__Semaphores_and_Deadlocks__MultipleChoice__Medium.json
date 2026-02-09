@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Deadlocks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 20:31:21",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1047,
+      "output_tokens": 828,
+      "total_tokens": 4021
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Semaphores",
+      "Deadlocks",
+      "Concurrency",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתון קטע קוד המשתמש בסמפורים (semaphores) ובשני תהליכונים (threads) המנסים לרכוש משאבים. איזה מהטענות הבאות נכונה לגבי פוטנציאל קיפאון (deadlock) בקוד זה?",
+      "code_snippet": "sem_t s1, s2; // Semaphores initialized to 1\n\n// Thread 1\nvoid* thread1_func(void* arg) {\n    sem_wait(&s1); // Acquire s1\n    sem_wait(&s2); // Acquire s2\n    // Critical section\n    sem_post(&s2); // Release s2\n    sem_post(&s1); // Release s1\n    return NULL;\n}\n\n// Thread 2\nvoid* thread2_func(void* arg) {\n    sem_wait(&s2); // Acquire s2\n    sem_wait(&s1); // Acquire s1\n    // Critical section\n    sem_post(&s1); // Release s1\n    sem_post(&s2); // Release s2\n    return NULL;\n}",
+      "options": [
+        "א. הקוד יכנס לקיפאון בהכרח.",
+        "ב. הקוד לעולם לא יכנס לקיפאון.",
+        "ג. הקוד עשוי להיכנס לקיפאון, אך לא בהכרח.",
+        "ד. הקוד לא יכנס לקיפאון מכיוון שהסמפורים משוחררים בסדר הפוך מסדר הרכישה."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "הקוד מציג מצב קלאסי של פוטנציאל לקיפאון (deadlock). מתקיימים בו כל ארבעת התנאים ההכרחיים לקיפאון: מניעה הדדית (mutual exclusion) על ידי הסמפורים (s1, s2), החזק והמתן (hold and wait) כאשר כל תהליכון מחזיק סמפור אחד וממתין לשני (לדוגמה, תהליכון 1 מחזיק את s1 וממתין ל-s2, ותהליכון 2 מחזיק את s2 וממתין ל-s1), אי-הפקעה (no preemption) של הסמפורים, והמתנה מעגלית (circular wait) כאשר תהליכון 1 ממתין למשאב שמוחזק על ידי תהליכון 2, ותהליכון 2 ממתין למשאב שמוחזק על ידי תהליכון 1. \nעם זאת, קיפאון אינו מובטח. אם אחד התהליכונים יספיק לרכוש ולשחרר את שני הסמפורים לפני שהתהליכון השני יגיע לנקודת הרכישה השנייה שלו, קיפאון לא יתרחש. לכן, הקוד *עשוי* להיכנס לקיפאון, אך זה לא בהכרח יקרה בכל הרצה."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

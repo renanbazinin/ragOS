@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Processes and Memory Management",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 20:06:04",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1034,
+      "output_tokens": 343,
+      "total_tokens": 2330
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Processes",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "מה מאוחסן בדרך כלל ב-Text Segment (קטע הקוד) של תהליך?",
+      "code_snippet": null,
+      "options": [
+        "א. משתנים גלובליים ואתחולים סטטיים.",
+        "ב. הקוד הבינארי הניתן להרצה של התוכנית.",
+        "ג. נתונים דינמיים שהוקצו על ידי התוכנית בזמן ריצה.",
+        "ד. נתונים של פונקציות ומשתנים מקומיים.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב. קטע הקוד (Text Segment) של תהליך מכיל את ההוראות הבינאריות של התוכנית, כלומר את הקוד הניתן להרצה (executable code). הוא בדרך כלל מוגן מפני כתיבה וניתן לשיתוף בין מספר תהליכים המריצים את אותה תוכנית."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

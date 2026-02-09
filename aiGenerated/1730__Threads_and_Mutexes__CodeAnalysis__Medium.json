@@ -1,0 +1,57 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Threads and Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 20:22:09",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2951,
+      "output_tokens": 1942,
+      "total_tokens": 13397
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Threads",
+      "Mutexes",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C++ המשתמשת בתהליכונים (threads) ובמנעולים (mutexes) כדי לעדכן מונה גלובלי. התוכנית יוצרת 5 תהליכונים, כאשר כל תהליכון מבצע 1000 פעולות הגדלה של המונה הגלובלי, המוגנות על ידי מנעול. לאחר שכל תהליכון מסיים את 1000 ההגדלות שלו, הוא מדפיס את הערך הנוכחי של המונה הגלובלי. לבסוף, התהליכון הראשי ממתין לכל התהליכונים שיסיימו את פעולתם ומדפיס את הערך הסופי של המונה.",
+      "code_snippet": "#include <iostream>\n#include <vector>\n#include <thread>\n#include <mutex>\n\n// Global shared resources\nstd::mutex mtx;\nint global_counter = 0;\nconst int NUM_INCREMENTS_PER_THREAD = 1000;\nconst int NUM_THREADS = 5;\n\nvoid thread_func(int thread_id) {\n    for (int i = 0; i < NUM_INCREMENTS_PER_THREAD; ++i) {\n        mtx.lock();\n        global_counter++;\n        mtx.unlock();\n    }\n    std::cout << \"Thread \" << thread_id << \" finished. Global counter: \" << global_counter << std::endl;\n}\n\nint main() {\n    std::vector<std::thread> threads;\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        threads.emplace_back(thread_func, i);\n    }\n\n    for (std::thread& t : threads) {\n        t.join();\n    }\n\n    std::cout << \"Main thread: All threads finished. Final global counter: \" << global_counter << std::endl;\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "101.1",
+        "text": "מהו הערך הסופי של המונה הגלובלי (`global_counter`) שיוצג על ידי התהליכון הראשי (`Main thread`)? נמקו.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "101.2",
+        "text": "מהו טווח הערכים האפשריים (מינימום ומקסימום) שיכולים להיות מודפסים על ידי *כל אחד* מהתהליכונים בתוך הפונקציה `thread_func` (בשורה המדפיסה את ערך המונה הגלובלי)? נמקו.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "101.3",
+        "text": "האם ייתכן ששני תהליכונים שונים ידפיסו את *אותו* הערך עבור המונה הגלובלי? אם כן, תארו תרחיש אפשרי. אם לא, הסבירו מדוע.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1. **הערך הסופי של המונה הגלובלי (`global_counter`) שיוצג על ידי התהליכון הראשי (`Main thread`):**\n   הערך יהיה 5000. ישנם 5 תהליכונים, וכל אחד מהם מבצע 1000 הגדלות של המונה. סך הכל מתבצעות 5 * 1000 = 5000 הגדלות. השימוש במנעול (mutex) מבטיח שכל פעולת הגדלה (`global_counter++`) היא אטומית ובטוחה מפני מרוצי תנאים (race conditions). הקריאה ל-`join()` בתהליכון הראשי מבטיחה שהתהליכון הראשי ימתין לכל התהליכונים לסיים את עבודתם לפני שהוא מדפיס את הערך הסופי, ולכן הערך יהיה תמיד 5000.\n\n2. **טווח הערכים האפשריים (מינימום ומקסימום) שיכולים להיות מודפסים על ידי *כל אחד* מהתהליכונים בתוך הפונקציה `thread_func`:**\n   טווח הערכים האפשריים הוא בין 1000 ל-5000.\n   *   **מינימום (1000):** תרחיש אפשרי הוא שתהליכון מסוים (לדוגמה, Thread 0) יסיים את כל 1000 ההגדלות שלו וידפיס את הערך הנוכחי של `global_counter` לפני ששאר התהליכונים הספיקו לבצע הגדלות משמעותיות משלהם (או אפילו לפני שהתחילו). במקרה כזה, הערך המודפס יהיה 1000.\n   *   **מקסימום (5000):** תרחיש אפשרי הוא שתהליכון מסוים (לדוגמה, Thread 0) יסיים את כל 1000 ההגדלות שלו, אך לפני שהוא יספיק לבצע את פעולת ההדפסה, כל שאר 4 התהליכונים יסיימו גם הם את 1000 ההגדלות שלהם כל אחד. במצב זה, `global_counter` יגיע ל-5000, ורק אז Thread 0 ידפיס את הערך 5000.\n\n3. **האם ייתכן ששני תהליכונים שונים ידפיסו את *אותו* הערך עבור המונה הגלובלי?**\n   כן, בהחלט ייתכן ששני תהליכונים שונים (או יותר) ידפיסו את אותו הערך.\n   **תרחיש אפשרי:**\n   1.  תהליכון A מסיים את 1000 ההגדלות שלו. `global_counter` מגיע ל-1000 (נניח שרק הוא עבד עד כה). הוא מוכן להדפיס.\n   2.  תהליכון B מסיים את 1000 ההגדלות שלו. `global_counter` מגיע ל-2000. הוא מוכן להדפיס.\n   3.  המתזמן (scheduler) של מערכת ההפעלה מעביר את הריצה לתהליכון A. תהליכון A קורא את `global_counter` (שהוא כעת 2000) ומדפיס אותו.\n   4.  המתזמן מעביר את הריצה לתהליכון B. תהליכון B קורא את `global_counter` (שהוא עדיין 2000, שכן אף אחד לא הגדיל אותו מאז) ומדפיס אותו.\n   במקרה זה, שני התהליכונים ידפיסו את הערך 2000. הדבר אפשרי מכיוון שפעולת ההדפסה (`std::cout`) אינה מוגנת על ידי המנעול, וקריאת המונה לצורך הדפסה מתרחשת *לאחר* שהתהליכון סיים את פעולות ההגדלה המוגנות שלו. לכן, ערך המונה יכול להשתנות בין רגע סיום ההגדלות של תהליכון מסוים לבין רגע הדפסת הערך על ידו, ויתרה מכך, מספר תהליכונים יכולים לקרוא את אותו ערך של המונה אם הם מודפסים ברצף כאשר המונה לא משתנה ביניהם."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

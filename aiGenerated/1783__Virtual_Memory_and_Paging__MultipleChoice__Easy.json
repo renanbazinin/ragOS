@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory and Paging",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 20:47:43",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 949,
+      "output_tokens": 451,
+      "total_tokens": 3373
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Virtual Memory",
+      "Paging",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של מנגנון ה-Paging בזיכרון וירטואלי?",
+      "code_snippet": null,
+      "options": [
+        "א. לאפשר למעבד לגשת לזיכרון מהר יותר.",
+        "ב. לספק הגנה מפני גישה בלתי חוקית לזיכרון של תהליכים אחרים.",
+        "ג. לאפשר לתהליכים להשתמש בזיכרון וירטואלי שגודלו עולה על גודל הזיכרון הפיזי הזמין.",
+        "ד. להקצות זיכרון פיזי רציף לכל תהליך."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "המטרה העיקרית של מנגנון ה-Paging בזיכרון וירטואלי היא לאפשר לתהליכים להשתמש במרחב כתובות וירטואלי שגודלו יכול להיות גדול מהזיכרון הפיזי הקיים במערכת. על ידי חלוקת הזיכרון לדפים (pages) והעברתם בין הזיכרון הפיזי לדיסק (swap space) לפי הצורך, המערכת יכולה ליצור אשליה של זיכרון גדול ורציף לכל תהליך, ובכך לאפשר הרצת יותר תהליכים או תהליכים גדולים יותר ממה שהזיכרון הפיזי מאפשר לבדו."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

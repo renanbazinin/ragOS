@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Producer-Consumer",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 07:42:41",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3452,
+      "output_tokens": 1722,
+      "total_tokens": 8785
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Producer-Consumer",
+      "Synchronization",
+      "Semaphores",
+      "Mutexes",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתונה בעיית יצרן-צרכן קלאסית: מערכת מרובת חוטים בה יצרנים מייצרים מוצרים ומוסיפים אותם למחסן משותף, וצרכנים מוציאים מוצרים מהמחסן וצורכים אותם. המחסן הוא בעל גודל קבוע N.\nיש לדאוג לסנכרון נכון כך ש:\n1.  לא ניתן להוסיף מוצר למחסן כשהוא מלא.\n2.  לא ניתן להוציא מוצר מהמחסן כשהוא ריק.\n3.  פעולות הוספה והוצאה למחסן יבוצעו באופן בטוח ללא תנאי מרוץ (race conditions).\n\nלצורך הפתרון, נתונות הפונקציות הבאות (אין צורך לממש אותן):\n-   `Item produce_item()`: מייצרת מוצר חדש ומחזירה אותו.\n-   `void consume_item(Item item)`: צורכת מוצר נתון.\n-   `void add_item_to_buffer(Item item)`: מוסיפה מוצר למחסן המשותף. פונקציה זו אינה בטוחה לשימוש במקביל.\n-   `Item remove_item_from_buffer()`: מוציאה מוצר מהמחסן המשותף ומחזירה אותו. פונקציה זו אינה בטוחה לשימוש במקביל.\n\nממשו את פונקציות ה-\"חוט יצרן\" (producer) ו-\"חוט צרכן\" (consumer) באמצעות מנעול (mutex) ושני סמפורים. יש לתאר את המשתנים הגלובליים הנדרשים ואת ערכי האתחול שלהם.",
+      "code_snippet": "#include <pthread.h>\n#include <semaphore.h>\n\n#define N 10 // גודל המחסן\n\ntypedef int Item; // נניח ש-Item הוא int לצורך פשטות\n\n// פונקציות חיצוניות (נתונות, אין צורך לממש אותן)\nItem produce_item();\nvoid consume_item(Item item);\nvoid add_item_to_buffer(Item item);\nItem remove_item_from_buffer();\n\n// משתנים גלובליים (יש להגדיר ולאתחל כאן)\n// לדוגמה:\n// pthread_mutex_t buffer_mutex; // אתחול: ...\n// sem_t empty_slots;           // אתחול: ...\n// sem_t filled_slots;          // אתחול: ...\n\nvoid* producer(void* arg) {\n    while (1) {\n        // ... קוד היצרן ...\n    }\n    return NULL;\n}\n\nvoid* consumer(void* arg) {\n    while (1) {\n        // ... קוד הצרכן ...\n    }\n    return NULL;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון לבעיית יצרן-צרכן דורש שלושה מנגנוני סנכרון:\n1.  **מנעול (Mutex)**: להגנה על המחסן המשותף מפני תנאי מרוץ כאשר מספר חוטים מנסים לגשת אליו בו-זמנית. המנעול מאותחל ל-1.\n2.  **סמפור `empty_slots`**: סופר את מספר המקומות הריקים במחסן. הוא מאותחל ל-N (גודל המחסן). היצרן מבצע `wait` עליו לפני הוספת מוצר (כדי לוודא שיש מקום), והצרכן מבצע `post` עליו לאחר הוצאת מוצר (כדי לשחרר מקום).\n3.  **סמפור `filled_slots`**: סופר את מספר המקומות המלאים (מוצרים) במחסן. הוא מאותחל ל-0. הצרכן מבצע `wait` עליו לפני הוצאת מוצר (כדי לוודא שיש מוצר), והיצרן מבצע `post` עליו לאחר הוספת מוצר (כדי לסמן שיש מוצר).\n\nהיצרן ימתין למקום פנוי (`sem_wait(&empty_slots)`), ינעל את המחסן (`pthread_mutex_lock(&buffer_mutex)`), יוסיף את המוצר, ישחרר את המנעול (`pthread_mutex_unlock(&buffer_mutex)`), ויודיע שיש מוצר חדש (`sem_post(&filled_slots)`).\nהצרכן ימתין למוצר קיים (`sem_wait(&filled_slots)`), ינעל את המחסן (`pthread_mutex_lock(&buffer_mutex)`), יוציא את המוצר, ישחרר את המנעול (`pthread_mutex_unlock(&buffer_mutex)`), ויודיע שיש מקום פנוי חדש (`sem_post(&empty_slots)`).\n\n```c\n// משתנים גלובליים (יש לכתוב ערכי אתחול בהערה):\npthread_mutex_t buffer_mutex; // אתחול: 1 (pthread_mutex_init(&buffer_mutex, NULL);)\nsem_t empty_slots;           // אתחול: N (sem_init(&empty_slots, 0, N);)\nsem_t filled_slots;          // אתחול: 0 (sem_init(&filled_slots, 0, 0);)\n\nvoid* producer(void* arg) {\n    Item item;\n    while (1) {\n        item = produce_item();         // ייצור מוצר\n        sem_wait(&empty_slots);        // המתן למקום פנוי\n        pthread_mutex_lock(&buffer_mutex); // נעל את המחסן\n        add_item_to_buffer(item);      // הוסף למחסן\n        pthread_mutex_unlock(&buffer_mutex); // שחרר את המנעול\n        sem_post(&filled_slots);       // אותת שיש מוצר חדש\n    }\n    return NULL;\n}\n\nvoid* consumer(void* arg) {\n    Item item;\n    while (1) {\n        sem_wait(&filled_slots);       // המתן למוצר\n        pthread_mutex_lock(&buffer_mutex); // נעל את המחסן\n        item = remove_item_from_buffer(); // הוצא מהמחסן\n        pthread_mutex_unlock(&buffer_mutex); // שחרר את המנעול\n        sem_post(&empty_slots);        // אותת שיש מקום פנוי\n        consume_item(item);            // צרוך את המוצר\n    }\n    return NULL;\n}\n```",
+      "difficulty_estimation": "Easy"
+    }
+  }
+}

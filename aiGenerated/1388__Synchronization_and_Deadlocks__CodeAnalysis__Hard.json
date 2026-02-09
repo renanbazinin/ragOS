@@ -1,0 +1,46 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Synchronization and Deadlocks",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 09:47:47",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5388,
+      "output_tokens": 2343,
+      "total_tokens": 16679
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Deadlocks",
+      "Atomic Operations",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "במערכת מרובת-חוטים, קיימים N משאבים משותפים, `forks[0]` עד `forks[N-1]`, המיוצגים על ידי מערך שלמים. כל משאב מאותחל ל-0 (פנוי). בנוסף, קיימים N חוטים, כאשר לכל חוט `i` (מ-0 עד `N-1`) נדרשים שני משאבים סמוכים: `forks[i]` ו-`forks[(i+1)%N]` כדי לבצע את פעולתו הקריטית. לרשותכם עומדת פקודת חומרה אטומית יחידה בשם `AtomicTestAndSet`, אשר מוגדרת כדלקמן: פקודה זו משנה באופן אטומי את ערכו של `*flag_ptr` ל-1 ומחזירה את ערכו הקודם (0 אם המשאב היה פנוי, 1 אם היה תפוס). אין להשתמש באובייקטי סנכרון או פעולות מעבד אטומיות אחרות מלבד `AtomicTestAndSet`. יש לדאוג למניעה הדדית, חופש מקיפאון, ולנסות למזער רעב.",
+      "code_snippet": "int AtomicTestAndSet(int *flag_ptr) {\n    // This is a conceptual C equivalent. The actual hardware operation is atomic.\n    int old_val = *flag_ptr;\n    *flag_ptr = 1;\n    return old_val;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "8.1",
+        "text": "ממשו את הפונקציות `init_forks`, `acquire_forks` ו-`release_forks` עבור חוט `id` ו-`N` משאבים, תוך שימוש בלעדי ב-`AtomicTestAndSet`, כך שתובטח מניעת קיפאון ורעב מינימלי.",
+        "code_snippet": "void init_forks(int N, int* forks) {\n    // Initialize all forks to 0 (available)\n}\n\nvoid acquire_forks(int thread_id, int N, int* forks) {\n    // Acquire forks[thread_id] and forks[(thread_id+1)%N]\n}\n\nvoid release_forks(int thread_id, int N, int* forks) {\n    // Release forks[thread_id] and forks[(thread_id+1)%N]\n}",
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון מתבסס על שבירת תנאי ההמתנה המעגלית (circular wait), שהוא אחד מארבעת התנאים ההכרחיים לקיפאון. אנו עושים זאת על ידי הטלת סדר גלובלי על תפיסת המשאבים (המזלגות):\n\n**פונקציית `init_forks`:**\nפשוט מאתחלת את כל המזלגות (משאבים) ל-0, מה שמציין שהם פנויים.\n```c\nvoid init_forks(int N, int* forks) {\n    for (int i = 0; i < N; ++i) {\n        forks[i] = 0; // 0 means available, 1 means taken\n    }\n}\n```\n\n**פונקציית `acquire_forks`:**\nכדי למנוע קיפאון, אנו מבטיחים שחוטים תמיד יתפסו את המזלגות בסדר מסוים. רוב החוטים (`T_0` עד `T_{N-2}`) יתפסו קודם את המזלג בעל האינדקס הנמוך יותר, ואז את המזלג בעל האינדקס הגבוה יותר. החוט האחרון, `T_{N-1}`, הוא המקרה המיוחד שישבור את המעגל: הוא יתפוס קודם את `forks[0]` (שהוא המזלג בעל האינדקס הנמוך ביותר במערכת כולה), ורק אז את `forks[N-1]`.\n\nהאלגוריתם:\n1.  קובעים את שני המזלגות הנדרשים לחוט `id`: `fork_idx1` ו-`fork_idx2`.\n2.  עבור חוטים `0` עד `N-2`: `fork_idx1 = id`, `fork_idx2 = (id + 1) % N`.\n3.  עבור חוט `N-1`: `fork_idx1 = 0`, `fork_idx2 = N - 1`. (זהו היפוך סדר יחסית לזוג `N-1, 0` רגיל, המבטיח שבירת מעגל).\n4.  החוט מנסה לתפוס את `forks[fork_idx1]` באמצעות `AtomicTestAndSet` בלולאת ספין (spin-lock) עד להצלחה.\n5.  לאחר מכן, החוט מנסה לתפוס את `forks[fork_idx2]` גם כן באמצעות `AtomicTestAndSet` בלולאת ספין עד להצלחה.\n\n**מניעת קיפאון:** סדר תפיסת המשאבים המוטל מבטיח שלא תיווצר שרשרת המתנה מעגלית. אם חוט `A` מחזיק במשאב `X` ומחכה למשאב `Y`, וחוט `B` מחזיק במשאב `Y` ומחכה למשאב `X`, זהו קיפאון. הסדר הגלובלי (למעט חוט `N-1` שתופס בסדר `0, N-1`) מבטיח שכל חוט ינסה לתפוס קודם את המשאב ה\"קטן\" יותר באינדקס, ואז את ה\"גדול\" יותר. חוט `N-1` שובר את הסימטריה בכך שהוא תופס את `forks[0]` לפני `forks[N-1]`. זה מבטיח שאף פעם לא יקרה מצב שבו `T_i` מחכה ל`R_{i+1}` ו-`T_{i+1}` מחכה ל`R_i`, ובכך נמנע קיפאון.\n\n**מזעור רעב:** למרות השימוש ב-spin-locks, אשר עלולים לבזבז זמן מעבד, הסדר הגלובלי מבטיח שכל חוט שיצליח לתפוס את המזלג הראשון שלו, יצליח בסופו של דבר לתפוס גם את המזלג השני. לא ייתכן מצב של רעב תמידי מכיוון שאין המתנה מעגלית. המזלגות משתחררים בסופו של דבר, מה שמאפשר לחוטים ממתינים להתקדם.\n```c\nvoid acquire_forks(int thread_id, int N, int* forks) {\n    int fork_idx1, fork_idx2;\n\n    // Implement resource ordering to prevent deadlock\n    if (thread_id == N - 1) { // Special case for the last thread to break circular wait\n        fork_idx1 = 0; // Acquire lowest indexed fork first\n        fork_idx2 = N - 1; // Then its own fork\n    } else { // All other threads acquire in ascending order of indices\n        fork_idx1 = thread_id;\n        fork_idx2 = (thread_id + 1) % N;\n    }\n\n    // Acquire the first fork\n    while (AtomicTestAndSet(&forks[fork_idx1]) == 1) {\n        // Spin-wait until the fork is available\n    }\n\n    // Acquire the second fork\n    while (AtomicTestAndSet(&forks[fork_idx2]) == 1) {\n        // Spin-wait until the fork is available\n        // No need to release fork_idx1 and retry, because the ordering guarantees\n        // that if fork_idx2 is taken, the thread holding it will eventually release it\n        // without waiting for fork_idx1 (due to the imposed global order).\n    }\n}\n```\n\n**פונקציית `release_forks`:**\nפשוט מאתחלת את שני המזלגות שתפס החוט בחזרה ל-0, מה שהופך אותם לזמינים עבור חוטים אחרים. פעולות אלו אינן חייבות להיות אטומיות בפני עצמן מכיוון שרק החוט המחזיק במזלגות רשאי לשחרר אותם.\n```c\nvoid release_forks(int thread_id, int N, int* forks) {\n    int fork_idx1, fork_idx2;\n\n    // Determine the forks in the same order as they were acquired for consistency\n    if (thread_id == N - 1) {\n        fork_idx1 = 0;\n        fork_idx2 = N - 1;\n    } else {\n        fork_idx1 = thread_id;\n        fork_idx2 = (thread_id + 1) % N;\n    }\n\n    forks[fork_idx1] = 0; // Release the first fork\n    forks[fork_idx2] = 0; // Release the second fork\n}\n```"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

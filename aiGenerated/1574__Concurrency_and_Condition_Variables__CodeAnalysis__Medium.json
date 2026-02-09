@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency and Condition Variables",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 11:35:50",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2951,
+      "output_tokens": 1684,
+      "total_tokens": 8225
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Concurrency",
+      "Condition Variables",
+      "Threads",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המשתמשת ב-pthreads, mutexes ובמשתני תנאי (condition variables) כדי לסנכרן בין תהליכון יצרן (producer) לתהליכון צרכן (consumer). תהליכון היצרן מייצר מספרים עוקבים החל מ-0 ועד 4. תהליכון הצרכן צורך את המספרים הללו ומחשב את סכומם הכולל. יש להניח שכל קריאות המערכת מצליחות.\n\nמה יהיה הפלט הסופי של התוכנית, ובפרט, מהו הסכום הסופי שיודפס על ידי התהליכון הראשי ('Main thread received final sum')?",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h> // For exit\n\n// Shared resources\nint buffer = -1;\nint count = 0; // 0: empty, 1: full\npthread_mutex_t mutex;\npthread_cond_t cond_producer; // Producer waits if buffer is full\npthread_cond_t cond_consumer; // Consumer waits if buffer is empty\n\nvoid* producer(void* arg) {\n    for (int i = 0; i < 5; ++i) {\n        pthread_mutex_lock(&mutex);\n        while (count == 1) { // Buffer is full, producer waits\n            pthread_cond_wait(&cond_producer, &mutex);\n        }\n        buffer = i; // Produce item\n        printf(\"Producer produced: %d\\n\", buffer);\n        count = 1; // Mark buffer as full\n        pthread_cond_signal(&cond_consumer); // Signal consumer that item is ready\n        pthread_mutex_unlock(&mutex);\n    }\n    return NULL;\n}\n\nvoid* consumer(void* arg) {\n    long sum = 0; // Use long for sum for safety with pointer casting\n    for (int i = 0; i < 5; ++i) {\n        pthread_mutex_lock(&mutex);\n        while (count == 0) { // Buffer is empty, consumer waits\n            pthread_cond_wait(&cond_consumer, &mutex);\n        }\n        sum += buffer; // Consume item\n        printf(\"Consumer consumed: %d, current sum: %ld\\n\", buffer, sum);\n        count = 0; // Mark buffer as empty\n        pthread_cond_signal(&cond_producer); // Signal producer that buffer is empty\n        pthread_mutex_unlock(&mutex);\n    }\n    printf(\"Final sum: %ld\\n\", sum);\n    return (void*)sum; // Return sum as void*\n}\n\nint main() {\n    setbuf(stdout, NULL); // Disable buffering for immediate output\n    pthread_t prod_tid, cons_tid;\n    \n    // Initialize mutex and condition variables\n    pthread_mutex_init(&mutex, NULL);\n    pthread_cond_init(&cond_producer, NULL);\n    pthread_cond_init(&cond_consumer, NULL);\n\n    // Create threads\n    pthread_create(&prod_tid, NULL, producer, NULL);\n    pthread_create(&cons_tid, NULL, consumer, NULL);\n\n    // Wait for threads to finish\n    pthread_join(prod_tid, NULL);\n    long final_sum_from_consumer;\n    pthread_join(cons_tid, (void**)&final_sum_from_consumer);\n\n    printf(\"Main thread received final sum: %ld\\n\", final_sum_from_consumer);\n\n    // Destroy mutex and condition variables\n    pthread_mutex_destroy(&mutex);\n    pthread_cond_destroy(&cond_producer);\n    pthread_cond_destroy(&cond_consumer);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "התוכנית מדגימה מנגנון סנכרון יצרן-צרכן (producer-consumer) באמצעות mutex ושני משתני תנאי (condition variables).\n\n1.  **`cond_producer`**: משמש את היצרן כדי להמתין אם ה-buffer מלא (`count == 1`). היצרן ישוחרר מההמתנה כאשר הצרכן יצרוך פריט ויאותת (signal) לו.\n2.  **`cond_consumer`**: משמש את הצרכן כדי להמתין אם ה-buffer ריק (`count == 0`). הצרכן ישוחרר מההמתנה כאשר היצרן ייצר פריט ויאותת לו.\n3.  ה-`mutex` מגן על הגישה המשותפת למשתנים `buffer` ו-`count`.\n\n**מהלך הריצה:**\n*   היצרן מייצר את המספר 0, מאותת לצרכן, והצרכן צורך אותו. סכום = 0.\n*   היצרן מייצר את המספר 1, מאותת לצרכן, והצרכן צורך אותו. סכום = 0 + 1 = 1.\n*   היצרן מייצר את המספר 2, מאותת לצרכן, והצרכן צורך אותו. סכום = 1 + 2 = 3.\n*   היצרן מייצר את המספר 3, מאותת לצרכן, והצרכן צורך אותו. סכום = 3 + 3 = 6.\n*   היצרן מייצר את המספר 4, מאותת לצרכן, והצרכן צורך אותו. סכום = 6 + 4 = 10.\n\nבסיום, תהליכון הצרכן יסיים את הלולאה וידפיס 'Final sum: 10'. תהליכון ה-`main` ימתין לסיום הצרכן ויקבל את הערך המוחזר (10) וידפיס 'Main thread received final sum: 10'.\n\n**פלט אפשרי:**\nProducer produced: 0\nConsumer consumed: 0, current sum: 0\nProducer produced: 1\nConsumer consumed: 1, current sum: 1\nProducer produced: 2\nConsumer consumed: 2, current sum: 3\nProducer produced: 3\nConsumer consumed: 3, current sum: 6\nProducer produced: 4\nConsumer consumed: 4, current sum: 10\nFinal sum: 10\nMain thread received final sum: 10\n\nהסכום הסופי שיוצג על ידי התהליכון הראשי הוא 10."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

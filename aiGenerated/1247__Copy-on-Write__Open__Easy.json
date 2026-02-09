@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Copy-on-Write",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 08:56:25",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4669,
+      "output_tokens": 1609,
+      "total_tokens": 10648
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Operating Systems",
+      "Memory Management",
+      "Copy-on-Write",
+      "Process Management"
+    ],
+    "content": {
+      "text": "הסבר את מנגנון ה-Copy-on-Write (CoW) בהקשר של יצירת תהליכים חדשים באמצעות קריאת המערכת `fork()` במערכת הפעלה. בהתייחס לקוד ה-C המצורף, תאר כיצד מנגנון CoW בא לידי ביטוי עבור המשתנים `global_var` ו-`local_var` כאשר תהליך הבן משנה אותם. הסבר מתי ולמה מנגנון זה מופעל, ומה היתרונות שלו.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <sys/types.h>\n#include <unistd.h>\n\nint global_var = 10;\n\nint main() {\n    int local_var = 20;\n    pid_t pid;\n\n    printf(\"Before fork: global_var = %d, local_var = %d\\n\", global_var, local_var);\n\n    pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        exit(1);\n    } else if (pid == 0) { // Child process\n        printf(\"Child process: PID = %d\\n\", getpid());\n        global_var = 15;\n        local_var = 25;\n        printf(\"Child modified: global_var = %d, local_var = %d\\n\", global_var, local_var);\n    } else { // Parent process\n        printf(\"Parent process: PID = %d, Child PID = %d\\n\", getpid(), pid);\n        sleep(1); // Give child a chance to run and modify\n        printf(\"Parent after child modified: global_var = %d, local_var = %d\\n\", global_var, local_var);\n    }\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "מנגנון Copy-on-Write (CoW) הוא אסטרטגיה לניהול זיכרון המאפשרת שיתוף יעיל של משאבים בין תהליכים, במיוחד בעת יצירת תהליכים חדשים עם `fork()`.\n\n1.  **הסבר המנגנון ב-`fork()`**:\n    כאשר תהליך אב קורא ל-`fork()` כדי ליצור תהליך בן, במקום לשכפל באופן מיידי את כל מרחב הכתובות של האב עבור הבן, מערכת ההפעלה משתמשת ב-CoW. זה אומר שבתחילה, גם האב וגם הבן חולקים את אותם דפי זיכרון פיזיים. דפים אלו מסומנים כ\"לקריאה בלבד\" (read-only) בטבלאות הדפים של שני התהליכים.\n\n2.  **התייחסות למשתנים בקוד המצורף**:\n    -   **לפני השינוי בבן**: המשתנים `global_var` ו-`local_var` נמצאים בדפי זיכרון משותפים בין האב לבן. שניהם רואים את הערכים המקוריים (10 ו-20 בהתאמה).\n    -   **כאשר הבן מנסה לשנות את `global_var` (ל-15)**: תהליך הבן מנסה לכתוב לדף זיכרון המכיל את `global_var`. מכיוון שהדף מסומן כ-read-only, מתרחשת \"תקלת דף\" (page fault). מערכת ההפעלה מזהה שזו תקלת CoW:\n        1.  היא יוצרת עותק חדש של הדף הפיזי המכיל את `global_var`.\n        2.  היא מעדכנת את טבלת הדפים של תהליך הבן כך שהכתובת הווירטואלית של `global_var` תצביע כעת לדף הפיזי החדש והבלעדי של הבן, ומסמנת אותו כ-read-write.\n        3.  תהליך הבן כותב לערך `global_var` בעותק שלו.\n        4.  הדף המקורי המכיל את `global_var` של האב נשאר ללא שינוי, והאב ממשיך להשתמש בו.\n    -   **כאשר הבן מנסה לשנות את `local_var` (ל-25)**: אותו תהליך מתרחש עבור הדף המכיל את `local_var`. נוצר עותק חדש של הדף עבור הבן, והבן כותב לעותק שלו. האב ממשיך לראות את הערך המקורי של `local_var`.\n    -   **תוצאה**: לאחר השינויים של הבן, האב ימשיך לראות `global_var = 10` ו-`local_var = 20`, בעוד הבן יראה `global_var = 15` ו-`local_var = 25` (במרחב הכתובות שלו).\n\n3.  **מתי ולמה מנגנון זה מופעל**:\n    -   **מתי**: מופעל כאשר אחד מהתהליכים (אב או בן) מנסה לכתוב לדף זיכרון המשותף לו ולתהליך אחר, ודף זה סומן כ-read-only לצורך CoW.\n    -   **למה (יתרונות)**:\n        *   **יעילות בזיכרון**: נמנע שכפול מיותר של דפי זיכרון. אם תהליך הבן לא משנה דף מסוים, או אם הוא קורא ל-`exec()` מיד לאחר `fork()` (ומחליף את כל מרחב הכתובות שלו), אין צורך לבזבז זיכרון על עותקים שלא ישמשו.\n        *   **ביצועים משופרים**: פעולת `fork()` מהירה יותר באופן משמעותי מכיוון שהיא דורשת רק העתקה של טבלאות דפים וסימונם, ולא העתקה פיזית של כל הנתונים. העתקה פיזית מתרחשת רק \"לפי דרישה\" (on demand) כאשר יש צורך בכך."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

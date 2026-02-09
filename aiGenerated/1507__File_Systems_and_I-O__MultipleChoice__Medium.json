@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "File Systems and I/O",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 10:58:29",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1233,
+      "output_tokens": 567,
+      "total_tokens": 3938
+    }
+  },
+  "question": {
+    "id": 6,
+    "type": "MultipleChoice",
+    "topic": [
+      "File Systems",
+      "I/O",
+      "Caching"
+    ],
+    "content": {
+      "text": "במערכת הפעלה טיפוסית (ללא שימוש בדגלים מיוחדים כמו O_SYNC), כאשר קריאת המערכת `write()` מחזירה ערך חיובי המציין הצלחה, מהי ההצהרה הנכונה ביותר לגבי מצב הנתונים?",
+      "code_snippet": null,
+      "options": [
+        "א. הנתונים נכתבו בהצלחה לדיסק הפיזי.",
+        "ב. הנתונים נכתבו בהצלחה ל-buffer cache (או ל-page cache) ונמצאים בתור לכתיבה לדיסק הפיזי במועד כלשהו בעתיד.",
+        "ג. הנתונים נכתבו בהצלחה ל-buffer cache (או ל-page cache) והם מובטחים להיכתב לדיסק הפיזי רק לאחר קריאת המערכת `fsync()`.",
+        "ד. הנתונים עדיין נמצאים בזיכרון התהליך וטרם הועתקו לזיכרון הליבה.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "כאשר קריאת המערכת `write()` מחזירה הצלחה (ללא דגלי סינכרון מפורשים), זה בדרך כלל אומר שהנתונים הועתקו בהצלחה מה-buffer של התהליך ל-buffer cache (או page cache) בזיכרון הליבה. הנתונים מסומנים כ-'מלוכלכים' (dirty) ויועברו לדיסק הפיזי במועד מאוחר יותר על ידי מנגנוני כתיבה לרקע של מערכת ההפעלה, או בעקבות קריאה מפורשת כמו `sync()` או `fsync()`, או בעת סגירת הקובץ או כיבוי המערכת. אין ערובה שהנתונים נמצאים פיזית על הדיסק ברגע ש-`write()` חוזר."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

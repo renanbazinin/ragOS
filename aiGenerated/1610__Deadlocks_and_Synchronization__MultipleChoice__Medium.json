@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Deadlocks and Synchronization",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 11:50:46",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1163,
+      "output_tokens": 1218,
+      "total_tokens": 3997
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Deadlocks",
+      "Synchronization",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתונים שני חוטים (threads), T1 ו-T2, ושני מנעולים (mutexes), M1 ו-M2. נניח שהקוד הבא רץ במערכת:\n\n",
+      "code_snippet": "pthread_mutex_t M1, M2;\n\nvoid* thread_T1(void* arg) {\n    pthread_mutex_lock(&M1);\n    pthread_mutex_lock(&M2);\n    // Critical section T1\n    pthread_mutex_unlock(&M2);\n    pthread_mutex_unlock(&M1);\n    return NULL;\n}\n\nvoid* thread_T2(void* arg) {\n    pthread_mutex_lock(&M2);\n    pthread_mutex_lock(&M1);\n    // Critical section T2\n    pthread_mutex_unlock(&M1);\n    pthread_mutex_unlock(&M2);\n    return NULL;\n}\n\n// main function would create and run T1, T2\n",
+      "options": [
+        "א. קיימת ריצה אפשרית של הקוד שבה יתרחש קיפאון (deadlock).",
+        "ב. קיפאון אינו אפשרי בקוד זה מכיוון שכל חוט משחרר את המנעולים שרכש.",
+        "ג. קיפאון אינו אפשרי בקוד זה מכיוון שאין תלות מעגלית במשאבים.",
+        "ד. קיפאון אינו אפשרי אם מערכת ההפעלה מבצעת החלפת הקשר (context switch) רק לאחר שחרור המנעולים."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "הטענה הנכונה היא א'. קוד זה מדגים מצב קלאסי שבו יכול להתרחש קיפאון (deadlock). קיפאון מתרחש כאשר מתקיימים ארבעת התנאים:\n1.  **Mutual Exclusion (מניעה הדדית):** המנעולים (M1, M2) מבטיחים גישה בלעדית למשאבים. תנאי זה מתקיים.\n2.  **Hold and Wait (החזק והמתן):** כל חוט מחזיק במשאב אחד (מנעול) וממתין למשאב אחר. לדוגמה, חוט T1 יכול לרכוש את M1 ולאחר מכן להמתין ל-M2, בעוד חוט T2 רוכש את M2 וממתין ל-M1. תנאי זה מתקיים.\n3.  **No Preemption (אי-נשללות):** לא ניתן לקחת מנעול מחוט שמחזיק בו בכוח. תנאי זה מתקיים עבור מנעולי mutex.\n4.  **Circular Wait (המתנה מעגלית):** קיימת שרשרת מעגלית של חוטים, כאשר כל חוט בשרשרת ממתין למשאב המוחזק על ידי החוט הבא בשרשרת. במקרה זה, T1 מחזיק ב-M1 וממתין ל-M2, בעוד T2 מחזיק ב-M2 וממתין ל-M1, מה שיוצר תלות מעגלית.\n\nריצה אפשרית שתוביל לקיפאון:\n1.  חוט T1 מבצע `pthread_mutex_lock(&M1);` ורוכש את M1.\n2.  מערכת ההפעלה מבצעת החלפת הקשר (context switch) לחוט T2.\n3.  חוט T2 מבצע `pthread_mutex_lock(&M2);` ורוכש את M2.\n4.  מערכת ההפעלה מבצעת החלפת הקשר לחוט T1.\n5.  חוט T1 מנסה לבצע `pthread_mutex_lock(&M2);` אך M2 מוחזק על ידי T2, ולכן T1 נכנס למצב המתנה.\n6.  מערכת ההפעלה מבצעת החלפת הקשר לחוט T2.\n7.  חוט T2 מנסה לבצע `pthread_mutex_lock(&M1);` אך M1 מוחזק על ידי T1, ולכן T2 נכנס למצב המתנה.\nבשלב זה, שני החוטים ממתינים זה לזה, וזהו קיפאון.\n\nאפשרויות ב', ג' ו-ד' שגויות: שחרור המנעולים הוא חיוני אך אינו מונע קיפאון אם סדר הרכישה יוצר תלות מעגלית. קיימת תלות מעגלית במשאבים (M1 -> M2 -> M1). ההנחה לגבי החלפת הקשר אינה מציאותית ואינה מבטיחה היעדר קיפאון במצב זה."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

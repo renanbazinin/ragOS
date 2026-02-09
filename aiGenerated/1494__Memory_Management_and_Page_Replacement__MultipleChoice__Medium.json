@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Memory Management and Page Replacement",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 10:46:03",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 941,
+      "output_tokens": 387,
+      "total_tokens": 2388
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Memory Management",
+      "Page Replacement",
+      "Paging Algorithms"
+    ],
+    "content": {
+      "text": "איזה אלגוריתם החלפת דפים משתמש ב-reference bit כדי לתת לדף \"הזדמנות שנייה\" לפני שהוא מוחלף?",
+      "code_snippet": null,
+      "options": [
+        "א. FIFO (First-In, First-Out)",
+        "ב. LRU (Least Recently Used)",
+        "ג. Optimal",
+        "ד. Clock (Second-Chance)",
+        "ה. אף אחת מהתשובות אינה נכונה."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ד",
+      "explanation": "אלגוריתם Clock (המכונה גם Second-Chance) הוא שיפור של FIFO. הוא שומר רשימה מעגלית של דפים ומשתמש ב-reference bit. כאשר יש צורך להחליף דף, האלגוריתם סורק את הרשימה. אם ה-reference bit של דף כלשהו מוגדר (כלומר, הוא שימש לאחרונה), ה-bit מאופס והדף מקבל \"הזדמנות שנייה\" (הוא לא מוחלף מיד). הסריקה ממשיכה עד שנמצא דף עם reference bit מאופס, ואז הוא מוחלף."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 07:01:59",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5728,
+      "output_tokens": 3813,
+      "total_tokens": 15315
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Race Conditions",
+      "Concurrency",
+      "Synchronization",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C/C++ המשתמשת בחוטים (pthreads) כדי לטעון משאבים. התוכנית מגדירה מערך גלובלי `slots` המייצג משאבים, ומונה גלובלי `claimed_count` הסופר כמה משאבים נטענו בהצלחה. כל חוט מנסה למצוא משבצת פנויה (ערך 0), לסמן אותה עם המזהה הייחודי שלו (thread ID), ולאחר מכן להגדיל את המונה `claimed_count`. שימו לב שהפונקציה `worker_thread` מנסה לתפוס משבצת פעמיים.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <pthread.h>\n#include <unistd.h>\n\n#define NUM_SLOTS 3 // מספר משבצות המשאב\n#define NUM_THREADS 3 // מספר חוטים\n\nint slots[NUM_SLOTS]; // 0 = פנוי, >0 = נתפס ע\"י חוט (מזהה החוט)\nint claimed_count = 0; // מונה גלובלי של משבצות שנטענו\n\nvoid* worker_thread(void* arg) {\n    long thread_id = (long)arg;\n    for (int attempt = 0; attempt < 2; ++attempt) { // כל חוט מנסה לתפוס משבצת פעמיים\n        int found_slot_idx = -1;\n        // לולאה למציאת משבצת פנויה\n        for (int i = 0; i < NUM_SLOTS; ++i) {\n            if (slots[i] == 0) { // בדיקה אם פנוי\n                found_slot_idx = i;\n                break; // נמצאה משבצת, יוצאים מהלולאה הפנימית\n            }\n        }\n\n        if (found_slot_idx != -1) {\n            // תפיסת המשבצת והגדלת המונה\n            // כאן עשויה להתרחש החלפת הקשר לפני ששתי הפעולות מתבצעות יחד\n            slots[found_slot_idx] = thread_id; // סימון המשבצת כנתפסת\n            claimed_count++; // הגדלת מונה המשאבים שנטענו\n            // printf(\"Thread %ld claimed slot %d. Current claimed_count: %d\\n\", thread_id, found_slot_idx, claimed_count);\n        } else {\n            // printf(\"Thread %ld found no available slots in attempt %d.\\n\", thread_id, attempt + 1);\n        }\n    }\n    return NULL;\n}\n\nint main() {\n    for (int i = 0; i < NUM_SLOTS; ++i) {\n        slots[i] = 0; // אתחול כל המשבצות כפנויות\n    }\n\n    pthread_t threads[NUM_THREADS];\n\n    for (long i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, worker_thread, (void*)(i + 1)); // מזהי חוטים 1, 2, 3\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    // חישוב מספר המשבצות הייחודיות שנתפסו בפועל\n    int actual_unique_claimed_slots = 0;\n    for (int i = 0; i < NUM_SLOTS; ++i) {\n        if (slots[i] != 0) {\n            actual_unique_claimed_slots++;\n        }\n    }\n\n    printf(\"\\nFinal state:\\n\");\n    for (int i = 0; i < NUM_SLOTS; ++i) {\n        printf(\"Slot %d: %d\\n\", i, slots[i]);\n    }\n    printf(\"Final claimed_count: %d\\n\", claimed_count);\n    printf(\"Actual unique claimed slots: %d\\n\", actual_unique_claimed_slots);\n\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "זהו את כל תנאי המירוץ הקיימים בפונקציה `worker_thread` והסבירו מדוע הם מהווים תנאי מירוץ.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "ספקו תרחיש ריצה מפורט (פירוט סדר הפעולות בין החוטים) שמוביל למצב סופי שבו הערך של `claimed_count` גדול מהערך של `actual_unique_claimed_slots`. הציגו את מצב המערך `slots` ואת ערך `claimed_count` בכל שלב קריטי.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.3",
+        "text": "הציעו פתרון מינימלי לתיקון תנאי המירוץ באמצעות סמפורים או מוטקסים, וספקו את קטע הקוד המתוקן של `worker_thread` (כולל אתחול אובייקטי הסנכרון במיין).",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.1: קיימים שני תנאי מירוץ עיקריים בפונקציה `worker_thread`:\n    1.  **תנאי מירוץ על המערך `slots` (Check-Then-Act):** כאשר חוט מזהה שמשבצת `slots[i]` פנויה (כלומר `slots[i] == 0`), הוא ממשיך לתפוס אותה באמצעות `slots[found_slot_idx] = thread_id`. אולם, בין שלב הבדיקה (`if (slots[i] == 0)`) לבין שלב הפעולה (`slots[found_slot_idx] = thread_id`) עשויה להתרחש החלפת הקשר (context switch). חוט אחר יכול גם הוא לבדוק את אותה משבצת, למצוא אותה פנויה, ולתפוס אותה. כתוצאה מכך, שני חוטים יכולים לחשוב שהם תפסו את אותה משבצת, כאשר בפועל רק אחד מהם ישנה את ערכה במערך `slots`, והעדכון של השני יאבד. זהו מצב של \"עדכון אבוד\" (Lost Update).\n    2.  **תנאי מירוץ על המונה `claimed_count` (Read-Modify-Write):** הפעולה `claimed_count++` אינה אטומית. היא מורכבת משלוש פעולות בסיסיות: קריאת הערך הנוכחי של `claimed_count`, הגדלת הערך, וכתיבת הערך החדש בחזרה לזיכרון. אם שני חוטים או יותר מנסים להגדיל את המונה בו-זמנית, ייתכן ששניהם יקראו את אותו ערך התחלתי, יגדילו אותו בנפרד, ולאחר מכן יכתבו בחזרה את הערך המוגדל. לדוגמה, אם `claimed_count` הוא 0, חוט A קורא 0, חוט B קורא 0. חוט A כותב 1, חוט B כותב 1. במקום שהמונה יהיה 2, הוא נשאר 1. זה גם מצב של \"עדכון אבוד\".\n\n1.2: תרחיש ריצה שמוביל למצב בו `claimed_count` גדול מ-`actual_unique_claimed_slots`:\n\n    *   **מצב התחלתי:** `slots = {0,0,0}`, `claimed_count = 0`\n    *   **חוט 1 (T1) מתחיל (ID=1):**\n        *   T1: נכנס ל-`worker_thread` (ניסיון 0).\n        *   T1: מוצא `slots[0] == 0`. `found_slot_idx = 0`.\n    *   **החלפת הקשר.**\n    *   **חוט 2 (T2) מתחיל (ID=2):**\n        *   T2: נכנס ל-`worker_thread` (ניסיון 0).\n        *   T2: מוצא `slots[0] == 0`. `found_slot_idx = 0`.\n    *   **החלפת הקשר.**\n    *   **חוט 3 (T3) מתחיל (ID=3):**\n        *   T3: נכנס ל-`worker_thread` (ניסיון 0).\n        *   T3: מוצא `slots[1] == 0`. `found_slot_idx = 1`.\n    *   **החלפת הקשר.**\n    *   **T1 ממשיך:**\n        *   T1: `slots[0] = 1`. `slots = {1,0,0}`.\n        *   T1: `claimed_count++`. `claimed_count = 1`.\n    *   **החלפת הקשר.**\n    *   **T2 ממשיך:**\n        *   T2: `slots[0] = 2`. `slots = {2,0,0}` (העדכון של T1 על `slots[0]` נדרס).\n        *   T2: `claimed_count++`. `claimed_count = 2`.\n    *   **החלפת הקשר.**\n    *   **T3 ממשיך:**\n        *   T3: `slots[1] = 3`. `slots = {2,3,0}`.\n        *   T3: `claimed_count++`. `claimed_count = 3`.\n    *   **החלפת הקשר.**\n    *   **T1 ממשיך (ניסיון 1):**\n        *   T1: מוצא `slots[2] == 0`. `found_slot_idx = 2`.\n        *   T1: `slots[2] = 1`. `slots = {2,3,1}`.\n        *   T1: `claimed_count++`. `claimed_count = 4`.\n    *   **T1 מסיים.**\n    *   **T2 ממשיך (ניסיון 1):**\n        *   T2: אין משבצות פנויות (`slots` הוא ` {2,3,1}`). `found_slot_idx = -1`.\n    *   **T2 מסיים.**\n    *   **T3 ממשיך (ניסיון 1):**\n        *   T3: אין משבצות פנויות (`slots` הוא ` {2,3,1}`). `found_slot_idx = -1`.\n    *   **T3 מסיים.**\n\n    **מצב סופי:**\n    *   `slots = {2,3,1}`\n    *   `claimed_count = 4`\n    *   `actual_unique_claimed_slots = 3` (משבצות 0, 1, 2 נתפסו). \n    במצב זה, `claimed_count` (4) גדול מ-`actual_unique_claimed_slots` (3).\n\n1.3: כדי לתקן את תנאי המירוץ, נשתמש במוטקס (mutex) כדי להגן על כל הקטע הקריטי שבו מתבצעת בדיקת זמינות המשבצת, תפיסתה, ועדכון המונה הגלובלי. הקטע הקריטי יכלול את לולאת החיפוש, את תפיסת המשבצת ואת הגדלת המונה.\n\n    **שינויים בפונקציה `main`:**\n    יש לאתחל את המוטקס לפני יצירת החוטים ולשחרר אותו בסיום התוכנית:\n\n    ```c\n    // הגדרה גלובלית של המוטקס (ניתן להגדיר גם בתוך main אם אין צורך לגשת אליו מחוץ ל-main)\n    pthread_mutex_t mutex;\n\n    int main() {\n        for (int i = 0; i < NUM_SLOTS; ++i) {\n            slots[i] = 0; // אתחול כל המשבצות כפנויות\n        }\n\n        // אתחול המוטקס\n        pthread_mutex_init(&mutex, NULL);\n\n        pthread_t threads[NUM_THREADS];\n\n        for (long i = 0; i < NUM_THREADS; ++i) {\n            pthread_create(&threads[i], NULL, worker_thread, (void*)(i + 1)); // מזהי חוטים 1, 2, 3\n        }\n\n        for (int i = 0; i < NUM_THREADS; ++i) {\n            pthread_join(threads[i], NULL);\n        }\n\n        // שחרור המוטקס\n        pthread_mutex_destroy(&mutex);\n\n        // ... שאר קוד ההדפסה והחישובים ...\n\n        return 0;\n    }\n    ```\n\n    **פונקציה `worker_thread` מתוקנת:**\n\n    ```c\n    void* worker_thread(void* arg) {\n        long thread_id = (long)arg;\n        for (int attempt = 0; attempt < 2; ++attempt) {\n            int found_slot_idx = -1;\n\n            pthread_mutex_lock(&mutex); // ננעל את המוטקס לפני גישה למשתנים המשותפים\n\n            // לולאה למציאת משבצת פנויה ותפיסתה\n            for (int i = 0; i < NUM_SLOTS; ++i) {\n                if (slots[i] == 0) { // בדיקה אם פנוי\n                    found_slot_idx = i;\n                    slots[found_slot_idx] = thread_id; // סימון המשבצת כנתפסת\n                    claimed_count++; // הגדלת מונה המשאבים שנטענו\n                    break; // נמצאה ונתפסה משבצת, יוצאים מהלולאה הפנימית\n                }\n            }\n            \n            pthread_mutex_unlock(&mutex); // נשחרר את המוטקס לאחר סיום הגישה למשתנים המשותפים\n\n            if (found_slot_idx != -1) {\n                // printf(\"Thread %ld claimed slot %d. Current claimed_count: %d\\n\", thread_id, found_slot_idx, claimed_count);\n            } else {\n                // printf(\"Thread %ld found no available slots in attempt %d.\\n\", thread_id, attempt + 1);\n            }\n        }\n        return NULL;\n    }\n    ```\n    המוטקס מבטיח שרק חוט אחד יוכל לבצע את פעולות הבדיקה, התפיסה והעדכון של המונה בכל רגע נתון, ובכך מונע את תנאי המירוץ שזוהו."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Deadlocks and Synchronization",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 11:51:54",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1163,
+      "output_tokens": 978,
+      "total_tokens": 4404
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Deadlocks",
+      "Synchronization",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "במערכת מרובת חוטים, נתונים שני חוטים (threads) המנסים לרכוש שני מנעולים (mutexes) גלובליים, m1 ו-m2, כפי שמוצג בקוד הבא. איזו מהטענות הבאות נכונה לגבי פוטנציאל לקיפאון (deadlock) במערכת זו?",
+      "code_snippet": "pthread_mutex_t m1 = PTHREAD_MUTEX_INITIALIZER;\npthread_mutex_t m2 = PTHREAD_MUTEX_INITIALIZER;\n\nvoid* thread_func1(void* arg) {\n    pthread_mutex_lock(&m1);\n    // do some work\n    pthread_mutex_lock(&m2);\n    // do more work\n    pthread_mutex_unlock(&m2);\n    pthread_mutex_unlock(&m1);\n    return NULL;\n}\n\nvoid* thread_func2(void* arg) {\n    pthread_mutex_lock(&m2);\n    // do some work\n    pthread_mutex_lock(&m1);\n    // do more work\n    pthread_mutex_unlock(&m1);\n    pthread_mutex_unlock(&m2);\n    return NULL;\n}",
+      "options": [
+        "א. קיפאון אינו אפשרי, מכיוון שמנעולים (mutexes) מונעים תמיד מצבי מרוץ (race conditions).",
+        "ב. קיפאון אינו אפשרי, מכיוון שאין כאן המתנה מעגלית (circular wait).",
+        "ג. קיפאון אפשרי, מכיוון שכל ארבעת התנאים ההכרחיים לקיפאון יכולים להתקיים.",
+        "ד. קיפאון אינו אפשרי, מכיוון שמנגנון המנעולים תומך בהשתלטות (preemption) על המשאבים."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "התשובה הנכונה היא ג'. קיפאון אפשרי במערכת זו מכיוון שכל ארבעת התנאים ההכרחיים לקיפאון יכולים להתקיים:\n1.  **הדדיות (Mutual Exclusion)**: המנעולים m1 ו-m2 מבטיחים שרק חוט אחד יכול להחזיק כל משאב בכל רגע נתון.\n2.  **החזקה והמתנה (Hold and Wait)**: כל חוט רוכש מנעול אחד (לדוגמה, חוט 1 רוכש את m1) ולאחר מכן ממתין לרכישת המנעול השני (m2) בזמן שהוא עדיין מחזיק במנעול הראשון.\n3.  **אי-השתלטות (No Preemption)**: המנעולים הם מסוג שאינו מאפשר השתלטות. חוט שמחזיק במנעול לא ישחרר אותו אלא מרצונו.\n4.  **המתנה מעגלית (Circular Wait)**: אם חוט 1 רוכש את m1 ומחכה ל-m2, ובמקביל חוט 2 רוכש את m2 ומחכה ל-m1, נוצרת שרשרת המתנה מעגלית שמובילה לקיפאון.\nלכן, מכיוון שכל התנאים מתקיימים, קיפאון אפשרי. אפשרות א' אינה נכונה מכיוון שמנעולים מונעים מצבי מרוץ אך יכולים לגרום לקיפאון. אפשרות ב' אינה נכונה מכיוון שבהחלט קיימת אפשרות להמתנה מעגלית. אפשרות ד' אינה נכונה מכיוון שמנעולים אינם תומכים בהשתלטות על משאבים שהם מחזיקים."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

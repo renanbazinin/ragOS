@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Scheduling",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 09:04:53",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 999,
+      "output_tokens": 339,
+      "total_tokens": 2605
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Scheduling",
+      "CPU Scheduling"
+    ],
+    "content": {
+      "text": "איזה מאלגוריתמי תזמון המעבד הבאים הוא אלגוריתם תזמון קדם-הפקעי (preemptive)?",
+      "code_snippet": null,
+      "options": [
+        "א. First-Come, First-Served (FCFS)",
+        "ב. Shortest-Job-First (SJF)",
+        "ג. Round Robin (RR)",
+        "ד. Priority Scheduling"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג'. אלגוריתם Round Robin הוא אלגוריתם תזמון קדם-הפקעי (preemptive) מכיוון שהוא מפקיע את המעבד מתהליך לאחר שרץ למשך 'פרוסת זמן' (time quantum) קבועה, ומעביר את המעבד לתהליך הבא בתור. אלגוריתם FCFS, לדוגמה, הוא אלגוריתם לא קדם-הפקעי, שכן תהליך רץ עד לסיומו או עד שהוא נחסם."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

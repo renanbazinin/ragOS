@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "IPC and Signals",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 21:43:37",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1103,
+      "output_tokens": 552,
+      "total_tokens": 3597
+    }
+  },
+  "question": {
+    "id": 6,
+    "type": "MultipleChoice",
+    "topic": [
+      "IPC",
+      "Signals",
+      "fork()"
+    ],
+    "content": {
+      "text": "תהליך אב מגדיר מטפל (handler) עבור סיגנל מסוים, ולפני קריאה ל-`fork()`, הסיגנל הזה נשלח לתהליך האב אך טרם טופל (pending). מהי הטענה הנכונה ביותר לגבי מצב הסיגנל בתהליך הבן שנוצר?",
+      "code_snippet": null,
+      "options": [
+        "א. מטפל הסיגנל עובר בירושה לתהליך הבן, והסיגנל נשאר תלוי (pending) גם בתהליך הבן.",
+        "ב. מטפל הסיגנל עובר בירושה לתהליך הבן, אך הסיגנל התלוי אינו עובר בירושה ונמחק בתהליך הבן.",
+        "ג. מטפל הסיגנל אינו עובר בירושה לתהליך הבן, אך הסיגנל נשאר תלוי (pending) גם בתהליך הבן.",
+        "ד. גם מטפל הסיגנל וגם הסיגנל התלוי אינם עוברים בירושה ונמחקים בתהליך הבן.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב. כאשר תהליך אב מבצע `fork()`, תהליך הבן יורש את הגדרות מטפלי הסיגנלים (signal dispositions) של האב. כלומר, אם האב הגדיר מטפל לסיגנל מסוים, גם הבן יטפל באותו סיגנל באותה צורה. עם זאת, סיגנלים שנשלחו לאב והם 'תלויים' (pending) – כלומר, הגיעו אך טרם טופלו – אינם עוברים בירושה לבן ונמחקים עבורו. הבן מתחיל ללא סיגנלים תלויים."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

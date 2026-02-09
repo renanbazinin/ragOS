@@ -1,0 +1,55 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Producer-Consumer",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 10:34:17",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4898,
+      "output_tokens": 2484,
+      "total_tokens": 16895
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Semaphores",
+      "Producer-Consumer",
+      "Deadlock",
+      "Concurrency",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "להלן מימוש חלקי של בעיית יצרן-צרכן עם פריטים משני סוגים (ITEM_TYPE_A, ITEM_TYPE_B) ומחסן יחיד ומשותף. המערכת כוללת יצרנים מסוג A, יצרנים מסוג B, ופונקציית צרכן מיוחדת `consume_A_then_B` אשר אמורה לצרוך באופן אטומי פריט אחד מסוג A ולאחר מכן פריט אחד מסוג B.\nהסמפורים מאותחלים באופן הבא: `mutex` ל-1, `empty` ל-`BUFFER_SIZE`, `full_A` ל-0, ו-`full_B` ל-0.\nהפונקציות `add_item_to_buffer` ו-`remove_item_of_type` מבצעות את הפעולות הנדרשות על המחסן באופן פנימי ואינן חוסמות (בהינתן שהסמפורים `full_A`/`full_B`/`empty` כבר אותתו על זמינות).\nנתון קוד המימוש עבור יצרנים וצרכן מיוחד זה:",
+      "code_snippet": "#include <semaphore.h>\n#include <stdio.h>\n#include <stdlib.h>\n\n#define BUFFER_SIZE 10\n#define ITEM_TYPE_A 0\n#define ITEM_TYPE_B 1\n\ntypedef struct {\n    int type; // ITEM_TYPE_A or ITEM_TYPE_B\n    // Other item data could be here\n} Item;\n\n// Shared resources (semaphores)\nsem_t mutex;     // Initialized to 1, protects buffer access and internal counts\nsem_t empty;     // Initialized to BUFFER_SIZE, counts empty slots\nsem_t full_A;    // Initialized to 0, counts available items of type A\nsem_t full_B;    // Initialized to 0, counts available items of type B\n\n// Assume add_item_to_buffer(Item item) and remove_item_of_type(int type) exist\n// and handle the internal buffer logic correctly when protected by mutex.\n// They do not block, as semaphore waits are handled externally.\n// For the purpose of this question, their internal implementation is not required.\n\nvoid producer_A() {\n    Item item_A = {ITEM_TYPE_A}; // Assume produce_item_A() creates an item\n    sem_wait(&empty);\n    sem_wait(&mutex);\n    // add_item_to_buffer(item_A); // Abstract operation\n    sem_post(&full_A);\n    sem_post(&mutex);\n}\n\nvoid producer_B() {\n    Item item_B = {ITEM_TYPE_B}; // Assume produce_item_B() creates an item\n    sem_wait(&empty);\n    sem_wait(&mutex);\n    // add_item_to_buffer(item_B); // Abstract operation\n    sem_post(&full_B);\n    sem_post(&mutex);\n}\n\nvoid consume_A_then_B() {\n    // This function attempts to consume one A, then one B, atomically.\n    sem_wait(&mutex); // Acquire mutex first\n    sem_wait(&full_A); // Wait for an A item\n    sem_wait(&full_B); // Wait for a B item\n\n    // Item a_item = remove_item_of_type(ITEM_TYPE_A); // Abstract operation\n    // Item b_item = remove_item_of_type(ITEM_TYPE_B); // Abstract operation\n\n    sem_post(&mutex);\n    sem_post(&empty); // For item A\n    sem_post(&empty); // For item B\n}"
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "האם המימוש הנתון של הפונקציה `consume_A_then_B` פועל באופן תקין? אם כן, הסבירו מדוע. אחרת, תארו תרחיש ספציפי (לדוגמה, רצף פעולות של שני חוטים) המוביל לבעיה (כגון קיפאון או מצב מירוץ) והסבירו מדוע הוא בעייתי.",
+        "code_snippet": null,
+        "options": [
+          "פועל תקין",
+          "לא פועל תקין"
+        ]
+      },
+      {
+        "id": "10.2",
+        "text": "תקנו את הפונקציה `consume_A_then_B` כך שתפעל באופן תקין ותמנע את הבעיה שתיארתם בסעיף הקודם, תוך שמירה על דרישת האטומיות של צריכת שני הפריטים. אין לשנות את הפונקציות `producer_A` ו-`producer_B`. כתבו רק את הקוד המתוקן של `consume_A_then_B`.",
+        "code_snippet": "void consume_A_then_B_fixed() {\n    // Write your corrected code here\n}",
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "לא פועל תקין",
+      "explanation": "10.1: המימוש הנתון של `consume_A_then_B` אינו פועל באופן תקין והוא יכול להוביל לקיפאון (Deadlock).\n\n**תרחיש קיפאון:**\n1.  נניח שהמחסן מכיל כעת פריט אחד מסוג A (כלומר `full_A=1`, `full_B=0`) ו-`empty=BUFFER_SIZE-1`.\n2.  חוט T1 קורא לפונקציה `consume_A_then_B`.\n    *   T1: מבצע `sem_wait(&mutex);` בהצלחה. כעת T1 מחזיק את ה-`mutex`.\n    *   T1: מבצע `sem_wait(&full_A);` בהצלחה (כי `full_A=1`). כעת `full_A` יורד ל-0.\n    *   T1: מבצע `sem_wait(&full_B);`. מכיוון ש-`full_B=0`, חוט T1 נחסם וממתין לפריט מסוג B.\n    *   **חשוב**: חוט T1 ממשיך להחזיק את ה-`mutex` בזמן שהוא חסום וממתין ל-`full_B`.\n3.  חוט T2 קורא לפונקציה `producer_B` (אשר אמורה לייצר פריט מסוג B).\n    *   T2: מבצע `sem_wait(&empty);` בהצלחה (כי `empty=BUFFER_SIZE-1`). `empty` יורד ל-`BUFFER_SIZE-2`.\n    *   T2: מבצע `sem_wait(&mutex);`. מכיוון שחוט T1 מחזיק את ה-`mutex`, חוט T2 נחסם וממתין ל-`mutex`.\n    *   **קיפאון**: חוט T1 ממתין ש-`full_B` יעלה (ש-T2 יעשה `sem_post(&full_B)`), אך T2 אינו יכול לעשות זאת מכיוון שהוא חסום בהמתנה ל-`mutex` שמוחזק על ידי T1. T1 לא יכול לשחרר את ה-`mutex` לפני שיקבל את `full_B`, ו-T2 לא יכול לייצר ולעשות `sem_post(&full_B)` עד שיקבל את ה-`mutex`. נוצר מעגל המתנה הדדי (circular wait) והמערכת נכנסת לקיפאון.\n\n10.2: הבעיה נובעת מכך שה-`mutex` נתפס לפני ההמתנה לסמפורי הנתונים (full_A, full_B). כדי למנוע קיפאון, יש לתפוס את המשאבים בסדר עקבי. במקרה זה, יש לתפוס את סמפורי הנתונים (`full_A` ו-`full_B`) לפני סמפור ההדדיות (`mutex`). סדר תפיסת `full_A` ו-`full_B` ביניהם אינו משנה בהינתן שאין צרכנים אחרים שמנסים לתפוס אותם בסדר הפוך (מה שלא קיים בשאלה זו).\n\n**קוד מתוקן:**\n```c\nvoid consume_A_then_B_fixed() {\n    sem_wait(&full_A); // Wait for an A item (without holding mutex)\n    sem_wait(&full_B); // Wait for a B item (without holding mutex)\n    sem_wait(&mutex);  // Acquire mutex to access the buffer and perform removals\n\n    // Item a_item = remove_item_of_type(ITEM_TYPE_A); // Abstract operation\n    // Item b_item = remove_item_of_type(ITEM_TYPE_B); // Abstract operation\n\n    sem_post(&mutex);  // Release mutex\n    sem_post(&empty);  // Signal one empty slot (for item A)\n    sem_post(&empty);  // Signal another empty slot (for item B)\n}\n```\nבפתרון המתוקן, חוט המנסה לצרוך פריטים ימתין לזמינותם של פריט A ופריט B מבלי להחזיק את ה-`mutex`. רק לאחר שווידא ששני הפריטים זמינים (על ידי הקטנת `full_A` ו-`full_B`), הוא יתפוס את ה-`mutex` כדי לבצע את פעולת ההסרה בפועל מהמחסן. בדרך זו, חוט שממתין לפריטים אינו מונע מיצרנים לגשת למחסן ולייצר פריטים, ובכך נמנע הקיפאון."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

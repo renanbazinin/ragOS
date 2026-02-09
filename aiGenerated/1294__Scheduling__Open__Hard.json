@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Scheduling",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 09:21:18",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3419,
+      "output_tokens": 2513,
+      "total_tokens": 14938
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Scheduling",
+      "Round Robin",
+      "CPU Utilization",
+      "Turnaround Time"
+    ],
+    "content": {
+      "text": "נתונה מערכת הפעלה המשתמשת באלגוריתם תזמון Round Robin. ישנם שלושה תהליכים הממתינים לביצוע, עם זמני הגעה ודרישות מעבד/קלט-פלט כדלקמן:\n\n*   **P1**: מגיע ב-0ms. דורש 5ms CPU, מבצע פעולת I/O של 10ms, ואז דורש עוד 5ms CPU.\n*   **P2**: מגיע ב-1ms. דורש 10ms CPU (תהליך CPU-Bound).\n*   **P3**: מגיע ב-2ms. דורש 3ms CPU, מבצע פעולת I/O של 5ms, ואז דורש עוד 3ms CPU.\n\nנתון כי גודל ה-Quantum הוא 4ms. עלות החלפת הקשר (Context Switch) היא 1ms.\nהמתזמן מעבד את תור ה-Ready לפי סדר הגעה (FIFO). תהליכים שסיימו I/O חוזרים לסוף תור ה-Ready.\n\nעליך לענות על השאלות הבאות:\n1.  ציירו דיאגרמת גאנט מפורטת המתארת את ביצוע התהליכים.\n2.  חשבו את זמן המחזור הממוצע (Average Turnaround Time) של התהליכים.\n3.  חשבו את ניצולת המעבד (CPU Utilization) הכוללת (באחוזים).",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "נבצע סימולציה מפורטת של תזמון התהליכים:\n\n**נתונים:**\nQuantum = 4ms\nContext Switch (CS) = 1ms\n\n**מעקב אחר מצב המערכת:**\n\n*   **t=0**: P1 מגיע. תור Ready: [P1]. מעבד: P1 מתחיל.\n*   **t=1**: P2 מגיע. תור Ready: [P1, P2].\n*   **t=2**: P3 מגיע. תור Ready: [P1, P2, P3].\n*   **t=4**: P1 השתמש ב-4ms CPU. נותרו לו 1ms CPU. P1 נדחק (preempted). דיאגרמת גאנט: P1 (0-4).\n*   **t=4-5**: מתבצע Context Switch (1ms). דיאגרמת גאנט: CS (4-5).\n*   **t=5**: CS מסתיים. P2 נשלח למעבד (התהליך הבא בתור). תור Ready: [P3, P1]. P2 נותרו 10ms CPU.\n*   **t=9**: P2 השתמש ב-4ms CPU. נותרו לו 6ms CPU. P2 נדחק. דיאגרמת גאנט: P2 (5-9).\n*   **t=9-10**: מתבצע Context Switch (1ms). דיאגרמת גאנט: CS (9-10).\n*   **t=10**: CS מסתיים. P3 נשלח למעבד. תור Ready: [P1, P2]. P3 נותרו 3ms CPU.\n*   **t=13**: P3 השתמש ב-3ms CPU. סיים את פרץ ה-CPU הראשון שלו. P3 עובר למצב I/O. פעולת ה-I/O של P3 תסתיים ב-t=13+5=18ms. דיאגרמת גאנט: P3 (10-13).\n*   **t=13-14**: מתבצע Context Switch (1ms). דיאגרמת גאנט: CS (13-14).\n*   **t=14**: CS מסתיים. P1 נשלח למעבד. תור Ready: [P2]. P1 נותרו 1ms CPU.\n*   **t=15**: P1 השתמש ב-1ms CPU. סיים את פרץ ה-CPU הראשון שלו. P1 עובר למצב I/O. פעולת ה-I/O של P1 תסתיים ב-t=15+10=25ms. דיאגרמת גאנט: P1 (14-15).\n*   **t=15-16**: מתבצע Context Switch (1ms). דיאגרמת גאנט: CS (15-16).\n*   **t=16**: CS מסתיים. P2 נשלח למעבד. תור Ready: []. P2 נותרו 6ms CPU.\n*   **t=18**: פעולת ה-I/O של P3 מסתיימת. P3 חוזר לתור Ready. תור Ready: [P3].\n*   **t=20**: P2 השתמש ב-4ms CPU. נותרו לו 2ms CPU. P2 נדחק. דיאגרמת גאנט: P2 (16-20).\n*   **t=20-21**: מתבצע Context Switch (1ms). דיאגרמת גאנט: CS (20-21).\n*   **t=21**: CS מסתיים. P3 נשלח למעבד. תור Ready: [P2]. P3 נותרו 3ms CPU.\n*   **t=24**: P3 השתמש ב-3ms CPU. סיים את פרץ ה-CPU השני שלו. P3 מסיים ויוצא מהמערכת. דיאגרמת גאנט: P3 (21-24).\n    *   **זמן מחזור P3**: 24 (סיום) - 2 (הגעה) = 22ms.\n*   **t=24-25**: מתבצע Context Switch (1ms). דיאגרמת גאנט: CS (24-25).\n*   **t=25**: פעולת ה-I/O של P1 מסתיימת. P1 חוזר לתור Ready. תור Ready: [P2, P1].\n*   **t=25**: CS מסתיים. P2 נשלח למעבד. תור Ready: [P1]. P2 נותרו 2ms CPU.\n*   **t=27**: P2 השתמש ב-2ms CPU. סיים את כל דרישות ה-CPU שלו. P2 מסיים ויוצא מהמערכת. דיאגרמת גאנט: P2 (25-27).\n    *   **זמן מחזור P2**: 27 (סיום) - 1 (הגעה) = 26ms.\n*   **t=27-28**: מתבצע Context Switch (1ms). דיאגרמת גאנט: CS (27-28).\n*   **t=28**: CS מסתיים. P1 נשלח למעבד. תור Ready: []. P1 נותרו 5ms CPU.\n*   **t=32**: P1 השתמש ב-4ms CPU. נותרו לו 1ms CPU. P1 נדחק. דיאגרמת גאנט: P1 (28-32).\n*   **t=32-33**: מתבצע Context Switch (1ms). דיאגרמת גאנט: CS (32-33).\n*   **t=33**: CS מסתיים. P1 נשלח למעבד. תור Ready: []. P1 נותרו 1ms CPU.\n*   **t=34**: P1 השתמש ב-1ms CPU. סיים את כל דרישות ה-CPU שלו. P1 מסיים ויוצא מהמערכת. דיאגרמת גאנט: P1 (33-34).\n    *   **זמן מחזור P1**: 34 (סיום) - 0 (הגעה) = 34ms.\n\n**1. דיאגרמת גאנט:**\n```\n0  4  5  9  10 13 14 15 16 20 21 24 25 27 28 32 33 34\n|P1|CS|P2|CS|P3|CS|P1|CS|P2|CS|P3|CS|P2|CS|P1|CS|P1|\n```\n\n**2. זמן המחזור הממוצע (Average Turnaround Time):**\n*   P1 Turnaround Time = 34ms\n*   P2 Turnaround Time = 26ms\n*   P3 Turnaround Time = 22ms\n\nממוצע = (34 + 26 + 22) / 3 = 82 / 3 = 27.33ms\n\n**3. ניצולת המעבד (CPU Utilization):**\n*   סה\"כ זמן CPU שנוצל על ידי תהליכים (CPU Burst Time Total):\n    *   P1: 5ms + 5ms = 10ms\n    *   P2: 10ms\n    *   P3: 3ms + 3ms = 6ms\n    *   סה\"כ זמן CPU לתהליכים = 10 + 10 + 6 = 26ms\n\n*   סה\"כ זמן שבו המערכת הייתה פעילה (Total Elapsed Time עד לסיום התהליך האחרון) = 34ms.\n\n*   ניצולת המעבד = (סה\"כ זמן CPU לתהליכים) / (סה\"כ זמן פעילות המערכת)\n    *   ניצולת המעבד = 26ms / 34ms = 0.7647...\n    *   **ניצולת המעבד = 76.47%**\n\n(נציין כי סה\"כ זמן Context Switch היה 8ms, ו-26ms זמן תהליכים, סה\"כ 34ms פעילות, ללא זמן סרק.)"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

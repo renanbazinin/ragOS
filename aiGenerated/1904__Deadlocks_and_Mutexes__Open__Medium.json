@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Deadlocks and Mutexes",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 21:40:57",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2445,
+      "output_tokens": 2382,
+      "total_tokens": 7574
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "Open",
+    "topic": [
+      "Deadlocks",
+      "Mutexes",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה המשתמשת בשני מנעולים (mutexes) ובשני תהליכים (threads).\nא. האם קיימת אפשרות לקיפאון (deadlock) בתוכנית זו? נמקו והסבירו כיצד הוא יכול להתרחש.\nב. אם כן, הציעו פתרון המונע קיפאון, תוך כדי שמירה על פונקציונליות הקוד המקורית ככל הניתן. הציגו את הקוד המתוקן והסבירו את עקרון הפתרון.",
+      "code_snippet": "```c\n#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h> // For sleep\n\npthread_mutex_t mutex1;\npthread_mutex_t mutex2;\n\nvoid* thread_func1(void* arg) {\n    pthread_mutex_lock(&mutex1);\n    printf(\"Thread 1 acquired mutex1\\n\");\n    sleep(1); // Simulate work or context switch\n    pthread_mutex_lock(&mutex2);\n    printf(\"Thread 1 acquired mutex2\\n\");\n    // Critical section requiring both mutexes\n    printf(\"Thread 1 in critical section\\n\");\n    pthread_mutex_unlock(&mutex2);\n    printf(\"Thread 1 released mutex2\\n\");\n    pthread_mutex_unlock(&mutex1);\n    printf(\"Thread 1 released mutex1\\n\");\n    return NULL;\n}\n\nvoid* thread_func2(void* arg) {\n    pthread_mutex_lock(&mutex2);\n    printf(\"Thread 2 acquired mutex2\\n\");\n    sleep(1); // Simulate work or context switch\n    pthread_mutex_lock(&mutex1);\n    printf(\"Thread 2 acquired mutex1\\n\");\n    // Critical section requiring both mutexes\n    printf(\"Thread 2 in critical section\\n\");\n    pthread_mutex_unlock(&mutex1);\n    printf(\"Thread 2 released mutex1\\n\");\n    pthread_mutex_unlock(&mutex2);\n    printf(\"Thread 2 released mutex2\\n\");\n    return NULL;\n}\n\nint main() {\n    pthread_t t1, t2;\n\n    pthread_mutex_init(&mutex1, NULL);\n    pthread_mutex_init(&mutex2, NULL);\n\n    pthread_create(&t1, NULL, thread_func1, NULL);\n    pthread_create(&t2, NULL, thread_func2, NULL);\n\n    pthread_join(t1, NULL);\n    pthread_join(t2, NULL);\n\n    pthread_mutex_destroy(&mutex1);\n    pthread_mutex_destroy(&mutex2);\n\n    return 0;\n}\n```",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "א. כן, קיימת אפשרות לקיפאון (deadlock) בתוכנית זו.\n\n**הסבר לקיפאון (Deadlock Explanation)**:\nהקיפאון יכול להתרחש בתרחיש הבא:\n1.  **תהליך 1 רוכש את `mutex1`**: `thread_func1` מבצע `pthread_mutex_lock(&mutex1)` ומצליח לרכוש את `mutex1`.\n2.  **תהליך 2 רוכש את `mutex2`**: במקביל, `thread_func2` מבצע `pthread_mutex_lock(&mutex2)` ומצליח לרכוש את `mutex2`.\n3.  **תהליך 1 ממתין ל-`mutex2`**: כעת, `thread_func1` מנסה לרכוש את `mutex2` (`pthread_mutex_lock(&mutex2)`). אך `mutex2` תפוס על ידי `thread_func2`, ולכן `thread_func1` נכנס למצב המתנה.\n4.  **תהליך 2 ממתין ל-`mutex1`**: באותו זמן, `thread_func2` מנסה לרכוש את `mutex1` (`pthread_mutex_lock(&mutex1)`). אך `mutex1` תפוס על ידי `thread_func1`, ולכן `thread_func2` נכנס למצב המתנה.\n\nשני התהליכים ממתינים זה לזה לשחרור המנעולים שהם זקוקים להם, וכתוצאה מכך נוצר קיפאון. זהו מקרה קלאסי של התקיימות כל ארבעת התנאים לקיפאון:\n*   **מניעה הדדית (Mutual exclusion)**: רק תהליך אחד יכול להחזיק במנעול בכל רגע נתון.\n*   **החזקה והמתנה (Hold and wait)**: כל תהליך מחזיק במנעול אחד (או יותר) וממתין למנעול נוסף.\n*   **אי-הפקעה (No preemption)**: לא ניתן להכריח תהליך לשחרר מנעול שהוא מחזיק בו, אלא רק אם הוא משחרר אותו מרצונו.\n*   **המתנה מעגלית (Circular wait)**: קיים מעגל של תהליכים, כאשר כל תהליך במעגל ממתין למשאב שמוחזק על ידי התהליך הבא במעגל.\n\nב. **פתרון למניעת קיפאון (Solution to Prevent Deadlock)**:\nהדרך הנפוצה והפשוטה ביותר למנוע קיפאון במצב זה היא על ידי אכיפת סדר רכישת מנעולים קבוע (Resource Ordering). כלומר, כל התהליכים חייבים לרכוש את המנעולים באותו סדר. אם כל התהליכים ירכשו תמיד את `mutex1` לפני `mutex2`, לא תיווצר לעולם המתנה מעגלית.\n\n**קוד מתוקן לדוגמה (Corrected Code Example)**:\n```c\n#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h> // For sleep\n\npthread_mutex_t mutex1;\npthread_mutex_t mutex2;\n\n// Thread function 1 - acquires mutex1 then mutex2\nvoid* thread_func1_solution(void* arg) {\n    pthread_mutex_lock(&mutex1);\n    printf(\"Thread 1 acquired mutex1\\n\");\n    sleep(1); // Simulate work or context switch\n    pthread_mutex_lock(&mutex2); // Acquire mutex2 AFTER mutex1\n    printf(\"Thread 1 acquired mutex2\\n\");\n    // Critical section requiring both mutexes\n    printf(\"Thread 1 in critical section\\n\");\n    pthread_mutex_unlock(&mutex2);\n    printf(\"Thread 1 released mutex2\\n\");\n    pthread_mutex_unlock(&mutex1);\n    printf(\"Thread 1 released mutex1\\n\");\n    return NULL;\n}\n\n// Thread function 2 - also acquires mutex1 then mutex2\nvoid* thread_func2_solution(void* arg) {\n    pthread_mutex_lock(&mutex1); // Acquire mutex1 FIRST\n    printf(\"Thread 2 acquired mutex1\\n\");\n    sleep(1); // Simulate work or context switch\n    pthread_mutex_lock(&mutex2); // Acquire mutex2 AFTER mutex1\n    printf(\"Thread 2 acquired mutex2\\n\");\n    // Critical section requiring both mutexes\n    printf(\"Thread 2 in critical section\\n\");\n    pthread_mutex_unlock(&mutex2);\n    printf(\"Thread 2 released mutex2\\n\");\n    pthread_mutex_unlock(&mutex1);\n    printf(\"Thread 2 released mutex1\\n\");\n    return NULL;\n}\n\nint main_solution() {\n    pthread_t t1, t2;\n\n    pthread_mutex_init(&mutex1, NULL);\n    pthread_mutex_init(&mutex2, NULL);\n\n    pthread_create(&t1, NULL, thread_func1_solution, NULL);\n    pthread_create(&t2, NULL, thread_func2_solution, NULL);\n\n    pthread_join(t1, NULL);\n    pthread_join(t2, NULL);\n\n    pthread_mutex_destroy(&mutex1);\n    pthread_mutex_destroy(&mutex2);\n\n    return 0;\n}\n```\n\n**עקרון הפתרון (Principle of the Solution)**:\nבפתרון זה, שני התהליכים (thread_func1_solution ו-thread_func2_solution) מנסים לרכוש את `mutex1` ולאחר מכן את `mutex2`. אם `thread_func1_solution` רוכש את `mutex1` ראשון, `thread_func2_solution` ימתין עד ש`thread_func1_solution` ישחרר אותו (לאחר שסיים את כל הקטע הקריטי ושחרר את שני המנעולים). לאחר מכן, `thread_func2_solution` יוכל לרכוש את `mutex1` ואז את `mutex2`. מכיוון שכל התהליכים מקפידים על אותו סדר רכישת מנעולים (mutex1 -> mutex2), לעולם לא תיווצר סיטואציה שבה תהליך אחד מחזיק ב-`mutex1` וממתין ל-`mutex2`, בעוד שתהליך אחר מחזיק ב-`mutex2` וממתין ל-`mutex1`. סדר רכישה עקבי מבטיח שלא תיווצר המתנה מעגלית, ובכך מונע קיפאון."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

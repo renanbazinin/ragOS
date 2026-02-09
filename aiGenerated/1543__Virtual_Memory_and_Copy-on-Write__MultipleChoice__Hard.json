@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory and Copy-on-Write",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 11:18:05",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 975,
+      "output_tokens": 2582,
+      "total_tokens": 11625
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Virtual Memory",
+      "Copy-on-Write",
+      "Process Management"
+    ],
+    "content": {
+      "text": "נתונה מערכת הפעלה המשתמשת בזיכרון וירטואלי עם מנגנון Copy-on-Write (CoW). גודל דף זיכרון הוא 4KB. נתבונן בקוד C הבא:\n\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\n#define PAGE_SIZE 4096\n#define NUM_PAGES 2\n#define ARRAY_SIZE (NUM_PAGES * (PAGE_SIZE / sizeof(int))) // 2 * 1024 = 2048 integers\n\nint main() {\n    int* data = (int*)malloc(ARRAY_SIZE * sizeof(int));\n    if (data == NULL) {\n        perror(\"malloc failed\");\n        return 1;\n    }\n\n    // Initialize all elements to 0\n    for (int i = 0; i < ARRAY_SIZE; i++) {\n        data[i] = 0;\n    }\n\n    pid_t pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        return 1;\n    } else if (pid == 0) { // Child process\n        printf(\"Child process: Modifying data[0]\\n\");\n        data[0] = 50; // This is on the first page\n        exit(0);\n    } else { // Parent process\n        printf(\"Parent process: Waiting for child...\\n\");\n        wait(NULL); // Wait for child to finish\n        printf(\"Parent process: Modifying data[1024]\\n\");\n        data[1024] = 100; // This is on the second page (1024 * 4 bytes = 4096 bytes offset)\n    }\n\n    free(data);\n    return 0;\n}\n```\n\nבהנחה ש-`malloc` בהתחלה מקצה שני דפים פיזיים רציפים, וכמות הזיכרון הנוספת הנדרשת על ידי המערכת עבור העתקת דפים היא זניחה. כמה דפים פיזיים בסך הכל יהיו בשימוש על ידי שני התהליכים (האב והבן) *מיד לאחר ששניהם סיימו את פעולות הכתיבה שלהם*, וכמה אירועי Page Fault מסוג Copy-on-Write יתרחשו בסך הכל?",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\n#define PAGE_SIZE 4096\n#define NUM_PAGES 2\n#define ARRAY_SIZE (NUM_PAGES * (PAGE_SIZE / sizeof(int))) // 2 * 1024 = 2048 integers\n\nint main() {\n    int* data = (int*)malloc(ARRAY_SIZE * sizeof(int));\n    if (data == NULL) {\n        perror(\"malloc failed\");\n        return 1;\n    }\n\n    // Initialize all elements to 0\n    for (int i = 0; i < ARRAY_SIZE; i++) {\n        data[i] = 0;\n    }\n\n    pid_t pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        return 1;\n    } else if (pid == 0) { // Child process\n        printf(\"Child process: Modifying data[0]\\n\");\n        data[0] = 50; // This is on the first page\n        exit(0);\n    } else { // Parent process\n        printf(\"Parent process: Waiting for child...\\n\");\n        wait(NULL); // Wait for child to finish\n        printf(\"Parent process: Modifying data[1024]\\n\");\n        data[1024] = 100; // This is on the second page (1024 * 4 bytes = 4096 bytes offset)\n    }\n\n    free(data);\n    return 0;\n}",
+      "options": [
+        "א. 3 דפים פיזיים, 1 Page Fault מסוג CoW.",
+        "ב. 4 דפים פיזיים, 2 Page Faults מסוג CoW.",
+        "ג. 2 דפים פיזיים, 2 Page Faults מסוג CoW.",
+        "ד. 4 דפים פיזיים, 1 Page Fault מסוג CoW.",
+        "ה. 3 דפים פיזיים, 2 Page Faults מסוג CoW."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "התשובה הנכונה היא א.\n\nלהלן ניתוח של השלבים:\n1.  **הקצאה ראשונית**: הפונקציה `malloc` מקצה זיכרון בגודל `ARRAY_SIZE * sizeof(int)`, שהוא `2048 * 4 = 8192` בתים. מאחר שגודל דף הוא 4KB (4096 בתים), מוקצים שני דפים פיזיים (נסמנם P1 ו-P2) עבור התהליך האב. בשלב זה, בשימוש 2 דפים פיזיים.\n2.  **אתחול**: לולאת ה-`for` מאתחלת את כל האיברים ב-`data` ל-0. פעולה זו כותבת לדפים P1 ו-P2.\n3.  **קריאה ל-`fork()`**:\n    *   נוצר תהליך הבן. מערכת ההפעלה משתמשת במנגנון Copy-on-Write.\n    *   טבלאות הדפים של האב והבן עבור הזיכרון שהוקצה על ידי `malloc` מצביעות כעת לדפים P1 ו-P2, והן מסומנות כקריאה בלבד (read-only) וכ-CoW.\n    *   מונה ההפניות (reference count) לדפים P1 ו-P2 הוא 2 (אב ובן).\n    *   מספר הדפים הפיזיים עדיין 2 (P1, P2). מספר ה-CoW Page Faults: 0.\n4.  **תהליך הבן כותב ל-`data[0]`**:\n    *   הבן מנסה לכתוב ל-`data[0]`. איבר זה נמצא בדף הראשון (P1).\n    *   הדף P1 מסומן CoW, ולכן מתרחשת פסיקת דף מסוג CoW (CoW Page Fault). (סה\"כ CoW Page Faults: 1).\n    *   מערכת ההפעלה מקצה דף פיזי חדש (נסמנו P3), מעתיקה אליו את התוכן של P1, ומעדכנת את טבלת הדפים של הבן כך שהכתובת הוירטואלית המתאימה תצביע כעת ל-P3 עם הרשאות קריאה/כתיבה (read-write).\n    *   מונה ההפניות לדף P1 יורד ל-1. כעת רק האב מפנה לדף P1. לכן, מערכת ההפעלה מעדכנת את הרשאות הדף P1 בטבלת הדפים של האב ל-read-write (ומבטלת את סימון ה-CoW עבור דף זה אצל האב).\n    *   הכתיבה `data[0] = 50` מתבצעת כעת בדף P3.\n    *   בשלב זה, קיימים 3 דפים פיזיים: P1 (עבור האב), P2 (משותף CoW), ו-P3 (עבור הבן).\n5.  **תהליך הבן יוצא (`exit(0)`)**:\n    *   מרחב הכתובות של הבן נהרס.\n    *   מונה ההפניות לדף P3 יורד ל-0, ולכן P3 משוחרר.\n    *   מונה ההפניות לדף P2 יורד ל-1. כעת רק האב מפנה לדף P2. לכן, מערכת ההפעלה מעדכנת את הרשאות הדף P2 בטבלת הדפים של האב ל-read-write (ומבטלת את סימון ה-CoW עבור דף זה אצל האב).\n    *   בשלב זה, קיימים 2 דפים פיזיים: P1 ו-P2 (שניהם עבור האב, ועם הרשאות כתיבה).\n6.  **תהליך האב כותב ל-`data[1024]`**:\n    *   האב ממתין לסיום הבן (`wait(NULL)`).\n    *   האב מנסה לכתוב ל-`data[1024]`. איבר זה נמצא בדף השני (P2).\n    *   כפי שצוין בסעיף הקודם, דף P2 כבר אינו מסומן CoW עבור האב (כי הבן יצא ומונה ההפניות ירד ל-1), ולכן האב יכול לכתוב ישירות לדף P2.\n    *   לא מתרחשת פסיקת דף מסוג CoW נוספת. (סה\"כ CoW Page Faults: 1).\n    *   הכתיבה `data[1024] = 100` מתבצעת בדף P2.\n\n**סיכום סופי (בהתייחסות לדפים שנוצרו/היו בשימוש זמני):**\n*   סה\"כ CoW Page Faults שהתרחשו: 1.\n*   סה\"כ דפים פיזיים *שנוצרו או היו בשימוש* עבור ה-`data` במהלך הריצה (כולל אלו ששוחררו לאחר מכן): P1 ו-P2 (מה-`malloc` הראשוני) ו-P3 (שנוצר עקב CoW של הבן). סך הכל 3 דפים.\n\nלכן, התשובה המתאימה ביותר היא א: 3 דפים פיזיים (P1, P2, P3 נוצר זמנית), ו-1 CoW Page Fault."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

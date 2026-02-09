@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory and Paging",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 20:48:02",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 949,
+      "output_tokens": 338,
+      "total_tokens": 2530
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Virtual Memory",
+      "Paging"
+    ],
+    "content": {
+      "text": "מהי מטרתו העיקרית של טבלת הדפים (Page Table) במערכת זיכרון וירטואלי?",
+      "code_snippet": null,
+      "options": [
+        "א. לתרגם כתובות וירטואליות לכתובות פיזיות.",
+        "ב. לאחסן את קוד התוכנית בזיכרון הפיזי.",
+        "ג. לנהל את הקצאת ה-CPU לתהליכים שונים.",
+        "ד. לשמור מידע על התקני קלט/פלט."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "א. טבלת הדפים (Page Table) היא מבנה נתונים המשמש את מערכת ההפעלה לתרגום כתובות וירטואליות, המשמשות את התהליכים, לכתובות פיזיות בזיכרון הראשי. זהו המנגנון המרכזי שמאפשר לזיכרון וירטואלי לפעול."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

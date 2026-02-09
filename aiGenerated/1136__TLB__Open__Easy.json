@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "TLB",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 08:10:38",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3093,
+      "output_tokens": 489,
+      "total_tokens": 4663
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "TLB",
+      "Virtual Memory",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "מהו ה-TLB (Translation Lookaside Buffer), ומהי מטרתו העיקרית במערכת זיכרון וירטואלי?",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "ה-TLB (Translation Lookaside Buffer) הוא זיכרון מטמון קטן ומהיר הממוקם בדרך כלל בתוך יחידת ניהול הזיכרון (MMU) של המעבד. מטרתו העיקרית היא להאיץ את תהליך התרגום מכתובות וירטואליות לכתובות פיזיות. במערכות זיכרון וירטואליות, תרגום כתובות דורש בדרך כלל גישה לטבלת הדפים (Page Table) השמורה בזיכרון הראשי. גישה לזיכרון הראשי היא פעולה איטית יחסית. ה-TLB אוגר כניסות מטבלת הדפים שבהן נעשה שימוש לאחרונה. כאשר מתבצעת גישה לכתובת וירטואלית, המעבד בודק תחילה ב-TLB. אם המיפוי נמצא ב-TLB (TLB Hit), התרגום מתבצע במהירות ללא צורך בגישה לזיכרון הראשי. אם המיפוי אינו נמצא (TLB Miss), המעבד ניגש לטבלת הדפים בזיכרון הראשי, מבצע את התרגום, ולאחר מכן מעדכן את ה-TLB בכניסה החדשה, כדי שגישות עתידיות לאותו דף יהיו מהירות יותר."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "IPC",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 08:27:52",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2071,
+      "output_tokens": 2060,
+      "total_tokens": 6867
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "IPC",
+      "Shared Memory",
+      "Semaphores",
+      "Synchronization",
+      "Producer-Consumer"
+    ],
+    "content": {
+      "text": "תהליך יצרן (producer) מייצר נתונים ותהליך צרכן (consumer) צורך אותם, תוך שימוש באזור זיכרון משותף (shared memory) כבּאפֶר מעגלי. תאר את מנגנוני ה-IPC הנדרשים כדי להבטיח סנכרון תקין בין התהליכים, למנוע תנאי מרוץ (race conditions) ולוודא שהיצרן לא כותב לבאפר מלא והצרכן לא קורא מבאפר ריק. הסבר כיצד מנגנונים אלו פועלים יחד. כלול קטע קוד (פסאודו-קוד או C/C++) המדגים את הלוגיקה של היצרן והצרכן ביחס למנגנוני הסנכרון.",
+      "code_snippet": "/* Assume shared memory 'buffer' and size 'BUFFER_SIZE' exist.\n * Assume 'in' and 'out' pointers/indices for circular buffer exist in shared memory.\n *\n * Semaphores (initialized once, e.g., using sem_open):\n * semaphore_t mutex;      // Binary semaphore for mutual exclusion, initialized to 1\n * semaphore_t empty;      // Counting semaphore for empty slots, initialized to BUFFER_SIZE\n * semaphore_t full;       // Counting semaphore for full slots, initialized to 0\n */\n\n// --- Producer Process Logic ---\nvoid producer_process() {\n    item_t item;\n    while (true) {\n        // 1. Produce an item\n        produce_item(&item);\n\n        // 2. Wait if buffer is full (empty slots semaphore)\n        sem_wait(&empty); \n\n        // 3. Acquire lock for shared buffer (mutex semaphore)\n        sem_wait(&mutex); \n\n        // 4. Add item to buffer\n        buffer[in] = item;\n        in = (in + 1) % BUFFER_SIZE;\n\n        // 5. Release lock\n        sem_post(&mutex); \n\n        // 6. Signal that buffer has a full slot (full slots semaphore)\n        sem_post(&full);  \n    }\n}\n\n// --- Consumer Process Logic ---\nvoid consumer_process() {\n    item_t item;\n    while (true) {\n        // 1. Wait if buffer is empty (full slots semaphore)\n        sem_wait(&full);  \n\n        // 2. Acquire lock for shared buffer (mutex semaphore)\n        sem_wait(&mutex); \n\n        // 3. Remove item from buffer\n        item = buffer[out];\n        out = (out + 1) % BUFFER_SIZE;\n\n        // 4. Release lock\n        sem_post(&mutex); \n\n        // 5. Signal that buffer has an empty slot (empty slots semaphore)\n        sem_post(&empty); \n\n        // 6. Consume the item\n        consume_item(&item);\n    }\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הבעיה המתוארת היא בעיית יצרן-צרכן קלאסית, הדורשת שימוש בזיכרון משותף (shared memory) עבור הבאפר המעגלי, ובמנגנוני סנכרון מתאימים כדי למנוע תנאי מרוץ ולשלוט על גישה לבאפר.\n\n**מנגנוני ה-IPC הנדרשים הם:**\n1.  **זיכרון משותף (Shared Memory)**: משמש כבאפר מעגלי (circular buffer) שדרכו היצרן והצרכן מחליפים נתונים. זוהי שיטה יעילה לתקשורת בין תהליכים מכיוון שהיא מאפשרת גישה ישירה לנתונים ללא העתקה מיותרת, אך דורשת סנכרון חיצוני.\n2.  **סמפורים (Semaphores)**: נחוצים לסנכרון ומניעת תנאי מרוץ. ניצור שלושה סמפורים:\n    *   `mutex` (סמפור בינארי או מנעול) – מאותחל ל-1. מגן על הגישה לאזור הזיכרון המשותף עצמו (הבאפר) כדי להבטיח mutual exclusion. רק תהליך אחד יכול לגשת לבאפר בכל רגע נתון כדי לשנות את תוכנו או את האינדקסים `in` ו-`out`.\n    *   `empty` (סמפור ספירה) – מאותחל לגודל הבאפר (`BUFFER_SIZE`). מייצג את מספר המקומות הריקים הזמינים בבאפר. היצרן מבצע `sem_wait` עליו לפני כתיבה (ממתין אם הבאפר מלא) והצרכן מבצע `sem_post` עליו אחרי קריאה (מאותת שהתפנה מקום).\n    *   `full` (סמפור ספירה) – מאותחל ל-0. מייצג את מספר המקומות המלאים בבאפר. הצרכן מבצע `sem_wait` עליו לפני קריאה (ממתין אם הבאפר ריק) והיצרן מבצע `sem_post` עליו אחרי כתיבה (מאותת שהתווסף פריט).\n\n**כיצד הם פועלים יחד (כפי שמודגם בקטע הקוד):**\n\n*   **תהליך היצרן:**\n    1.  **מייצר פריט נתונים.**\n    2.  **`sem_wait(&empty)`**: מבצע פעולת `wait` על סמפור `empty`. אם `empty` שווה ל-0 (כלומר, הבאפר מלא), היצרן נחסם עד שיתפנה מקום. פעולה זו מקטינה את מונה ה`empty`.\n    3.  **`sem_wait(&mutex)`**: מבצע פעולת `wait` על סמפור `mutex`. פעולה זו רוכשת את המנעול, ומבטיחה שהיצרן יוכל לגשת לבאפר המשותף באופן בלעדי, ללא הפרעה מתהליך הצרכן או יצרן אחר.\n    4.  **מוסיף את הפריט לבאפר המשותף.**\n    5.  **`sem_post(&mutex)`**: מבצע פעולת `post` על סמפור `mutex`. פעולה זו משחררת את המנעול, ובכך מאפשרת לתהליכים אחרים לגשת לבאפר.\n    6.  **`sem_post(&full)`**: מבצע פעולת `post` על סמפור `full`. פעולה זו מאותתת שהתווסף פריט מלא לבאפר, ומגדילה את מונה ה`full`.\n\n*   **תהליך הצרכן:**\n    1.  **`sem_wait(&full)`**: מבצע פעולת `wait` על סמפור `full`. אם `full` שווה ל-0 (כלומר, הבאפר ריק), הצרכן נחסם עד שיופיע פריט. פעולה זו מקטינה את מונה ה`full`.\n    2.  **`sem_wait(&mutex)`**: מבצע פעולת `wait` על סמפור `mutex`. פעולה זו רוכשת את המנעול, ומבטיחה שהצרכן יוכל לגשת לבאפר המשותף באופן בלעדי.\n    3.  **מוציא פריט מהבאפר המשותף.**\n    4.  **`sem_post(&mutex)`**: מבצע פעולת `post` על סמפור `mutex`. פעולה זו משחררת את המנעול.\n    5.  **`sem_post(&empty)`**: מבצע פעולת `post` על סמפור `empty`. פעולה זו מאותתת שהתפנה מקום בבאפר, ומגדילה את מונה ה`empty`.\n    6.  **צורך את פריט הנתונים.**\n\nשילוב זה מבטיח שהיצרן והצרכן יפעלו באופן מסונכרן, ללא תנאי מרוץ, ושהבאפר לא יעלה על גדותיו (overrun) או יתרוקן יתר על המידה (underrun)."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

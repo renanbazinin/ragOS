@@ -1,0 +1,59 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Scheduling and Processes",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 21:08:48",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2768,
+      "output_tokens": 2074,
+      "total_tokens": 12267
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "Open",
+    "topic": [
+      "Scheduling",
+      "Processes",
+      "Round Robin",
+      "CPU Scheduling",
+      "Process States"
+    ],
+    "content": {
+      "text": "שקול מערכת עם מעבד יחיד המריצה מתזמן Round Robin (RR) עם קוונטום זמן Q. קיימים שלושה תהליכים: P1, P2, P3.\n*   P1: דורש 2Q זמן מעבד, לאחר מכן מבצע פעולת קלט/פלט (I/O) למשך 3Q זמן, ולאחר מכן דורש Q זמן מעבד נוסף.\n*   P2: דורש 3Q זמן מעבד, ולאחר מכן מסיים.\n*   P3: דורש Q זמן מעבד, לאחר מכן מבצע פעולת קלט/פלט למשך 2Q זמן, ולאחר מכן דורש 2Q זמן מעבד נוספים.\nכל התהליכים מגיעים בזמן t=0 לתור ה-Ready. הנח שפעולות קלט/פלט חוסמות את התהליך ומעבירות אותו למצב Blocked. כאשר פעולת קלט/פלט מסתיימת, התהליך חוזר לתור ה-Ready. התקורה של החלפת הקשר (Context Switch) זניחה.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "7.1",
+        "text": "תאר את רצף ביצוע התהליכים, מעברי המצבים (Ready, Running, Blocked, Terminated) והחלפות הקשר (Context Switches) עד לסיום כל התהליכים. הצג זאת בטבלה או בציר זמן ברור.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "7.2",
+        "text": "מהו המספר הכולל של החלפות קשר עד לסיום כל התהליכים?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "7.3",
+        "text": "מהו זמן המחזור (Turnaround Time) עבור כל אחד מהתהליכים (P1, P2, P3)?",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "נתוני התהליכים:\nP1: [2Q CPU, 3Q I/O, 1Q CPU]. סה\"כ CPU: 3Q.\nP2: [3Q CPU]. סה\"כ CPU: 3Q.\nP3: [1Q CPU, 2Q I/O, 2Q CPU]. סה\"כ CPU: 3Q.\n\nהנחה: תהליכים נכנסים לתור Ready בסדר P1, P2, P3.\n\n**7.1: רצף ביצוע, מעברי מצבים והחלפות קשר:**\n\n| זמן (t) | תהליך רץ | מצב P1 | מצב P2 | מצב P3 | תור Ready (בתחילת הקוונטום/אירוע) | תהליכים חסומים (I/O יסתיים ב-) | הערות/אירועים\n|:-------:|:---------:|:-------:|:-------:|:-------:|:----------------------------------:|:-------------------------------:|:----------------------------------------------------|\n| 0       | -         | Ready   | Ready   | Ready   | [P1, P2, P3]                       | -                               | הגעת תהליכים\n| 0-Q     | P1        | Running | Ready   | Ready   | [P2, P3]                           | -                               | P1 רץ\n| Q       | CS        | Ready   | Running | Ready   | [P2, P3, P1]                       | -                               | P1 קוונטום נגמר. **CS1**\n| Q-2Q    | P2        | Ready   | Running | Ready   | [P3, P1]                           | -                               | P2 רץ\n| 2Q      | CS        | Ready   | Ready   | Running | [P3, P1, P2]                       | -                               | P2 קוונטום נגמר. **CS2**\n| 2Q-3Q   | P3        | Ready   | Ready   | Running | [P1, P2]                           | -                               | P3 מסיים פרץ CPU ראשון\n| 3Q      | CS        | Ready   | Ready   | Blocked | [P1, P2]                           | P3 (I/O יסתיים ב-5Q)             | P3 עובר ל-Blocked. **CS3** (P3->P1)\n| 3Q-4Q   | P1        | Running | Ready   | Blocked | [P2]                               | P3 (I/O יסתיים ב-5Q)             | P1 מסיים פרץ CPU ראשון\n| 4Q      | CS        | Blocked | Running | Blocked | [P2]                               | P1 (I/O יסתיים ב-7Q), P3 (I/O יסתיים ב-5Q) | P1 עובר ל-Blocked. **CS4** (P1->P2)\n| 4Q-5Q   | P2        | Blocked | Running | Blocked | []                                 | P1 (I/O יסתיים ב-7Q), P3 (I/O יסתיים ב-5Q) | P2 רץ\n| 5Q      | P3 I/O ends | Blocked | Running | Ready   | [P3]                               | P1 (I/O יסתיים ב-7Q)             | P3 עובר ל-Ready\n| 5Q-6Q   | P2        | Blocked | Running | Ready   | [P3]                               | P1 (I/O יסתיים ב-7Q)             | P2 מסיים את כל ה-CPU שלו\n| 6Q      | CS        | Blocked | Terminated | Running | [P3]                               | P1 (I/O יסתיים ב-7Q)             | P2 מסיים. **CS5** (P2->P3)\n| 6Q-7Q   | P3        | Blocked | Terminated | Running | []                                 | P1 (I/O יסתיים ב-7Q)             | P3 רץ\n| 7Q      | P1 I/O ends | Ready   | Terminated | Running | [P1]                               | -                               | P1 עובר ל-Ready. P3 קוונטום נגמר.\n| 7Q      | CS        | Ready   | Terminated | Ready   | [P1, P3]                           | -                               | P3 נכנס לסוף תור ה-Ready. **CS6** (P3->P1)\n| 7Q-8Q   | P1        | Running | Terminated | Ready   | [P3]                               | -                               | P1 רץ\n| 8Q      | CS        | Ready   | Terminated | Running | [P3, P1]                           | -                               | P1 קוונטום נגמר. **CS7**\n| 8Q-9Q   | P3        | Ready   | Terminated | Running | [P1]                               | -                               | P3 מסיים את כל ה-CPU שלו\n| 9Q      | CS        | Ready   | Terminated | Terminated | [P1]                               | -                               | P3 מסיים. **CS8** (P3->P1)\n| 9Q-10Q  | P1        | Running | Terminated | Terminated | []                                 | -                               | P1 מסיים את כל ה-CPU שלו\n| 10Q     | -         | Terminated | Terminated | Terminated | []                                 | -                               | P1 מסיים.\n\n**7.2: מספר החלפות קשר כולל:**\nסה\"כ 8 החלפות קשר.\n\n**7.3: זמן המחזור (Turnaround Time) עבור כל תהליך:**\n*   P1: הגיע ב-0, סיים ב-10Q. זמן מחזור = 10Q.\n*   P2: הגיע ב-0, סיים ב-6Q. זמן מחזור = 6Q.\n*   P3: הגיע ב-0, סיים ב-9Q. זמן מחזור = 9Q."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

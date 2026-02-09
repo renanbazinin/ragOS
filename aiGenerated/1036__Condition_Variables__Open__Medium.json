@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Condition Variables",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 07:33:42",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2619,
+      "output_tokens": 2260,
+      "total_tokens": 9023
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "Open",
+    "topic": [
+      "Condition Variables",
+      "Synchronization",
+      "Producer-Consumer"
+    ],
+    "content": {
+      "text": "נתון קטע קוד חלקי שמטרתו לממש באפר מעגלי (circular buffer) בטוח לגישה מרובת חוטים (thread-safe) באמצעות mutex ו-condition variables. החוטים המייצרים (producers) מוסיפים נתונים לבאפר, והחוטים הצרכנים (consumers) מוציאים נתונים ממנו.\nיש להשלים את פונקציות `produce_item` ו-`consume_item` כך שיבטיחו סינכרון נכון וימנעו מצבי מירוץ (race conditions) וקיפאון (deadlocks), תוך שימוש במנגנוני הסינכרון הקיימים. יש להסביר כל שלב בפתרון.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <pthread.h>\n#include <unistd.h>\n\n#define BUFFER_SIZE 5\n\nint buffer[BUFFER_SIZE];\nint count = 0; // Number of items in the buffer\nint in = 0;    // Next write position\nint out = 0;   // Next read position\n\npthread_mutex_t mutex;\npthread_cond_t cond_full;  // Signaled when buffer is not full\npthread_cond_t cond_empty; // Signaled when buffer is not empty\n\nvoid init_sync() {\n    pthread_mutex_init(&mutex, NULL);\n    pthread_cond_init(&cond_full, NULL);\n    pthread_cond_init(&cond_empty, NULL);\n}\n\nvoid destroy_sync() {\n    pthread_mutex_destroy(&mutex);\n    pthread_cond_destroy(&cond_full);\n    pthread_cond_destroy(&cond_empty);\n}\n\nvoid produce_item(int item) {\n    // --- START YOUR CODE HERE ---\n    // Acquire mutex\n    // Wait if buffer is full\n    // Add item to buffer\n    // Increment count\n    // Signal consumers that buffer is not empty\n    // Release mutex\n    // --- END YOUR CODE HERE ---\n}\n\nint consume_item() {\n    int item;\n    // --- START YOUR CODE HERE ---\n    // Acquire mutex\n    // Wait if buffer is empty\n    // Remove item from buffer\n    // Decrement count\n    // Signal producers that buffer is not full\n    // Release mutex\n    // --- END YOUR CODE HERE ---\n    return item;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון דורש שימוש נכון ב-mutex כדי להגן על הגישה למשתנים המשותפים (buffer, count, in, out) וב-condition variables כדי לאפשר לחוטים להמתין ביעילות כאשר תנאי מסוים אינו מתקיים (הבאפר מלא עבור יצרנים, או ריק עבור צרכנים).\n\n**הקוד המלא והמושלם:**\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <pthread.h>\n#include <unistd.h>\n\n#define BUFFER_SIZE 5\n\nint buffer[BUFFER_SIZE];\nint count = 0; // Number of items in the buffer\nint in = 0;    // Next write position\nint out = 0;   // Next read position\n\npthread_mutex_t mutex;\npthread_cond_t cond_full;  // Signaled when buffer is not full\npthread_cond_t cond_empty; // Signaled when buffer is not empty\n\nvoid init_sync() {\n    pthread_mutex_init(&mutex, NULL);\n    pthread_cond_init(&cond_full, NULL);\n    pthread_cond_init(&cond_empty, NULL);\n}\n\nvoid destroy_sync() {\n    pthread_mutex_destroy(&mutex);\n    pthread_cond_destroy(&cond_full);\n    pthread_cond_destroy(&cond_empty);\n}\n\nvoid produce_item(int item) {\n    pthread_mutex_lock(&mutex);\n    while (count == BUFFER_SIZE) {\n        pthread_cond_wait(&cond_full, &mutex);\n    }\n    buffer[in] = item;\n    in = (in + 1) % BUFFER_SIZE;\n    count++;\n    pthread_cond_signal(&cond_empty); // ניתן גם pthread_cond_broadcast\n    pthread_mutex_unlock(&mutex);\n}\n\nint consume_item() {\n    int item;\n    pthread_mutex_lock(&mutex);\n    while (count == 0) {\n        pthread_cond_wait(&cond_empty, &mutex);\n    }\n    item = buffer[out];\n    out = (out + 1) % BUFFER_SIZE;\n    count--;\n    pthread_cond_signal(&cond_full); // ניתן גם pthread_cond_broadcast\n    pthread_mutex_unlock(&mutex);\n    return item;\n}\n```\n\n**הסבר מפורט:**\n\n**פונקציית `produce_item`:**\n1.  **`pthread_mutex_lock(&mutex);`**: ננעל את ה-mutex כדי להבטיח גישה בלעדית למשאבים המשותפים (הבאפר, המונים `count`, `in`, `out`) ולמנוע מצבי מירוץ (race conditions).\n2.  **`while (count == BUFFER_SIZE) { pthread_cond_wait(&cond_full, &mutex); }`**: אם הבאפר מלא, חוט היצרן ממתין. הפונקציה `pthread_cond_wait` מבצעת שתי פעולות קריטיות באופן אטומי: היא משחררת את ה-mutex ונכנסת למצב שינה. כאשר היא מתעוררת (עקב קריאה ל-`signal` או `broadcast` על `cond_full` או התעוררות כוזבת), היא רוכשת מחדש את ה-mutex לפני שהיא ממשיכה. חשוב להשתמש בלולאת `while` כדי לבדוק שוב את התנאי (`count == BUFFER_SIZE`) לאחר ההתעוררות. זאת מכיוון שתיתכן התעוררות כוזבת (spurious wakeup) או שחוט יצרן אחר הספיק למלא את הבאפר שוב לאחר שחוט צרכן יצר מקום, ועד שהחוט הנוכחי רכש מחדש את ה-mutex.\n3.  **`buffer[in] = item;`**: מוסיפים את הפריט לבאפר במיקום הכתיבה הבא.\n4.  **`in = (in + 1) % BUFFER_SIZE;`**: מקדמים את המצביע לכתיבה הבאה בבאפר המעגלי.\n5.  **`count++;`**: מגדילים את מונה הפריטים בבאפר.\n6.  **`pthread_cond_signal(&cond_empty);`**: מאותתים לחוט צרכן אחד (אם יש כזה שממתין על `cond_empty`) שהבאפר אינו ריק כעת ויש פריטים לצריכה. שימוש ב-`signal` מספיק במודל יצרן-צרכן קלאסי כאשר יש רק סוג אחד של חוטים (צרכנים) שיכולים להמשיך לאחר שהתנאי משתנה.\n7.  **`pthread_mutex_unlock(&mutex);`**: משחררים את ה-mutex, ומאפשרים לחוטים אחרים לגשת למשאבים המשותפים.\n\n**פונקציית `consume_item`:**\n1.  **`pthread_mutex_lock(&mutex);`**: ננעל את ה-mutex כדי להגן על הגישה למשאבים המשותפים.\n2.  **`while (count == 0) { pthread_cond_wait(&cond_empty, &mutex); }`**: אם הבאפר ריק, חוט הצרכן ממתין. בדומה לפונקציית היצרן, `pthread_cond_wait` משחררת ורוכשת מחדש את ה-mutex באופן אטומי, וחשוב להשתמש בלולאת `while` לבדיקת התנאי (`count == 0`) לאחר ההתעוררות מסיבות דומות (התעוררות כוזבת או שינוי מצב על ידי חוט אחר).\n3.  **`item = buffer[out];`**: מוציאים את הפריט מהבאפר במיקום הקריאה הבא.\n4.  **`out = (out + 1) % BUFFER_SIZE;`**: מקדמים את המצביע לקריאה הבאה בבאפר המעגלי.\n5.  **`count--;`**: מקטינים את מונה הפריטים בבאפר.\n6.  **`pthread_cond_signal(&cond_full);`**: מאותתים לחוט יצרן אחד (אם יש כזה שממתין על `cond_full`) שהבאפר אינו מלא כעת ויש מקום להוסיף פריטים.\n7.  **`pthread_mutex_unlock(&mutex);`**: משחררים את ה-mutex."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

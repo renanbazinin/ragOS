@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Condition Variables",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 07:34:24",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2619,
+      "output_tokens": 2364,
+      "total_tokens": 7916
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Condition Variables",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "משתני תנאי (Condition Variables) הם כלי חיוני לסנכרון ב-Operating Systems המאפשר לחוטים להמתין לאירוע או לתנאי מסוים שיתקיים.\nא. הסבר מהו הצורך במשתני תנאי, ומדוע מנעולים (mutexes) בלבד אינם מספיקים לכלל צרכי הסנכרון.\nב. נתון קטע הקוד הבא המממש תרחיש בסיסי של יצרן-צרכן. השלם את קטע הקוד החסר (מסומן כ-`// MISSING CODE HERE`) באמצעות משתני תנאי ומנעולים, כך שהצרכן ימתין לנתונים שיופקו על ידי היצרן.\nג. הסבר את תפקידם של `pthread_cond_wait` ו-`pthread_cond_signal` (או `pthread_cond_broadcast`) בקוד שהשלמת, וכן הסבר מדוע השימוש בלולאת `while` סביב `pthread_cond_wait` (כפי שנדרש בהשלמה) הוא קריטי לנכונות הפתרון.",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <stdbool.h>\n\n// Shared resources\nint shared_data = 0;\nbool data_available = false;\n\n// Synchronization primitives\npthread_mutex_t mutex;\npthread_cond_t cond_var;\n\nvoid* consumer_thread(void* arg) {\n    pthread_mutex_lock(&mutex);\n\n    // Wait for data to be available\n    // MISSING CODE HERE\n\n    printf(\"Consumer: Data received: %d\\n\", shared_data);\n    data_available = false; // Consume the data\n\n    pthread_mutex_unlock(&mutex);\n    return NULL;\n}\n\nvoid* producer_thread(void* arg) {\n    pthread_mutex_lock(&mutex);\n\n    shared_data = 100;\n    data_available = true;\n    printf(\"Producer: Data produced: %d\\n\", shared_data);\n\n    // Signal consumer\n    // MISSING CODE HERE\n\n    pthread_mutex_unlock(&mutex);\n    return NULL;\n}\n\nint main() {\n    pthread_mutex_init(&mutex, NULL);\n    pthread_cond_init(&cond_var, NULL);\n\n    pthread_t producer, consumer;\n\n    pthread_create(&consumer, NULL, consumer_thread, NULL);\n    pthread_create(&producer, NULL, producer_thread, NULL);\n\n    pthread_join(producer, NULL);\n    pthread_join(consumer, NULL);\n\n    pthread_mutex_destroy(&mutex);\n    pthread_cond_destroy(&cond_var);\n\n    return 0;\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "א. **הצורך במשתני תנאי:**\nמנעולים (mutexes) מספקים מנגנון להבטחת גישה הדדית בלעדית (mutual exclusion) לקטע קריטי, כלומר, רק חוט אחד יכול להיכנס לקטע קריטי נתון בזמן מסוים. עם זאת, מנעולים אינם מספקים דרך לחוט להמתין באופן יעיל לתנאי מסוים שיתקיים. אם חוט צריך להמתין לתנאי, ללא משתני תנאי הוא יצטרך לבצע המתנה פעילה (busy-waiting) – לנעול את המנעול, לבדוק את התנאי, לשחרר את המנעול, לישון לזמן קצר, ולחזור על התהליך. המתנה פעילה מבזבזת משאבי מעבד ואינה יעילה. משתני תנאי מאפשרים לחוט להשעות את עצמו (block) ביעילות עד שתנאי מסוים מתקיים, וחוט אחר יכול לאותת לו כשהתנאי השתנה.\n\nב. **השלמת הקוד:**\n```c\n#include <pthread.h>\n#include <stdio.h>\n#include <stdbool.h>\n\n// Shared resources\nint shared_data = 0;\nbool data_available = false;\n\n// Synchronization primitives\npthread_mutex_t mutex;\npthread_cond_t cond_var;\n\nvoid* consumer_thread(void* arg) {\n    pthread_mutex_lock(&mutex);\n\n    // Wait for data to be available\n    while (!data_available) { // CRITICAL: Use while loop for spurious wakeups\n        pthread_cond_wait(&cond_var, &mutex);\n    }\n\n    printf(\"Consumer: Data received: %d\\n\", shared_data);\n    data_available = false; // Consume the data\n\n    pthread_mutex_unlock(&mutex);\n    return NULL;\n}\n\nvoid* producer_thread(void* arg) {\n    pthread_mutex_lock(&mutex);\n\n    shared_data = 100;\n    data_available = true;\n    printf(\"Producer: Data produced: %d\\n\", shared_data);\n\n    // Signal consumer\n    pthread_cond_signal(&cond_var); // Or pthread_cond_broadcast if multiple consumers\n\n    pthread_mutex_unlock(&mutex);\n    return NULL;\n}\n\nint main() {\n    pthread_mutex_init(&mutex, NULL);\n    pthread_cond_init(&cond_var, NULL);\n\n    pthread_t producer, consumer;\n\n    pthread_create(&consumer, NULL, consumer_thread, NULL);\n    pthread_create(&producer, NULL, producer_thread, NULL);\n\n    pthread_join(producer, NULL);\n    pthread_join(consumer, NULL);\n\n    pthread_mutex_destroy(&mutex);\n    pthread_cond_destroy(&cond_var);\n\n    return 0;\n}\n```\n\nג. **הסבר תפקיד הפונקציות ושימוש בלולאת `while`:**\n*   **`pthread_cond_wait(&cond_var, &mutex)`**: פונקציה זו משמשת את הצרכן כדי להמתין לתנאי (`data_available == true`). כאשר היא נקראת, היא מבצעת שתי פעולות אטומיות:\n    1.  משחררת את המנעול (`mutex`) באופן אוטומטי.\n    2.  משעה את החוט הקורא (הצרכן) על משתנה התנאי (`cond_var`) עד לקבלת איתות.\n    כאשר חוט אחר מאותת על משתנה התנאי, הצרכן מתעורר, ולפני שהוא ממשיך בביצוע, הוא נועל מחדש את המנעול (`mutex`).\n*   **`pthread_cond_signal(&cond_var)`**: פונקציה זו משמשת את היצרן כדי לאותת (להעיר) לחוט אחד (אם ישנם חוטים הממתינים) על משתנה התנאי (`cond_var`) כי התנאי השתנה (במקרה זה, `data_available` הפך ל-`true`). אם אין חוטים ממתינים, האות אובד.\n*   **`pthread_cond_broadcast(&cond_var)`**: בדומה ל-`signal`, אך מעירה את כל החוטים הממתינים על משתנה התנאי. שימושי כאשר מספר חוטים צריכים להגיב לשינוי בתנאי.\n*   **שימוש בלולאת `while` סביב `pthread_cond_wait`**: השימוש בלולאת `while` (`while (!data_available)`) לבדיקת התנאי לאחר שחוט מתעורר מ-`pthread_cond_wait` הוא קריטי מכמה סיבות:\n    1.  **התעוררויות שווא (Spurious Wakeups)**: מערכות הפעלה מסוימות או יישומי pthread עשויים להעיר חוטים הממתינים על משתנה תנאי גם אם לא נשלח איתות. ללא לולאת `while`, חוט כזה ימשיך בביצוע למרות שהתנאי עדיין לא התקיים, מה שיוביל לשגיאות לוגיות.\n    2.  **מספר מאותתים/ממתינים (Multiple Signalers/Waiters)**: אם מספר חוטים ממתינים לאותו תנאי, וחוט אחד מאותת, כל החוטים המועדים להתעורר ינסו לנעול את המנעול. רק אחד יצליח, והאחרים ימתינו. כאשר אחד משחרר את המנעול, חוט נוסף יכול לנעול אותו. אם התנאי שהעירו עבורו נצרך על ידי החוט הראשון, ייתכן שהחוטים האחרים יתעוררו אך התנאי כבר לא יתקיים עבורם. לולאת `while` מבטיחה שכל חוט יבדוק את התנאי שוב לאחר ההתעוררות ולפני שהוא ממשיך.\n    3.  **איתותים אבודים (Lost Signals)**: אם איתות נשלח לפני שחוט החל להמתין, האיתות אובד. לולאת `while` אינה פותרת בעיה זו ישירות, אך היא חלק מהפרדיגמה הכללית שבה התנאי נבדק תמיד תחת המנעול לפני הכניסה למצב המתנה ומיד לאחר היציאה ממנו."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "TLB",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 08:07:40",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1140,
+      "output_tokens": 628,
+      "total_tokens": 3090
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Virtual Memory",
+      "Paging",
+      "TLB",
+      "Context Switch"
+    ],
+    "content": {
+      "text": "מהי הסיבה העיקרית לניקוי (flush) ה-TLB בעת מעבר הקשר (context switch) בין תהליכים?",
+      "code_snippet": null,
+      "options": [
+        "א. כדי לפנות מקום ב-TLB עבור רשומות המיפוי של התהליך החדש.",
+        "ב. כדי להבטיח שהתהליך החדש ישתמש במיפויי טבלת הדפים שלו ולא במיפויים מיושנים של התהליך הקודם.",
+        "ג. כדי לשפר את יחס הפגיעות (hit ratio) עבור התהליך החדש באופן מיידי.",
+        "ד. מכיוון שדפי הזיכרון הפיזי מוקצים מחדש במלואם בכל מעבר הקשר.",
+        "ה. אף אחת מהתשובות האחרות אינה נכונה."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "בעת מעבר הקשר בין תהליכים, מערכת ההפעלה טוענת את מצבו של תהליך חדש. לכל תהליך יש מרחב כתובות וירטואלי משלו וטבלת דפים משלו. ה-TLB מכיל מיפויים וירטואליים-לפיזיים מהתהליך הקודם. אם לא ננקה את ה-TLB, התהליך החדש עלול לנסות לגשת לכתובת וירטואלית מסוימת (לדוגמה, כתובת 0x1000) וה-TLB יחזיר מיפוי פיזי שהיה שייך לכתובת 0x1000 של התהליך הקודם, מה שיוביל לגישה שגויה לזיכרון (או ל-segmentation fault). לכן, ניקוי ה-TLB הכרחי כדי למנוע שימוש במיפויים שגויים השייכים לתהליך אחר. שימוש ב-ASIDs (Address Space Identifiers) יכול למנוע ניקוי מלא של ה-TLB בכל פעם, אך הרעיון הבסיסי נשאר - להבטיח שהמיפויים ב-TLB מתאימים לתהליך הנוכחי."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "CPU Scheduling and Context Switching",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 11:45:15",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1035,
+      "output_tokens": 407,
+      "total_tokens": 3531
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "CPU Scheduling",
+      "Context Switching"
+    ],
+    "content": {
+      "text": "במהלך החלפת הקשר (context switch) בין תהליכים, אילו רכיבים נשמרים עבור התהליך היוצא ונטענים עבור התהליך הנכנס?",
+      "code_snippet": null,
+      "options": [
+        "א. רק את תוכן אוגרי המעבד (CPU registers).",
+        "ב. רק את תוכן הזיכרון (memory content) של התהליך.",
+        "ג. את מצב המעבד (CPU state) ומידע נדרש לניהול זיכרון (memory management information).",
+        "ד. את תוכן קבצי המערכת הפתוחים (open system files).",
+        "ה. רק את מצב ה-I/O של התהליך."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג'. החלפת הקשר כוללת שמירת מצבו המלא של התהליך הנוכחי (כולל אוגרי מעבד, מונה תוכנית, מצב ערימה, וכו') וטעינת מצבו של התהליך החדש. בנוסף, נשמר ונטען מידע ניהול זיכרון כגון מצביע לטבלת הדפים של התהליך, המאפשר למעבד גישה נכונה למרחב הכתובות של התהליך."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

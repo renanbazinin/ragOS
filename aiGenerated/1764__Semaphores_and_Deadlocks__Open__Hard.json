@@ -1,0 +1,58 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Deadlocks",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 20:39:03",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4395,
+      "output_tokens": 3893,
+      "total_tokens": 14043
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Semaphores",
+      "Deadlocks",
+      "Concurrency",
+      "Resource Management"
+    ],
+    "content": {
+      "text": "מערכת הפעלה מנהלת N תהליכים עובדים (worker threads) הזקוקים למשאבים משותפים. קיימים שני סוגי משאבים: משאב A ומשאב B.\nלכל סוג משאב קיימת כמות מוגבלת של יחידות זמינות: `NUM_A` יחידות של משאב A ו-`NUM_B` יחידות של משאב B.\nכל תהליך עובד זקוק ליחידה אחת של משאב A וליחידה אחת של משאב B כדי לבצע את משימתו. לאחר סיום המשימה, התהליך משחרר את שתי היחידות שבהן השתמש.\nיש לממש את מנגנון הקצאת ושחרור המשאבים באמצעות סמפורים בלבד.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "השלימו את המימוש החלקי של הפונקציות `acquire_resources` ו-`release_resources` תוך שימוש בסמפורים, *מבלי להתחשב בשלב זה בבעיית הקיפאון (deadlock)*.\nלאחר מכן, הסבירו בקצרה כיצד עלול להיווצר קיפאון במימוש זה, תוך התייחסות לתנאי הקיפאון.",
+        "code_snippet": "typedef struct {\n    sem_t resource_A;\n    sem_t resource_B;\n} ResourceManager;\n\nvoid init_resource_manager(ResourceManager *rm, int num_a, int num_b) {\n    sem_init(&rm->resource_A, 0, num_a);\n    sem_init(&rm->resource_B, 0, num_b);\n}\n\nvoid destroy_resource_manager(ResourceManager *rm) {\n    sem_destroy(&rm->resource_A);\n    sem_destroy(&rm->resource_B);\n}\n\nvoid acquire_resources(ResourceManager *rm) {\n    // Implement resource acquisition here\n}\n\nvoid release_resources(ResourceManager *rm) {\n    // Implement resource release here\n}",
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "שנו את המימוש של הפונקציות `acquire_resources_deadlock_free` ו-`release_resources_deadlock_free` כך שימנעו קיפאון. הסבירו את האסטרטגיה שבחרתם למניעת קיפאון והוכיחו בקצרה מדוע היא מונעת קיפאון.",
+        "code_snippet": "typedef struct {\n    sem_t resource_A;\n    sem_t resource_B;\n} ResourceManager;\n\nvoid init_resource_manager(ResourceManager *rm, int num_a, int num_b) {\n    sem_init(&rm->resource_A, 0, num_a);\n    sem_init(&rm->resource_B, 0, num_b);\n}\n\nvoid destroy_resource_manager(ResourceManager *rm) {\n    sem_destroy(&rm->resource_A);\n    sem_destroy(&rm->resource_B);\n}\n\nvoid acquire_resources_deadlock_free(ResourceManager *rm) {\n    // Implement deadlock-free resource acquisition here\n}\n\nvoid release_resources_deadlock_free(ResourceManager *rm) {\n    // Implement resource release here\n}",
+        "options": null
+      },
+      {
+        "id": "10.3",
+        "text": "האם המימוש חסר הקיפאון שפיתחתם בסעיף 10.2 מבטיח הוגנות (fairness) בין התהליכים? נמקו. אם לא, הציעו שינוי קצר שישפר את ההוגנות (אין צורך לממש, רק להסביר).",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "10.1 - מימוש ראשוני וקיפאון:\n\n**מימוש פונקציות:**\n```c\nvoid acquire_resources(ResourceManager *rm) {\n    sem_wait(&rm->resource_A); // נסה לרכוש משאב A\n    sem_wait(&rm->resource_B); // נסה לרכוש משאב B\n}\n\nvoid release_resources(ResourceManager *rm) {\n    sem_post(&rm->resource_A); // שחרר משאב A\n    sem_post(&rm->resource_B); // שחרר משאב B\n}\n```\n\n**הסבר על היווצרות קיפאון:**\nקיפאון יכול להיווצר במימוש זה כאשר קיימים לפחות שני תהליכים ויחידה אחת מכל משאב. נניח `NUM_A = 1`, `NUM_B = 1` ו-`NUM_THREADS = 2`.\n1.  **תהליך 1** מבצע `sem_wait(&rm->resource_A)` ומצליח לרכוש את יחידת משאב A היחידה.\n2.  מיד לאחר מכן, תזמן המערכת את **תהליך 2**. תהליך 2 מבצע `sem_wait(&rm->resource_B)` ומצליח לרכוש את יחידת משאב B היחידה.\n3.  **תהליך 1** כעת מנסה לרכוש את משאב B (`sem_wait(&rm->resource_B)`), אך הוא תפוס על ידי תהליך 2 ולכן תהליך 1 נכנס למצב המתנה.\n4.  **תהליך 2** מנסה לרכוש את משאב A (`sem_wait(&rm->resource_A)`), אך הוא תפוס על ידי תהליך 1 ולכן תהליך 2 נכנס למצב המתנה.\n\nשני התהליכים נמצאים במצב המתנה הדדית, כאשר כל אחד מחזיק במשאב שהשני זקוק לו וממתין למשאב שהשני מחזיק. זהו קיפאון.\n\n**תנאי הקיפאון (Conditions for Deadlock) מתקיימים:**\n*   **מניעה הדדית (Mutual Exclusion):** הסמפורים מבטיחים שיחידת משאב ניתנת לתהליך אחד בלבד בכל רגע נתון (או למספר מוגבל של תהליכים אם הסמפור מונה). במקרה של יחידה בודדת מכל משאב, זהו מנעול הדדי.\n*   **החזקה והמתנה (Hold and Wait):** תהליך (למשל תהליך 1) מחזיק במשאב אחד (A) וממתין למשאב אחר (B) שנמצא בשימוש של תהליך אחר.\n*   **ללא הקצאה מוקדמת (No Preemption):** לא ניתן לקחת משאב בכוח מתהליך שמחזיק בו; התהליך חייב לשחרר אותו מרצונו לאחר סיום השימוש.\n*   **המתנה מעגלית (Circular Wait):** קיימת שרשרת של תהליכים `P1 -> P2 -> P1` כך ש-`P1` ממתין למשאב ש-`P2` מחזיק בו, ו-`P2` ממתין למשאב ש-`P1` מחזיק בו.\n\n10.2 - מימוש חסר קיפאון:\n\n**אסטרטגיה למניעת קיפאון:**\nהאסטרטגיה שנבחרה למניעת קיפאון היא **סדר היררכי בהקצאת משאבים** (Resource Ordering). כל התהליכים מחויבים לרכוש את המשאבים באותו סדר קבוע מראש: תחילה משאב A, ורק לאחר מכן משאב B.\n\n**מימוש פונקציות:**\n```c\nvoid acquire_resources_deadlock_free(ResourceManager *rm) {\n    sem_wait(&rm->resource_A); // תמיד רכוש את A ראשון\n    sem_wait(&rm->resource_B); // רק אז רכוש את B\n}\n\nvoid release_resources_deadlock_free(ResourceManager *rm) {\n    sem_post(&rm->resource_A); // שחרר את A\n    sem_post(&rm->resource_B); // שחרר את B\n}\n```\n\n**הוכחה למניעת קיפאון:**\nכדי שיתקיים קיפאון, חייב להתקיים תנאי ההמתנה המעגלית (Circular Wait). אם כל התהליכים רוכשים את המשאבים בסדר A ואז B, לעולם לא תוכל להיווצר שרשרת המתנה מעגלית.\n\nנניח בשלילה שנוצר קיפאון. זה אומר שישנה קבוצת תהליכים `P1, P2, ..., Pk` כך ש-`P1` ממתין למשאב ש-`P2` מחזיק בו, `P2` ממתין למשאב ש-`P3` מחזיק בו, וכן הלאה, עד ש-`Pk` ממתין למשאב ש-`P1` מחזיק בו. במילים אחרות, `P_i` ממתין למשאב ש-`P_{i+1}` מחזיק בו (ועבור `Pk`, `P_k` ממתין למשאב ש-`P1` מחזיק בו).\n\nבמערכת שלנו, תהליך יכול להיות באחד משני מצבים: (1) מחזיק ב-A וממתין ל-B, או (2) מחזיק גם ב-A וגם ב-B. תהליך לעולם לא יחזיק במשאב B וימתין למשאב A, מכיוון שהוא תמיד מנסה לרכוש את A קודם. לכן, כל תהליך שממתין, ממתין למשאב \"גבוה\" יותר בסדר ההיררכי (כלומר, אם הוא מחזיק ב-A, הוא ממתין ל-B).\n\nאם `P_i` ממתין למשאב ש-`P_{i+1}` מחזיק בו, זה אומר ש-`P_i` מחזיק במשאב A וממתין למשאב B. מכאן נובע ש-`P_{i+1}` חייב להחזיק במשאב B. אבל אם `P_{i+1}` מחזיק במשאב B, הוא בהכרח כבר רכש את משאב A (על פי סדר הרכישה הקבוע: A ואז B). לכן, לא ייתכן מצב שבו `P_{i+1}` ממתין למשאב A ש-`P_i` מחזיק בו, משום ש-`P_{i+1}` כבר מחזיק ב-A.\n\nמכיוון שכל תהליך שממתין עושה זאת עבור משאב בעל מספר סידורי גבוה יותר בסדר המוגדר, לעולם לא יכולה להיווצר שרשרת מעגלית שבה תהליך שמחזיק במשאב \"גבוה\" ממתין למשאב \"נמוך\" יותר. בכך, תנאי ההמתנה המעגלית נשבר, והמערכת חופשית מקיפאון.\n\n10.3 - הוגנות:\n\nהמימוש חסר הקיפאון שהוצע בסעיף 10.2 **אינו מבטיח הוגנות** (fairness) במובן של FIFO (First-In, First-Out) או מניעת הרעבה (starvation).\n\n**נימוק:**\nסמפורים (ובפרט סמפורי POSIX המשמשים ב-C) אינם מבטיחים הוגנות כברירת מחדל. כאשר מספר תהליכים ממתינים על אותו סמפור (לדוגמה, `sem_wait(&rm->resource_A)`), אין ערובה שהתהליך שהמתין הכי הרבה זמן יהיה הבא שיקבל את המשאב כאשר הוא משתחרר. סדר ההשכמה של תהליכים ממתינים על סמפור תלוי במימוש מערכת ההפעלה ויכול להיות אקראי, מבוסס על קדימות, או על סדר אחר שאינו FIFO. כתוצאה מכך, תהליך מסוים עלול להמתין indefinitely (להיות מורעב) אם תמיד תהליכים אחרים מצליחים לרכוש את המשאבים לפניו.\n\n**שינוי לשיפור הוגנות:**\nכדי לשפר את ההוגנות, ניתן להשתמש בסמפור בינארי נוסף (`entry_mutex`) אשר יאפשר רק לתהליך אחד בכל פעם לנסות לרכוש את המשאבים. זה מבטיח שהניסיונות לרכוש את צמד המשאבים (A ואז B) נעשים בטור, ובכך מונע מצב של \"תחרות פרועה\" על המשאבים שיכולה להרעיב תהליכים מסוימים. ה-`entry_mutex` יתווסף למבנה `ResourceManager` ויאותחל ל-1.\n\n**הסבר לשינוי:**\n```c\ntypedef struct {\n    sem_t resource_A;\n    sem_t resource_B;\n    sem_t entry_mutex; // חדש: סמפור בינארי לכניסה הוגנת לקטע הקריטי של הרכישה\n} ResourceManager;\n\nvoid init_resource_manager(ResourceManager *rm, int num_a, int num_b) {\n    sem_init(&rm->resource_A, 0, num_a);\n    sem_init(&rm->resource_B, 0, num_b);\n    sem_init(&rm->entry_mutex, 0, 1); // אתחול ל-1\n}\n\nvoid acquire_resources_fair(ResourceManager *rm) {\n    sem_wait(&rm->entry_mutex); // רכוש מנעול כניסה - רק תהליך אחד יכול לנסות לרכוש משאבים\n    sem_wait(&rm->resource_A); // רכוש A\n    sem_wait(&rm->resource_B); // רכוש B\n    sem_post(&rm->entry_mutex); // שחרר את מנעול הכניסה לאחר רכישה מוצלחת של שניהם\n}\n\nvoid release_resources_fair(ResourceManager *rm) {\n    sem_post(&rm->resource_A);\n    sem_post(&rm->resource_B);\n}\n```\nשינוי זה מבטיח שאם תהליך מצליח לרכוש את `entry_mutex`, הוא ינסה לרכוש את שני המשאבים בזה אחר זה. רק לאחר שיצליח לרכוש את שניהם, הוא ישחרר את `entry_mutex`, ויאפשר לתהליך הבא בתור לנסות. זה מונע מצב בו תהליכים \"מתחרים\" על המשאבים בו זמנית, ובכך משפר את הסיכויים להוגנות, אם כי עדיין אינו מבטיח הוגנות FIFO מלאה עבור כל מקרה קצה (למשל, אם תהליך נתקע על `resource_A` או `resource_B` לאחר שלקח את `entry_mutex`, הוא יחסום את כל שאר התהליכים).\nפתרון הוגן לחלוטין דורש לרוב מנגנון תור מפורש או שימוש במשתני תנאי (conditional variables) יחד עם מנעול, אך עבור \"שינוי קצר\", הוספת `entry_mutex` היא שיפור משמעותי בהשוואה למימוש ללא כל מנגנון הוגנות."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

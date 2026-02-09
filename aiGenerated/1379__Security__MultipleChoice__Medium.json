@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "Security",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 09:44:00",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1204,
+      "output_tokens": 520,
+      "total_tokens": 2975
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "Security",
+      "Protection Rings",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "מה יקרה כאשר תוכנית הפועלת במצב משתמש (User Mode) תנסה לבצע גישה ישירה לכתובת זיכרון השייכת לליבה (Kernel Space) או להפעיל פקודה שמורה (Privileged Instruction)?",
+      "code_snippet": null,
+      "options": [
+        "המערכת תבצע אוטומטית הרחבת הרשאות לתוכנית כדי לאפשר את הפעולה.",
+        "פעולת הגישה או הפקודה תתעלם והתוכנית תמשיך לרוץ כרגיל.",
+        "המעבד יפיק חריגה (Exception) כגון General Protection Fault או Segmentation Fault, והמערכת תסיים את התוכנית.",
+        "הליבה תבדוק אם למשתמש יש הרשאות מתאימות, ובמידה וכן, תאפשר את הפעולה.",
+        "הליבה תעביר את הפעולה למצב משתמש ותנסה לבצע אותה שם."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "כאשר תוכנית במצב משתמש מנסה לגשת ישירות לזיכרון הליבה או לבצע פקודה שמורה, יחידת ניהול הזיכרון (MMU) ומנגנוני ההגנה של המעבד (כמו Protection Rings) יזהו הפרת הרשאות. המעבד יפיק חריגה (לדוגמה, General Protection Fault או Segmentation Fault), והמערכת תגיב בדרך כלל בסיום התוכנית הפוגעת, כדי למנוע פגיעה באבטחת המערכת וביציבותה. גישה לפעולות ליבה מתבצעת באופן מבוקר דרך קריאות מערכת (System Calls)."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

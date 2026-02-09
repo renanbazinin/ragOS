@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Threads and Mutexes",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 20:28:22",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4527,
+      "output_tokens": 2325,
+      "total_tokens": 10376
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "Open",
+    "topic": [
+      "Threads",
+      "Mutexes",
+      "Synchronization",
+      "Deadlock"
+    ],
+    "content": {
+      "text": "נתון קוד C/C++ המשתמש ב-POSIX threads וב-mutexes לצורך סנכרון גישה למשאבים משותפים. קרא בעיון את הקוד המצורף.\n\nא. זהה והסבר את הבעיות הפוטנציאליות בקוד, תוך התייחסות למצבי מרוץ (race conditions), קיפאון (deadlocks), או בעיות סנכרון אחרות. נמק מדוע הבעיה מתרחשת וכיצד היא יכולה להשפיע על ביצוע התוכנית.\n\nב. הצע פתרון לקוד המתואר שימנע את הבעיות שזיהית בסעיף א'. הצג את הקוד המתוקן והסבר בקצרה מדוע הפתרון שלך פותר את הבעיות ומבטיח פעולה תקינה של התוכנית.",
+      "code_snippet": "#include <iostream>\n#include <pthread.h>\n#include <unistd.h> // For usleep\n\n// Shared resources\nint resource1 = 0;\nint resource2 = 0;\n\n// Mutexes for shared resources\npthread_mutex_t mutex1 = PTHREAD_MUTEX_INITIALIZER;\npthread_mutex_t mutex2 = PTHREAD_MUTEX_INITIALIZER;\n\n// Thread function that acquires mutex1 then mutex2\nvoid* thread_func_A(void* arg) {\n    for (int i = 0; i < 5; ++i) {\n        pthread_mutex_lock(&mutex1);\n        pthread_mutex_lock(&mutex2);\n\n        // Critical section\n        resource1++;\n        resource2++;\n        std::cout << \"Thread A: R1=\" << resource1 << \", R2=\" << resource2 << std::endl;\n\n        pthread_mutex_unlock(&mutex2);\n        pthread_mutex_unlock(&mutex1);\n        usleep(100000); // Simulate some work\n    }\n    return NULL;\n}\n\n// Thread function that acquires mutex2 then mutex1\nvoid* thread_func_B(void* arg) {\n    for (int i = 0; i < 5; ++i) {\n        pthread_mutex_lock(&mutex2);\n        pthread_mutex_lock(&mutex1);\n\n        // Critical section\n        resource1--;\n        resource2--;\n        std::cout << \"Thread B: R1=\" << resource1 << \", R2=\" << resource2 << std::endl;\n\n        pthread_mutex_unlock(&mutex1);\n        pthread_mutex_unlock(&mutex2);\n        usleep(100000); // Simulate some work\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t tid[4];\n\n    // Create threads\n    pthread_create(&tid[0], NULL, thread_func_A, NULL);\n    pthread_create(&tid[1], NULL, thread_func_B, NULL);\n    pthread_create(&tid[2], NULL, thread_func_A, NULL);\n    pthread_create(&tid[3], NULL, thread_func_B, NULL);\n\n    // Join threads\n    for (int i = 0; i < 4; ++i) {\n        pthread_join(tid[i], NULL);\n    }\n\n    // Destroy mutexes\n    pthread_mutex_destroy(&mutex1);\n    pthread_mutex_destroy(&mutex2);\n\n    std::cout << \"Final R1=\" << resource1 << \", R2=\" << resource2 << std::endl;\n\n    return 0;\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "א. הבעיה המרכזית בקוד היא פוטנציאל לקיפאון (deadlock). קיפאון יכול להתרחש כאשר שני תהליכונים (או יותר) מנסים לרכוש מספר מנעולים (mutexes) בסדר הפוך. בקוד הנתון:\n- `thread_func_A` רוכש קודם את `mutex1` ואז את `mutex2`.\n- `thread_func_B` רוכש קודם את `mutex2` ואז את `mutex1`.\nתרחיש קיפאון אפשרי הוא כדלקמן: תהליכון A מתחיל ורוכש את `mutex1`. במקביל, תהליכון B מתחיל ורוכש את `mutex2`. כעת, תהליכון A מנסה לרכוש את `mutex2` (שמוחזק על ידי B) ונכנס למצב המתנה. במקביל, תהליכון B מנסה לרכוש את `mutex1` (שמוחזק על ידי A) ונכנס גם הוא למצב המתנה. שני התהליכונים ממתינים זה לזה באופן אינסופי, והתוכנית נתקעת (deadlocked).\nאין כאן בעיית race condition על `resource1` או `resource2` כשלעצמן, כיוון שכל גישה למשאבים אלו מוגנת על ידי רכישה של שני המנעולים. הבעיה היא בסדר רכישת המנעולים.\n\nב. כדי למנוע קיפאון, יש להבטיח שכל התהליכונים ירכשו את המנעולים באותו סדר קבוע. הדרך הפשוטה ביותר לפתור את הבעיה היא לשנות את `thread_func_B` כך שירכוש את המנעולים באותו סדר כמו `thread_func_A`, כלומר קודם `mutex1` ואז `mutex2`.\n\nהקוד המתוקן ייראה כך:\n```c\n#include <iostream>\n#include <pthread.h>\n#include <unistd.h> // For usleep\n\n// Shared resources\nint resource1 = 0;\nint resource2 = 0;\n\n// Mutexes for shared resources\npthread_mutex_t mutex1 = PTHREAD_MUTEX_INITIALIZER;\npthread_mutex_t mutex2 = PTHREAD_MUTEX_INITIALIZER;\n\n// Thread function that acquires mutex1 then mutex2\nvoid* thread_func_A(void* arg) {\n    for (int i = 0; i < 5; ++i) {\n        pthread_mutex_lock(&mutex1);\n        pthread_mutex_lock(&mutex2);\n\n        // Critical section\n        resource1++;\n        resource2++;\n        std::cout << \"Thread A: R1=\" << resource1 << \", R2=\" << resource2 << std::endl;\n\n        pthread_mutex_unlock(&mutex2);\n        pthread_mutex_unlock(&mutex1);\n        usleep(100000); // Simulate some work\n    }\n    return NULL;\n}\n\n// Corrected thread function: acquires mutex1 then mutex2 (same order as A)\nvoid* thread_func_B_corrected(void* arg) {\n    for (int i = 0; i < 5; ++i) {\n        pthread_mutex_lock(&mutex1); // Changed order\n        pthread_mutex_lock(&mutex2); // Changed order\n\n        // Critical section\n        resource1--;\n        resource2--;\n        std::cout << \"Thread B (corrected): R1=\" << resource1 << \", R2=\" << resource2 << std::endl;\n\n        pthread_mutex_unlock(&mutex2);\n        pthread_mutex_unlock(&mutex1);\n        usleep(100000); // Simulate some work\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t tid[4];\n\n    // Create threads\n    pthread_create(&tid[0], NULL, thread_func_A, NULL);\n    pthread_create(&tid[1], NULL, thread_func_B_corrected, NULL); // Use corrected function\n    pthread_create(&tid[2], NULL, thread_func_A, NULL);\n    pthread_create(&tid[3], NULL, thread_func_B_corrected, NULL); // Use corrected function\n\n    // Join threads\n    for (int i = 0; i < 4; ++i) {\n        pthread_join(tid[i], NULL);\n    }\n\n    // Destroy mutexes\n    pthread_mutex_destroy(&mutex1);\n    pthread_mutex_destroy(&mutex2);\n\n    std::cout << \"Final R1=\" << resource1 << \", R2=\" << resource2 << std::endl;\n\n    return 0;\n}\n```\nעל ידי הקפדה על סדר אחיד לרכישת מנעולים (לדוגמה, תמיד קודם `mutex1` ואז `mutex2`), אנו מבטלים את התנאי הרביעי מבין ארבעת התנאים ההכרחיים לקיפאון – תנאי ההמתנה המעגלית (Circular Wait). כעת, אם תהליכון אחד מחזיק ב-`mutex1` וממתין ל-`mutex2`, שום תהליכון אחר לא יוכל להחזיק ב-`mutex2` ולחכות ל-`mutex1` בו זמנית, מכיוון שכולם מנסים לרכוש את `mutex1` קודם. זה מבטיח שהתוכנית תרוץ ללא חשש מקיפאון כתוצאה מסדר רכישת המנעולים."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

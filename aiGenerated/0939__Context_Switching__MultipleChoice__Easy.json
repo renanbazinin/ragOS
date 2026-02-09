@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Context Switching",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 07:03:09",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 956,
+      "output_tokens": 409,
+      "total_tokens": 2117
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Context Switching",
+      "Processes",
+      "CPU Scheduling"
+    ],
+    "content": {
+      "text": "אילו נתונים נשמרים ונשחזרים בדרך כלל במהלך החלפת הקשר (context switch) בין תהליכים?",
+      "code_snippet": null,
+      "options": [
+        "א. רק מונה התוכנית (Program Counter).",
+        "ב. רק זיכרון המחסנית (Stack Memory).",
+        "ג. מצב המעבד (CPU Registers), מונה התוכנית (Program Counter) ומצב התהליך (Process State).",
+        "ד. כל מרחב הכתובות של התהליך (Process Address Space).",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג'. במהלך החלפת הקשר, מערכת ההפעלה שומרת את מצב המעבד (כולל אוגרים ומונה התוכנית) ואת מצב התהליך הנוכחי בבלוק בקרת התהליך (PCB), וטוענת את מצב המעבד והתהליך של התהליך הבא שאמור לרוץ. מרחב הכתובות של התהליך עצמו אינו נשמר או נטען מחדש באופן מלא, אלא רק ממופים מחדש במנגנון ניהול הזיכרון (MMU)."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

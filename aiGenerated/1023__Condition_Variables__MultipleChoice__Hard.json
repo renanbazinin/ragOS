@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Condition Variables",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 07:28:42",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 1726,
+      "total_tokens": 12832
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Condition Variables",
+      "Synchronization",
+      "Concurrency",
+      "Race Conditions"
+    ],
+    "content": {
+      "text": "נתון קוד C++ המשתמש במשתני תנאי (condition variables):\n\n```cpp\n#include <iostream>\n#include <thread>\n#include <mutex>\n#include <condition_variable>\n#include <chrono>\n\nstd::mutex mtx;\nstd::condition_variable cv;\nbool data_ready = false;\n\nvoid producer() {\n    std::this_thread::sleep_for(std::chrono::milliseconds(100)); // מדמה עבודה\n\n    std::unique_lock<std::mutex> lock(mtx);\n    data_ready = true;\n    lock.unlock(); // שחרור המנעול לפני הקריאה ל-notify\n\n    cv.notify_one(); // קריאה ל-notify_one ללא המנעול\n}\n\nvoid consumer() {\n    std::unique_lock<std::mutex> lock(mtx);\n    cv.wait(lock, [] { return data_ready; });\n    std::cout << \"Consumer: Data is ready!\" << std::endl;\n}\n\nint main() {\n    std::thread p(producer);\n    std::thread c(consumer);\n\n    p.join();\n    c.join();\n    return 0;\n}\n```\n\nמהו התיאור המדויק ביותר לתוצאה הפוטנציאלית של קריאת `cv.notify_one()` בפונקציית `producer` *לאחר* שחרור המנעול (`lock`)?",
+      "code_snippet": "#include <iostream>\n#include <thread>\n#include <mutex>\n#include <condition_variable>\n#include <chrono>\n\nstd::mutex mtx;\nstd::condition_variable cv;\nbool data_ready = false;\n\nvoid producer() {\n    std::this_thread::sleep_for(std::chrono::milliseconds(100)); // מדמה עבודה\n\n    std::unique_lock<std::mutex> lock(mtx);\n    data_ready = true;\n    lock.unlock(); // שחרור המנעול לפני הקריאה ל-notify\n\n    cv.notify_one(); // קריאה ל-notify_one ללא המנעול\n}\n\nvoid consumer() {\n    std::unique_lock<std::mutex> lock(mtx);\n    cv.wait(lock, [] { return data_ready; });\n    std::cout << \"Consumer: Data is ready!\" << std::endl;\n}\n\nint main() {\n    std::thread p(producer);\n    std::thread c(consumer);\n\n    p.join();\n    c.join();\n    return 0;\n}",
+      "options": [
+        "א. התוכנית תיתקע תמיד (deadlock) מכיוון שהצרכן לעולם לא יקבל התראה.",
+        "ב. התוכנית תסתיים בהצלחה תמיד, שכן קריאה ל-`notify_one` מחוץ למנעול היא תקינה ויעילה לחלוטין.",
+        "ג. התוכנית עלולה לסבול מבעיית \"התעוררות אבודה\" (lost wakeup), מה שעלול לגרום לצרכן להמתין ללא הגבלת זמן, במיוחד בתנאי תזמון ספציפיים.",
+        "ד. התוכנית תקרוס באופן מיידי עקב התנהגות בלתי מוגדרת (undefined behavior), שכן `notify_one` חייבת תמיד להיקרא תוך כדי החזקת המנעול המשויך."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "הקריאה ל-`cv.notify_one()` מחוץ למנעול (לאחר `lock.unlock()`) יוצרת חלון זמן קריטי (race window) בין שחרור המנעול לבין שליחת ההתראה. במהלך חלון זה, המצב המשותף (`data_ready`) כבר השתנה ל-`true`, אך ההתראה עדיין לא נשלחה. אם בתזמון מסוים, ה-`consumer` יתעורר באופן שקרי (spurious wakeup), ירכוש מחדש את המנעול, יבדוק את התנאי (`data_ready` שהוא `true`), וימשיך בדרכו *לפני* שה-`producer` יספיק לשלוח את ה-`notify_one` – אזי ההתראה נחשבת \"אבודה\" (lost wakeup). במקרה זה, הצרכן אמנם ימשיך, אך ההתראה הייתה מיותרת.\n\nהמצב המסוכן יותר הוא אם ה-`producer` משנה את המצב ומשחרר את המנעול, אך נדחה על ידי המתזמן *לפני* שהוא מספיק לקרוא ל-`notify_one()`. אם ה-`consumer` נמצא במצב המתנה (לאחר שחרור המנעול ובדיקת התנאי כ-`false`), והוא *אינו* מתעורר באופן שקרי, אזי הוא ימשיך להמתין. כאשר ה-`producer` יחזור לפעול ויקרא ל-`notify_one()`, ההתראה תגיע ותעיר את ה-`consumer`. הבעיה האמיתית מתעוררת כאשר ההתראה נשלחת *לפני* שמישהו נמצא במצב המתנה, או כאשר ישנם מספר צרכנים, וההתראה \"נאבדת\" עבור צרכן מסוים. תקן C++ עצמו מזהיר כי קריאה ל-`notify_one` ללא החזקת המוטקס \"עלולה להוביל להתראה חסרה (missed notification)\". התראה חסרה זו עלולה, בתנאי תזמון מסוימים או במערכות מורכבות יותר, לגרום לכך שחוט ימתין ללא הגבלת זמן, גם אם התנאי עבורו התקיים. לכן, האפשרות ג' מתארת את הסיכון הפוטנציאלי בצורה המדויקת ביותר.\n\nא. לא נכון. הקוד לא יגרום בהכרח ל-deadlock. במקרים רבים, ה-`consumer` ימשיך לפעול כרגיל.\nב. לא נכון. למרות שהקוד עשוי לעבוד בהצלחה במקרים רבים, הוא אינו נכון תמיד ואינו נחשב לפרקטיקה מומלצת עקב הסיכונים שתוארו.\nד. לא נכון. קריאה ל-`notify_one` ללא החזקת המנעול אינה גורמת בהכרח לקריסה מיידית או להתנהגות בלתי מוגדרת במובן של קריסה, אם כי היא מוגדרת כפחות בטוחה ויכולה להוביל לבעיות לוגיות."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

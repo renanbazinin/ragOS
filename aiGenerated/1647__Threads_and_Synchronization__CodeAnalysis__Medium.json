@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Threads and Synchronization",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 19:42:38",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1971,
+      "output_tokens": 1222,
+      "total_tokens": 8533
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Threads",
+      "Synchronization",
+      "Race Conditions"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה, המשתמשת בחוטים (threads) ובמנעול (mutex) כדי לעדכן מונה גלובלי. מהו הערך הסופי של המונה `g_counter` לאחר סיום ריצת כל החוטים?",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\n#define NUM_THREADS 2\n#define ITERATIONS_PER_THREAD 100000\n\nint g_counter = 0;\npthread_mutex_t g_mutex;\n\nvoid* thread_func(void* arg) {\n    for (int i = 0; i < ITERATIONS_PER_THREAD; ++i) {\n        pthread_mutex_lock(&g_mutex);\n        pthread_mutex_unlock(&g_mutex);\n        // The increment operation is outside the critical section\n        g_counter++; \n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    pthread_mutex_init(&g_mutex, NULL);\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, thread_func, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final counter value: %d\\n\", g_counter);\n\n    pthread_mutex_destroy(&g_mutex);\n    return 0;\n}",
+      "options": [
+        "א. תמיד 200000",
+        "ב. תמיד 0",
+        "ג. ערך כלשהו בין 1 ל-200000 (כולל)",
+        "ד. התוכנית תיתקע (deadlock)",
+        "ה. התוכנית תקרוס"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "התשובה הנכונה היא ג'. בתוכנית זו, פעולת העדכון של המונה `g_counter` (כלומר `g_counter++`) מתבצעת מחוץ למקטע הקריטי המוגן על ידי המנעול (mutex). המנעול נתפס ומשוחרר מיד לפני העדכון, אך אינו מגן על העדכון עצמו. כתוצאה מכך, קיימת תחרות (race condition) על המונה `g_counter`.\n\nמצב תחרותי זה אומר שהפעולה `g_counter++`, שאינה אטומית (היא כוללת קריאה, שינוי וכתיבה), יכולה להיות מופסקת על ידי חוט אחר. לדוגמה, אם `g_counter` הוא 0:\n1. חוט 1 קורא את `g_counter` (מקבל 0).\n2. חוט 2 קורא את `g_counter` (מקבל 0).\n3. חוט 1 מגדיל את הערך שקרא (הופך ל-1).\n4. חוט 2 מגדיל את הערך שקרא (הופך ל-1).\n5. חוט 1 כותב את הערך בחזרה ל`g_counter` (מגדיר `g_counter` ל-1).\n6. חוט 2 כותב את הערך בחזרה ל`g_counter` (מגדיר `g_counter` ל-1).\nבמקרה זה, שתי פעולות הגדלה הביאו לתוצאה של 1 במקום 2, כלומר אבד עדכון אחד.\n\nכיוון שאי אפשר לצפות את סדר הריצה המדויק של החוטים, הערך הסופי של `g_counter` אינו מובטח להיות `2 * ITERATIONS_PER_THREAD` (שהוא 200000). הוא כמעט תמיד יהיה נמוך יותר בגלל אובדן עדכונים. באופן תיאורטי, במקרה הגרוע ביותר, אם כל העדכונים נמחקים זה על ידי זה, והעדכון האחרון הוא היחיד ששורד, הערך יכול להיות 1 (לדוגמה, אם כל 200,000 פעולות `g_counter++` מתרחשות בסדר שבו רק פעולת ה-store האחרונה היא זו שנקלטת). במקרה הטוב ביותר, אם במקרה כל הפעולות מתרחשות באופן סדרתי ללא הפרעות, הערך יכול להגיע ל-200000. לכן, טווח הערכים האפשרי הוא בין 1 ל-200000 (כולל)."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

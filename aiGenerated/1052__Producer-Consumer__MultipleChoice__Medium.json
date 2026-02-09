@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Producer-Consumer",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 07:39:27",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 887,
+      "output_tokens": 1156,
+      "total_tokens": 3973
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Producer-Consumer",
+      "Synchronization",
+      "Semaphores",
+      "Deadlock"
+    ],
+    "content": {
+      "text": "בהינתן קוד ה-Producer הבא המיישם את בעיית ה-Producer-Consumer עם חיץ מוגבל (Bounded Buffer) באמצעות סמפורים, איזה מההיגדים הבאים נכון?",
+      "code_snippet": "/*\nAssume:\nsemaphore mutex = 1;      // For mutual exclusion on buffer access\nsemaphore empty = N;      // Counts empty slots, N is buffer size\nsemaphore full = 0;       // Counts full slots\nbuffer[N];                // The shared buffer\nitem;                     // Item to be produced\n*/\n\nvoid producer() {\n    while (true) {\n        // produce an item\n        item = produce_item();\n\n        // 1. wait(empty);\n        // 2. wait(mutex);\n        // 3. add item to buffer;\n        // 4. signal(mutex);\n        // 5. signal(full);\n    }\n}",
+      "options": [
+        "אם השורות 1 ו-2 יוחלפו (כלומר wait(mutex) יקדם את wait(empty)), ייתכן מצב של קיפאון (deadlock).",
+        "אם השורות 4 ו-5 יוחלפו (כלומר signal(full) יקדם את signal(mutex)), ייתכן מצב של קיפאון (deadlock).",
+        "אין חשיבות לסדר בין השורות 1 ו-2 וגם לא בין השורות 4 ו-5.",
+        "הקוד המוצג עלול לגרום למצב של רעב (starvation) עבור ה-Producer."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "אם השורות 1 ו-2 יוחלפו (כלומר wait(mutex) יקדם את wait(empty)), ייתכן מצב של קיפאון (deadlock).",
+      "explanation": "ההיגד הנכון הוא: 'אם השורות 1 ו-2 יוחלפו (כלומר wait(mutex) יקדם את wait(empty)), ייתכן מצב של קיפאון (deadlock)'.\n\nהסבר:\n1. אם ה-Producer יבצע `wait(mutex)` לפני `wait(empty)`:\n   ה-Producer עשוי לרכוש את ה-mutex (הנעילה על החיץ) ואז להיחסם בעת ניסיון לבצע `wait(empty)` כאשר החיץ מלא. במצב זה, ה-Producer מחזיק ב-mutex אך אינו יכול להתקדם. במקביל, ה-Consumers אינם יכולים לגשת לחיץ (כדי לצרוך פריטים ולשחרר מקום בחיץ, ובכך לאפשר ל-empty לעלות) מכיוון שה-mutex נעול על ידי ה-Producer. מצב זה יוביל לקיפאון (deadlock), שכן אף אחד מהתהליכים לא יכול להמשיך.\n\n2. אם השורות 4 ו-5 יוחלפו (כלומר `signal(full)` יקדם את `signal(mutex)`):\n   זה אומר שה-Producer יאותת על כך שהחיץ מכיל פריט נוסף (`signal(full)`) לפני שהוא משחרר את הנעילה על החיץ (`signal(mutex)`). למרות שזהו סדר לא אידיאלי (ה-mutex מוחזק זמן רב יותר מהנדרש), זה לא יוביל לקיפאון. ה-Producer ישחרר את ה-mutex מיד לאחר מכן, וה-Consumers יוכלו לגשת לחיץ. זו אינה בעיה של קיפאון אלא יותר של יעילות ופרדיגמה נכונה של קטע קריטי.\n\n3. אין חשיבות לסדר בין השורות 1 ו-2 וגם לא בין השורות 4 ו-5:\n   לא נכון, כפי שהוסבר לעיל, לסדר בין `wait(mutex)` ו-`wait(empty)` יש חשיבות קריטית למניעת קיפאון.\n\n4. הקוד המוצג עלול לגרום למצב של רעב (starvation) עבור ה-Producer:\n   הקוד המוצג הוא הפתרון הסטנדרטי והנכון לבעיית ה-Producer-Consumer באמצעות סמפורים. הוא מונע קיפאון ורעב, בהנחה שמימוש הסמפורים הוגן (כלומר, תהליכים הממתינים בתור לסמפור יתקדמו בסדר הוגן, בדרך כלל FIFO)."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

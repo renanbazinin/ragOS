@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Condition Variables",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 07:31:36",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1573,
+      "output_tokens": 1273,
+      "total_tokens": 5811
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "Open",
+    "topic": [
+      "Condition Variables",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "הסבר מהו משתנה תנאי (Condition Variable) ומדוע הוא חייב תמיד להיות בשימוש יחד עם מנעול הדדי (Mutex). ספק דוגמת קוד פשוטה ב-C/C++ המדגימה שימוש ב-`pthread_cond_wait` וב-`pthread_cond_signal`.",
+      "code_snippet": "pthread_mutex_t my_mutex;\npthread_cond_t my_condition_var;\nint condition_met = 0; // The condition to wait for\n\n// Thread 1: Waits for the condition\nvoid* thread_waiter(void* arg) {\n    pthread_mutex_lock(&my_mutex);\n    while (!condition_met) {\n        // Atomically unlocks mutex and waits. Re-locks mutex on return.\n        pthread_cond_wait(&my_condition_var, &my_mutex);\n    }\n    // Condition is met, proceed with critical section\n    // ... (access shared resources protected by my_mutex)\n    pthread_mutex_unlock(&my_mutex);\n    return NULL;\n}\n\n// Thread 2: Changes the condition and signals\nvoid* thread_signaler(void* arg) {\n    // ... perform some work that leads to condition_met being true ...\n    pthread_mutex_lock(&my_mutex);\n    condition_met = 1; // Change the condition\n    pthread_cond_signal(&my_condition_var); // Wake up one waiting thread\n    // Or pthread_cond_broadcast(&my_condition_var); // Wake up all waiting threads\n    pthread_mutex_unlock(&my_mutex);\n    return NULL;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "משתנה תנאי (Condition Variable) הוא פרימיטיב סנכרון המאפשר לחוטים להמתין עד שתנאי מסוים מתקיים. הוא משמש כאשר חוט אחד צריך להמתין לשינוי מצב מסוים (למשל, שמשאב יהיה זמין, או שנתונים יהיו מוכנים) שחוט אחר צפוי לבצע.\n\nמשתנה תנאי חייב תמיד להיות בשימוש יחד עם מנעול הדדי (Mutex) מהסיבות הבאות:\n1.  **הגנה על התנאי המשותף ועל הנתונים המשותפים**: המוטקס מגן על הנתונים המשותפים שבהם תלוי התנאי (לדוגמה, המשתנה `condition_met` בדוגמה). הוא מבטיח שרק חוט אחד יוכל לבדוק או לשנות את התנאי בכל רגע נתון, ובכך מונע תנאי מירוץ (race conditions) ואי-עקביות בנתונים.\n2.  **אטומיות בפעולות המתנה ואיתות (Wait and Signal)**: כאשר חוט קורא ל-`pthread_cond_wait()`, הוא משחרר באופן אטומי את המוטקס ונכנס למצב שינה (waiting). כאשר הוא מתעורר (בעקבות `signal` או `broadcast`), הוא רוכש מחדש את המוטקס באופן אוטומטי. אטומיות זו חיונית כדי למנוע מצב שבו חוט בודק תנאי, מוצא אותו שקרי, ואז לפני שהוא מספיק להיכנס למצב המתנה, חוט אחר משנה את התנאי ושולח איתות – איתות זה יישכח והחוט הראשון ימתין ללא קץ (או עד לאיתות אחר).\n\n**דוגמת קוד:**\nהקוד שסופק מדגים את השימוש הבסיסי:\n*   `thread_waiter`: נועל את המוטקס, בודק את `condition_met`. כל עוד התנאי לא התקיים (`!condition_met`), הוא קורא ל-`pthread_cond_wait`. פונקציה זו משחררת את `my_mutex` באופן אטומי ושמה את החוט לישון. כאשר חוט אחר מאותת, `pthread_cond_wait` מתעורר, רוכש מחדש את `my_mutex` ובודק שוב את התנאי (למקרה של 'התעוררות שווא'). לאחר שהתנאי מתקיים, החוט ממשיך בביצוע המקטע הקריטי ומשחרר את המוטקס.\n*   `thread_signaler`: נועל את המוטקס, משנה את הערך של `condition_met` ל-1 (מקיים את התנאי), ואז קורא ל-`pthread_cond_signal` כדי להעיר חוט אחד מבין החוטים הממתינים על `my_condition_var`. לבסוף, הוא משחרר את המוטקס. אם ישנם מספר חוטים הממתינים וכולם צריכים להגיב לשינוי התנאי, ניתן להשתמש ב-`pthread_cond_broadcast` במקום `pthread_cond_signal`."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

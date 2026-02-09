@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Context Switching",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 07:04:00",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1290,
+      "output_tokens": 838,
+      "total_tokens": 4701
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Context Switching",
+      "Processes",
+      "Threads",
+      "Kernel"
+    ],
+    "content": {
+      "text": "איזו מהטענות הבאות לגבי החלפת הקשר (Context Switch) נכונה?",
+      "code_snippet": null,
+      "options": [
+        "קוד הפועל במצב משתמש (user mode) יכול ליזום באופן ישיר את תהליך החלפת הקשר.",
+        "כל החלפת הקשר בהכרח כוללת שינוי של מפת הזיכרון (page table) של המעבד.",
+        "הקרנל (kernel) אחראי לשמור ולשחזר את מצב המעבד, הכולל את ערכי האוגרים הכלליים (general-purpose registers) ואוגר מונה התוכנית (Program Counter).",
+        "החלפת הקשר מתרחשת רק בתגובה לפסיקות (interrupts) חיצוניות מהחומרה.",
+        "אף אחת מהטענות האחרות אינה נכונה."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "הקרנל (kernel) אחראי לשמור ולשחזר את מצב המעבד, הכולל את ערכי האוגרים הכלליים (general-purpose registers) ואוגר מונה התוכנית (Program Counter).",
+      "explanation": "התשובה הנכונה היא ג'.\nא. לא נכון. קוד במצב משתמש (user mode) אינו יכול ליזום ישירות החלפת הקשר. הוא יכול לבצע קריאת מערכת (system call) שמבקשת מהקרנל לבצע פעולה שעשויה לכלול החלפת הקשר (לדוגמה, yield() או sleep()), אך הקרנל הוא זה שמבצע את ההחלפה בפועל מכיוון שזוהי פעולה פריבילגית.\nב. לא נכון. החלפת הקשר בין חוטים (threads) ששייכים לאותו תהליך אינה דורשת שינוי של מפת הזיכרון, מכיוון שהם חולקים את אותו מרחב כתובות וירטואלי. שינוי מפת הזיכרון נחוץ רק בהחלפת הקשר בין תהליכים (processes) שונים.\nג. נכון. חלק חיוני מכל החלפת הקשר הוא שמירה של מצב המעבד (CPU state) של יחידת הביצוע היוצאת (תהליך או חוט) וטעינת מצב המעבד של יחידת הביצוע הנכנסת. מצב המעבד כולל בין היתר את כל האוגרים הכלליים ואת אוגר מונה התוכנית (PC), שאותם הקרנל שומר ב-PCB/TCB המתאים. פעולה זו דורשת הרשאות קרנל.\nד. לא נכון. החלפת הקשר יכולה להיות מופעלת על ידי מגוון אירועים, כולל פסיקות חומרה (כמו פסיקת טיימר או I/O), קריאות מערכת (system calls) יזומות על ידי תהליכים (לדוגמה, בקשה ל-I/O, yield, exit), או אפילו פסיקות תוכנה (למשל, בעקבות page fault)."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

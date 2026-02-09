@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Page Replacement",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 07:53:17",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1059,
+      "output_tokens": 523,
+      "total_tokens": 2978
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Page Replacement",
+      "Virtual Memory",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "איזו מהטענות הבאות נכונה לגבי אלגוריתמי החלפת דפים?",
+      "code_snippet": null,
+      "options": [
+        "אלגוריתם LRU (Least Recently Used) סובל מאנומליית בלאדי (Belady's Anomaly).",
+        "אלגוריתם FIFO (First-In, First-Out) תמיד יבצע ביצועים טובים יותר מאלגוריתם LRU.",
+        "האלגוריתם האופטימלי (Optimal) ניתן ליישום מעשי במערכות הפעלה מודרניות.",
+        "באלגוריתם FIFO, הגדלת מספר מסגרות הזיכרון הפיזי שזמין לתהליך עלולה להגדיל את מספר כשלי הדף (page faults) עבור רצף גישות נתון."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ד",
+      "explanation": "ד'. אנומליית בלאדי מתארת מצב שבו הגדלת מספר מסגרות הזיכרון הפיזי הזמינות לתהליך גורמת דווקא לעלייה במספר כשלי הדף. אלגוריתם FIFO הוא אחד האלגוריתמים הידועים שסובלים מתופעה זו.\nא. אלגוריתם LRU אינו סובל מאנומליית בלאדי.\nב. FIFO בדרך כלל מבצע ביצועים פחות טובים מ-LRU, ולא תמיד טוב יותר. LRU לרוב עדיף על FIFO.\nג. האלגוריתם האופטימלי אינו ניתן ליישום מעשי מכיוון שהוא דורש ידע מראש על רצף הגישות העתידי לדפים, דבר שאינו אפשרי במערכת הפעלה בזמן ריצה."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Threads and Mutexes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 20:19:39",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1131,
+      "output_tokens": 525,
+      "total_tokens": 2538
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Threads",
+      "Mutexes",
+      "Synchronization",
+      "Race Conditions"
+    ],
+    "content": {
+      "text": "בתוכנית מרובת חוטים (multithreaded program), כאשר מספר חוטים ניגשים ומשנים משתנה גלובלי משותף (shared global variable) בו זמנית, איזה מנגנון סנכרון משמש בדרך כלל כדי למנוע תנאי מירוץ (race condition) ולהבטיח גישה בטוחה למשתנה?",
+      "code_snippet": null,
+      "options": [
+        "א. סמפור (Semaphore)",
+        "ב. מוטקס (Mutex)",
+        "ג. צינור (Pipe)",
+        "ד. זיכרון משותף (Shared Memory)",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "מוטקס (Mutex) הוא מנגנון סנכרון המשמש כדי להגן על משאבים משותפים (כמו משתנה גלובלי) מפני גישה בו-זמנית על ידי מספר חוטים. הוא מבטיח שרק חוט אחד יוכל להיכנס לקטע קריטי (critical section) ולשנות את המשאב בכל רגע נתון, ובכך מונע תנאי מירוץ ומבטיח עקביות נתונים. סמפורים הם כלליים יותר ויכולים לשמש למגוון רחב יותר של בעיות סנכרון, אך לגישה בלעדית למשאב בודד, מוטקס הוא הבחירה הנפוצה והמתאימה ביותר. צינורות וזיכרון משותף הם מנגנוני תקשורת בין תהליכים (IPC), לא מנגנוני סנכרון למניעת תנאי מירוץ בתוך תהליך מרובה חוטים."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

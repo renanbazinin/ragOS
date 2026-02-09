@@ -1,0 +1,58 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Synchronization and Deadlocks",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 09:55:54",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3054,
+      "output_tokens": 3318,
+      "total_tokens": 13975
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Synchronization",
+      "Deadlocks",
+      "Mutexes",
+      "Resource Ordering"
+    ],
+    "content": {
+      "text": "נתונה מערכת מרובת חוטים המבצעת פעולות העברת כספים בין חשבונות. קיימים N חשבונות, ולכל חשבון יש מנעול (mutex) משלו. פעולת העברה `transfer(account_id_a, account_id_b, amount)` דורשת לנעול את שני החשבונות המעורבים לפני ביצוע ההעברה, ולאחר מכן לשחרר אותם. נתון מימוש חלקי של פונקציית ה-`transfer`:\n\n",
+      "code_snippet": "typedef struct {\n    int id;\n    long balance;\n    pthread_mutex_t lock;\n} Account;\n\n// Global array of accounts (initialized elsewhere)\nextern Account* accounts;\n\nvoid transfer(int from_id, int to_id, long amount) {\n    // For simplicity, assume from_id and to_id are valid and distinct\n    if (from_id == to_id) {\n        // In a real system, this might be a no-op or require a single lock.\n        // For this problem, we focus on transfers between distinct accounts.\n        return;\n    }\n\n    Account* from_acc = &accounts[from_id];\n    Account* to_acc = &accounts[to_id];\n\n    // Acquire lock for 'from' account\n    pthread_mutex_lock(&from_acc->lock);\n    // Acquire lock for 'to' account\n    pthread_mutex_lock(&to_acc->lock);\n\n    // Critical section: Perform transfer\n    if (from_acc->balance >= amount) {\n        from_acc->balance -= amount;\n        to_acc->balance += amount;\n        // In a real system, logging or further actions would occur here\n    } else {\n        // Insufficient funds\n    }\n\n    // Release locks\n    pthread_mutex_unlock(&to_acc->lock);\n    pthread_mutex_unlock(&from_acc->lock);\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "a",
+        "text": "תארו מצב ספציפי (כולל דוגמה עם שני חוטים) שיכול להוביל לקיפאון (deadlock) במערכת זו עם המימוש הנתון של `transfer`. הסבירו מדוע הקיפאון מתרחש בהתבסס על ארבעת התנאים של קיפאון.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "b",
+        "text": "הציעו פתרון לבעיית הקיפאון על ידי שינוי קוד פעולת ה-`transfer` בלבד. עליכם להשתמש רק במנעולים (mutexes) ובפעולותיהם (`pthread_mutex_lock`/`pthread_mutex_unlock`). הציגו את קוד הפונקציה המתוקן ונמקו מדוע הפתרון שלכם מונע קיפאון.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "c",
+        "text": "האם הפתרון שהצעתם בסעיף ב' מבטיח חופש מהרעבה (starvation-free)? נמקו את תשובתכם.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "### סעיף א: תיאור קיפאון\nקיפאון (deadlock) יכול להתרחש במערכת זו כאשר שני חוטים מנסים לבצע העברות כספים בין אותם שני חשבונות, אך בסדר הפוך. נניח שיש לנו שני חשבונות, A ו-B, ושני חוטים, T1 ו-T2.\n\n**תרחיש קיפאון:**\n1.  **חוט T1** קורא לפונקציה `transfer(A, B, amount1)`. הוא נועל את חשבון A: `pthread_mutex_lock(&accounts[A].lock);`\n2.  **חוט T2** קורא לפונקציה `transfer(B, A, amount2)`. הוא נועל את חשבון B: `pthread_mutex_lock(&accounts[B].lock);`\n3.  **חוט T1** מנסה כעת לנעול את חשבון B: `pthread_mutex_lock(&accounts[B].lock);`. חשבון B נעול על ידי T2, ולכן T1 נחסם וממתין.\n4.  **חוט T2** מנסה כעת לנעול את חשבון A: `pthread_mutex_lock(&accounts[A].lock);`. חשבון A נעול על ידי T1, ולכן T2 נחסם וממתין.\n\nכתוצאה מכך, T1 ממתין ל-T2 שישחרר את B, ו-T2 ממתין ל-T1 שישחרר את A. נוצר מעגל המתנה הדדי שאינו יכול להיפתר, והמערכת נכנסת למצב של קיפאון.\n\n**הסבר על פי ארבעת התנאים של קיפאון:**\n1.  **מניעה הדדית (Mutual Exclusion):** מתקיימת. כל חשבון מוגן על ידי מנעול, ורק חוט אחד יכול להחזיק במנעול של חשבון מסוים בכל רגע נתון.\n2.  **החזק והמתן (Hold and Wait):** מתקיים. חוט T1 מחזיק במנעול של חשבון A וממתין למנעול של חשבון B. חוט T2 מחזיק במנעול של חשבון B וממתין למנעול של חשבון A.\n3.  **אי-הפקעה (No Preemption):** מתקיים. מנעולים אינם ניתנים להפקעה. חוט לא יכול לקחת מנעול מחוט אחר; רק החוט שמחזיק במנעול יכול לשחרר אותו.\n4.  **המתנה מעגלית (Circular Wait):** מתקיים. T1 ממתין למנעול של B שמוחזק על ידי T2, ו-T2 ממתין למנעול של A שמוחזק על ידי T1. נוצר מעגל המתנה: T1 מחכה ל-B ← B מוחזק ע\"י T2 ← T2 מחכה ל-A ← A מוחזק ע\"י T1. \n\n### סעיף ב: פתרון לקיפאון\nהפתרון הנפוץ לבעיה זו הוא למנוע את תנאי ההמתנה המעגלית על ידי אכיפת סדר עקבי לרכישת משאבים (מנעולים). במקרה זה, נגדיר סדר גלובלי עבור חשבונות, למשל, תמיד לנעול את החשבון בעל המזהה הקטן יותר (ID) קודם, ולאחר מכן את החשבון בעל המזהה הגדול יותר.\n\n**קוד פונקציית `transfer` המתוקן:**\n```c\nvoid transfer_fixed(int from_id, int to_id, long amount) {\n    if (from_id == to_id) {\n        // Transfer to self - assuming this case is either not allowed or handled differently\n        // (e.g., by locking only one mutex if needed, or doing nothing).\n        // For the purpose of deadlock prevention between distinct accounts, we return.\n        return;\n    }\n\n    Account* acc_a = &accounts[from_id]; // Source account\n    Account* acc_b = &accounts[to_id];   // Destination account\n\n    // Determine which account has the lower ID to ensure consistent lock ordering\n    Account* first_lock_acc;\n    Account* second_lock_acc;\n\n    if (acc_a->id < acc_b->id) {\n        first_lock_acc = acc_a;\n        second_lock_acc = acc_b;\n    } else { // acc_b->id < acc_a->id (since from_id != to_id)\n        first_lock_acc = acc_b;\n        second_lock_acc = acc_a;\n    }\n\n    // Acquire locks in a predefined order (e.g., by account ID: lower ID first)\n    pthread_mutex_lock(&first_lock_acc->lock);\n    pthread_mutex_lock(&second_lock_acc->lock);\n\n    // Critical section: Perform transfer logic using the original acc_a and acc_b pointers\n    if (acc_a->balance >= amount) {\n        acc_a->balance -= amount;\n        acc_b->balance += amount;\n        // printf(\"Transfer from %d to %d: %ld. New balances: %d=%ld, %d=%ld\\n\",\n        //        from_id, to_id, amount, from_id, acc_a->balance, to_id, acc_b->balance);\n    } else {\n        // printf(\"Transfer failed from %d to %d: insufficient funds. Balance: %ld, Amount: %ld\\n\",\n        //        from_id, to_id, acc_a->balance, amount);\n    }\n\n    // Release locks in reverse order of acquisition\n    pthread_mutex_unlock(&second_lock_acc->lock);\n    pthread_mutex_unlock(&first_lock_acc->lock);\n}\n```\n\n**הנמקה למניעת קיפאון:**\nפתרון זה מונע קיפאון על ידי שבירת תנאי ההמתנה המעגלית. כעת, כל חוט המבצע העברה בין חשבונות A ו-B (בכל כיוון) ינסה לרכוש את המנעולים באותו סדר: תמיד קודם את המנעול של החשבון בעל המזהה הקטן יותר (`min(ID_A, ID_B)`) ואז את המנעול של החשבון בעל המזהה הגדול יותר (`max(ID_A, ID_B)`). \n\nאם חוט T1 מנסה להעביר מ-A ל-B, וחוט T2 מנסה להעביר מ-B ל-A:\n-   שניהם ינסו לנעול את `accounts[min(ID_A, ID_B)].lock` ראשונים.\n-   רק אחד מהם יצליח לרכוש את המנעול הזה. נניח T1 מצליח.\n-   T2 יחסם וימתין ש-T1 ישחרר את `accounts[min(ID_A, ID_B)].lock`.\n-   T1 ימשיך, ירכוש את `accounts[max(ID_A, ID_B)].lock`, יבצע את ההעברה וישחרר את שני המנעולים.\n-   לאחר מכן, T2 יוכל לרכוש את `accounts[min(ID_A, ID_B)].lock`, ואז את `accounts[max(ID_A, ID_B)].lock`, לבצע את ההעברה ולשחרר.\n\nאין יותר אפשרות למצב שבו T1 מחזיק במנעול של A וממתין למנעול של B, בעוד T2 מחזיק במנעול של B וממתין למנעול של A, מכיוון ששני החוטים מנסים לרכוש את המשאבים באותו סדר מוגדר. זה מבטיח שלא תהיה המתנה מעגלית, ובכך מונע קיפאון.\n\n### סעיף ג: חופש מהרעבה\nהפתרון שהוצג **אינו מבטיח חופש מהרעבה (starvation-free)** באופן מוחלט. הסיבה לכך היא שקיימת תלות בהוגנות (fairness) של מימוש ה-`pthread_mutex_lock` על ידי מערכת ההפעלה.\n\n-   **למה לא מונע הרעבה:** מנעולי `pthread_mutex` אינם מבטיחים הוגנות (לרוב אינם מבטיחים סדר FIFO - First-In, First-Out). ייתכן שחוט מסוים הממתין למנעול יפסיד שוב ושוב את \"המירוץ\" על המנעול לטובת חוטים אחרים, גם אם המנעול משתחרר מדי פעם. אם חוטים רבים מתחרים על אותו מנעול, וחוט מסוים נמצא בתחתית תור התזמון או שהוא פשוט חסר מזל שוב ושוב, הוא עלול לעולם לא לקבל את המנעול ולהישאר במצב של הרעבה.\n-   **הפתרון למניעת קיפאון (סדר המשאבים) אינו מתייחס להרעבה:** אכיפת סדר רכישת המנעולים מונעת רק מצבים של המתנה מעגלית, אך היא אינה פותרת את הבעיה הבסיסית של חוטים הממתינים ללא הגבלת זמן למשאב, אם התזמון או המימוש של המנעולים אינם הוגנים. כדי למנוע הרעבה, נדרשים מנגנוני סנכרון נוספים המבטיחים הוגנות, כגון מנעולים הוגנים (fair mutexes) או שימוש בתורים עם סדר קדימויות ברור, אשר אינם חלק מהפתרון שהוצג כאן (שמתמקד רק ב-`pthread_mutex_lock` הסטנדרטי)."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

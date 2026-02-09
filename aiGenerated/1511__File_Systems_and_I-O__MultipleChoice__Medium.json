@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "File Systems and I/O",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 10:59:21",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1233,
+      "output_tokens": 661,
+      "total_tokens": 4145
+    }
+  },
+  "question": {
+    "id": 6,
+    "type": "MultipleChoice",
+    "topic": [
+      "File Systems",
+      "I/O",
+      "Caching",
+      "System Calls"
+    ],
+    "content": {
+      "text": "איזו מהטענות הבאות לגבי פעולות קריאה וכתיבה במערכת קבצים (כמו `read` ו-`write`) נכונה?",
+      "code_snippet": null,
+      "options": [
+        "א. קריאה (read) תמיד ניגשת ישירות לדיסק כדי להביא את הנתונים.",
+        "ב. כתיבה (write) מבטיחה שהנתונים נשמרו באופן קבוע על הדיסק מיד לאחר חזרת הקריאה למשתמש.",
+        "ג. פעולות `read` ו-`write` פועלות כברירת מחדל על זיכרון המטמון של הליבה (page cache).",
+        "ד. שימוש בדגל `O_DIRECT` בפתיחת קובץ (open) מבטיח שכל פעולות הכתיבה לקובץ יישמרו בדיסק באופן מיידי וקבוע.",
+        "ה. אף אחת מהטענות האחרות אינה נכונה."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג. פעולות `read` ו-`write` ברמת ה-syscall אינן ניגשות ישירות לדיסק כברירת מחדל. במקום זאת, הן משתמשות ב-page cache של הליבה. `read` ינסה קודם לקרוא מה-page cache, ורק אם הנתונים אינם שם, יפנה לדיסק. `write` כותב את הנתונים ל-page cache ומסמן את הדפים כ'מלוכלכים' (dirty), והם ייכתבו לדיסק מאוחר יותר על ידי תהליכי רקע (flusher daemon). אופציות א' ו-ב' אינן נכונות מאותה סיבה – הן מתארות פעולות ישירות לדיסק או הבטחת עמידות מיידית שאינן ברירת המחדל. אופציה ד' אינה נכונה מכיוון שבעוד `O_DIRECT` עוקף את ה-page cache של הליבה, הוא אינו מבטיח כתיבה מיידית למדיה הפיזית הקבועה (persistent storage) בדיסק, שכן גם לבקרי דיסק יש מטמוני כתיבה משלהם. כדי להבטיח עמידות נתונים על הדיסק יש להשתמש ב-`fsync`."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

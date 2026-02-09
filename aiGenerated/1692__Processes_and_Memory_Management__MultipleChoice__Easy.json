@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Processes and Memory Management",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 20:05:31",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1034,
+      "output_tokens": 467,
+      "total_tokens": 2604
+    }
+  },
+  "question": {
+    "id": 2,
+    "type": "MultipleChoice",
+    "topic": [
+      "Processes",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "מהו תהליך (process) במערכת הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. קובץ הרצה (executable file) המאוחסן על דיסק קשיח.",
+        "ב. מופע פועל של תוכנית, הכולל את קוד התוכנית, נתונים, מחסנית (stack) ואוגרי מעבד (CPU registers).",
+        "ג. יחידה לוגית בתוך תוכנית, המאפשרת ביצוע מקבילי של משימות קטנות יותר.",
+        "ד. אזור בזיכרון הפיזי המשמש לאחסון קבצי מערכת ההפעלה בלבד."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "תהליך הוא מופע פועל של תוכנית. הוא כולל את כל המשאבים הדרושים לביצוע התוכנית: קוד התוכנית, הנתונים שהתוכנית משתמשת בהם (כגון משתנים גלובליים ו-heap), מחסנית (stack) עבור קריאות לפונקציות ומשתנים מקומיים, ואת מצב המעבד (כמו אוגרים ומונה תוכנית - program counter) המשקף את נקודת הביצוע הנוכחית של התהליך. אפשרות א' מתארת תוכנית, לא תהליך. אפשרות ג' מתארת חוט (thread). אפשרות ד' מתארת חלק מזיכרון הליבה, לא תהליך ספציפי."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

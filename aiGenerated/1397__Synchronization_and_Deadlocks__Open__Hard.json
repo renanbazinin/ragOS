@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Synchronization and Deadlocks",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 09:53:45",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3054,
+      "output_tokens": 2528,
+      "total_tokens": 10280
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Synchronization",
+      "Deadlocks",
+      "Resource Allocation"
+    ],
+    "content": {
+      "text": "מערכת הפעלה מנהלת N תהליכונים (threads) ו-M סוגי משאבים שונים, הממוספרים מ-0 ועד M-1. כל תהליכון מבצע לולאה אינסופית שבה הוא בוחר שני משאבים **שונים** מתוך M המשאבים הזמינים, רוכש אותם, מבצע פעולה כלשהי המצריכה את שני המשאבים, ומשחרר אותם. המשאבים ניתנים לשימוש בלעדי, כלומר רק תהליכון אחד יכול להחזיק במשאב נתון בכל רגע נתון.\n\n1.  תארו תרחיש ספציפי (רצף פעולות של מספר תהליכונים) שבו עלול להיווצר קיפאון (deadlock) במערכת, אם התהליכונים ינסו לרכוש את המשאבים בסדר שרירותי. הסבירו מדוע תרחיש זה מוביל לקיפאון בהתבסס על ארבעת התנאים של קיפאון.\n2.  כתבו מימוש ב-C/C++ עבור פונקציית `acquire_two_resources(int res1_id, int res2_id)` ופונקציית `release_two_resources(int res1_id, int res2_id)` שיאפשרו לתהליכונים לרכוש ולשחרר את שני המשאבים הנדרשים באופן בטוח, כך שמובטח שלא ייווצר קיפאון. המימוש צריך להשתמש ב-POSIX mutexes (pthread_mutex_t) ולהיות יעיל ככל האפשר מבחינת מקביליות. יש להניח ש-`res1_id` ו-`res2_id` הם תמיד מזהים שונים ותקפים.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "חלק 1: תרחיש קיפאון\n\nקיפאון יכול להיווצר אם מתקיימים ארבעת התנאים הבאים בו-זמנית:\n1.  **מניעה הדדית (Mutual Exclusion):** מתקיים. כל משאב יכול להיות מוחזק על ידי תהליכון אחד בלבד בכל רגע נתון.\n2.  **החזק והמתן (Hold and Wait):** מתקיים. תהליכון יכול להחזיק במשאב אחד (או יותר) ולחכות למשאב נוסף.\n3.  **אי-הפקעה (No Preemption):** מתקיים. משאבים אינם ניתנים להפקעה מתהליכון שמחזיק בהם; עליו לשחרר אותם מרצונו.\n4.  **המתנה מעגלית (Circular Wait):** זהו התנאי שאנו יכולים ליצור כדי להוביל לקיפאון.\n\nתרחיש לדוגמה:\nנניח שיש לנו 3 תהליכונים (T1, T2, T3) ו-3 משאבים (R0, R1, R2).\n*   T1 זקוק ל-R0 ו-R1.\n*   T2 זקוק ל-R1 ו-R2.\n*   T3 זקוק ל-R2 ו-R0.\n\nרצף פעולות שיוביל לקיפאון:\n1.  T1 רוכש את R0: `pthread_mutex_lock(&resources[0]);`\n2.  T2 רוכש את R1: `pthread_mutex_lock(&resources[1]);`\n3.  T3 רוכש את R2: `pthread_mutex_lock(&resources[2]);`\n   (בשלב זה, כל תהליכון מחזיק משאב אחד ומוכן לבקש את השני).\n4.  T1 מנסה לרכוש את R1: `pthread_mutex_lock(&resources[1]);` - T1 נחסם כי R1 מוחזק על ידי T2.\n5.  T2 מנסה לרכוש את R2: `pthread_mutex_lock(&resources[2]);` - T2 נחסם כי R2 מוחזק על ידי T3.\n6.  T3 מנסה לרכוש את R0: `pthread_mutex_lock(&resources[0]);` - T3 נחסם כי R0 מוחזק על ידי T1.\n\nכעת נוצרה המתנה מעגלית: T1 מחכה ל-R1 שמוחזק על ידי T2, T2 מחכה ל-R2 שמוחזק על ידי T3, ו-T3 מחכה ל-R0 שמוחזק על ידי T1. אף תהליכון לא יכול להמשיך, וכל המערכת נמצאת בקיפאון.\n\nחלק 2: מימוש למניעת קיפאון\n\nכדי למנוע קיפאון, נשבור את תנאי \"המתנה מעגלית\" על ידי אכיפת סדר גלובלי לרכישת משאבים. גישה נפוצה היא להקצות סדר מספרי לכל המשאבים (שהוא כבר קיים במקרה זה - לפי מזהה המשאב), ולדרוש מכל התהליכונים לרכוש משאבים לפי סדר זה. כלומר, תהליכון תמיד ירכוש את המשאב בעל המזהה הקטן יותר תחילה, ורק לאחר מכן את המשאב בעל המזהה הגדול יותר.\n\nמבנה הנתונים:\nנצטרך מערך של mutexes, אחד לכל משאב.\n\n```c\n#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h> // For min/max logic or just conditional assignment\n\n// Assume M is defined globally or passed somehow\n#define M 5 // Example: 5 resources\n\npthread_mutex_t resources[M]; // Array of mutexes, one for each resource\n\n// Initialize all mutexes\nvoid init_resource_system() {\n    for (int i = 0; i < M; i++) {\n        pthread_mutex_init(&resources[i], NULL);\n    }\n}\n\n// Destroy all mutexes\nvoid destroy_resource_system() {\n    for (int i = 0; i < M; i++) {\n        pthread_mutex_destroy(&resources[i]);\n    }\n}\n\n// Function to acquire two distinct resources, preventing deadlocks\nvoid acquire_two_resources(int res1_id, int res2_id) {\n    if (res1_id == res2_id) {\n        fprintf(stderr, \"Error: Cannot acquire the same resource twice.\\n\");\n        return;\n    }\n    if (res1_id < 0 || res1_id >= M || res2_id < 0 || res2_id >= M) {\n        fprintf(stderr, \"Error: Invalid resource ID.\\n\");\n        return;\n    }\n\n    // Enforce an ordering: always acquire the resource with the smaller ID first\n    int first_res = (res1_id < res2_id) ? res1_id : res2_id;\n    int second_res = (res1_id > res2_id) ? res1_id : res2_id;\n\n    pthread_mutex_lock(&resources[first_res]);\n    pthread_mutex_lock(&resources[second_res]);\n}\n\n// Function to release two distinct resources\nvoid release_two_resources(int res1_id, int res2_id) {\n    if (res1_id == res2_id) {\n        fprintf(stderr, \"Error: Cannot release the same resource twice.\\n\");\n        return;\n    }\n    if (res1_id < 0 || res1_id >= M || res2_id < 0 || res2_id >= M) {\n        fprintf(stderr, \"Error: Invalid resource ID.\\n\");\n        return;\n    }\n\n    // Release in reverse order of acquisition for robustness, or any order once both are held\n    int first_res = (res1_id < res2_id) ? res1_id : res2_id;\n    int second_res = (res1_id > res2_id) ? res1_id : res2_id;\n\n    pthread_mutex_unlock(&resources[second_res]);\n    pthread_mutex_unlock(&resources[first_res]);\n}\n```\n\nהסבר:\nעל ידי אכיפת הסדר הגלובלי (תמיד לרכוש קודם את המשאב בעל המזהה הקטן יותר), אנו מבטיחים שלא ייתכן מצב של המתנה מעגלית. אם תהליכון T1 מחכה למשאב Rj שמוחזק על ידי T2, ו-T2 מחכה למשאב Rk שמוחזק על ידי T3, וכן הלאה, הרי שבהכרח:\n*   T1 רוכש Ri, ממתין ל-Rj. לפי הכלל, Ri < Rj.\n*   T2 רוכש Rj, ממתין ל-Rk. לפי הכלל, Rj < Rk.\n*   ...\n*   Tn רוכש Rx, ממתין ל-Ry. לפי הכלל, Rx < Ry.\n*   אם הייתה המתנה מעגלית, אז התהליכון האחרון בשרשרת היה צריך להמתין למשאב שמוחזק על ידי התהליכון הראשון. למשל, Tn ממתין ל-Ri שמוחזק על ידי T1. אבל אז היינו מקבלים Ry < Ri.\n    הדבר יוצר סתירה: Ri < Rj < Rk < ... < Rx < Ry < Ri. \n    מכיוון שאי-שוויון זה בלתי אפשרי, המתנה מעגלית אינה יכולה להיווצר. \n    פתרון זה מאפשר מקסימום מקביליות, שכן תהליכונים יכולים להמשיך לעבוד כל עוד הם אינם מתחרים על אותו משאב או על משאבים שהסדר שלהם חוסם אותם."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

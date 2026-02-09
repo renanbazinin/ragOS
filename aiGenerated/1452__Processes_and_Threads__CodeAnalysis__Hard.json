@@ -1,0 +1,58 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Processes and Threads",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 10:23:32",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2789,
+      "output_tokens": 3672,
+      "total_tokens": 13947
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Processes",
+      "Threads",
+      "Concurrency",
+      "System Calls",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה המשלבת יצירת תהליכים (processes) ותהליכונים (threads). קראו בעיון את הקוד וענו על השאלות הבאות. יש להניח שכל קריאות המערכת מצליחות, וכי מזהי תהליכים (PIDs) ומזהי תהליכונים (TIDs) הם ייחודיים ומוקצים בסדר עולה (אך לא בהכרח עוקבים) עבור כל סוג. כמו כן, יש להניח שקריאות `printf` אינן מחוצצות ומודפסות מיד.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <pthread.h>\n#include <sys/wait.h>\n\nint global_var = 0; // משתנה גלובלי\n\n// פונקציית התהליכון\nvoid *thread_func(void *arg) {\n    int thread_id = *(int*)arg;\n    printf(\"Thread %d (PID %d, TID %lu) starting. global_var = %d\\n\",\n           thread_id, getpid(), pthread_self(), global_var);\n    sleep(1); // מדמה עבודה\n    global_var += thread_id; // שינוי המשתנה הגלובלי\n    printf(\"Thread %d (PID %d, TID %lu) finished. global_var = %d\\n\",\n           thread_id, getpid(), pthread_self(), global_var);\n    return NULL;\n}\n\nint main() {\n    pthread_t tid1, tid2, tid3;\n    int id1 = 1, id2 = 2, id3 = 3;\n    pid_t pid;\n\n    printf(\"Main process (PID %d) starting. global_var = %d\\n\", getpid(), global_var);\n\n    // יצירת תהליכון 1 בתהליך הראשי\n    pthread_create(&tid1, NULL, thread_func, &id1);\n    printf(\"Main process (PID %d) created Thread 1 (TID %lu)\\n\", getpid(), tid1);\n\n    usleep(500 * 1000); // מאפשר לתהליכון 1 להתחיל\n\n    pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        exit(1);\n    } else if (pid == 0) { // תהליך הבן\n        // הערה: רק התהליכון הקורא (התהליכון הראשי של הבן) משוכפל. תהליכונים אחרים לא.\n        // המשתנה הגלובלי global_var מועתק בנקודת ה-fork.\n        printf(\"Child process (PID %d, PPID %d) after fork. global_var = %d\\n\",\n               getpid(), getppid(), global_var);\n\n        // יצירת תהליכון 2 בתהליך הבן\n        pthread_create(&tid2, NULL, thread_func, &id2);\n        printf(\"Child process (PID %d) created Thread 2 (TID %lu)\\n\", getpid(), tid2);\n\n        pthread_join(tid2, NULL); // המתנה לתהליכון 2\n        printf(\"Child process (PID %d) joined Thread 2. Final global_var = %d\\n\",\n               getpid(), global_var);\n        exit(0);\n    } else { // תהליך האב\n        printf(\"Parent process (PID %d) after fork, child PID is %d. global_var = %d\\n\",\n               getpid(), pid, global_var);\n\n        // יצירת תהליכון 3 בתהליך האב\n        pthread_create(&tid3, NULL, thread_func, &id3);\n        printf(\"Parent process (PID %d) created Thread 3 (TID %lu)\\n\", getpid(), tid3);\n\n        pthread_join(tid1, NULL); // המתנה לתהליכון 1 (זה שנוצר לפני ה-fork)\n        pthread_join(tid3, NULL); // המתנה לתהליכון 3\n        wait(NULL); // המתנה לתהליך הבן\n        printf(\"Parent process (PID %d) joined Thread 1 and Thread 3, waited for child. Final global_var = %d\\n\",\n               getpid(), global_var);\n    }\n\n    return 0;\n}"
+    },
+    "sub_questions": [
+      {
+        "id": "8.1",
+        "text": "תארו את ההשפעה של קריאת ה-`fork()` על התהליכון `tid1` ועל המשתנה הגלובלי `global_var` בתהליך הבן. מה יהיו הערכים הסופיים האפשריים של `global_var` בתהליך האב ובתהליך הבן (לאחר סיום כל התהליכונים והתהליכים בהם)? הסבירו בקצרה את החישוב.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.2",
+        "text": "האם קיים מצב מרוץ (race condition) בתוכנית? אם כן, תארו אותו (בין אילו ישויות הוא מתרחש ועל איזה משאב) והסבירו כיצד ניתן למנוע אותו באמצעות שימוש במנעול (mutex) מתאים. אם לא, הסבירו מדוע.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.3",
+        "text": "נניח שהסרנו את השורות המבצעות `pthread_join` עבור `tid1` ו-`tid3` בתהליך האב, וגם את השורה המבצעת `pthread_join` עבור `tid2` בתהליך הבן. אילו בעיות עלולות לצוץ? הסבירו.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "פתרון:\n\n**8.1 השפעת `fork()` וערכים סופיים של `global_var`:**\n*   **השפעת `fork()` על `tid1` בתהליך הבן**: כאשר `fork()` נקרא, רק התהליכון הקורא (התהליכון הראשי של התהליך האב במקרה זה) משוכפל לתהליך הבן. כלומר, `tid1` (התהליכון שנוצר באב לפני ה-`fork`) אינו משוכפל לתהליך הבן ואינו קיים כתהליכון פעיל בתהליך הבן. מזהה ה-`tid1` בתהליך הבן הוא רק מספר חסר משמעות עבור תהליכון פעיל. לכן, כל קריאה ל-`pthread_join(tid1, NULL)` בתהליך הבן תכשל או תהיה חסרת משמעות.\n*   **השפעת `fork()` על `global_var` בתהליך הבן**: `global_var` הוא משתנה גלובלי השוכן בקטע הנתונים של התוכנית. כאשר `fork()` נקרא, תהליך הבן מקבל עותק מלא של מרחב הזיכרון של האב (כולל קטע הנתונים) בנקודת הזמן של ה-`fork`. לכן, לתהליך הבן תהיה גרסה משלו של `global_var`, שערכה יהיה זהה לערך של `global_var` באב ברגע הקריאה ל-`fork()`. שינויים עתידיים ב-`global_var` באב לא ישפיעו על הבן, ולהיפך.\n*   **ערכים סופיים אפשריים של `global_var` בתהליך האב**: בתהליך האב, `global_var` מתחיל ב-0. לאחר מכן, תהליכון 1 (id=1) ותהליכון 3 (id=3) משנים אותו. כיוון ששניהם פועלים באותו מרחב זיכרון, שניהם ישנו את אותו `global_var`. הם מוסיפים 1 ו-3 בהתאמה. ללא אמצעי סנכרון, יש מצב מרוץ (ראה סעיף 8.2), אך אם נניח שהפעולות מתבצעות ומשלימות, הערך הסופי יהיה 0 + 1 + 3 = 4.\n*   **ערכים סופיים אפשריים של `global_var` בתהליך הבן**: בתהליך הבן, `global_var` מקבל את ערכו מנקודת ה-`fork`. יש שתי אפשרויות לערך זה:\n    1.  **אם תהליכון 1 באב הספיק לסיים את שינוי `global_var` לפני ה-`fork`**: `global_var` באב יהיה 1. הבן יקבל עותק של 1. לאחר מכן, תהליכון 2 (id=2) בבן יוסיף 2 ל-`global_var` שלו. הערך הסופי בבן יהיה 1 + 2 = 3.\n    2.  **אם תהליכון 1 באב לא הספיק לסיים את שינוי `global_var` לפני ה-`fork`**: `global_var` באב יהיה עדיין 0. הבן יקבל עותק של 0. לאחר מכן, תהליכון 2 (id=2) בבן יוסיף 2 ל-`global_var` שלו. הערך הסופי בבן יהיה 0 + 2 = 2.\n    לכן, הערכים הסופיים האפשריים של `global_var` בתהליך הבן הם 2 או 3.\n\n**8.2 מצב מרוץ (race condition):**\n*   **כן, קיים מצב מרוץ בתוכנית.**\n*   **בין אילו ישויות ועל איזה משאב**: מצב המרוץ מתרחש בין התהליכונים שנוצרו באותו תהליך וניגשים לאותו משתנה גלובלי `global_var`. ספציפית, בתהליך האב, יש מצב מרוץ בין תהליכון 1 ותהליכון 3 על `global_var`. הבעיה המרכזית היא בין תהליכון 1 ותהליכון 3 בתהליך האב.\n*   **הסבר**: הפעולה `global_var += thread_id;` אינה אטומית. היא מורכבת מקריאת הערך של `global_var`, ביצוע פעולת החיבור, וכתיבת הערך החדש בחזרה ל-`global_var`. אם שני תהליכונים (למשל, תהליכון 1 ותהליכון 3 באב) ניגשים לשורה זו בו-זמנית, ייתכן ששניהם יקראו את הערך הישן של `global_var` לפני שאחד מהם יספיק לכתוב את הערך החדש. כתוצאה מכך, אחד מהעדכונים עלול \"לאבד\" והערך הסופי של `global_var` יהיה שגוי.\n*   **מניעה באמצעות mutex**: כדי למנוע את מצב המרוץ, יש להגן על הגישה למשתנה `global_var` באמצעות מנעול (mutex). יש להכריז על mutex גלובלי, ולנעול אותו לפני הגישה ל-`global_var` ולשחרר אותו מיד לאחר מכן:\n    ```c\n    pthread_mutex_t global_var_mutex = PTHREAD_MUTEX_INITIALIZER;\n\n    void *thread_func(void *arg) {\n        int thread_id = *(int*)arg;\n        printf(\"Thread %d (PID %d, TID %lu) starting. global_var = %d\\n\",\n               thread_id, getpid(), pthread_self(), global_var);\n        sleep(1);\n        pthread_mutex_lock(&global_var_mutex); // נעילת המוטקס\n        global_var += thread_id;\n        pthread_mutex_unlock(&global_var_mutex); // שחרור המוטקס\n        printf(\"Thread %d (PID %d, TID %lu) finished. global_var = %d\\n\",\n               thread_id, getpid(), pthread_self(), global_var);\n        return NULL;\n    }\n    ```\n\n**8.3 בעיות כתוצאה מהסרת `pthread_join`:**\nהסרת קריאות `pthread_join` עלולה לגרום למספר בעיות:\n*   **סיום תהליכים מוקדם מהצפוי (Detached threads / Zombie threads)**: אם התהליך הראשי (או תהליך הבן) מסיים את ריצתו לפני שהתהליכונים שיצר סיימו את פעולתם, התהליכונים יופסקו בפתאומיות (יתומים). במקרה זה, פונקציית ה-`thread_func` כוללת `sleep(1)`, מה שמבטיח כמעט בוודאות שהתהליכונים לא יסיימו לפני שהתהליכים הקוראים ינסו לסיים. זה יכול להוביל לכך שפעולות קריטיות שהתהליכונים מבצעים לא יושלמו. במערכות POSIX, תהליכון שסיים את פעולתו ולא צורף (joined) הופך ל-detached. המשאבים שלו (כגון מחסנית) לא ישוחררו באופן מיידי אם הוא לא detached במפורש, מה שעלול להוביל לדליפת משאבים (resource leak) אם נוצרים הרבה תהליכונים כאלה. ה-`pthread_join` מבטיח שהתהליך המצורף ימתין לסיום התהליכון וישחרר את המשאבים שלו.\n*   **פלט לא צפוי/לא שלם**: ללא `pthread_join`, אין ערובה שהתהליכונים יסיימו את פעולתם וידפיסו את הפלט הסופי שלהם לפני שהתהליך הראשי או תהליך הבן יסיימו וידפיסו את הודעות הסיום שלהם. ייתכן שנראה את הודעת ה-\"Final global_var\" לפני שהתהליכונים סיימו לעדכן את המשתנה או להדפיס את הודעות ה-\"finished\" שלהם, מה שיוביל לפלט מטעה או חלקי.\n*   **חוסר יכולת לקבל ערך חזרה מהתהליכון**: `pthread_join` מאפשר גם לקבל ערך חזרה מהתהליכון. ללא קריאה זו, לא ניתן לקבל ערכים אלו (אם היו כאלה)."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

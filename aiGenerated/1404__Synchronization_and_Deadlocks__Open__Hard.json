@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Synchronization and Deadlocks",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 09:58:36",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3054,
+      "output_tokens": 2656,
+      "total_tokens": 13069
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Synchronization",
+      "Deadlocks",
+      "Resource Allocation",
+      "Mutexes"
+    ],
+    "content": {
+      "text": "נתונה מערכת מרובת חוטים שבה N חוטים מתחרים על גישה לשני משאבים ייחודיים: `משאב A` ו-`משאב B`. קיימת רק יחידה אחת מכל משאב.\nהחוטים במערכת מוגדרים בשני סוגים:\n1.  **חוט מסוג 1**: מנסה לרכוש תחילה את `משאב A`, ורק לאחר מכן את `משאב B`. בסיום השימוש בשניהם, הוא משחרר את `משאב B` ולאחר מכן את `משאב A`.\n2.  **חוט מסוג 2**: מנסה לרכוש תחילה את `משאב B`, ורק לאחר מכן את `משאב A`. בסיום השימוש בשניהם, הוא משחרר את `משאב A` ולאחר מכן את `משאב B`.\n\nכל חוט, לאחר שרכש את שני המשאבים, מבצע \"עבודה\" כלשהי (ניתן לייצג זאת ע\"י `sleep` או פעולה ריקה), ולאחר מכן משחרר אותם בסדר ההפוך לרכישה.\n\n**נדרש:**\nא. הסבירו כיצד תרחיש זה עלול להוביל למצב של קיפאון (Deadlock). פרטו את ארבעת התנאים ההכרחיים לקיפאון בהקשר זה.\nב. הציעו מימוש ב-C/C++ (באמצעות מנעולים - mutexes ו/או סמפורים - semaphores) שימנע קיפאון, יבטיח מניעה הדדית (mutual exclusion) עבור כל משאב, וישמור על הוגנות (fairness) בין החוטים ככל הניתן. הציגו את מבנה הנתונים הנדרש עבור המשאבים ופונקציות לרכישה ולשחרור.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "א. **הסבר למצב קיפאון (Deadlock):**\nמצב קיפאון עלול להתרחש בתרחיש המתואר עקב התקיימותם של ארבעת התנאים ההכרחיים לקיפאון:\n1.  **מניעה הדדית (Mutual Exclusion)**: מתקיים. כל משאב (A ו-B) הוא ייחודי ויכול להיות מוחזק על ידי חוט אחד בלבד בכל רגע נתון. אם חוט מחזיק במשאב, חוט אחר אינו יכול להחזיק בו.\n2.  **החזקה והמתנה (Hold and Wait)**: מתקיים. חוטים רוכשים משאב אחד (לדוגמה, חוט מסוג 1 רוכש את משאב A) וממתינים למשאב נוסף (משאב B) תוך כדי שהם ממשיכים להחזיק במשאב שרכשו. הם לא משחררים את המשאב המוחזק עד לקבלת המשאב הנוסף.\n3.  **אי-הפקעה (No Preemption)**: מתקיים. משאבים אינם ניתנים להפקעה מחוט שמחזיק בהם; חוט חייב לשחרר את המשאב מרצונו החופשי לאחר שסיים את השימוש בו.\n4.  **המתנה מעגלית (Circular Wait)**: מתקיים. זהו התנאי המרכזי שמוביל לקיפאון במקרה זה. דמיינו את התרחיש הבא:\n    *   חוט T1 (מסוג 1) מצליח לרכוש את `משאב A` (`pthread_mutex_lock(&resource_A_mutex);`) ונכנס למצב המתנה ל-`משאב B` (`pthread_mutex_lock(&resource_B_mutex);`).\n    *   בו-זמנית, חוט T2 (מסוג 2) מצליח לרכוש את `משאב B` (`pthread_mutex_lock(&resource_B_mutex);`) ונכנס למצב המתנה ל-`משאב A` (`pthread_mutex_lock(&resource_A_mutex);`).\n    *   כעת, T1 ממתין ל-B שמוחזק על ידי T2, ו-T2 ממתין ל-A שמוחזק על ידי T1. נוצר מעגל המתנה, ושני החוטים חסומים לצמיתות ואינם יכולים להתקדם.\n\nב. **מימוש למניעת קיפאון, מניעה הדדית והוגנות:**\nכדי למנוע קיפאון, נשתמש באסטרטגיית מניעה (Deadlock Prevention) על ידי שבירת תנאי ה\"המתנה מעגלית\". הדרך הנפוצה והיעילה ביותר לשבור תנאי זה היא **כפיית סדר גלובלי לרכישת משאבים**. כלומר, כל החוטים במערכת ירכשו את המשאבים באותו סדר קבוע מראש, ללא קשר לסדר \"הטבעי\" שהם היו מעדיפים. במקרה זה, נקבע שכל חוט ירכוש תמיד קודם את `משאב A` ולאחר מכן את `משאב B`. שחרור המשאבים יתבצע בסדר הפוך (B ואז A).\n\n**מבנה הנתונים הנדרש ופונקציות הרכישה/שחרור:**\nנשתמש בשני מנעולי `pthread_mutex_t` גלובליים, אחד עבור כל משאב, כדי להבטיח מניעה הדדית.\n\n```c\n#include <pthread.h>\n#include <stdio.h> // לצורך הדפסה בלבד, לא חובה לפתרון המינימלי\n#include <unistd.h> // לצורך sleep בלבד, לא חובה לפתרון המינימלי\n\n// מנעולים גלובליים המייצגים את שני המשאבים הייחודיים\npthread_mutex_t resource_A_mutex = PTHREAD_MUTEX_INITIALIZER;\npthread_mutex_t resource_B_mutex = PTHREAD_MUTEX_INITIALIZER;\n\n// פונקציה לרכישה בטוחה של שני המשאבים – אוכפת סדר גלובלי (A ואז B)\n// פונקציה זו תשמש את כל סוגי החוטים.\nvoid acquire_both_resources_safely() {\n    // כל חוט, ללא קשר לסוגו, חייב לרכוש את משאב A תחילה\n    pthread_mutex_lock(&resource_A_mutex);\n    // printf(\"Thread %lu: Acquired Resource A. Waiting for Resource B...\\n\", (unsigned long)pthread_self());\n    \n    // רק לאחר מכן, לרכוש את משאב B\n    pthread_mutex_lock(&resource_B_mutex);\n    // printf(\"Thread %lu: Acquired Resource B. Both resources acquired.\\n\", (unsigned long)pthread_self());\n}\n\n// פונקציה לשחרור בטוח של שני המשאבים – משחררת בסדר הפוך לרכישה (B ואז A)\n// פונקציה זו תשמש את כל סוגי החוטים.\nvoid release_both_resources_safely() {\n    // שחרור משאב B\n    pthread_mutex_unlock(&resource_B_mutex);\n    // printf(\"Thread %lu: Released Resource B.\\n\", (unsigned long)pthread_self());\n    \n    // שחרור משאב A\n    pthread_mutex_unlock(&resource_A_mutex);\n    // printf(\"Thread %lu: Released Resource A. Both resources released.\\n\", (unsigned long)pthread_self());\n}\n\n// דוגמה לפונקציית חוט המשתמשת בפונקציות הבטוחות\n// שני סוגי החוטים ישתמשו באותה לוגיקה של רכישה ושחרור\nvoid* work_thread(void* arg) {\n    printf(\"Thread starting...\\n\");\n    acquire_both_resources_safely();\n    printf(\"Thread acquired both resources, performing work...\\n\");\n    sleep(2); // מדמה עבודה\n    printf(\"Thread finished work, releasing resources...\\n\");\n    release_both_resources_safely();\n    printf(\"Thread finished.\\n\");\n    return NULL;\n}\n```\n\n**הסבר לפתרון:**\n*   **מניעת קיפאון**: על ידי אכיפת סדר רכישה עולמי קבוע (תמיד A ואז B), אנו מבטיחים שלעולם לא ייווצר מצב שבו חוט אחד מחזיק ב-A וממתין ל-B, ובמקביל חוט אחר מחזיק ב-B וממתין ל-A. חוט שרוצה את B ואז A, עדיין יצטרך לרכוש את A קודם. אם A תפוס, הוא ימתין ל-A. אם B תפוס, הוא ימתין ל-B רק לאחר שרכש את A. מצב זה מונע ביעילות את ההמתנה המעגלית, ובכך מונע קיפאון.\n*   **מניעה הדדית**: מובטחת על ידי השימוש במנעולי `pthread_mutex_t`. כל מנעול מבטיח שרק חוט אחד יכול להחזיק בו בו-זמנית, כך שכל משאב מוגן מגישה מקבילה.\n*   **הוגנות**: מנגנוני `pthread_mutex_t` בדרך כלל מספקים רמה סבירה של הוגנות (לדוגמה, באמצעות תור FIFO פנימי לחוטים הממתינים). מאחר ומנענו קיפאון, חוטים לא ימתינו ללא הגבלה עקב מעגל המתנה. חוטים ימתינו רק עד שהמשאבים יתפנו, והגישה אליהם תהיה הוגנת במידה רבה על ידי מנגנון המנעול עצמו. אמנם, ייתכן שחוט מסוג 2 ייאלץ לחכות ל-A למרות ש-B פנוי (כי הסדר הגלובלי מחייב זאת), אך זהו מחיר הכרחי למניעת קיפאון, והוא אינו מוביל להרעבה (starvation) מכיוון שהמנעולים עצמם מבטיחים שכל חוט ממתין יקבל בסופו של דבר את המנעול כשהוא יתפנה."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Atomic Operations",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 09:26:36",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 1280,
+      "total_tokens": 6288
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Atomic Operations",
+      "Memory Ordering",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא המדגים אתחול עצלני של אובייקט בזיכרון משותף בין תהליכים. אנו רוצים להבטיח כי ברגע שתהליך צרכן (consumer) רואה שהמצביע `data_ptr` אינו `nullptr`, הוא יראה גם את כל השינויים שבוצעו על ידי הבנאי של האובייקט `Data` (כלומר, שערך `value` יהיה 42). איזו פקודת סדר זיכרון (memory order) היא המינימלית הנדרשת עבור פעולת ה-`store` על `data_ptr` כדי להבטיח נכונות זו? שימו לב כי פעולת ה-`load` בתהליך הצרכן משתמשת ב-`std::memory_order_acquire`.",
+      "code_snippet": "#include <atomic>\n#include <thread>\n#include <vector>\n#include <iostream>\n\nstruct Data {\n    int value;\n    Data() : value(42) {} // Constructor initializes value\n};\n\nstd::atomic<Data*> data_ptr(nullptr);\n\nvoid producer_thread() {\n    Data* new_data = new Data();\n    // Which memory_order for store is needed here?\n    data_ptr.store(new_data, /* ??? */); \n}\n\nvoid consumer_thread() {\n    Data* local_data = nullptr;\n    // This load uses std::memory_order_acquire for correctness\n    while (!(local_data = data_ptr.load(std::memory_order_acquire))) {\n        // Spin until initialized\n    }\n    // We want to guarantee local_data->value is 42 here\n}\n",
+      "options": [
+        "א. `std::memory_order_relaxed`",
+        "ב. `std::memory_order_acquire`",
+        "ג. `std::memory_order_release`",
+        "ד. `std::memory_order_acq_rel`",
+        "ה. `std::memory_order_seq_cst`"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "התשובה הנכונה היא ג. `std::memory_order_release`.\n\nכדי להבטיח שתהליך צרכן יראה את כל השינויים שבוצעו לפני פעולת ה-`store` (כולל אתחול האובייקט `Data` על ידי הבנאי) ברגע שהוא רואה את המצביע כלא-ריק, יש להשתמש בזוג `release-acquire`.\n\n1.  **`std::memory_order_relaxed`**: אינו מספק שום סנכרון או הבטחת סדר בין פעולות זיכרון. לכן, ייתכן שתהליך הצרכן יראה את המצביע `data_ptr` לפני שכל פעולות הבנאי של `Data` הושלמו או הפכו גלויות (reordering).\n2.  **`std::memory_order_acquire`**: זוהי פקודת סדר זיכרון עבור פעולות `load` (קריאה). פעולת `store` (כתיבה) אינה יכולה להיות `acquire`.\n3.  **`std::memory_order_release`**: פעולת `store` עם `release` מבטיחה שכל פעולות הזיכרון שבוצעו *לפניה* באותו תהליך (כמו למשל כתיבת הערך 42 בבנאי של `Data`) יהיו גלויות לכל תהליך אחר שיבצע `load` תואם עם `acquire` על אותו משתנה אטומי *לאחר* פעולת ה-`release`. זה בדיוק מה שנדרש כאן: ה-`store` ב-`producer_thread` משחרר את הנתונים, וה-`load` ב-`consumer_thread` רוכש אותם, ובכך מבטיח שכל מה שקרה לפני ה-`release` ב-`producer` ייראה אחרי ה-`acquire` ב-`consumer` (יוצר קשר \"happens-before\").\n4.  **`std::memory_order_acq_rel`**: זוהי פקודת סדר זיכרון עבור פעולות קריאה-שינוי-כתיבה (Read-Modify-Write) כמו `fetch_add` או `compare_exchange`, ולא עבור פעולת `store` פשוטה.\n5.  **`std::memory_order_seq_cst`**: אמנם פקודה זו תבטיח את הנכונות הנדרשת (היא חזקה יותר מ-`release` ומספקת עקביות סדרתית גלובלית), אך השאלה מבקשת את פקודת סדר הזיכרון ה*מינימלית* הנדרשת. `release` מספיק למקרה זה ופחות מגבילה ביצועים מ-`seq_cst`."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Signals",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 08:37:07",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1021,
+      "output_tokens": 497,
+      "total_tokens": 2327
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Signals",
+      "IPC",
+      "Process Management"
+    ],
+    "content": {
+      "text": "מהו אות (signal) במערכות הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. מנגנון לתקשורת בין תהליכים (IPC) דרך העברת נתונים.",
+        "ב. הודעה אסינכרונית שנשלחת לתהליך כדי להודיע לו על אירוע מסוים.",
+        "ג. פונקציה במערכת ההפעלה המשמשת ליצירת תהליכים חדשים.",
+        "ד. אזור זיכרון משותף בו תהליכים יכולים לכתוב ולקרוא מידע.",
+        "ה. מנגנון למתן עדיפות לתהליכים שונים."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב'. אות (signal) הוא הודעה אסינכרונית שנשלחת לתהליך או לקבוצת תהליכים על ידי הקרנל או על ידי תהליך אחר, כדי להודיע על אירוע מסוים. אירועים אלה יכולים להיות שגיאות חומרה, בקשות משתמש (כמו לחיצה על Ctrl+C), או אירועים פנימיים של המערכת. תהליך יכול לטפל באות על ידי קביעת פונקציית טיפול (handler), להתעלם ממנו (למעט SIGKILL ו-SIGSTOP), או לבצע את פעולת ברירת המחדל של המערכת (לרוב סיום התהליך). אפשרויות א', ד' ו-ה' מתארות מנגנוני IPC או ניהול תהליכים אחרים. אפשרות ג' מתארת יצירת תהליכים."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

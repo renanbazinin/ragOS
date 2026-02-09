@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Signals",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 08:36:51",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1021,
+      "output_tokens": 435,
+      "total_tokens": 2988
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Signals"
+    ],
+    "content": {
+      "text": "מהו אות (signal) במערכת הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. מנגנון המאפשר לתהליך להריץ קוד ספציפי בתגובה לאירוע חומרה.",
+        "ב. הודעה אסינכרונית הנשלחת לתוכנית כדי להודיע לה על אירוע מסוים, כמו שגיאה, בקשת סיום, או אירוע חיצוני.",
+        "ג. קטע קוד שרץ בקרנל ותפקידו לטפל בפסיקות מערכת.",
+        "ד. דרך לתהליכים שונים לשתף נתונים בצורה בטוחה."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב'. אות (signal) הוא מנגנון תקשורת אסינכרוני במערכת הפעלה, המשמש להודיע לתהליך על התרחשות של אירוע מסוים. אירועים אלו יכולים לכלול שגיאות חומרה (כמו חלוקה באפס), אירועים חיצוניים (כמו לחיצה על Ctrl+C), או בקשות של תהליכים אחרים (כמו בקשת סיום). האות מאפשר לתהליך להגיב לאירועים אלו באופן מוגדר, למשל על ידי הפעלת פונקציית טיפול באות (signal handler) או שימוש בפעולת ברירת המחדל."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

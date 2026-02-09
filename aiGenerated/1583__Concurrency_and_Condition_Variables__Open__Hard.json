@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency and Condition Variables",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 11:42:10",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3819,
+      "output_tokens": 2180,
+      "total_tokens": 13545
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Concurrency",
+      "Condition Variables",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתונה מערכת המורכבת ממספר חוטי עבודה (Worker Threads) וחוט מפקח (Supervisor Thread). חוטי העבודה מבצעים משימות בקבוצות (batches). בכל רגע נתון, לכל היותר MAX_CONCURRENT_TASKS חוטי עבודה יכולים להיות פעילים במקביל. לאחר שכל המשימות בקבוצה מסוימת מסתיימות, חוט המפקח צריך לבצע פעולות איפוס וניקוי לפני שקבוצת משימות חדשה יכולה להתחיל.\nהחוטים משתמשים במנעולים (mutexes) ובמשתני תנאי (condition variables) לצורך סנכרון.\n\nכתבו את קטעי הקוד הדרושים עבור הפונקציות worker_task() ו-supervisor_thread() שיבטיחו את הסנכרון הנכון בין החוטים, תוך שימוש במנגנוני סנכרון של POSIX (כגון pthread_mutex_t, pthread_cond_t).\nיש לכלול את כל משתני הסנכרון הגלובליים הנדרשים.\nודאו שהפתרון שלכם מונע מצבי מירוץ (race conditions) וקיפאון (deadlocks).",
+      "code_snippet": "/* הגדרות ומשתנים גלובליים */\n#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h> // For sleep\n\n#define MAX_CONCURRENT_TASKS 3 // גודל קבוצה לדוגמא\n\n// משתני סנכרון גלובליים\n// ... יש למלא כאן ...\n\nvoid* worker_task(void* arg) {\n    // ... יש למלא כאן את לוגיקת חוט העבודה ...\n    return NULL;\n}\n\nvoid* supervisor_thread(void* arg) {\n    // ... יש למלא כאן את לוגיקת חוט המפקח ...\n    return NULL;\n}\n\nint main() {\n    // קוד אתחול ויצירת חוטים (לא נדרש למלא כחלק מהפתרון, אך חשוב להבנה)\n    return 0;\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הסבר הפתרון:\n\nמטרת הפתרון היא לסנכרן בין חוטי עבודה (worker threads) לבין חוט מפקח (supervisor thread) כך ש:\n1. לכל היותר MAX_CONCURRENT_TASKS חוטי עבודה ירוצו במקביל.\n2. חוט המפקח יבצע פעולות איפוס וניקוי רק לאחר שכל חוטי העבודה בקבוצה הנוכחית סיימו את משימותיהם.\n3. קבוצת משימות חדשה לא תתחיל לפני שחוט המפקח סיים את פעולותיו.\n\nלצורך כך, אנו משתמשים במשתנים גלובליים הבאים:\n- mutex: מנעול להגנה על משתנים משותפים (כמו active_tasks ו-batch_ready) מפני מצבי מירוץ.\n- cond_task_can_start: משתנה תנאי שעליו ממתינים חוטי העבודה כאשר הם אינם יכולים להתחיל משימה חדשה (או בגלל שהגענו למספר המקסימלי של משימות במקביל, או בגלל שחוט המפקח מבצע איפוס).\n- cond_supervisor_can_reset: משתנה תנאי שעליו ממתין חוט המפקח עד שכל חוטי העבודה בקבוצה הנוכחית יסיימו את משימותיהם.\n- active_tasks: מונה את מספר המשימות הפעילות כרגע.\n- batch_ready: דגל (flag) המציין האם קבוצת משימות חדשה יכולה להתחיל (1) או שחוט המפקח ממתין או מבצע איפוס (0).\n\nקוד הפתרון:\n```c\n#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h> // For sleep\n\n#define MAX_CONCURRENT_TASKS 3 // Example batch size\n\n// Global synchronization variables\npthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;\npthread_cond_t cond_task_can_start = PTHREAD_COND_INITIALIZER;\npthread_cond_t cond_supervisor_can_reset = PTHREAD_COND_INITIALIZER;\n\nint active_tasks = 0;\nint batch_ready = 1; // 1 means a new batch can start, 0 means supervisor is resetting or waiting\n\nvoid* worker_task(void* arg) {\n    long id = (long)arg;\n    while (1) { // Simulate continuous work\n        pthread_mutex_lock(&mutex);\n\n        // Wait if max concurrent tasks reached or supervisor is resetting\n        while (active_tasks >= MAX_CONCURRENT_TASKS || !batch_ready) {\n            printf(\"Worker %ld: Waiting to start task (active_tasks=%d, batch_ready=%d)\\n\", id, active_tasks, batch_ready);\n            pthread_cond_wait(&cond_task_can_start, &mutex);\n        }\n\n        active_tasks++;\n        printf(\"Worker %ld: Started task. Active tasks: %d\\n\", id, active_tasks);\n\n        pthread_mutex_unlock(&mutex);\n\n        // Simulate work\n        sleep(1 + (id % 2)); // Simulate varying task duration\n\n        pthread_mutex_lock(&mutex);\n        active_tasks--;\n        printf(\"Worker %ld: Finished task. Active tasks: %d\\n\", id, active_tasks);\n\n        // If this was the last task of the current batch and supervisor is waiting, signal the supervisor\n        if (active_tasks == 0 && !batch_ready) {\n            printf(\"Worker %ld: Last task of batch finished. Signaling supervisor.\\n\", id);\n            pthread_cond_signal(&cond_supervisor_can_reset);\n        }\n        pthread_mutex_unlock(&mutex);\n        sleep(1); // Small delay before trying next task\n    }\n    return NULL;\n}\n\nvoid* supervisor_thread(void* arg) {\n    while (1) {\n        pthread_mutex_lock(&mutex);\n\n        // Indicate that a batch is no longer ready (prevent new tasks from starting)\n        batch_ready = 0;\n        printf(\"Supervisor: Batch not ready. Waiting for all tasks to finish (active_tasks=%d)\\n\", active_tasks);\n\n        // Wait until all current tasks have finished\n        while (active_tasks > 0) {\n            pthread_cond_wait(&cond_supervisor_can_reset, &mutex);\n        }\n\n        printf(\"Supervisor: All tasks finished. Performing reset/cleanup.\\n\");\n        pthread_mutex_unlock(&mutex);\n\n        // Simulate reset/cleanup work\n        sleep(2);\n\n        pthread_mutex_lock(&mutex);\n        // Reset state and allow new batch to start\n        batch_ready = 1;\n        printf(\"Supervisor: Reset complete. Signaling workers for new batch.\\n\");\n        pthread_cond_broadcast(&cond_task_can_start); // Wake up all waiting workers\n        pthread_mutex_unlock(&mutex);\n\n        sleep(3); // Small delay before starting next batch cycle\n    }\n    return NULL;\n}\n```\n\nמניעת מצבי מירוץ וקיפאון:\n- מצבי מירוץ: כל הגישות למשתנים המשותפים (active_tasks, batch_ready) מוגנות על ידי המנעול mutex, מה שמונע מצבי מירוץ.\n- קיפאון (Deadlock):\n    - סדר נעילת המנעולים: יש רק מנעול אחד, כך שאין בעיה של סדר נעילה.\n    - שחרור מנעול לפני המתנה: pthread_cond_wait משחרר את המנעול באופן אטומי לפני הכניסה למצב המתנה, ונועל אותו מחדש לאחר ההתעוררות. זה מונע קיפאון שבו חוט מחזיק מנעול וממתין לתנאי שחוט אחר יצר אך לא יכול לגשת למנעול כדי לאותת.\n    - שימוש ב-while עבור תנאי ההמתנה: זה מבטיח שהחוט בודק מחדש את התנאי לאחר התעוררות, ומונע מצבים שבהם החוט ממשיך למרות שהתנאי כבר לא מתקיים (למשל, עקב התעוררות שווא או שינוי מהיר של המצב על ידי חוט אחר)."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

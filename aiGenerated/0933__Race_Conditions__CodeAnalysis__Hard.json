@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 07:00:41",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5728,
+      "output_tokens": 2045,
+      "total_tokens": 33900
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Race Conditions",
+      "Concurrency",
+      "Mutexes",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתון קטע קוד המשתמש בשני משתנים גלובליים x ו-y, המאותחלים ל-0, ובמנעול pthread_mutex_t בשם mutex המאותחל לשימוש רגיל. שני חוטים (thread_func_A ו-thread_func_B) מריצים את הפונקציות הבאות במקביל. יש לפרט את כל זוגות הערכים האפשריים עבור המשתנים x, y אשר יכולים להתקבל לאחר ששני החוטים מסיימים את ריצתם. עבור כל זוג יש להסביר בקצרה את תזמון הריצה המוביל אליו.",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n\nint x = 0;\nint y = 0;\npthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;\n\nvoid* thread_func_A(void* arg) {\n    x = x + 1; // Operation A1\n    pthread_mutex_lock(&mutex);\n    y = y + x; // Operation A_CS\n    pthread_mutex_unlock(&mutex);\n    x = x * 2; // Operation A5\n    return NULL;\n}\n\nvoid* thread_func_B(void* arg) {\n    y = y - 1; // Operation B1\n    pthread_mutex_lock(&mutex);\n    x = x - y; // Operation B_CS\n    pthread_mutex_unlock(&mutex);\n    y = y * 2; // Operation B5\n    return NULL;\n}\n\n/*\nint main() {\n    pthread_t tidA, tidB;\n    pthread_create(&tidA, NULL, thread_func_A, NULL);\n    pthread_create(&tidB, NULL, thread_func_B, NULL);\n    pthread_join(tidA, NULL);\n    pthread_join(tidB, NULL);\n    printf(\"Final: x=%d, y=%d\\n\", x, y);\n    return 0;\n}\n*/",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הבעיה נובעת מתנאי מרוץ בין הפעולות שאינן מוגנות על ידי המנעול (A1, A5, B1, B5) לבין הפעולות המוגנות (A_CS, B_CS) ובינן לבין עצמן. המנעול מבטיח ש-A_CS ו-B_CS לא ירוצו במקביל, אך סדר הריצה ביניהן וביחס לפעולות האחרות משפיע על התוצאה הסופית. להלן כל זוגות הערכים האפשריים עבור (x,y) והסבר קצר לכל תרחיש:\n\n1.  **(2,0)**\n    *   **תרחיש לדוגמה:**\n        1.  חוט A מבצע: `x = x + 1;` (x=1, y=0)\n        2.  חוט B מבצע: `y = y - 1;` (x=1, y=-1)\n        3.  חוט A תופס מנעול. `A_CS`: `y = y + x;` (y = -1 + 1 = 0). מצב: (x=1, y=0)\n        4.  חוט A משחרר מנעול.\n        5.  חוט B תופס מנעול. `B_CS`: `x = x - y;` (x = 1 - 0 = 1). מצב: (x=1, y=0)\n        6.  חוט B משחרר מנעול.\n        7.  חוט A מבצע: `x = x * 2;` (x = 1 * 2 = 2). מצב: (x=2, y=0)\n        8.  חוט B מבצע: `y = y * 2;` (y = 0 * 2 = 0). מצב סופי: (x=2, y=0)\n\n2.  **(4,2)**\n    *   **תרחיש לדוגמה:**\n        1.  חוט A מבצע: `x = x + 1;` (x=1, y=0)\n        2.  חוט B מבצע: `y = y - 1;` (x=1, y=-1)\n        3.  חוט B תופס מנעול. `B_CS`: `x = x - y;` (x = 1 - (-1) = 2). מצב: (x=2, y=-1)\n        4.  חוט B משחרר מנעול.\n        5.  חוט A תופס מנעול. `A_CS`: `y = y + x;` (y = -1 + 2 = 1). מצב: (x=2, y=1)\n        6.  חוט A משחרר מנעול.\n        7.  חוט A מבצע: `x = x * 2;` (x = 2 * 2 = 4). מצב: (x=4, y=1)\n        8.  חוט B מבצע: `y = y * 2;` (y = 1 * 2 = 2). מצב סופי: (x=4, y=2)\n\n3.  **(4,-2)**\n    *   **תרחיש לדוגמה:**\n        1.  חוט B מבצע: `y = y - 1;` (x=0, y=-1)\n        2.  חוט A תופס מנעול. `A_CS`: `y = y + x;` (y = -1 + 0 = -1). מצב: (x=0, y=-1)\n        3.  חוט A משחרר מנעול.\n        4.  חוט A מבצע: `x = x + 1;` (x = 0 + 1 = 1). מצב: (x=1, y=-1)\n        5.  חוט B תופס מנעול. `B_CS`: `x = x - y;` (x = 1 - (-1) = 2). מצב: (x=2, y=-1)\n        6.  חוט B משחרר מנעול.\n        7.  חוט A מבצע: `x = x * 2;` (x = 2 * 2 = 4). מצב: (x=4, y=-1)\n        8.  חוט B מבצע: `y = y * 2;` (y = -1 * 2 = -2). מצב סופי: (x=4, y=-2)\n\n4.  **(2,-2)**\n    *   **תרחיש לדוגמה:**\n        1.  חוט A תופס מנעול. `A_CS`: `y = y + x;` (y = 0 + 0 = 0). מצב: (x=0, y=0)\n        2.  חוט A משחרר מנעול.\n        3.  חוט B תופס מנעול. `B_CS`: `x = x - y;` (x = 0 - 0 = 0). מצב: (x=0, y=0)\n        4.  חוט B משחרר מנעול.\n        5.  חוט A מבצע: `x = x + 1;` (x = 0 + 1 = 1). מצב: (x=1, y=0)\n        6.  חוט B מבצע: `y = y - 1;` (y = 0 - 1 = -1). מצב: (x=1, y=-1)\n        7.  חוט A מבצע: `x = x * 2;` (x = 1 * 2 = 2). מצב: (x=2, y=-1)\n        8.  חוט B מבצע: `y = y * 2;` (y = -1 * 2 = -2). מצב סופי: (x=2, y=-2)"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

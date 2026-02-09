@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Signals",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 08:46:53",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3748,
+      "output_tokens": 2931,
+      "total_tokens": 12450
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Signals",
+      "Process Synchronization",
+      "Race Conditions",
+      "Signal Masking"
+    ],
+    "content": {
+      "text": "תהליך אב יוצר תהליך בן. תהליך האב שולח אות `SIGUSR1` לתהליך הבן לאחר השהיה קצרה. תהליך הבן אמור לבצע 'עבודה קריטית' כלשהי, ורק לאחר מכן להמתין לאות `SIGUSR1` מהאב. כאשר האות מתקבל, הבן צריך להדפיס הודעה מסוימת ולסיים.\n\nכתוב את קוד תהליך הבן (השלם את הפונקציה `child_process`) כך שיטפל באות `SIGUSR1` באופן בטוח ונכון, תוך שימוש בפונקציות `sigprocmask` ו-`sigsuspend`. קוד ה-`main` וה-`handler` מסופקים.\n\nהסבר מדוע הפתרון שלך נכון, וציין אילו בעיות עלולות להתעורר במימוש פחות זהיר (לדוגמה, שימוש ב-`pause()` במקום ב-`sigsuspend` לאחר ביטול חסימת האות). הדגש את חשיבותן של פעולות אטומיות בהקשר של טיפול באותות.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <signal.h>\n#include <sys/types.h>\n#include <sys/wait.h>\n#include <errno.h>\n\nvolatile sig_atomic_t sigusr1_received = 0;\n\nvoid handler(int signum) {\n    if (signum == SIGUSR1) {\n        sigusr1_received = 1;\n        printf(\"Child: SIGUSR1 received!\\n\");\n    }\n}\n\nvoid critical_work() {\n    printf(\"Child: Performing critical work...\\n\");\n    sleep(2); // Simulate critical work\n    printf(\"Child: Critical work finished.\\n\");\n}\n\nvoid child_process() {\n    printf(\"Child: PID %d started.\\n\", getpid());\n    \n    // TODO: Implement signal handling logic here\n    // 1. Block SIGUSR1 initially.\n    // 2. Perform critical_work().\n    // 3. Wait for SIGUSR1 using sigprocmask and sigsuspend safely.\n    // 4. Print \"Child: Exiting.\"\n    \n    printf(\"Child: Exiting.\\n\");\n}\n\nvoid parent_process(pid_t child_pid) {\n    printf(\"Parent: PID %d started. Child PID: %d\\n\", getpid(), child_pid);\n    sleep(3); // Give child time to set up and do critical work\n    printf(\"Parent: Sending SIGUSR1 to child %d\\n\", child_pid);\n    if (kill(child_pid, SIGUSR1) == -1) {\n        perror(\"kill\");\n        exit(EXIT_FAILURE);\n    }\n    printf(\"Parent: SIGUSR1 sent.\\n\");\n    wait(NULL); // Wait for child to finish\n    printf(\"Parent: Child finished, exiting.\\n\");\n}\n\nint main() {\n    struct sigaction sa;\n    sa.sa_handler = handler;\n    sigemptyset(&sa.sa_mask);\n    sa.sa_flags = 0; // No SA_RESTART or SA_SIGINFO needed for this simple case\n\n    if (sigaction(SIGUSR1, &sa, NULL) == -1) {\n        perror(\"sigaction\");\n        exit(EXIT_FAILURE);\n    }\n\n    pid_t pid = fork();\n\n    if (pid == -1) {\n        perror(\"fork\");\n        exit(EXIT_FAILURE);\n    } else if (pid == 0) {\n        // Child process\n        child_process();\n    } else {\n        // Parent process\n        parent_process(pid);\n    }\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "פתרון:\n\nלהלן קוד מלא ומתוקן עבור פונקציית `child_process`:\n\n```c\nvoid child_process() {\n    printf(\"Child: PID %d started.\\n\", getpid());\n\n    sigset_t oldmask, blockmask, suspend_mask;\n\n    // 1. חסימת SIGUSR1 בתחילה:\n    // יוצרים מסכה שתחסום את SIGUSR1.\n    sigemptyset(&blockmask);\n    sigaddset(&blockmask, SIGUSR1);\n    // חוסמים את SIGUSR1 ושומרים את המסכה הקודמת ב-oldmask.\n    if (sigprocmask(SIG_BLOCK, &blockmask, &oldmask) == -1) {\n        perror(\"sigprocmask BLOCK\");\n        exit(EXIT_FAILURE);\n    }\n    printf(\"Child: SIGUSR1 blocked.\\n\");\n\n    // 2. ביצוע העבודה הקריטית:\n    // העבודה מתבצעת בזמן ש-SIGUSR1 חסום, כך שהוא לא יפריע.\n    critical_work();\n\n    // 3. הכנת המסכה עבור sigsuspend:\n    // אנו רוצים ש-sigsuspend ימתין ל-SIGUSR1. לשם כך,\n    // עלינו להעביר ל-sigsuspend מסכה שבה SIGUSR1 אינו חסום,\n    // אך כל שאר האותות שכרגע חסומים יישארו חסומים.\n    // נתחיל מהמסכה הנוכחית (שבה SIGUSR1 חסום)\n    if (sigprocmask(SIG_SETMASK, NULL, &suspend_mask) == -1) { // קבל את המסכה הנוכחית\n        perror(\"sigprocmask GET\");\n        exit(EXIT_FAILURE);\n    }\n    // ונבטל את חסימת SIGUSR1 במסכה זו.\n    sigdelset(&suspend_mask, SIGUSR1);\n\n    // 4. המתן ל-SIGUSR1 באופן בטוח באמצעות sigsuspend:\n    // הלולאה מבטיחה שאם ה-handler נקרא (לדוגמה, אם האות הגיע לפני ה-sigsuspend\n    // במקרה של מימוש אחר, או wakeups כוזבים), נצא.\n    while (!sigusr1_received) {\n        printf(\"Child: Waiting for SIGUSR1...\\n\");\n        // sigsuspend מבצע שתי פעולות באופן אטומי:\n        // א. משנה את מסכת האותות למסכה שהועברה (suspend_mask, שבה SIGUSR1 אינו חסום).\n        // ב. משעה את התהליך עד לקבלת אות שאינו חסום.\n        // לאחר שהאות מטופל וה-handler חוזר, sigsuspend משחזר את מסכת האותות\n        // שהייתה פעילה *לפני* הקריאה ל-sigsuspend (כלומר, SIGUSR1 שוב חסום).\n        if (sigsuspend(&suspend_mask) == -1 && errno != EINTR) {\n             perror(\"sigsuspend\");\n             exit(EXIT_FAILURE);\n        }\n    }\n    \n    // שחזור מסכת האותות המקורית שהייתה בתחילת child_process.\n    // זהו ה-oldmask ששמרנו כאשר חסמנו לראשונה את SIGUSR1.\n    if (sigprocmask(SIG_SETMASK, &oldmask, NULL) == -1) {\n        perror(\"sigprocmask SETMASK\");\n        exit(EXIT_FAILURE);\n    }\n    printf(\"Child: SIGUSR1 handled and mask restored.\\n\");\n\n    printf(\"Child: Exiting.\\n\");\n}\n```\n\n**הסבר:**\n\nהפתרון מבטיח טיפול בטוח ונכון באות `SIGUSR1` על ידי שימוש בפעולות אטומיות למניעת תנאי מרוץ (Race Conditions).\n\n1.  **חסימה ראשונית (`sigprocmask`):** בתחילה, `SIGUSR1` נחסם. זה מבטיח שאם תהליך האב ישלח את האות מוקדם מהצפוי (לדוגמה, לפני שהבן סיים את עבודתו הקריטית), האות לא יטופל מיד אלא יישאר ממתין (pending). כך, העבודה הקריטית של הבן תתבצע ללא הפרעה.\n2.  **עבודה קריטית (`critical_work()`):** בזמן זה, `SIGUSR1` חסום, והתהליך הבן יכול לבצע את משימותיו בבטחה.\n3.  **המתנה בטוחה (`sigsuspend`):** לאחר סיום העבודה הקריטית, התהליך הבן מוכן לקבל את האות. כאן טמונה הנקודה הקריטית ביותר:\n    *   **בעיית תנאי מרוץ עם `sigprocmask` + `pause()`:** אם היינו משתמשים בגישה של `sigprocmask(SIG_UNBLOCK, ...)` ואחריה `pause()`, היה עלול להיווצר תנאי מרוץ. אם האות `SIGUSR1` היה מגיע *מיד לאחר* ביטול החסימה שלו (על ידי `sigprocmask`) אך *לפני* הקריאה ל-`pause()`, ה-handler היה מטפל באות, ו-`pause()` היה ממתין ללא הגבלת זמן לאות נוסף שלעולם לא יגיע. התהליך הבן היה נתקע (Deadlock).\n    *   **הפתרון עם `sigsuspend()`:** הפונקציה `sigsuspend()` פותרת את תנאי המרוץ הזה על ידי ביצוע שתי פעולות באופן אטומי: היא משנה את מסכת האותות של התהליך למסכה שבה `SIGUSR1` אינו חסום (כפי שהוגדרה ב-`suspend_mask`), ואז משעה את התהליך. רק כאשר `SIGUSR1` (או כל אות אחר שאינו חסום במסכה החדשה) מתקבל, התהליך מתעורר, וה-handler נקרא. לאחר שה-handler חוזר, `sigsuspend()` משחזר באופן אוטומטי את מסכת האותות שהייתה פעילה *לפני* הקריאה ל-`sigsuspend` (כלומר, `SIGUSR1` שוב חסום). זה מבטיח שהאות לא יחמוק בין ביטול החסימה להשעיה.\n4.  **שחזור מסכה (`sigprocmask`):** בסיום, אנו משחזרים את מסכת האותות למצבה המקורי לפני שכלל התחלנו לטפל ב-`SIGUSR1` בתוך `child_process`. זוהי פרקטיקה טובה לשמור על ניקיון סביבת האותות.\n\n**חשיבות פעולות אטומיות:** תנאי המרוץ שתיארנו מדגיש את החשיבות הקריטית של פעולות אטומיות בהקשר של טיפול באותות ובסנכרון תהליכים. כאשר יש רצף של פעולות שצריכות להתבצע יחד כדי להבטיח נכונות (כמו ביטול חסימה והמתנה לאות), חייבים להשתמש במנגנונים המבטיחים שהן יתבצעו כיחידה בלתי ניתנת להפרעה, כדי למנוע מצבים בלתי צפויים או קיפאון. `sigsuspend` הוא דוגמה מצוינת לפעולה אטומית כזו."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "IPC",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 08:21:18",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1196,
+      "output_tokens": 642,
+      "total_tokens": 3259
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "IPC",
+      "Synchronization",
+      "Shared Memory"
+    ],
+    "content": {
+      "text": "שני תהליכים (P1 ו-P2) משתפים מקטע זיכרון ובו מונה שלם (integer counter). כל אחד מהתהליכים מבצע לולאה בה הוא קורא את ערך המונה, מגדיל אותו באחד, וכותב אותו חזרה לזיכרון המשותף. איזו מנגנון IPC הוא המתאים ביותר על מנת להבטיח שהמונה יתעדכן בצורה נכונה (ללא תנאי מרוץ)?",
+      "code_snippet": null,
+      "options": [
+        "א. צינורות (Pipes)",
+        "ב. תורי הודעות (Message Queues)",
+        "ג. סמפורים (Semaphores)",
+        "ד. אותות (Signals)",
+        "ה. רק זיכרון משותף, ללא מנגנון IPC נוסף."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג. סמפורים",
+      "explanation": "התשובה הנכונה היא ג. סמפורים. כאשר מספר תהליכים ניגשים למשאב משותף (כמו מונה בזיכרון משותף) ומשנים אותו, נוצר חשש לתנאי מרוץ (race condition) שעלול להוביל לערכים שגויים. סמפורים הם מנגנון IPC המאפשר שליטה על גישה למשאבים משותפים על ידי מתן ערובה לגישה הדדית בלעדית (mutual exclusion). תהליך יבצע פעולת P (wait) על הסמפור לפני הגישה למשאב, ופעולת V (signal) אחרי סיום השימוש, ובכך יבטיח שרק תהליך אחד יגש למונה בכל רגע נתון.\nא. צינורות ותורי הודעות משמשים להעברת נתונים בין תהליכים, אך אינם מיועדים לסנכרון גישה למשאב משותף בזיכרון.\nד. אותות משמשים להתראה על אירועים, ולא לסנכרון גישה הדדית בלעדית.\nה. שימוש בזיכרון משותף בלבד, ללא מנגנון סנכרון נוסף כגון סמפורים, יוביל בוודאות לתנאי מרוץ ולתוצאות שגויות."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

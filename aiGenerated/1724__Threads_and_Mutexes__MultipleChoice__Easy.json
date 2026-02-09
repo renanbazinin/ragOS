@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Threads and Mutexes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 20:19:48",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1131,
+      "output_tokens": 424,
+      "total_tokens": 2927
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Threads",
+      "Mutexes",
+      "Synchronization",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של שימוש ב-Mutex (מנעול הדדי) בתכנות מרובה חוטים?",
+      "code_snippet": null,
+      "options": [
+        "א. לאפשר למספר חוטים לגשת למשאב משותף בו זמנית.",
+        "ב. למנוע תנאי מירוץ (race conditions) ולוודא גישה יחידה למשאב משותף בזמן נתון.",
+        "ג. לסיים חוט שנתקע או הפסיק להגיב.",
+        "ד. לשנות את העדיפות (priority) של חוטים בזמן ריצה."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "Mutex (מנעול הדדי) הוא כלי סנכרון בסיסי המשמש להגן על קטעים קריטיים (critical sections) של קוד. מטרתו העיקרית היא למנוע תנאי מירוץ (race conditions) על ידי הבטחת גישה בלעדית למשאב משותף (כגון משתנה גלובלי או מבנה נתונים) על ידי חוט אחד בלבד בכל רגע נתון. כאשר חוט אחד מחזיק ב-mutex, חוטים אחרים המנסים לגשת לאותו mutex יחסמו עד שהחוט המחזיק ישחרר אותו."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

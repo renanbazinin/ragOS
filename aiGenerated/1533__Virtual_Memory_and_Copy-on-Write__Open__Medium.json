@@ -1,0 +1,63 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory and Copy-on-Write",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 11:12:33",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2412,
+      "output_tokens": 2393,
+      "total_tokens": 12323
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Virtual Memory",
+      "Copy-on-Write",
+      "Paging"
+    ],
+    "content": {
+      "text": "נתונה מערכת הפעלה התומכת בזיכרון וירטואלי ובמנגנון העתקה בעת כתיבה (Copy-on-Write - CoW) עבור קריאות למערכת fork(). גודל דף הוא 4KB. תהליך אב (Parent) מקצה 10 דפים של זיכרון ומאתחל אותם. לאחר מכן, הוא קורא ל-fork() ליצירת תהליך בן (Child). לאחר יצירת התהליך הבן, התהליך הבן כותב לשלושה דפים שונים: דף 0, דף 1 ודף 5. לאחר מכן, התהליך הבן מסיים את ריצתו. התהליך האב ממשיך וכותב לשלושה דפים אחרים: דף 0, דף 2 ודף 3.\n\nבהתבסס על התרחיש הנ\"ל, ענה על השאלות הבאות בהתחשב בכך שכל דף וירטואלי תופס מסגרת פיזית אחת.",
+      "code_snippet": "#include <unistd.h> // For fork()\n#include <stdlib.h> // For malloc(), exit()\n#include <stdio.h>  // For printf()\n#include <sys/wait.h> // For wait()\n\n#define PAGE_SIZE 4096\n#define NUM_PAGES 10\n\nint main() {\n    char *data[NUM_PAGES];\n    int i;\n\n    // Allocate and initialize 10 pages\n    for (i = 0; i < NUM_PAGES; i++) {\n        data[i] = (char *)malloc(PAGE_SIZE);\n        if (data[i] == NULL) return 1;\n        data[i][0] = 'A'; // Simulate initialization\n    }\n    // Phase 1: Parent allocates and initializes 10 pages.\n\n    pid_t pid = fork();\n\n    if (pid == 0) { // Child process\n        // Phase 2: Child starts. No writes yet.\n        data[0][0] = 'C'; // Child writes to page 0\n        data[1][0] = 'C'; // Child writes to page 1\n        data[5][0] = 'C'; // Child writes to page 5\n        // Phase 3: Child finishes its writes.\n        exit(0);\n    } else if (pid > 0) { // Parent process\n        wait(NULL); // Wait for child to finish\n        // Phase 4: Parent starts its writes.\n        data[0][0] = 'P'; // Parent writes to page 0\n        data[2][0] = 'P'; // Parent writes to page 2\n        data[3][0] = 'P'; // Parent writes to page 3\n        // Phase 5: Parent finishes its writes.\n    }\n    // (Memory deallocation omitted for brevity)\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "כמה מסגרות פיזיות נמצאות בשימוש מיד לאחר הקצאת ואתחול 10 הדפים על ידי תהליך האב, ולפני קריאת ה-fork()?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "כמה מסגרות פיזיות נמצאות בשימוש מיד לאחר קריאת ה-fork() וטרם בוצעו פעולות כתיבה כלשהן על ידי התהליך הבן או האב? הסבר מדוע.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.3",
+        "text": "כמה מסגרות פיזיות נמצאות בשימוש לאחר שהתהליך הבן סיים את כתיבותיו (לדפים 0, 1, 5) וטרם בוצעו כתיבות על ידי תהליך האב? הסבר אילו דפים הם עותקים פרטיים של הבן, ואילו דפים עדיין משותפים.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.4",
+        "text": "כמה מסגרות פיזיות נמצאות בשימוש לאחר שגם התהליך האב סיים את כתיבותיו (לדפים 0, 2, 3)? פרט את המצב הסופי של הדפים (משותף, פרטי לאב, פרטי לבן).",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "פתרון:\n\n**10.1: 10 מסגרות פיזיות.**\n   **הסבר:** תהליך האב מקצה ומאתחל 10 דפים. אתחול מחייב הקצאה של מסגרות פיזיות עבור כל דף וירטואלי, ולכן 10 מסגרות פיזיות נמצאות בשימוש.\n\n**10.2: 10 מסגרות פיזיות.**\n   **הסבר:** לאחר קריאת fork() ובזכות מנגנון ה-Copy-on-Write (CoW), הזיכרון הפיזי של התהליך האב אינו משוכפל מיד. במקום זאת, טבלאות הדפים של האב והבן מכוונות לאותן 10 מסגרות פיזיות. כל כניסה בטבלת הדפים (PTE) עבור דפים אלו מסומנת כקריאה בלבד (read-only) או כבעלת הגנת כתיבה (write-protected). כך, בשלב זה, אין צורך להקצות מסגרות פיזיות נוספות, והמספר נשאר 10.\n\n**10.3: 13 מסגרות פיזיות.**\n   **הסבר:** התהליך הבן כותב לדפים 0, 1, ו-5. מכיוון שדפים אלו מסומנים כקריאה בלבד עבור הבן (בגלל CoW), כל ניסיון כתיבה יגרום ל-Page Fault (תקלת דף). מערכת ההפעלה תיירט את התקלה, תשכפל את המסגרת הפיזית המשותפת למסגרת פיזית חדשה עבור הבן, ותעדכן את ה-PTE של הבן כך שיצביע על המסגרת החדשה (ותסמן אותה כניתנת לכתיבה). דפים 0, 1, 5 של הבן הופכים לעותקים פרטיים שלו. לכן, נוספו 3 מסגרות פיזיות חדשות. סך הכל: 10 (מקורי) + 3 (חדשים) = 13 מסגרות.\n   *   **דפים שהם עותקים פרטיים לבן:** דף 0, דף 1, דף 5.\n   *   **דפים שעדיין משותפים:** דף 2, דף 3, דף 4, דף 6, דף 7, דף 8, דף 9. (האב והבן מצביעים לאותן מסגרות פיזיות עבור דפים אלה).\n\n**10.4: 16 מסגרות פיזיות.**\n   **הסבר:** התהליך האב כותב לדפים 0, 2, ו-3.\n   *   **דף 0:** דף 0 כבר שוכפל עבור הבן בסעיף הקודם. כעת, כשהאב כותב לדף 0, הוא גם יגרום ל-Page Fault מכיוון שהדף עדיין מסומן כקריאה בלבד עבור האב. מערכת ההפעלה תשכפל גם את הדף הזה עבור האב. לכן, נוספת מסגרת פיזית אחת עבור דף 0 של האב.\n   *   **דפים 2, 3:** דפים אלו עדיין היו משותפים לאב ולבן. כתיבה אליהם על ידי האב תגרום לשכפול עבור האב (בדומה לדפים 0, 1, 5 עבור הבן). לכן, נוספות 2 מסגרות פיזיות עבור דפים 2 ו-3 של האב.\n   *   **סה\"כ תוספת:** 1 (לדף 0 של האב) + 2 (לדפים 2, 3 של האב) = 3 מסגרות פיזיות חדשות.\n   *   **סה\"כ כולל:** 13 (מסעיף קודם) + 3 (חדשים) = 16 מסגרות פיזיות.\n\n   **מצב סופי של הדפים:**\n   *   **פרטי לבן (Child's private copies):** דף 1, דף 5. (הבן יצר עותק, האב כתב לדף 0 אך לא לדפים אלו, כך שהעותקים של הבן נותרו פרטיים לו).\n   *   **פרטי לאב (Parent's private copies):** דף 0, דף 2, דף 3. (האב יצר עותק של דף 0, וגם של דפים 2 ו-3).\n   *   **משותפים (Shared):** דף 4, דף 6, דף 7, דף 8, דף 9. (אף אחד לא כתב לדפים אלו, ולכן הם נותרו משותפים בין האב לבן)."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

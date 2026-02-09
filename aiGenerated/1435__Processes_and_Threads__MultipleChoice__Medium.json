@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Processes and Threads",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 10:15:57",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1710,
+      "output_tokens": 1302,
+      "total_tokens": 6356
+    }
+  },
+  "question": {
+    "id": 6,
+    "type": "MultipleChoice",
+    "topic": [
+      "Processes",
+      "Threads",
+      "Memory Management",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתונה תוכנית ה-C הבאה:\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <pthread.h>\n#include <sys/wait.h>\n\nint global_counter = 0;\n\nvoid* thread_incrementer(void* arg) {\n    global_counter++;\n    return NULL;\n}\n\nint main() {\n    // Scenario 1: Processes\n    pid_t pid = fork();\n    if (pid == 0) { // Child process\n        global_counter++;\n        exit(0);\n    } else if (pid > 0) { // Parent process\n        wait(NULL); // Wait for child to finish\n        global_counter++;\n        printf(\"After process fork: global_counter = %d\\n\", global_counter);\n    }\n\n    // Reset for next scenario\n    global_counter = 0;\n\n    // Scenario 2: Threads\n    pthread_t tid;\n    pthread_create(&tid, NULL, thread_incrementer, NULL);\n    pthread_join(tid, NULL); // Wait for thread to finish\n    global_counter++; // Main thread also increments\n    printf(\"After thread create: global_counter = %d\\n\", global_counter);\n\n    return 0;\n}\n```\nמה יהיה הפלט של התוכנית?",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <pthread.h>\n#include <sys/wait.h>\n\nint global_counter = 0;\n\nvoid* thread_incrementer(void* arg) {\n    global_counter++;\n    return NULL;\n}\n\nint main() {\n    // Scenario 1: Processes\n    pid_t pid = fork();\n    if (pid == 0) { // Child process\n        global_counter++;\n        exit(0);\n    } else if (pid > 0) { // Parent process\n        wait(NULL); // Wait for child to finish\n        global_counter++;\n        printf(\"After process fork: global_counter = %d\\n\", global_counter);\n    }\n\n    // Reset for next scenario\n    global_counter = 0;\n\n    // Scenario 2: Threads\n    pthread_t tid;\n    pthread_create(&tid, NULL, thread_incrementer, NULL);\n    pthread_join(tid, NULL); // Wait for thread to finish\n    global_counter++; // Main thread also increments\n    printf(\"After thread create: global_counter = %d\\n\", global_counter);\n\n    return 0;\n}",
+      "options": [
+        "א. \nAfter process fork: global_counter = 1\nAfter thread create: global_counter = 1",
+        "ב. \nAfter process fork: global_counter = 2\nAfter thread create: global_counter = 2",
+        "ג. \nAfter process fork: global_counter = 1\nAfter thread create: global_counter = 2",
+        "ד. \nAfter process fork: global_counter = 2\nAfter thread create: global_counter = 1",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "בתרחיש הראשון (תהליכים):\nכאשר נוצר תהליך בן (child process) באמצעות `fork()`, התהליך הבן מקבל עותק פרטי של מרחב הזיכרון של האב, כולל המשתנים הגלובליים. לכן, כאשר התהליך הבן משנה את `global_counter` (מ-0 ל-1), הוא משנה את העותק הפרטי שלו, והשינוי אינו משפיע על ערכו של `global_counter` בתהליך האב. התהליך האב ממשיך עם `global_counter = 0` (העותק שלו), ולאחר שהוא ממתין לסיום הבן, הוא מגדיל את המונה שלו פעם אחת (מ-0 ל-1). לכן, הפלט הראשון יהיה 1.\n\nבתרחיש השני (תהליכונים):\nהתוכנית מאפסת את `global_counter` ל-0. כאשר נוצר תהליכון (child thread) באמצעות `pthread_create()`, התהליכון חולק את אותו מרחב זיכרון עם התהליכון הראשי (האב). לכן, כל שינוי שמתבצע על ידי התהליכון הבן למשתנה גלובלי משפיע ישירות על אותו המשתנה בתהליכון הראשי. התהליכון הבן מגדיל את `global_counter` מ-0 ל-1. לאחר שהתהליכון הראשי ממתין לסיום הבן, הוא מגדיל את `global_counter` שוב (מ-1 ל-2). לכן, הפלט השני יהיה 2."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

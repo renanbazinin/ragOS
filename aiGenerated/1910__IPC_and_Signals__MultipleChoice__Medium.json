@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "IPC and Signals",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 21:42:54",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1103,
+      "output_tokens": 899,
+      "total_tokens": 5212
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "IPC",
+      "Signals",
+      "Process Management",
+      "System Calls"
+    ],
+    "content": {
+      "text": "תהליך אב מגדיר מטפל (handler) עבור סיגנל SIGUSR1 באמצעות sigaction (ללא דגלים מיוחדים) וחוסם את הסיגנל SIGUSR2 באמצעות sigprocmask. לאחר מכן, תהליך האב מבצע fork() ויוצר תהליך בן. תהליך הבן ממשיך לרוץ ואז מבצע execve() לתוכנית חדשה. איזו מהטענות הבאות נכונה לגבי מצב הסיגנלים בתהליך הבן *לאחר* ה-execve()?",
+      "code_snippet": null,
+      "options": [
+        "א. מטפל ה-SIGUSR1 יתאפס לברירת המחדל, ומסיכת חסימת ה-SIGUSR2 תישמר.",
+        "ב. מטפל ה-SIGUSR1 יירש מהאב, ומסיכת חסימת ה-SIGUSR2 תישמר.",
+        "ג. מטפל ה-SIGUSR1 יתאפס לברירת המחדל, ומסיכת חסימת ה-SIGUSR2 תתאפס אף היא לברירת המחדל (כלומר SIGUSR2 לא יהיה חסום).",
+        "ד. גם מטפל ה-SIGUSR1 וגם מסיכת חסימת ה-SIGUSR2 יירשו מהאב.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "ההתנהגות של סיגנלים לאחר fork() ולאחר execve() שונה באופן מהותי:\n\n1.  **לאחר fork()**: תהליך הבן יורש את כל מטפלי הסיגנלים (signal dispositions) ואת מסיכת הסיגנלים החסומים (signal mask) מתהליך האב. לכן, מיד לאחר ה-fork(), תהליך הבן יכיל את המטפל המוגדר עבור SIGUSR1 ו-SIGUSR2 יהיה חסום, בדיוק כמו באב.\n\n2.  **לאחר execve()**: כאשר תהליך מבצע execve() (או כל אחת מפונקציות ה-exec), הוא טוען ומריץ תוכנית חדשה. בהקשר של סיגנלים, מתרחשים שני דברים עיקריים:\n    *   **מטפלי סיגנלים (Signal Handlers)**: כל מטפלי הסיגנלים שהוגדרו באופן מותאם אישית (כלומר, אינם SIG_DFL - ברירת מחדל, או SIG_IGN - התעלמות) מתאפסים לברירת המחדל (SIG_DFL) בתוכנית החדשה. מכיוון ש-SIGUSR1 הוגדר עם מטפל מותאם אישית, הוא יתאפס לברירת המחדל.\n    *   **מסיכת סיגנלים (Signal Mask)**: מסיכת הסיגנלים החסומים נשמרת (preserved) על פני קריאת execve(). כלומר, הסיגנלים שהיו חסומים בתהליך המקורי יישארו חסומים גם בתוכנית החדשה. לכן, SIGUSR2 יישאר חסום.\n\nלפיכך, הטענה הנכונה היא שמטפל ה-SIGUSR1 יתאפס לברירת המחדל, ומסיכת חסימת ה-SIGUSR2 תישמר."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

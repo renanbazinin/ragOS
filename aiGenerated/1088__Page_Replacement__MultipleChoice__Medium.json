@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Page Replacement",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 07:52:30",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1059,
+      "output_tokens": 561,
+      "total_tokens": 3047
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Page Replacement",
+      "Virtual Memory",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "באלגוריתמי החלפת דפים, אילו מהטענות הבאות מתארת נכונה את מטרתם של ה-Reference Bit וה-Dirty Bit?",
+      "code_snippet": null,
+      "options": [
+        "ה-Reference Bit מציין אם הדף שונה (modified), וה-Dirty Bit מציין אם ניגשו לדף (accessed) לאחרונה.",
+        "ה-Reference Bit מציין אם ניגשו לדף (accessed) לאחרונה, וה-Dirty Bit מציין אם הדף שונה (modified) מאז שהועבר לזיכרון הראשי.",
+        "שניהם משמשים בעיקר באלגוריתם FIFO כדי לזהות את הדף המיושן ביותר לפי זמן.",
+        "שניהם משמשים אך ורק באלגוריתם LRU כדי לעקוב אחר סדר הגישה לדפים.",
+        "ה-Reference Bit משמש למניעת Belady's Anomaly, וה-Dirty Bit משמש לשיפור ביצועי ה-TLB."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב. ה-Reference Bit (או Accessed Bit) מוגדר ל-1 על ידי החומרה בכל פעם שניגשים לדף (קריאה או כתיבה), ומשמש אלגוריתמים כמו Clock או NRU לזיהוי דפים שנעשה בהם שימוש לאחרונה. ה-Dirty Bit (או Modified Bit) מוגדר ל-1 על ידי החומרה בכל פעם שתוכן הדף משתנה (כתיבה). הוא קריטי באלגוריתמי החלפת דפים מכיוון שדף 'מלוכלך' חייב להיכתב בחזרה לדיסק לפני שניתן יהיה לפנות אותו, בעוד שדף 'נקי' (שלא השתנה) ניתן לפנות ללא כתיבה לדיסק, ובכך לחסוך פעולת I/O יקרה."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

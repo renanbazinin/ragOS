@@ -1,0 +1,58 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Deadlocks and Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 21:35:18",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4085,
+      "output_tokens": 2762,
+      "total_tokens": 15068
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Deadlocks",
+      "Mutexes",
+      "Synchronization",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המשתמשת בחוטים (pthreads) ובמנעולים (mutexes) כדי לסנכרן גישה לשני משאבים (buffer1 ו-buffer2). התוכנית מורכבת משני חוטים, כאשר כל חוט מנסה להעביר נתונים בין המאגרים אך בסדר נעילה שונה. עיינו בקוד ובהמשך ענו על השאלות.",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h> // for usleep\n\n// Global resources and their mutexes\nint buffer1 = 10;\nint buffer2 = 0;\n\npthread_mutex_t mutex1; // Protects buffer1\npthread_mutex_t mutex2; // Protects buffer2\n\n// Simulate some work to increase the chance of interleaving\nvoid simulate_work() {\n    usleep(10000); // 10 milliseconds\n}\n\n// Thread function 1: Transfers data from buffer1 to buffer2\nvoid* transfer_thread_1(void* arg) {\n    printf(\"Thread 1: Attempting to lock mutex1...\\n\");\n    pthread_mutex_lock(&mutex1);\n    printf(\"Thread 1: Locked mutex1. Attempting to lock mutex2...\\n\");\n    simulate_work(); // Simulate work while holding mutex1\n    pthread_mutex_lock(&mutex2);\n    printf(\"Thread 1: Locked mutex2. Transferring data from buffer1 to buffer2.\\n\");\n\n    // Critical section\n    buffer2 += buffer1;\n    buffer1 = 0;\n    printf(\"Thread 1: Transfer complete. buffer1 = %d, buffer2 = %d\\n\", buffer1, buffer2);\n\n    pthread_mutex_unlock(&mutex2);\n    printf(\"Thread 1: Unlocked mutex2.\\n\");\n    pthread_mutex_unlock(&mutex1);\n    printf(\"Thread 1: Unlocked mutex1.\\n\");\n    return NULL;\n}\n\n// Thread function 2: Transfers data from buffer2 to buffer1\nvoid* transfer_thread_2(void* arg) {\n    printf(\"Thread 2: Attempting to lock mutex2...\\n\");\n    pthread_mutex_lock(&mutex2);\n    printf(\"Thread 2: Locked mutex2. Attempting to lock mutex1...\\n\");\n    simulate_work(); // Simulate work while holding mutex2\n    pthread_mutex_lock(&mutex1);\n    printf(\"Thread 2: Locked mutex1. Transferring data from buffer2 to buffer1.\\n\");\n\n    // Critical section\n    buffer1 += buffer2;\n    buffer2 = 0;\n    printf(\"Thread 2: Transfer complete. buffer1 = %d, buffer2 = %d\\n\", buffer1, buffer2);\n\n    pthread_mutex_unlock(&mutex1);\n    printf(\"Thread 2: Unlocked mutex1.\\n\");\n    pthread_mutex_unlock(&mutex2);\n    printf(\"Thread 2: Unlocked mutex2.\\n\");\n    return NULL;\n}\n\nint main() {\n    pthread_t tid1, tid2;\n\n    pthread_mutex_init(&mutex1, NULL);\n    pthread_mutex_init(&mutex2, NULL);\n\n    printf(\"Initial state: buffer1 = %d, buffer2 = %d\\n\", buffer1, buffer2);\n\n    pthread_create(&tid1, NULL, transfer_thread_1, NULL);\n    pthread_create(&tid2, NULL, transfer_thread_2, NULL);\n\n    pthread_join(tid1, NULL);\n    pthread_join(tid2, NULL);\n\n    pthread_mutex_destroy(&mutex1);\n    pthread_mutex_destroy(&mutex2);\n\n    printf(\"Final state: buffer1 = %d, buffer2 = %d\\n\", buffer1, buffer2);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "א. זהו את הבעיה העיקרית שיכולה להתרחש בתוכנית זו והסבירו מדוע היא מסווגת כבעיה זו.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "ב. תארו תרחיש ריצה ספציפי (interleaving) של החוטים המדגים כיצד הבעיה שזיהיתם בסעיף א' אכן מתרחשת. ציינו במפורש את פעולות הנעילה והשחרור של המנעולים עבור כל חוט.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.3",
+        "text": "ג. הציעו פתרון לבעיה שזיהיתם. כתבו את קטעי הקוד המתוקנים עבור פונקציות החוטים (transfer_thread_1 ו-transfer_thread_2) או עבור פונקציה משותפת חדשה, והסבירו בקצרה מדוע הפתרון שלכם מונע את הבעיה.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": false,
+      "correct_option": null,
+      "explanation": "1. הבעיה העיקרית שיכולה להתרחש בתוכנית היא קיפאון (Deadlock). קיפאון מתרחש כאשר שני חוטים או יותר נחסמים באופן אינסופי וממתינים למשאבים שמוחזקים על ידי חוטים אחרים באותה קבוצה. במקרה זה, חוט 1 דורש את mutex1 ואז את mutex2, בעוד שחוט 2 דורש את mutex2 ואז את mutex1. אם כל חוט תופס את המנעול הראשון שלו בו זמנית (חוט 1 תופס את mutex1 וחוט 2 תופס את mutex2), הם יחסמו אחד את השני בניסיון לתפוס את המנעול השני, ולא יוכלו להתקדם.\n\n2. תרחיש ריצה המוביל לקיפאון:\n   א. חוט 1 מבצע: `pthread_mutex_lock(&mutex1);` - חוט 1 תופס את mutex1.\n   ב. חוט 2 מבצע: `pthread_mutex_lock(&mutex2);` - חוט 2 תופס את mutex2.\n   ג. חוט 1 ממשיך לבצע: `simulate_work();` - מבצע עבודה כלשהי תוך כדי שהוא מחזיק ב-mutex1.\n   ד. חוט 2 ממשיך לבצע: `simulate_work();` - מבצע עבודה כלשהי תוך כדי שהוא מחזיק ב-mutex2.\n   ה. חוט 1 מנסה לבצע: `pthread_mutex_lock(&mutex2);` - חוט 1 נחסם, מכיוון ש-mutex2 מוחזק על ידי חוט 2.\n   ו. חוט 2 מנסה לבצע: `pthread_mutex_lock(&mutex1);` - חוט 2 נחסם, מכיוון ש-mutex1 מוחזק על ידי חוט 1.\n   בנקודה זו, שני החוטים חסומים באופן הדדי ואינסופי, ממתינים למשאב שהשני מחזיק, ונוצר קיפאון.\n\n3. הפתרון הנפוץ והיעיל ביותר למניעת קיפאון מסוג זה הוא אכיפת סדר נעילה קבוע (Locking Order) עבור כל המשאבים. כל החוטים שדורשים גישה למספר מנעולים חייבים לתפוס אותם באותו סדר מוגדר מראש. במקרה זה, נגדיר שכל החוטים יתפסו תמיד קודם את `mutex1` ולאחר מכן את `mutex2`.\n\n**קוד מתוקן:**\n```c\n// Thread function 1: Transfers data from buffer1 to buffer2\nvoid* transfer_thread_1(void* arg) {\n    // Always lock mutex1 then mutex2\n    printf(\"Thread 1: Attempting to lock mutex1...\\n\");\n    pthread_mutex_lock(&mutex1);\n    printf(\"Thread 1: Locked mutex1. Attempting to lock mutex2...\\n\");\n    simulate_work();\n    pthread_mutex_lock(&mutex2);\n    printf(\"Thread 1: Locked mutex2. Transferring data from buffer1 to buffer2.\\n\");\n\n    buffer2 += buffer1;\n    buffer1 = 0;\n    printf(\"Thread 1: Transfer complete. buffer1 = %d, buffer2 = %d\\n\", buffer1, buffer2);\n\n    pthread_mutex_unlock(&mutex2);\n    printf(\"Thread 1: Unlocked mutex2.\\n\");\n    pthread_mutex_unlock(&mutex1);\n    printf(\"Thread 1: Unlocked mutex1.\\n\");\n    return NULL;\n}\n\n// Thread function 2: Transfers data from buffer2 to buffer1\nvoid* transfer_thread_2(void* arg) {\n    // Enforce the same locking order: always mutex1 then mutex2\n    printf(\"Thread 2: Attempting to lock mutex1...\\n\"); // Changed from mutex2\n    pthread_mutex_lock(&mutex1); // Changed from mutex2\n    printf(\"Thread 2: Locked mutex1. Attempting to lock mutex2...\\n\");\n    simulate_work();\n    pthread_mutex_lock(&mutex2);\n    printf(\"Thread 2: Locked mutex2. Transferring data from buffer2 to buffer1.\\n\");\n\n    buffer1 += buffer2;\n    buffer2 = 0;\n    printf(\"Thread 2: Transfer complete. buffer1 = %d, buffer2 = %d\\n\", buffer1, buffer2);\n\n    pthread_mutex_unlock(&mutex2);\n    printf(\"Thread 2: Unlocked mutex2.\\n\");\n    pthread_mutex_unlock(&mutex1);\n    printf(\"Thread 2: Unlocked mutex1.\\n\");\n    return NULL;\n}\n```\n**הסבר:**\nעל ידי אכיפת סדר נעילה עקבי (mutex1 ואז mutex2) עבור שני החוטים, אנו מבטלים את התנאי של \"המתנה מעגלית\" (Circular Wait), שהוא אחד מארבעת התנאים ההכרחיים לקיפאון. כעת, אם חוט 1 מחזיק ב-mutex1 וממתין ל-mutex2, חוט 2 לא יוכל לתפוס את mutex2 לפני ש-mutex1 ישוחרר (מכיוון שגם הוא צריך לתפוס את mutex1 קודם). במילים אחרות, חוט אחד יתפוס את שני המנעולים ויסיים את עבודתו לפני שהשני יוכל להתחיל לתפוס את שניהם, ובכך נמנע קיפאון."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

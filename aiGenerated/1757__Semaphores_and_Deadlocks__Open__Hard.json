@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Deadlocks",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 20:33:59",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4395,
+      "output_tokens": 2665,
+      "total_tokens": 15012
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Semaphores",
+      "Deadlocks",
+      "Concurrency",
+      "Resource Management"
+    ],
+    "content": {
+      "text": "מניעת קיפאון במערכת ניהול משאבים עם סמפורים\n\nנתונה מערכת הכוללת N תהליכונים (threads) ו-M פריטי נתונים משותפים (shared data items), הממוספרים מ-0 עד M-1. כל פריט נתונים מוגן על ידי סמפור בינארי משלו. \n\nכל תהליכון מבצע בלולאה אינסופית את הפעולות הבאות:\n1. בוחר באופן אקראי שני פריטי נתונים *שונים* `item_idx_1` ו-`item_idx_2` מתוך `M` הפריטים הזמינים.\n2. מנסה לנעול את `item_idx_1` ולאחר מכן את `item_idx_2`.\n3. לאחר נעילת שני הפריטים, מבצע פעולה קריטית כלשהי (critical section).\n4. משחרר את הנעילה מ-`item_idx_1` ולאחר מכן מ-`item_idx_2`.\n\n**הבעיה**: מימוש נאיבי של לקיחת המשאבים עלול להוביל למצב של קיפאון (deadlock). \n\n**המשימה**:\nא.  יש להגדיר את מבנה הנתונים הנדרש עבור המערכת (לדוגמה, מערך סמפורים).\nב.  יש לממש את פונקציית `worker_thread_func` אשר מדמה את פעולת התהליכון, תוך שימוש בסמפורים בלבד, כך שמובטח שלא ייווצר מצב קיפאון במערכת.\nג.  יש להסביר את מנגנון מניעת הקיפאון בפתרון שהצעתם.\n\n**דרישות**:\n*   השתמשו בשפת C/C++.\n*   ההסבר צריך להיות מפורט ומנומק.\n*   המטרה היא למקסם את המקביליות האפשרית ללא קיפאון.",
+      "code_snippet": "/* מבנה הנתונים הנדרש */\ntypedef struct {\n    sem_t *item_locks; // Array of semaphores for each item\n    int num_items;     // Number of shared items\n} SystemState;\n\n/* חתימת פונקציית התהליכון */\nvoid *worker_thread_func(void *arg) {\n    SystemState *sys = (SystemState *)arg;\n    \n    // יש לממש את לוגיקת התהליכון כאן, כולל רכישת שני פריטים שונים\n    // ומניעת קיפאון.\n    \n    return NULL;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הסבר הפתרון:\nכדי למנוע קיפאון במצב שבו תהליכונים זקוקים לשני משאבים שונים בו זמנית, נשתמש באסטרטגיית מניעת קיפאון של \"היררכיית משאבים\" (Resource Ordering). אסטרטגיה זו מונעת את התנאי הרביעי לקיפאון (circular wait) על ידי אילוץ כל התהליכונים לרכוש משאבים בסדר קבוע ומוגדר מראש.\n\nבמקרה זה, מכיוון שלכל פריט נתונים יש אינדקס ייחודי (0 עד M-1), נוכל להגדיר סדר גלובלי לרכישת המשאבים: תמיד לרכוש את המשאב בעל האינדקס הנמוך יותר תחילה, ולאחר מכן את המשאב בעל האינדקס הגבוה יותר.\n\nשלבי הפעולה של תהליכון:\n1.  התהליכון בוחר שני אינדקסים `idx1` ו-`idx2` עבור פריטי הנתונים שהוא זקוק להם. הוא מוודא ש-`idx1 != idx2`.\n2.  הוא קובע את סדר הרכישה על ידי השוואת האינדקסים:\n    *   `first_idx = min(idx1, idx2)`\n    *   `second_idx = max(idx1, idx2)`\n3.  התהליכון מבצע `sem_wait` על הסמפור של `sys->item_locks[first_idx]`.\n4.  לאחר מכן, הוא מבצע `sem_wait` על הסמפור של `sys->item_locks[second_idx]`.\n5.  כעת, כשהוא מחזיק בשני המשאבים, הוא מבצע את הפעולה הקריטית.\n6.  לאחר סיום הפעולה, הוא משחרר את המשאבים על ידי `sem_post` על הסמפורים. סדר השחרור פחות קריטי למניעת קיפאון, אך נוהג מקובל הוא לשחרר בסדר הפוך לרכישה, או פשוט לשחרר את שניהם.\n\nכיצד זה מונע קיפאון?\nקיפאון מתרחש כאשר קיימת שרשרת מעגלית של תהליכונים, כאשר כל תהליכון בשרשרת ממתין למשאב שמוחזק על ידי התהליכון הבא בשרשרת. על ידי אכיפת סדר רכישה גלובלי, אנו מבטיחים שלעולם לא תוכל להיווצר שרשרת המתנה מעגלית.\nלדוגמה, אם תהליכון A זקוק למשאבים (i, j) ותהליכון B זקוק למשאבים (j, i):\n*   תהליכון A ינסה לרכוש `min(i,j)` ואז `max(i,j)`.\n*   תהליכון B ינסה לרכוש `min(j,i)` ואז `max(j,i)`.\nמאחר ש-`min(i,j)` שווה ל-`min(j,i)`, ושניהם ינסו לרכוש את אותו המשאב הראשון. רק אחד מהם יצליח. התהליכון שיצליח ימשיך לרכוש את המשאב השני. התהליכון שלא יצליח ימתין עד שהמשאב הראשון ישוחרר. בשום שלב לא תהיה סיטואציה שבה A מחזיק ב-i וממתין ל-j, בעוד B מחזיק ב-j וממתין ל-i, מכיוון ששניהם היו מנסים לרכוש את `min(i,j)` ראשון. כך נמנע מצב של המתנה מעגלית.\n\nמקסימום מקביליות:\nפתרון זה מאפשר מקסימום מקביליות במידה סבירה, שכן הוא מאפשר לכל זוג משאבים שאינו מעורב בקיפאון פוטנציאלי להינעל באופן עצמאי. כל עוד תהליכונים רוכשים זוגות משאבים שונים ובהתאם לסדר המוגדר, הם יכולים להתקדם במקביל.\n\nקוד C/C++ למימוש:\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <pthread.h>\n#include <semaphore.h>\n#include <unistd.h> // For usleep\n#include <time.h>   // For srand, rand\n\n// מבנה הנתונים הנדרש\ntypedef struct {\n    sem_t *item_locks; // Array of semaphores for each item\n    int num_items;     // Number of shared items\n} SystemState;\n\n// פונקציית התהליכון\nvoid *worker_thread_func(void *arg) {\n    SystemState *sys = (SystemState *)arg;\n    // שימוש ב-pthread_self() כמעין ID יחידני ללוגים, למרות שזה לא מובטח להיות עוקב\n    long thread_id = (long)pthread_self(); \n\n    while (1) {\n        // 1. בחירה אקראית של שני פריטי נתונים שונים\n        int item_idx_1, item_idx_2;\n        do {\n            item_idx_1 = rand() % sys->num_items;\n            item_idx_2 = rand() % sys->num_items;\n        } while (item_idx_1 == item_idx_2);\n\n        // 2. קביעת סדר הרכישה (אינדקס נמוך תחילה)\n        int first_lock_idx = (item_idx_1 < item_idx_2) ? item_idx_1 : item_idx_2;\n        int second_lock_idx = (item_idx_1 < item_idx_2) ? item_idx_2 : item_idx_1;\n\n        printf(\"Thread %ld: Trying to acquire items %d and %d (ordered: %d then %d)\\n\",\n               thread_id, item_idx_1, item_idx_2, first_lock_idx, second_lock_idx);\n\n        // 3. רכישת המשאב הראשון\n        sem_wait(&sys->item_locks[first_lock_idx]);\n        printf(\"Thread %ld: Acquired item %d\\n\", thread_id, first_lock_idx);\n        \n        // 4. רכישת המשאב השני\n        sem_wait(&sys->item_locks[second_lock_idx]);\n        printf(\"Thread %ld: Acquired items %d and %d\\n\", thread_id, first_lock_idx, second_lock_idx);\n\n        // 5. ביצוע פעולה קריטית\n        printf(\"Thread %ld: Performing critical operation on items %d and %d\\n\",\n               thread_id, item_idx_1, item_idx_2);\n        usleep(rand() % 100000 + 50000); // הדמיית עבודה קריטית (50-150ms)\n\n        // 6. שחרור המשאבים\n        sem_post(&sys->item_locks[second_lock_idx]);\n        sem_post(&sys->item_locks[first_lock_idx]);\n        printf(\"Thread %ld: Released items %d and %d\\n\", thread_id, first_lock_idx, second_lock_idx);\n\n        usleep(rand() % 200000 + 100000); // הדמיית עבודה מחוץ לקטע הקריטי (100-300ms)\n    }\n\n    return NULL;\n}\n```",
+      "difficulty_estimation": "Hard"
+    }
+  }
+}

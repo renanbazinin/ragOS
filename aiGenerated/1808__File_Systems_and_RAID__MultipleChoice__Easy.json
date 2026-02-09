@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "File Systems and RAID",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 21:00:27",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1064,
+      "output_tokens": 400,
+      "total_tokens": 2396
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "File Systems",
+      "RAID"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של RAID רמה 1 (Mirroring)?",
+      "code_snippet": null,
+      "options": [
+        "א. הגדלת מהירות הקריאה והכתיבה על ידי פיצול נתונים בין דיסקים שונים.",
+        "ב. יצירת עותק זהה של הנתונים על דיסק נוסף, לצורך גיבוי ושרידות כשל.",
+        "ג. שילוב דיסקים מרובים לדיסק לוגי אחד ללא יתירות.",
+        "ד. שימוש בדיסק אחד לאחסון נתונים ובדיסק אחר לאחסון מידע זוגיות (parity) לצורך שחזור.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב'. כפי שנלמד, RAID רמה 1 (Mirroring) משכפל נתונים באופן זהה על שני דיסקים פיזיים או יותר. המטרה העיקרית היא לספק יתירות (redundancy) ושרידות כשל (fault tolerance), כך שאם אחד הדיסקים נכשל, הנתונים עדיין זמינים ונגישים מהדיסק המראה (mirrored disk) השני."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

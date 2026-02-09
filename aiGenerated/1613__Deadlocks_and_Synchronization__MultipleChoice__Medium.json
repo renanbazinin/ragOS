@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Deadlocks and Synchronization",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 11:51:40",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1163,
+      "output_tokens": 749,
+      "total_tokens": 4429
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Deadlocks",
+      "Synchronization",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא המשתמש בשני מנעולים (mutexes) ובשני חוטים שונים. בהנחה ששני החוטים מופעלים במקביל, איזה מהתנאים הבאים לקיום קיפאון הוא הגורם המרכזי לאפשרות לקיפאון במערכת זו?",
+      "code_snippet": "pthread_mutex_t m1, m2;\n\nvoid* thread_func1(void* arg) {\n    pthread_mutex_lock(&m1);\n    // עושה עבודה כלשהי\n    pthread_mutex_lock(&m2);\n    // עושה עבודה נוספת\n    pthread_mutex_unlock(&m2);\n    pthread_mutex_unlock(&m1);\n    return NULL;\n}\n\nvoid* thread_func2(void* arg) {\n    pthread_mutex_lock(&m2);\n    // עושה עבודה כלשהי\n    pthread_mutex_lock(&m1);\n    // עושה עבודה נוספת\n    pthread_mutex_unlock(&m1);\n    pthread_mutex_unlock(&m2);\n    return NULL;\n}",
+      "options": [
+        "א. קיפאון אינו אפשרי כלל במערכת זו.",
+        "ב. קיפאון אפשרי בעיקר בשל תנאי 'החזק והמתן' (Hold and Wait).",
+        "ג. קיפאון אפשרי בעיקר בשל תנאי 'המתנה מעגלית' (Circular Wait).",
+        "ד. קיפאון אפשרי בעיקר בשל תנאי 'אי-הפקעה' (No Preemption)."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "תנאי הדדיות (Mutual Exclusion), החזק והמתן (Hold and Wait) ואי-הפקעה (No Preemption) קיימים במערכת זו באופן טבעי עקב השימוש במנעולים (mutexes). עם זאת, הגורם המרכזי והספציפי שמאפשר קיפאון בתרחיש זה הוא תנאי ההמתנה המעגלית (Circular Wait). חוט 1 מנסה לרכוש את m1 ואז את m2, בעוד חוט 2 מנסה לרכוש את m2 ואז את m1. אם חוט 1 רוכש את m1 וחוט 2 רוכש את m2, שניהם ימתינו אינסוף לנעילה שהשני מחזיק, ובכך נוצרת המתנה מעגלית. כדי למנוע זאת, ניתן לאכוף סדר אחיד לרכישת המנעולים בשני החוטים (לדוגמה, תמיד לרכוש קודם את m1 ואז את m2)."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

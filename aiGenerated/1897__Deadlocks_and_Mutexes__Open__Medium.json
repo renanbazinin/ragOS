@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Deadlocks and Mutexes",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 21:38:15",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2445,
+      "output_tokens": 2343,
+      "total_tokens": 8168
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "Open",
+    "topic": [
+      "Deadlocks",
+      "Mutexes",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתונה תוכנית המכילה שני תהליכונים (threads), `Thread A` ו-`Thread B`, ושני מנעולים (mutexes), `mutex1` ו-`mutex2`, אשר מאותחלים וזמינים לשימוש. תהליכונים אלו מנסים לגשת לקטע קריטי משותף הדורש החזקה של שני המנעולים בו זמנית.\n`Thread A` מבצע את הפעולות הבאות:\n1.  תופס את `mutex1`.\n2.  תופס את `mutex2`.\n3.  מבצע פעולה קריטית.\n4.  משחרר את `mutex2`.\n5.  משחרר את `mutex1`.\n\n`Thread B` מבצע את הפעולות הבאות:\n1.  תופס את `mutex2`.\n2.  תופס את `mutex1`.\n3.  מבצע פעולה קריטית.\n4.  משחרר את `mutex1`.\n5.  משחרר את `mutex2`.\n\nא. האם תרחיש זה יכול להוביל למצב של קיפאון (deadlock)? אם כן, הסבר מדוע וכיצד הוא מתרחש תוך התייחסות לארבעת התנאים ההכרחיים לקיפאון.\nב. הצע פתרון למניעת קיפאון במצב זה. הצג את השינויים הנדרשים בקוד (במידת הצורך) והסבר כיצד הפתרון שלך מונע קיפאון, תוך התייחסות לתנאי הקיפאון שנשבר.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "א. **האם תרחיש זה יכול להוביל למצב של קיפאון (deadlock)?**\nכן, תרחיש זה אכן יכול להוביל למצב של קיפאון (deadlock).\n\n**הסבר:**\nקיפאון מתרחש כאשר מתקיימים ארבעת התנאים הבאים:\n1.  **Mutual Exclusion (מניעה הדדית):** המשאבים (המנעולים `mutex1` ו-`mutex2`) ניתנים לשימוש על ידי תהליך אחד בלבד בכל רגע נתון. תנאי זה מתקיים שכן מנעולים מטבעם אוכפים מניעה הדדית – רק תהליכון אחד יכול להחזיק במנעול מסוים בזמן נתון.\n2.  **Hold and Wait (החזקה והמתנה):** תהליכון מחזיק במשאב אחד לפחות וממתין למשאבים נוספים שמוחזקים על ידי תהליכונים אחרים.\n    *   `Thread A` תופס את `mutex1` וממתין ל-`mutex2`.\n    *   `Thread B` תופס את `mutex2` וממתין ל-`mutex1`.\n    תנאי זה מתקיים שכן כל תהליכון מחזיק במנעול אחד ומנסה לרכוש את המנעול השני.\n3.  **No Preemption (אי-נשללות):** לא ניתן לקחת משאב מתהליכון שמחזיק בו, אלא רק הוא יכול לשחרר אותו מרצונו. מנעולים אינם ניתנים לשליפה כפויה, כלומר, תהליכון יכול לשחרר מנעול רק מרצונו. תנאי זה מתקיים.\n4.  **Circular Wait (המתנה מעגלית):** קיימת שרשרת מעגלית של תהליכונים, כאשר כל תהליכון בשרשרת ממתין למשאב המוחזק על ידי התהליכון הבא בשרשרת.\n    *   `Thread A` ממתין ל-`mutex2` שמוחזק על ידי `Thread B`.\n    *   `Thread B` ממתין ל-`mutex1` שמוחזק על ידי `Thread A`.\n    קיימת המתנה מעגלית: `Thread A` מחכה ל-`Thread B`, ו-`Thread B` מחכה ל-`Thread A`. תנאי זה מתקיים.\n\nכאשר כל ארבעת התנאים מתקיימים, המערכת יכולה להיכנס לקיפאון. לדוגמה, התרחיש הבא יוביל לקיפאון:\n1.  `Thread A` תופס את `mutex1`.\n2.  `Thread B` תופס את `mutex2`.\n3.  `Thread A` מנסה לתפוס את `mutex2` ונחסם (כי `Thread B` מחזיק בו).\n4.  `Thread B` מנסה לתפוס את `mutex1` ונחסם (כי `Thread A` מחזיק בו).\nשני התהליכונים חסומים זה לזה במצב של המתנה הדדית, ואינם יכולים להמשיך, מה שמוביל לקיפאון.\n\nב. **פתרון למניעת קיפאון:**\nהדרך הנפוצה והפשוטה ביותר למנוע קיפאון במצב זה היא על ידי אכיפת סדר עקבי (global ordering) ברכישת המשאבים. אם כל התהליכונים ירכשו את המשאבים באותו סדר, תנאי ההמתנה המעגלית (Circular Wait) יישבר.\n\n**שינויים נדרשים בקוד:**\nנניח שנקבע סדר רכישה: תמיד קודם `mutex1` ואז `mutex2`. הנה דוגמת קוד ב-C/C++ באמצעות Pthreads:\n\n```c\n#include <stdio.h>\n#include <pthread.h>\n\npthread_mutex_t mutex1 = PTHREAD_MUTEX_INITIALIZER;\npthread_mutex_t mutex2 = PTHREAD_MUTEX_INITIALIZER;\n\nvoid* thread_A_function(void* arg) {\n    printf(\"Thread A: Trying to acquire mutex1...\\n\");\n    pthread_mutex_lock(&mutex1); // Acquire mutex1 first\n    printf(\"Thread A: Acquired mutex1. Trying to acquire mutex2...\\n\");\n    pthread_mutex_lock(&mutex2); // Then acquire mutex2\n\n    // Critical section\n    printf(\"Thread A: Acquired both mutexes. Performing critical operation...\\n\");\n    // ... perform critical operation ...\n\n    printf(\"Thread A: Releasing mutex2...\\n\");\n    pthread_mutex_unlock(&mutex2);\n    printf(\"Thread A: Releasing mutex1...\\n\");\n    pthread_mutex_unlock(&mutex1);\n    return NULL;\n}\n\nvoid* thread_B_function(void* arg) {\n    printf(\"Thread B: Trying to acquire mutex1...\\n\");\n    pthread_mutex_lock(&mutex1); // Acquire mutex1 first (same order as Thread A)\n    printf(\"Thread B: Acquired mutex1. Trying to acquire mutex2...\\n\");\n    pthread_mutex_lock(&mutex2); // Then acquire mutex2 (same order as Thread A)\n\n    // Critical section\n    printf(\"Thread B: Acquired both mutexes. Performing critical operation...\\n\");\n    // ... perform critical operation ...\n\n    printf(\"Thread B: Releasing mutex2...\\n\");\n    pthread_mutex_unlock(&mutex2);\n    printf(\"Thread B: Releasing mutex1...\\n\");\n    pthread_mutex_unlock(&mutex1);\n    return NULL;\n}\n\n// int main() { /* ... thread creation and joining ... */ }\n```\n\n**הסבר כיצד הפתרון מונע קיפאון:**\nעל ידי אכיפת סדר רכישה גלובלי (לדוגמה, תמיד `mutex1` ואז `mutex2`), אנחנו שוברים את תנאי ההמתנה המעגלית (Circular Wait). במצב כזה:\n\n*   `Thread A` ינסה לרכוש את `mutex1` ואז את `mutex2`.\n*   `Thread B` ינסה גם הוא לרכוש את `mutex1` ואז את `mutex2`.\n\nרק אחד מהתהליכונים יוכל לרכוש את `mutex1` ראשון. נניח ש-`Thread A` רכש את `mutex1`. כעת `Thread B` יחסם בניסיון לרכוש את `mutex1` ולא יוכל להמשיך לפני ש-`Thread A` ישחרר אותו. `Thread A` ימשיך לרכוש את `mutex2`, יבצע את פעולתו, וישחרר את שני המנעולים. רק אז `Thread B` יוכל לרכוש את `mutex1` (ואחריו את `mutex2`), לבצע את פעולתו ולשחרר אותם.\n\nבמצב זה, לא תיווצר שרשרת המתנה מעגלית, שכן תהליכון שרכש את `mutex2` (המשאב בעל הסדר הגבוה יותר) לא יצטרך אף פעם לרכוש את `mutex1` (המשאב בעל הסדר הנמוך יותר) לאחר מכן. בכך נמנעת האפשרות לקיפאון מסוג Hold and Wait עם Circular Wait, ותנאי ההמתנה המעגלית נשבר."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

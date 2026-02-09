@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Copy-on-Write",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 08:51:45",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1142,
+      "output_tokens": 591,
+      "total_tokens": 2653
+    }
+  },
+  "question": {
+    "id": 6,
+    "type": "MultipleChoice",
+    "topic": [
+      "Copy-on-Write",
+      "Virtual Memory",
+      "Processes"
+    ],
+    "content": {
+      "text": "בהינתן תהליך אב ותהליך בן שנוצר באמצעות ()fork, כאשר מערכת ההפעלה משתמשת במנגנון Copy-on-Write (COW) עבור דפי הזיכרון. מה יקרה כאשר תהליך הבן ינסה לכתוב לזיכרון בדף שהיה משותף לו ולאב?",
+      "code_snippet": null,
+      "options": [
+        "א. הכתיבה תתבצע ישירות לדף הזיכרון המשותף, ותשנה את התוכן עבור שני התהליכים.",
+        "ב. מערכת ההפעלה תיצור עותק חדש של הדף עבור תהליך הבן, והכתיבה תתבצע לעותק זה.",
+        "ג. מערכת ההפעלה תיצור עותק חדש של הדף עבור תהליך האב, והכתיבה תתבצע לדף המקורי (שיהפוך כעת לדף של הבן).",
+        "ד. תהליך הבן יקבל שגיאת הגנה (segmentation fault) מאחר והדף מסומן כקריאה בלבד."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "כאשר תהליך הבן מנסה לכתוב לדף זיכרון המשותף לו ולאב תחת מנגנון Copy-on-Write (COW), הדף מסומן במקור כקריאה בלבד עבור שני התהליכים (לאחר ה-fork). ניסיון הכתיבה של הבן מפעיל חריגה (page fault). מנגנון COW מזהה זאת, יוצר עותק פרטי של הדף עבור הבן, מעדכן את טבלת הדפים של הבן שתצביע על הדף החדש (ומסמן אותו כניתן לכתיבה), ומאפשר לבן לבצע את הכתיבה לעותק הפרטי שלו. דף האב נשאר ללא שינוי, והאב ממשיך להשתמש בו באופן נפרד. לכן, הכתיבה של הבן אינה משפיעה על האב."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

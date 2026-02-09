@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Memory Management and Page Replacement",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 10:45:35",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 941,
+      "output_tokens": 425,
+      "total_tokens": 2472
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Memory Management",
+      "Page Replacement",
+      "Optimal Algorithm"
+    ],
+    "content": {
+      "text": "אלגוריתם החלפת הדפים האופטימלי (Optimal Page Replacement Algorithm) מבטיח את מספר ה-Page Faults הנמוך ביותר האפשרי. עם זאת, הוא אינו ניתן ליישום בפועל במערכות הפעלה מודרניות. מהי הסיבה העיקרית לכך?",
+      "code_snippet": null,
+      "options": [
+        "א. הוא דורש ידע מוקדם על רצף הגישות לדפים בעתיד.",
+        "ב. הוא גורם לעומס חישובי גבוה מדי על המעבד.",
+        "ג. הוא אינו תומך בניהול זיכרון וירטואלי.",
+        "ד. הוא מצריך כמות עצומה של זיכרון לניהול המידע.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "האלגוריתם האופטימלי דורש לדעת אילו דפים לא ישמשו במשך הזמן הארוך ביותר בעתיד, כדי לפנות אותם. ידע זה על העתיד אינו זמין למערכת ההפעלה בזמן אמת, ולכן האלגוריתם אינו ניתן ליישום בפועל, אלא משמש רק כבסיס השוואה תיאורטי."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

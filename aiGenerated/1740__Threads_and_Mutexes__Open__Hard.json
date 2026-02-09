@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Threads and Mutexes",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 20:27:30",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4527,
+      "output_tokens": 1730,
+      "total_tokens": 10043
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Threads",
+      "Mutexes",
+      "Concurrency",
+      "Race Condition"
+    ],
+    "content": {
+      "text": "נתון קטע קוד C המשתמש בתהליכונים (threads) ובמנעולים (mutexes) כדי לעדכן מונה גלובלי משותף. הקוד נועד להבטיח שכל התהליכונים יחד יגדילו את המונה למספר סופי וצפוי.\n\nעם זאת, לאחר הרצת הקוד מספר פעמים, מתקבל לעיתים קרובות ערך סופי של המונה הגלובלי שאינו תואם לערך הצפוי. לדוגמה, עבור 5 תהליכונים שכל אחד מבצע מיליון הגדלות, הערך הסופי אינו 5,000,000.\n\nא. זהה את הבעיה בקטע הקוד. הסבר בפירוט מדוע היא מתרחשת (תוך התייחסות למבנה פעולת ההגדלה של המונה) ומהן ההשלכות שלה על נכונות התוכנית.\n\nב. הצג פתרון מתוקן לקטע הקוד (רק את הפונקציה `thread_function` מספיק), והסבר מדוע הפתרון שלך מבטיח עבודה נכונה ומונע את הבעיה שזוהתה בסעיף א'.",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h> // For exit\n\n#define NUM_THREADS 5\n#define ITERATIONS_PER_THREAD 1000000\n\nlong long global_counter = 0;\npthread_mutex_t mutex;\n\nvoid* thread_function(void* arg) {\n    long long local_iterations = ITERATIONS_PER_THREAD;\n    while (local_iterations > 0) {\n        long long temp = global_counter; // BUG: Read outside lock\n        pthread_mutex_lock(&mutex);\n        global_counter = temp + 1;      // Write inside lock\n        pthread_mutex_unlock(&mutex);\n        local_iterations--;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n    pthread_mutex_init(&mutex, NULL);\n\n    for (int i = 0; i < NUM_THREADS; i++) {\n        if (pthread_create(&threads[i], NULL, thread_function, NULL) != 0) {\n            perror(\"Failed to create thread\");\n            exit(EXIT_FAILURE);\n        }\n    }\n\n    for (int i = 0; i < NUM_THREADS; i++) {\n        if (pthread_join(threads[i], NULL) != 0) {\n            perror(\"Failed to join thread\");\n            exit(EXIT_FAILURE);\n        }\n    }\n\n    printf(\"Final global counter value: %lld\\n\", global_counter);\n    printf(\"Expected value: %lld\\n\", (long long)NUM_THREADS * ITERATIONS_PER_THREAD);\n\n    pthread_mutex_destroy(&mutex);\n    return 0;\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "א. הבעיה בקטע הקוד היא תנאי מרוץ (Race Condition) המוביל לאובדן עדכונים (Lost Updates) של המונה הגלובלי. פעולת ההגדלה של המונה, `global_counter++`, אינה פעולה אטומית בפועל ברמת המעבד. היא מורכבת משלושה שלבים עיקריים:\n1.  קריאת הערך הנוכחי של `global_counter` לתוך רגיסטר (או משתנה זמני, במקרה זה `temp`).\n2.  הגדלת הערך ברגיסטר באחד.\n3.  כתיבת הערך המוגדל מהרגיסטר בחזרה ל`global_counter`.\n\nבקטע הקוד הנתון, השלב הראשון (קריאת הערך לתוך `temp = global_counter;`) מתבצע מחוץ לאזור הקריטי המוגן על ידי המנעול. כלומר, תהליכון יכול לקרוא את הערך של `global_counter` לתוך המשתנה המקומי `temp`, ואז לפני שהוא מספיק לנעול את המנעול ולכתוב את הערך המוגדל בחזרה, תהליכון אחר יכול גם הוא לקרוא את אותו ערך ישן של `global_counter`. כאשר שני התהליכונים כותבים בחזרה את הערך המוגדל (כל אחד בתורו, בתוך אזור מוגן), אחד מהעדכונים יאבד מכיוון ששניהם התבססו על אותו ערך התחלתי שנקרא לפני שהמנעול נתפס.\n\nההשלכות הן שהמונה הגלובלי יכיל בסיום הרצת התוכנית ערך נמוך מהצפוי. ככל שמספר התהליכונים והאיטרציות גדול יותר, כך גדל הסיכוי לאובדן עדכונים, והפער בין הערך בפועל לערך הצפוי יגדל.\n\nב. הפתרון המתוקן דורש שהקריאה, ההגדלה והכתיבה של המונה הגלובלי יתבצעו כולן בתוך האזור הקריטי המוגן על ידי המנעול. הדרך הפשוטה והנכונה ביותר היא להשתמש באופרטור ההגדלה `++` בתוך האזור המוגן, מכיוון שהוא מייצג את כל שלושת השלבים של הפעולה.\n\n```c\nvoid* thread_function(void* arg) {\n    long long local_iterations = ITERATIONS_PER_THREAD;\n    while (local_iterations > 0) {\n        pthread_mutex_lock(&mutex);\n        global_counter++; // Corrected: All operations (read, increment, write) are inside the lock\n        pthread_mutex_unlock(&mutex);\n        local_iterations--;\n    }\n    return NULL;\n}\n```\n\nהפתרון המתוקן מבטיח עבודה נכונה מכיוון שעתה כל שלושת השלבים של פעולת ההגדלה (קריאה, הגדלה, כתיבה) מוגנים על ידי המנעול. כאשר תהליכון אחד מחזיק את המנעול, אף תהליכון אחר אינו יכול להיכנס לאזור הקריטי ולגשת ל`global_counter`. זה מבטיח שאף קריאה לא תתבסס על ערך מיושן, ושאף עדכון לא יאבד. כל תהליכון שיבצע את ההגדלה יראה את הערך העדכני ביותר של המונה, ויגדיל אותו באופן בלעדי לפני שחרור המנעול ומאפשר לתהליכון הבא לגשת אליו. בכך נמנע תנאי המרוץ ונשמרת נכונות המונה הגלובלי."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

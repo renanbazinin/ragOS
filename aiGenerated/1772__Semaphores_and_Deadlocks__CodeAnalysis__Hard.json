@@ -1,0 +1,53 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Deadlocks",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 20:44:40",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4285,
+      "output_tokens": 2364,
+      "total_tokens": 12099
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Semaphores",
+      "Deadlocks",
+      "Concurrency",
+      "Synchronization",
+      "Resource Allocation"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המדמה הקצאת משאבים במערכת הפעלה. במערכת קיימים שני סוגי משאבים, R1 ו-R2, המוגנים על ידי סמפורים בינאריים `s1` ו-`s2` בהתאמה, שמאותחלים ל-1. קיימים שני סוגי תהליכונים (threads), `threadA_func` ו-`threadB_func`, המנסים לתפוס ולהשתמש במשאבים אלו. \n\nיש לענות על הסעיפים הבאים בהתבסס על הקוד הנתון:",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <semaphore.h>\n#include <unistd.h> // For sleep\n\nsem_t s1; // Protects Resource 1\nsem_t s2; // Protects Resource 2\n\nvoid* threadA_func(void* arg) {\n    printf(\"Thread A: Trying to acquire s1...\\n\");\n    sem_wait(&s1);\n    printf(\"Thread A: Acquired s1. Trying to acquire s2...\\n\");\n    sleep(1); // Simulate work or context switch\n    sem_wait(&s2);\n    printf(\"Thread A: Acquired s2. Both resources acquired.\\n\");\n    // Use resources\n    printf(\"Thread A: Releasing s2.\\n\");\n    sem_post(&s2);\n    printf(\"Thread A: Releasing s1.\\n\");\n    sem_post(&s1);\n    printf(\"Thread A: Done.\\n\");\n    return NULL;\n}\n\nvoid* threadB_func(void* arg) {\n    printf(\"Thread B: Trying to acquire s2...\\n\");\n    sem_wait(&s2);\n    printf(\"Thread B: Acquired s2. Trying to acquire s1...\\n\");\n    sleep(1); // Simulate work or context switch\n    sem_wait(&s1);\n    printf(\"Thread B: Acquired s1. Both resources acquired.\\n\");\n    // Use resources\n    printf(\"Thread B: Releasing s1.\\n\");\n    sem_post(&s1);\n    printf(\"Thread B: Releasing s2.\\n\");\n    sem_post(&s2);\n    printf(\"Thread B: Done.\\n\");\n    return NULL;\n}\n\nint main() {\n    sem_init(&s1, 0, 1);\n    sem_init(&s2, 0, 1);\n\n    pthread_t tidA, tidB;\n\n    pthread_create(&tidA, NULL, threadA_func, NULL);\n    pthread_create(&tidB, NULL, threadB_func, NULL);\n\n    pthread_join(tidA, NULL);\n    pthread_join(tidB, NULL);\n\n    sem_destroy(&s1);\n    sem_destroy(&s2);\n\n    return 0;\n}"
+    },
+    "options": null,
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "האם יכול להתרחש קיפאון (Deadlock) בתוכנית המצורפת? אם כן, תארו רצף אירועים ספציפי (interleaving) של פעולות התהליכונים שיוביל לקיפאון. הסבירו בקצרה מדוע תנאי הקיפאון מתקיימים במקרה זה.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "תקנו את הקוד המצורף כך שימנע קיפאון, תוך שמירה על רמת מקביליות גבוהה ככל האפשר ושינויים מינימליים. יש להציג את הפונקציה/ות המתוקנת/ות בלבד. הסבירו את התיקון שבצעתם ומדוע הוא מונע קיפאון.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": 15,
+    "solution": {
+      "is_present_in_file": false,
+      "correct_option": null,
+      "explanation": "1.1. כן, קיפאון יכול להתרחש בתוכנית המצורפת.\n\n**רצף אירועים המוביל לקיפאון:**\n1.  **תהליכון A** מבצע `sem_wait(&s1)` בהצלחה. (הסמפור `s1` כעת 0).\n2.  **תהליכון B** מבצע `sem_wait(&s2)` בהצלחה. (הסמפור `s2` כעת 0).\n3.  **תהליכון A** מנסה לבצע `sem_wait(&s2)`. מכיוון ש-`s2` מוחזק על ידי תהליכון B (ערכו 0), תהליכון A נחסם וממתין.\n4.  **תהליכון B** מנסה לבצע `sem_wait(&s1)`. מכיוון ש-`s1` מוחזק על ידי תהליכון A (ערכו 0), תהליכון B נחסם וממתין.\n\nבנקודה זו, שני התהליכונים חסומים באופן הדדי, כאשר כל אחד ממתין למשאב המוחזק על ידי האחר, ולכן מתרחש קיפאון.\n\n**הסבר תנאי הקיפאון:**\n*   **מניעה הדדית (Mutual Exclusion):** הסמפורים הבינאריים `s1` ו-`s2` מבטיחים שרק תהליכון אחד יכול להחזיק כל משאב (R1 או R2) בכל רגע נתון. תנאי זה מתקיים.\n*   **החזק והמתן (Hold and Wait):** תהליכון A מחזיק במשאב R1 (באמצעות `s1`) וממתין למשאב R2 (המוגן על ידי `s2`). תהליכון B מחזיק במשאב R2 (באמצעות `s2`) וממתין למשאב R1 (המוגן על ידי `s1`). תנאי זה מתקיים.\n*   **אי-הפקעה (No Preemption):** המשאבים (הסמפורים) אינם יכולים להילקח בכוח מתהליכון שמחזיק בהם; הם חייבים להשתחרר באופן יזום. תנאי זה מתקיים.\n*   **המתנה מעגלית (Circular Wait):** קיים מעגל המתנה: תהליכון A ממתין למשאב R2 (המוחזק על ידי B), ותהליכון B ממתין למשאב R1 (המוחזק על ידי A). תנאי זה מתקיים.\n\n1.2. כדי למנוע קיפאון, נשנה את סדר תפיסת המשאבים כך שכל התהליכונים יתפסו אותם באותו סדר. הדרך הנפוצה והפשוטה ביותר היא להגדיר סדר גלובלי למשאבים (לדוגמה, תמיד לתפוס את `s1` ואז את `s2`).\n\n**הפונקציה המתוקנת `threadB_func`:**\n```c\nvoid* threadB_func(void* arg) {\n    printf(\"Thread B (Fixed): Trying to acquire s1...\\n\"); // Changed order\n    sem_wait(&s1); // Acquire s1 first\n    printf(\"Thread B (Fixed): Acquired s1. Trying to acquire s2...\\n\");\n    sleep(1); // Simulate work or context switch\n    sem_wait(&s2);\n    printf(\"Thread B (Fixed): Acquired s2. Both resources acquired.\\n\");\n    // Use resources\n    printf(\"Thread B (Fixed): Releasing s2.\\n\");\n    sem_post(&s2);\n    printf(\"Thread B (Fixed): Releasing s1.\\n\");\n    sem_post(&s1);\n    printf(\"Thread B (Fixed): Done.\\n\");\n    return NULL;\n}\n```\n\n**הסבר התיקון:**\nהתיקון מונע את תנאי ה'המתנה מעגלית'. כעת, גם `threadA_func` וגם `threadB_func` מנסים לתפוס את `s1` תחילה, ורק לאחר מכן את `s2`. אם `threadA` תופס את `s1`, אז `threadB` יחסם בניסיון לתפוס את `s1` ולא יגיע לנסות לתפוס את `s2` לפני ש-`s1` ישוחרר. באופן דומה, אם `threadB` יתפוס ראשון את `s1`, אז `threadA` יחסם. לכן, לא ייתכן מצב שבו `threadA` מחזיק ב-`s1` וממתין ל-`s2`, בעוד `threadB` מחזיק ב-`s2` וממתין ל-`s1`. אחד מהם יחזיק את המשאב הראשון בסדר (s1) וימתין למשאב השני (s2), והשני ימתין למשאב הראשון (s1). זה מונע את המעגל החוזר ומבטיח שקיפאון לא יתרחש."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

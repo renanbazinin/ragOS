@@ -1,0 +1,63 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Synchronization and Deadlocks",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 09:49:53",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5388,
+      "output_tokens": 1995,
+      "total_tokens": 13223
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Deadlocks",
+      "Atomic Operations"
+    ],
+    "content": {
+      "text": "מערכת הפעלה נדרשת לנהל גישה למשאב משותף המורכב משני תתי-משאבים עצמאיים, R1 ו-R2. לצורך ביצוע פעולה קריטית כלשהי, חוט חייב להחזיק בו-זמנית הן ב-R1 והן ב-R2. ידוע כי ניסיון לרכוש את המשאבים בזה אחר זה עלול להוביל למצב קיפאון (deadlock) אם חוטים שונים מנסים לרכוש אותם בסדר שונה.\n\nלרשותנו עומדת פקודת חומרה אטומית מיוחדת בשם `compare_and_swap_double` (CAS_D), אשר מנסה לעדכן אטומית שני תאי זיכרון. הפקודה מתוארת באופן הבא:\n\nהבהרה: תיאור הפעולה הוא קוד C לצורך הסבר בלבד. פעולת המעבד מבצעת זאת באופן אטומי ולא בכמה פעולות.\n\nעליכם לממש מנעול דו-משאבי (`TRLock`) המשתמש אך ורק בפקודת `compare_and_swap_double` (ובלולאות/פקודות בסיסיות אחרות) כדי לרכוש ולשחרר את שני המשאבים (R1 ו-R2) באופן המונע קיפאון. המנעול צריך להיות מיוצג על ידי מבנה נתונים שיכיל את מצבי R1 ו-R2. יש לדאוג למניעה הדדית (mutual exclusion) וחופש מקיפאון. אין להשתמש באובייקטי סנכרון אחרים (כמו mutexes, semaphores) מלבד CAS_D.",
+      "code_snippet": "int compare_and_swap_double(int* ptr1, int expected1, int new1, int* ptr2, int expected2, int new2) {\n    // Atomically checks if *ptr1 == expected1 AND *ptr2 == expected2.\n    // If true, sets *ptr1 = new1 and *ptr2 = new2, and returns 1.\n    // If false, makes no changes and returns 0.\n    // (This is a conceptual description for the atomic hardware instruction)\n    if (*ptr1 == expected1 && *ptr2 == expected2) {\n        *ptr1 = new1;\n        *ptr2 = new2;\n        return 1;\n    }\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "הגדירו את מבנה הנתונים `TRLock` שישמש למנעול.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "ממשו את הפונקציה `void trlock_init(TRLock* lock)` לאתחול המנעול.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.3",
+        "text": "ממשו את הפונקציה `void trlock_acquire(TRLock* lock)` אשר חוסמת את החוט הקורא עד ששני המשאבים R1 ו-R2 נרכשים בהצלחה.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.4",
+        "text": "ממשו את הפונקציה `void trlock_release(TRLock* lock)` אשר משחררת את שני המשאבים R1 ו-R2.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון מתבסס על השימוש בפקודת `compare_and_swap_double` (CAS_D) כדי לרכוש ולשחרר את שני המשאבים R1 ו-R2 באופן אטומי. פעולה זו מבטיחה שחוט ירכוש את שני המשאבים יחד או אף אחד מהם, ובכך מונעת מצב של רכישה חלקית שיכולה להוביל לקיפאון (deadlock) כתוצאה מתנאי 'החזק והמתן' (hold and wait) ו'המתנה מעגלית' (circular wait).\n\n```c\n// 1.1: הגדרת מבנה הנתונים TRLock\ntypedef struct _trlock {\n    int r1_state; // 0: פנוי, 1: תפוס\n    int r2_state; // 0: פנוי, 1: תפוס\n} TRLock;\n\n// 1.2: מימוש פונקציית trlock_init\nvoid trlock_init(TRLock* lock) {\n    lock->r1_state = 0;\n    lock->r2_state = 0;\n}\n\n// 1.3: מימוש פונקציית trlock_acquire\nvoid trlock_acquire(TRLock* lock) {\n    // בלולאה, ננסה לרכוש את שני המשאבים אטומית. כל עוד הניסיון נכשל (CAS_D מחזיר 0),\n    // נמשיך לנסות. זוהי שיטת busy-waiting.\n    while (compare_and_swap_double(&lock->r1_state, 0, 1, &lock->r2_state, 0, 1) == 0) {\n        // ניתן להוסיף כאן לוגיקה של yield() או sleep() כדי למנוע בזבוז משאבי CPU,\n        // אך בהיעדר אובייקטי סנכרון מותרים אחרים, busy-waiting הוא הפתרון המקובל.\n    }\n}\n\n// 1.4: מימוש פונקציית trlock_release\nvoid trlock_release(TRLock* lock) {\n    // נשחרר את שני המשאבים אטומית על ידי שינוי מצבם מ-1 ל-0. נניח שרק החוט שרכש\n    // את המשאבים יקרא לפונקציה זו, ולכן ה-CAS_D אמור להצליח בניסיון הראשון.\n    while (compare_and_swap_double(&lock->r1_state, 1, 0, &lock->r2_state, 1, 0) == 0) {\n        // במקרה תיאורטי של כשל כאן (לא סביר בשימוש נכון), נמשיך לנסות.\n    }\n}\n```\n\n**הסבר למניעת קיפאון:**\nהשימוש בפקודת `compare_and_swap_double` חיוני למניעת קיפאון במקרה זה. המנגנון מאפשר לרכוש את R1 ו-R2 בפעולה אטומית יחידה. המשמעות היא שחוט לעולם לא יחזיק ב-R1 וימתין ל-R2, או יחזיק ב-R2 וימתין ל-R1. בכך, אנו מבטלים את התנאי ההכרחי לקיפאון של 'החזק והמתן' (hold and wait), שבו חוט מחזיק במשאב אחד וממתין למשאב אחר. מכיוון ששני המשאבים נרכשים או לא נרכשים יחד, לא יכולה להיווצר המתנה מעגלית על המשאבים הללו. הפתרון מבטיח מניעה הדדית (רק חוט אחד יכול להחזיק בשני המשאבים בו-זמנית) וחופש מקיפאון. יש לציין כי פתרון זה עלול לסבול מ'רעב' (starvation) בחוטים מסוימים אם חוטים אחרים מצליחים לרכוש את המשאבים שוב ושוב, אך אינו סובל מקיפאון."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "File Systems and I/O",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 10:58:39",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1233,
+      "output_tokens": 561,
+      "total_tokens": 3113
+    }
+  },
+  "question": {
+    "id": 6,
+    "type": "MultipleChoice",
+    "topic": [
+      "File Systems",
+      "I/O",
+      "Persistence"
+    ],
+    "content": {
+      "text": "במערכת הפעלה לינוקס, איזו מהפעולות הבאות מבטיחה באופן המהימן ביותר שנתונים שנכתבו לקובץ באמצעות תוכנית משתמש אכן נשמרו באופן עמיד (persistent) על הדיסק הפיזי?",
+      "code_snippet": null,
+      "options": [
+        "א. קריאת מערכת write() חוזרת בהצלחה.",
+        "ב. פונקציית הספרייה הסטנדרטית fclose() חוזרת בהצלחה.",
+        "ג. קריאת מערכת fsync() חוזרת בהצלחה עבור מתאר הקובץ.",
+        "ד. פונקציית הספרייה הסטנדרטית fflush() חוזרת בהצלחה עבור זרם הקובץ.",
+        "ה. אף אחת מהתשובות אינה נכונה."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג. קריאת המערכת fsync() (או fdatasync()) היא היחידה מבין האפשרויות שמבטיחה שהנתונים והמטא-דאטה (או רק הנתונים עבור fdatasync()) של הקובץ נכתבו מהזיכרון המטמון של הליבה (page cache/buffer cache) אל הדיסק הפיזי, ובכך מבטיחה עמידות (persistence) מפני קריסה של המערכת או הפסקת חשמל.\nא. write() רק מעתיק את הנתונים לזיכרון המטמון של הליבה, ואינו מבטיח כתיבה מיידית לדיסק.\nב. fclose() מרוקן את המטמון של ספריית stdio אל זיכרון הליבה, אך לא מבטיח כתיבה לדיסק הפיזי.\nד. fflush() עושה פעולה דומה ל-fclose() – מרוקן את המטמון של stdio לליבה, אך לא לדיסק הפיזי."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

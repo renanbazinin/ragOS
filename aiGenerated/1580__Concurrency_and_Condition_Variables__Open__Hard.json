@@ -1,0 +1,58 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency and Condition Variables",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 11:39:18",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3819,
+      "output_tokens": 2876,
+      "total_tokens": 15469
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Concurrency",
+      "Condition Variables",
+      "Synchronization",
+      "Mutexes"
+    ],
+    "content": {
+      "text": "נתבונן במערכת שבה מספר רב של תהליכים (threads) מעוניינים לגשת למשאב משותף. המשאב מוגבל כך שרק מספר מקסימלי של MAX_USERS תהליכים יכולים לגשת אליו בו-זמנית. עליכם לממש שתי פונקציות: enter_resource() ו-exit_resource(). הפונקציה enter_resource() תאפשר לתהליך להיכנס למשאב אם יש מקום פנוי, או לחכות אם המשאב מלא. הפונקציה exit_resource() תאפשר לתהליך לצאת מהמשאב ולשחרר מקום עבור תהליכים ממתינים. המימוש חייב להשתמש במנעול (mutex) ובמשתני תנאי (condition variables).\n\nלהלן ניסיון מימוש של פונקציות אלו. אנא ענו על השאלות הבאות בהתבסס על הקוד הנתון:",
+      "code_snippet": "#include <iostream>\n#include <thread>\n#include <mutex>\n#include <condition_variable>\n#include <vector>\n\nconst int MAX_USERS = 3;\nint current_users = 0;\n\nstd::mutex mtx;\nstd::condition_variable cv;\n\nvoid enter_resource() {\n    mtx.lock();\n    if (current_users >= MAX_USERS) {\n        cv.wait(mtx); // Note: std::condition_variable::wait expects std::unique_lock\n    }\n    current_users++;\n    std::cout << \"Thread \" << std::this_thread::get_id() << \" entered. Users: \" << current_users << std::endl;\n    mtx.unlock();\n}\n\nvoid exit_resource() {\n    mtx.lock();\n    current_users--;\n    std::cout << \"Thread \" << std::this_thread::get_id() << \" exited. Users: \" << current_users << std::endl;\n    cv.notify_one();\n    mtx.unlock();\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "זיהוי בעיות: האם המימוש הנתון נכון? אם לא, זהו והסבירו לפחות שתי בעיות פוטנציאליות בשימוש במשתני התנאי או במנעול, כולל מצבי מרוץ (race conditions) או קיפאון (deadlock) או חוסר יעילות. (לדוגמה: spurious wakeups, lost wakeups, incorrect predicate, starvation).",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "תיקון: הציעו תיקון מלא לקוד הנתון כדי לפתור את הבעיות שזיהיתם. הסבירו מדוע התיקון שלכם פותר את הבעיות.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.3",
+        "text": "הוגנות (Fairness): האם המימוש המתוקן שלכם מבטיח הוגנות (fairness) בין התהליכים הממתינים? נמקו.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "פתרון שאלה 10:\n\n10.1 זיהוי בעיות:\nהמימוש הנתון אינו נכון ויש בו מספר בעיות:\nא. **בדיקת תנאי שגויה (Incorrect Predicate Check / Spurious Wakeups):** בקוד של `enter_resource()`, התנאי `if (current_users >= MAX_USERS)` נבדק פעם אחת בלבד לפני הקריאה ל-`cv.wait(mtx)`. כאשר תהליך מתעורר מ-`wait` (בין אם כתוצאה מ-`notify_one` או מ-`spurious wakeup`), הוא ממשיך מיד לאחר ה-`if`. ייתכנו שני תרחישים בהם הדבר יוביל לבעיה:\n   1. **Spurious Wakeup:** התהליך התעורר מ-`wait` באופן שרירותי (ללא קריאה ל-`notify_one`). במקרה זה, התנאי `current_users >= MAX_USERS` עדיין עשוי להיות נכון, אך התהליך ימשיך כאילו המשאב פנוי ויגדיל את `current_users` מעבר ל-`MAX_USERS`. \n   2. **Race Condition לאחר `notify_one`:** תהליך אחד יצא מהמשאב וקרא ל-`notify_one()`. מספר תהליכים ממתינים על משתנה התנאי. ה-`notify_one()` מעיר תהליך אחד. לפני שהתהליך שהתעורר מצליח לתפוס מחדש את המנעול, תהליך אחר (שאולי לא חיכה על משתנה התנאי, או תהליך שהתעורר ספורדית) תופס את המנעול, נכנס למשאב (מכיוון שה-`if` כבר לא יבדק עבורו שוב) וממלא אותו שוב. התהליך שהתעורר עכשיו מה-`wait` ימשיך אף הוא ויגרום ל-`current_users` להיות גדול מ-`MAX_USERS`.\n   הפתרון לבעיה זו הוא לבדוק את התנאי בתוך לולאת `while` במקום `if`.\nב. **שימוש שגוי ב-`std::mutex` עם `std::condition_variable::wait`:** הפונקציה `std::condition_variable::wait` מצפה לקבל אובייקט מסוג `std::unique_lock<std::mutex>` (או `std::lock_guard` בגרסאות ישנות יותר עם התאמות). הקוד הנתון מעביר אובייקט `std::mutex` ישירות, מה שאינו תואם את ה-API ויוביל לשגיאת קומפילציה או התנהגות בלתי מוגדרת. יש להשתמש ב-`std::unique_lock` כדי לנהל את המנעול בצורה נכונה עם משתני תנאי.\nג. **פוטנציאל לחוסר יעילות/הוגנות (אם כי `notify_one` לרוב מספיק למקרה זה):** למרות ש-`notify_one()` מספיק במקרה שבו רק מקום אחד מתפנה בכל פעם, אם `MAX_USERS` היה גדול יותר וניתן היה לשחרר מספר מקומות בבת אחת (למשל, אם `exit_resource` הייתה מפחיתה יותר מ-1), או אם היה מצב שבו כמה תהליכים יכלו להיכנס בו-זמנית לאחר יציאת תהליך אחד, שימוש ב-`notify_one()` היה מעיר רק תהליך אחד, מה שעלול להשאיר תהליכים אחרים ממתינים ללא צורך או להוביל לחוסר יעילות. עבור המימוש הספציפי הזה (שחרור מקום בודד), `notify_one` הוא לרוב בחירה סבירה, אך חשוב להבין את ההשלכות.\n\n10.2 תיקון:\nהתיקון מתמקד בשימוש נכון ב-`std::unique_lock` ובשימוש בלולאת `while` לבדיקת התנאי.\n\n```cpp\n#include <iostream>\n#include <thread>\n#include <mutex>\n#include <condition_variable>\n#include <vector>\n#include <chrono>\n\nconst int MAX_USERS = 3;\nint current_users = 0;\n\nstd::mutex mtx;\nstd::condition_variable cv;\n\nvoid enter_resource() {\n    std::unique_lock<std::mutex> lock(mtx); // שימוש ב-unique_lock\n    while (current_users >= MAX_USERS) { // בדיקת התנאי בלולאת while\n        cv.wait(lock); \n    }\n    current_users++;\n    std::cout << \"Thread \" << std::this_thread::get_id() << \" entered. Users: \" << current_users << std::endl;\n}\n\nvoid exit_resource() {\n    std::unique_lock<std::mutex> lock(mtx); // שימוש ב-unique_lock\n    current_users--;\n    std::cout << \"Thread \" << std::this_thread::get_id() << \" exited. Users: \" << current_users << std::endl;\n    cv.notify_one(); // notify_one מספיק שכן רק מקום אחד משתחרר בכל פעם\n}\n```\n\n**הסבר לתיקונים:**\n- **`std::unique_lock<std::mutex> lock(mtx);`**: שימוש ב-`std::unique_lock` מבטיח שהמנעול ננעל ומשוחרר באופן אוטומטי ובטוח. `std::condition_variable::wait` דורש `unique_lock` כדי לבצע את פעולות שחרור המנעול לפני הכניסה למצב המתנה ונעילתו מחדש לאחר היקיצה בצורה אטומית ונכונה.\n- **`while (current_users >= MAX_USERS)`**: שינוי ה-`if` ל-`while` מבטיח שכל תהליך שמתעורר מ-`wait` (בין אם כתוצאה מ-`notify_one` או מ-`spurious wakeup`) יבדוק מחדש את התנאי לפני שימשיך. אם התנאי עדיין לא מתקיים (למשל, בגלל `spurious wakeup` או בגלל שתהליך אחר תפס את המשאב), התהליך יחזור למצב המתנה. זה מונע מ-`current_users` לחרוג מ-`MAX_USERS` ומבטיח את נכונות האלגוריתם.\n\n10.3 הוגנות (Fairness):\nהמימוש המתוקן **אינו מבטיח הוגנות**. הסיבות לכך הן:\nא. **`notify_one()`:** הפונקציה `std::condition_variable::notify_one()` מעירה תהליך בודד אחד מבין התהליכים הממתינים. אין כל הבטחה איזה תהליך יתעורר – זה יכול להיות התהליך שהמתין הכי הרבה זמן, או תהליך שהמתין פחות זמן, או אפילו תהליך שהגיע זה עתה למצב המתנה. בדרך כלל, סדר ההשכמה נקבע על ידי מימוש מערכת ההפעלה ואינו בהכרח FIFO (First-In, First-Out).\nב. **תזמון מערכת ההפעלה:** גם אם תהליך התעורר, אין הבטחה שהוא יהיה הראשון לתפוס את המנעול מיד לאחר שחרורו על ידי התהליך הקורא ל-`notify_one()`. מתזמן מערכת ההפעלה יכול להחליט להריץ תהליכים אחרים (שאינם ממתינים על משתנה התנאי) או אף תהליך חדש לפני שהתהליך המעורר יצליח לתפוס מחדש את המנעול ולבדוק את התנאי.\n\nכדי להבטיח הוגנות, נדרש מנגנון מורכב יותר, כמו תור מפורש של תהליכים ממתינים, או שימוש במשתני תנאי ייעודיים לכל תהליך, או סמפורים המבטיחים סדר FIFO."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

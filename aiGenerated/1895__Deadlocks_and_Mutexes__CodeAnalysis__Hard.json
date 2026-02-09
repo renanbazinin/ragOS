@@ -1,0 +1,51 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Deadlocks and Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 21:37:24",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4085,
+      "output_tokens": 3049,
+      "total_tokens": 15747
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Deadlocks",
+      "Mutexes",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתונה מערכת המטפלת במשימות באמצעות מאגר עובדים (Worker Pool) ותור משימות (Job Queue).\nקיימים שני סוגי חוטים במערכת:\n1.  **חוטי עובד (Worker Threads)**: חוטים אלו לוקחים משימות מתור המשימות ומבצעים אותן. כדי לעשות זאת, חוט עובד צריך לעדכן את סטטוס זמינותו במאגר העובדים (לדוגמה, מ\"פנוי\" ל\"עסוק\") ולאחר מכן לגשת לתור המשימות כדי לקחת משימה.\n2.  **חוטי משגר (Dispatcher Threads)**: חוטים אלו מוסיפים משימות חדשות לתור המשימות. לאחר הוספת משימה, חוט משגר עשוי לנסות להעיר חוט עובד פנוי במאגר העובדים כדי שיטפל במשימה החדשה.\n\nשני משאבים משותפים מוגנים על ידי מנעולים (mutexes) כדלקמן:\n-   `pool_mutex`: מגן על המצב הפנימי של מאגר העובדים (לדוגמה, מספר העובדים הפנויים).\n-   `queue_mutex`: מגן על תור המשימות (לדוגמה, גודל התור).\n\nלהלן קטע קוד המדגים את אופן תפיסת המנעולים על ידי שני סוגי החוטים:",
+      "code_snippet": "```c\n#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n\n// Shared resources and mutexes\npthread_mutex_t pool_mutex; // Protects worker pool state\npthread_mutex_t queue_mutex; // Protects job queue\n\n// Simplified representation of worker pool and job queue state\nint num_idle_workers = 0;\nint job_queue_size = 0;\n\nvoid init_system() {\n    pthread_mutex_init(&pool_mutex, NULL);\n    pthread_mutex_init(&queue_mutex, NULL);\n}\n\nvoid destroy_system() {\n    pthread_mutex_destroy(&pool_mutex);\n    pthread_mutex_destroy(&queue_mutex);\n}\n\n// Function for a worker thread to get a job\nvoid worker_get_job() {\n    pthread_mutex_lock(&pool_mutex); // Acquire pool lock (Order 1 for worker)\n    num_idle_workers--; // Worker becomes busy (conceptually)\n    \n    pthread_mutex_lock(&queue_mutex); // Acquire queue lock (Order 2 for worker)\n    // Simulate getting a job from the queue\n    if (job_queue_size > 0) {\n        job_queue_size--;\n        printf(\"Worker got a job. Queue size: %d, Idle workers: %d\\n\", job_queue_size, num_idle_workers);\n    } else {\n        printf(\"Worker found no jobs. Queue size: %d, Idle workers: %d. Becoming idle again.\\n\", job_queue_size, num_idle_workers);\n        num_idle_workers++; // Worker becomes idle if no job was taken\n    }\n    pthread_mutex_unlock(&queue_mutex); // Release queue lock\n    \n    // If a job was taken, simulate work and then become idle\n    if (job_queue_size >= 0) { // Simplified check, assumes job was taken if queue wasn't empty initially\n        // Simulate work... sleep(1);\n    }\n    \n    num_idle_workers++; // Worker finished job, becomes idle\n    pthread_mutex_unlock(&pool_mutex); // Release pool lock\n}\n\n// Function for a dispatcher thread to add a job\nvoid dispatcher_add_job() {\n    pthread_mutex_lock(&queue_mutex); // Acquire queue lock (Order 1 for dispatcher)\n    // Simulate adding a job\n    job_queue_size++;\n    printf(\"Dispatcher added a job. Queue size: %d.\\n\", job_queue_size);\n\n    pthread_mutex_lock(&pool_mutex); // Acquire pool lock (Order 2 for dispatcher)\n    // Simulate waking up an idle worker\n    if (num_idle_workers > 0) {\n        printf(\"Dispatcher signaling an idle worker (current idle: %d).\\n\", num_idle_workers);\n        // In a real system, would use a condition variable to wake up a worker\n    }\n    pthread_mutex_unlock(&pool_mutex); // Release pool lock\n    \n    pthread_mutex_unlock(&queue_mutex); // Release queue lock\n}\n\n// Example thread functions (simplified for deadlock demo)\nvoid* worker_thread_func(void* arg) {\n    for (int i = 0; i < 3; ++i) {\n        worker_get_job();\n        sleep(1);\n    }\n    return NULL;\n}\n\nvoid* dispatcher_thread_func(void* arg) {\n    for (int i = 0; i < 3; ++i) {\n        dispatcher_add_job();\n        sleep(1);\n    }\n    return NULL;\n}\n\nint main() {\n    init_system();\n    pthread_t worker_t[2], dispatcher_t[2];\n\n    // Initialize some idle workers\n    num_idle_workers = 2;\n\n    pthread_create(&worker_t[0], NULL, worker_thread_func, NULL);\n    pthread_create(&dispatcher_t[0], NULL, dispatcher_thread_func, NULL);\n    pthread_create(&worker_t[1], NULL, worker_thread_func, NULL);\n    pthread_create(&dispatcher_t[1], NULL, dispatcher_thread_func, NULL);\n\n    pthread_join(worker_t[0], NULL);\n    pthread_join(dispatcher_t[0], NULL);\n    pthread_join(worker_t[1], NULL);\n    pthread_join(dispatcher_t[1], NULL);\n\n    destroy_system();\n    return 0;\n}\n```",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "**זיהוי קיפאון:** תארו תרחיש ספציפי (עם מספר חוטים כרצונכם) שבו יכול להתרחש קיפאון (Deadlock) במימוש הנוכחי. הסבירו מדוע קיפאון זה מתרחש תוך התייחסות למצב המשאבים והמנעולים.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "**תיקון המימוש:** תקנו את המימוש הקיים כך שתימנע בעיית הקיפאון, תוך שימוש במנעולים הקיימים בלבד (אין להוסיף מנעולים חדשים, סמפורים או משתני תנאי). הציגו את הקוד המתוקן והסבירו בקצרה מדוע הפתרון שלכם מונע קיפאון.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.  **זיהוי קיפאון:**\n    קיפאון (Deadlock) יכול להתרחש בתרחיש הבא:\n    -   **שלב 1:** חוט עובד (נכנה אותו W) מבצע קריאה ל-`worker_get_job()`. הוא תופס בהצלחה את `pool_mutex`.\n    -   **שלב 2:** חוט משגר (נכנה אותו D) מבצע קריאה ל-`dispatcher_add_job()`. הוא תופס בהצלחה את `queue_mutex`.\n    -   **שלב 3:** חוט W, שעדיין מחזיק ב-`pool_mutex`, מנסה כעת לתפוס את `queue_mutex`. מכיוון ש-`queue_mutex` מוחזק על ידי חוט D, חוט W נחסם וממתין.\n    -   **שלב 4:** חוט D, שעדיין מחזיק ב-`queue_mutex`, מנסה כעת לתפוס את `pool_mutex`. מכיוון ש-`pool_mutex` מוחזק על ידי חוט W, חוט D נחסם וממתין.\n    בשלב זה, חוט W ממתין ל-`queue_mutex` שמוחזק על ידי D, וחוט D ממתין ל-`pool_mutex` שמוחזק על ידי W. נוצר מצב של המתנה מעגלית (Circular Wait), המהווה אחד מארבעת התנאים ההכרחיים לקיפאון. שני החוטים חסומים באופן הדדי ולא יוכלו להתקדם, מה שמוביל לקיפאון במערכת.\n\n2.  **תיקון המימוש:**\n    הפתרון הנפוץ למניעת קיפאון מסוג זה הוא אכיפת סדר עקבי בתפיסת המנעולים. כלומר, כל החוטים במערכת יתפסו את המנעולים תמיד באותו סדר. במקרה זה, נבחר את הסדר: תחילה `queue_mutex` ולאחר מכן `pool_mutex`.\n\n    **קוד מתוקן:**\n    ```c\nvoid worker_get_job_fixed() {\n    pthread_mutex_lock(&queue_mutex); // Acquire queue lock (Order 1)\n    \n    if (job_queue_size > 0) {\n        job_queue_size--;\n        printf(\"Worker got a job. Queue size: %d.\\n\", job_queue_size);\n        \n        pthread_mutex_lock(&pool_mutex); // Acquire pool lock (Order 2)\n        num_idle_workers--; // Worker is now busy with a job\n        printf(\"Worker status updated. Idle workers: %d.\\n\", num_idle_workers);\n        pthread_mutex_unlock(&pool_mutex); // Release pool lock\n        \n        pthread_mutex_unlock(&queue_mutex); // Release queue lock\n        \n        // Simulate work\n        sleep(1); \n        \n        // After work, update status to idle\n        pthread_mutex_lock(&pool_mutex); // Re-acquire pool_mutex\n        num_idle_workers++; // Worker finished job, becomes idle\n        printf(\"Worker finished job. Idle workers: %d.\\n\", num_idle_workers);\n        pthread_mutex_unlock(&pool_mutex); // Release pool_mutex\n        \n    } else {\n        printf(\"Worker found no jobs. Releasing queue_mutex.\\n\");\n        pthread_mutex_unlock(&queue_mutex); // Release queue lock\n        // Worker remains conceptually idle, no change to num_idle_workers here.\n    }\n}\n\n// dispatcher_add_job remains unchanged as it already follows the chosen order:\n// void dispatcher_add_job() {\n//     pthread_mutex_lock(&queue_mutex); // Acquire queue lock (Order 1)\n//     // ...\n//     pthread_mutex_lock(&pool_mutex); // Acquire pool lock (Order 2)\n//     // ...\n//     pthread_mutex_unlock(&pool_mutex);\n//     pthread_mutex_unlock(&queue_mutex);\n// }\n    ```\n\n    **הסבר:**\n    במימוש המתוקן, הפונקציה `worker_get_job_fixed()` שונתה כך שתתפוס את `queue_mutex` ראשונה, ורק לאחר מכן את `pool_mutex`. הפונקציה `dispatcher_add_job()` כבר פועלת בסדר זה (תחילה `queue_mutex` ואז `pool_mutex`).\n    כעת, כל חוט המבקש לתפוס את שני המנעולים יבצע זאת תמיד באותו סדר: `queue_mutex` ואז `pool_mutex`. בכך אנו מונעים את תנאי ההמתנה המעגלית, שכן לא ייתכן מצב שבו חוט אחד יחזיק את A וימתין ל-B, ובמקביל חוט אחר יחזיק את B וימתין ל-A. חוטים תמיד ינסו לתפוס את המנעולים בסדר קבוע, וכך הקיפאון נמנע."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

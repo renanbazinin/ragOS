@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Synchronization and Deadlocks",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 09:46:57",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5388,
+      "output_tokens": 1966,
+      "total_tokens": 15796
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Deadlocks",
+      "Atomic Operations",
+      "Resource Management",
+      "Race Conditions"
+    ],
+    "content": {
+      "text": "נתון לנו מאגר משאבים (resource pool) בגודל N, המכיל N יחידות זהות של משאב. חוטים רוצים לרכוש יחידת משאב אחת ולשחרר אותה לאחר שימוש. לרשותנו עומדת פקודת חומרה אטומית בשם AtomicDecrementIfPositive, אשר מקטינה מונה באחד ומחזירה האם ההקטנה בוצעה בהצלחה (כלומר, האם המונה היה חיובי לפני ההקטנה). הפקודה ניתנת לתיאור באופן הבא:\n\nהבהרה: תיאור הפעולה הוא קוד C לצורך הסבר בלבד. פעולת המעבד מבצעת זאת באופן אטומי ולא בכמה פעולות.\nבכל שאלה זו אין להשתמש באובייקטי סנכרון או פעולות מעבד אטומיות מלבד AtomicDecrementIfPositive ופעולות אטומיות בסיסיות של קריאה/כתיבה (לדוגמה, x++ אינו אטומי). יש לדאוג למניעה הדדית, חופש מקיפאון וחופש מרעב (במידת האפשר).\n\nממשו את מבנה המשאבים ResourcePool ואת הפונקציות init, acquire ו-release עבור מאגר משאבים בגודל N. הפונקציה acquire צריכה להחזיר 1 אם הצליחה לרכוש משאב, ו-0 אם לא הצליחה (מבלי לחסום). הפונקציה release משחררת משאב שחוט רכש.\n\n```c\ntypedef struct _resource_pool { }\nResourcePool;\n\nvoid init(ResourcePool *pool, int N);\nint acquire(ResourcePool *pool);\nvoid release(ResourcePool *pool);\nvoid destroy(ResourcePool *pool);\n```",
+      "code_snippet": "int atomic_dec_if_pos(int *val) {\n    // Atomically checks if *val > 0.\n    // If true, atomically decrements *val by 1 and returns 1.\n    // If false, returns 0 and *val remains unchanged.\n    if (*val > 0) {\n        *val = *val - 1;\n        return 1;\n    }\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "המבנה ResourcePool יכיל מונה יחיד, available_resources, שיעקוב אחר מספר המשאבים הפנויים.\n\n```c\n#include <stdlib.h> // For potential future dynamic allocation, though not used in this simple struct\n\n// Conceptual description of an atomic hardware instruction.\n// The CPU guarantees its atomicity.\n// Returns 1 if decrement was successful (value was > 0), 0 otherwise.\nint atomic_dec_if_pos(int *val) {\n    // This part is atomically executed by hardware.\n    if (*val > 0) {\n        *val = *val - 1;\n        return 1;\n    }\n    return 0;\n}\n\ntypedef struct _resource_pool {\n    int available_resources;\n    int N_total; // Stores N for context, though not strictly used after init\n} ResourcePool;\n\nvoid init(ResourcePool *pool, int N) {\n    pool->available_resources = N;\n    pool->N_total = N;\n}\n\nint acquire(ResourcePool *pool) {\n    return atomic_dec_if_pos(&pool->available_resources);\n}\n\nvoid release(ResourcePool *pool) {\n    // This operation is problematic without a specific atomic increment primitive.\n    // As stated in the question, \"x++ אינו אטומי\" (x++ is not atomic).\n    // A simple increment here leads to a race condition.\n    // For the purpose of providing an answer *as requested* by implementing the function,\n    // this is the most direct implementation, but it is flawed in a concurrent environment.\n    pool->available_resources++;\n}\n\nvoid destroy(ResourcePool *pool) {\n    // No dynamic memory allocated within the pool struct itself in this simple design.\n    // If an array of resource_flags was used, it would be freed here.\n}\n```\n\n**מימוש הפונקציות:**\n\n*   **`init`**: מאתחל את המונה `available_resources` ל-N.\n*   **`acquire`**: משתמש ישירות בפקודה האטומית `atomic_dec_if_pos`. הפקודה תנסה להקטין את המונה; אם הצליחה (היו משאבים זמינים), היא מחזירה 1, אחרת 0. זהו מימוש נכון ובטוח מבחינה אטומית עבור פעולת הניסיון לרכישה.\n*   **`release`**: כאן טמונה הבעיה המרכזית. הפונקציה צריכה להגדיל את המונה `available_resources` באחד. אולם, ההנחיה בשאלה מציינת במפורש שפעולות כמו `x++` אינן אטומיות. הפקודה `atomic_dec_if_pos` היא פקודה אטומית ספציפית שמבצעת הקטנה מותנית בלבד, ואינה מאפשרת מימוש ישיר של פעולת הגדלה אטומית. לכן, המימוש `pool->available_resources++;` יוצר תנאי מרוץ (race condition). אם שני חוטים ישחררו משאבים במקביל, ייתכן ששניהם יקראו את הערך הנוכחי של `available_resources`, שניהם יגדילו אותו באחד, ושניהם יכתבו אותו בחזרה, וכתוצאה מכך המונה יוגדל רק באחד במקום בשניים. הדבר יוביל למונה שגוי של משאבים זמינים ולבסוף לאובדן משאבים או לחריגה מהמספר המקסימלי של משאבים ב-pool.\n\n**חופש מקיפאון וחופש מרעב:**\n\n*   **חופש מקיפאון (Deadlock Freedom)**: מכיוון שפונקציית `acquire` אינה חוסמת (היא מחזירה 0 אם אין משאב זמין), אין מצב של המתנה מעגלית הנדרש לקיפאון. חוטים פשוט מנסים שוב או מבצעים עבודה אחרת.\n*   **חופש מרעב (Starvation Freedom)**: פונקציית `acquire` אינה מבטיחה חופש מרעב. אם מספר רב של חוטים ינסו לרכוש משאב בו זמנית, ורק אחד מצליח בכל פעם, ייתכן שחוט מסוים ימשיך להיכשל ברכישת משאב שוב ושוב, גם אם משאבים משתחררים. אין מנגנון עדיפות או תור הוגן (fair queue) שמונע זאת במימוש הנוכחי.\n\n**פתרון לבעיית `release` (מעבר לדרישות השאלה):**\nכדי לממש את `release` באופן אטומי, היה נדרש אובייקט סנכרון נוסף (כמו מנעול mutex) או פקודת חומרה אטומית כללית יותר, כגון `fetch_and_add` (הגדלה אטומית) או `compare_and_swap` (החלפה מותנית אטומית), שאינן ניתנות למימוש באמצעות `atomic_dec_if_pos` בלבד. בהיעדר פקודה כזו, הפונקציה `release` כפי שמומשה אינה בטוחה לשימוש במקביל."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

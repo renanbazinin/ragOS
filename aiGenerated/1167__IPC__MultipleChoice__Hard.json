@@ -1,0 +1,46 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "IPC",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 08:24:16",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 968,
+      "output_tokens": 1342,
+      "total_tokens": 5977
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "IPC",
+      "Shared Memory",
+      "Synchronization",
+      "Semaphores",
+      "Producer-Consumer"
+    ],
+    "content": {
+      "text": "תהליך P1 ותהליך P2 מתקשרים באמצעות זיכרון משותף (shared memory) ומנגנון סמפור (System V semaphore) לצורך סנכרון. קטע הקוד הבא מראה את הלוגיקה העיקרית של כל תהליך. הסמפור `semid` מוגדר כבעל ערך התחלתי 1. (אין צורך בקוד boilerplate של יצירה/חיבור לזיכרון משותף או לסמפור). איזו מהטענות הבאות מתארת בצורה הטובה ביותר את הבעיה או התוצאה האפשרית של קוד זה?",
+      "code_snippet": "/* קטע קוד עבור תהליך P1 (כותב) */\nvoid P1_Writer() {\n    // ... shmget, shmat, semget (semid initialized to 1) ...\n    struct sembuf p_op = {0, -1, 0}; // P operation on semaphore 0\n    struct sembuf v_op = {0, 1, 0};  // V operation on semaphore 0\n\n    for (int i = 0; i < 5; ++i) {\n        semop(semid, &p_op, 1); // Wait for shared memory access\n        sprintf(shm_ptr, \"Data item %d\", i); // Write to shared memory\n        printf(\"P1 wrote: %s\\n\", shm_ptr);\n        semop(semid, &v_op, 1); // Release shared memory access\n        sleep(1);\n    }\n    // ... shmdt, shmctl, semctl(IPC_RMID) ...\n}\n\n/* קטע קוד עבור תהליך P2 (קורא) */\nvoid P2_Reader() {\n    // ... shmget, shmat, semget ...\n    struct sembuf p_op = {0, -1, 0}; // P operation on semaphore 0\n    struct sembuf v_op = {0, 1, 0};  // V operation on semaphore 0\n\n    for (int i = 0; i < 5; ++i) {\n        semop(semid, &p_op, 1); // Wait for shared memory access\n        printf(\"P2 read: %s\\n\", shm_ptr); // Read from shared memory\n        semop(semid, &v_op, 1); // Release shared memory access\n        sleep(1);\n    }\n    // ... shmdt ...\n}",
+      "options": [
+        "א. הקוד יגרום ל-deadlock כיוון ששני התהליכים ינסו לתפוס את הסמפור בו-זמנית.",
+        "ב. הקוד מבטיח בלעדיות הדדית (mutual exclusion) לגישה לזיכרון המשותף, אך אינו מבטיח ש-P2 יקרא כל פריט נתונים שנכתב על ידי P1, או ש-P1 לא יכתוב מעל נתונים ש-P2 טרם קרא.",
+        "ג. תהליך P2 יקרא בהכרח כל פריט נתונים שנכתב על ידי P1, אך סדר הקריאה אינו מובטח.",
+        "ד. תהליך P1 יחסם באופן קבוע לאחר הכתיבה הראשונה, כיוון שאין אף תהליך שישחרר את הסמפור עבורו.",
+        "ה. הסנכרון תקין לחלוטין ויבטיח שכל פריט נתונים ייכתב וייקרא פעם אחת בדיוק, ובסדר הנכון."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "התשובה הנכונה היא ב'. הסמפור היחיד עם ערך התחלתי 1 מתפקד כמונעל (mutex). הוא מבטיח שרק תהליך אחד (P1 או P2) יוכל לגשת לזיכרון המשותף בכל רגע נתון, ובכך מונע תנאי מרוץ (race conditions) הנוגעים לגישה בו-זמנית לאותו אזור בזיכרון. עם זאת, מנעול זה אינו מספק את הסנכרון הדרוש לדפוס מפיק-צרכן (producer-consumer) מלא. הוא אינו מבטיח ש-P2 יקרא כל פריט נתונים ש-P1 כתב, שכן P1 יכול לכתוב מספר פריטים ברצף ולדרוס נתונים לפני ש-P2 יספיק לקרוא אותם (overwriting). כמו כן, הוא אינו מונע מ-P2 לקרוא את אותו פריט נתונים מספר פעמים (אם P1 אינו כותב מספיק מהר ו-P2 קורא שוב ושוב את הנתון האחרון שנכתב). כדי להבטיח סנכרון נכון של מפיק-צרכן, נדרשים בדרך כלל שני סמפורים: אחד המציין את מספר המקומות הריקים בבופר (empty slots) עבור הכותב, ואחד המציין את מספר המקומות המלאים (full slots) עבור הקורא."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

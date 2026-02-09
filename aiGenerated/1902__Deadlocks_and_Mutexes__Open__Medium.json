@@ -1,0 +1,61 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Deadlocks and Mutexes",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 21:40:13",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2445,
+      "output_tokens": 2512,
+      "total_tokens": 11552
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "Open",
+    "topic": [
+      "Deadlocks",
+      "Mutexes",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתונה פיסת קוד בשפת C המשתמשת במנעולים (mutexes) של POSIX. קטע הקוד מציג שני חוטים (threads) המנסים לגשת לשני משאבים המוגנים על ידי שני מנעולים שונים, `mutexA` ו-`mutexB`.",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h> // For sleep\n\npthread_mutex_t mutexA;\npthread_mutex_t mutexB;\n\nvoid* thread_func1(void* arg) {\n    pthread_mutex_lock(&mutexA);\n    printf(\"Thread 1 acquired mutex A\\n\");\n    sleep(1); // Simulate work\n    pthread_mutex_lock(&mutexB);\n    printf(\"Thread 1 acquired mutex B\\n\");\n    // Critical section\n    pthread_mutex_unlock(&mutexB);\n    pthread_mutex_unlock(&mutexA);\n    printf(\"Thread 1 finished\\n\");\n    return NULL;\n}\n\nvoid* thread_func2(void* arg) {\n    pthread_mutex_lock(&mutexB);\n    printf(\"Thread 2 acquired mutex B\\n\");\n    sleep(1); // Simulate work\n    pthread_mutex_lock(&mutexA);\n    printf(\"Thread 2 acquired mutex A\\n\");\n    // Critical section\n    pthread_mutex_unlock(&mutexA);\n    pthread_mutex_unlock(&mutexB);\n    printf(\"Thread 2 finished\\n\");\n    return NULL;\n}\n\nint main() {\n    pthread_t t1, t2;\n    pthread_mutex_init(&mutexA, NULL);\n    pthread_mutex_init(&mutexB, NULL);\n\n    pthread_create(&t1, NULL, thread_func1, NULL);\n    pthread_create(&t2, NULL, thread_func2, NULL);\n\n    pthread_join(t1, NULL);\n    pthread_join(t2, NULL);\n\n    pthread_mutex_destroy(&mutexA);\n    pthread_mutex_destroy(&mutexB);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "101.1",
+        "text": "א. הסבירו אילו מבין ארבעת התנאים לקיום קיפאון (deadlock) מתקיימים בקטע קוד זה, והדגימו כיצד תרחיש כזה יכול להתרחש.",
+        "code_snippet": null,
+        "options": null,
+        "solution": {
+          "is_present_in_file": true,
+          "correct_option": null,
+          "explanation": "התנאים לקיום קיפאון הם:\n1.  **מניעה הדדית (Mutual Exclusion):** מתקיים. המנעולים `mutexA` ו-`mutexB` הם משאבים שרק חוט אחד יכול להחזיק בהם בכל רגע נתון. אם חוט אחד תפס מנעול, חוט אחר לא יכול לתפוס אותו עד שהראשון ישחרר אותו.\n2.  **החזק והמתן (Hold and Wait):** מתקיים. כל חוט (Thread 1 ו-Thread 2) תופס מנעול אחד (לדוגמה, Thread 1 תופס את `mutexA`) וממתין למנעול נוסף (במקרה זה, `mutexB`) שמוחזק על ידי חוט אחר (Thread 2).\n3.  **אי-הפקעה (No Preemption):** מתקיים. המערכת אינה יכולה להפקיע בכוח מנעול מחוט שמחזיק בו. חוט חייב לשחרר את המנעול מרצונו החופשי לאחר שסיים להשתמש בו.\n4.  **המתנה מעגלית (Circular Wait):** מתקיים. יכול להיווצר מעגל המתנה: Thread 1 ממתין ל-`mutexB` שמוחזק על ידי Thread 2, ו-Thread 2 ממתין ל-`mutexA` שמוחזק על ידי Thread 1.\n\n**תרחיש קיפאון לדוגמה:**\n1.  Thread 1 מבצע `pthread_mutex_lock(&mutexA)` ומצליח לתפוס את `mutexA`.\n2.  במקביל, Thread 2 מבצע `pthread_mutex_lock(&mutexB)` ומצליח לתפוס את `mutexB`.\n3.  Thread 1 ממשיך לנסות לתפוס את `mutexB` באמצעות `pthread_mutex_lock(&mutexB)`, אך הוא נחסם ונכנס למצב המתנה מכיוון ש-`mutexB` מוחזק על ידי Thread 2.\n4.  Thread 2 ממשיך לנסות לתפוס את `mutexA` באמצעות `pthread_mutex_lock(&mutexA)`, אך הוא נחסם ונכנס למצב המתנה מכיוון ש-`mutexA` מוחזק על ידי Thread 1.\nבשלב זה, שני החוטים ממתינים זה לזה באופן אינסופי, ונוצר מצב של קיפאון."
+        }
+      },
+      {
+        "id": "101.2",
+        "text": "ב. הציעו שינוי בקוד למניעת קיפאון, והסבירו מדוע השינוי שלכם מונע קיפאון. הציגו את קטע הקוד המתוקן.",
+        "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h> // For sleep\n\npthread_mutex_t mutexA;\npthread_mutex_t mutexB;\n\nvoid* thread_func1(void* arg) {\n    pthread_mutex_lock(&mutexA);\n    printf(\"Thread 1 acquired mutex A\\n\");\n    sleep(1); // Simulate work\n    pthread_mutex_lock(&mutexB);\n    printf(\"Thread 1 acquired mutex B\\n\");\n    // Critical section\n    pthread_mutex_unlock(&mutexB);\n    pthread_mutex_unlock(&mutexA);\n    printf(\"Thread 1 finished\\n\");\n    return NULL;\n}\n\nvoid* thread_func2(void* arg) {\n    // Changed order: acquire mutexA then mutexB\n    pthread_mutex_lock(&mutexA); // Changed from mutexB\n    printf(\"Thread 2 acquired mutex A\\n\"); // Changed from mutexB\n    sleep(1); // Simulate work\n    pthread_mutex_lock(&mutexB);\n    printf(\"Thread 2 acquired mutex B\\n\");\n    // Critical section\n    pthread_mutex_unlock(&mutexB);\n    pthread_mutex_unlock(&mutexA);\n    printf(\"Thread 2 finished\\n\");\n    return NULL;\n}\n\nint main() {\n    pthread_t t1, t2;\n    pthread_mutex_init(&mutexA, NULL);\n    pthread_mutex_init(&mutexB, NULL);\n\n    pthread_create(&t1, NULL, thread_func1, NULL);\n    pthread_create(&t2, NULL, thread_func2, NULL);\n\n    pthread_join(t1, NULL);\n    pthread_join(t2, NULL);\n\n    pthread_mutex_destroy(&mutexA);\n    pthread_mutex_destroy(&mutexB);\n    return 0;\n}",
+        "options": null,
+        "solution": {
+          "is_present_in_file": true,
+          "correct_option": null,
+          "explanation": "**פתרון:**\nהדרך הנפוצה והפשוטה ביותר למנוע קיפאון במקרה זה היא לשבור את תנאי \"המתנה מעגלית\" (Circular Wait) על ידי הקפדה על סדר תפיסת המשאבים (מנעולים) בין כל החוטים. אם כל החוטים יתפסו את המנעולים באותו סדר גלובלי, לא יוכל להיווצר מעגל המתנה.\n\n**שינוי בקוד:**\nנשנה את הפונקציה `thread_func2` כך שתתפוס את המנעולים באותו סדר כמו `thread_func1` (כלומר, קודם `mutexA` ואז `mutexB`).\n\n**קטע הקוד המתוקן:** (הקוד מופיע בשדה `code_snippet` של סעיף זה).\n\n**הסבר מדוע השינוי מונע קיפאון:**\nעל ידי הקפדה על סדר תפיסת מנעולים זהה (קודם `mutexA` ואז `mutexB`) עבור כל החוטים, אנו מבטיחים שלא יוכל להיווצר מעגל המתנה. במצב החדש, אם Thread 1 מחזיק ב-`mutexA` וממתין ל-`mutexB`, ו-Thread 2 גם מנסה לתפוס את `mutexA` (בסדר החדש), הוא ימתין עד ש-Thread 1 ישחרר את `mutexA`. Thread 1, לאחר שתפס את `mutexA`, ימשיך לתפוס את `mutexB` (אם הוא פנוי), יבצע את הקטע הקריטי וישחרר את שני המנעולים. רק לאחר ש-Thread 1 ישחרר את `mutexA`, יוכל Thread 2 לתפוס אותו ולהמשיך בביצוע. לא ייתכן מצב שבו Thread 1 מחכה ל-`mutexB` שמוחזק על ידי Thread 2, ובמקביל Thread 2 מחכה ל-`mutexA` שמוחזק על ידי Thread 1, מכיוון ששניהם ינסו לתפוס את `mutexA` ראשון, ובכך נשבר תנאי ה\"המתנה מעגלית\". זה מבטיח שאחד החוטים תמיד יסיים את עבודתו וישחרר את המנעולים, מה שיאפשר לחוט השני להתקדם."
+        }
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון המלא מפורט בסעיפים א' וב' של השאלה."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

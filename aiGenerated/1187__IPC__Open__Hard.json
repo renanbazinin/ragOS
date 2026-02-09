@@ -1,0 +1,70 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "IPC",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 08:35:05",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4148,
+      "output_tokens": 5947,
+      "total_tokens": 21319
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "IPC",
+      "Shared Memory",
+      "Semaphores",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתונה מערכת המורכבת מתהליך יצרן (Producer) יחיד ומ-N תהליכי צרכן (Consumers). תהליכים אלו מתקשרים באמצעות באפר מעגלי הממוקם בזיכרון משותף (Shared Memory). הבאפר מיועד לאחסון מספרים שלמים (integers). היצרן מייצר מספרים שלמים עוקבים (לדוגמה, 0, 1, 2, ...). כל מספר שלם המיוצר על ידי היצרן חייב להיצרך על ידי תהליך צרכן אחד בלבד מבין N הצרכנים. גודל הבאפר הוא 100 מספרים שלמים. המערכת צריכה להיות יציבה ועמידה לתקלות ככל האפשר.\n\nיש לפרט ולנמק את כל החישובים/החלטות העיצוב.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "עיצוב מבנה הנתונים והסנכרון:\nתארו את מבנה הנתונים שתשמשו בו בזיכרון המשותף (הבאפר, אינדקסים, מונים). אילו פרימיטיבי סנכרון תבחרו (לדוגמה, סמפורים)? פרטו את תפקידו של כל פרימיטיב ונמקו את בחירתכם.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "קוד יצרן:\nספקו קוד C/C++ (או פסאודו-קוד מפורט) עבור תהליך היצרן. הקוד צריך לכלול את שלבי יצירת הזיכרון המשותף, אתחול הסמפורים, ואת הלולאה הראשית של היצרן המייצרת וכותבת נתונים לבאפר.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.3",
+        "text": "קוד צרכן:\nספקו קוד C/C++ (או פסאודו-קוד מפורט) עבור תהליך צרכן בודד. הקוד צריך לכלול את שלבי ההתחברות לזיכרון המשותף, שימוש בסמפורים, ואת הלולאה הראשית של הצרכן הקוראת וצורכת נתונים מהבאפר.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.4",
+        "text": "מצבי מירוץ וקיפאון:\nזהו מצבי מירוץ (Race Conditions) או קיפאון (Deadlocks) פוטנציאליים בעיצוב שלכם (אם קיימים, או הסבירו מדוע אינם קיימים). הסבירו כיצד מנגנוני הסנכרון שבחרתם מונעים אותם, ובפרט כיצד הם מבטיחים שכל פריט נצרך פעם אחת בלבד על ידי צרכן אחד.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.5",
+        "text": "ניקוי משאבים:\nהסבירו כיצד יש לנקות כראוי את משאבי הזיכרון המשותף והסמפורים, במיוחד בתרחישים שבהם תהליכים מסתיימים באופן בלתי צפוי (לדוגמה, קריסה).",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "פתרון:\n\n**1.1. עיצוב מבנה הנתונים והסנכרון:**\nנשתמש במבנה נתונים בזיכרון משותף שיכלול את הבאפר המעגלי עצמו, אינדקסים לכתיבה וקריאה, וסמפורים לסנכרון. הבחירה בסמפורים מסוג POSIX (מובנים בתוך הזיכרון המשותף) מאפשרת סנכרון בין תהליכים שונים.\n\n```c\n#define BUFFER_SIZE 100\n\ntypedef struct {\n    int buffer[BUFFER_SIZE]; // הבאפר המעגלי לאחסון מספרים שלמים\n    int in;                   // אינדקס המצביע על המקום הבא לכתיבה על ידי היצרן\n    int out;                  // אינדקס המצביע על המקום הבא לקריאה על ידי הצרכן\n    sem_t mutex;              // סמפור בינארי להגנה על גישה לנתונים המשותפים (in, out, buffer)\n    sem_t full;               // סמפור מונה המייצג את מספר המקומות הריקים בבאפר. היצרן ממתין אם 0.\n    sem_t empty;              // סמפור מונה המייצג את מספר הפריטים המלאים בבאפר. הצרכנים ממתינים אם 0.\n} shm_data_t;\n```\n\n**הסבר לבחירה:**\n*   **`buffer[BUFFER_SIZE]`**: מערך בגודל קבוע לאחסון הנתונים.\n*   **`in`, `out`**: אינדקסים למימוש באפר מעגלי. `in` מתקדם עם כתיבת היצרן, `out` מתקדם עם קריאת הצרכנים.\n*   **`mutex`**: סמפור בינארי (ערך התחלתי 1). מגן על גישה הדדית לנתונים המשותפים (`in`, `out`, וגישה לתאי הבאפר עצמם). רק תהליך אחד יכול להחזיק ב-`mutex` בכל רגע נתון, ובכך למנוע מצבי מירוץ בעת עדכון האינדקסים או הגישה לבאפר.\n*   **`full`**: סמפור מונה (ערך התחלתי `BUFFER_SIZE`). מספר את המקומות הפנויים בבאפר. היצרן מבצע `sem_wait` על `full` לפני כתיבה (ממתין אם הבאפר מלא), והצרכנים מבצעים `sem_post` על `full` לאחר קריאה (משחררים מקום).\n*   **`empty`**: סמפור מונה (ערך התחלתי 0). מספר את הפריטים המלאים בבאפר. הצרכנים מבצעים `sem_wait` על `empty` לפני קריאה (ממתינים אם הבאפר ריק), והיצרן מבצע `sem_post` על `empty` לאחר כתיבה (מסמן שפריט חדש זמין).\n\n**1.2. קוד יצרן (C/C++):**\n\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n#include <fcntl.h>\n#include <sys/mman.h>\n#include <sys/stat.h>\n#include <unistd.h>\n#include <semaphore.h>\n\n#define SHM_NAME \"/my_shm_ipc_q\"\n#define BUFFER_SIZE 100\n\ntypedef struct {\n    int buffer[BUFFER_SIZE];\n    int in;     // Producer's index\n    int out;    // Consumer's index\n    sem_t mutex;  // Protects 'in', 'out', and buffer access\n    sem_t full;   // Counts available slots for producer\n    sem_t empty;  // Counts available items for consumers\n} shm_data_t;\n\nint main() {\n    int shm_fd;\n    shm_data_t *shm_ptr;\n\n    // 1. יצירת אובייקט זיכרון משותף (או פתיחתו אם קיים)\n    shm_fd = shm_open(SHM_NAME, O_CREAT | O_EXCL | O_RDWR, 0666); // O_EXCL מבטיח שהיצרן הוא היחיד שיוצר\n    if (shm_fd == -1) {\n        perror(\"shm_open (producer) - trying to unlink and retry\");\n        shm_unlink(SHM_NAME); // ניסיון לנקות משאב ישן וליצור מחדש\n        shm_fd = shm_open(SHM_NAME, O_CREAT | O_RDWR, 0666);\n        if (shm_fd == -1) {\n            perror(\"shm_open (producer) - failed even after unlink\");\n            exit(EXIT_FAILURE);\n        }\n    }\n\n    // 2. קביעת גודל אובייקט הזיכרון המשותף\n    if (ftruncate(shm_fd, sizeof(shm_data_t)) == -1) {\n        perror(\"ftruncate\");\n        shm_unlink(SHM_NAME); // ניקוי במקרה של כשל\n        exit(EXIT_FAILURE);\n    }\n\n    // 3. מיפוי אובייקט הזיכרון המשותף למרחב הכתובות של התהליך\n    shm_ptr = mmap(0, sizeof(shm_data_t), PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);\n    if (shm_ptr == MAP_FAILED) {\n        perror(\"mmap\");\n        shm_unlink(SHM_NAME); // ניקוי במקרה של כשל\n        exit(EXIT_FAILURE);\n    }\n\n    // 4. אתחול נתוני הזיכרון המשותף (רק פעם אחת על ידי היצרן)\n    shm_ptr->in = 0;\n    shm_ptr->out = 0;\n\n    // 5. אתחול סמפורים (pshared = 1 מציין סמפורים בין-תהליכיים)\n    if (sem_init(&shm_ptr->mutex, 1, 1) == -1) { perror(\"sem_init mutex\"); munmap(shm_ptr, sizeof(shm_data_t)); shm_unlink(SHM_NAME); exit(EXIT_FAILURE); }\n    if (sem_init(&shm_ptr->full, 1, BUFFER_SIZE) == -1) { perror(\"sem_init full\"); sem_destroy(&shm_ptr->mutex); munmap(shm_ptr, sizeof(shm_data_t)); shm_unlink(SHM_NAME); exit(EXIT_FAILURE); }\n    if (sem_init(&shm_ptr->empty, 1, 0) == -1) { perror(\"sem_init empty\"); sem_destroy(&shm_ptr->mutex); sem_destroy(&shm_ptr->full); munmap(shm_ptr, sizeof(shm_data_t)); shm_unlink(SHM_NAME); exit(EXIT_FAILURE); }\n\n    printf(\"Producer: Shared memory and semaphores initialized.\\n\");\n\n    int item = 0;\n    while (1) {\n        // ייצור פריט\n        printf(\"Producer: Producing item %d\\n\", item);\n        sleep(1); // הדמיית עבודה\n\n        // המתן למקום פנוי בבאפר\n        sem_wait(&shm_ptr->full);\n        // רכוש את ה-mutex לגישה לבאפר ולנתונים המשותפים\n        sem_wait(&shm_ptr->mutex);\n\n        // כתוב את הפריט לבאפר\n        shm_ptr->buffer[shm_ptr->in] = item;\n        shm_ptr->in = (shm_ptr->in + 1) % BUFFER_SIZE;\n\n        printf(\"Producer: Wrote item %d, in = %d\\n\", item, shm_ptr->in);\n\n        // שחרר את ה-mutex\n        sem_post(&shm_ptr->mutex);\n        // סמן שפריט זמין לקריאה\n        sem_post(&shm_ptr->empty);\n\n        item++;\n    }\n\n    // ניקוי (בתרחיש אמיתי, יטופל על ידי פונקציית ניקוי או מטפל אותות)\n    sem_destroy(&shm_ptr->mutex);\n    sem_destroy(&shm_ptr->full);\n    sem_destroy(&shm_ptr->empty);\n    munmap(shm_ptr, sizeof(shm_data_t));\n    shm_unlink(SHM_NAME);\n\n    return 0;\n}\n```\n\n**1.3. קוד צרכן (C/C++):**\n\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n#include <fcntl.h>\n#include <sys/mman.h>\n#include <sys/stat.h>\n#include <unistd.h>\n#include <semaphore.h>\n\n#define SHM_NAME \"/my_shm_ipc_q\"\n#define BUFFER_SIZE 100\n\ntypedef struct {\n    int buffer[BUFFER_SIZE];\n    int in;\n    int out;\n    sem_t mutex;\n    sem_t full;\n    sem_t empty;\n} shm_data_t;\n\nint main(int argc, char *argv[]) {\n    int shm_fd;\n    shm_data_t *shm_ptr;\n    int consumer_id = (argc > 1) ? atoi(argv[1]) : getpid(); // מזהה צרכן, שימושי לניפוי באגים\n\n    // 1. פתיחת אובייקט הזיכרון המשותף (חייב כבר להיות קיים)\n    shm_fd = shm_open(SHM_NAME, O_RDWR, 0666);\n    if (shm_fd == -1) {\n        perror(\"shm_open (consumer) - ensure producer is running\");\n        exit(EXIT_FAILURE);\n    }\n\n    // 2. מיפוי אובייקט הזיכרון המשותף למרחב הכתובות של התהליך\n    shm_ptr = mmap(0, sizeof(shm_data_t), PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);\n    if (shm_ptr == MAP_FAILED) {\n        perror(\"mmap (consumer)\");\n        exit(EXIT_FAILURE);\n    }\n\n    printf(\"Consumer %d: Attached to shared memory.\\n\", consumer_id);\n\n    while (1) {\n        // המתן לפריט זמין בבאפר\n        sem_wait(&shm_ptr->empty);\n        // רכוש את ה-mutex לגישה לבאפר ולנתונים המשותפים\n        sem_wait(&shm_ptr->mutex);\n\n        // קרא את הפריט מהבאפר\n        int item = shm_ptr->buffer[shm_ptr->out];\n        shm_ptr->out = (shm_ptr->out + 1) % BUFFER_SIZE;\n\n        printf(\"Consumer %d: Read item %d, out = %d\\n\", consumer_id, item, shm_ptr->out);\n\n        // שחרר את ה-mutex\n        sem_post(&shm_ptr->mutex);\n        // סמן שמקום התפנה בבאפר\n        sem_post(&shm_ptr->full);\n\n        sleep(2); // הדמיית עבודה\n    }\n\n    // ניקוי (צרכנים בדרך כלל לא מבצעים unlink או destroy לסמפורים)\n    munmap(shm_ptr, sizeof(shm_data_t));\n    // close(shm_fd); // ניתן לסגור את ה-fd לאחר munmap\n\n    return 0;\n}\n```\n\n**1.4. מצבי מירוץ וקיפאון:**\n\n**מצבי מירוץ:**\nהעיצוב שהוצג מונע מצבי מירוץ באמצעות השימוש בסמפור `mutex`. כל גישה או שינוי של הנתונים המשותפים (`in`, `out`, ותוכן ה-`buffer` עצמו) מתבצעת בתוך קטע קריטי המוגן על ידי ה-`mutex`. כאשר תהליך (יצרן או צרכן) רוצה לגשת לנתונים אלו, הוא מבצע `sem_wait(&shm_ptr->mutex)` ורק לאחר מכן ניגש לנתונים. בסיום הגישה, הוא מבצע `sem_post(&shm_ptr->mutex)`. זה מבטיח שרק תהליך אחד יכול לגשת לנתונים המשותפים בו זמנית, ובכך נמנעים מצבי מירוץ כמו:\n*   שני צרכנים מנסים לקרוא מאותו `out` במקביל.\n*   היצרן והצרכן מנסים לעדכן את `in` או `out` במקביל.\n*   היצרן כותב לתא בזמן שצרכן קורא ממנו (אם מדובר באותו תא).\n\n**קיפאון (Deadlocks):**\nהעיצוב אינו סובל מקיפאון בתרחיש הפעולה הרגיל, בזכות סדר הפעולות הקבוע והשימוש בסמפורים מוֹנים:\n*   **יצרן:** קודם ממתין למקום פנוי (`sem_wait(full)`), ואז רוכש מנעול לגישה לנתונים (`sem_wait(mutex)`).\n*   **צרכן:** קודם ממתין לפריט זמין (`sem_wait(empty)`), ואז רוכש מנעול לגישה לנתונים (`sem_wait(mutex)`).\nסדר זה מונע את התנאים לקיפאון של \"המתנה מעגלית\" (Circular Wait), שכן לא קיימת שרשרת תהליכים שכל אחד מחזיק במשאב שדרוש לתהליך הבא בשרשרת. הסמפורים `full` ו-`empty` מטפלים בסנכרון יצרן-צרכן, וה-`mutex` מטפל בגישה הדדית לזיכרון המשותף.\n\n**הבטחת צריכה יחידה על ידי צרכן אחד בלבד:**\nדרישה זו מושגת באופן טבעי באמצעות דפוס היצרן-צרכן הסטנדרטי עם באפר מעגלי יחיד ואינדקס `out` יחיד לכלל הצרכנים.\n1.  כאשר פריט זמין בבאפר, הסמפור `empty` מקבל ערך חיובי.\n2.  אם מספר צרכנים ממתינים על `empty`, רק אחד מהם יתעורר ויבצע `sem_wait(&shm_ptr->empty)` בהצלחה.\n3.  לאחר מכן, אותו צרכן ינסה לרכוש את ה-`mutex`. אם מספר צרכנים התעוררו (כי `empty` היה גדול מ-1), הם יתחרו על ה-`mutex`. רק אחד יצליח.\n4.  הצרכן שרכש את ה-`mutex` יקרא את הפריט מ-`shm_ptr->buffer[shm_ptr->out]` ויקדם את `shm_ptr->out`.\n5.  מכיוון ש-`shm_ptr->out` הוא משתנה משותף המוגן על ידי ה-`mutex`, כל צרכן שיגיע לקטע הקריטי יקרא את הפריט הבא בתור ויקדם את האינדקס. כך, כל פריט נצרך פעם אחת בלבד על ידי הצרכן שהצליח לרכוש את ה-`mutex` ולקדם את `out` באותו רגע.\n\n**1.5. ניקוי משאבים:**\n\nניקוי נכון של משאבי זיכרון משותף וסמפורים הוא קריטי למניעת דליפות משאבים ובעיות במערכת.\n\n*   **אחריות:** תהליך היצרן הוא האחראי ליצירת ואתחול הזיכרון המשותף והסמפורים המוטבעים בו. לכן, הוא גם האחראי העיקרי לניקויים. הצרכנים רק מתחברים ומשתמשים במשאבים אלו.\n\n*   **ניקוי רגיל (יציאה מסודרת):**\n    *   **יצרן:** לפני יציאה, היצרן צריך לבצע `sem_destroy()` על כל הסמפורים שהותחלו בתוך הזיכרון המשותף, ואז `munmap()` כדי לבטל את מיפוי הזיכרון המשותף ממרחב הכתובות שלו, ולבסוף `shm_unlink()` כדי למחוק את אובייקט הזיכרון המשותף מהמערכת.\n    *   **צרכנים:** לפני יציאה, הצרכנים צריכים לבצע רק `munmap()` כדי לבטל את מיפוי הזיכרון המשותף ממרחב הכתובות שלהם. אסור להם לבצע `sem_destroy()` או `shm_unlink()` מכיוון שתהליכים אחרים (כולל היצרן וצרכנים אחרים) עדיין עשויים להשתמש במשאבים אלו.\n\n*   **ניקוי במקרה של סיום בלתי צפוי (קריסה):**\n    *   אם היצרן קורס לפני ביצוע הניקוי, הזיכרון המשותף והסמפורים יישארו במערכת. זה יכול לגרום לבעיות כגון:\n        *   ניסיון להריץ שוב את היצרן יכשל ב-`shm_open` עם `O_EXCL` (אם השתמשו בו) או יתחבר לזיכרון ישן עם נתונים לא עקביים.\n        *   צרכנים ינסו לגשת לסמפורים או זיכרון שכבר לא בשימוש פעיל, מה שעלול לגרום להם להיתקע או לקרוס.\n    *   כדי לטפל בכך, מומלץ שהיצרן ירשום מטפלי אותות (signal handlers) עבור אותות כמו `SIGINT` (Ctrl+C), `SIGTERM` (סיום), `SIGHUP` (ניתוק טרמינל), ואף `SIGSEGV` (כשל סגמנטציה). מטפלי אותות אלו יבצעו את הניקוי הנדרש (כלומר, קריאה לפונקציית ניקוי הכוללת `sem_destroy`, `munmap`, `shm_unlink`).\n    *   בנוסף, עבור סמפורים בעלי שם (named semaphores), ניתן להשתמש בפקודות מערכת כמו `rm /dev/shm/my_shm_ipc_q` (עבור זיכרון משותף POSIX) או `ipcrm` (עבור System V IPC) כדי לנקות משאבים ידנית במקרה של קריסה.\n    *   אם צרכן קורס, זה פחות קריטי למשאבים המשותפים, מכיוון שהוא לא אחראי על יצירתם או ניקויים. עם זאת, קריסה של צרכן עלולה להשפיע על המערכת אם הוא היה אמור לבצע פעולות מסוימות חיוניות או אם הוא החזיק במשאבים ספציפיים. במקרה כזה, שאר הצרכנים והיצרן ימשיכו לפעול כרגיל, וייתכן שפריטים מסוימים שהיו מיועדים לצרכן שקרס יישארו בבאפר עד שצרכנים אחרים יקראו אותם (במקרה של מספר צרכנים).\n"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

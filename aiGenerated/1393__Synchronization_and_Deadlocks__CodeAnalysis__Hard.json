@@ -1,0 +1,65 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Synchronization and Deadlocks",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 09:51:00",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5388,
+      "output_tokens": 2074,
+      "total_tokens": 13255
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Deadlocks",
+      "Atomic Operations",
+      "Mutexes",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "מנעול (mutex) הוא אובייקט סנכרון המבטיח מניעה הדדית (mutual exclusion) על קטע קריטי. נניח שברשותנו עומדת פקודת חומרה אטומית ששמה `conditional_swap`, אשר מבצעת החלפה מותנית של ערך בתא זיכרון. הפקודה פועלת באופן הבא: היא קוראת באופן אטומי את הערך הנוכחי בכתובת `ptr` לתוך משתנה זמני `old_val`. אם `old_val` שווה ל-`expected_val`, אז היא כותבת את `new_val` לכתובת `ptr`. הפקודה מחזירה את `old_val` בכל מקרה (בין אם ההחלפה בוצעה ובין אם לא). \n\nהבהרה: תיאור הפעולה הוא קוד C לצורך הסבר בלבד. פעולת המעבד מבצעת זאת באופן אטומי ולא בכמה פעולות. בכל שאלה זו אין להשתמש באובייקטי סנכרון או פעולות מעבד אטומיות מלבד `conditional_swap`, ויש לדאוג למניעה הדדית וחופש מקיפאון.",
+      "code_snippet": "int conditional_swap(int* ptr, int expected_val, int new_val) {\n    // This is an atomic hardware instruction.\n    // The C code below is for explanation only.\n    int old_val = *ptr;\n    if (old_val == expected_val) {\n        *ptr = new_val;\n    }\n    return old_val;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "מבנה המנעול ואתחולו:\nהגדירו את מבנה הנתונים `my_mutex_t` עבור המנעול, ומימשו את פונקציית האתחול `my_mutex_init(my_mutex_t* lock)`.",
+        "code_snippet": "typedef struct {\n    // Your definition here\n} my_mutex_t;\n\nvoid my_mutex_init(my_mutex_t* lock) {\n    // Your implementation here\n}",
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "פונקציית נעילה:\nמימשו את פונקציית הנעילה `my_mutex_lock(my_mutex_t* lock)`, אשר תנסה לתפוס את המנעול. אם המנעול תפוס, החוט ימתין (בסחרור - busy-waiting) עד שהמנעול יתפנה.",
+        "code_snippet": "void my_mutex_lock(my_mutex_t* lock) {\n    // Your implementation here\n}",
+        "options": null
+      },
+      {
+        "id": "1.3",
+        "text": "פונקציית שחרור:\nמימשו את פונקציית השחרור `my_mutex_unlock(my_mutex_t* lock)`, אשר תשחרר את המנעול. יש להניח שהחוט הקורא לפונקציה הוא אכן החוט שמחזיק במנעול.",
+        "code_snippet": "void my_mutex_unlock(my_mutex_t* lock) {\n    // Your implementation here\n}",
+        "options": null
+      },
+      {
+        "id": "1.4",
+        "text": "ניתוח בעיות פוטנציאליות:\nהאם המימוש שלכם מבטיח חופש מקיפאון (deadlock-free)? האם הוא הוגן (fair) במובן שכל חוט שמנסה לתפוס את המנעול יצליח בסופו של דבר? נמקו בקצרה.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.1: מבנה המנעול ואתחולו:\nהמנעול ייצג את מצבו באמצעות משתנה `int`. נשתמש ב-`0` כדי לייצג מנעול פנוי (unlocked) וב-`1` כדי לייצג מנעול תפוס (locked).\n```c\ntypedef struct {\n    int state;\n} my_mutex_t;\n\nvoid my_mutex_init(my_mutex_t* lock) {\n    lock->state = 0; // Initialize to unlocked\n}\n```\n\n1.2: פונקציית נעילה:\nהפונקציה תנסה לשנות את מצב המנעול מ-`0` ל-`1`. אם `conditional_swap` יחזיר `0` (הערך שהיה לפני ההחלפה, כלומר המנעול היה פנוי ועתה נתפס), אז הנעילה הצליחה. אם יחזיר `1` (הערך שהיה לפני ההחלפה, כלומר המנעול היה כבר תפוס), אז הנעילה נכשלה והחוט ימשיך לסחרר (busy-wait) ולנסות שוב.\n```c\nvoid my_mutex_lock(my_mutex_t* lock) {\n    // Loop until the conditional_swap successfully changes state from 0 to 1\n    // A return value of 0 means the state was 0 (unlocked) and is now 1 (locked)\n    while (conditional_swap(&(lock->state), 0, 1) != 0) {\n        // Busy-wait (spin)\n    }\n}\n```\n\n1.3: פונקציית שחרור:\nהפונקציה תשנה את מצב המנעול מ-`1` ל-`0`. מכיוון שאנו מניחים שהחוט הקורא הוא אכן בעל המנעול, אין צורך בלולאה או בדיקת שגיאות. קריאה בודדת ל-`conditional_swap` תספיק.\n```c\nvoid my_mutex_unlock(my_mutex_t* lock) {\n    // Change state from 1 (locked) to 0 (unlocked)\n    // The return value is 1 (the old state), indicating it was successfully unlocked.\n    // We assume the calling thread holds the lock, so no check is needed.\n    conditional_swap(&(lock->state), 1, 0);\n}\n```\n\n1.4: ניתוח בעיות פוטנציאליות:\n*   **חופש מקיפאון (Deadlock-free)?** כן, המימוש הוא חופשי מקיפאון. קיפאון מתרחש כאשר קבוצת חוטים ממתינה זה לזה במעגל על משאבים. במקרה זה, כל חוט מנסה לרכוש משאב יחיד (המנעול). אין מצב של החזקה והמתנה (Hold and Wait) על משאבים מרובים, וגם אין מצב של Preemption (אפשרות לקחת משאב בכוח) או Circular Wait (המתנה מעגלית) במובן הקלאסי של קיפאון על משאבים מרובים. חוטים פשוט ממתינים שהמנעול יתפנה.\n*   **הוגנות (Fairness)?** לא, המימוש אינו בהכרח הוגן. זוהי בעיית רעב (starvation). בגלל מנגנון ה-busy-waiting (סחרור), אם מספר חוטים ממתינים למנעול, אין הבטחה שחוט מסוים יצליח לתפוס את המנעול לפני חוטים אחרים. מתזמן המערכת (scheduler) יכול להריץ שוב ושוב חוטים שכבר מנסים לתפוס את המנעול, בעוד שחוטים אחרים הממתינים עלולים לעולם לא לקבל הזדמנות להריץ את `conditional_swap` בהצלחה, או שיקבלו אותה אך יפסידו בתחרות שוב ושוב. כדי להבטיח הוגנות, נדרש מנגנון תור מפורש, לרוב באמצעות סמפורים או מנעולים מורכבים יותר המשתמשים בתור המתנה של מערכת ההפעלה."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

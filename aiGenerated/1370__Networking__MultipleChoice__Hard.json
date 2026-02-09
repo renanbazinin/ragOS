@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "Networking",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 09:42:29",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 968,
+      "output_tokens": 787,
+      "total_tokens": 3692
+    }
+  },
+  "question": {
+    "id": 6,
+    "type": "MultipleChoice",
+    "topic": [
+      "Networking",
+      "Sockets",
+      "TCP",
+      "Process Management"
+    ],
+    "content": {
+      "text": "שרת TCP מקבל חיבור חדש מלקוח. מיד לאחר קבלת החיבור (באמצעות `accept()`), השרת מבצע `fork()` ליצירת תהליך בן. תהליך הבן מטפל בבקשת הלקוח ומיד בסיום הטיפול קורא לפונקציה `close()` על ה-socket descriptor של החיבור הספציפי. תהליך האב חוזר ל-`accept()` כדי לקבל חיבורים נוספים. איזו מהטענות הבאות נכונה לגבי סיום חיבור ה-TCP בין הלקוח לשרת?",
+      "code_snippet": null,
+      "options": [
+        "א. חיבור ה-TCP נסגר באופן מיידי ברגע שתהליך הבן קורא ל-`close()` על ה-socket descriptor, והלקוח מקבל חבילת `FIN`.",
+        "ב. חיבור ה-TCP נשאר פתוח כל עוד תהליך האב מחזיק עותק של ה-socket descriptor הפתוח, ורק כאשר תהליך האב יקרא ל-`close()` על עותק זה (או יסיים), הלקוח יקבל חבילת `FIN`.",
+        "ג. הלקוח יקבל חבילת `RST` מכיוון שהחיבור נסגר באופן לא צפוי על ידי תהליך הבן, בעוד שהאב מצפה להמשך תקשורת.",
+        "ד. השרת (האב או הבן) ישלח חבילת `FIN` רק כאשר הלקוח ישלח את חבילת ה-`FIN` הראשונה שלו."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "התשובה הנכונה היא ב'. כאשר תהליך מבצע `fork()`, תהליך הבן מקבל עותקים של כל ה-file descriptors הפתוחים של האב. עם זאת, ה-file descriptors הללו מצביעים לאותם אובייקטי קבצים (או סוקטים) בקרנל. לכל אובייקט סוקט בקרנל יש מונה התייחסויות (reference count). קריאה ל-`close()` על ידי תהליך הבן רק מורידה את מונה ההתייחסויות הזה באחד. חבילת `FIN` נשלחת ללקוח רק כאשר מונה ההתייחסויות של אובייקט הסוקט הספציפי מגיע לאפס. כל עוד תהליך האב עדיין מחזיק עותק של ה-socket descriptor של החיבור הספציפי, מונה ההתייחסויות אינו מגיע לאפס, ולכן חיבור ה-TCP נשאר פתוח מנקודת מבט השרת, והלקוח לא יקבל `FIN` עד שתהליך האב גם יסגור את ה-descriptor שלו (או יסיים את פעולתו, מה שיביא לסגירת כל ה-descriptors הפתוחים שלו)."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

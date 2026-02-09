@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Atomic Operations",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 09:27:21",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 1230,
+      "total_tokens": 7001
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Atomic Operations",
+      "Concurrency",
+      "Memory Model"
+    ],
+    "content": {
+      "text": "נתון הקוד הבא המורץ בשני תהליכים (threads) שונים במקביל. המשתנים `x` ו-`y` הם מסוג `std::atomic<int>` ומאותחלים ל-0.\n\n```cpp\n#include <atomic>\n#include <thread>\n\nstd::atomic<int> x{0}, y{0};\n\nvoid thread1_func() {\n    x.store(1, std::memory_order_relaxed); // (1)\n    y.store(1, std::memory_order_relaxed); // (2)\n}\n\nvoid thread2_func() {\n    while (y.load(std::memory_order_relaxed) == 0);\n    int r1 = x.load(std::memory_order_relaxed); // (4)\n}\n```\n\nבהנחה ש-Thread 1 סיים את ריצתו ו-Thread 2 הגיע לשורה (4) וקלט את `y` כ-1, איזה מהבאים נכון לגבי הערך של `r1`?",
+      "code_snippet": "#include <atomic>\n#include <thread>\n\nstd::atomic<int> x{0}, y{0};\n\nvoid thread1_func() {\n    x.store(1, std::memory_order_relaxed); // (1)\n    y.store(1, std::memory_order_relaxed); // (2)\n}\n\nvoid thread2_func() {\n    while (y.load(std::memory_order_relaxed) == 0);\n    int r1 = x.load(std::memory_order_relaxed); // (4)\n}\n",
+      "options": [
+        "א. `r1` יכיל בוודאות את הערך 1.",
+        "ב. `r1` יכיל בוודאות את הערך 0.",
+        "ג. `r1` יכול להכיל את הערך 0 או 1, אך ערך ברירת המחדל של `std::atomic` מבטיח עקביות.",
+        "ד. `r1` יכול להכיל את הערך 0 או 1, מכיוון שאין כל ערבות לסדר גלובלי בין פעולות אטומיות שונות ב-`std::memory_order_relaxed`."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ד. `r1` יכול להכיל את הערך 0 או 1, מכיוון שאין כל ערבות לסדר גלובלי בין פעולות אטומיות שונות ב-`std::memory_order_relaxed`.",
+      "explanation": "התשובה הנכונה היא ד'.\n\nפעולות אטומיות עם `std::memory_order_relaxed` אינן מספקות ערבויות לסדר בין פעולות על משתנים אטומיים שונים. בעוד שפעולות בתוך אותו תהליך (כמו `x.store` ואז `y.store` ב-Thread 1) נשארות בסדר תוכנית (program order) מנקודת מבטו של אותו תהליך, אין ערבות שהסדר הזה ישתקף כלפי תהליכים אחרים, ובטח שלא על פני משתנים אטומיים שונים. כלומר, אין קשר 'happens-before' בין `x.store(1)` לבין `y.store(1)` מבחינת ראות גלובלית.\n\nבמקרה זה, `y.store(1, std::memory_order_relaxed)` ב-Thread 1 ו-`y.load(std::memory_order_relaxed)` ב-Thread 2 אכן מבטיחים ש-Thread 2 יראה בסופו של דבר את `y` כ-1. עם זאת, עצם העובדה ש-Thread 2 רואה את `y` כ-1 לא יוצרת שום קשר סינכרוני או סדר 'happens-before' עם `x.store(1)`. אין שום דבר שאומר שברגע ש-`y` נראה כ-1, גם `x` חייב להיראות כ-1.\n\nלכן, ייתכן ש-Thread 2 יראה את `y` כ-1 (כי ה-store שלו הפך גלוי), אך עדיין לא יראה את השינוי ב-`x` (כי ה-store שלו עדיין לא הפך גלוי או שהמעבד/קומפיילר ביצעו reordering שגורם ל-`x` להיראות ישן). זהו מצב קלאסי של חוסר עקביות סדרתית (sequential consistency) הנגרמת משימוש ב-`memory_order_relaxed` ללא קשרים נוספים של release-acquire או fence. לכן, `r1` יכול להכיל 0 או 1."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

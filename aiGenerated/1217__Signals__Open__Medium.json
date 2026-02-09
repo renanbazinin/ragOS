@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Signals",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 08:45:16",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2023,
+      "output_tokens": 1894,
+      "total_tokens": 10448
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Signals",
+      "Signal Handling",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "תהליך רץ מבצע לולאה אינסופית המכילה קטע קריטי בו הוא מבצע פעולות רגישות. נניח שקבלת אות SIGINT (לחיצת Ctrl+C) בזמן שהתהליך נמצא בתוך הקטע הקריטי עלולה להשאיר את המערכת במצב לא עקבי. כתוב תוכנית C המדגימה כיצד ניתן למנוע את קבלת האות SIGINT בזמן שהתהליך מבצע את הקטע הקריטי, וכיצד להחזיר את הטיפול באות למצב רגיל לאחר יציאה מהקטע הקריטי. הסבר את המנגנון שבו השתמשת ומדוע הוא נחוץ.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון משתמש בפונקציה `sigprocmask` כדי לנהל את מסכת האותות החסומים עבור התהליך.\n\nלהלן דוגמת קוד המממשת את הדרישות:\n\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <signal.h>\n\nvoid sigint_handler(int signo) {\n    printf(\"\\n[Handler] Received SIGINT. Exiting gracefully...\\n\");\n    exit(0);\n}\n\nint main() {\n    // 1. Register the signal handler for SIGINT\n    struct sigaction sa;\n    sa.sa_handler = sigint_handler;\n    sigemptyset(&sa.sa_mask); // Don't block any other signals while handler runs\n    sa.sa_flags = 0; // No special flags\n    if (sigaction(SIGINT, &sa, NULL) == -1) {\n        perror(\"sigaction\");\n        exit(EXIT_FAILURE);\n    }\n\n    printf(\"Process started. SIGINT handler registered. Press Ctrl+C.\\n\");\n\n    sigset_t block_mask, old_mask;\n\n    // 2. Initialize a signal set to block SIGINT\n    sigemptyset(&block_mask);\n    sigaddset(&block_mask, SIGINT);\n\n    while (1) {\n        // Before critical section\n        printf(\"Entering critical section in 3 seconds...\\n\");\n        sleep(3);\n\n        // --- BLOCK SIGINT ---\n        // Block SIGINT and save the old mask\n        if (sigprocmask(SIG_BLOCK, &block_mask, &old_mask) == -1) {\n            perror(\"sigprocmask SIG_BLOCK\");\n            exit(EXIT_FAILURE);\n        }\n        printf(\"SIGINT is now BLOCKED.\\n\");\n\n        // --- CRITICAL SECTION START ---\n        printf(\"CRITICAL SECTION: Performing sensitive operations (5 seconds)...\\n\");\n        sleep(5); // Simulate critical work\n        printf(\"CRITICAL SECTION: Done.\\n\");\n        // --- CRITICAL SECTION END ---\n\n        // --- UNBLOCK SIGINT ---\n        // Restore the old signal mask (which unblocks SIGINT)\n        if (sigprocmask(SIG_SETMASK, &old_mask, NULL) == -1) {\n            perror(\"sigprocmask SIG_SETMASK\");\n            exit(EXIT_FAILURE);\n        }\n        printf(\"SIGINT is now UNBLOCKED.\\n\");\n\n        // After critical section\n        printf(\"Exiting critical section. Waiting 2 seconds before re-entering.\\n\");\n        sleep(2);\n    }\n\n    return 0;\n}\n```\n\n**הסבר מפורט**:\n\n1.  **הגדרת Handler**: ראשית, אנו מגדירים `sigint_handler` שיטפל באות `SIGINT`. Handler זה פשוט מדפיס הודעה ויוצא מהתהליך בצורה מסודרת. אנו משתמשים ב-`sigaction` במקום ב-`signal` הישנה מכיוון שהיא מציעה שליטה טובה יותר והיא הדרך המועדפת לטפל באותות ב-POSIX. הוספת `sigemptyset(&sa.sa_mask);` מבטיחה שאף אות נוסף לא ייחסם באופן אוטומטי בזמן שה-handler רץ.\n2.  **יצירת מסכה לחסימה**: אנו יוצרים קבוצת אותות (`sigset_t`) בשם `block_mask` ומכניסים לתוכה את האות `SIGINT` באמצעות `sigemptyset` (לאתחול הקבוצה כריקה) ו-`sigaddset` (להוספת `SIGINT`). קבוצה זו תגדיר אילו אותות אנו רוצים לחסום.\n3.  **חסימת אותות לפני קטע קריטי**: לפני הכניסה לקטע הקריטי, אנו קוראים ל-`sigprocmask` עם `SIG_BLOCK` ו-`block_mask`. פעולה זו מוסיפה את האותות המוגדרים ב-`block_mask` (במקרה זה `SIGINT`) למסכת האותות החסומים הנוכחית של התהליך. הפרמטר השלישי, `&old_mask`, משמש לשמירת המסכה הקודמת של התהליך. זה קריטי כדי שנוכל לשחזר את המצב הקודם מאוחר יותר. אם אות `SIGINT` נשלח בזמן שהוא חסום, הוא לא יימסר מיד (כלומר, ה-handler לא יופעל) אלא יישאר תלוי ועומד (pending) עד שהאות יבוטל חסימתו. אם אותו אות נשלח מספר פעמים בזמן החסימה, בדרך כלל רק מופע אחד שלו יישמר כ-pending ויימסר לאחר ביטול החסימה (בהתאם לסוג האות).\n4.  **ביצוע קטע קריטי**: התהליך מבצע את הפעולות הרגישות בקטע הקריטי. במהלך 5 השניות הללו, אם Ctrl+C נלחץ, ה-handler של `SIGINT` לא יופעל מיד, והתהליך ימשיך בביצוע הקטע הקריטי.\n5.  **ביטול חסימת אותות אחרי קטע קריטי**: לאחר שהתהליך סיים את הקטע הקריטי, אנו קוראים שוב ל-`sigprocmask`, הפעם עם `SIG_SETMASK` ו-`old_mask`. פעולה זו מחזירה את מסכת האותות של התהליך למצב שהיה לפני החסימה, ובכך מבטלת את חסימת `SIGINT`. אם אות `SIGINT` היה תלוי ועומד בזמן החסימה, הוא יימסר לתהליך מיד לאחר ביטול החסימה (כלומר, ה-handler יופעל).\n\n**חשיבות המנגנון**:\nהמנגנון הזה קריטי כאשר ישנם קטעי קוד שבהם קבלת אות עלולה להוביל למצב לא עקבי של המערכת, לדוגמה, אם התהליך מעדכן מבני נתונים משותפים, משאבים חיוניים, או קבצים. חסימת האות מבטיחה שהקטע הקריטי יסתיים בשלמותו לפני שהאות יטופל. זה מונע הפסקות בלתי צפויות שיכולות להשאיר את הנתונים במצב חלקי או פגום, ובכך שומר על אמינות ושלמות הנתונים והמערכת."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

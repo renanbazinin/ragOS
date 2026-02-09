@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Copy-on-Write",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 08:54:44",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 972,
+      "output_tokens": 1887,
+      "total_tokens": 9094
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Copy-on-Write",
+      "Virtual Memory",
+      "Process Management",
+      "fork()"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המשתמשת במערך גלובלי בגודל דף זיכרון יחיד (PAGE_SIZE). התוכנית מאתחלת את המערך, מבצעת fork, ולאחר מכן תהליך הבן משנה איבר אחד במערך ויוצא. תהליך האב ממתין לבן, ולאחר מכן משנה איבר אחר באותו המערך.\nבהנחה שמערכת ההפעלה מיישמת מנגנון Copy-on-Write סטנדרטי, וכאשר תהליך יוצא כל משאבי הזיכרון הפיזיים הייעודיים שלו משוחררים, כמה דפים פיזיים *נפרדים* שימשו למערך `global_array` מרגע תחילת התוכנית ועד לסיומה המלא של תהליך האב?",
+      "code_snippet": "#include <unistd.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <sys/wait.h>\n\n// נניח ש-PAGE_SIZE הוא 4096 בתים\n#define PAGE_SIZE 4096\n\nchar global_array[PAGE_SIZE]; // מערך בגודל דף זיכרון יחיד\n\nint main() {\n    pid_t pid;\n\n    // אתחול המערך - מבטיח שהדף נמצא בזיכרון פיזי\n    for (int i = 0; i < PAGE_SIZE; ++i) {\n        global_array[i] = 'X';\n    }\n\n    pid = fork();\n\n    if (pid == 0) { // תהליך הבן\n        global_array[0] = 'C'; // שינוי בבייט הראשון\n        printf(\"Child: global_array[0] = %c\\n\", global_array[0]);\n        exit(0);\n    } else if (pid > 0) { // תהליך האב\n        wait(NULL); // המתן לבן שיסיים\n        global_array[PAGE_SIZE - 1] = 'P'; // שינוי בבייט האחרון באותו דף\n        printf(\"Parent: global_array[PAGE_SIZE - 1] = %c\\n\", global_array[PAGE_SIZE - 1]);\n    } else {\n        perror(\"fork failed\");\n        return 1;\n    }\n\n    return 0;\n}",
+      "options": [
+        "א. 1",
+        "ב. 2",
+        "ג. 3",
+        "ד. 4"
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "הסבר: נתח את השימוש בדפי הזיכרון הפיזיים עבור המערך `global_array` לאורך זמן:\n1.  **לפני `fork()`**: המערך `global_array` מאותחל בלולאה. פעולה זו גורמת להקצאת דף פיזי יחיד עבור המערך ולכתיבת הנתונים אליו. נקרא לדף זה `P_original`. (סה\"כ: דף פיזי נפרד אחד: `P_original`).\n2.  **לאחר `fork()`**: גם תהליך האב וגם תהליך הבן חולקים כעת את `P_original`. רשומות טבלת הדפים (PTEs) בשני התהליכים עבור דף זה מסומנות כקריאה בלבד (Read-Only) כחלק ממנגנון ה-Copy-on-Write.\n3.  **תהליך הבן כותב `global_array[0] = 'C'`**: \n    *   הבן מנסה לכתוב לדף המסומן כקריאה בלבד. הדבר מפעיל תקלת דף (page fault) מסוג Copy-on-Write.\n    *   מערכת ההפעלה מקצה **דף פיזי חדש** עבור הבן. נקרא לו `P_child_copy`.\n    *   תוכן `P_original` מועתק ל-`P_child_copy`.\n    *   רשומת טבלת הדפים של הבן עבור `global_array` מתעדכנת כך שתצביע על `P_child_copy` ומסומנת ככתיבה/קריאה (Writable).\n    *   הבן כותב 'C' ל-`P_child_copy[0]`.\n    *   רשומת טבלת הדפים של האב עבור `global_array` **עדיין מצביעה על `P_original`** ועדיין מסומנת כקריאה בלבד.\n    *   בשלב זה, שני דפים פיזיים נפרדים (`P_original` ו-`P_child_copy`) היו בשימוש עבור המשתנה על ידי התהליכים הפעילים.\n4.  **תהליך הבן קורא ל-`exit(0)`**: \n    *   תהליך הבן מסיים את פעולתו. כל המשאבים הייעודיים שלו, כולל `P_child_copy`, משוחררים בחזרה למערכת ההפעלה. `P_child_copy` אינו בשימוש עוד.\n5.  **תהליך האב כותב `global_array[PAGE_SIZE - 1] = 'P'` (לאחר `wait(NULL)`):**\n    *   האב מנסה לכתוב ל-`global_array`. רשומת טבלת הדפים שלו עבור כתובת וירטואלית זו עדיין מצביעה על `P_original` ומסומנת כקריאה בלבד (מתוך שלב 2).\n    *   פעולה זו מפעילה **תקלת דף נוספת** מסוג Copy-on-Write עבור האב.\n    *   מערכת ההפעלה מקצה **דף פיזי חדש נוסף** עבור האב. נקרא לו `P_parent_copy`.\n    *   תוכן `P_original` (שהאב עדיין חלק אותו בקריאה בלבד) מועתק ל-`P_parent_copy`.\n    *   רשומת טבלת הדפים של האב עבור `global_array` מתעדכנת כך שתצביע על `P_parent_copy` ומסומנת ככתיבה/קריאה.\n    *   האב כותב 'P' ל-`P_parent_copy[PAGE_SIZE - 1]`.\n    *   בשלב זה, `P_original` אינו מקושר עוד לאף תהליך עבור `global_array` וניתן לשחררו. `P_child_copy` כבר שוחרר. רק `P_parent_copy` נמצא בשימוש פעיל על ידי התהליך הנותר.\n\nהשאלה מתייחסת למספר הדפים הפיזיים ה*נפרדים* ששימשו את `global_array` מרגע תחילת התוכנית ועד סיומה המלא של תהליך האב. אלו הם:\n1.  `P_original` (הוקצה בתחילה).\n2.  `P_child_copy` (נוצר בעת כתיבת הבן).\n3.  `P_parent_copy` (נוצר בעת כתיבת האב).\nלכן, בסך הכל 3 דפים פיזיים נפרדים היו מעורבים בטיפול בזיכרון של `global_array` לאורך כל ריצת התוכנית."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

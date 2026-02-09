@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Threads and Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 20:23:19",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2951,
+      "output_tokens": 1825,
+      "total_tokens": 9766
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Threads",
+      "Mutexes",
+      "Concurrency",
+      "Race Conditions"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה המשתמשת ב-pthreads וב-mutex. התוכנית יוצרת שני תהליכונים (threads) שכל אחד מהם אמור להגדיל מונה גלובלי (global_counter) מספר רב של פעמים. תהליכון אחד (thread_func_A) משתמש ב-mutex כדי להגן על הגישה למונה, בעוד שהתהליכון השני (thread_func_B) אינו משתמש ב-mutex כלל.\nמהו טווח הערכים האפשריים עבור `global_counter` בסיום ריצת התוכנית, לאחר ששני התהליכונים סיימו את פעולתם?\nיש להניח שכל קריאות המערכת מצליחות ושהמערכת תומכת במקביליות מלאה.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <unistd.h> // Not strictly needed for this example, but common in thread code\n\n#define NUM_ITERATIONS 100000\n\nint global_counter = 0;\npthread_mutex_t counter_mutex;\n\nvoid* thread_func_A(void* arg) {\n    for (int i = 0; i < NUM_ITERATIONS; ++i) {\n        pthread_mutex_lock(&counter_mutex);\n        global_counter++;\n        pthread_mutex_unlock(&counter_mutex);\n    }\n    return NULL;\n}\n\nvoid* thread_func_B(void* arg) {\n    for (int i = 0; i < NUM_ITERATIONS; ++i) {\n        // No mutex protection here!\n        global_counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t thread1, thread2;\n    pthread_mutex_init(&counter_mutex, NULL);\n\n    pthread_create(&thread1, NULL, thread_func_A, NULL);\n    pthread_create(&thread2, NULL, thread_func_B, NULL);\n\n    pthread_join(thread1, NULL);\n    pthread_join(thread2, NULL);\n\n    printf(\"Final global_counter value: %d\\n\", global_counter);\n\n    pthread_mutex_destroy(&counter_mutex);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון צריך לכלול את הטווח המינימלי והמקסימלי האפשרי לערך של `global_counter`.\n\n*   **ניתוח `thread_func_A`**: תהליכון זה מבצע `NUM_ITERATIONS` הגדלות ל-`global_counter`. כל הגדלה מוגנת על ידי `pthread_mutex_lock` ו-`pthread_mutex_unlock`. המשמעות היא שכל פעולת `global_counter++` בתוך `thread_func_A` היא אטומית ובטוחה מפני תנאי מרוץ (race conditions) עם גישות אחרות המשתמשות באותו mutex. לכן, תהליכון `A` תמיד יוסיף בדיוק `NUM_ITERATIONS` למונה.\n\n*   **ניתוח `thread_func_B`**: תהליכון זה מבצע `NUM_ITERATIONS` הגדלות ל-`global_counter` ללא שימוש ב-mutex. פעולת `global_counter++` אינה אטומית ברמת המעבד, והיא מורכבת בדרך כלל משלושה שלבים:\n    1.  קריאת הערך הנוכחי של `global_counter` לתוך אוגר.\n    2.  הגדלת הערך באוגר.\n    3.  כתיבת הערך מהאוגר בחזרה ל-`global_counter`.\n    בגלל היעדר הגנה, פעולות אלו יכולות להתרחש במקביל עם גישות אחרות (מתהליכון `A`). זה יוצר תנאי מרוץ.\n    כאשר `thread_func_B` ותהליכון `A` מנסים לגשת ל-`global_counter` במקביל:\n    *   תהליכון `A` תמיד יבצע את פעולתו בהצלחה ובאופן אטומי (בזכות ה-mutex). תרומתו למונה היא תמיד `NUM_ITERATIONS`.\n    *   תהליכון `B` יכול לקרוא ערך `X`, ובזמן שהוא מעבד אותו, תהליכון `A` (שאינו חוסם את `B` כי `B` לא משתמש ב-mutex) יכול להשלים הגדלה משלו ל-`X+1`. כאשר `B` יכתוב חזרה את `X+1` (הערך המוגדל שלו), הוא למעשה יכתוב את אותו ערך שכבר נמצא ב-`global_counter`, ובכך תרומתו של `B` לאיטרציה זו אובדת.\n\n*   **טווח הערכים האפשריים:**\n    *   **ערך מקסימלי**: המקסימום יושג אם כל `NUM_ITERATIONS` ההגדלות של `thread_func_B` יתרחשו בסדר כרונולוגי לחלוטין, ללא חפיפה כלשהי עם פעולות אחרות, כך שאף הגדלה לא תאבד. במקרה זה, `thread_func_A` יוסיף `NUM_ITERATIONS` ו-`thread_func_B` יוסיף `NUM_ITERATIONS`, ובסך הכל נקבל `2 * NUM_ITERATIONS`. כלומר, `2 * 100000 = 200000`.\n    *   **ערך מינימלי**: המינימום יושג כאשר מרבית ההגדלות של `thread_func_B` אובדות עקב תנאי מרוץ. מכיוון שפעולות `thread_func_A` מוגנות על ידי mutex, הן תמיד יתרמו את מלוא `NUM_ITERATIONS`. הבעיה היא רק עם ההגדלות של `thread_func_B`. במקרה הגרוע ביותר, כל `NUM_ITERATIONS-1` פעולות של `thread_func_B` יאבדו, ורק פעולת `global_counter++` אחת מ-`thread_func_B` תצליח להיות אפקטיבית ולשנות את ערך המונה. זה קורה אם כל פעולה של `B` נדרסת על ידי פעולה של `A` או על ידי פעולה קודמת של `B` עצמו (אם היינו מניחים שפעולות של `B` יכולות לדרוס זו את זו). לכן, הערך המינימלי הוא `NUM_ITERATIONS` (מ-A) + 1 (מ-B). כלומר, `100000 + 1 = 100001`.\n\n**טווח התוצאות האפשריות הוא בין `NUM_ITERATIONS + 1` לבין `2 * NUM_ITERATIONS`.**\nלדוגמה, עבור `NUM_ITERATIONS = 100000`, הטווח הוא בין `100001` לבין `200000`."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

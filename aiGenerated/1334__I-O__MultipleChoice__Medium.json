@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Disks",
+    "topic_hint": "I/O",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 09:34:08",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1141,
+      "output_tokens": 539,
+      "total_tokens": 4496
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "I/O",
+      "Polling",
+      "Interrupts",
+      "CPU Utilization"
+    ],
+    "content": {
+      "text": "איזו מבין הטענות הבאות נכונה לגבי שיטות קלט/פלט (I/O) מבוססות Polling ו-Interrupts?",
+      "code_snippet": null,
+      "options": [
+        "א. שימוש ב-Polling תמיד מבטיח זמן תגובה מהיר יותר לאירועי I/O בהשוואה ל-Interrupts.",
+        "ב. במערכת עם תעבורת I/O נמוכה מאוד, שימוש ב-Interrupts בדרך כלל מוביל לניצול מעבד יעיל יותר מאשר Polling.",
+        "ג. במערכת עם תעבורת I/O גבוהה מאוד, שימוש ב-Polling הוא לרוב יעיל יותר מבחינת ניצול מעבד מאשר Interrupts.",
+        "ד. היתרון העיקרי של Polling הוא בכך שהוא מאפשר למעבד לבצע עבודה אחרת בזמן ההמתנה ל-I/O."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב. נכון. כאשר תעבורת ה-I/O נמוכה מאוד, אירועי I/O מתרחשים לעיתים רחוקות. בשיטת Polling, המעבד נאלץ לבדוק באופן קבוע את מצב ההתקן (או לבצע busy-waiting), ובכך מבזבז משאבי מעבד רבים על המתנה סרק אם אין אירועים. לעומת זאת, בשיטת Interrupts, ההתקן מודיע למעבד רק כאשר הוא מוכן, מה שמאפשר למעבד לבצע עבודה שימושית אחרת (או לעבור למצב שינה) בזמן ההמתנה לאירוע ה-I/O. זה מוביל לניצול מעבד יעיל יותר בסך הכל במצבים של תעבורת I/O נמוכה."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

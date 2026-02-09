@@ -1,0 +1,54 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Processes and Memory Management",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 20:11:49",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3064,
+      "output_tokens": 3013,
+      "total_tokens": 14064
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Processes",
+      "Memory Management",
+      "System Calls",
+      "Shared Memory",
+      "Copy-on-Write",
+      "exec"
+    ],
+    "content": {
+      "text": "נתונות התוכניות הבאות, prog1 ו-prog2:\n\nהניחו כי גודל דף זיכרון הוא 4KB. תוכניות prog1 ו-prog2, כולל קוד, נתונים ומחסנית, דורשות כל אחת בדיוק דף פיזי אחד בלבד (4KB) לצורך פעולתן הרגילה, לפני כל הקצאת זיכרון נוספת. קריאת המערכת mmap בשורה 12 ב-prog1 מקצה דף זיכרון פיזי נוסף.\n\nהניחו שכל קריאות המערכת מצליחות, ולא נוצרים תהליכים או קריאות זיכרון נוספות מלבד המתוארות במפורש בקוד. כל תהליך מקבל מזהה הגדול ב-1 מהתהליך שנוצר לפניו. יש להניח שהתהליך המקורי של prog1 מקבל PID 100.\n\nprog1.c:\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/mman.h>\n#include <sys/wait.h>\n\n#define MMAP_SIZE 4096 // A single page\n\nint main() {\n    int *shared_mem;\n    pid_t pid;\n\n    // Allocate a shared anonymous memory region\n    shared_mem = mmap(NULL, MMAP_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);\n    if (shared_mem == MAP_FAILED) {\n        perror(\"mmap failed\");\n        exit(1);\n    }\n\n    *shared_mem = 100; // Initial value\n\n    printf(\"Parent PID: %d, Initial shared value: %d\\n\", getpid(), *shared_mem);\n\n    pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        exit(1);\n    } else if (pid == 0) { // Child process\n        printf(\"Child PID: %d, Parent PID: %d, Before modification shared value: %d\\n\", getpid(), getppid(), *shared_mem);\n        *shared_mem = 200; // Modify shared memory\n        printf(\"Child PID: %d, After modification shared value: %d\\n\", getpid(), *shared_mem);\n\n        char *args[] = {\"./prog2\", NULL};\n        printf(\"Child PID: %d, Executing prog2...\\n\", getpid());\n        execve(args[0], args, NULL);\n        perror(\"execve failed\"); // Should not reach here if execve succeeds\n        exit(1);\n    } else { // Parent process\n        int local_var = 5;\n        local_var++; // This modification to a local variable will cause COW on the parent's stack page.\n        \n        wait(NULL); // Wait for child to finish\n\n        printf(\"Parent PID: %d, After child finished, shared value: %d\\n\", getpid(), *shared_mem);\n        \n        // Clean up shared memory\n        if (munmap(shared_mem, MMAP_SIZE) == -1) {\n            perror(\"munmap failed\");\n            exit(1);\n        }\n    }\n\n    return 0;\n}\n```\n\nprog2.c:\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n\nint main() {\n    printf(\"Prog2 running. PID: %d, PPID: %d\\n\", getpid(), getppid());\n    return 0;\n}\n```\n\nענו על השאלות הבאות:",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "101.1",
+        "text": "מהו הפלט האפשרי היחיד של התוכנית prog1? הסבירו כל שורת פלט.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "101.2",
+        "text": "כמה דפי זיכרון פיזיים (frames) יהיו בשימוש על ידי המערכת עבור זיכרון המשתמש (user space) מיד לאחר שורת הקוד `execve(args[0], args, NULL);` ב-prog1 *הסתיימה בהצלחה* (כלומר, התהליך הבן כבר מריץ את prog2), אך *לפני* שהתהליך הבן (המריץ את prog2) הספיק להדפיס את שורת הפלט הראשונה שלו? נמקו את תשובתכם בהתייחס למנגנוני זיכרון כגון Copy-on-Write וזיכרון משותף.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "פתרון:\n\n**סעיף 101.1: פלט התוכנית**\nהתהליך הראשי (PID 100) מתחיל ויוצר אזור זיכרון משותף באמצעות `mmap`. הוא מאתחל את הערך ל-100.\n\n1.  `Parent PID: 100, Initial shared value: 100` - הודעה זו מודפסת על ידי תהליך האב מיד לאחר אתחול הזיכרון המשותף.\n\nלאחר מכן, תהליך האב מבצע `fork()`. נוצר תהליך בן (PID 101, PPID 100).\n\n2.  `Child PID: 101, Parent PID: 100, Before modification shared value: 100` - הודעה זו מודפסת על ידי תהליך הבן. הוא קורא את הערך הנוכחי בזיכרון המשותף, שהוא עדיין 100. חשוב לציין שהזיכרון המשותף נשאר משותף פיזית גם לאחר ה-fork.\n\n3.  `Child PID: 101, After modification shared value: 200` - תהליך הבן משנה את הערך באזור הזיכרון המשותף ל-200, ומדפיס אותו. מכיוון שהזיכרון משותף (MAP_SHARED), שינוי זה יהיה גלוי גם לתהליך האב.\n\n4.  `Child PID: 101, Executing prog2...` - תהליך הבן מודיע שהוא עומד לבצע `execve`.\n\nלאחר מכן, תהליך הבן מבצע `execve` ומחליף את הקוד שלו לקוד של `prog2`. כתובות הזיכרון הוירטואליות שלו מאותחלות מחדש עבור `prog2`. הזיכרון המשותף שמופה ב-prog1 אינו חלק ממרחב הכתובות של prog2.\n\n5.  `Prog2 running. PID: 101, PPID: 100` - הודעה זו מודפסת על ידי תהליך הבן (שהפך כעת ל-prog2). ה-PID שלו נשאר 101, וה-PPID שלו נשאר 100 (שכן האב לא השתנה).\n\nתהליך האב ממתין שהבן יסיים באמצעות `wait(NULL)`.\n\n6.  `Parent PID: 100, After child finished, shared value: 200` - לאחר שהבן סיים (כלומר prog2 סיים את ריצתו), תהליך האב ממשיך. הוא קורא את הערך מהזיכרון המשותף. מכיוון שהבן שינה אותו ל-200 והזיכרון משותף, האב רואה את הערך המעודכן 200.\n\n**סעיף 101.2: מספר דפי זיכרון פיזיים בשימוש**\nננתח את מצב הזיכרון בנקודת הזמן המבוקשת: מיד לאחר ש-`execve` הסתיים בהצלחה בתהליך הבן, ולפני שהבן (המריץ את prog2) הספיק להדפיס את הפלט הראשון שלו.\n\n1.  **מצב התחלתי (לפני fork, לאחר mmap):**\n    *   `prog1` (קוד, נתונים, מחסנית): 1 דף פיזי (לפי הנתון). נכנה אותו P1_private_frame.\n    *   זיכרון משותף (`mmap`): 1 דף פיזי. נכנה אותו Shared_mmap_frame.\n    *   סה\"כ: 2 דפים פיזיים.\n\n2.  **לאחר `fork()` ושינויים שגרמו ל-COW, אך לפני `execve` בבן:**\n    *   תהליך האב ותהליך הבן מקבלים עותק של מרחב הכתובות של האב. ה-Shared_mmap_frame נשאר משותף פיזית (כי הוא MAP_SHARED).\n    *   ה-P1_private_frame משותף בהתחלה במנגנון Copy-on-Write (COW).\n    *   בתוכנית, תהליך האב מבצע `local_var++`, מה שגורם לשינוי בדף המחסנית שלו. כיוון שדף זה הוא חלק מה-P1_private_frame, דף זה הופך לדף פיזי נפרד עבור האב (P1_private_frame_parent).\n    *   תהליך הבן מדפיס מספר הודעות (מה שמשנה את המחסנית שלו) ומשנה את הזיכרון המשותף. שינוי המחסנית שלו גורם גם לדף הפרטי שלו להפוך לדף פיזי נפרד (P1_private_frame_child).\n    *   לכן, בשלב זה, ישנם:\n        *   דף פיזי אחד עבור הזיכרון הפרטי של האב (P1_private_frame_parent).\n        *   דף פיזי אחד עבור הזיכרון הפרטי של הבן (P1_private_frame_child).\n        *   דף פיזי אחד עבור הזיכרון המשותף (Shared_mmap_frame).\n    *   סה\"כ: 3 דפים פיזיים.\n\n3.  **לאחר `execve` בבן (נקודת הזמן המבוקשת):**\n    *   **תהליך האב (prog1):** הוא ממשיך לרוץ. הוא מחזיק:\n        *   דף פיזי אחד עבור הזיכרון הפרטי שלו (P1_private_frame_parent).\n        *   דף פיזי אחד עבור הזיכרון המשותף (Shared_mmap_frame).\n        *   סה\"כ עבור האב: 2 דפים פיזיים.\n    *   **תהליך הבן (כעת מריץ prog2):** קריאת `execve` מחליפה את כל מרחב הכתובות של התהליך הבן. המשמעות היא:\n        *   כל הדפים הפיזיים שהיו שייכים ל-prog1 במרחב הכתובות של הבן (כולל P1_private_frame_child וגם המיפוי של Shared_mmap_frame) *משוחררים או נעלמים ממרחב הכתובות שלו*.\n        *   נוצר מרחב כתובות חדש עבור `prog2`.\n        *   `prog2` דורש דף פיזי אחד עבור קוד/נתונים/מחסנית משלו (לפי הנתון). נכנה אותו P2_private_frame.\n        *   סה\"כ עבור הבן (prog2): 1 דף פיזי.\n\n    *   **סה\"כ דפים פיזיים במערכת:** 2 דפים (של האב) + 1 דף (של הבן/prog2) = **3 דפים פיזיים**."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

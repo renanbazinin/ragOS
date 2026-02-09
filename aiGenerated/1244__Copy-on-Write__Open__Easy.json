@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Copy-on-Write",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 08:55:36",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4669,
+      "output_tokens": 1650,
+      "total_tokens": 8475
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Copy-on-Write",
+      "Memory Management",
+      "Processes"
+    ],
+    "content": {
+      "text": "נתון קוד C/C++ הבא המשתמש בקריאת המערכת `fork()`:\n```c\n#include <stdio.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\nint global_var = 10;\n\nint main() {\n    pid_t pid;\n\n    printf(\"Before fork: global_var = %d (PID: %d)\\n\", global_var, getpid());\n\n    pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        return 1;\n    } else if (pid == 0) { // Child process\n        printf(\"Child process (PID: %d) - global_var before modification: %d\\n\", getpid(), global_var);\n        global_var = 20;\n        printf(\"Child process (PID: %d) - global_var after modification: %d\\n\", getpid(), global_var);\n    } else { // Parent process\n        wait(NULL); // Wait for child to finish\n        printf(\"Parent process (PID: %d) - global_var after child modification: %d\\n\", getpid(), global_var);\n    }\n\n    return 0;\n}\n```\nבהתבסס על מנגנון Copy-on-Write, הסבר מה יהיה הפלט הצפוי של התוכנית עבור כל אחד מהתהליכים (האב והבן) וכיצד מנגנון זה בא לידי ביטוי בפעולה זו.",
+      "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\nint global_var = 10;\n\nint main() {\n    pid_t pid;\n\n    printf(\"Before fork: global_var = %d (PID: %d)\\n\", global_var, getpid());\n\n    pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        return 1;\n    } else if (pid == 0) { // Child process\n        printf(\"Child process (PID: %d) - global_var before modification: %d\\n\", getpid(), global_var);\n        global_var = 20;\n        printf(\"Child process (PID: %d) - global_var after modification: %d\\n\", getpid(), global_var);\n    } else { // Parent process\n        wait(NULL); // Wait for child to finish\n        printf(\"Parent process (PID: %d) - global_var after child modification: %d\\n\", getpid(), global_var);\n    }\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הסבר:\nמנגנון Copy-on-Write (CoW) הוא אופטימיזציה המשמשת במערכות הפעלה רבות, כולל בעת קריאת המערכת `fork()`. כאשר תהליך אב יוצר תהליך בן באמצעות `fork()`, במקום להעתיק באופן מיידי את כל מרחב הכתובות של האב לבן, שני התהליכים חולקים את אותם דפי זיכרון פיזיים. דפים אלו מסומנים כקריאה בלבד (read-only) בטבלאות הדפים של שני התהליכים, ומערכת ההפעלה שומרת ספירת התייחסויות (reference count) עבור כל דף, המציינת כמה תהליכים משתמשים בו.\n\nבמקרה של הקוד הנתון:\n1.  **לפני `fork()`**: התהליך האב מדפיס את `global_var` שערכו 10.\n2.  **לאחר `fork()`**: התהליך הבן נוצר. כעת, גם התהליך האב וגם התהליך הבן חולקים את דף הזיכרון הפיזי המכיל את `global_var`, והדף מסומן כקריאה בלבד. ספירת ההתייחסויות לדף זה היא 2.\n3.  **התהליך הבן מדפיס את `global_var` לפני השינוי**: מאחר שהדף עדיין משותף ולא בוצע בו שינוי על ידי הבן, הוא מדפיס את הערך המקורי, 10.\n4.  **התהליך הבן משנה את `global_var` ל-20**: זוהי פעולת כתיבה. מכיוון שהדף משותף ומסומן כקריאה בלבד, מתרחשת 'הפרת דף' (page fault). מערכת ההפעלה מזהה שהדף משותף (ספירת ההתייחסויות גדולה מ-1) ומבצעת את פעולת ה-Copy-on-Write: היא יוצרת עותק פרטי של דף זה עבור התהליך הבן, מעדכנת את טבלת הדפים של הבן כך שתצביע על הדף החדש שנוצר, ומקטינה את ספירת ההתייחסויות לדף המקורי באחד. כעת, התהליך הבן יכול לכתוב ללא הפרעה לדף הפרטי שלו.\n5.  **התהליך הבן מדפיס את `global_var` לאחר השינוי**: הוא מדפיס את הערך החדש, 20, מהדף הפרטי שלו.\n6.  **התהליך האב ממתין ומדפיס את `global_var`**: טבלת הדפים של התהליך האב עדיין מצביעה על הדף המקורי, שלא שונה מעולם על ידי האב. לכן, הוא מדפיס את הערך המקורי, 10.\n\nפלט צפוי:\n```\nBefore fork: global_var = 10 (PID: [Parent PID])\nChild process (PID: [Child PID]) - global_var before modification: 10\nChild process (PID: [Child PID]) - global_var after modification: 20\nParent process (PID: [Parent PID]) - global_var after child modification: 10\n```\n(סדר שתי השורות של התהליך הבן ביחס לשורת ה-`Before fork` ושל התהליך האב יכול להשתנות בהתאם ל-scheduler, אך הסדר הפנימי בתוך כל תהליך נשמר, והערכים המודפסים יהיו כפי שצויין)."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

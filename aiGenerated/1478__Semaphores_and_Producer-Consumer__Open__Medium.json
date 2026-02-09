@@ -1,0 +1,52 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Producer-Consumer",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 10:41:18",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1649,
+      "output_tokens": 1584,
+      "total_tokens": 6548
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "Open",
+    "topic": [
+      "Semaphores",
+      "Producer-Consumer",
+      "Synchronization",
+      "Deadlocks"
+    ],
+    "content": {
+      "text": "בעיית יצרן-צרכן היא בעיה קלאסית בתזמון תהליכים, המשתמשת בסמפורים כדי להבטיח גישה בטוחה למאגר חלופי (bounded buffer) ולתאם את הפעולות בין היצרנים לצרכנים. נתון קוד C/C++ עבור פונקציית יצרן (producer) הפועלת מול מאגר חלופי משותף, תוך שימוש בסמפורים, כפי שמוצג מטה. יש להניח כי הסמפורים והמאגר הוגדרו ואותחלו כראוי (לדוגמה: sem_t mutex; sem_t empty; sem_t full; sem_init(&mutex, 0, 1); sem_init(&empty, 0, N); sem_init(&full, 0, 0); כאשר N הוא גודל המאגר).",
+      "code_snippet": "typedef int buffer_item;\nconst int N = 10; // Example buffer size\nbuffer_item buffer[N];\nint in = 0; // Index for producer\n\n// Assume semaphores mutex, empty, full are declared and initialized globally\n// sem_t mutex;    // Initialized to 1\n// sem_t empty;    // Initialized to N\n// sem_t full;     // Initialized to 0\n\nbuffer_item produce_item() {\n    // Simulate item production\n    return rand();\n}\n\nvoid producer() {\n    buffer_item item;\n    while (1) {\n        // produce an item\n        item = produce_item();\n\n        sem_wait(&mutex);\n        sem_wait(&empty);\n\n        buffer[in] = item;\n        in = (in + 1) % N;\n\n        sem_post(&full);\n        sem_post(&mutex);\n    }\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "5.1",
+        "text": "זהו וציינו מהי הבעיה הפוטנציאלית בקוד היצרן המוצג לעיל (לדוגמה: תנאי מרוץ, קיפאון, רעב). הסבירו בפירוט מדוע הבעיה מתרחשת.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "5.2",
+        "text": "הציעו תיקון לקוד היצרן כך שיפעל בצורה בטוחה ונכונה, וציינו את השינויים הנדרשים בקוד. הסבירו מדוע התיקון שהצעתם פותר את הבעיה.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "**פתרון:**\n\n**א. זיהוי הבעיה והסבר:**\nהבעיה הפוטנציאלית בקוד היצרן המוצג היא **קיפאון (Deadlock)**.\n\n**הסבר:** תרחיש אפשרי לקיפאון מתרחש כאשר המאגר המשותף (buffer) מלא. במצב כזה, ערך הסמפור `empty` הוא 0. היצרן יבצע בהצלחה `sem_wait(&mutex)` (מכיוון ש-`mutex` מאותחל ל-1 וסביר להניח שפנוי). לאחר מכן, היצרן ינסה לבצע `sem_wait(&empty)`. מאחר ש-`empty` הוא 0, היצרן ייחסם וימתין שיתפנה מקום במאגר. אולם, בזמן שהיצרן חסום, הוא מחזיק בסמפור `mutex` (ערכו כעת 0). כתוצאה מכך, אף צרכן (consumer) לא יוכל לבצע `sem_wait(&mutex)` כדי לגשת למאגר, לצרוך פריט ולשחרר מקום (כלומר, להגדיל את `empty`). מכיוון שהיצרן מחכה ש-`empty` יגדל אך רק הצרכן יכול לגרום לכך, והצרכן מחכה ל-`mutex` שהיצרן מחזיק, נוצר מעגל המתנה הדדית – קיפאון.\n\n**ב. תיקון הקוד והסבר:**\nכדי לפתור את הקיפאון, יש לשנות את סדר פעולות ה-`wait` בקוד היצרן. היצרן צריך להמתין למקום פנוי במאגר (`empty`) לפני שהוא מנסה לרכוש גישה בלעדית למאגר (`mutex`).\n\n**קוד יצרן מתוקן:**\n```c\nvoid producer() {\n    buffer_item item;\n    while (1) {\n        // produce an item\n        item = produce_item();\n\n        sem_wait(&empty);    // המתן למקום פנוי במאגר\n        sem_wait(&mutex);    // רכוש גישה בלעדית למאגר\n\n        buffer[in] = item;\n        in = (in + 1) % N;\n\n        sem_post(&mutex);    // שחרר גישה בלעדית\n        sem_post(&full);     // סמן שנוסף פריט\n    }\n}\n```\n\n**הסבר לתיקון:**\nבתיקון זה, היצרן ממתין קודם ל-`empty`. אם המאגר מלא, היצרן נחסם על `empty` *מבלי להחזיק את סמפור ה-`mutex`*. זה מאפשר לצרכנים לגשת ל-`mutex`, לצרוך פריטים, ולשחרר את הסמפור `empty` (על ידי `sem_post(&empty)`). ברגע שצרכן מפנה מקום, היצרן יכול להמשיך, לרכוש את `mutex`, להוסיף את הפריט ולשחרר את `mutex` ו-`full`. סדר פעולות זה מונע את הקיפאון מכיוון שהיצרן אינו חוסם את הגישה למאגר כאשר הוא עצמו ממתין למקום בו."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

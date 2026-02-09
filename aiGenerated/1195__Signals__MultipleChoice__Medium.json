@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Signals",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 08:37:23",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 923,
+      "output_tokens": 1058,
+      "total_tokens": 4771
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Signals",
+      "Process Management",
+      "System Calls"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא. תהליך האב מגדיר handler עבור סיגנל SIGUSR1. לאחר מכן, הוא יוצר תהליך בן באמצעות fork. תהליך האב שולח סיגנל SIGUSR1 לתהליך הבן. מה תהיה התוצאה הסבירה ביותר בביצוע תהליך הבן?",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <signal.h>\n#include <sys/wait.h>\n\nvoid handler(int signum) {\n    if (signum == SIGUSR1) {\n        printf(\"Received SIGUSR1 in process %d\\n\", getpid());\n    }\n}\n\nint main() {\n    struct sigaction sa;\n    sa.sa_handler = handler;\n    sigemptyset(&sa.sa_mask);\n    sa.sa_flags = 0; // No SA_RESTART, SA_NOCLDWAIT etc.\n\n    if (sigaction(SIGUSR1, &sa, NULL) == -1) {\n        perror(\"sigaction\");\n        exit(EXIT_FAILURE);\n    }\n\n    pid_t pid = fork();\n\n    if (pid == -1) {\n        perror(\"fork\");\n        exit(EXIT_FAILURE);\n    } else if (pid == 0) { // Child process\n        printf(\"Child process %d waiting...\\n\", getpid());\n        sleep(2); // Give parent time to send signal\n        printf(\"Child process %d finished waiting.\\n\", getpid());\n    } else { // Parent process\n        printf(\"Parent process %d sending SIGUSR1 to child %d\\n\", getpid(), pid);\n        sleep(1); // Ensure child is ready\n        kill(pid, SIGUSR1);\n        wait(NULL); // Wait for child to terminate (child will eventually terminate after sleep)\n        printf(\"Parent process %d exiting.\\n\", getpid());\n    }\n\n    return 0;\n}",
+      "options": [
+        "א. תהליך הבן יתעלם מהסיגנל וימשיך בביצועו, ולא ידפיס את הודעת ה-handler.",
+        "ב. תהליך הבן יסיים את פעולתו מיד עם קבלת הסיגנל, מבלי לבצע את ה-handler.",
+        "ג. תהליך הבן יבצע את פונקציית ה-handler שהוגדרה לפני ה-fork, ידפיס את ההודעה, ולאחר מכן ימשיך בביצועו (יסיים את ה-sleep).",
+        "ד. תהליך הבן יבצע את פונקציית ה-handler שהוגדרה לפני ה-fork, ידפיס את ההודעה, ולאחר מכן יסיים את פעולתו."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "כאשר תהליך אב מבצע fork, תהליך הבן יורש עותק של טבלת ה-dispositions (פעולות) של הסיגנלים מהאב. לכן, אם האב הגדיר handler עבור SIGUSR1 לפני ה-fork, הבן יירש handler זה. כאשר האב שולח SIGUSR1 לבן, הבן יפסיק את פעולתו הנוכחית (במקרה זה, sleep), יבצע את פונקציית ה-handler (ידפיס 'Received SIGUSR1 in process X'), ולאחר שה-handler יסיים את פעולתו ויחזור, הבן ימשיך בנקודה שבה הופסק (כלומר, ימשיך את ה-sleep ויסיים אותו). ברירת המחדל של SIGUSR1 היא לסיים את התהליך, אך התקנת handler עוקפת פעולה זו ומאפשרת לתהליך להמשיך לאחר שה-handler חוזר, אלא אם ה-handler עצמו קורא לפונקציית יציאה כמו exit()."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

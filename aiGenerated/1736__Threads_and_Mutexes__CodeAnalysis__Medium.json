@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Threads and Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 20:24:35",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2951,
+      "output_tokens": 1562,
+      "total_tokens": 9462
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Threads",
+      "Mutexes",
+      "Deadlock"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה, המשתמשת בחוטים (threads) ובמנעול (mutex) כדי לעדכן מונה גלובלי. נתחו את התוכנית וענו על השאלות הבאות:\n1. מה יהיה הפלט הסופי של המונה (g_counter)?\n2. האם התוכנית תסיים את ריצתה כצפוי? אם לא, הסבירו מדוע ומהי הבעיה המרכזית שתתרחש.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <unistd.h> // For usleep\n\n#define NUM_THREADS 3\n#define ITERATIONS_PER_THREAD 1000000\n\nlong long g_counter = 0;\npthread_mutex_t g_mutex;\n\nvoid* thread_func(void* arg) {\n    long thread_id = (long)arg;\n\n    for (int i = 0; i < ITERATIONS_PER_THREAD; ++i) {\n        pthread_mutex_lock(&g_mutex);\n        \n        // Simulate a condition causing an early exit without unlocking\n        if (i == ITERATIONS_PER_THREAD / 2 && thread_id == 0) {\n            printf(\"Thread %ld (ID 0) is exiting prematurely at iteration %d, holding the mutex locked.\\n\", thread_id, i);\n            pthread_exit(NULL); // Exits without unlocking g_mutex\n        }\n\n        g_counter++;\n        pthread_mutex_unlock(&g_mutex);\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n    \n    // Initialize the mutex\n    if (pthread_mutex_init(&g_mutex, NULL) != 0) {\n        printf(\"Mutex init failed\\n\");\n        return 1;\n    }\n\n    for (long i = 0; i < NUM_THREADS; ++i) {\n        if (pthread_create(&threads[i], NULL, thread_func, (void*)i) != 0) {\n            printf(\"Thread creation failed\\n\");\n            return 1;\n        }\n    }\n\n    printf(\"Main thread created all worker threads. Waiting for them to finish...\\n\");\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"All threads have finished.\\n\");\n    printf(\"Final counter value: %lld\\n\", g_counter);\n\n    pthread_mutex_destroy(&g_mutex);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": 10,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "ניתוח התוכנית:\nהתוכנית יוצרת שלושה חוטים (threads) שכל אחד מהם אמור להגדיל מונה גלובלי (g_counter) מיליון פעמים. הגישה למונה מוגנת באמצעות מנעול (g_mutex) כדי למנוע תנאי מרוץ (race conditions).\n\n1. פלט סופי של המונה (g_counter):\nהחוט הראשון (ID 0) מבצע לולאה ומגדיל את המונה. כאשר המונה הפנימי של הלולאה (i) מגיע ל-ITERATIONS_PER_THREAD / 2 (כלומר 500,000), החוט הראשון נכנס לתנאי ה-if. בנקודה זו, החוט מחזיק את המנעול g_mutex נעול. הוא מדפיס הודעה ולאחר מכן קורא ל-pthread_exit(NULL), שגורם לו לסיים את ריצתו באופן מיידי מבלי לשחרר את המנעול.\nכתוצאה מכך, החוט הראשון יגדיל את g_counter בדיוק ITERATIONS_PER_THREAD / 2 פעמים (מ-i=0 ועד i=499,999). שאר החוטים (ID 1 ו-ID 2) ינסו לרכוש את המנעול באמצעות pthread_mutex_lock(&g_mutex), אך המנעול נשאר נעול על ידי החוט הראשון שסיים את ריצתו. לכן, חוטים 1 ו-2 יחסמו באופן אינסופי ולא יצליחו להגדיל את המונה כלל.\nהפלט הסופי של המונה יהיה: 500,000 (ITERATIONS_PER_THREAD / 2).\n\n2. האם התוכנית תסיים את ריצתה כצפוי? אם לא, הסבירו מדוע ומהי הבעיה המרכזית שתתרחש:\nהתוכנית לא תסיים את ריצתה כצפוי. הבעיה המרכזית היא קיפאון (deadlock).\nכאשר החוט הראשון (ID 0) מסיים את ריצתו בטרם עת באמצעות pthread_exit(NULL) בתוך הקטע הקריטי (critical section) כשהוא מחזיק את המנעול g_mutex נעול, הוא אינו משחרר את המנעול. המנעול נשאר נעול לצמיתות.\nשאר החוטים (ID 1 ו-ID 2) ינסו לרכוש את המנעול כדי להמשיך את פעולתם, אך כיוון שהמנעול נעול ואין מי שישחרר אותו, הם יחסמו באופן אינסופי בקריאה ל-pthread_mutex_lock.\nהחוט הראשי (main) יקרא ל-pthread_join עבור כל החוטים. הוא יצליח לצרף (join) את חוט 0 שכבר סיים את ריצתו. אך כאשר ינסה לצרף את חוטים 1 ו-2, הוא יחסם גם כן באופן אינסופי, כיוון שחוטים אלו נמצאים בקיפאון ואינם מסיימים את ריצתם. כתוצאה מכך, התוכנית תיתקע ולא תגיע להדפסת השורות האחרונות ב-main או ל-pthread_mutex_destroy."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

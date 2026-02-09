@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Scheduling",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 09:04:28",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 999,
+      "output_tokens": 373,
+      "total_tokens": 2468
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Scheduling",
+      "CPU Scheduling"
+    ],
+    "content": {
+      "text": "איזה מאלגוריתמי תזמון המעבד הבאים הוא אלגוריתם שאינו דורסני (non-preemptive)?",
+      "code_snippet": null,
+      "options": [
+        "א. Round Robin (RR)",
+        "ב. Shortest Remaining Time First (SRTF)",
+        "ג. First-Come, First-Served (FCFS)",
+        "ד. Priority Scheduling (עם דריסה)"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג. אלגוריתם FCFS (First-Come, First-Served) הוא אלגוריתם שאינו דורסני. משמעות הדבר היא שברגע שתהליך מקבל את המעבד, הוא ממשיך לרוץ ללא הפרעה עד לסיום הביצוע שלו, או עד שהוא נכנס למצב המתנה (למשל, עקב פעולת קלט/פלט). שאר האלגוריתמים המוצגים (RR, SRTF, ו-Priority Scheduling עם דריסה) הם אלגוריתמים דורסניים, כלומר הם יכולים לקטוע תהליך רץ ולהחליף אותו בתהליך אחר."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

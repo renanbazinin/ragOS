@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Deadlocks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 20:32:04",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1047,
+      "output_tokens": 721,
+      "total_tokens": 4205
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Semaphores",
+      "Deadlocks",
+      "Concurrency",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתונים שני תהליכים (או תרדים) A ו-B המנסים לגשת לשני משאבים, s1 ו-s2, המוגנים על ידי סמפורים בינאריים (מנעולים), כפי שמוצג בקוד הבא:\n\nבהנחה ששני התהליכים רצים במקביל, איזו מהטענות הבאות נכונה?",
+      "code_snippet": "sem_t s1, s2;\n\n// Process A\nvoid* processA(void* arg) {\n    sem_wait(&s1);\n    // ... do some work ...\n    sem_wait(&s2);\n    // Critical section\n    sem_post(&s2);\n    sem_post(&s1);\n    return NULL;\n}\n\n// Process B\nvoid* processB(void* arg) {\n    sem_wait(&s2);\n    // ... do some work ...\n    sem_wait(&s1);\n    // Critical section\n    sem_post(&s1);\n    sem_post(&s2);\n    return NULL;\n}",
+      "options": [
+        "א. הקוד יבצע את פעולתו בהצלחה ללא חשש מקיפאון או הרעבה.",
+        "ב. הקוד עלול להיכנס למצב קיפאון (Deadlock) אך לא יגרום להרעבה (Starvation).",
+        "ג. הקוד עלול לגרום להרעבה (Starvation) אך לא ייכנס למצב קיפאון (Deadlock).",
+        "ד. הקוד עלול להיכנס למצב קיפאון (Deadlock) וגם עלול לגרום להרעבה (Starvation).",
+        "ה. אף אחת מהטענות האחרות אינה נכונה."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ד",
+      "explanation": "הקוד מדגים מצב קלאסי של תלות הדדית מעגלית (Circular Wait), אחד מארבעת התנאים ההכרחיים לקיפאון (Deadlock). אם תהליך A ישיג את s1 ותהליך B ישיג את s2 בו זמנית, שניהם ימתינו אינסוף למשאב שהשני מחזיק, וייכנסו למצב קיפאון. מצב קיפאון הוא בעצם סוג של הרעבה, שכן התהליכים לא מצליחים להתקדם. בנוסף, גם ללא קיפאון מוחלט, אחד התהליכים עלול לסבול מהרעבה אם המתזמן תמיד יעדיף את התהליך השני ברכישת הסמפורים."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

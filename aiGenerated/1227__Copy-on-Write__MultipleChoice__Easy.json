@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Copy-on-Write",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 08:50:42",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 967,
+      "output_tokens": 432,
+      "total_tokens": 2918
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Virtual Memory",
+      "Memory Management",
+      "Copy-on-Write"
+    ],
+    "content": {
+      "text": "מה קורה כאשר תהליך מנסה לכתוב לדף זיכרון המשותף לו ולתהליך אחר באמצעות מנגנון Copy-on-Write?",
+      "code_snippet": null,
+      "options": [
+        "א. הגישה לכתיבה נדחית עד שכל התהליכים מפסיקים להשתמש בדף.",
+        "ב. נוצר עותק פרטי של הדף עבור התהליך המנסה לכתוב, והוא כותב לעותק זה.",
+        "ג. מערכת ההפעלה מונעת את הכתיבה ומחזירה שגיאה לתהליך.",
+        "ד. כל התהליכים המשתפים את הדף מקבלים הודעה על הכוונה לכתוב וצריכים לאשר אותה."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב'. מנגנון Copy-on-Write (עותק בעת כתיבה) עובד כך שבתחילה תהליכים חולקים את אותו דף זיכרון בגישת קריאה בלבד. כאשר אחד התהליכים מנסה לכתוב לדף זה, מערכת ההפעלה יוצרת עבורו עותק פרטי של הדף, והכתיבה מתבצעת על העותק החדש. כך, התהליכים האחרים ממשיכים להשתמש בדף המקורי ללא שינוי."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

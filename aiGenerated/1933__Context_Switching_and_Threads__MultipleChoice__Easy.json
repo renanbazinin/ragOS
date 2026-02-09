@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Context Switching and Threads",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 21:55:36",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 985,
+      "output_tokens": 420,
+      "total_tokens": 2351
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Context Switching",
+      "Threads"
+    ],
+    "content": {
+      "text": "בעת ביצוע החלפת הקשר (context switch) בין שני חוטים (threads) השייכים לאותו תהליך (process), איזה רכיב בדרך כלל *אינו* נשמר או משוחזר, בהשוואה להחלפת הקשר בין שני תהליכים שונים?",
+      "code_snippet": null,
+      "options": [
+        "א. מצביעי המחסנית (Stack Pointers)",
+        "ב. רשומות המעבד (CPU Registers)",
+        "ג. מפת הזיכרון (Memory Map / Page Table)",
+        "ד. מונה התוכנית (Program Counter)",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג'. כאשר מתבצעת החלפת הקשר בין חוטים השייכים לאותו תהליך, הם חולקים את אותו מרחב כתובות (address space) ואת אותה מפת זיכרון (page table). לכן, אין צורך לשמור ולשחזר את מפת הזיכרון. לעומת זאת, רשומות המעבד, מצביעי המחסנית ומונה התוכנית הם ספציפיים לכל חוט ויש לשמור ולשחזר אותם בכל החלפת קשר, בין אם בין חוטים או בין תהליכים."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

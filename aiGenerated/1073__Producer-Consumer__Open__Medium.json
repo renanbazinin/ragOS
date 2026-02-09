@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Producer-Consumer",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 07:46:36",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1877,
+      "output_tokens": 1679,
+      "total_tokens": 6517
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Producer-Consumer",
+      "Synchronization",
+      "Condition Variables",
+      "Race Conditions"
+    ],
+    "content": {
+      "text": "נתון קטע קוד המממש את בעיית היצרן-צרכן (Producer-Consumer) באמצעות Mutex ומשתני תנאי (Condition Variables).\nהאם המימוש המוצג נכון? אם לא, הסבירו מהי הבעיה וכיצד היא עלולה להתבטא בפועל, וספקו את התיקון הנדרש בקוד.",
+      "code_snippet": "```c\n#include <iostream>\n#include <vector>\n#include <queue>\n#include <thread>\n#include <mutex>\n#include <condition_variable>\n\nconst int BUFFER_SIZE = 5;\nstd::queue<int> buffer;\nstd::mutex mtx;\nstd::condition_variable cv_producer; // For producers to wait when buffer is full\nstd::condition_variable cv_consumer; // For consumers to wait when buffer is empty\n\nvoid producer(int id) {\n    for (int i = 0; i < 10; ++i) {\n        std::unique_lock<std::mutex> lock(mtx);\n        // PROBLEM: Using if instead of while\n        if (buffer.size() == BUFFER_SIZE) {\n            std::cout << \"Producer \" << id << \" waiting, buffer full.\" << std::endl;\n            cv_producer.wait(lock);\n        }\n        \n        int item = id * 100 + i;\n        buffer.push(item);\n        std::cout << \"Producer \" << id << \" produced: \" << item << \", buffer size: \" << buffer.size() << std::endl;\n        lock.unlock(); // Unlock before notifying to avoid contention\n        cv_consumer.notify_one(); // Notify a waiting consumer\n        std::this_thread::sleep_for(std::chrono::milliseconds(50));\n    }\n}\n\nvoid consumer(int id) {\n    for (int i = 0; i < 10; ++i) {\n        std::unique_lock<std::mutex> lock(mtx);\n        // PROBLEM: Using if instead of while\n        if (buffer.empty()) {\n            std::cout << \"Consumer \" << id << \" waiting, buffer empty.\" << std::endl;\n            cv_consumer.wait(lock);\n        }\n        \n        int item = buffer.front();\n        buffer.pop();\n        std::cout << \"Consumer \" << id << \" consumed: \" << item << \", buffer size: \" << buffer.size() << std::endl;\n        lock.unlock(); // Unlock before notifying\n        cv_producer.notify_one(); // Notify a waiting producer\n        std::this_thread::sleep_for(std::chrono::milliseconds(100));\n    }\n}\n```",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "המימוש המוצג אינו נכון. הבעיה טמונה בשימוש בפקודת `if` במקום `while` לבדיקת התנאי לאחר הקריאה ל-`cv.wait()`.\n\n**הסבר הבעיה:**\nכאשר חוט (thread) קורא ל-`cv.wait(lock)`, הוא משחרר את המנעול ונכנס למצב המתנה. כאשר הוא מתעורר (בין אם כתוצאה מ-`notify_one`, `notify_all`, או 'התעוררות שווא' - spurious wakeup), הוא מנסה לרכוש מחדש את המנעול. לאחר רכישת המנעול, הוא ממשיך את הריצה.\nאם נשתמש ב-`if` לבדיקת התנאי (`buffer.size() == BUFFER_SIZE` עבור היצרן או `buffer.empty()` עבור הצרכן):\n1.  **התעוררות שווא (Spurious Wakeup):** חוט יכול להתעורר מ-`wait` גם ללא קריאה מפורשת ל-`notify_one` או `notify_all`. אם הבדיקה היא `if`, הוא ימשיך בריצה גם אם התנאי עדיין אינו מתקיים (לדוגמה, המאגר עדיין מלא עבור יצרן).\n2.  **מרוץ תנאים (Race Condition):** גם אם ההתעוררות אינה שווא, ייתכן שבין רגע ההתעוררות של חוט מסוים לבין רגע בו הוא מצליח לרכוש מחדש את המנעול ולבדוק את התנאי, חוט אחר כבר שינה את מצב המאגר. לדוגמה, יצרן מתעורר כי צרכן צרך פריט אחד, אך לפני שהיצרן מצליח לרכוש את המנעול, יצרן אחר ממלא שוב את המאגר. אם היצרן המקורי יבדוק עם `if`, הוא יראה שהתנאי (מאגר מלא) כבר לא מתקיים וינסה להוסיף פריט למאגר שכבר מלא שוב, מה שיוביל לשגיאה או לחריגה מגודל המאגר המוגדר.\n\n**התיקון הנדרש:**\nיש להחליף את `if` ב-`while` בשני המקומות (גם בקוד היצרן וגם בקוד הצרכן). השימוש ב-`while` מבטיח שהחוט יבדוק שוב ושוב את התנאי לאחר כל התעוררות ורכישת מנעול מחדש, ורק כאשר התנאי באמת מתקיים (המאגר לא מלא עבור יצרן, והמאגר לא ריק עבור צרכן), הוא ימשיך בביצוע הפעולה הרצויה.\n\n**קוד מתוקן (קטעי הקוד הרלוונטיים בלבד):**\n\n```c\n// בקוד היצרן:\nvoid producer(int id) {\n    // ...\n    std::unique_lock<std::mutex> lock(mtx);\n    while (buffer.size() == BUFFER_SIZE) { // תיקון: if הוחלף ב-while\n        std::cout << \"Producer \" << id << \" waiting, buffer full.\" << std::endl;\n        cv_producer.wait(lock);\n    }\n    // ...\n}\n\n// בקוד הצרכן:\nvoid consumer(int id) {\n    // ...\n    std::unique_lock<std::mutex> lock(mtx);\n    while (buffer.empty()) { // תיקון: if הוחלף ב-while\n        std::cout << \"Consumer \" << id << \" waiting, buffer empty.\" << std::endl;\n        cv_consumer.wait(lock);\n    }\n    // ...\n}\n```"
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

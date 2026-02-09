@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Paging and TLB",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 10:01:51",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1143,
+      "output_tokens": 687,
+      "total_tokens": 3501
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Paging",
+      "TLB",
+      "Memory Management",
+      "Virtual Memory"
+    ],
+    "content": {
+      "text": "במערכת הפעלה המשתמשת בזיכרון וירטואלי עם מנגנון דפדוף (paging), נתונים הפרמטרים הבאים:\n- זמן גישה ל-TLB: 20 ננו-שניות.\n- זמן גישה לזיכרון הפיזי (RAM): 100 ננו-שניות.\n- יחס פגיעות (hit ratio) ב-TLB: 90%.\nבהנחה שכל גישה לזיכרון הפיזי מחזירה את הנתונים המבוקשים (אין page faults), מהו זמן הגישה האפקטיבי הממוצע לזיכרון?",
+      "code_snippet": null,
+      "options": [
+        "א. 120 ננו-שניות.",
+        "ב. 130 ננו-שניות.",
+        "ג. 110 ננו-שניות.",
+        "ד. 220 ננו-שניות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "זמן הגישה האפקטיבי הממוצע מחושב באופן הבא:\n\nבמקרה של פגיעה ב-TLB (יחס פגיעות של 90%):\n   זמן גישה = זמן גישה ל-TLB + זמן גישה לזיכרון הפיזי (לנתונים) = 20 ננו-שניות + 100 ננו-שניות = 120 ננו-שניות.\n\nבמקרה של החטאה ב-TLB (יחס החטאות של 10%):\n   זמן גישה = זמן גישה ל-TLB + זמן גישה לזיכרון הפיזי (לטבלת הדפים) + זמן גישה לזיכרון הפיזי (לנתונים) = 20 ננו-שניות + 100 ננו-שניות + 100 ננו-שניות = 220 ננו-שניות.\n\nזמן הגישה האפקטיבי הכולל = (יחס פגיעות * זמן גישה בפגיעה) + (יחס החטאות * זמן גישה בהחטאה)\n= (0.90 * 120 ננו-שניות) + (0.10 * 220 ננו-שניות)\n= 108 ננו-שניות + 22 ננו-שניות\n= 130 ננו-שניות."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Producer-Consumer",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 07:38:43",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1101,
+      "output_tokens": 426,
+      "total_tokens": 3168
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Producer-Consumer",
+      "Synchronization",
+      "Semaphores"
+    ],
+    "content": {
+      "text": "בבעיית היצרן-צרכן (Producer-Consumer), איזה מנגנון סנכרון חיוני כדי למנוע מהיצרן לנסות להוסיף פריט למאגר כאשר הוא מלא?",
+      "code_snippet": null,
+      "options": [
+        "א. מנעול (Mutex)",
+        "ב. סמפור (Semaphore)",
+        "ג. משתנה תנאי (Condition Variable)",
+        "ד. מנעול סיבובי (Spinlock)"
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "בבעיית היצרן-צרכן, סמפור ספירה (counting semaphore) משמש לניהול מספר המקומות הפנויים במאגר. כאשר היצרן מנסה להוסיף פריט למאגר מלא, פעולת ה-wait/P על הסמפור המייצג מקומות פנויים תגרום לו להיחסם עד שיתפנה מקום על ידי הצרכן. מנעול (mutex) משמש להבטחת גישה בלעדית למאגר עצמו, אך אינו מטפל בתנאי המלא/ריק. משתנה תנאי יכול לשמש יחד עם mutex, אך סמפור הוא הפתרון הנפוץ והישיר ביותר לבעיה זו בהקשר של ספירת מקומות פנויים/תפוסים."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

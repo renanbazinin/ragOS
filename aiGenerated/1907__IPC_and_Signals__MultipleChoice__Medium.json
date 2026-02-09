@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "IPC and Signals",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 21:42:03",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1103,
+      "output_tokens": 572,
+      "total_tokens": 3059
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "IPC",
+      "Signals",
+      "System Calls",
+      "Process Management"
+    ],
+    "content": {
+      "text": "תהליך אב (parent process) חוסם סיגנל מסוים (למשל, SIGUSR1) באמצעות `sigprocmask`. לאחר מכן, האב מבצע `fork()` ליצירת תהליך בן (child process). איזו מהטענות הבאות נכונה לגבי מצב חסימת הסיגנל בתהליך הבן?",
+      "code_snippet": null,
+      "options": [
+        "א. תהליך הבן יירש את מסיכת הסיגנלים החסומים של האב, ולכן SIGUSR1 יהיה חסום גם אצלו.",
+        "ב. תהליך הבן יתחיל עם מסיכת סיגנלים ריקה (אף סיגנל לא חסום), ללא קשר למצב האב.",
+        "ג. תהליך הבן יירש את מסיכת הסיגנלים החסומים של האב, אך רק אם האב לא הגדיר Handler ל-SIGUSR1.",
+        "ד. תהליך הבן יירש את מסיכת הסיגנלים החסומים של האב, אך SIGUSR1 יהיה חסום רק אם נשלח לאב לפני ה-`fork()`.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "כאשר תהליך מבצע `fork()`, תהליך הבן נוצר כמעט ככפיל מדויק של תהליך האב. זה כולל את מסיכת הסיגנלים (signal mask) של האב, אשר קובעת אילו סיגנלים חסומים. לכן, אם האב חסם את SIGUSR1 לפני ה-`fork()`, הסיגנל הזה יהיה חסום גם בתהליך הבן. הגדרות ה-handler (באמצעות `signal` או `sigaction`) גם הן נשמרות, וכך גם הסיגנלים הממתינים (pending signals) עבור תהליך הבן."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

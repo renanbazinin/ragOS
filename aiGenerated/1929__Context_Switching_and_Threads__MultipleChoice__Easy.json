@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Context Switching and Threads",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 21:55:02",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 985,
+      "output_tokens": 415,
+      "total_tokens": 2600
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Context Switching",
+      "Threads"
+    ],
+    "content": {
+      "text": "איזה מידע נשמר בדרך כלל במהלך החלפת הקשר (context switch) בין שני חוטים (threads) באותו תהליך (process)?",
+      "code_snippet": null,
+      "options": [
+        "א. מרחב הכתובות המלא של התהליך.",
+        "ב. מצב המעבד (CPU registers), מונה התוכנית (Program Counter), והמחסנית (stack) של החוט.",
+        "ג. רשימת הקבצים הפתוחים של התהליך.",
+        "ד. טבלת דפי הזיכרון (page table) של התהליך."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב. חוטים באותו תהליך חולקים את מרחב הכתובות, קבצים פתוחים ומשאבים רבים אחרים של התהליך. לכן, החלפת הקשר בין חוטים באותו תהליך דורשת רק שמירה ושחזור של מצב המעבד הספציפי לחוט, הכולל את האוגרים (registers), מונה התוכנית (Program Counter) והמחסנית (stack) שלו. זהו הבדל משמעותי מהחלפת קשר בין תהליכים, הדורשת שמירה ושחזור של מצב תהליך מלא יותר, כולל טבלת הדפים."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

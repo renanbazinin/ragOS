@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "TLB",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 08:06:33",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1201,
+      "output_tokens": 364,
+      "total_tokens": 2167
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "TLB",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של ה-TLB (Translation Lookaside Buffer)?",
+      "code_snippet": null,
+      "options": [
+        "א. לאחסן דפי קוד עבור גישה מהירה.",
+        "ב. לשמש כמטמון (cache) לתרגומי כתובות וירטואליות לכתובות פיזיות.",
+        "ג. לנהל את תורי הקלט/פלט של המערכת.",
+        "ד. לאפשר למעבד לגשת ישירות לזיכרון הדיסק.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב'. ה-TLB הוא מטמון חומרה מהיר המאחסן תרגומי כתובות וירטואליות לכתובות פיזיות שנעשה בהם שימוש לאחרונה. מטרתו העיקרית היא להאיץ את תהליך תרגום הכתובות על ידי הפחתת הצורך בגישה לטבלת הדפים בזיכרון הראשי (RAM)."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

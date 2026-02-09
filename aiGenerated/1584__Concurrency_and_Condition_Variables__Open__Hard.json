@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency and Condition Variables",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 11:42:44",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3819,
+      "output_tokens": 2357,
+      "total_tokens": 11716
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Concurrency",
+      "Condition Variables",
+      "Synchronization",
+      "Race Conditions",
+      "Deadlock",
+      "Starvation"
+    ],
+    "content": {
+      "text": "נתבונן במערכת המנהלת מאגר של `MAX_RESOURCES` משאבים זהים. מספר חוטים צריכים לרכוש כמות מסוימת של משאבים (`count`) ולשחרר אותם לאחר שימוש. להלן מימוש חלקי עבור הפונקציות `acquire_resources` ו-`release_resources`:\n\nא. זהו ונתחו שתי בעיות פוטנציאליות (לפחות) במימוש הנתון, הקשורות לתקינות (correctness) או לביצועים (performance/starvation). הסבירו כיצד כל בעיה עלולה להתרחש.\nב. הציעו תיקונים לקוד כדי לפתור את הבעיות שזיהיתם. הסבירו מדוע התיקונים שלכם פותרים את הבעיות, ובמיוחד התייחסו להבדל בין `pthread_cond_signal` ל-`pthread_cond_broadcast` ומתי יש להשתמש בכל אחד מהם בהקשר זה.",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n\n#define MAX_RESOURCES 10\n\nint available_resources = MAX_RESOURCES;\npthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;\npthread_cond_t cond = PTHREAD_COND_INITIALIZER;\n\nvoid acquire_resources(int count) {\n    pthread_mutex_lock(&mutex);\n    if (available_resources < count) {\n        printf(\"Thread %lu waiting for %d resources. Available: %d\\n\", pthread_self(), count, available_resources);\n        pthread_cond_wait(&cond, &mutex);\n    }\n    available_resources -= count;\n    printf(\"Thread %lu acquired %d resources. Remaining: %d\\n\", pthread_self(), count, available_resources);\n    pthread_mutex_unlock(&mutex);\n}\n\nvoid release_resources(int count) {\n    pthread_mutex_lock(&mutex);\n    available_resources += count;\n    printf(\"Thread %lu released %d resources. Available: %d\\n\", pthread_self(), count, available_resources);\n    pthread_cond_signal(&cond);\n    pthread_mutex_unlock(&mutex);\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "פתרון:\n\nא. זיהוי וניתוח בעיות:\n1.  **שימוש ב-`if` במקום ב-`while` ב-`acquire_resources`**: כאשר חוט מתעורר מ-`pthread_cond_wait`, ייתכנו שני מצבים שבהם התנאי שגרם לו להמתין עדיין אינו מתקיים:\n    *   **התעוררות שווא (Spurious Wakeup)**: מערכת ההפעלה עשויה להעיר חוט ללא קשר לכך שהתנאי השתנה. אם החוט לא בודק מחדש את התנאי באמצעות לולאת `while`, הוא ימשיך בביצוע כאילו התנאי אכן התקיים, מה שיוביל למצב שגוי (לדוגמה, `available_resources` יהפוך לשלילי).\n    *   **מרוץ (Race Condition) לאחר התעוררות**: גם אם חוט מתעורר כיוון שמשאבים שוחררו, ייתכן שחוט אחר (שהתעורר לפניו או שהיה פעיל) ירכוש את המשאבים הנדרשים *לפני* שהחוט הנוכחי יצליח לרכוש מחדש את המוטקס ולבדוק את התנאי. במצב כזה, אם החוט המקורי משתמש ב-`if`, הוא יתקדם בביצוע ללא בדיקה חוזרת של התנאי, וינסה לרכוש משאבים שאינם זמינים, מה שיוביל לחוסר תקינות.\n    *   **דוגמה**: נניח `available_resources = 3`. חוט A צריך 5 משאבים וממתין. חוט B משחרר 5 משאבים, `available_resources` הופך ל-8. חוט A מתעורר. לפני שחוט A רוכש מחדש את המוטקס, חוט C רוכש 6 משאבים, ו-`available_resources` הופך ל-2. חוט A רוכש את המוטקס, אך בגלל ה-`if` הוא לא בודק מחדש את התנאי וממשיך לרכוש 5 משאבים, מה שיוביל ל-`available_resources = -3`.\n\n2.  **שימוש ב-`pthread_cond_signal` במקום ב-`pthread_cond_broadcast` ב-`release_resources`**: כאשר משאבים משוחררים, ייתכן שיותר מחוט אחד מהחוטים הממתינים יוכל כעת להמשיך. שימוש ב-`pthread_cond_signal` מעיר רק חוט אחד. הדבר עלול להוביל ל:\n    *   **רעב (Starvation) וחוסר יעילות**: אם החוט שהתעורר לא יכול עדיין להמשיך (לדוגמה, הוא צריך 7 משאבים, אך רק 5 התפנו), הוא יחזור להמתין. בינתיים, ייתכן שחוט אחר שהיה ממתין, וזקוק לכמות קטנה יותר של משאבים (לדוגמה, 2 משאבים), יכול היה להמשיך באופן מיידי. מכיוון שהוא לא התעורר, הוא נשאר רעב שלא לצורך, ומשאבים פנויים אינם מנוצלים ביעילות.\n    *   **דוגמה**: `available_resources = 2`. חוט A צריך 5 משאבים וממתין. חוט B צריך 3 משאבים וממתין. חוט C משחרר 4 משאבים. `available_resources` הופך ל-6. `pthread_cond_signal` מעיר את חוט A. חוט A בודק (אפילו אם עם `while`), רואה שיש 6 משאבים, אך הוא צריך 5. הוא רוכש 5 משאבים, ו-`available_resources` הופך ל-1. חוט B עדיין ממתין, למרות שברגע ש-`available_resources` היה 6, הוא יכול היה לרכוש את 3 המשאבים שביקש. הוא ימשיך להמתין עד לאות נוסף.\n\nב. תיקונים והסבר:\n1.  **תיקון ב-`acquire_resources`**: יש לשנות את ה-`if` ל-`while`:\n    ```c\n    void acquire_resources(int count) {\n        pthread_mutex_lock(&mutex);\n        while (available_resources < count) { // שינוי מ-if ל-while\n            printf(\"Thread %lu waiting for %d resources. Available: %d\\n\", pthread_self(), count, available_resources);\n            pthread_cond_wait(&cond, &mutex);\n        }\n        available_resources -= count;\n        printf(\"Thread %lu acquired %d resources. Remaining: %d\\n\", pthread_self(), count, available_resources);\n        pthread_mutex_unlock(&mutex);\n    }\n    ```\n    **הסבר**: לולאת `while` מבטיחה שכל חוט שמתעורר יבדוק מחדש את התנאי (`available_resources < count`) *לפני* שהוא ממשיך בביצוע הקטע הקריטי. זה מונע מחוטים להמשיך כאשר התנאי אינו מתקיים עקב התעוררות שווא או שינוי במצב המשאבים על ידי חוט אחר, ובכך מבטיח את תקינות המערכת.\n\n2.  **תיקון ב-`release_resources`**: יש לשנות את `pthread_cond_signal` ל-`pthread_cond_broadcast`:\n    ```c\n    void release_resources(int count) {\n        pthread_mutex_lock(&mutex);\n        available_resources += count;\n        printf(\"Thread %lu released %d resources. Available: %d\\n\", pthread_self(), count, available_resources);\n        pthread_cond_broadcast(&cond); // שינוי מ-pthread_cond_signal ל-pthread_cond_broadcast\n        pthread_mutex_unlock(&mutex);\n    }\n    ```\n    **הסבר**: שימוש ב-`pthread_cond_broadcast` מעיר את *כל* החוטים הממתינים על משתנה התנאי. לאחר מכן, כל חוט שהתעורר בודק את התנאי שלו באמצעות לולאת ה-`while` (כפי שתוקן בסעיף הקודם). זה מבטיח שכל חוט שיכול כעת לרכוש את המשאבים הנדרשים לו יתעורר וינסה לעשות זאת. זה מונע רעב של חוטים שיכולים היו להמשיך, ומאפשר ניצול יעיל יותר של המשאבים ברגע שהם מתפנים. אף על פי ש-`broadcast` עשוי לגרום ליותר החלפות הקשר (context switches) בטווח הקצר, הוא מבטיח הוגנות טובה יותר ומונע מצבי רעב במערכות מורכבות יותר שבהן מספר חוטים ממתינים לתנאים שונים שעשויים להתמלא על ידי אותה פעולת שחרור."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Deadlocks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 20:31:49",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1047,
+      "output_tokens": 964,
+      "total_tokens": 4494
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Semaphores",
+      "Deadlocks",
+      "Concurrency",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא המשתמש בסמפורים (semaphores) ויוצר שני תהליכונים (threads). איזו מהטענות הבאות נכונה לגבי קטע קוד זה?",
+      "code_snippet": "#include <semaphore.h>\n#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h>\n\nsem_t s1;\nsem_t s2;\n\nvoid* thread1_func(void* arg) {\n    sem_wait(&s1);\n    printf(\"Thread 1 acquired s1\\n\");\n    sleep(1); // Simulate work\n    sem_wait(&s2);\n    printf(\"Thread 1 acquired s2\\n\");\n    // ... critical section ...\n    sem_post(&s2);\n    sem_post(&s1);\n    return NULL;\n}\n\nvoid* thread2_func(void* arg) {\n    sem_wait(&s2);\n    printf(\"Thread 2 acquired s2\\n\");\n    sleep(1); // Simulate work\n    sem_wait(&s1);\n    printf(\"Thread 2 acquired s1\\n\");\n    // ... critical section ...\n    sem_post(&s1);\n    sem_post(&s2);\n    return NULL;\n}\n\nint main() {\n    sem_init(&s1, 0, 1);\n    sem_init(&s2, 0, 1);\n\n    pthread_t t1, t2;\n    pthread_create(&t1, NULL, thread1_func, NULL);\n    pthread_create(&t2, NULL, thread2_func, NULL);\n\n    pthread_join(t1, NULL);\n    pthread_join(t2, NULL);\n\n    sem_destroy(&s1);\n    sem_destroy(&s2);\n    return 0;\n}",
+      "options": [
+        "א. קטע הקוד אינו יכול להגיע למצב של קיפאון (Deadlock).",
+        "ב. קטע הקוד יכול להגיע למצב של קיפאון, מכיוון שתהליכונים מנסים לרכוש את הסמפורים בסדר הפוך.",
+        "ג. קטע הקוד אינו יכול להגיע למצב של קיפאון, מכיוון שכל סמפור נרכש רק פעם אחת.",
+        "ד. קטע הקוד תמיד יוביל לקיפאון."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "הסבר: קטע הקוד יכול להגיע למצב של קיפאון (deadlock). קיפאון יתרחש אם תהליכון 1 ירכוש את סמפור s1 ותהליכון 2 ירכוש את סמפור s2. בשלב זה, מתקיימים תנאי 'החזק והמתן' (Hold and Wait) ו'אי דריסה' (No Preemption). לאחר מכן, תהליכון 1 ינסה לרכוש את s2 (שמוחזק על ידי תהליכון 2) ותהליכון 2 ינסה לרכוש את s1 (שמוחזק על ידי תהליכון 1). זה יוצר תלות מעגלית (Circular Wait) שבה כל אחד מהתהליכונים ממתין ללא הגבלת זמן למשאב המוחזק על ידי השני. למרות שכל סמפור נרכש רק פעם אחת על ידי כל תהליכון, הסדר שבו הם נרכשים הוא קריטי ועלול לגרום לקיפאון פוטנציאלי."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

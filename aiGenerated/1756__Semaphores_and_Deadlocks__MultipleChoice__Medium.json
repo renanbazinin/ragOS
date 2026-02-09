@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Deadlocks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 20:33:16",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1047,
+      "output_tokens": 902,
+      "total_tokens": 4133
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Semaphores",
+      "Deadlocks",
+      "Concurrency",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתונים שני סמפורים בינאריים, `s1` ו-`s2`, המאותחלים לערך 1. שני תהליכונים (threads) מנסים לגשת למשאבים על ידי רכישת הסמפורים בסדרים הבאים:\n\n",
+      "code_snippet": "// משתנים גלובליים\nsem_t s1;\nsem_t s2;\n\n// אתחול: sem_init(&s1, 0, 1); sem_init(&s2, 0, 1);\n\nvoid* thread_func1(void* arg) {\n    sem_wait(&s1); // רכישת s1\n    // ... (עבודה כלשהי)\n    sem_wait(&s2); // רכישת s2\n    // קטע קריטי\n    sem_post(&s2);\n    sem_post(&s1);\n    return NULL;\n}\n\nvoid* thread_func2(void* arg) {\n    sem_wait(&s2); // רכישת s2\n    // ... (עבודה כלשהי)\n    sem_wait(&s1); // רכישת s1\n    // קטע קריטי\n    sem_post(&s1);\n    sem_post(&s2);\n    return NULL;\n}\n",
+      "options": [
+        "א. קיפאון (Deadlock) אינו אפשרי במערכת זו לעולם.",
+        "ב. קיפאון אפשרי רק אם קטע הקוד המסומן ב-`...` גורם להשהיה ארוכה מספיק.",
+        "ג. קיפאון אפשרי במערכת זו עקב סדר רכישת המשאבים השונה.",
+        "ד. קיפאון תמיד יתרחש במערכת זו."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג. קיפאון אפשרי במערכת זו עקב סדר רכישת המשאבים השונה. ארבעת התנאים לקיפאון מתקיימים:\n1.  **הדדיות (Mutual Exclusion)**: הסמפורים הבינאריים מבטיחים שרק תהליכון אחד יכול להחזיק בסמפור נתון בכל רגע.\n2.  **החזקה והמתנה (Hold and Wait)**: תהליכון 1 יכול להחזיק ב-`s1` ולהמתין ל-`s2`, ותהליכון 2 יכול להחזיק ב-`s2` ולהמתין ל-`s1`.\n3.  **אי-נשלפות (No Preemption)**: לא ניתן לקחת סמפור מתהליכון בכוח.\n4.  **המתנה מעגלית (Circular Wait)**: אם תהליכון 1 רוכש את `s1` ותהליכון 2 רוכש את `s2` (במקביל או בסמיכות), נוצר מצב שבו תהליכון 1 ממתין למשאב שמוחזק על ידי תהליכון 2, ותהליכון 2 ממתין למשאב שמוחזק על ידי תהליכון 1. \nשילוב תנאים אלו מאפשר קיפאון, אך הוא לא יתרחש בהכרח בכל ריצה, אלא רק בתזמון ספציפי של פעולות."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

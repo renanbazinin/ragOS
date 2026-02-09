@@ -1,0 +1,55 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Producer-Consumer",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 10:38:49",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4898,
+      "output_tokens": 2019,
+      "total_tokens": 11306
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Semaphores",
+      "Producer-Consumer",
+      "Concurrency",
+      "Race Condition",
+      "Critical Section"
+    ],
+    "content": {
+      "text": "להלן מימוש לבעיית יצרן-צרכן עבור חוצץ חסום (bounded buffer). המימוש משתמש בשלושה סמפורים: `full`, `empty`, ו-`mutex`, המאותחלים באופן המקובל (full=0, empty=BUFFER_SIZE, mutex=1). הקוד הבא מראה את פונקציות ה-`producer` וה-`consumer`. הניחו כי `produce_item()` ו-`consume_item()` הן פונקציות בטוחות לשימוש במקביל ואינן דורשות סנכרון פנימי. שימו לב למיקום הספציפי של פעולות ה-`sem_post(&mutex)`.",
+      "code_snippet": "#include <semaphore.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <pthread.h>\n\n#define BUFFER_SIZE 5\nint buffer[BUFFER_SIZE];\nint in = 0; // מצביע להכנסה\nint out = 0; // מצביע להוצאה\n\nsem_t mutex; // מאותחל ל-1\nsem_t full;  // מאותחל ל-0\nsem_t empty; // מאותחל ל-BUFFER_SIZE\n\n// פונקציות עזר (מוצגות לצורך הבנה, אך אין לשנות אותן)\nvoid produce_item(int* item_ptr) {\n    *item_ptr = rand() % 100; // מדמה ייצור פריט\n}\n\nvoid consume_item(int item) {\n    // מדמה צריכת פריט\n    // printf(\"Consumed: %d\\n\", item);\n}\n\nvoid* producer(void* arg) {\n    int item;\n    while (1) {\n        produce_item(&item);\n        sem_wait(&empty);\n        sem_wait(&mutex);\n        buffer[in] = item;\n        sem_post(&mutex); // שחרור המנעול כאן\n        in = (in + 1) % BUFFER_SIZE; // עדכון המצביע מחוץ למנעול\n        sem_post(&full);\n        // usleep(10000); // מדמה עבודה מחוץ לקטע הקריטי\n    }\n    return NULL;\n}\n\nvoid* consumer(void* arg) {\n    int item;\n    while (1) {\n        sem_wait(&full);\n        sem_wait(&mutex);\n        item = buffer[out];\n        sem_post(&mutex); // שחרור המנעול כאן\n        out = (out + 1) % BUFFER_SIZE; // עדכון המצביע מחוץ למנעול\n        sem_post(&empty);\n        consume_item(item);\n        // usleep(10000); // מדמה עבודה מחוץ לקטע הקריטי\n    }\n    return NULL;\n}"
+    },
+    "sub_questions": [
+      {
+        "id": "101.1",
+        "text": "האם המימוש הנתון פותר באופן נכון את בעיית יצרן-צרכן? אם כן, יש להוכיח שהפתרון עובד נכון, אחרת יש לתאר את התרחיש הבעייתי ולהסביר אותו.",
+        "code_snippet": null,
+        "options": [
+          "פותר נכון",
+          "לא פותר"
+        ]
+      },
+      {
+        "id": "101.2",
+        "text": "תקנו את קטע הקוד של ה-`producer` ושל ה-`consumer` כך שיעבדו באופן תקין. אין לשנות את שורות אתחול הסמפורים או את הגדרות המשתנים הגלובליים.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "לא פותר",
+      "explanation": "101.1: המימוש הנתון אינו פותר באופן נכון את בעיית יצרן-צרכן. קיימת תחרות (race condition) על המשתנים הגלובליים המשותפים `in` ו-`out`. בפרט, לאחר ש-`producer` מוסיף פריט לחוצץ ב-`buffer[in]`, הוא משחרר את ה-`mutex` *לפני* שהוא מעדכן את `in = (in + 1) % BUFFER_SIZE`. באופן דומה, ה-`consumer` משחרר את ה-`mutex` *לפני* שהוא מעדכן את `out = (out + 1) % BUFFER_SIZE`.\n\nתרחיש בעייתי לדוגמה עבור `producer`:\n1.  `Producer A` מבצע `sem_wait(&empty)` ו-`sem_wait(&mutex)`. המשתנה `in` מכיל כרגע את הערך `X`. \n2.  `Producer A` כותב `buffer[X] = item_A`. \n3.  `Producer A` מבצע `sem_post(&mutex)`. כעת ה-`mutex` משוחרר, אך `in` עדיין שווה `X`. \n4.  `Producer B` נכנס לריצה, מבצע `sem_wait(&empty)` (בהנחה שיש מקום) ו-`sem_wait(&mutex)`. \n5.  `Producer B` כותב `buffer[X] = item_B`. מכיוון ש-`in` לא עודכן על ידי `Producer A` לפני שחרור ה-`mutex`, `Producer B` כותב לאותו מיקום בחוצץ, ודורס את `item_A`. \n6.  `Producer B` מבצע `sem_post(&mutex)`. \n7.  `Producer B` מעדכן `in = (X + 1) % BUFFER_SIZE`. \n8.  `Producer B` מבצע `sem_post(&full)`. \n9.  `Producer A` חוזר להמשיך את ריצתו, ומעדכן `in = (X + 1) % BUFFER_SIZE`. \n\nהתוצאה היא איבוד פריטים (פריט `A` נדרס) ו/או אי-סדר בחוצץ עקב עדכונים שגויים של המצביעים `in` ו-`out`, מה שעלול להוביל גם לשגיאות גישה לזיכרון או קריאה של נתונים שגויים.\n\n101.2: התיקון הוא להבטיח שכל הגישות למשתנים הגלובליים המשותפים `in` ו-`out`, כולל העדכון שלהם, יתבצעו בתוך הקטע הקריטי המוגן על ידי ה-`mutex`. באופן זה, מובטח שרק חוט אחד בכל פעם ניגש או משנה את המצביעים `in` ו-`out`, ובכך נמנעת תחרות על משאבים אלו.\n\n**קוד מתוקן:**\n```c\nvoid* producer_corrected(void* arg) {\n    int item;\n    while (1) {\n        produce_item(&item);\n        sem_wait(&empty);\n        sem_wait(&mutex);\n        buffer[in] = item;\n        in = (in + 1) % BUFFER_SIZE; // עדכון המצביע בתוך הקטע הקריטי\n        sem_post(&mutex);\n        sem_post(&full);\n    }\n    return NULL;\n}\n\nvoid* consumer_corrected(void* arg) {\n    int item;\n    while (1) {\n        sem_wait(&full);\n        sem_wait(&mutex);\n        item = buffer[out];\n        out = (out + 1) % BUFFER_SIZE; // עדכון המצביע בתוך הקטע הקריטי\n        sem_post(&mutex);\n        sem_post(&empty);\n        consume_item(item);\n    }\n    return NULL;\n}\n```"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Disks",
+    "topic_hint": "RAID",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 09:37:09",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1012,
+      "output_tokens": 566,
+      "total_tokens": 4079
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "RAID"
+    ],
+    "content": {
+      "text": "בהינתן שרת עם 4 דיסקים קשיחים, בגודל 1TB כל אחד. איזו תצורת RAID תספק את שטח האחסון המקסימלי תוך הבטחת עמידות בפני כשל של שני דיסקים כלשהם בו-זמנית?",
+      "code_snippet": null,
+      "options": [
+        "א. RAID-0",
+        "ב. RAID-1",
+        "ג. RAID-5",
+        "ד. RAID-6",
+        "ה. אף אחת מהתשובות האחרות אינה נכונה."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ד. RAID-6",
+      "explanation": "RAID-0 אינו מספק עמידות בפני כשל כלל. RAID-1 (בדרך כלל mirroring דו-כיווני) עם 4 דיסקים יספק 2TB שטח אחסון שמיש, אך אינו מבטיח עמידות בפני כשל של 'שני דיסקים כלשהם' (לדוגמה, אם שני הדיסקים בזוג מראה אחד נכשלים). אם הכוונה היא ל-RAID-1 שבו כל הדיסקים הם עותקים זהים, הוא יספק רק 1TB שטח אחסון שמיש (3 עותקים + מקור), וזה פחות מ-RAID-6. RAID-5 יכול להתמודד עם כשל של דיסק אחד בלבד, ומספק 3TB שטח אחסון שמיש. RAID-6 הוא היחיד מבין האפשרויות שמבטיח עמידות בפני כשל של שני דיסקים כלשהם. במקרה זה, עם 4 דיסקים, RAID-6 יספק 2TB שטח אחסון שמיש (N-2 דיסקים * גודל דיסק), וזה שטח האחסון המקסימלי העומד בקריטריון של עמידות בפני כשל של שני דיסקים כלשהם."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

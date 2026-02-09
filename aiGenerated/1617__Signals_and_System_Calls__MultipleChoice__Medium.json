@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Signals and System Calls",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 11:52:35",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 926,
+      "output_tokens": 840,
+      "total_tokens": 4684
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Signals",
+      "System Calls",
+      "Process Management"
+    ],
+    "content": {
+      "text": "תהליך אב יוצר תהליך בן ומיד לאחר מכן קורא לפונקציית המערכת waitpid() כדי להמתין לסיום הבן. לפני קריאה ל-waitpid(), האב התקין מטפל (handler) עבור הסיגנל SIGUSR1 באמצעות sigaction(), כאשר הדגל SA_RESTART *לא* נקבע (כלומר, sa.sa_flags = 0).\nבזמן שהתהליך האב חסום בקריאה ל-waitpid(), נשלח אליו הסיגנל SIGUSR1.\nמהי התוצאה הסבירה ביותר של קריאת waitpid() בתהליך האב?",
+      "code_snippet": "void sigusr1_handler(int signum) {\n    // ... handler logic ...\n}\n\n// In parent process:\nstruct sigaction sa;\nsa.sa_handler = sigusr1_handler;\nsigemptyset(&sa.sa_mask);\nsa.sa_flags = 0; // SA_RESTART is NOT set\nsigaction(SIGUSR1, &sa, NULL);\n\npid_t pid = fork();\n// ... handle child process ...\n\n// Parent process:\nint status;\npid_t result = waitpid(pid, &status, 0);\n// ... check result and errno ...",
+      "options": [
+        "א. קריאת waitpid() תופסק, המטפל בסיגנל ירוץ, ולאחר מכן waitpid() תופעל מחדש (restarted) באופן אוטומטי.",
+        "ב. קריאת waitpid() תופסק, המטפל בסיגנל ירוץ, ו-waitpid() תחזיר -1 עם errno השווה ל-EINTR.",
+        "ג. קריאת waitpid() תמשיך להמתין ללא הפרעה, מכיוון שסיגנלים חסומים באופן אוטומטי בזמן קריאות מערכת.",
+        "ד. קריאת waitpid() תופסק, המטפל בסיגנל ירוץ, והתהליך האב יסיים את פעולתו (terminate) באופן מיידי.",
+        "ה. אף אחת מהתשובות האחרות אינה נכונה."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "כאשר סיגנל מגיע לתהליך בזמן שהוא חסום בקריאת מערכת (כמו waitpid()), והותקן עבורו מטפל באמצעות sigaction() ללא הדגל SA_RESTART, קריאת המערכת מופסקת. המטפל בסיגנל רץ, ולאחר מכן קריאת המערכת waitpid() תחזיר -1 ותקבע את errno ל-EINTR (Interrupted system call), מה שמציין שהיא נקטעה על ידי סיגנל. התהליך האב יצטרך לטפל ב-EINTR ולהחליט אם לנסות לקרוא ל-waitpid() שוב. אם הדגל SA_RESTART היה נקבע, קריאת המערכת הייתה מופעלת מחדש באופן אוטומטי לאחר סיום המטפל בסיגנל."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

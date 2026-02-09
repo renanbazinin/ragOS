@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Condition Variables",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 07:25:19",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 873,
+      "output_tokens": 415,
+      "total_tokens": 2162
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Synchronization",
+      "Condition Variables",
+      "Mutexes"
+    ],
+    "content": {
+      "text": "מהי הפעולה הנכונה ביותר המתארת את התנהגות הפונקציה `pthread_cond_wait` ביחס למנעול (mutex) המשויך אליה?",
+      "code_snippet": null,
+      "options": [
+        "א. היא נועלת את המנעול (mutex) ואז ממתינה.",
+        "ב. היא משחררת את המנעול (mutex) ואז ממתינה.",
+        "ג. היא משחררת את המנעול (mutex), ממתינה, ולאחר מכן נועלת אותו מחדש.",
+        "ד. היא אינה משפיעה על מצב המנעול (mutex)."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "הסבר: הפונקציה `pthread_cond_wait` נועדה לאפשר לחוט להמתין לתנאי מסוים תוך כדי שחרור המנעול, כדי לאפשר לחוטים אחרים לשנות את התנאי. כאשר התנאי מתקיים והחוט מתעורר (על ידי `pthread_cond_signal` או `pthread_cond_broadcast`), הוא נועל מחדש את המנעול לפני שהוא ממשיך בביצוע. זה מבטיח שהגישה למשתנים המשותפים המוגנים על ידי המנעול תהיה בטוחה וקוהרנטית."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

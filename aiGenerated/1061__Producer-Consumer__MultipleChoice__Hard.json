@@ -1,0 +1,46 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Producer-Consumer",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 07:41:56",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 970,
+      "output_tokens": 917,
+      "total_tokens": 5483
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Producer-Consumer",
+      "Synchronization",
+      "Deadlock",
+      "Semaphores",
+      "Mutexes"
+    ],
+    "content": {
+      "text": "נתונה בעיית המפיק-צרכן המשתמשת בחוצץ מעגלי בגודל N. המימוש משתמש ב-`pthread_mutex_t` ובשני סמפורים: `empty` (מאתחל ל-N) ו-`full` (מאתחל ל-0). להלן קוד פונקציית המפיק (Producer). איזו טענה נכונה לגבי מימוש זה?",
+      "code_snippet": "#include <pthread.h>\n#include <semaphore.h>\n\n#define N 5 // Example buffer size\n\n// Global variables (assumed to be initialized):\n// int buffer[N];\n// int in = 0;\n// int out = 0;\n// pthread_mutex_t mutex;\n// sem_t empty; // Initialized to N\n// sem_t full;  // Initialized to 0\n\n// Dummy function (assume it exists):\n// int produce_item();\n\n// Producer thread function\nvoid *producer(void *arg) {\n    int item;\n    while (1) {\n        item = produce_item(); // Assume item production\n        \n        pthread_mutex_lock(&mutex); // Acquire mutex FIRST\n        sem_wait(&empty);           // THEN wait for space (problematic order)\n        \n        // Critical section: Add item to buffer\n        // buffer[in] = item;\n        // in = (in + 1) % N;\n        // ... (actual buffer operations)\n        \n        sem_post(&full);            // Signal item available\n        pthread_mutex_unlock(&mutex); // Release mutex\n    }\n    return NULL;\n}",
+      "options": [
+        "א. המימוש נכון ויבטיח פעולה תקינה ללא קיפאון (deadlock) או תנאי מרוץ (race conditions).",
+        "ב. המימוש עלול לגרום לתנאי מרוץ (race conditions) בגישה לחוצץ.",
+        "ג. המימוש עלול לגרום לקיפאון (deadlock) כאשר החוצץ מלא.",
+        "ד. המימוש עלול לגרום לקיפאון (deadlock) כאשר החוצץ ריק.",
+        "ה. המימוש עלול לגרום ל-starvation של צרכנים."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג. המימוש המוצג סובל מבעיית קיפאון (deadlock). אם החוצץ מלא, המפיק יקבל את המנעול (mutex) ולאחר מכן ינסה לבצע `sem_wait(&empty)`. מכיוון שהחוצץ מלא, הסמפור `empty` יהיה שווה ל-0, והמפיק ייחסם (block) תוך כדי שהוא מחזיק במנעול. כעת, אף צרכן לא יוכל לגשת לחוצץ כדי להסיר פריט, מכיוון שהוא יצטרך לתפוס את המנעול שמוחזק על ידי המפיק החסום. זהו מצב קיפאון קלאסי שבו המפיק מחכה למקום בחוצץ (שחרור `empty` על ידי צרכן) והצרכן מחכה למנעול (שחרור `mutex` על ידי המפיק). הסדר הנכון הוא לבצע `sem_wait(&empty)` לפני `pthread_mutex_lock(&mutex)`."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

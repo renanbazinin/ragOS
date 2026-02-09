@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "File Systems and RAID",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 21:01:06",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1064,
+      "output_tokens": 387,
+      "total_tokens": 3206
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "File Systems",
+      "RAID",
+      "Data Redundancy"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של RAID רמה 1 (Mirroring)?",
+      "code_snippet": null,
+      "options": [
+        "א. להגדיל את נפח האחסון הזמין.",
+        "ב. לשפר באופן דרמטי את מהירות הכתיבה.",
+        "ג. לספק יתירות נתונים והגנה מפני כשל של דיסק יחיד.",
+        "ד. לאפשר פיצול (striping) של נתונים על פני מספר דיסקים לשיפור ביצועים.",
+        "ה. להשתמש בחישובי זוגיות (parity) כדי לשחזר נתונים שאבדו."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג. RAID רמה 1 (Mirroring) משכפלת את הנתונים באופן זהה על פני שני דיסקים או יותר. מטרתה העיקרית היא לספק יתירות נתונים והגנה מפני כשל של דיסק יחיד; אם דיסק אחד נכשל, הנתונים עדיין זמינים מהדיסק המשוכפל, ובכך נשמרת אמינות המערכת וזמינות הנתונים."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Condition Variables",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 07:26:53",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 983,
+      "output_tokens": 1011,
+      "total_tokens": 3262
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Synchronization",
+      "Condition Variables",
+      "Concurrency",
+      "Bounded Buffer"
+    ],
+    "content": {
+      "text": "נתון הקטע קוד הבא המנסה לממש תור מוגבל (bounded buffer) באמצעות משתני תנאי. איזה שינוי הכרחי יש לבצע בפונקציה `consumer` כדי להבטיח נכונות, גם במקרה של 'התעוררות שווא' (spurious wakeup) או כאשר מספר צרכנים מתחרים?",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n\n#define BUFFER_SIZE 5\n\nint buffer[BUFFER_SIZE];\nint count = 0;\nint in = 0;\nint out = 0;\n\npthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;\npthread_cond_t cond_full = PTHREAD_COND_INITIALIZER;\npthread_cond_t cond_empty = PTHREAD_COND_INITIALIZER;\n\nvoid *producer(void *arg) {\n    // ... producer logic ...\n    return NULL;\n}\n\nvoid *consumer(void *arg) {\n    int item;\n    pthread_mutex_lock(&mutex);\n    if (count == 0) { // <--- The problematic line\n        pthread_cond_wait(&cond_empty, &mutex);\n    }\n    item = buffer[out];\n    out = (out + 1) % BUFFER_SIZE;\n    count--;\n    pthread_cond_signal(&cond_full);\n    pthread_mutex_unlock(&mutex);\n    return NULL;\n}",
+      "options": [
+        "א. לשנות את `if (count == 0)` ל-`while (count == 0)`.",
+        "ב. להחליף את `pthread_cond_wait` ב-`pthread_cond_timedwait`.",
+        "ג. להוסיף `pthread_mutex_unlock(&mutex);` לפני `pthread_cond_wait`.",
+        "ד. להחליף את `pthread_cond_signal` ב-`pthread_cond_broadcast`.",
+        "ה. הקוד נכון כפי שהוא ואין צורך בשינוי."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "א'. השימוש בלולאת `while` במקום `if` בעת המתנה על משתנה תנאי הוא קריטי ממספר סיבות:\n1.  **התעוררות שווא (Spurious Wakeups)**: מערכות הפעלה עשויות להעיר תהליכים הממתינים על משתנה תנאי גם ללא קריאה מפורשת ל-`signal` או `broadcast`. אם נשתמש ב-`if`, התהליך יעבור ישר לביצוע הקוד הבא מבלי לבדוק שוב את התנאי, מה שעלול להוביל לגישה לנתונים לא חוקיים (לדוגמה, ניסיון לקחת פריט מתור ריק).\n2.  **תחרות בין מספר צרכנים/יצרנים (Multiple Consumers/Producers)**: אם מספר צרכנים ממתינים, ורק אחד מהם מקבל `signal`, כאשר הוא יתעורר ויקח פריט, ייתכן שצרכן אחר שיתעורר (לדוגמה, עקב `broadcast` או `signal` שהגיע מאוחר יותר) ימצא שהתור שוב ריק, אך מכיוון שהוא השתמש ב-`if`, הוא לא יבדוק שוב ועלול להמשיך עם מצב שגוי. לולאת `while` מבטיחה שהתנאי נבדק מחדש בכל פעם שהתהליך מתעורר לפני שהוא ממשיך בביצוע.\n3.  **אמינות התנאי**: ה-`while` מבטיח שהתהליך ימשיך רק כאשר התנאי אכן מתקיים, ולא רק כאשר הוא מקבל אות התעוררות."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

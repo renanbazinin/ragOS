@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Copy-on-Write",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 08:52:59",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 972,
+      "output_tokens": 1551,
+      "total_tokens": 7535
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Copy-on-Write",
+      "Virtual Memory",
+      "Process Management"
+    ],
+    "content": {
+      "text": "נתבונן בקוד C הבא המשתמש בזיכרון משותף בשיטת Copy-on-Write (COW) דרך `fork()`:\n\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n#include <sys/mman.h>\n\nint main() {\n    int* shared_data = (int*)mmap(NULL, sizeof(int) * 10, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);\n    if (shared_data == MAP_FAILED) {\n        perror(\"mmap failed\");\n        return 1;\n    }\n\n    for (int i = 0; i < 10; ++i) {\n        shared_data[i] = i + 1; // Initialize with 1, 2, ..., 10\n    }\n\n    pid_t pid1 = fork();\n    if (pid1 == -1) { perror(\"fork failed\"); return 1; }\n\n    if (pid1 == 0) { // Child 1\n        shared_data[0] = 100; // Modify index 0\n        exit(0);\n    }\n\n    pid_t pid2 = fork();\n    if (pid2 == -1) { perror(\"fork failed\"); return 1; }\n\n    if (pid2 == 0) { // Child 2\n        shared_data[1] = 200; // Modify index 1\n        exit(0);\n    }\n\n    // Parent waits for children to complete\n    waitpid(pid1, NULL, 0);\n    waitpid(pid2, NULL, 0);\n\n    printf(\"Parent process: shared_data[0]=%d, shared_data[1]=%d\\n\", shared_data[0], shared_data[1]);\n\n    munmap(shared_data, sizeof(int) * 10);\n    return 0;\n}\n```\n\nלאחר ביצוע הקוד והמתנה לסיום כל תהליכי הילד, מה יהיו הערכים המודפסים על ידי תהליך האב?",
+      "code_snippet": null,
+      "options": [
+        "א. `shared_data[0]=100, shared_data[1]=200`",
+        "ב. `shared_data[0]=100, shared_data[1]=2`",
+        "ג. `shared_data[0]=1, shared_data[1]=200`",
+        "ד. `shared_data[0]=1, shared_data[1]=2`",
+        "ה. ההתנהגות אינה מוגדרת ועלולה להשתנות בין מערכות הפעלה."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ד. `shared_data[0]=1, shared_data[1]=2`",
+      "explanation": "ההסבר:\n1.  **אתחול**: תהליך האב מאתחל את הזיכרון (עמוד פיזי `P_orig`) כך ש-`shared_data[0]=1` ו-`shared_data[1]=2`.\n2.  **`fork()` לילד 1**: כאשר האב מבצע `fork()` ליצירת ילד 1, שניהם חולקים את אותו עמוד פיזי `P_orig` במצב קריאה בלבד (COW). ספירת ההתייחסויות (reference count) של `P_orig` עולה ל-2.\n3.  **שינוי בילד 1**: ילד 1 כותב ל-`shared_data[0] = 100`. מכיוון שהעמוד נמצא במצב COW (קריאה בלבד), מתרחשת פסיקת דף (page fault). מערכת ההפעלה יוצרת עותק חדש של `P_orig` (נקרא לו `P_child1`). ילד 1 משנה את `shared_data[0]` בתוך `P_child1`. ספירת ההתייחסויות של `P_orig` יורדת ל-1 (האב עדיין מצביע אליו). `P_child1` מכיל כעת `shared_data[0]=100` ואת שאר הערכים המקוריים.\n4.  **`fork()` לילד 2**: האב, שעדיין מצביע על `P_orig` המקורי (שעדיין מכיל `shared_data[0]=1, shared_data[1]=2`), מבצע `fork()` נוסף ליצירת ילד 2. כעת, האב וילד 2 חולקים שוב את `P_orig` במצב COW. ספירת ההתייחסויות של `P_orig` עולה שוב ל-2.\n5.  **שינוי בילד 2**: ילד 2 כותב ל-`shared_data[1] = 200`. בדומה לילד 1, מתרחשת פסיקת דף, ומערכת ההפעלה יוצרת עותק חדש של `P_orig` (נקרא לו `P_child2`). ילד 2 משנה את `shared_data[1]` בתוך `P_child2`. ספירת ההתייחסויות של `P_orig` יורדת ל-1 (האב עדיין מצביע אליו). `P_child2` מכיל כעת `shared_data[1]=200` ואת שאר הערכים המקוריים.\n6.  **הדפסה באב**: בסיום, תהליך האב עדיין מצביע לעמוד הפיזי המקורי `P_orig`, שלא השתנה על ידו או על ידי אף אחד מהילדים (השינויים שלהם יצרו עותקים נפרדים). לכן, האב ידפיס את הערכים המקוריים: `shared_data[0]=1` ו-`shared_data[1]=2`."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

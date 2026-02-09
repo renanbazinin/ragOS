@@ -1,0 +1,62 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory and Paging",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 20:49:51",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2075,
+      "output_tokens": 1173,
+      "total_tokens": 6704
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Virtual Memory",
+      "Paging",
+      "Memory Management",
+      "Multi-level Paging"
+    ],
+    "content": {
+      "text": "נתונה מערכת עם זיכרון וירטואלי של 4GB, גודל דף של 4KB, וזיכרון פיזי של 512MB. המערכת משתמשת בטבלת דפים דו-שכבתית (two-level page table), כאשר גודל כל כניסה בטבלת הדפים (PTE) הוא 4 בתים.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "מהם הגדלים של ה-VPN, ה-PFN, וביטים עבור כל רמה של הטבלה הדו-שכבתית (P1 ו-P2)?\nVPN: ________ PFN: ________ P1 ביטים: ________ P2 ביטים: ________",
+        "code_snippet": null,
+        "options": null,
+        "solution": {
+          "is_present_in_file": true,
+          "correct_option": null,
+          "explanation": "1.  **כתובת וירטואלית**: 4GB = 2^32 בתים, לכן כתובת וירטואלית היא באורך 32 ביטים.\n2.  **היסט (Offset)**: גודל דף הוא 4KB = 2^12 בתים, לכן ההיסט הוא באורך 12 ביטים.\n3.  **VPN (Virtual Page Number)**: 32 ביטים (VA) - 12 ביטים (Offset) = 20 ביטים.\n4.  **כתובת פיזית**: 512MB = 2^9 * 2^20 = 2^29 בתים, לכן כתובת פיזית היא באורך 29 ביטים.\n5.  **PFN (Physical Frame Number)**: 29 ביטים (PA) - 12 ביטים (Offset) = 17 ביטים.\n6.  **חלוקת ה-VPN לרמות**: גודל כניסה בטבלת דפים (PTE) הוא 4 בתים. גודל דף הוא 4KB. לכן, מספר הכניסות בכל טבלת דפים הוא 4KB / 4 בתים = 1024 כניסות. 1024 = 2^10, כלומר כל רמה של טבלת הדפים יכולה לכלול 10 ביטים.\n    *   P1 (אינדקס טבלת דפים חיצונית): 10 ביטים.\n    *   P2 (אינדקס טבלת דפים פנימית): 10 ביטים.\n    *   סך הכל VPN = 10 + 10 = 20 ביטים, תואם."
+        }
+      },
+      {
+        "id": "10.2",
+        "text": "כמה זיכרון פיזי תתפוס טבלת דפים (דו-שכבתית) עבור תהליך המנצל באופן מלא את מרחב הכתובות הוירטואלי שלו?\nזיכרון פיזי: ________",
+        "code_snippet": null,
+        "options": null,
+        "solution": {
+          "is_present_in_file": true,
+          "correct_option": null,
+          "explanation": "תהליך המנצל באופן מלא את מרחב הכתובות הוירטואלי שלו יצטרך:\n1.  **טבלת דפים חיצונית אחת (P1)**: טבלה זו תתפוס דף אחד (4KB).\n2.  **טבלאות דפים פנימיות (P2)**: כיוון שהתהליך מנצל את כל מרחב הכתובות, כל 2^10 הכניסות בטבלת P1 יהיו תקפות ויצביעו על טבלת P2. כל טבלת P2 תתפוס דף אחד. לכן נצטרך 2^10 = 1024 טבלאות P2.\n3.  **סה\"כ דפים לטבלאות דפים**: 1 דף (עבור P1) + 1024 דפים (עבור P2) = 1025 דפים.\n4.  **סה\"כ זיכרון פיזי**: 1025 דפים * 4KB/דף = 4100KB (או כ-4.0039MB)."
+        }
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": null
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

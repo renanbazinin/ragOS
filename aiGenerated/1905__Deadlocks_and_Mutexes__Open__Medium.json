@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Deadlocks and Mutexes",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 21:41:28",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2445,
+      "output_tokens": 1980,
+      "total_tokens": 10540
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "Open",
+    "topic": [
+      "Deadlocks",
+      "Mutexes",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המשתמשת בשני מנעולים (mutexes), `m1` ו-`m2`, ושני תהליכונים המנסים לגשת למשאבים מוגנים על ידם. תהליכון `thread_A` מנסה לנעול את `m1` ואז את `m2`, ואילו תהליכון `thread_B` מנסה לנעול את `m2` ואז את `m1`. הקוד המקורי מוצג להלן:\n\nא. האם קיפאון (deadlock) אפשרי בתרחיש זה? אם כן, הסבר מדוע, תוך התייחסות לארבעת התנאים ההכרחיים לקיום קיפאון.\nב. הצע שינוי בקוד המקורי על מנת למנוע קיפאון, תוך שימוש באותם mutexes בלבד. הצג את הקוד המתוקן (עבור שני התהליכונים) והסבר את פתרונך.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <unistd.h> // For sleep\n\npthread_mutex_t m1 = PTHREAD_MUTEX_INITIALIZER;\npthread_mutex_t m2 = PTHREAD_MUTEX_INITIALIZER;\n\nvoid* thread_A(void* arg) {\n    printf(\"Thread A: Trying to acquire m1\\n\");\n    pthread_mutex_lock(&m1);\n    printf(\"Thread A: Acquired m1, trying to acquire m2\\n\");\n    sleep(1); // Simulate work or context switch\n    pthread_mutex_lock(&m2);\n    printf(\"Thread A: Acquired m2, entering critical section\\n\");\n    // Critical section\n    printf(\"Thread A: Releasing m2\\n\");\n    pthread_mutex_unlock(&m2);\n    printf(\"Thread A: Releasing m1\\n\");\n    pthread_mutex_unlock(&m1);\n    printf(\"Thread A: Exiting\\n\");\n    return NULL;\n}\n\nvoid* thread_B(void* arg) {\n    printf(\"Thread B: Trying to acquire m2\\n\");\n    pthread_mutex_lock(&m2);\n    printf(\"Thread B: Acquired m2, trying to acquire m1\\n\");\n    sleep(1); // Simulate work or context switch\n    pthread_mutex_lock(&m1);\n    printf(\"Thread B: Acquired m1, entering critical section\\n\");\n    // Critical section\n    printf(\"Thread B: Releasing m1\\n\");\n    pthread_mutex_unlock(&m1);\n    printf(\"Thread B: Releasing m2\\n\");\n    pthread_mutex_unlock(&m2);\n    printf(\"Thread B: Exiting\\n\");\n    return NULL;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "א. כן, קיפאון (deadlock) אפשרי בתרחיש זה. הבה נבחן את ארבעת התנאים ההכרחיים לקיום קיפאון:\n1.  **מניעה הדדית (Mutual Exclusion)**: מתקיים. מנעולים (mutexes) מטבעם מבטיחים שרק תהליכון אחד יכול להחזיק מנעול מסוים בזמן נתון.\n2.  **החזקה והמתנה (Hold and Wait)**: מתקיים. תהליכון A מחזיק במנעול `m1` וממתין למנעול `m2`. במקביל, תהליכון B מחזיק במנעול `m2` וממתין למנעול `m1`.\n3.  **אי-הפקעה (No Preemption)**: מתקיים. לא ניתן להפקיע מנעול מתהליכון שמחזיק בו; התהליכון חייב לשחרר אותו מרצונו.\n4.  **המתנה מעגלית (Circular Wait)**: מתקיים. קיים מעגל המתנה: תהליכון A ממתין למשאב (`m2`) שמוחזק על ידי תהליכון B, ותהליכון B ממתין למשאב (`m1`) שמוחזק על ידי תהליכון A. מצב זה יוצר מעגל.\nמאחר שכל ארבעת התנאים מתקיימים, קיפאון הוא אפשרי ואף סביר.\n\nב. כדי למנוע קיפאון, ניתן לשבור את תנאי ההמתנה המעגלית על ידי אכיפת סדר קבוע לרכישת המנעולים. אם כל התהליכונים ירכשו את המנעולים באותו סדר (לדוגמה, תמיד `m1` ואז `m2`), לא יתכן מעגל המתנה.\n\nקוד מתוקן:\n```c\n#include <stdio.h>\n#include <pthread.h>\n#include <unistd.h>\n\npthread_mutex_t m1 = PTHREAD_MUTEX_INITIALIZER;\npthread_mutex_t m2 = PTHREAD_MUTEX_INITIALIZER;\n\nvoid* thread_A_fixed(void* arg) {\n    printf(\"Thread A (fixed): Trying to acquire m1\\n\");\n    pthread_mutex_lock(&m1);\n    printf(\"Thread A (fixed): Acquired m1, trying to acquire m2\\n\");\n    pthread_mutex_lock(&m2); // Acquire m2 after m1\n    printf(\"Thread A (fixed): Acquired m2, entering critical section\\n\");\n    // Critical section\n    printf(\"Thread A (fixed): Releasing m2\\n\");\n    pthread_mutex_unlock(&m2);\n    printf(\"Thread A (fixed): Releasing m1\\n\");\n    pthread_mutex_unlock(&m1);\n    printf(\"Thread A (fixed): Exiting\\n\");\n    return NULL;\n}\n\nvoid* thread_B_fixed(void* arg) {\n    printf(\"Thread B (fixed): Trying to acquire m1\\n\"); // Changed order\n    pthread_mutex_lock(&m1);\n    printf(\"Thread B (fixed): Acquired m1, trying to acquire m2\\n\");\n    pthread_mutex_lock(&m2); // Acquire m2 after m1\n    printf(\"Thread B (fixed): Acquired m2, entering critical section\\n\");\n    // Critical section\n    printf(\"Thread B (fixed): Releasing m2\\n\");\n    pthread_mutex_unlock(&m2);\n    printf(\"Thread B (fixed): Releasing m1\\n\");\n    pthread_mutex_unlock(&m1);\n    printf(\"Thread B (fixed): Exiting\\n\");\n    return NULL;\n}\n```\nההסבר לפתרון:\nעל ידי אכיפת סדר רכישה עקבי (לדוגמה, תמיד `m1` ואז `m2`), אנו מבטיחים שלעולם לא ייווצר מצב שבו תהליכון A מחזיק ב-`m1` וממתין ל-`m2` בעוד שתהליכון B מחזיק ב-`m2` וממתין ל-`m1`. אם תהליכון A יתפוס את `m1`, תהליכון B יצטרך להמתין עד ש-A ישחרר את `m1` לפני שיוכל להתקדם. ברגע ש-A ישחרר את `m1` (לאחר שסיים את הקטע הקריטי ושחרר גם את `m2`), תהליכון B יוכל לתפוס את `m1` ואז את `m2` ולהמשיך. כך נשברת ההמתנה המעגלית ולא יתכן קיפאון."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

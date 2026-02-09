@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Producer-Consumer",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 07:38:22",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1101,
+      "output_tokens": 442,
+      "total_tokens": 2811
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Producer-Consumer",
+      "Concurrency",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של תבנית יצרן-צרכן (Producer-Consumer) במערכות הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. להבטיח שכל תהליך יקבל זמן מעבד שווה.",
+        "ב. לאפשר העברת נתונים יעילה ואסינכרונית בין תהליכים או חוטים, תוך שימוש בחוצץ משותף.",
+        "ג. למנוע מצב של Deadlock בין תהליכים המשתפים משאבים.",
+        "ד. לספק מנגנון לגישה בלעדית (mutual exclusion) למשאב משותף כלשהו."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "תבנית יצרן-צרכן נועדה לאפשר תקשורת והעברת נתונים בין תהליכים או חוטים הפועלים בקצבים שונים, על ידי שימוש בחוצץ משותף. היא מאפשרת ליצרן להמשיך לייצר גם כשהצרכן איטי, ולצרכן לצרוך כשהיצרן מסיים לייצר פריטים, ובכך משפרת את היעילות ומספקת דה-קפלינג (decoupling) ביניהם. מניעת Deadlock ו-Mutual Exclusion הם היבטים של המימוש הנכון של התבנית, אך לא המטרה העיקרית שלה."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

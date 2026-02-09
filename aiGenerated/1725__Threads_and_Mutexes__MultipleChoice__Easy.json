@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Threads and Mutexes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 20:19:57",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1131,
+      "output_tokens": 561,
+      "total_tokens": 2766
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Threads",
+      "Mutexes",
+      "Synchronization",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "בתוכנית מרובת חוטים, מספר חוטים ניגשים ומשנים משתנה גלובלי משותף (לדוגמה, מונה). איזה מנגנון סנכרון יש להשתמש בו כדי להבטיח שרק חוט אחד יוכל לגשת למשתנה בכל רגע נתון, ובכך למנוע מצב מירוץ (race condition)?",
+      "code_snippet": null,
+      "options": [
+        "א. סמפור (Semaphore)",
+        "ב. מנעול הדדי (Mutex)",
+        "ג. משתנה תנאי (Condition Variable)",
+        "ד. מנעול ספין (Spinlock)",
+        "ה. לא נדרש דבר מיוחד, המערכת מטפלת בכך אוטומטית."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "מנעול הדדי (Mutex) הוא מנגנון סנכרון המאפשר להגן על קטעים קריטיים בקוד (critical sections) ועל משאבים משותפים. הוא מבטיח שרק חוט אחד יוכל להיכנס לקטע הקריטי בכל רגע נתון, ובכך מונע מצבי מירוץ כאשר מספר חוטים מנסים לגשת ולשנות את אותו משתנה משותף. סמפור יכול לשמש גם למטרה זו אך מיועד בדרך כלל לבקרת גישה למספר מופעים של משאב, בעוד מנעול הדדי מיועד באופן ספציפי לגישה בלעדית (mutual exclusion). משתנה תנאי משמש לסנכרון חוטים הממתינים לתנאי מסוים. מנעול ספין הוא סוג של מנעול הדדי שבו חוט ממתין על ידי 'סחרור' (spinning) במקום לחסום, והוא מתאים בדרך כלל לקטעים קריטיים קצרים מאוד או בסביבות ליבה."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

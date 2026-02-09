@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions and Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 11:27:35",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5488,
+      "output_tokens": 2903,
+      "total_tokens": 16083
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Race Conditions",
+      "Mutexes",
+      "Deadlock",
+      "Synchronization",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתונה מערכת המטפלת בשני מונים משותפים, `counter1` ו-`counter2`, המוגנים על ידי מנעולים נפרדים: `mutex_c1` מגן על `counter1` ו-`mutex_c2` מגן על `counter2`. המערכת מופעלת על ידי שני חוטים במקביל, כמתואר בקוד הבא. חוט אחד (`thread_updater`) מגדיל את שני המונים באופן מחזורי, וחוט שני (`thread_monitor`) בודק את סכום המונים (`counter1 + counter2`) ומאפס אותם אם הסכום חורג מגבול מסוים (`limit`).\n\nנתח את הקוד הנתון וענה על השאלות הבאות:\n\n1. האם הקוד הנתון סובל מבעיות סנכרון? אם כן, פרט והסבר את כל הבעיות שאתה מזהה (לדוגמה: תנאי מירוץ, קיפאון).\n2. בהנחה ששני החוטים מצליחים לסיים את ריצתם ללא קיפאון, האם תוצאות הספירה הסופיות של `counter1` ו-`counter2` מובטחות להיות עקביות? (כלומר, האם הערכים הסופיים מייצגים מצב לוגי תקין בהינתן פעולות הגידול והאיפוס?) נמק.\n3. תקן את הקוד כך שיפתור את כל הבעיות שצוינו, תוך שמירה על העקרונות של מניעת קיפאון, עקביות וסנכרון נכון. הצג את הקוד המתוקן עבור שתי פונקציות החוטים (`thread_updater` ו-`thread_monitor`).",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n\n// Shared data structure\ntypedef struct {\n    int counter1;\n    int counter2;\n    pthread_mutex_t mutex_c1; // Protects counter1\n    pthread_mutex_t mutex_c2; // Protects counter2\n} SharedCounters;\n\nSharedCounters global_data;\n\n// Function to initialize shared data and mutexes\nvoid init_shared_counters() {\n    global_data.counter1 = 0;\n    global_data.counter2 = 0;\n    pthread_mutex_init(&global_data.mutex_c1, NULL);\n    pthread_mutex_init(&global_data.mutex_c2, NULL);\n}\n\n// Function to clean up mutexes\nvoid cleanup_shared_counters() {\n    pthread_mutex_destroy(&global_data.mutex_c1);\n    pthread_mutex_destroy(&global_data.mutex_c2);\n}\n\n// Thread function 1: Updates both counters\nvoid* thread_updater(void* arg) {\n    int iterations = *(int*)arg;\n    for (int i = 0; i < iterations; ++i) {\n        pthread_mutex_lock(&global_data.mutex_c1);\n        global_data.counter1++;\n        pthread_mutex_lock(&global_data.mutex_c2);\n        global_data.counter2++;\n        pthread_mutex_unlock(&global_data.mutex_c2);\n        pthread_mutex_unlock(&global_data.mutex_c1);\n    }\n    return NULL;\n}\n\n// Thread function 2: Reads sum and conditionally resets\nvoid* thread_monitor(void* arg) {\n    int limit = *(int*)arg;\n    for (int i = 0; i < 1000; ++i) { // Monitor multiple times\n        pthread_mutex_lock(&global_data.mutex_c2); // Different order\n        int current_c2 = global_data.counter2;\n        pthread_mutex_lock(&global_data.mutex_c1);\n        int current_c1 = global_data.counter1;\n        \n        if ((current_c1 + current_c2) > limit) {\n            global_data.counter1 = 0;\n            global_data.counter2 = 0;\n        }\n        pthread_mutex_unlock(&global_data.mutex_c1);\n        pthread_mutex_unlock(&global_data.mutex_c2);\n    }\n    return NULL;\n}\n\n/* Example main function to run the threads:\nint main() {\n    init_shared_counters();\n    pthread_t t1, t2;\n    int iterations = 100000; // Large number to increase chance of issues\n    int limit = 50;         // Reset limit\n\n    pthread_create(&t1, NULL, thread_updater, &iterations);\n    pthread_create(&t2, NULL, thread_monitor, &limit);\n\n    pthread_join(t1, NULL);\n    pthread_join(t2, NULL);\n\n    printf(\"Final counter1: %d, counter2: %d\\n\", global_data.counter1, global_data.counter2);\n    cleanup_shared_counters();\n    return 0;\n}\n*/",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1. **בעיות סנכרון:**\n    *   **קיפאון (Deadlock):** כן, קיים קיפאון. `thread_updater` מנסה לתפוס את `mutex_c1` ואז את `mutex_c2`. `thread_monitor` מנסה לתפוס את `mutex_c2` ואז את `mutex_c1`. אם `thread_updater` יתפוס את `mutex_c1` ו-`thread_monitor` יתפוס את `mutex_c2` בו זמנית, שניהם יחסמו בניסיון לתפוס את המנעול השני, מה שיוביל לקיפאון.\n    *   **תנאי מירוץ (Race Condition):**\n        *   **על סכום המונים:** במימוש הנתון, `thread_monitor` תופס את שני המנעולים לפני שהוא קורא את שני המונים. כל עוד שני המנעולים מוחזקים, אף חוט אחר לא יכול לשנות אף אחד מהמונים. לכן, הקריאה של `current_c1` ו-`current_c2` *בתוך* `thread_monitor` עצמה היא אטומית מבחינת הגישה למונים, ואין תנאי מירוץ על הסכום *בזמן החישוב שלו בתוך `thread_monitor`*. עם זאת, בשל הקיפאון, המערכת לא תגיע בהכרח למצב יציב.\n        *   **על ערכים סופיים:** הערכים הסופיים של המונים אינם ניתנים לחיזוי מדויק. הם תלויים בסדר הריצה של החוטים ובתזמון האיפוס על ידי `thread_monitor`. זהו חוסר דטרמיניזם לגיטימי בהתאם למדיניות האיפוס, ולא תנאי מירוץ קלאסי במובן של נתונים שגויים, אך מצביע על כך שהמערכת אינה דטרמיניסטית מבחינת ערכי הסיום.\n\n2. **עקביות תוצאות סופיות (בהנחה שאין קיפאון):**\n    *   **סכום נצפה:** כן, הסכום של `counter1 + counter2` כפי שהוא נצפה על ידי `thread_monitor` הוא תמיד סכום של מונים עקביים. הסיבה היא ש-`thread_monitor` תופס את שני המנעולים (`mutex_c2` ואז `mutex_c1`) לפני שהוא קורא את שני המונים. כל עוד שני המנעולים מוחזקים, אף חוט אחר לא יכול לשנות אף אחד מהמונים, ובכך מובטחת עקביות של צמד הערכים הנקראים באותו רגע.\n    *   **ערכים סופיים ניתנים לחיזוי:** לא, הערכים הסופיים של `counter1` ו-`counter2` אינם ניתנים לחיזוי מדויק. הם יהיו איפשהו בין 0 ל-`iterations` (הערך המקסימלי ללא איפוס), וזה תלוי במספר הפעמים ש-`thread_monitor` יבצע איפוס, ובאיזה שלב של הספירה הוא יבצע זאת. זהו מצב לא דטרמיניסטי לגיטימי של המערכת ולא תנאי מירוץ.\n\n3. **תיקון הקוד:**\n    הפתרון העיקרי למניעת קיפאון במצב כזה הוא להבטיח שכל החוטים התופסים מספר מנעולים יעשו זאת באותו סדר קנוני. במקרה זה, נבחר סדר `mutex_c1` ואז `mutex_c2`.\n    כדי למנוע תנאי מירוץ על הסכום (אם הגישה הייתה מתבצעת ללא החזקת שני המנעולים בו-זמנית), יש לוודא שקריאת שני המונים (וכל פעולה תלויה בהם כמו איפוס) תתבצע תחת הגנה של שני המנעולים בו זמנית. במימוש הנתון, `thread_monitor` כבר מחזיק את שני המנעולים לפני חישוב הסכום, אך סדר תפיסת המנעולים שונה, וזהו מקור הקיפאון.\n\n    **קוד מתוקן:**\n\n    ```c\n    // thread_updater מתוקן (ללא שינוי בסדר, אך חשוב שהסדר יהיה קנוני)\n    void* thread_updater(void* arg) {\n        int iterations = *(int*)arg;\n        for (int i = 0; i < iterations; ++i) {\n            pthread_mutex_lock(&global_data.mutex_c1); // תמיד קודם m1\n            pthread_mutex_lock(&global_data.mutex_c2); // ואז m2\n            global_data.counter1++;\n            global_data.counter2++;\n            pthread_mutex_unlock(&global_data.mutex_c2);\n            pthread_mutex_unlock(&global_data.mutex_c1);\n        }\n        return NULL;\n    }\n\n    // thread_monitor מתוקן\n    void* thread_monitor(void* arg) {\n        int limit = *(int*)arg;\n        for (int i = 0; i < 1000; ++i) {\n            pthread_mutex_lock(&global_data.mutex_c1); // תמיד קודם m1\n            pthread_mutex_lock(&global_data.mutex_c2); // ואז m2\n            \n            int current_c1 = global_data.counter1;\n            int current_c2 = global_data.counter2;\n            \n            if ((current_c1 + current_c2) > limit) {\n                global_data.counter1 = 0;\n                global_data.counter2 = 0;\n            }\n            pthread_mutex_unlock(&global_data.mutex_c2);\n            pthread_mutex_unlock(&global_data.mutex_c1);\n        }\n        return NULL;\n    }\n    ```\n\n    התיקון מבטיח ששני החוטים תמיד ינסו לתפוס את המנעולים באותו סדר (`mutex_c1` ואז `mutex_c2`), ובכך מונע קיפאון. כמו כן, בתוך כל אחד מהקטעים הקריטיים, שני המונים מוגנים בו זמנית, מה שמבטיח עקביות של קריאה וכתיבה של צמדי המונים."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

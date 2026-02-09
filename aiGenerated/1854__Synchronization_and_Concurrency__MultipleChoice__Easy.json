@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Synchronization and Concurrency",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 21:12:46",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 998,
+      "output_tokens": 409,
+      "total_tokens": 2468
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Synchronization",
+      "Concurrency",
+      "Race Condition"
+    ],
+    "content": {
+      "text": "תנאי מרוץ (Race Condition) מתרחש כאשר:",
+      "code_snippet": null,
+      "options": [
+        "א. שני חוטים (threads) שונים ניגשים לזיכרון נפרד.",
+        "ב. חוטים מנסים לגשת למשאב משותף אך המערכת מונעת זאת.",
+        "ג. מספר חוטים ניגשים באופן מקבילי (concurrently) לנתונים משותפים, ולפחות אחד מהם משנה את הנתונים.",
+        "ד. חוט אחד בלבד ניגש למשאב קריטי."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "תנאי מרוץ מתרחש כאשר מספר תהליכים או חוטים ניגשים לנתונים משותפים באופן מקבילי (concurrently), ולפחות אחד מהם משנה את הנתונים, והתוצאה הסופית תלויה בסדר הספציפי שבו הפעולות מתבצעות. מצב זה עלול להוביל לתוצאות בלתי צפויות ולא נכונות. אפשרות א' אינה רלוונטית לנתונים משותפים. אפשרויות ב' ו-ד' מתארות מנגנוני מניעה או מצב שבו אין תנאי מרוץ."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

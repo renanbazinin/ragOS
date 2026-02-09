@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Deadlocks and Mutexes",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 21:41:53",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2445,
+      "output_tokens": 1993,
+      "total_tokens": 8576
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "Open",
+    "topic": [
+      "Deadlocks",
+      "Mutexes",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה בשפת C, המשתמשת ב-pthreads וב-mutexes להגנה על משאבים משותפים. התוכנית מורכבת משני תהליכונים (threads), `thread_A` ו-`thread_B`, ומשני mutexes, `mutex_1` ו-`mutex_2`.\n\n1.  האם התוכנית הנתונה עלולה להיתקל בקיפאון (deadlock)? נמקו את תשובתכם והסבירו אילו מהתנאים לקיפאון מתקיימים במקרה זה.\n2.  אם התשובה חיובית, הציעו שינוי בקוד למניעת הקיפאון, והסבירו מדוע השינוי שלכם מונע קיפאון.",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h> // For sleep\n\npthread_mutex_t mutex_1 = PTHREAD_MUTEX_INITIALIZER;\npthread_mutex_t mutex_2 = PTHREAD_MUTEX_INITIALIZER;\n\nvoid* thread_A_func(void* arg) {\n    printf(\"Thread A: Attempting to acquire mutex_1...\\n\");\n    pthread_mutex_lock(&mutex_1);\n    printf(\"Thread A: Acquired mutex_1. Attempting to acquire mutex_2...\\n\");\n    sleep(1); // Simulate work\n    pthread_mutex_lock(&mutex_2);\n    printf(\"Thread A: Acquired mutex_2. Critical section A...\\n\");\n    // Critical section A\n    pthread_mutex_unlock(&mutex_2);\n    printf(\"Thread A: Released mutex_2.\\n\");\n    pthread_mutex_unlock(&mutex_1);\n    printf(\"Thread A: Released mutex_1. Exiting.\\n\");\n    return NULL;\n}\n\nvoid* thread_B_func(void* arg) {\n    printf(\"Thread B: Attempting to acquire mutex_2...\\n\");\n    pthread_mutex_lock(&mutex_2);\n    printf(\"Thread B: Acquired mutex_2. Attempting to acquire mutex_1...\\n\");\n    sleep(1); // Simulate work\n    pthread_mutex_lock(&mutex_1);\n    printf(\"Thread B: Acquired mutex_1. Critical section B...\\n\");\n    // Critical section B\n    pthread_mutex_unlock(&mutex_1);\n    printf(\"Thread B: Released mutex_1.\\n\");\n    pthread_mutex_unlock(&mutex_2);\n    printf(\"Thread B: Released mutex_2. Exiting.\\n\");\n    return NULL;\n}\n\nint main() {\n    pthread_t tid_A, tid_B;\n\n    pthread_create(&tid_A, NULL, thread_A_func, NULL);\n    pthread_create(&tid_B, NULL, thread_B_func, NULL);\n\n    pthread_join(tid_A, NULL);\n    pthread_join(tid_B, NULL);\n\n    pthread_mutex_destroy(&mutex_1);\n    pthread_mutex_destroy(&mutex_2);\n\n    printf(\"Main: All threads finished.\\n\");\n    return 0;\n}"
+    },
+    "sub_questions": null,
+    "points": 20,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.  **האם התוכנית עלולה להיתקל בקיפאון?** כן, התוכנית הנתונה עלולה להיתקל בקיפאון (deadlock).\n    \n    **הנמקה והסבר התנאים לקיפאון:**\n    *   **מניעה הדדית (Mutual Exclusion):** כל mutex (`mutex_1`, `mutex_2`) מגן על משאב, ומבטיח שרק תהליכון אחד יכול להחזיק בו בזמן נתון. תנאי זה מתקיים.\n    *   **החזקה והמתנה (Hold and Wait):** תהליכון A רוכש את `mutex_1` ולאחר מכן ממתין ל-`mutex_2`. במקביל, תהליכון B רוכש את `mutex_2` ולאחר מכן ממתין ל-`mutex_1`. שני התהליכונים מחזיקים במשאב אחד (mutex) בזמן שהם ממתינים למשאב נוסף. תנאי זה מתקיים.\n    *   **ללא דריסה (No Preemption):** לא ניתן לקחת mutex בכוח מתהליכון שמחזיק בו; הוא ישוחרר רק מרצונו על ידי התהליכון שמחזיק בו. תנאי זה מתקיים.\n    *   **המתנה מעגלית (Circular Wait):** תהליכון A ממתין ל-`mutex_2` שמוחזק על ידי תהליכון B. במקביל, תהליכון B ממתין ל-`mutex_1` שמוחזק על ידי תהליכון A. מצב זה יוצר תלות מעגלית. תנאי זה מתקיים.\n    \n    מאחר שכל ארבעת התנאים מתקיימים, קיפאון יכול להתרחש כאשר תהליכון A תופס את `mutex_1` ותהליכון B תופס את `mutex_2`, ושניהם מנסים לרכוש את ה-mutex השני המוחזק על ידי האחר.\n\n2.  **שינוי למניעת קיפאון:** הדרך הנפוצה ביותר למנוע קיפאון מסוג זה היא לאכוף סדר קבוע ועקבי של רכישת משאבים (mutexes). שני התהליכונים חייבים לנסות לרכוש את ה-mutexes באותו סדר.\n    \n    **קוד מתוקן עבור `thread_B_func` (כך ששני התהליכונים ירכשו את `mutex_1` ואז את `mutex_2`):**\n    ```c\n    void* thread_B_func(void* arg) {\n        printf(\"Thread B: Attempting to acquire mutex_1...\\n\"); // סדר רכישה שונה\n        pthread_mutex_lock(&mutex_1);\n        printf(\"Thread B: Acquired mutex_1. Attempting to acquire mutex_2...\\n\");\n        sleep(1); // Simulate work\n        pthread_mutex_lock(&mutex_2);\n        printf(\"Thread B: Acquired mutex_2. Critical section B...\\n\");\n        // Critical section B\n        pthread_mutex_unlock(&mutex_2);\n        printf(\"Thread B: Released mutex_2.\\n\");\n        pthread_mutex_unlock(&mutex_1);\n        printf(\"Thread B: Released mutex_1. Exiting.\\n\");\n        return NULL;\n    }\n    ```\n    \n    **הסבר מדוע השינוי מונע קיפאון:** על ידי הבטחה ששני התהליכונים רוכשים את `mutex_1` לפני `mutex_2`, אנו מפרים את תנאי ההמתנה המעגלית. כעת, אם תהליכון A רוכש את `mutex_1`, תהליכון B ייחסם בניסיון לרכוש את `mutex_1` עד שתהליכון A ישחרר אותו. תהליכון A ימשיך לרכוש את `mutex_2` (אם פנוי), יסיים את הקטע הקריטי שלו, וישחרר את שני ה-mutexes. רק אז יוכל תהליכון B לרכוש את `mutex_1` ולאחר מכן את `mutex_2`. זה מבטל את האפשרות שתהליכון A יחזיק ב-`mutex_1` וימתין ל-`mutex_2` בעוד שתהליכון B מחזיק ב-`mutex_2` וממתין ל-`mutex_1` בו-זמנית, ובכך מונע קיפאון."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

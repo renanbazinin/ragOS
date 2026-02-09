@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Copy-on-Write",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 08:51:05",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 967,
+      "output_tokens": 403,
+      "total_tokens": 2293
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Virtual Memory",
+      "Memory Management",
+      "Copy-on-Write"
+    ],
+    "content": {
+      "text": "מהו העיקרון המרכזי של מנגנון Copy-on-Write (CoW)?",
+      "code_snippet": null,
+      "options": [
+        "א. להעתיק את כל דפי הזיכרון של תהליך אב לתהליך בן מיד לאחר קריאת `fork()`.",
+        "ב. לאפשר לתהליכים אב ובן לחלוק דפי זיכרון, ולהעתיק דף רק כאשר אחד מהם מנסה לכתוב אליו.",
+        "ג. למנוע מתהליכים מרובים לכתוב לאותו אזור זיכרון משותף.",
+        "ד. להעביר דפי זיכרון מהזיכרון הפיזי ל-swap space כאשר הזיכרון הפיזי מתמלא."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב'. Copy-on-Write הוא מנגנון אופטימיזציה המאפשר לתהליך אב ולתהליך בן לחלוק בתחילה את אותם דפי זיכרון. העתקה של דף מתרחשת רק כאשר אחד מהתהליכים מנסה לשנות (לכתוב ל-) דף משותף זה, ובכך חוסך זמן וזיכרון אם אין שינויים."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

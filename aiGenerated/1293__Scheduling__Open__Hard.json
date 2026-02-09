@@ -1,0 +1,58 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Scheduling",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 09:20:34",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3419,
+      "output_tokens": 3907,
+      "total_tokens": 33248
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Scheduling",
+      "SRTF",
+      "Context Switching",
+      "Performance Metrics"
+    ],
+    "content": {
+      "text": "נתונה מערכת הפעלה המשתמשת באלגוריתם תזמון Shortest Remaining Time First (SRTF) עם עדיפות לתהליך בעל ID נמוך יותר במקרה של שוויון. זמן החלפת הקשר (Context Switch) הוא 1 מילישנייה. פעולות קלט/פלט אינן ניתנות לדריסה (non-preemptive) אך המעבד יכול לתזמן תהליכים אחרים בזמן פעולת קלט/פלט.\n\nלהלן רשימת תהליכים:\n\n| תהליך | זמן הגעה | פרץ מעבד ראשון | פרץ קלט/פלט | פרץ מעבד שני |\n|---|---|---|---|---|\n| P1 | 0 | 5ms | 10ms | 3ms |\n| P2 | 2 | 4ms | 8ms | 2ms |\n| P3 | 4 | 6ms | 12ms | 4ms |\n| P4 | 6 | 2ms | 5ms | 1ms |\n\nיש להניח שזמן החלפת הקשר מתרחש *לאחר* קבלת ההחלטה על התהליך הבא, וכי התהליך החדש יתחיל לרוץ מילישנייה אחת *לאחר* שהמעבד התפנה. לדוגמה, אם תהליך P_A רץ עד זמן T, והמעבד מחליט להריץ את P_B, אז P_B יתחיל לרוץ בזמן T+1. אם המעבד היה במצב סרק עד זמן T, והוא מחליט להריץ את P_B, אז P_B יתחיל לרוץ בזמן T+1.\n\n",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "ציירו תרשים גאנט מפורט המציג את סדר ריצת התהליכים על המעבד, כולל זמני חילופי הקשר.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "חשבו עבור כל תהליך את: זמן סיום (Completion Time), זמן מחזור (Turnaround Time), וזמן המתנה (Waiting Time).",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.3",
+        "text": "מהו ניצול המעבד (CPU Utilization) הכולל של המערכת?",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "נבצע מעקב מפורט אחר מצב המעבד והתהליכים, תוך התחשבות בזמני הגעה, פרצי מעבד/קלט-פלט, כללי SRTF וזמן החלפת הקשר (CS = 1ms). נסמן: Px.R1 = זמן מעבד שנותר לפרץ הראשון, Px.R2 = זמן מעבד שנותר לפרץ השני, Px.TotR = סה\"כ זמן מעבד שנותר, Px.IO_End = זמן סיום פעולת הקלט/פלט.\n\n**מעקב צעד אחר צעד:**\n*   **זמן 0:** P1 מגיע. RQ: {P1(TotR=8)}. המעבד סרק. CS Idle->P1 (0-1). P1 מתחיל בזמן 1.\n*   **זמן 1:** P1 מתחיל. P1(R1=4,R2=3,TotR=7).\n*   **זמן 2:** P2 מגיע. P1(R1=3,R2=3,TotR=6). P2(R1=4,R2=2,TotR=6). RQ: {P1(6), P2(6)}. שוויון ב-TotR, P1 ממשיך (ID נמוך יותר).\n*   **זמן 3:** P1 רץ. P1(R1=2,R2=3,TotR=5).\n*   **זמן 4:** P3 מגיע. P1(R1=1,R2=3,TotR=4). P3(R1=6,R2=4,TotR=10). RQ: {P1(4), P2(6), P3(10)}. P1 ממשיך (4 הכי קטן).\n*   **זמן 5:** P1 רץ. P1(R1=0,R2=3,TotR=3). P1 סיים פרץ CPU ראשון. P1 נכנס ל-I/O. P1.IO_End = 5+10 = 15. RQ: {P2(6), P3(10)}. P2 נבחר. CS P1->P2 (5-6). P2 מתחיל בזמן 6.\n*   **זמן 6:** P2 מתחיל. P2(R1=3,R2=2,TotR=5). P4 מגיע. P4(R1=2,R2=1,TotR=3). RQ: {P2(5), P3(10), P4(3)}. P4 נבחר (3 הכי קטן). CS P2->P4 (6-7). P4 מתחיל בזמן 7.\n*   **זמן 7:** P4 מתחיל. P4(R1=1,R2=1,TotR=2).\n*   **זמן 8:** P4 רץ. P4(R1=0,R2=1,TotR=1). P4 סיים פרץ CPU ראשון. P4 נכנס ל-I/O. P4.IO_End = 8+5 = 13. RQ: {P2(5), P3(10)}. P2 נבחר. CS P4->P2 (8-9). P2 מתחיל בזמן 9.\n*   **זמן 9:** P2 מתחיל. P2(R1=2,R2=2,TotR=4).\n*   **זמן 10:** P2 רץ. P2(R1=1,R2=2,TotR=3).\n*   **זמן 11:** P2 רץ. P2(R1=0,R2=2,TotR=2). P2 סיים פרץ CPU ראשון. P2 נכנס ל-I/O. P2.IO_End = 11+8 = 19. RQ: {P3(10)}. P3 נבחר. CS P2->P3 (11-12). P3 מתחיל בזמן 12.\n*   **זמן 12:** P3 מתחיל. P3(R1=5,R2=4,TotR=9).\n*   **זמן 13:** P4 I/O הסתיים (P4.IO_End=13). P3 רץ. P3(R1=4,R2=4,TotR=8). RQ: {P3(8), P4(1)}. P4 נבחר (1 הכי קטן). CS P3->P4 (13-14). P4 מתחיל בזמן 14.\n*   **זמן 14:** P4 מתחיל. P4(R1=0,R2=0,TotR=0). P4 סיים פרץ CPU שני. P4 הסתיים. זמן סיום P4 = 15.\n*   **זמן 15:** P1 I/O הסתיים (P1.IO_End=15). RQ: {P1(3), P3(8)}. P1 נבחר (3 הכי קטן). CS P4->P1 (15-16). P1 מתחיל בזמן 16.\n*   **זמן 16:** P1 מתחיל. P1(R1=0,R2=2,TotR=2) (רץ 1ms עבור R1=1, ואז 1ms עבור R2=3).\n*   **זמן 17:** P1 רץ. P1(R1=0,R2=1,TotR=1).\n*   **זמן 18:** P1 רץ. P1(R1=0,R2=0,TotR=0). P1 סיים פרץ CPU שני. P1 הסתיים. זמן סיום P1 = 20.\n*   **זמן 19:** P2 I/O הסתיים (P2.IO_End=19). (P1 רץ עד 20). P1.TotR היה 1, רץ עד 20. ב-19, P2 נכנס ל-RQ. P2(TotR=2). P1 נבחר כי הוא רץ.\n*   **זמן 20:** P1 הסתיים. RQ: {P2(2), P3(8)}. P2 נבחר. CS P1->P2 (20-21). P2 מתחיל בזמן 21.\n*   **זמן 21:** P2 מתחיל. P2(R1=0,R2=1,TotR=1).\n*   **זמן 22:** P2 רץ. P2(R1=0,R2=0,TotR=0). P2 סיים פרץ CPU שני. P2 הסתיים. זמן סיום P2 = 23.\n*   **זמן 23:** RQ: {P3(8)}. P3 נבחר. CS P2->P3 (23-24). P3 מתחיל בזמן 24.\n*   **זמן 24:** P3 מתחיל. P3(R1=4,R2=4,TotR=8) (רץ 1ms).\n*   **זמן 25:** P3 רץ. P3(R1=3,R2=4,TotR=7).\n*   **זמן 26:** P3 רץ. P3(R1=2,R2=4,TotR=6).\n*   **זמן 27:** P3 רץ. P3(R1=1,R2=4,TotR=5).\n*   **זמן 28:** P3 רץ. P3(R1=0,R2=4,TotR=4). P3 סיים פרץ CPU ראשון. P3 נכנס ל-I/O. P3.IO_End = 28+12 = 40. RQ ריקה. CS P3->Idle (28-29). המעבד סרק.\n*   **זמן 29-40:** המעבד סרק. (Idle (29-40)).\n*   **זמן 40:** P3 I/O הסתיים (P3.IO_End=40). RQ: {P3(4)}. המעבד סרק. CS Idle->P3 (40-41). P3 מתחיל בזמן 41.\n*   **זמן 41:** P3 מתחיל. P3(R1=0,R2=3,TotR=3).\n*   **זמן 42:** P3 רץ. P3(R1=0,R2=2,TotR=2).\n*   **זמן 43:** P3 רץ. P3(R1=0,R2=1,TotR=1).\n*   **זמן 44:** P3 רץ. P3(R1=0,R2=0,TotR=0). P3 סיים פרץ CPU שני. P3 הסתיים. זמן סיום P3 = 45.\n*   **זמן 45:** כל התהליכים הסתיימו.\n\n**1. תרשים גאנט:**\n```\n|Idle| P1 |CS| P2 |CS| P4 |CS| P2 |CS| P3 |CS| P4 |CS| P1 |CS| P2 |CS| P3 |CS|Idle (11ms)|CS| P3 |\n0    1    5  6    7  8    9  11   12   13   14   15   16   20   21   22   23   28   29         40   41   45\n```\n\n**2. זמני סיום, מחזור והמתנה:**\n*   **זמן סיום (Completion Time):**\n    *   P1: 20ms\n    *   P2: 23ms\n    *   P3: 45ms\n    *   P4: 15ms\n\n*   **זמן מחזור (Turnaround Time = Completion Time - Arrival Time):**\n    *   P1: 20 - 0 = 20ms\n    *   P2: 23 - 2 = 21ms\n    *   P3: 45 - 4 = 41ms\n    *   P4: 15 - 6 = 9ms\n\n*   **זמן המתנה (Waiting Time = Turnaround Time - Total CPU Burst Time - Total I/O Burst Time):**\n    *   P1: Total CPU = 5+3=8ms. Total I/O = 10ms. Waiting = 20 - 8 - 10 = 2ms.\n    *   P2: Total CPU = 4+2=6ms. Total I/O = 8ms. Waiting = 21 - 6 - 8 = 7ms.\n    *   P3: Total CPU = 6+4=10ms. Total I/O = 12ms. Waiting = 41 - 10 - 12 = 19ms.\n    *   P4: Total CPU = 2+1=3ms. Total I/O = 5ms. Waiting = 9 - 3 - 5 = 1ms.\n\n**3. ניצול המעבד (CPU Utilization):**\n*   סה\"כ זמן ביצוע (Total Time) = 45ms (זמן סיום התהליך האחרון).\n*   סה\"כ זמן פרצי מעבד (Total CPU Burst Time) = (5+3) + (4+2) + (6+4) + (2+1) = 8 + 6 + 10 + 3 = 27ms.\n*   סה\"כ חילופי קשר (Context Switches): נספור את ה-CS בתרשים הגאנט:\n    1.  Idle->P1 (0-1)\n    2.  P1->P2 (5-6)\n    3.  P2->P4 (6-7)\n    4.  P4->P2 (8-9)\n    5.  P2->P3 (11-12)\n    6.  P3->P4 (13-14)\n    7.  P4->P1 (15-16)\n    8.  P1->P2 (20-21)\n    9.  P2->P3 (23-24)\n    10. P3->Idle (28-29)\n    11. Idle->P3 (40-41)\n    סה\"כ 11 חילופי קשר. זמן חילופי קשר כולל = 11 * 1ms = 11ms.\n*   זמן שהמעבד היה עסוק (CPU Busy Time) = Total CPU Burst Time + Total CS Time = 27ms + 11ms = 38ms.\n*   ניצול המעבד (CPU Utilization) = (Total CPU Burst Time) / (Total Time) = 27ms / 45ms = 0.6 = 60%.\n    (לחילופין, (CPU Busy Time - Total CS Time) / Total Time = (38-11)/45 = 27/45 = 60%)",
+      "difficulty_estimation": "Hard"
+    }
+  }
+}

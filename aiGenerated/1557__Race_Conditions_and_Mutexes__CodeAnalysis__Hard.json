@@ -1,0 +1,52 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions and Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 11:24:29",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5488,
+      "output_tokens": 2727,
+      "total_tokens": 20531
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Race Conditions",
+      "Mutexes",
+      "Synchronization",
+      "Invariants",
+      "Deadlock"
+    ],
+    "content": {
+      "text": "נתונה מערכת המנהלת שני מונים, `counter1` ו-`counter2`, ומשתנה שלישי `total_sum` שאמור לייצג תמיד את סכומם של שני המונים (כלומר, `total_sum = counter1 + counter2`). המערכת מיועדת לרוץ בסביבה מרובת חוטים, כאשר חוטים שונים יכולים לעדכן את המונים. כל מונה מוגן על ידי מנעול נפרד ( `mutex1` ו-`mutex2` בהתאמה).\n\nלהלן מימוש חלקי של המערכת:\n",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n\n// משתנים גלובליים\nint counter1 = 0;\nint counter2 = 0;\nint total_sum = 0; // אמור תמיד להיות שווה ל- counter1 + counter2\n\n// מנעולים\npthread_mutex_t mutex1;\npthread_mutex_t mutex2;\n\n// פונקציות עזר לאתחול וניקוי\nvoid init_system() {\n    pthread_mutex_init(&mutex1, NULL);\n    pthread_mutex_init(&mutex2, NULL);\n}\n\nvoid cleanup_system() {\n    pthread_mutex_destroy(&mutex1);\n    pthread_mutex_destroy(&mutex2);\n}\n\n// פונקציות לשינוי המונים\nvoid increment_counter1() {\n    pthread_mutex_lock(&mutex1);\n    counter1++;\n    total_sum++; // עדכון סכום כולל\n    pthread_mutex_unlock(&mutex1);\n}\n\nvoid decrement_counter1() {\n    pthread_mutex_lock(&mutex1);\n    counter1--;\n    total_sum--; // עדכון סכום כולל\n    pthread_mutex_unlock(&mutex1);\n}\n\nvoid increment_counter2() {\n    pthread_mutex_lock(&mutex2);\n    counter2++;\n    total_sum++; // עדכון סכום כולל\n    pthread_mutex_unlock(&mutex2);\n}\n\nvoid decrement_counter2() {\n    pthread_mutex_lock(&mutex2);\n    counter2--;\n    total_sum--; // עדכון סכום כולל\n    pthread_mutex_unlock(&mutex2);\n}"
+    },
+    "sub_questions": [
+      {
+        "id": "8.1",
+        "text": "האם המימוש הנתון מבטיח שהאינווריאנט `total_sum = counter1 + counter2` נשמר תמיד? אם לא, תארו מצב מירוץ ספציפי (interleaving) המוביל לחוסר עקביות והסבירו מדוע הוא מתרחש.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.2",
+        "text": "הציעו תיקון לבעיה על ידי שינוי המימוש של הפונקציה `increment_counter1` בלבד. יש להבטיח שהאינווריאנט נשמר, תוך שמירה על רמת מקסום מקביליות סבירה (לדוגמה, אין צורך לנעול את המערכת כולה לכל פעולה אם אין בכך צורך). הסבירו מדוע התיקון שלכם עובד. יש להניח שפונקציות `decrement_counter1`, `increment_counter2`, `decrement_counter2` יתוקנו באופן דומה.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "8.1: לא, המימוש הנתון אינו מבטיח שהאינווריאנט `total_sum = counter1 + counter2` נשמר תמיד. קיים מצב מירוץ שעלול להוביל לחוסר עקביות.\n\n**תרחיש מצב מירוץ לדוגמה:**\nנניח מצב התחלתי: `counter1 = 0`, `counter2 = 0`, `total_sum = 0`.\n\n1.  **חוט A** קורא לפונקציה `increment_counter1()`:\n    *   תופס את `mutex1`.\n    *   `counter1` הופך ל-`1`.\n    *   **חוט A קורא את `total_sum` (ערך `0`), ומחשב את הערך הבא שלו (1).**\n    *   **החלפת הקשר לחוט B.**\n2.  **חוט B** קורא לפונקציה `increment_counter2()`:\n    *   תופס את `mutex2`.\n    *   `counter2` הופך ל-`1`.\n    *   **חוט B קורא את `total_sum` (ערך `0`), ומחשב את הערך הבא שלו (1).**\n    *   **חוט B כותב `total_sum = 1`.**\n    *   משחרר את `mutex2`.\n    *   **החלפת הקשר חזרה לחוט A.**\n3.  **חוט A** ממשיך את ריצת הפונקציה `increment_counter1()`:\n    *   **חוט A כותב `total_sum = 1`.** (הוא כותב את `0+1` שחישב קודם, ובכך דורס את העדכון של חוט B).\n    *   משחרר את `mutex1`.\n\n**מצב סופי:**\n`counter1 = 1`\n`counter2 = 1`\n`total_sum = 1`\n\n**האינווריאנט נשבר!** (`total_sum` אמור להיות `2`).\n\n**הסבר הבעיה:**\nהבעיה נובעת מכך ש-`total_sum` הוא משתנה משותף המעודכן על ידי מספר חוטים, אך אין מנעול יחיד המגן על כל הגישות אליו ועל הקשר שלו לשני המונים. הפעולות `total_sum++` ו-`total_sum--` הן פעולות קריאה-שינוי-כתיבה. כאשר חוט A מבצע `total_sum++` תחת `mutex1`, הוא קורא את הערך הנוכחי של `total_sum`, מגדיל אותו ב-1 וכותב אותו חזרה. אם בזמן שחוט A קרא את הערך של `total_sum` (אך לפני שכתב את הערך החדש), חוט B ביצע פעולה דומה על `total_sum` (תחת `mutex2`), העדכון של חוט B עלול להידרס על ידי חוט A, וכתוצאה מכך `total_sum` לא ישקף נכונה את סכום `counter1` ו-`counter2`. כלומר, העדכונים של `total_sum` אינם אטומיים ביחס לשינויים בשני המונים יחד.\n\n8.2: כדי לתקן את הבעיה ולהבטיח שהאינווריאנט `total_sum = counter1 + counter2` נשמר תמיד, כל פעולה שמשנה את אחד המונים חייבת לעדכן את `total_sum` באופן אטומי ביחס לערכים העדכניים של *שני* המונים. המשמעות היא שבעת עדכון `total_sum`, יש להחזיק במנעולים של `counter1` ושל `counter2` יחד. כדי למנוע קיפאון (deadlock), יש לתפוס את המנעולים בסדר קבוע. נבחר סדר קבוע: תמיד נתפוס את `mutex1` לפני `mutex2`.\n\n**תיקון לפונקציה `increment_counter1`:**\n\n```c\nvoid increment_counter1() {\n    // תופסים את המנעולים בסדר קבוע כדי למנוע קיפאון\n    pthread_mutex_lock(&mutex1); // תופסים את המנעול של counter1\n    pthread_mutex_lock(&mutex2); // תופסים את המנעול של counter2\n\n    counter1++; // מעדכנים את counter1\n    total_sum = counter1 + counter2; // מעדכנים את total_sum על בסיס הערכים העדכניים של שני המונים\n\n    // משחררים את המנעולים בסדר הפוך לסדר התפיסה\n    pthread_mutex_unlock(&mutex2);\n    pthread_mutex_unlock(&mutex1);\n}\n```\n\n**הסבר מדוע התיקון עובד:**\nהתיקון מבטיח שכל הפעולות המשנות את `counter1` או `counter2` ומעדכנות את `total_sum` יתבצעו תחת הגנה של *שני* המנעולים (`mutex1` ו-`mutex2`) יחד.\n\n1.  **מניעה הדדית (Mutual Exclusion):** על ידי תפיסת `mutex1` ו-`mutex2` יחד, אנו מבטיחים שרק חוט אחד יוכל לבצע שינויים ב-`counter1`, `counter2` ו-`total_sum` בו זמנית, או לקרוא אותם לצורך עדכון `total_sum`.\n2.  **שמירת האינווריאנט:** כאשר חוט תופס את שני המנעולים, הוא מבצע את כל השינויים (`counter1++` ו-`total_sum = counter1 + counter2`) באופן אטומי. השורה `total_sum = counter1 + counter2;` מבטיחה ש-`total_sum` יקבל את הערך הנכון, המחושב מהערכים העדכניים של `counter1` ו-`counter2`, ללא חשש שמשהו ישתנה ביניהם במהלך החישוב.\n3.  **הסרת מצב המירוץ:** מצב המירוץ שתואר בסעיף הקודם (שבו עדכון אחד של `total_sum` דורס עדכון אחר) נמנע כיוון שכל העדכונים ל-`total_sum` מתרחשים באופן סדרתי תחת הגנה משותפת של שני המנעולים.\n4.  **מניעת קיפאון (Deadlock):** תפיסת המנעולים בסדר קבוע (תמיד `mutex1` ואז `mutex2`) מונעת מצבי קיפאון שעלולים להיווצר כאשר חוטים שונים מנסים לתפוס את אותם מנעולים בסדר שונה.\n\nיש לתקן את כל הפונקציות האחרות (`decrement_counter1`, `increment_counter2`, `decrement_counter2`) באופן דומה, על ידי תפיסת `mutex1` ואז `mutex2` (ושחרורם בסדר הפוך) ועדכון `total_sum = counter1 + counter2;` לאחר שינוי המונה הרלוונטי."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "IPC",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 08:20:25",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1139,
+      "output_tokens": 436,
+      "total_tokens": 3308
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "IPC",
+      "Pipes"
+    ],
+    "content": {
+      "text": "איזו מהטענות הבאות נכונה לגבי צינורות (pipes) במערכות הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. צינורות מיועדים לתקשורת בין תהליכים קשורים (כגון אב ובן) והם חד-כיווניים.",
+        "ב. צינורות מאפשרים גישה לזיכרון משותף (shared memory) בין תהליכים שונים.",
+        "ג. צינורות מאפשרים תקשורת דו-כיוונית (bidirectional) ופועלים על בסיס הודעות (messages).",
+        "ד. צינורות יכולים לשמש לתקשורת בין כל שני תהליכים במערכת, גם אם אינם קשורים (unrelated)."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "א. צינורות (anonymous pipes) הם מנגנון תקשורת חד-כיווני (unidirectional) המיועד בעיקר לתקשורת בין תהליכים קשורים, כגון תהליך אב ותהליך בן שנוצר ממנו. הם פועלים כזרם בתים (byte stream) ולא כהודעות. מנגנונים אחרים כמו Named Pipes או Sockets יכולים לשמש לתקשורת בין תהליכים לא קשורים, ומנגנון זיכרון משותף עובד באופן שונה לחלוטין."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

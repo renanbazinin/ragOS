@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Threads and Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 20:20:56",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2951,
+      "output_tokens": 1133,
+      "total_tokens": 8757
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Threads",
+      "Mutexes",
+      "Race Conditions"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה, המשתמשת בחוטים (threads) ומשתנה גלובלי משותף.\nהתוכנית יוצרת מספר חוטים שכל אחד מהם מגדיל מונה גלובלי משותף מספר רב של פעמים.\nשימו לב: אין שימוש במנגנוני סנכרון (כגון mutex).\nמהו טווח הערכים האפשריים עבור `shared_counter` שיוצגו בפלט הסופי של התוכנית?\n(ציינו את הערך המינימלי ואת הערך המקסימלי האפשריים).",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h> \n\n#define NUM_THREADS 4\n#define INCREMENTS_PER_THREAD 100000\n\nint shared_counter = 0;\n\nvoid* thread_func(void* arg) {\n    for (int i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n        shared_counter++; // Not atomic!\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, thread_func, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final counter value: %d\\n\", shared_counter);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": 10,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הבעיה המרכזית בתוכנית זו היא שפעולת ההגדלה `shared_counter++` אינה פעולה אטומית. היא מורכבת משלושה שלבים עיקריים ברמת המעבד:\n1. קריאת הערך הנוכחי של `shared_counter` מהזיכרון לתוך רגיסטר.\n2. הגדלת הערך ברגיסטר.\n3. כתיבת הערך המעודכן מהרגיסטר בחזרה לזיכרון.\n\nמכיוון שאין שימוש ב-mutex או בכל מנגנון סנכרון אחר, חוטים שונים יכולים לבצע את השלבים הללו באופן חופף (interleave). לדוגמה, חוט אחד יכול לקרוא את הערך, ואז לפני שהוא מספיק לכתוב בחזרה, חוט אחר קורא את אותו ערך, מגדיל אותו וכותב אותו בחזרה. כאשר החוט הראשון יסיים את פעולתו, הוא עלול לכתוב בחזרה את הערך הישן (שקרא לפני שחברו הספיק לכתוב), ובכך \"יאבד\" את העדכון של החוט השני. זהו תנאי מרוץ (race condition).\n\n**הערך המקסימלי האפשרי:**\nבמקרה הטוב ביותר, כל הפעולות יתבצעו באופן סדרתי, כך שכל הגדלה של כל חוט \"תיתפס\". במצב זה, כל 4 החוטים יבצעו 100,000 הגדלות כל אחד, ובסה\"כ: `4 * 100,000 = 400,000`. זהו הערך המקסימלי האפשרי.\n\n**הערך המינימלי האפשרי:**\nבמצב של תנאי מרוץ חמור, ייתכן שרוב העדכונים יאבדו. תיאורטית, אם כל החוטים קוראים את הערך ההתחלתי (0), ואז אחד מהם מצליח להשלים הגדלה אחת (קורא 0, מגדיל ל-1, כותב 1), וכל שאר פעולות הכתיבה של החוטים האחרים דורסות את הערך הזה עם 1 (כי הם קראו 0), אז הערך הסופי יכול להיות 1. זהו מקרה קיצוני אך תיאורטית אפשרי.\n\nלכן, טווח הערכים האפשריים הוא בין 1 ל-400,000 (כולל)."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

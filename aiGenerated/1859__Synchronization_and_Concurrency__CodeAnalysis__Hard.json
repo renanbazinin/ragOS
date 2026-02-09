@@ -1,0 +1,59 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Synchronization and Concurrency",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 21:15:24",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4132,
+      "output_tokens": 2367,
+      "total_tokens": 13043
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Concurrency",
+      "Deadlock",
+      "Condition Variables",
+      "Mutexes",
+      "Missed Signal"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה, המדמה מערכת שבה מספר חוטי עבודה (workers) מבצעים משימות ומעדכנים מונה משותף של משימות שהושלמו. חוט ניטור (monitor) ממתין שהמונה יגיע לסף מסוים, ואז מבצע פעולות ניקוי ומאפס את המונה. קיימת שגיאה לוגית בטיפול בסנכרון. עליך לזהות את השגיאה, להסביר אותה, ולתקן את הקוד כך שיפעל כראוי. ניתן להניח שכל קריאות המערכת הצליחו ושאין בעיות אחרות של תזמון מערכת הפעלה מעבר למוצג בקוד.",
+      "code_snippet": "1 #include <pthread.h>\n2 #include <stdio.h>\n3 #include <stdlib.h>\n4 #include <unistd.h> // For sleep\n5 \n6 #define NUM_WORKERS 3\n7 #define TASKS_PER_WORKER 2\n8 #define MONITOR_THRESHOLD (NUM_WORKERS * TASKS_PER_WORKER / 2) // Example: 3\n9 \n10 pthread_mutex_t mutex;\n11 pthread_cond_t cond_monitor;\n12 int completed_tasks = 0;\n13 \n14 void* worker_thread(void* arg) {\n15     long id = (long)arg;\n16     for (int i = 0; i < TASKS_PER_WORKER; ++i) {\n17         // Simulate work\n18         sleep(1); \n19         \n20         pthread_mutex_lock(&mutex);\n21         completed_tasks++;\n22         printf(\"Worker %ld completed task %d. Total: %d\\n\", id, i + 1, completed_tasks);\n23         \n24         // Potential bug here: What if the monitor is waiting and we signal too early/late?\n25         if (completed_tasks == MONITOR_THRESHOLD) { \n26             pthread_cond_signal(&cond_monitor); \n27         }\n28         pthread_mutex_unlock(&mutex);\n29     }\n30     return NULL;\n31 }\n32 \n33 void* monitor_thread(void* arg) {\n34     printf(\"Monitor thread started.\\n\");\n35     pthread_mutex_lock(&mutex);\n36     while (completed_tasks < MONITOR_THRESHOLD) { \n37         printf(\"Monitor waiting. Current tasks: %d\\n\", completed_tasks);\n38         pthread_cond_wait(&cond_monitor, &mutex);\n39     }\n40     printf(\"Monitor woke up! Completed tasks reached threshold: %d\\n\", completed_tasks);\n41     // Perform cleanup (simulated)\n42     sleep(2); \n43     completed_tasks = 0; // Reset for next cycle (if any)\n44     printf(\"Monitor finished cleanup and reset tasks to 0.\\n\");\n45     pthread_mutex_unlock(&mutex);\n46     return NULL;\n47 }\n48 \n49 int main() {\n50     pthread_t workers[NUM_WORKERS];\n51     pthread_t monitor;\n52 \n53     pthread_mutex_init(&mutex, NULL);\n54     pthread_cond_init(&cond_monitor, NULL);\n55 \n56     pthread_create(&monitor, NULL, monitor_thread, NULL);\n57     for (long i = 0; i < NUM_WORKERS; ++i) {\n58         pthread_create(&workers[i], NULL, worker_thread, (void*)i);\n59     }\n60 \n61     for (int i = 0; i < NUM_WORKERS; ++i) {\n62         pthread_join(workers[i], NULL);\n63     }\n64     pthread_join(monitor, NULL); \n65 \n66     pthread_mutex_destroy(&mutex);\n67     pthread_cond_destroy(&cond_monitor);\n68 \n69     printf(\"Main finished.\\n\");\n70     return 0;\n71 }"
+    },
+    "sub_questions": [
+      {
+        "id": "8.1",
+        "text": "מהי השגיאה הלוגית בקוד? תאר אותה בפירוט והסבר מדוע היא מתרחשת.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.2",
+        "text": "באילו תנאים (למשל, ערכי קבועים, תזמוני ריצה) השגיאה עלולה לבוא לידי ביטוי? תאר דוגמה ספציפית.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.3",
+        "text": "תקן את הקוד כך שיפעל באופן נכון. הצג רק את השורה/ות שצריך לשנות.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "8.1: השגיאה הלוגית בקוד היא מצב של 'אות חסר' (missed signal) שעלול להוביל לקיפאון (deadlock) של חוט הניטור. חוט הניטור ממתין שהמונה `completed_tasks` יגיע לערך `MONITOR_THRESHOLD`. חוט עבודה כלשהו קורא ל-`pthread_cond_signal` רק כאשר `completed_tasks` שווה *בדיוק* ל-`MONITOR_THRESHOLD` (שורה 25). הבעיה היא שאם שני חוטי עבודה או יותר יסיימו משימות ויקדמו את המונה בזה אחר זה במהירות, ייתכן שהמונה יעבור את `MONITOR_THRESHOLD` מבלי שיהיה שווה לו בדיוק ברגע קריאת `signal`. במקרה כזה, אף חוט עבודה לא יפעיל את `signal` כאשר המונה שווה בדיוק לסף. חוט הניטור, שייתכן וכבר המתין ב-`pthread_cond_wait`, ימשיך להמתין לנצח, כי התנאי לכאורה התקיים (המונה עבר את הסף) אך לא קיבל אף פעם `signal` שיעיר אותו, מה שמוביל לקיפאון של המערכת.\n\n8.2: השגיאה תבוא לידי ביטוי כאשר קיימת סבירות גבוהה שהמונה `completed_tasks` ידלג על הערך המדויק `MONITOR_THRESHOLD`. זה קורה לרוב כאשר ישנם מספר חוטי עבודה גדול יחסית, או כאשר `TASKS_PER_WORKER` גבוה, או כאשר `MONITOR_THRESHOLD` הוא ערך נמוך יחסית לכמות המשימות הכוללת, והתזמון מאפשר לחוטים מרובים לרוץ ברצף ולעדכן את המונה מבלי שחוט הניטור יקבל את ההזדמנות להתעורר בין עדכונים. לדוגמה, עבור ערכי הקבועים הנתונים: `NUM_WORKERS = 3`, `TASKS_PER_WORKER = 2`, `MONITOR_THRESHOLD = 3`. נניח ש-`completed_tasks` הוא 2. חוט עבודה A מסיים משימה, מקדם את `completed_tasks` ל-3, קורא ל-`pthread_cond_signal` ומשחרר את המוטקס. מיד לאחר מכן, לפני שחוט הניטור הספיק להתעורר ולהגיב ל-signal, חוט עבודה B מסיים משימה, מקדם את `completed_tasks` ל-4. כעת, גם אם ה-signal של חוט A נשלח, ייתכן שחוט הניטור לא יתעורר בזמן (למשל, אם הוא עדיין לא הספיק להיכנס למצב המתנה), או שה-signal אבד. גרוע מכך, אם חוט עבודה A וחוט עבודה B יקדמו את המונה מ-2 ל-3 ואז מ-3 ל-4 *בתוך הקטע הקריטי* של חוט עבודה A (כלומר, חוט A מקדם ל-3, נקטע, חוט B מקדם ל-4, חוט A ממשיך ובודק `completed_tasks == 3` שזה כבר שקר), אז חוט A לא יקרא ל-`signal` כלל.\n\n8.3: התיקון לקוד הוא לשנות את תנאי הקריאה ל-`pthread_cond_signal` בתוך פונקציית `worker_thread` משורה 25:\n`if (completed_tasks == MONITOR_THRESHOLD)`\nל-\n`if (completed_tasks >= MONITOR_THRESHOLD)`\n\nשינוי זה מבטיח שאם המונה עבר את הסף, גם אם דילג עליו, חוט עבודה עדיין יפעיל את ה-signal ויעיר את חוט הניטור. חוט הניטור, מצדו, משתמש בלולאת `while` עם התנאי `completed_tasks < MONITOR_THRESHOLD` (שורה 36), וזהו שימוש נכון המטפל ב-spurious wakeups ומבטיח שהחוט ימתין עד שהתנאי אכן מתקיים, גם אם התעורר מוקדם מדי או קיבל signal 'מיותר'."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

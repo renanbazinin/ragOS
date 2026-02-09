@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Signals",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 08:39:08",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 968,
+      "output_tokens": 1382,
+      "total_tokens": 5657
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Signals",
+      "Signal Masking",
+      "sigsuspend",
+      "Pending Signals"
+    ],
+    "content": {
+      "text": "נתונה תוכנית ה-C הבאה:\n\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <signal.h>\n#include <string.h>\n\nvolatile sig_atomic_t signal_received_count = 0;\n\nvoid handler(int signum) {\n    signal_received_count++;\n}\n\nint main() {\n    sigset_t block_mask, old_mask;\n    struct sigaction sa;\n\n    // 1. Block SIGUSR1\n    sigemptyset(&block_mask);\n    sigaddset(&block_mask, SIGUSR1);\n    if (sigprocmask(SIG_BLOCK, &block_mask, &old_mask) == -1) {\n        perror(\"sigprocmask block\");\n        return 1;\n    }\n    printf(\"Main: SIGUSR1 blocked. Old mask saved.\\n\");\n\n    // 2. Set up signal handler for SIGUSR1\n    memset(&sa, 0, sizeof(sa));\n    sa.sa_handler = handler;\n    sigemptyset(&sa.sa_mask); // No additional signals blocked inside handler\n    sa.sa_flags = 0; // Default behavior\n\n    if (sigaction(SIGUSR1, &sa, NULL) == -1) {\n        perror(\"sigaction\");\n        return 1;\n    }\n    printf(\"Main: SIGUSR1 handler set.\\n\");\n\n    // 3. Simulate a signal arriving while SIGUSR1 is blocked\n    printf(\"Main: Raising SIGUSR1 (it's blocked).\\n\");\n    raise(SIGUSR1); // SIGUSR1 is now pending\n\n    // 4. Call sigsuspend with the old_mask (which does *not* block SIGUSR1)\n    printf(\"Main: Calling sigsuspend...\\n\");\n    sigsuspend(&old_mask); // Temporarily unblocks SIGUSR1 and waits\n\n    printf(\"Main: sigsuspend returned. Signal received count: %d\\n\", signal_received_count);\n\n    // Restore original mask, although not strictly necessary for this example\n    sigprocmask(SIG_SETMASK, &old_mask, NULL);\n\n    return 0;\n}\n```\n\nמה יהיה הפלט של התוכנית כאשר היא תורץ?",
+      "code_snippet": null,
+      "options": [
+        "א. Main: SIGUSR1 blocked. Old mask saved.\nMain: SIGUSR1 handler set.\nMain: Raising SIGUSR1 (it's blocked).\nMain: Calling sigsuspend...\nMain: sigsuspend returned. Signal received count: 0",
+        "ב. Main: SIGUSR1 blocked. Old mask saved.\nMain: SIGUSR1 handler set.\nMain: Raising SIGUSR1 (it's blocked).\nMain: Calling sigsuspend...\nMain: sigsuspend returned. Signal received count: 1",
+        "ג. התוכנית תיכנס ללולאה אינסופית ותמתין לאות, כיוון שהאות נשלח לפני שהיא החלה להאזין לו.",
+        "ד. התוכנית תקרוס עקב קבלת אות SIGUSR1 לא מטופל (unhandled signal).",
+        "ה. התנהגות התוכנית אינה מוגדרת (undefined behavior) עקב תנאי מירוץ בין שליחת האות לבין קריאת sigsuspend."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "התוכנית חוסמת תחילה את האות SIGUSR1 באמצעות `sigprocmask(SIG_BLOCK, ...)`, ושומרת את מסכת האותות הקודמת ב-`old_mask`. יש לזכור ש-`old_mask` היא המסכה שהייתה פעילה לפני ש-SIGUSR1 נחסם, ולכן SIGUSR1 אינו חסום בה.\nלאחר מכן, היא מגדירה מטפל (handler) עבור SIGUSR1.\nהקריאה ל-`raise(SIGUSR1)` שולחת את האות SIGUSR1 לתהליך. מכיוון שהאות SIGUSR1 חסום באותו רגע, הוא אינו נמסר מיד אלא נשאר במצב \"ממתין\" (pending) עבור התהליך.\nכאשר `sigsuspend(&old_mask)` נקרא, מתרחשים שני דברים באופן אטומי:\n1.  מסכת האותות של התהליך משתנה זמנית ל-`old_mask`.\n2.  התהליך נכנס למצב שינה וממתין לאות.\nמכיוון ש-SIGUSR1 היה ממתין והמסכה הזמנית `old_mask` מאפשרת את קבלתו (כי היא לא חוסמת אותו), האות נמסר מיד. המטפל `handler` מופעל, מעלה את המונה `signal_received_count` ל-1.\nלאחר שהמטפל מסיים, `sigsuspend` חוזר (תמיד עם קוד שגיאה `EINTR` במקרה של קבלת אות). המסכה המקורית (שבה SIGUSR1 חסום) משוחזרת אוטומטית על ידי `sigsuspend` לפני שהוא חוזר.\nלכן, התוכנית תדפיס שהמונה הוא 1."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

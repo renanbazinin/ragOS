@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Synchronization and Concurrency",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 21:11:54",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 998,
+      "output_tokens": 308,
+      "total_tokens": 2116
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Synchronization",
+      "Concurrency",
+      "Mutex"
+    ],
+    "content": {
+      "text": "מהי מטרתו העיקרית של מנגנון mutex (מנעול הדדי)?",
+      "code_snippet": null,
+      "options": [
+        "א. להבטיח שרק תהליך אחד ירוץ בכל רגע נתון.",
+        "ב. למנוע מצב של Deadlock.",
+        "ג. להגן על קטע קריטי מפני גישה בו-זמנית של מספר חוטים/תהליכים.",
+        "ד. לאפשר תקשורת בין תהליכים."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג. מטרתו העיקרית של mutex היא להבטיח הדרה הדדית (mutual exclusion) בקטע קריטי, כך שרק חוט/תהליך אחד יוכל לגשת למשאב משותף בו זמנית ולמנוע תנאי מירוץ (race conditions)."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

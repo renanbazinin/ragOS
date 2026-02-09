@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Producer-Consumer",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 10:43:42",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1649,
+      "output_tokens": 2044,
+      "total_tokens": 6957
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Synchronization",
+      "Semaphores",
+      "Producer-Consumer",
+      "Deadlocks"
+    ],
+    "content": {
+      "text": "סטודנט כתב קוד ב-C/C++ המממש את בעיית היצרן-צרכן (Producer-Consumer Problem) באמצעות סמפורים. הקוד נועד לטפל בחיץ (buffer) בגודל קבוע. עיין בקוד המצורף:\n\nא. האם הקוד המצורף נכון? אם לא, תאר בעיה פוטנציאלית אחת לפחות שעלולה להתרחש (לדוגמה: תנאי מרוץ, קיפאון, רעב). נמק את תשובתך בפירוט.\nב. הצע פתרון לבעיה שתיארת בסעיף א'. הצג את השינויים הנדרשים בקוד.",
+      "code_snippet": "#include <semaphore.h>\n#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n\n#define BUFFER_SIZE 5\n\nint buffer[BUFFER_SIZE];\nint in = 0;\nint out = 0;\n\nsem_t mutex;    // For mutual exclusion\nsem_t full;     // Counts number of full slots\nsem_t empty;    // Counts number of empty slots\n\nvoid *producer(void *param) {\n    int item;\n    for (int i = 0; i < 10; i++) {\n        item = rand() % 100; // Produce a random item\n\n        sem_wait(&mutex); // Acquire mutex\n        sem_wait(&empty); // Wait for an empty slot\n\n        buffer[in] = item;\n        printf(\"Producer produced: %d at %d\\n\", item, in);\n        in = (in + 1) % BUFFER_SIZE;\n\n        sem_post(&full);  // Signal that a slot is full\n        sem_post(&mutex); // Release mutex\n        usleep(100000); // Simulate work\n    }\n    return NULL;\n}\n\nvoid *consumer(void *param) {\n    int item;\n    for (int i = 0; i < 10; i++) {\n        sem_wait(&mutex); // Acquire mutex\n        sem_wait(&full);  // Wait for a full slot\n\n        item = buffer[out];\n        printf(\"Consumer consumed: %d from %d\\n\", item, out);\n        out = (out + 1) % BUFFER_SIZE;\n\n        sem_post(&empty); // Signal that a slot is empty\n        sem_post(&mutex); // Release mutex\n        usleep(200000); // Simulate work\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t prod_tid, cons_tid;\n\n    sem_init(&mutex, 0, 1);\n    sem_init(&full, 0, 0);\n    sem_init(&empty, 0, BUFFER_SIZE);\n\n    pthread_create(&prod_tid, NULL, producer, NULL);\n    pthread_create(&cons_tid, NULL, consumer, NULL);\n\n    pthread_join(prod_tid, NULL);\n    pthread_join(cons_tid, NULL);\n\n    sem_destroy(&mutex);\n    sem_destroy(&full);\n    sem_destroy(&empty);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "א. הקוד המצורף אינו נכון ועלול להוביל למצב של קיפאון (deadlock).\nהבעיה טמונה בסדר פעולות ה-`sem_wait` בחוטי היצרן והצרכן. בשני המקרים, חוט מנסה לרכוש את סמפור ה-`mutex` לפני שהוא ממתין לסמפור הספירה המתאים (`empty` ליצרן, `full` לצרכן).\n\n**תרחיש קיפאון אפשרי:**\n1.  **חיץ מלא (Producer Deadlock):** נניח שהחיץ מלא. היצרן מנסה לייצר פריט נוסף. הוא מבצע `sem_wait(&mutex)` ומצליח לרכוש את המנעול. לאחר מכן, הוא מבצע `sem_wait(&empty)` ונחסם, מכיוון שאין מקומות פנויים (`empty` שווה ל-0). היצרן כעת מחזיק ב-`mutex` וחוסם את הצרכן מלהתקדם. הצרכן, שמנסה לצרוך פריט, יבצע `sem_wait(&mutex)` וייחסם, מכיוון שהיצרן מחזיק את ה-`mutex`. הצרכן אינו יכול לצרוך פריט ולשחרר מקום (`sem_post(&empty)`), והיצרן אינו יכול להתקדם מכיוון שהוא ממתין למקום פנוי. נוצר קיפאון.\n2.  **חיץ ריק (Consumer Deadlock):** נניח שהחיץ ריק. הצרכן מנסה לצרוך פריט. הוא מבצע `sem_wait(&mutex)` ומצליח לרכוש את המנעול. לאחר מכן, הוא מבצע `sem_wait(&full)` ונחסם, מכיוון שאין פריטים בחיץ (`full` שווה ל-0). הצרכן כעת מחזיק ב-`mutex` וחוסם את היצרן מלהתקדם. היצרן, שמנסה לייצר פריט, יבצע `sem_wait(&mutex)` וייחסם, מכיוון שהצרכן מחזיק את ה-`mutex`. היצרן אינו יכול לייצר פריט ולסמן שהחיץ מכיל פריט (`sem_post(&full)`), והצרכן אינו יכול להתקדם מכיוון שהוא ממתין לפריט מלא. נוצר קיפאון.\n\nב. הפתרון לבעיה הוא לשנות את סדר פעולות ה-`sem_wait` כך שסמפורי הספירה (`empty`, `full`) יירכשו לפני סמפור ההדדיות (`mutex`). זאת על מנת להבטיח שחוט לא יחזיק את מנעול ההדדיות בזמן שהוא ממתין למשאב שחוט אחר צריך לשחרר. באופן זה, אם החוט נחסם על סמפור הספירה, הוא אינו מונע מחוט אחר להיכנס לקטע קריטי ולשחרר את המשאב הדרוש לו.\n\n**שינויים בקוד:**\n\n**בפונקציית `producer`:**\n```c\nvoid *producer(void *param) {\n    int item;\n    for (int i = 0; i < 10; i++) {\n        item = rand() % 100;\n\n        sem_wait(&empty); // Wait for an empty slot FIRST\n        sem_wait(&mutex); // Then acquire mutex for critical section\n\n        buffer[in] = item;\n        printf(\"Producer produced: %d at %d\\n\", item, in);\n        in = (in + 1) % BUFFER_SIZE;\n\n        sem_post(&mutex); // Release mutex\n        sem_post(&full);  // Signal that a slot is full LAST\n        usleep(100000);\n    }\n    return NULL;\n}\n```\n\n**בפונקציית `consumer`:**\n```c\nvoid *consumer(void *param) {\n    int item;\n    for (int i = 0; i < 10; i++) {\n        sem_wait(&full);  // Wait for a full slot FIRST\n        sem_wait(&mutex); // Then acquire mutex for critical section\n\n        item = buffer[out];\n        printf(\"Consumer consumed: %d from %d\\n\", item, out);\n        out = (out + 1) % BUFFER_SIZE;\n\n        sem_post(&mutex); // Release mutex\n        sem_post(&empty); // Signal that a slot is empty LAST\n        usleep(200000);\n    }\n    return NULL;\n}\n```"
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

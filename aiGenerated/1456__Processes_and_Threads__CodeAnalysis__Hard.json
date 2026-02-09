@@ -1,0 +1,52 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Processes and Threads",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 10:26:32",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2789,
+      "output_tokens": 3897,
+      "total_tokens": 18258
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Processes",
+      "Threads",
+      "Concurrency",
+      "Synchronization",
+      "System Calls"
+    ],
+    "content": {
+      "text": "נתונה תוכנית ה-C הבאה, המשלבת תהליכים (processes) ותהלכונים (threads) עם מנגנוני סנכרון. עליך לנתח את הקוד ולהשיב על השאלות הבאות בהתבסס על ההנחות הבאות:\n1.  כל קריאות המערכת והספריה מצליחות.\n2.  לא נוצרים תהליכים או תהלכונים נוספים במערכת מעבר לאלה שבקוד הנתון.\n3.  הדפסות לפלט הסטנדרטי אינן מחוצצות (unbuffered).\n4.  מזהי תהליכים (PID) ומזהי תהלכונים (TID) יהיו שונים עבור ישויות שונות, אך ערכם הספציפי אינו קבוע ואינו עוקב.\n5.  הקוד יורץ בסביבת Linux טיפוסית.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <pthread.h>\n#include <sys/wait.h>\n\nint global_counter = 0;\npthread_mutex_t mutex;\n\nvoid* thread_func(void* arg) {\n    int thread_id = *(int*)arg;\n    pthread_mutex_lock(&mutex);\n    global_counter++;\n    printf(\"PID: %d, TID: %lu, Counter: %d\\n\", getpid(), pthread_self(), global_counter);\n    pthread_mutex_unlock(&mutex);\n    return NULL;\n}\n\nint main() {\n    pthread_mutex_init(&mutex, NULL);\n    pthread_t threads[2];\n    int thread_args[2];\n\n    printf(\"Main PID: %d (Initial)\\n\", getpid());\n\n    // Parent creates 2 threads\n    for (int i = 0; i < 2; i++) {\n        thread_args[i] = i + 1;\n        pthread_create(&threads[i], NULL, thread_func, &thread_args[i]);\n    }\n\n    // Wait for parent's initial threads to finish\n    for (int i = 0; i < 2; i++) {\n        pthread_join(threads[i], NULL);\n    }\n\n    pid_t pid = fork();\n\n    if (pid == 0) { // Child process\n        printf(\"Child PID: %d (After Fork)\\n\", getpid());\n        // Child creates 2 new threads\n        pthread_t child_threads[2];\n        int child_thread_args[2];\n        for (int i = 0; i < 2; i++) {\n            child_thread_args[i] = i + 3; // Different IDs for child's threads\n            pthread_create(&child_threads[i], NULL, thread_func, &child_thread_args[i]);\n        }\n        for (int i = 0; i < 2; i++) {\n            pthread_join(child_threads[i], NULL);\n        }\n        exit(0);\n    } else if (pid > 0) { // Parent process after fork\n        wait(NULL); // Wait for child to finish\n        printf(\"Parent PID: %d (After Fork)\\n\", getpid());\n        // Parent creates 1 more thread after fork\n        pthread_t parent_post_fork_threads[1];\n        int parent_post_fork_thread_arg = 5;\n        pthread_create(&parent_post_fork_threads[0], NULL, thread_func, &parent_post_fork_thread_arg);\n        pthread_join(parent_post_fork_threads[0], NULL);\n    }\n\n    pthread_mutex_destroy(&mutex);\n    return 0;\n}"
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "כתבו את כל הפלטים האפשריים של התוכנית. עבור כל פלט אפשרי, הסבירו בפירוט את רצף האירועים שמוביל אליו, תוך התייחסות לערך המונה הגלובלי (global_counter) בכל נקודת הדפסה, ומדוע ה-PID וה-TID שונים.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "כיצד ישתנה הפלט של התוכנית, ובפרט ערכי המונה (Counter) המודפסים על ידי התהלכונים של תהליך הבן, אם המנעול (mutex) היה מאותחל עם התכונה PTHREAD_PROCESS_SHARED? כלומר, אם היינו מבצעים את השורות הבאות לפני pthread_mutex_init:\n```c\npthread_mutexattr_t attr;\npthread_mutexattr_init(&attr);\npthread_mutexattr_setpshared(&attr, PTHREAD_PROCESS_SHARED);\n// ואז: pthread_mutex_init(&mutex, &attr);\n```\nהסבירו את התופעה והציגו את טווחי הערכים האפשריים למונה.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "פתרון לשאלה 1.1:\n\n**הסבר כללי:**\n1.  **אתחול:** המשתנה `global_counter` מאותחל ל-0. מנעול `mutex` מאותחל לסנכרון בין תהלכונים בתוך תהליך בודד.\n2.  **תהלכונים ראשוניים של האב:**\n    *   התהליך הראשי (נכנה את ה-PID שלו `P_main`) מדפיס \"Main PID: P_main (Initial)\".\n    *   הוא יוצר שני תהלכונים. כל תהלכון רוכש את המנעול, מגדיל את `global_counter` באחד, מדפיס את ה-PID שלו, ה-TID שלו ואת ערך `global_counter`, ומשחרר את המנעול.\n    *   מכיוון שהמנעול מבטיח גישה בלעדית ל-`global_counter`, המונה יגדל בצורה דטרמיניסטית: תהלכון אחד ידפיס `Counter: 1`, והשני ידפיס `Counter: 2`. סדר ההדפסה של שתי שורות אלו (והמזהים (TID) שלהן) אינו דטרמיניסטי.\n    *   לאחר ששני התהלכונים מסיימים, ערך `global_counter` ב-`P_main` יהיה 2.\n3.  **פעולת `fork()`:**\n    *   תהליך `P_main` קורא ל-`fork()`. נוצר תהליך בן חדש (נכנה את ה-PID שלו `P_child`).\n    *   **חשוב:** `fork()` יוצר *עותק* של מרחב הכתובות המלא של תהליך האב. משמעות הדבר היא ש-`P_child` מקבל *עותק עצמאי משלו* של `global_counter` המאותחל ל-2, וכן *עותק עצמאי משלו* של `mutex` (שגם הוא מאותחל ופתוח, אך פועל רק במרחב הכתובות של `P_child`).\n4.  **תהלכונים של הבן:**\n    *   `P_child` מדפיס \"Child PID: P_child (After Fork)\".\n    *   לאחר מכן הוא יוצר שני תהלכונים. תהלכונים אלה פועלים על ה-`global_counter` של `P_child` (שהחל מ-2) ועל ה-`mutex` של `P_child`.\n    *   בדומה לתהלכונים הראשוניים של האב, שני תהלכוני הבן יגדילו באופן דטרמיניסטי את ה-`global_counter` של `P_child`. אחד ידפיס `Counter: 3` (מ-`P_child`), והשני ידפיס `Counter: 4` (מ-`P_child`). סדר ההדפסה אינו דטרמיניסטי.\n    *   לאחר ששני תהלכוני הבן מסיימים, ערך `global_counter` ב-`P_child` יהיה 4. `P_child` מסיים את פעולתו באמצעות `exit(0)`.\n5.  **תהלכון של האב לאחר `fork()`:**\n    *   `P_main` ממתין לסיום `P_child` (`wait(NULL)`).\n    *   `P_main` מדפיס \"Parent PID: P_main (After Fork)\".\n    *   לאחר מכן הוא יוצר תהלכון נוסף. תהלכון זה פועל על ה-`global_counter` של `P_main` (שהיה 2 לאחר סיום התהלכונים הראשוניים) ועל ה-`mutex` של `P_main`.\n    *   תהלכון זה ירכוש את המנעול של `P_main`, יגדיל את `global_counter` של `P_main` ל-3, ידפיס את ה-PID שלו, ה-TID שלו ו-`Counter: 3`, ולאחר מכן ישחרר את המנעול.\n    *   לאחר סיום תהלכון זה, ערך `global_counter` ב-`P_main` יהיה 3.\n\n**פלטים אפשריים:**\nסדר הדפסת השורות מתהליך האב ומתהליך הבן אינו דטרמיניסטי, כמו גם סדר הדפסת התהלכונים הראשוניים של האב ותהלכוני הבן. עם זאת, ישנם דפוסים קבועים:\n*   השורה \"Main PID: ... (Initial)\" תמיד תודפס ראשונה.\n*   שתי שורות ההדפסה של התהלכונים הראשוניים של האב יציגו תמיד `Counter: 1` ו-`Counter: 2` (בסדר כלשהו) עם ה-PID של האב.\n*   השורה \"Child PID: ... (After Fork)\" תודפס לפני שורות התהלכונים של הבן.\n*   שתי שורות ההדפסה של תהלכוני הבן יציגו תמיד `Counter: 3` ו-`Counter: 4` (בסדר כלשהו) עם ה-PID של הבן.\n*   השורה \"Parent PID: ... (After Fork)\" תודפס *לאחר* כל הפלטים של הבן (בגלל `wait(NULL)`).\n*   שורת ההדפסה של התהלכון הנוסף של האב תציג תמיד `Counter: 3` עם ה-PID של האב.\n\n**דוגמה לפלט אפשרי אחד:**\n(נניח PID 1000 לאב, PID 1001 לבן, ו-TIDs שונים)\n```\nMain PID: 1000 (Initial)\nPID: 1000, TID: 140737488355328, Counter: 1\nPID: 1000, TID: 140737488355329, Counter: 2\nChild PID: 1001 (After Fork)\nPID: 1001, TID: 140737488355330, Counter: 3\nPID: 1001, TID: 140737488355331, Counter: 4\nParent PID: 1000 (After Fork)\nPID: 1000, TID: 140737488355332, Counter: 3\n```\n\nפתרון לשאלה 1.2:\n\n**הסבר:**\nכאשר `pthread_mutex_t` מאותחל עם התכונה `PTHREAD_PROCESS_SHARED`, פירוש הדבר שהמנעול עצמו יכול לשמש לסנכרון בין תהלכונים בתהליכים *שונים*. עם זאת, תכונה זו הופכת *רק את המנעול* למשותף. היא *אינה* הופכת באופן אוטומטי את הנתונים שהוא מגן עליהם למשותפים. כדי שהנתונים (`global_counter` במקרה זה) יהיו באמת משותפים בין תהליכים, עליהם להיות ממוקמים באזור זיכרון משותף (לדוגמה, זיכרון שהוקצה באמצעות `mmap` עם `MAP_SHARED` או פונקציות זיכרון משותף של System V כמו `shmget`).\n\nבקוד הנתון, `global_counter` הוא משתנה גלובלי רגיל. כאשר נקראת `fork()`, כל מרחב הכתובות של תהליך האב, כולל המשתנה `global_counter`, משוכפל לתהליך הבן. משמעות הדבר היא שלאחר `fork()`, הן תהליך האב והן תהליך הבן מחזיקים ב*עותקים עצמאיים משלהם* של `global_counter`.\n\nלכן, גם אם המנעול מאותחל עם `PTHREAD_PROCESS_SHARED`, הוא עדיין ישמש להגנה על העותק של `global_counter` של `P_main` על ידי התהלכונים של `P_main`, ועל העותק של `global_counter` של `P_child` על ידי התהלכונים של `P_child`. המנעול המשותף היה יכול למנוע גישה בו-זמנית לשני המשתנים אם היו באמת משותפים, אך מכיוון שהם עותקים נפרדים, הוא יגן על כל עותק בנפרד.\n\nבהינתן ה-`wait(NULL)` בתהליך האב, סדר הביצוע נשאר כדלקמן:\n1.  התהלכונים הראשוניים של האב מגדילים את `global_counter` של `P_main` ל-2.\n2.  מתרחש `fork()`. `P_child` מקבל `global_counter = 2` (עותק משלו).\n3.  התהלכונים של `P_child` מתבצעים. הם מגדילים את `global_counter` של `P_child` מ-2 ל-3, ולאחר מכן ל-4. הם מדפיסים `Counter: 3` ו-`Counter: 4`.\n4.  `P_child` מסיים את פעולתו.\n5.  התהלכון הנוסף של `P_main` לאחר `fork()` מתבצע. הוא מגדיל את `global_counter` של `P_main` מ-2 ל-3. הוא מדפיס `Counter: 3`.\n\n**ערכי המונה האפשריים לתהלכונים של תהליך הבן:**\nהערכים המודפסים עבור `Counter` על ידי התהלכונים בתהליך הבן **לא ישתנו** מהתרחיש הקודם. הם עדיין יהיו **3 ו-4** (בסדר כלשהו).\nהשינוי היחיד בהתנהגות הוא שהמנעול `PTHREAD_PROCESS_SHARED` *היה יכול* לשמש לסנכרון גישה למשאב משותף באמת אם `global_counter` היה ממוקם גם הוא בזיכרון משותף. ללא `global_counter` בזיכרון משותף, המנעול המשותף למעשה מסנכרן גישה לשני משאבים נפרדים, אחד במרחב הכתובות של כל תהליך."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

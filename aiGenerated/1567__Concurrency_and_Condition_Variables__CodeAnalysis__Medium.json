@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency and Condition Variables",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 11:32:21",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2951,
+      "output_tokens": 1826,
+      "total_tokens": 8804
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Concurrency",
+      "Condition Variables",
+      "Mutexes"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המשתמשת במשתני תנאי (Condition Variables) ובמנעולים (Mutexes) לצורך סנכרון בין שני תהליכונים (Threads).\nהתוכנית מנסה ליישם תרחיש של יצרן-צרכן פשוט, כאשר תהליכון ה\"יצרן\" מכין משאב משותף ותהליכון ה\"צרכן\" ממתין שהמשאב יהיה מוכן לפני שהוא מעבד אותו.\n\n```c\n#include <stdio.h>\n#include <pthread.h>\n#include <unistd.h> // For sleep\n\npthread_mutex_t mutex;\npthread_cond_t cond;\nint shared_resource_ready = 0; // Predicate for the condition variable\n\nvoid* worker_thread(void* arg) {\n    printf(\"Worker thread: Waiting for resource to be ready...\\n\");\n    pthread_mutex_lock(&mutex);\n    if (!shared_resource_ready) { // Potential issue here\n        printf(\"Worker thread: Condition not met, waiting...\\n\");\n        pthread_cond_wait(&cond, &mutex);\n        printf(\"Worker thread: Woken up.\\n\");\n    }\n    printf(\"Worker thread: Resource is ready, processing data.\\n\");\n    pthread_mutex_unlock(&mutex);\n    return NULL;\n}\n\nvoid* producer_thread(void* arg) {\n    printf(\"Producer thread: Preparing resource...\\n\");\n    sleep(1); // Simulate work\n    pthread_mutex_lock(&mutex);\n    shared_resource_ready = 1;\n    printf(\"Producer thread: Resource ready. Signaling worker.\\n\");\n    pthread_cond_signal(&cond);\n    pthread_mutex_unlock(&mutex);\n    return NULL;\n}\n\nint main() {\n    pthread_t producer_tid, worker_tid;\n\n    pthread_mutex_init(&mutex, NULL);\n    pthread_cond_init(&cond, NULL);\n\n    pthread_create(&worker_tid, NULL, worker_thread, NULL);\n    pthread_create(&producer_tid, NULL, producer_thread, NULL);\n\n    pthread_join(worker_tid, NULL);\n    pthread_join(producer_tid, NULL);\n\n    printf(\"Main thread: All threads finished.\\n\");\n\n    pthread_mutex_destroy(&mutex);\n    pthread_cond_destroy(&cond);\n    return 0;\n}\n```\n\nמה הפלט האפשרי של התוכנית? האם קיימת בעיית סנכרון בקוד? אם כן, הסבר אותה וכיצד לתקן. אם לא, הסבר מדוע.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "פלט אפשרי:\n```\nWorker thread: Waiting for resource to be ready...\nWorker thread: Condition not met, waiting...\nProducer thread: Preparing resource...\nProducer thread: Resource ready. Signaling worker.\nWorker thread: Woken up.\nWorker thread: Resource is ready, processing data.\nMain thread: All threads finished.\n```\n(הפלט של `Producer thread: Preparing resource...` יכול להופיע לפני או אחרי שורות ה-`Worker thread` הראשונות, תלוי בתזמון המדויק, אך שורות ה-`Worker thread` יופיעו לרוב בסדר זה, אם ה-worker יגיע ל-wait לפני ה-signal).\n\n**בעיית סנכרון:**\nכן, קיימת בעיית סנכרון פוטנציאלית. השורה `if (!shared_resource_ready)` בתוך `worker_thread` אינה מספקת.\n\nבעיית ה-**spurious wakeups** (התעוררויות שווא) היא תופעה ידועה במשתני תנאי, שבה תהליכון הממתין על משתנה תנאי עשוי להתעורר מ-`pthread_cond_wait` גם אם לא נשלח איתות (`signal`) וגם אם התנאי עדיין לא מתקיים. אם ה-\"worker thread\" מתעורר באופן שוואי (spurious wakeup), הוא ימשיך בריצה מכיוון שהוא בודק את התנאי רק פעם אחת ב-`if`.\n\nבנוסף, גם ללא spurious wakeups, יכול להיווצר מצב מרוץ (race condition) שבו ה-`producer_thread` מסיים את הכנת המשאב (כלומר `shared_resource_ready` הופך ל-1) ושולח `pthread_cond_signal` לפני שה-`worker_thread` מגיע ל-`pthread_cond_wait`. במקרה כזה, ה-`worker_thread` יבדוק את התנאי `!shared_resource_ready` ימצא אותו כשקר (כי `shared_resource_ready` הוא כבר 1), ידלג על ה-`if` וה-`pthread_cond_wait`, וימשיך לעבד את המשאב. זה לא בהכרח \"בעיה\" במקרה זה כי המשאב אכן מוכן, אך ה-`signal` פשוט אבד. הבעיה האמיתית מתעוררת אם יש כמה תהליכוני צרכן או אם התנאי יכול להשתנות שוב.\n\nהבעיה החמורה יותר עם שימוש ב-`if` במקום `while` היא בהתעוררויות שווא. אם ה-`worker_thread` מתעורר באופן שוואי, או אם תהליכון אחר (אם היו כמה) שינה את המצב כך שהתנאי כבר לא מתקיים, ה-`worker_thread` ימשיך בעיבוד המשאב למרות שהוא לא מוכן, מה שיוביל לשגיאה לוגית.\n\n**תיקון:**\nכדי לפתור בעיה זו ולהבטיח שהתהליכון יבדוק את התנאי שוב לאחר כל התעוררות, יש להחליף את ה-`if` ב-`while` בלולאה:\n\n```c\nvoid* worker_thread(void* arg) {\n    printf(\"Worker thread: Waiting for resource to be ready...\\n\");\n    pthread_mutex_lock(&mutex);\n    while (!shared_resource_ready) { // Corrected: use while loop\n        printf(\"Worker thread: Condition not met, waiting...\\n\");\n        pthread_cond_wait(&cond, &mutex);\n        printf(\"Worker thread: Woken up (checking condition again).\\n\");\n    }\n    printf(\"Worker thread: Resource is ready, processing data.\\n\");\n    pthread_mutex_unlock(&mutex);\n    return NULL;\n}\n```\nהשימוש בלולאת `while` מבטיח שהתהליכון יבדוק את התנאי (`shared_resource_ready`) בכל פעם שהוא מתעורר מ-`pthread_cond_wait`, בין אם זה בגלל איתות אמיתי, התעוררות שוואית, או אם המצב השתנה שוב על ידי תהליכון אחר. זהו דפוס השימוש הנכון והבטוח עבור משתני תנאי."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

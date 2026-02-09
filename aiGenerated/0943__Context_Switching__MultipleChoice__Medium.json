@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Context Switching",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 07:03:43",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1290,
+      "output_tokens": 566,
+      "total_tokens": 3350
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "Context Switching",
+      "Processes",
+      "Kernel"
+    ],
+    "content": {
+      "text": "במהלך החלפת הקשר (context switch) בין שני תהליכים, איזה מהבאים נשמר ומשוחזר באופן עיקרי על ידי קרנל מערכת ההפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. רק אוגרי המעבד (CPU registers).",
+        "ב. רק מצביע התוכנית (Program Counter - PC) ומצביע המחסנית (Stack Pointer - SP).",
+        "ג. כל מרחב הזיכרון של התהליך.",
+        "ד. ערכי אוגרי המעבד, מצביע התוכנית (PC), מצביע המחסנית (SP), ומידע נוסף על מצב התהליך (כמו זה שנמצא ב-PCB).",
+        "ה. משתנים ונתוני משתמש (User-level variables and data)."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ד",
+      "explanation": "התשובה הנכונה היא ד'. במהלך החלפת הקשר, קרנל מערכת ההפעלה שומר את כל המידע ההכרחי להמשך ריצתו של התהליך הנוכחי מאוחר יותר, וטוען את המידע של התהליך הבא. מידע זה כולל את כל אוגרי המעבד (כולל PC ו-SP), ואת מצב התהליך (Process State) כפי שהוא מאוחסן ב-Process Control Block - PCB. ה-PCB מכיל מידע נוסף כמו מזהה תהליך, מצב התהליך (רץ, מוכן, חסום), מידע ניהול זיכרון (כמו מצביע לטבלת דפים), קבצים פתוחים ועוד. מרחב הזיכרון של התהליך עצמו אינו נשמר או משוחזר במלואו, אלא מתבצע עדכון של מיפוי הזיכרון (לרוב על ידי שינוי ערך באוגר המצביע לטבלת הדפים של התהליך החדש)."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

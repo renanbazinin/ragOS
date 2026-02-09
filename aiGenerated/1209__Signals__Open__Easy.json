@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Signals",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 08:42:11",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4591,
+      "output_tokens": 726,
+      "total_tokens": 7491
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Signals"
+    ],
+    "content": {
+      "text": "כתבו תוכנית C פשוטה המטפלת באות `SIGINT` (הנשלח בדרך כלל בלחיצה על `Ctrl+C`). במקום שהתוכנית תסתיים באופן רגיל בעת קבלת האות, על המטפל (handler) להדפיס הודעה מתאימה (לדוגמה, \"קיבלתי SIGINT! ממשיך לפעול...\") ולאחר מכן לאפשר לתוכנית להמשיך לרוץ. התוכנית הראשית צריכה לכלול לולאה אינסופית המדפיסה הודעה כל כמה שניות כדי להדגים שהיא ממשיכה לפעול.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון כולל הגדרת פונקציית מטפל לאות (signal handler) באמצעות הפונקציה `signal()` מהספרייה `signal.h`. כאשר המערכת מקבלת את האות `SIGINT` (לחיצת Ctrl+C), במקום לבצע את פעולת ברירת המחדל (סיום התהליך), היא קוראת לפונקציה `sigint_handler`. פונקציה זו מדפיסה הודעה וחוזרת, מה שמאפשר לתוכנית הראשית (הלולאה האינסופית) להמשיך לפעול. הפונקציה `sleep()` משמשת כדי שהתוכנית לא תצרוך את כל משאבי המעבד בזמן ההמתנה.\n\n```c\n#include <stdio.h>\n#include <signal.h>\n#include <unistd.h>\n\n// Signal handler function for SIGINT\nvoid sigint_handler(int signum) {\n    printf(\"\\nקיבלתי SIGINT! ממשיך לפעול...\\n\");\n    // No exit here, so the program continues\n}\n\nint main() {\n    // Register the signal handler for SIGINT\n    // When SIGINT is received, sigint_handler will be called instead of default action\n    if (signal(SIGINT, sigint_handler) == SIG_ERR) {\n        perror(\"Can't catch SIGINT\");\n        return 1;\n    }\n\n    printf(\"התוכנית רצה. לחץ Ctrl+C כדי לשלוח SIGINT.\\n\");\n\n    // Infinite loop to demonstrate continuous operation\n    while (1) {\n        printf(\"התוכנית ממשיכה לפעול...\\n\");\n        sleep(3); // Wait for 3 seconds\n    }\n\n    return 0;\n}\n```",
+      "code_snippet": null
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

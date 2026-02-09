@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Scheduling",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 09:05:31",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1023,
+      "output_tokens": 546,
+      "total_tokens": 3207
+    }
+  },
+  "question": {
+    "id": 6,
+    "type": "MultipleChoice",
+    "topic": [
+      "Scheduling",
+      "CPU Scheduling"
+    ],
+    "content": {
+      "text": "איזו מהטענות הבאות נכונה לגבי אלגוריתם תזמון Shortest Job First (SJF)?",
+      "code_snippet": null,
+      "options": [
+        "א. אלגוריתם SJF תמיד מונע הרעבה (starvation) עבור תהליכים ארוכים.",
+        "ב. אלגוריתם SJF אופטימלי ביחס לזמן מחזור ממוצע (average turnaround time).",
+        "ג. אלגוריתם SJF אינו יכול להיות מיושם במערכות הפעלה מודרניות כיוון שהוא דורש ידע מדויק מראש על משך זמן הריצה של כל תהליך.",
+        "ד. אלגוריתם SJF הוא תמיד אלגוריתם תזמון מקדים (preemptive)."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב. אלגוריתם SJF אופטימלי ביחס לזמן מחזור ממוצע (average turnaround time).",
+      "explanation": "תשובה נכונה: ב. אלגוריתם SJF ידוע כאופטימלי להשגת זמן מחזור ממוצע (וגם זמן המתנה ממוצע) מינימלי.\nא. לא נכון. SJF עלול לגרום להרעבה עבור תהליכים ארוכים אם יש זרם קבוע של תהליכים קצרים שמגיעים למערכת.\nג. לא נכון. אמנם SJF דורש אומדן של משך זמן הריצה, אך ניתן ליישם אותו במערכות הפעלה מודרניות באמצעות טכניקות חיזוי (לדוגמה, ממוצע אקספוננציאלי של זמני ריצה קודמים).\nד. לא נכון. קיימות גרסאות מקדימות (כמו Shortest Remaining Time First - SRTF) ולא מקדימות של SJF."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

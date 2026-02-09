@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "System Calls",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 07:18:12",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4164,
+      "output_tokens": 900,
+      "total_tokens": 7520
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "System Calls",
+      "Process Management",
+      "I/O"
+    ],
+    "content": {
+      "text": "הסבירו מהן קריאות מערכת (System Calls) ומדוע הן נחוצות במערכת הפעלה מודרנית. בנוסף, נתון קטע הקוד הבא ב-C. זהו שתי קריאות מערכת שונות שסביר להניח שיבוצעו במהלך ריצת קטע קוד זה, והסבירו בקצרה את תפקידן.",
+      "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\nint main() {\n    pid_t pid = fork();\n\n    if (pid == 0) {\n        // Child process\n        printf(\"I am the child process.\\n\");\n    } else if (pid > 0) {\n        // Parent process\n        wait(NULL);\n        printf(\"I am the parent process. Child PID: %d\\n\", pid);\n    } else {\n        // fork failed\n        perror(\"fork failed\");\n        return 1;\n    }\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "קריאת מערכת (System Call) היא ממשק תוכנה בין תהליך המשתמש לבין מערכת ההפעלה. היא מאפשרת לתוכניות הפועלות במצב משתמש (user mode) לבקש שירותים ממערכת ההפעלה, הפועלת במצב ליבה (kernel mode). קריאות מערכת נחוצות כדי להבטיח אבטחה, יציבות ושליטה על משאבי החומרה. תהליכי משתמש אינם יכולים לגשת ישירות לחומרה (כגון דיסק, זיכרון, או התקני קלט/פלט) או למשאבים קריטיים של המערכת מטעמי אבטחה והגנה. קריאות מערכת מספקות דרך מבוקרת ובטוחה לעשות זאת, כאשר מערכת ההפעלה מאמתת את הבקשה ומבצעת אותה באופן בטוח.\n\nשתי קריאות מערכת שסביר שיבוצעו במהלך ריצת קטע הקוד הן:\n\n1.  **`fork()`**: זוהי קריאת מערכת המשמשת ליצירת תהליך חדש (child process) שהוא כמעט שכפול של התהליך הקורא (parent process). תפקידה הוא לאפשר למערכת ההפעלה ליצור ולנהל תהליכים חדשים, ובכך לאפשר הרצת תוכניות במקביל. היא מחזירה 0 בתהליך הבן, את ה-PID של הבן בתהליך האב, ו-1- במקרה של כשל.\n\n2.  **`write()`**: למרות שבקוד מופיעה הפונקציה `printf()`, זוהי פונקציית ספרייה סטנדרטית של C. פונקציה זו, בדומה ל-`perror()`, עושה שימוש פנימי בקריאת המערכת `write()` כדי להדפיס טקסט למסוף (standard output). תפקידה של `write()` הוא לרשום נתונים למכשיר פלט, במקרה זה, למסך הקונסולה. היא מאפשרת לתהליכים לתקשר עם התקני קלט/פלט באופן מבוקר ובטוח דרך הליבה."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Synchronization and Deadlocks",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 09:53:16",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5388,
+      "output_tokens": 2897,
+      "total_tokens": 15865
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Deadlocks",
+      "Atomic Operations",
+      "Mutual Exclusion",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "מנעול ספירה (Counting Lock), המכונה CLock, הוא אובייקט סנכרון המאפשר לכל היותר K חוטים להחזיק בו זמנית במנעול. בנוסף, למנעול יש מגבלה גלובלית על מספר הפעמים הכולל שניתן לרכוש אותו בהצלחה: M. ברגע שהמנעול נרכש בהצלחה M פעמים בסך הכל (על ידי כל החוטים, לאורך כל זמן הריצה), המנעול נשבר באופן קבוע. לאחר שהמנעול נשבר, כל ניסיון עתידי לרכוש אותו חייב להיכשל מיד (להחזיר 0) מבלי לחסום את החוט. אם K חוטים כבר מחזיקים במנעול, ניסיון רכישה נוסף של המנעול חייב להיכשל מיד (להחזיר 0) מבלי לחסום את החוט. פונקציית הנעילה מחזירה 1 אם הרכישה הצליחה, ו-0 אם נכשלה.\n\nלרשותכם עומדת פקודת חומרה אטומית יחידה, compare_and_swap (CAS), המתוארת להלן. אין להשתמש באובייקטי סנכרון אחרים (כמו mutex, semaphore, condition variable) או בפעולות אטומיות אחרות מלבד CAS. יש לדאוג למניעה הדדית (mutual exclusion) ולחופש מקיפאון (deadlock freedom) עבור המשתנים הפנימיים של המנעול, וכן להבטיח את תקינות פעולת המנעול בהתאם לדרישות.",
+      "code_snippet": "int compare_and_swap(volatile int* address, int expected_value, int new_value) {\n    // This is a conceptual representation of an atomic hardware instruction.\n    // In real C/C++, it would use compiler intrinsics like __sync_val_compare_and_swap or C11 atomics.\n    // For this problem, assume it performs atomically.\n    int old_value = *address;\n    if (old_value == expected_value) {\n        *address = new_value;\n    }\n    return old_value; // Returns the value *before* the operation.\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "8.1",
+        "text": "הגדירו את מבנה המנעול (struct CLock) ומימשו את הפונקציות הבאות:",
+        "code_snippet": "typedef struct _cl_lock {\n    // הגדרה של משתני המצב של המנעול כאן\n} CLock;\n\nvoid init(CLock* lock, int K, int M) {\n}\n\nint lock(CLock* lock) {\n}\n\nvoid unlock(CLock* lock) {\n}\n\nvoid destroy(CLock* lock) {\n}",
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון דורש ניהול קפדני של מצב המנעול באמצעות פקודת `compare_and_swap` בלבד. נגדיר מבנה `CLock` שיכלול:\n1.  `k_limit`, `m_limit`: הפרמטרים `K` ו-`M` שצוינו.\n2.  `current_holders`: מונה את מספר החוטים שמחזיקים במנעול כרגע.\n3.  `total_acquisitions`: מונה את מספר הרכישות המוצלחות הכולל מאז אתחול המנעול.\n4.  `broken_flag`: דגל (0 או 1) המציין אם המנעול נשבר עקב הגעה למגבלת `M`.\n5.  `internal_lock_state`: ספינלוק פנימי (0 פתוח, 1 נעול) שישמש להגנה על גישה אטומית למשתנים `current_holders`, `total_acquisitions` ו-`broken_flag`.\n\n**פונקציית `init`:** תאתחל את כל המונים והדגלים ל-0 ואת המגבלות `k_limit` ו-`m_limit`.\n\n**פונקציית `lock`:**\n1.  חוט ינסה לרכוש את ה-`internal_lock_state` באמצעות ספינלוק עם `compare_and_swap` (מ-0 ל-1). לולאת busy-wait (ספינינג) תמתין עד שהספינלוק יתפנה.\n2.  לאחר רכישת ה-`internal_lock_state`, החוט יבדוק את `broken_flag`. אם הוא 1, המנעול שבור, והחוט ישחרר את ה-`internal_lock_state` ויחזיר 0.\n3.  לאחר מכן, החוט יבדוק אם `total_acquisitions` הגיע ל-`m_limit`. אם כן, הוא יגדיר את `broken_flag` ל-1, ישחרר את ה-`internal_lock_state` ויחזיר 0.\n4.  אם המנעול אינו שבור והמגבלה `M` לא הושגה, החוט יבדוק אם `current_holders` קטן מ-`k_limit`.\n    *   אם כן, הוא יגדיל את `current_holders` ב-1 ואת `total_acquisitions` ב-1. אם `total_acquisitions` החדש שווה או עולה על `m_limit`, החוט יגדיר את `broken_flag` ל-1. לבסוף, הוא ישחרר את ה-`internal_lock_state` ויחזיר 1 (הנעילה הצליחה).\n    *   אם לא (כלומר `current_holders` כבר שווה ל-`k_limit`), החוט ישחרר את ה-`internal_lock_state` ויחזיר 0 (הנעילה נכשלה עקב מגבלת `K`).\n\n**פונקציית `unlock`:**\n1.  חוט ינסה לרכוש את ה-`internal_lock_state` באמצעות ספינלוק.\n2.  לאחר רכישת ה-`internal_lock_state`, החוט יקטין את `current_holders` ב-1 (בבדיקה ש-`current_holders` גדול מ-0 למניעת קריסות, אם כי במקרה של שימוש נכון זה תמיד יהיה נכון).\n3.  לבסוף, הוא ישחרר את ה-`internal_lock_state`.\n\n**פונקציית `destroy`:** במקרה זה, אין צורך לשחרר זיכרון שהוקצה דינמית בתוך ה-`struct`, ולכן היא תהיה ריקה.\n\n**שיקולי נכונות:**\n*   **מניעה הדדית (Mutual Exclusion):** ה-`internal_lock_state` (ספינלוק הממומש באמצעות CAS) מבטיח שרק חוט אחד יכול לשנות את `current_holders`, `total_acquisitions` ו-`broken_flag` בכל רגע נתון.\n*   **חופש מקיפאון (Deadlock Freedom):** מכיוון שפונקציות `lock()` ו-`unlock()` רוכשות רק ספינלוק יחיד (`internal_lock_state`) ומשחררות אותו במהירות, ופונקציית `lock()` אינה חוסמת כאשר מגבלות `K` או `M` הושגו, אין תלות מעגלית במשאבים, ולכן אין קיפאון.\n*   **אטומיות של `compare_and_swap`:** הגדרת השאלה מניחה ש-`compare_and_swap` היא פקודת חומרה אטומית, כך שפעולתה מובטחת.\n*   **מילת המפתח `volatile`:** שימוש במילת המפתח `volatile` עבור המשתנים המשותפים מונע אופטימיזציות של מהדר שעלולות לשנות את סדר הפעולות או לשמור ערכים במטמון, ובכך מבטיח שקריאות וכתיבות מתבצעות מול הזיכרון הראשי כמתוכנן.",
+      "code_snippet": "typedef struct _cl_lock {\n    int k_limit; // Max concurrent holders\n    int m_limit; // Max total acquisitions\n\n    volatile int current_holders;\n    volatile int total_acquisitions;\n    volatile int broken_flag; // 1 if M_limit reached, 0 otherwise\n\n    volatile int internal_lock_state; // 0: unlocked, 1: locked\n} CLock;\n\nvoid init(CLock* lock, int K, int M) {\n    lock->k_limit = K;\n    lock->m_limit = M;\n    lock->current_holders = 0;\n    lock->total_acquisitions = 0;\n    lock->broken_flag = 0;\n    lock->internal_lock_state = 0;\n}\n\nint lock(CLock* lock_obj) {\n    // Acquire internal spinlock\n    while (compare_and_swap(&lock_obj->internal_lock_state, 0, 1) == 0) {\n        // Spin or yield (for real-world, might add sched_yield() or backoff)\n    }\n\n    // Check if the lock is already broken globally\n    if (lock_obj->broken_flag == 1) {\n        lock_obj->internal_lock_state = 0; // Release internal spinlock\n        return 0;\n    }\n\n    // Check if total acquisitions limit has been reached or will be reached by this acquisition\n    if (lock_obj->total_acquisitions >= lock_obj->m_limit) {\n        lock_obj->broken_flag = 1; // Mark as broken\n        lock_obj->internal_lock_state = 0; // Release internal spinlock\n        return 0;\n    }\n\n    // Check if concurrent holders limit has been reached\n    if (lock_obj->current_holders < lock_obj->k_limit) {\n        // Acquire lock slot\n        lock_obj->current_holders++;\n        lock_obj->total_acquisitions++;\n        \n        // If this acquisition reached the total limit, mark as broken for future attempts\n        if (lock_obj->total_acquisitions >= lock_obj->m_limit) {\n            lock_obj->broken_flag = 1;\n        }\n\n        lock_obj->internal_lock_state = 0; // Release internal spinlock\n        return 1; // Successfully acquired\n    } else {\n        // Concurrent limit reached, cannot acquire\n        lock_obj->internal_lock_state = 0; // Release internal spinlock\n        return 0; // Failed to acquire\n    }\n}\n\nvoid unlock(CLock* lock_obj) {\n    // Acquire internal spinlock\n    while (compare_and_swap(&lock_obj->internal_lock_state, 0, 1) == 0) {\n        // Spin or yield\n    }\n\n    // Decrement current holders, only if greater than 0 for safety\n    if (lock_obj->current_holders > 0) {\n        lock_obj->current_holders--;\n    }\n\n    lock_obj->internal_lock_state = 0; // Release internal spinlock\n}\n\nvoid destroy(CLock* lock) {\n    // No dynamically allocated memory within the struct itself to free.\n    // If the CLock object itself was dynamically allocated, it would be freed by the caller.\n}",
+      "options": null
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

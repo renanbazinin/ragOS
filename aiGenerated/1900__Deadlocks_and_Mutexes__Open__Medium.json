@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Deadlocks and Mutexes",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 21:39:15",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2445,
+      "output_tokens": 1127,
+      "total_tokens": 6270
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "Open",
+    "topic": [
+      "Deadlocks",
+      "Mutexes",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתונה פיסת הקוד הבאה המציגה שני תהליכונים (threads) המנסים לגשת למשאבים משותפים המוגנים על ידי שני מנעולי Mutex, `mutexA` ו-`mutexB`.\n\nהאם יתכן קיפאון (deadlock) בתרחיש זה?\n\nאם כן:\n1.  הסבר מדוע קיפאון אפשרי, תוך התייחסות לארבעת התנאים ההכרחיים לקיפאון.\n2.  הצע פתרון למניעת הקיפאון וכיצד הוא עובד.\n\nאם לא:\nהסבר בפירוט מדוע לא יתכן קיפאון.",
+      "code_snippet": "pthread_mutex_t mutexA;\npthread_mutex_t mutexB;\n\nvoid* thread1_func(void* arg) {\n    pthread_mutex_lock(&mutexA);\n    pthread_mutex_lock(&mutexB);\n    // קטע קריטי\n    pthread_mutex_unlock(&mutexB);\n    pthread_mutex_unlock(&mutexA);\n    return NULL;\n}\n\nvoid* thread2_func(void* arg) {\n    pthread_mutex_lock(&mutexB);\n    pthread_mutex_lock(&mutexA);\n    // קטע קריטי\n    pthread_mutex_unlock(&mutexA);\n    pthread_mutex_unlock(&mutexB);\n    return NULL;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "כן, יתכן קיפאון בתרחיש זה.\n\n**הסבר קיפאון לפי ארבעת התנאים:**\n1.  **מניעה הדדית (Mutual Exclusion):** מנעולי Mutex מטבעם אוכפים תנאי זה. רק תהליכון אחד יכול להחזיק במנעול `mutexA` או `mutexB` בכל רגע נתון.\n2.  **החזק והמתן (Hold and Wait):** תהליכון 1 מחזיק במנעול `mutexA` וממתין למנעול `mutexB`. במקביל, תהליכון 2 מחזיק במנעול `mutexB` וממתין למנעול `mutexA`. כל אחד מהם מחזיק במשאב אחד לפחות בזמן שהוא ממתין למשאב נוסף.\n3.  **אי-הפקעה (No Preemption):** מנעולי Mutex אינם ניתנים להפקעה. לא ניתן לקחת מנעול מתהליכון שמחזיק בו בכוח; הוא חייב לשחרר אותו באופן יזום.\n4.  **המתנה מעגלית (Circular Wait):** תהליכון 1 ממתין למנעול `mutexB` המוחזק על ידי תהליכון 2. תהליכון 2 ממתין למנעול `mutexA` המוחזק על ידי תהליכון 1. נוצר מעגל המתנה שבו כל תהליכון ממתין למשאב שמוחזק על ידי תהליכון אחר במעגל.\n\n**פתרון למניעת קיפאון:**\nהדרך הנפוצה והיעילה ביותר למנוע קיפאון במצב זה היא על ידי אכיפת **היררכיית משאבים (Resource Ordering)**. יש לקבוע סדר קבוע לרכישת המנעולים ולוודא שכל התהליכונים רוכשים את המנעולים באותו סדר.\nבמקרה זה, נוכל להחליט שכל התהליכונים ירכשו תמיד את `mutexA` לפני `mutexB`.\n\n**דוגמת פתרון (שינוי ב-`thread2_func`):**\n```c\nvoid* thread2_func(void* arg) {\n    pthread_mutex_lock(&mutexA); // סדר רכישה שונה\n    pthread_mutex_lock(&mutexB);\n    // קטע קריטי\n    pthread_mutex_unlock(&mutexB);\n    pthread_mutex_unlock(&mutexA);\n    return NULL;\n}\n```\nעל ידי אכיפת סדר רכישה עקבי (`mutexA` ואז `mutexB`) עבור שני התהליכונים, אנו מונעים את תנאי \"המתנה מעגלית\", ובכך מונעים קיפאון."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

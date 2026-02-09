@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Context Switching",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 07:04:14",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1290,
+      "output_tokens": 603,
+      "total_tokens": 4148
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Context Switching",
+      "Processes",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "מה נכון לגבי החלפת הקשר (Context Switch) בין שני תהליכים (processes) שונים במערכת הפעלה מודרנית?",
+      "code_snippet": null,
+      "options": [
+        "א. רק אוגרי המעבד (CPU registers) נשמרים ונטענים מחדש, מכיוון שכל תהליך מריץ קוד עצמאי.",
+        "ב. מפת הזיכרון (page table) של המעבד מוחלפת, אך תוכן ה-stack של התהליך נשאר ללא שינוי.",
+        "ג. שמירת מצב המעבד (כולל אוגרים) וטעינת מצב המעבד של התהליך הבא, יחד עם החלפת מפת הזיכרון.",
+        "ד. החלפת הקשר דורשת תמיד שמירה וטעינה מחדש של כל זיכרון ה-RAM הפיזי המוקצה לתהליך.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "החלפת הקשר בין תהליכים (process context switch) היא פעולה מורכבת יחסית. היא כוללת שמירה של מצב המעבד הנוכחי (כולל אוגרים כלליים, מונה תוכנית (PC), מצביע מחסנית (SP) ואוגרי מצב) של התהליך היוצא, וטעינה של מצב המעבד של התהליך הנכנס. בנוסף, מכיוון שלכל תהליך מרחב כתובות וירטואלי משלו, יש צורך להחליף את מפת הזיכרון (page table) במעבד, כך שהתהליך החדש יראה את מרחב הכתובות שלו. תשובה א' שגויה מכיוון שזה לא 'רק' אוגרים. תשובה ב' שגויה כי ה-stack הוא חלק ממרחב הכתובות של התהליך ומצביע ה-stack נשמר ומשוחזר. תשובה ד' מתארת פעולה של swapping ולא context switch."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

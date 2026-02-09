@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions and Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 11:30:57",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5488,
+      "output_tokens": 2156,
+      "total_tokens": 14933
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Race Conditions",
+      "Mutexes",
+      "Synchronization",
+      "Lazy Initialization",
+      "Double-Checked Locking"
+    ],
+    "content": {
+      "text": "להלן קטע קוד בשפת C/C++ המממש מנגנון לאתחול משאב יקר (ExpensiveResource) באופן עצלני (Lazy Initialization) תוך שימוש בדפוס Double-Checked Locking. המטרה היא להבטיח שרק חוט אחד יאתחל את המשאב, וששאר החוטים ישתמשו במופע המאותחל. המנגנון מנסה למזער את זמן החסימה על ידי בדיקה כפולה של מצב המשאב. יש לנתח את הקוד ולהסביר האם המימוש תקין.\n\nיש להניח שהקומפיילר והמעבד עלולים לבצע אופטימיזציות המשנות את סדר הפקודות (Instruction Reordering).",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h> // for sleep\n\n// מייצג משאב יקר לאתחול\ntypedef struct {\n    int data;\n    // יכולים להיות חברים מורכבים יותר\n} ExpensiveResource;\n\nExpensiveResource* global_resource = NULL; // מצביע למשאב המשותף\npthread_mutex_t init_mutex; // מנעול להגנה על תהליך האתחול\n\n// פונקציה המדמה יצירת משאב יקר\nExpensiveResource* create_expensive_resource() {\n    printf(\"Creating expensive resource...\\n\");\n    sleep(1); // מדמה אתחול שגוזל זמן\n    ExpensiveResource* res = (ExpensiveResource*)malloc(sizeof(ExpensiveResource));\n    if (res) {\n        res->data = 12345; // אתחול שדות המשאב\n    }\n    printf(\"Expensive resource created.\\n\");\n    return res;\n}\n\n// פונקציה לקבלת המשאב, תוך שימוש ב-Double-Checked Locking (פגום)\nExpensiveResource* get_resource() {\n    // בדיקה ראשונה ללא מנעול (אופטימית)\n    if (global_resource == NULL) { // [LINE A]\n        pthread_mutex_lock(&init_mutex); // [LINE B]\n        // בדיקה שנייה לאחר רכישת המנעול\n        if (global_resource == NULL) { // [LINE C]\n            global_resource = create_expensive_resource(); // [LINE D]\n        }\n        pthread_mutex_unlock(&init_mutex); // [LINE E]\n    }\n    return global_resource; // [LINE F]\n}\n\n// פונקציית חוט המשתמשת במשאב\nvoid* thread_func(void* arg) {\n    printf(\"Thread %ld: Attempting to get resource...\\n\", (long)arg);\n    ExpensiveResource* res = get_resource();\n    if (res) {\n        printf(\"Thread %ld: Got resource, data = %d\\n\", (long)arg, res->data);\n    } else {\n        printf(\"Thread %ld: Failed to get resource.\\n\", (long)arg);\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_mutex_init(&init_mutex, NULL);\n\n    pthread_t threads[5];\n    for (long i = 0; i < 5; ++i) {\n        pthread_create(&threads[i], NULL, thread_func, (void*)(i + 1));\n    }\n\n    for (int i = 0; i < 5; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    // ניקוי\n    if (global_resource) {\n        free(global_resource);\n    }\n    pthread_mutex_destroy(&init_mutex);\n    return 0;\n}"
+    },
+    "sub_questions": null,
+    "points": 15,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "המימוש הנתון של דפוס Double-Checked Locking **אינו תקין** ועלול להוביל לתנאי מרוץ (Race Condition) ולשגיאות. הבעיה נובעת מאופטימיזציות של הקומפיילר והמעבד (Instruction Reordering) ומחוסר ערבויות לנראות זיכרון (Memory Visibility) בין חוטים.\n\n**הסבר לבעיה:**\nהפקודה `global_resource = create_expensive_resource();` (מסומנת כ-[LINE D]) אינה פעולה אטומית אחת מבחינת המעבד והזיכרון. היא מורכבת בדרך כלל משלושה שלבים עיקריים:\n1.  הקצאת זיכרון עבור אובייקט `ExpensiveResource`.\n2.  אתחול השדות של אובייקט `ExpensiveResource` (לדוגמה, `res->data = 12345;`).\n3.  הצבת הכתובת של האובייקט שהוקצה בתוך המצביע הגלובלי `global_resource`.\n\nהקומפיילר או המעבד עשויים לשנות את סדר הביצוע של שלבים 2 ו-3. כלומר, ייתכן שהכתובת של הזיכרון שהוקצה תוכנס ל-`global_resource` (שלב 3) **לפני** שכל השדות של האובייקט אתחלו במלואם (שלב 2).\n\n**תרחיש תנאי המרוץ:**\n1.  **חוט א' (Thread A)** נכנס לפונקציה `get_resource()`.\n2.  חוט א' מבצע את הבדיקה הראשונה `global_resource == NULL` (LINE A) ומוצא שהיא נכונה, ולכן נכנס לבלוק ה-`if`.\n3.  חוט א' נועל את `init_mutex` (LINE B).\n4.  חוט א' מבצע את הבדיקה השנייה `global_resource == NULL` (LINE C) ומוצא שהיא עדיין נכונה, ולכן ממשיך ל-`global_resource = create_expensive_resource();` (LINE D).\n5.  במהלך ביצוע שורה D, הקומפיילר/מעבד מבצע אופטימיזציה: הזיכרון מוקצה, והכתובת שלו נכתבת ל-`global_resource`. עם זאת, אתחול שדה ה-`data` בתוך המשאב (`res->data = 12345;`) **טרם הושלם**.\n6.  חוט א' משחרר את `init_mutex` (LINE E).\n7.  **חוט ב' (Thread B)** נכנס לפונקציה `get_resource()` באותו זמן.\n8.  חוט ב' מבצע את הבדיקה הראשונה `global_resource == NULL` (LINE A). כעת, `global_resource` **אינו `NULL`** (כי חוט א' כבר כתב אליו את הכתובת, גם אם המשאב עדיין לא מאותחל במלואו). לכן, חוט ב' **מדלג על בלוק ה-`if` כולו** ואינו נועל את המנעול.\n9.  חוט ב' ממשיך ל-`return global_resource;` (LINE F) ומנסה לגשת ל-`res->data`.\n10. **התוצאה**: חוט ב' מקבל מצביע ל-`global_resource` שטרם הושלם אתחולו על ידי חוט א'. גישה ל-`res->data` במצב זה תוביל לקריאת מידע שגוי (Garbage Value), להתנהגות בלתי צפויה, או אף לקריסת התוכנית.\n\n**כיצד לתקן (לא נדרש בשאלה, אך להשלמת ההבנה):**\nכדי לתקן את בעיית ה-Double-Checked Locking ב-C/C++11 ומעלה, יש להשתמש בטיפוסים אטומיים (לדוגמה `std::atomic<ExpensiveResource*>`) עבור `global_resource` יחד עם סדרי זיכרון (memory orders) מתאימים (`memory_order_acquire` ו-`memory_order_release`) על מנת למנוע שינוי סדר פקודות ולהבטיח נראות זיכרון נכונה בין חוטים. בגרסאות C/C++ קודמות, זה היה מצריך שימוש במחסומי זיכרון (memory barriers) ספציפיים לפלטפורמה."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

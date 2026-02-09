@@ -1,0 +1,57 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "CPU Scheduling and Context Switching",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 11:49:54",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2319,
+      "output_tokens": 3096,
+      "total_tokens": 9912
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "Open",
+    "topic": [
+      "CPU Scheduling",
+      "Context Switching",
+      "Round Robin"
+    ],
+    "content": {
+      "text": null,
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "7.1",
+        "text": "הסבירו מהי החלפת הקשר (Context Switch) ופרטו את השלבים העיקריים שמערכת ההפעלה מבצעת בעת החלפת הקשר בין שני תהליכים או חוטים.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "7.2",
+        "text": "דמיינו קטע קוד C/C++ פסאודו-קוד פשוט הממחיש את השמירה והשחזור של הקשר (לפחות רשמי המעבד החשובים כמו PC, SP, ורשמי כלליים). אין צורך במימוש מלא של פונקציות המערכת, אלא רק הדגמת הרעיון המרכזי.",
+        "code_snippet": "typedef struct {\n    unsigned long program_counter;  // PC - הכתובת של ההוראה הבאה לביצוע\n    unsigned long stack_pointer;    // SP - מצביע לראש המחסנית\n    unsigned long general_registers[16]; // רשמים כלליים (דוגמה)\n    // ... רשמים נוספים (לדוגמה: רשמי מצב, רשמי נקודה צפה)\n} ProcessContext;\n\n// טבלת הקשרים של התהליכים במערכת (קונספטואלי)\nProcessContext process_contexts[10]; // לדוגמה, עד 10 תהליכים\nint current_process_id = 0; // מזהה התהליך הנוכחי\n\n// פונקציה קונספטואלית לקריאת רשם (במציאות, תלוי ארכיטקטורה ואסמבלר)\nunsigned long read_register(int reg_idx) { /* ... */ return 0; }\nvoid write_register(int reg_idx, unsigned long val) { /* ... */ }\nunsigned long read_pc_register() { /* ... */ return 0; }\nvoid write_pc_register(unsigned long val) { /* ... */ }\nunsigned long read_sp_register() { /* ... */ return 0; }\nvoid write_sp_register(unsigned long val) { /* ... */ }\nint select_next_process_to_run() { /* ... */ return (current_process_id + 1) % 10; }\n\n// פונקציה לשמירת הקשר של התהליך הרץ\nvoid save_current_process_context(int pid) {\n    // 1. שמירת ה-Program Counter (PC)\n    //    (במערכות אמיתיות, זה לרוב נשמר אוטומטית ע\"י החומרה או קוד ה-trap/interrupt)\n    process_contexts[pid].program_counter = read_pc_register();\n\n    // 2. שמירת ה-Stack Pointer (SP)\n    process_contexts[pid].stack_pointer = read_sp_register();\n\n    // 3. שמירת רשמים כלליים של המעבד\n    for (int i = 0; i < 16; i++) {\n        process_contexts[pid].general_registers[i] = read_register(i);\n    }\n    // ... שמירת רשמים נוספים\n}\n\n// פונקציה לשחזור הקשר של תהליך אחר\nvoid restore_process_context(int pid) {\n    // 1. שחזור רשמים כלליים של המעבד\n    for (int i = 0; i < 16; i++) {\n        write_register(i, process_contexts[pid].general_registers[i]);\n    }\n\n    // 2. שחזור ה-Stack Pointer (SP)\n    write_sp_register(process_contexts[pid].stack_pointer);\n\n    // 3. שחזור ה-Program Counter (PC)\n    //    (זהו בדרך כלל הצעד האחרון, שמבצע קפיצה לכתובת השמורה ומעביר את השליטה\n    //     לתהליך החדש בנקודה שבה הוא הופסק)\n    write_pc_register(process_contexts[pid].program_counter);\n}\n\n// פונקציה קונספטואלית לתזמון והחלפת קשר\nvoid scheduler_execute_context_switch() {\n    int old_pid = current_process_id;\n    \n    // שמור את הקשר של התהליך שרץ כעת\n    save_current_process_context(old_pid);\n    \n    // בחר את התהליך הבא לריצה (לדוגמה, ב-Round Robin)\n    int new_pid = select_next_process_to_run(); \n    current_process_id = new_pid;\n    \n    // שחזר את הקשר של התהליך החדש\n    restore_process_context(new_pid);\n    \n    // מכאן והלאה, התהליך החדש ממשיך את ריצתו\n}",
+        "options": null
+      },
+      {
+        "id": "7.3",
+        "text": "נתחו כיצד אורך יחידת הזמן (quantum) באלגוריתם תזמון Round Robin משפיע על תדירות החלפות הקשר ועל ביצועי המערכת הכוללים. התייחסו בניתוחכם לניצול המעבד (CPU utilization), זמן התגובה (responsiveness), וזמן הריצה הכולל של תהליכים.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "7.1. החלפת הקשר (Context Switch) היא הפעולה שמערכת הפעלה מבצעת כדי לשמור את מצבו (הקשרו) של תהליך או חוט אחד, ולטעון את מצבו של תהליך או חוט אחר, כך שהמעבד יוכל להמשיך את ריצתו מהנקודה שבה הופסק. פעולה זו מאפשרת למערכת ההפעלה לתת אשליה של ריבוי משימות מקבילות על מעבד יחיד.\n\nהשלבים העיקריים בהחלפת קשר הם:\n1.  **קבלת פסיקה/הפסקת זמן (Timer Interrupt/System Call):** החלפת הקשר נגרמת בדרך כלל על ידי פסיקת טיימר (במקרה של תזמון מונע-זמן כמו Round Robin), קריאת מערכת (לדוגמה, בקשת I/O או יציאה), או פסיקה אחרת.\n2.  **שמירת מצב המעבד הנוכחי:** המעבד שומר אוטומטית חלק מרשמיו (כמו PC ו-SP) למחסנית הקרנל עם כניסה לפסיקה. הליבה ממשיכה לשמור את שאר רשמי המעבד (רשמים כלליים, רשמי נקודה צפה, רשמי מצב וכו') למבנה נתונים ייעודי עבור התהליך המופסק (לרוב, בתוך ה-Process Control Block – PCB שלו).\n3.  **שמירת מצב מרחב הכתובות (אופציונלי):** אם התהליך שמוחלף משתמש במרחב כתובות שונה מהתהליך החדש (לדוגמה, אם מדובר בהחלפה בין תהליכים ולא בין חוטים באותו תהליך), הליבה עשויה לשמור את מצב טבלת הדפים או ה-MMU.\n4.  **בחירת התהליך הבא לריצה:** מתזמן המעבד (CPU Scheduler) בוחר את התהליך או החוט הבא שייכנס לריצה, על פי אלגוריתם התזמון הנתון (לדוגמה, Round Robin).\n5.  **טעינת מצב מרחב הכתובות (אופציונלי):** אם התהליך החדש משתמש במרחב כתובות שונה, הליבה טוענת את טבלת הדפים המתאימה ל-MMU.\n6.  **טעינת מצב המעבד החדש:** הליבה טוענת את רשמי המעבד (PC, SP, רשמים כלליים וכו') ממבנה הנתונים של התהליך החדש (ה-PCB שלו) אל רשמי המעבד.\n7.  **העברת שליטה:** המעבד ממשיך את ריצתו מהכתובת השמורה ב-Program Counter של התהליך החדש, כאילו מעולם לא הופסק.\n\n7.2. (הקוד כלול בשאלת המשנה עצמה. ההסבר הוא שהקוד מדגים את הרעיון של שמירה ושחזור קשר, ומציין שבמערכת הפעלה אמיתית פעולות אלו מבוצעות ברובן בקוד אסמבל, ולעתים קרובות משולבות עם שגרות טיפול בפסיקות).\n\n7.3. אורך יחידת הזמן (quantum) באלגוריתם Round Robin משפיע באופן ישיר על תדירות החלפות הקשר ועל ביצועי המערכת:\n\n*   **קוונטום קצר מאוד:**\n    *   **תדירות החלפות קשר:** גבוהה מאוד. המעבד עובר בין תהליכים במהירות רבה.\n    *   **ניצול המעבד (CPU utilization):** נמוך. זמן רב יחסית מבוזבז על תקורה של החלפות קשר (overhead), במקום על ביצוע עבודה שימושית של התהליכים. כל החלפת קשר דורשת זמן לשמירה וטעינה של רשמים, וזמן זה אינו תורם לביצועי התהליכים עצמם.\n    *   **זמן תגובה (Responsiveness):** גבוה (טוב). תהליכים אינטראקטיביים יקבלו זמן מעבד לעיתים קרובות, מה שיגרום למערכת להרגיש מהירה ומגיבה למשתמש.\n    *   **זמן ריצה כולל:** ארוך יותר. בגלל תקורת החלפות הקשר הגבוהה, הזמן הכולל הנדרש לכל התהליכים להשלים את ריצתם יגדל.\n\n*   **קוונטום ארוך מאוד:**\n    *   **תדירות החלפות קשר:** נמוכה מאוד. תהליך אחד יכול לרוץ זמן רב לפני שיוחלף.\n    *   **ניצול המעבד (CPU utilization):** גבוה (טוב). תקורת החלפות הקשר נמוכה יחסית, כך שרוב זמן המעבד מנוצל לביצוע עבודה שימושית.\n    *   **זמן תגובה (Responsiveness):** נמוך (רע). תהליכים אינטראקטיביים יצטרכו להמתין זמן רב לתורם, מה שיגרום למערכת להרגיש איטית ולא מגיבה. במקרה קיצוני, קוונטום ארוך מאוד מתנהג כמו FCFS (First Come First Served) עבור תהליכים שאינם מבוצעים.\n    *   **זמן ריצה כולל:** קצר יותר (בהשוואה לקוונטום קצר מאוד), מכיוון שתקורת החלפות הקשר מינימלית.\n\n*   **קוונטום אופטימלי:**\n    *   המטרה היא למצוא איזון. קוונטום אופטימלי יהיה ארוך מספיק כדי שתקורת החלפות הקשר תהיה זניחה יחסית לזמן הריצה של התהליך בתוך הקוונטום, אך קצר מספיק כדי לספק זמן תגובה טוב.\n    *   בדרך כלל, קוונטום צריך להיות ארוך יותר מזמן החלפת הקשר עצמו (לרוב פי 10 או יותר) כדי שהתקורה לא תהיה דומיננטית. ערכים נפוצים הם בין 10 ל-100 מילישניות.\n    *   בחירת הקוונטום תלויה בסוג המערכת (לדוגמה, מערכת אינטראקטיבית לעומת מערכת אצווה) ובדרישות הביצועים שלה."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

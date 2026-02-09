@@ -1,0 +1,52 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Producer-Consumer",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 10:38:19",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4898,
+      "output_tokens": 2815,
+      "total_tokens": 12450
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Semaphores",
+      "Producer-Consumer",
+      "Deadlock",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "להלן מימוש חלקי של בעיית יצרן-צרכן עם מאגר חלקי (bounded buffer) באמצעות סמפורים. המימוש נועד לאפשר מספר יצרנים ומספר צרכנים לעבוד במקביל. הסמפורים `mutex`, `full`, ו-`empty` מאותחלים באופן הבא: `mutex=1`, `full=0`, `empty=BUFFER_SIZE`. הפונקציות `produce_item()` ו-`consume_item()` מדמות יצירה וצריכה של פריט בהתאמה, ואינן דורשות סנכרון פנימי. `buffer` הוא מערך גלובלי המשמש כמאגר. בחנו את הקוד הנתון וענו על השאלות הבאות:",
+      "code_snippet": "#include <semaphore.h>\n#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h> \n#include <unistd.h> \n\n#define BUFFER_SIZE 5\nint buffer[BUFFER_SIZE];\nint in = 0;\nint out = 0;\n\nsem_t mutex;    // For critical section access to buffer\nsem_t full;     // Counts number of items in buffer\nsem_t empty;    // Counts number of empty slots in buffer\n\nvoid init_semaphores() {\n    sem_init(&mutex, 0, 1);\n    sem_init(&full, 0, 0);\n    sem_init(&empty, 0, BUFFER_SIZE);\n}\n\nvoid produce_item(int item) {\n    // Simulate item production\n}\n\nint consume_item(int item_val) {\n    // Simulate item consumption\n    return item_val;\n}\n\nvoid *producer(void *arg) {\n    int item = 0;\n    while (1) {\n        item++;\n        produce_item(item); // Simulate work\n\n        // --- Potentially problematic section ---\n        sem_wait(&mutex); // Acquire mutex first\n        sem_wait(&empty); // Then wait for empty slot\n        \n        buffer[in] = item;\n        in = (in + 1) % BUFFER_SIZE;\n        printf(\"Producer added item %d. Buffer state: [\", item);\n        for(int i=0; i<BUFFER_SIZE; ++i) printf(\"%d \", buffer[i]);\n        printf(\"]\\n\");\n\n        sem_post(&full);\n        sem_post(&mutex); // Release mutex\n        // --- End potentially problematic section ---\n        \n        usleep(rand() % 100000);\n    }\n    return NULL;\n}\n\nvoid *consumer(void *arg) {\n    int item_val;\n    while (1) {\n        // --- Potentially problematic section ---\n        sem_wait(&mutex); // Acquire mutex first\n        sem_wait(&full);  // Then wait for full slot\n        \n        item_val = buffer[out];\n        out = (out + 1) % BUFFER_SIZE;\n        printf(\"Consumer removed item %d. Buffer state: [\", item_val);\n        for(int i=0; i<BUFFER_SIZE; ++i) printf(\"%d \", buffer[i]);\n        printf(\"]\\n\");\n\n        sem_post(&empty);\n        sem_post(&mutex); // Release mutex\n        // --- End potentially problematic section ---\n\n        consume_item(item_val); // Simulate work\n        \n        usleep(rand() % 100000);\n    }\n    return NULL;\n}\n\nint main() {\n    init_semaphores();\n    pthread_t prod_thread, cons_thread;\n\n    pthread_create(&prod_thread, NULL, producer, NULL);\n    pthread_create(&cons_thread, NULL, consumer, NULL);\n\n    pthread_join(prod_thread, NULL);\n    pthread_join(cons_thread, NULL);\n\n    sem_destroy(&mutex);\n    sem_destroy(&full);\n    sem_destroy(&empty);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "8.1",
+        "text": "האם המימוש הנתון נכון? אם כן, הסבירו מדוע. אם לא, תארו תרחיש ספציפי המוביל לבעיה (כגון קיפאון, רעב או מצב מרוץ) והסבירו את הגורם לבעיה.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.2",
+        "text": "כיצד יש לתקן את הקוד על מנת שיפעל באופן תקין? הציגו את הקוד המתוקן והסבירו בקצרה את השינויים.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "8.1: המימוש הנתון אינו נכון ועלול להוביל למצב של קיפאון (deadlock).\nהבעיה טמונה בסדר תפיסת הסמפורים (`mutex`, `full`, `empty`). הן בפונקציית היצרן והן בפונקציית הצרכן, הסמפור `mutex` נתפס לפני הסמפורים `empty` או `full`.\n\n**תרחיש קיפאון לדוגמה (מאגר מלא):**\n1. נניח שהמאגר מלא. חוט יצרן (Producer) מנסה להוסיף פריט.\n2. הוא מבצע `sem_wait(&mutex)` ותופס את המנעול `mutex`.\n3. לאחר מכן, הוא מנסה לבצע `sem_wait(&empty)`. מכיוון שהמאגר מלא, הסמפור `empty` הוא 0, והחוט נחסם בהמתנה ל-`empty`.\n4. בשלב זה, חוט היצרן מחזיק את המנעול `mutex` אך חסום.\n5. כעת, אם חוט צרכן (Consumer) מנסה לצרוך פריט, הוא יבצע `sem_wait(&mutex)`. מכיוון ש-`mutex` מוחזק על ידי היצרן החסום, הצרכן ייחסם גם הוא בהמתנה ל-`mutex`.\n6. נוצר מצב של קיפאון: היצרן חסום ומחכה ש-`empty` יגדל (מה שיקרה רק אם צרכן יצרוך פריט), אך הצרכן חסום ומחכה ש-`mutex` ישוחרר (מה שיקרה רק אם היצרן יתקדם). אף אחד מהם לא יכול להתקדם.\n\n**תרחיש קיפאון נוסף (מאגר ריק):**\n1. נניח שהמאגר ריק. חוט צרכן מנסה לצרוך פריט.\n2. הוא מבצע `sem_wait(&mutex)` ותופס את המנעול `mutex`.\n3. לאחר מכן, הוא מנסה לבצע `sem_wait(&full)`. מכיוון שהמאגר ריק, הסמפור `full` הוא 0, והחוט נחסם בהמתנה ל-`full`.\n4. בשלב זה, חוט הצרכן מחזיק את המנעול `mutex` אך חסום.\n5. כעת, אם חוט יצרן מנסה לייצר פריט, הוא יבצע `sem_wait(&mutex)`. מכיוון ש-`mutex` מוחזק על ידי הצרכן החסום, היצרן ייחסם גם הוא בהמתנה ל-`mutex`.\n6. שוב, נוצר מצב של קיפאון.\n\n8.2: התיקון הוא לשנות את סדר תפיסת הסמפורים כך שהסמפורים `empty` ו-`full` ייתפסו לפני `mutex`. ההיגיון הוא ש-`empty` ו-`full` הם סמפורים סופרים (counting semaphores) שמנהלים את כמות המשאבים (מקומות ריקים/פריטים מלאים) ואינם מגנים על קטע קריטי. הם יכולים להחסם ללא חשש מקיפאון. רק לאחר שווידאנו שיש מקום או שיש פריט, ניכנס לקטע הקריטי המוגן על ידי `mutex` כדי לגשת למאגר המשותף.\n\n**קוד מתוקן:**\n```c\nvoid *producer(void *arg) {\n    int item = 0;\n    while (1) {\n        item++;\n        produce_item(item);\n\n        sem_wait(&empty); // Wait for an empty slot (outside mutex)\n        sem_wait(&mutex); // Acquire mutex to access buffer\n\n        buffer[in] = item;\n        in = (in + 1) % BUFFER_SIZE;\n        printf(\"Producer added item %d. Buffer state: [\", item);\n        for(int i=0; i<BUFFER_SIZE; ++i) printf(\"%d \", buffer[i]);\n        printf(\"]\\n\");\n\n        sem_post(&mutex); // Release mutex\n        sem_post(&full);  // Signal that a slot is full\n\n        usleep(rand() % 100000);\n    }\n    return NULL;\n}\n\nvoid *consumer(void *arg) {\n    int item_val;\n    while (1) {\n        sem_wait(&full);  // Wait for a full slot (outside mutex)\n        sem_wait(&mutex); // Acquire mutex to access buffer\n\n        item_val = buffer[out];\n        out = (out + 1) % BUFFER_SIZE;\n        printf(\"Consumer removed item %d. Buffer state: [\", item_val);\n        for(int i=0; i<BUFFER_SIZE; ++i) printf(\"%d \", buffer[i]);\n        printf(\"]\\n\");\n\n        sem_post(&mutex); // Release mutex\n        sem_post(&empty); // Signal that a slot is empty\n\n        consume_item(item_val);\n\n        usleep(rand() % 100000);\n    }\n    return NULL;\n}\n```\n**הסבר לשינויים:**\nבפונקציית `producer`, החלפנו את הסדר של `sem_wait(&mutex)` ו-`sem_wait(&empty)`. כעת, היצרן ימתין למקום פנוי במאגר לפני שינסה לתפוס את המנעול לגישה למאגר.\nבפונקציית `consumer`, החלפנו את הסדר של `sem_wait(&mutex)` ו-`sem_wait(&full)`. כעת, הצרכן ימתין לפריט זמין במאגר לפני שינסה לתפוס את המנעול לגישה למאגר.\nסדר השחרור של הסמפורים (`sem_post`) גם שונה בהתאמה כדי לשמור על הסימטריה: `mutex` משוחרר מיד לאחר היציאה מהקטע הקריטי, ואז `full` או `empty` משוחררים כדי לאותת על שינוי במצב המאגר."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

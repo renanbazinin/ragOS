@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Signals",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 08:44:23",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2023,
+      "output_tokens": 1378,
+      "total_tokens": 7594
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "Open",
+    "topic": [
+      "Signals",
+      "Signal Handling",
+      "Reentrancy"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המשתמשת ב-signal handler כדי לטפל באותות (signals). עיין בקוד המצורף וזהה בעיה פוטנציאלית אחת לפחות בטיפול באותות בתוכנית זו. הסבר מדוע זו בעיה והצע פתרון או דרך למתן את הבעיה.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <signal.h>\n\nvolatile int sig_count = 0;\n\nvoid signal_handler(int signum) {\n    sig_count++;\n    // הדפסה בתוך ה-signal handler\n    printf(\"Received signal %d. Total signals: %d\\n\", signum, sig_count);\n}\n\nint main() {\n    struct sigaction sa;\n    sa.sa_handler = signal_handler;\n    sigemptyset(&sa.sa_mask);\n    sa.sa_flags = 0; // ללא דגלים מיוחדים\n\n    if (sigaction(SIGUSR1, &sa, NULL) == -1) {\n        perror(\"sigaction\");\n        exit(EXIT_FAILURE);\n    }\n\n    printf(\"Process %d is running. Send SIGUSR1 to test.\\n\", getpid());\n\n    while (1) {\n        sleep(5); // מדמה עבודה אחרת\n    }\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": 15,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הבעיה המרכזית בקוד המצורף היא הקריאה לפונקציה `printf()` מתוך ה-signal handler (`signal_handler`). פונקציית `printf()` אינה פונקציה 'בטוחה לאותות אסינכרוניים' (async-signal-safe). המשמעות היא שאם אות מגיע בזמן שהתהליך הראשי (או כל חלק אחר בתוכנית) מבצע קריאה ל-`printf()` או לפונקציה אחרת שאינה בטוחה לאותות, ה-signal handler יקטע את הביצוע של `printf()`. כאשר ה-signal handler קורא שוב ל-`printf()`, הוא עלול לגשת למבני נתונים פנימיים של `printf()` שנמצאים במצב לא עקבי, מה שיכול להוביל לשגיאות, פלט משובש, קריסות של התוכנית (deadlocks או segfaults), או התנהגות בלתי צפויה אחרת.\n\nפתרון מוצע:\nיש להימנע משימוש בפונקציות שאינן async-signal-safe בתוך signal handlers. במקום זאת:\n1. **לוגינג פשוט:** אם יש צורך בלוגינג בסיסי, ניתן להשתמש בפונקציות async-signal-safe כמו `write()` לכתיבה ל-`stderr`. לדוגמה, במקום `printf(\"...\")`, ניתן להשתמש ב-`write(STDERR_FILENO, \"...\", strlen(\"...\"))`.\n2. **הגדרת דגל וטיפול מחוץ ל-handler:** דרך עדיפה יותר היא שה-signal handler יבצע את המינימום ההכרחי – לרוב, רק הגדרת דגל גלובלי (מסוג `volatile sig_atomic_t`) או עדכון משתנה אטומי. התהליך הראשי יבדוק מעת לעת את הדגל הזה ויבצע את הפעולות המורכבות יותר (כמו הדפסה, הקצאת זיכרון, או קריאה לפונקציות לא בטוחות) מחוץ ל-handler, בסביבה בטוחה.\n\nלדוגמה, במקרה זה, ה-handler יכול רק להגדיל את `sig_count` ולהגדיר דגל שצריך לטפל באות, והלולאה הראשית תדפיס:\n\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <signal.h>\n#include <string.h> // For strlen\n\nvolatile sig_atomic_t sig_count = 0;\nvolatile sig_atomic_t signal_received_flag = 0; // New flag\n\nvoid signal_handler(int signum) {\n    sig_count++;\n    signal_received_flag = 1; // Set flag\n}\n\nint main() {\n    struct sigaction sa;\n    sa.sa_handler = signal_handler;\n    sigemptyset(&sa.sa_mask);\n    sa.sa_flags = 0;\n\n    if (sigaction(SIGUSR1, &sa, NULL) == -1) {\n        perror(\"sigaction\");\n        exit(EXIT_FAILURE);\n    }\n\n    printf(\"Process %d is running. Send SIGUSR1 to test.\\n\", getpid());\n\n    while (1) {\n        sleep(1); // Check more frequently\n        if (signal_received_flag) {\n            // Handle the signal processing safely outside the handler\n            printf(\"Received signal (handled outside). Total signals: %d\\n\", sig_count);\n            signal_received_flag = 0; // Reset flag\n        }\n    }\n\n    return 0;\n}\n```"
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

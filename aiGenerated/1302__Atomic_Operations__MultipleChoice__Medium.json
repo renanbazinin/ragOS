@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Atomic Operations",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 09:24:29",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1758,
+      "output_tokens": 655,
+      "total_tokens": 4355
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Atomic Operations",
+      "Synchronization",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתון מעבד התומך בפעולה האטומית CAS, הניתנת להפעלה ע\"י קריאה לפונקציה:\n`BOOL compareAndSet (int* ptr, int expected, int new_val);`\nסטודנט כתב את הפונקציה הבאה לדימוי פעולת המעבד האטומית TAS (Test-and-Set) באמצעות פעולת CAS:",
+      "code_snippet": "int testAndSetWithCAS(int* ptr) {\n    int old_val;\n    do {\n        old_val = *ptr;\n    } while (!compareAndSet(ptr, old_val, 1));\n    return old_val;\n}",
+      "options": [
+        "א. המימוש תקין, ושקול לשימוש ב-TAS.",
+        "ב. המימוש תקין, אך יפגין ביצועים פחות טובים משימוש ב-TAS.",
+        "ג. המימוש לא תקין, שימוש בו עלול לגרום לקיפאון.",
+        "ד. המימוש לא תקין, שימוש בו עלול לגרום להרעבה.",
+        "ה. המימוש לא תקין, הערך שמוחזר לא תמיד יהיה נכון."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב'. המימוש תקין מבחינה פונקציונלית. לולאת ה-`do-while` מבטיחה שהערך `old_val` שיוחזר הוא אכן הערך שהיה ב-`*ptr` רגע לפני שפעולת ה-CAS של התהליך הנוכחי הצליחה לשנות אותו ל-1. אם חוט אחר משנה את `*ptr` בין הקריאה ל-`*ptr` לבין קריאת ה-`compareAndSet`, ה-CAS יכשל והלולאה תנסה שוב עם הערך המעודכן. עם זאת, פעולת TAS חומרתית היא בדרך כלל פקודת מעבד בודדת ואטומית, בעוד שהמימוש באמצעות CAS כרוך בלולאה (spin-loop) שעלולה לדרוש ניסיונות חוזרים ונשנים במקרה של תחרות גבוהה, מה שיפגע בביצועים בהשוואה ל-TAS מקורי."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

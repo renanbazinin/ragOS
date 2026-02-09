@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Disks",
+    "topic_hint": "I/O",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 09:35:52",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 970,
+      "output_tokens": 1655,
+      "total_tokens": 5902
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "I/O",
+      "Asynchronous I/O",
+      "Memory Management",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא המשתמש במנגנון קריאת I/O אסינכרונית (בדומה ל-`ReadFileEx` ב-Windows או `io_submit` בלינוקס). הפונקציה `AsyncReadWrapper` מפעילה קריאה אסינכרונית לתוך ה-buffer ומחזירה מיד. ה-kernel יבצע את פעולת הקריאה לתוך ה-buffer שהועבר לו במועד מאוחר יותר.",
+      "code_snippet": "#include <iostream>\n#include <vector>\n#include <string>\n\n// Assume HANDLE and OVERLAPPED are defined for context in a real system.\n// For this example, we use void* for generic pointers.\nvoid AsyncReadWrapper(void* hFile, char* buffer, size_t bytesToRead, void* pOverlapped, void* pCompletionRoutine) {\n    // This function initiates an asynchronous read operation\n    // and returns immediately. The kernel will write into 'buffer' at a later time.\n    std::cout << \"Async read initiated for buffer at \" << (void*)buffer << \" with size \" << bytesToRead << \" bytes.\" << std::endl;\n    // ... actual system call implementation would be here ...\n}\n\nint main() {\n    void* hFile = (void*)0xDEADBEEF; // Mock file handle for illustration\n\n    // Scenario 1: Stack-allocated buffer\n    std::cout << \"\\n--- Scenario 1: Stack Buffer ---\" << std::endl;\n    {\n        char stackBuffer[1024];\n        std::cout << \"Stack buffer allocated at \" << (void*)stackBuffer << std::endl;\n        AsyncReadWrapper(hFile, stackBuffer, sizeof(stackBuffer), nullptr, nullptr);\n        // The main function continues immediately.\n    } // stackBuffer goes out of scope here. Its memory might be reused.\n\n    std::cout << \"After stack buffer scope. I/O might still be pending for stackBuffer's address.\" << std::endl;\n\n    // Scenario 2: Heap-allocated buffer, freed immediately\n    std::cout << \"\\n--- Scenario 2: Heap Buffer ---\" << std::endl;\n    {\n        char* heapBuffer = new char[1024];\n        std::cout << \"Heap buffer allocated at \" << (void*)heapBuffer << std::endl;\n        AsyncReadWrapper(hFile, heapBuffer, 1024, nullptr, nullptr);\n        delete[] heapBuffer; // Buffer freed *before* I/O completes.\n        std::cout << \"Heap buffer freed at \" << (void*)heapBuffer << \". I/O might still be pending for this address.\" << std::endl;\n    }\n\n    std::cout << \"\\nEnd of main. In a real program, we would wait for I/O completion here.\" << std::endl;\n    return 0;\n}",
+      "options": [
+        "א. קריאות I/O אסינכרוניות תמיד חוסמות את התהליך עד להשלמתן, מה שמבטל את יתרון האסינכרוניות.",
+        "ב. ה-kernel יבצע העתקה של ה-buffer לזיכרון פנימי משלו מיד עם קבלת הבקשה, ולכן אין חשש לשחרור מוקדם של ה-buffer.",
+        "ג. עלולה להתרחש בעיה של 'שימוש בזיכרון לאחר שחרורו' (Use-After-Free) או שחיתות נתונים, מכיוון שה-buffer עשוי להשתחרר (במקרה של stackBuffer) או להימחק (במקרה של heapBuffer) לפני שה-kernel מסיים לכתוב אליו את הנתונים.",
+        "ד. ה-kernel יזהה אוטומטית שה-buffer שוחרר ויבטל את פעולת ה-I/O האסינכרונית באופן בטוח.",
+        "ה. אין בעיה בקטע קוד זה, והוא מדגים שימוש נכון ב-I/O אסינכרוני."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "הבעיה המרכזית בקטע הקוד היא ניהול מחזור החיים של ה-buffer עבור פעולות I/O אסינכרוניות. כאשר קוראים לפונקציה `AsyncReadWrapper` (שמייצגת קריאת I/O אסינכרונית), היא מחזירה מיד, וה-kernel מתחיל את פעולת הקריאה ברקע. ה-kernel מצפה שה-buffer שהועבר לו יהיה תקף, נגיש וזמין לכתיבה עד שהפעולה תושלם בפועל.\n\nבמקרה של `stackBuffer` (תרחיש 1): ה-buffer מוקצה על המחסנית. כאשר הבלוק מסתיים (ה-`}` הסוגר), ה-`stackBuffer` יוצא מתחום ההיקף והזיכרון שלו הופך להיות לא תקף ועלול להיות מוקצה מחדש לשימוש אחר. אם פעולת ה-I/O האסינכרונית לא הסתיימה עד לנקודה זו, ה-kernel ינסה לכתוב לזיכרון שכבר שוחרר או שימש מחדש, מה שיוביל להתנהגות בלתי צפויה, שחיתות נתונים או קריסה (בעיית Use-After-Free).\n\nבמקרה של `heapBuffer` (תרחיש 2): ה-buffer מוקצה על הערימה (heap) באמצעות `new char[1024]`. מיד לאחר קריאה ל-`AsyncReadWrapper`, ה-buffer משוחרר באמצעות `delete[] heapBuffer`. בדומה למקרה הראשון, אם ה-kernel עדיין לא סיים לכתוב ל-buffer, הוא ינסה לכתוב לזיכרון שכבר שוחרר, מה שיוביל לבעיות זהות.\n\nפתרון נכון דורש להבטיח שה-buffer יישאר תקף ונגיש עד להשלמת פעולת ה-I/O. הדבר נעשה בדרך כלל על ידי: הקצאת ה-buffer על הערימה (heap) וניהולו באמצעות מצביע חכם (smart pointer) או אובייקט ייעודי (כמו `std::vector<char>`) שמשחרר את הזיכרון רק לאחר קבלת הודעת השלמה על פעולת ה-I/O (לרוב בפונקציית ה-completion callback).\n\nלכן, האפשרות הנכונה היא ג'."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

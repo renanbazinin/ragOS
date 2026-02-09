@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Producer-Consumer",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 10:28:17",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1632,
+      "output_tokens": 1372,
+      "total_tokens": 7695
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Semaphores",
+      "Producer-Consumer",
+      "Concurrency",
+      "Deadlock"
+    ],
+    "content": {
+      "text": "נתון קטע קוד המממש את בעיית היצרן-צרכן (Producer-Consumer Problem) באמצעות סמפורים (semaphores) ב-C. המאגר המשותף (buffer) הוא בגודל 5. שימו לב לסדר קריאות ה-`sem_wait` בפונקציית הצרכן (`consumer`).\n\n```c\n#include <stdio.h>\n#include <pthread.h>\n#include <semaphore.h>\n\n#define BUFFER_SIZE 5\nint buffer[BUFFER_SIZE];\nint in = 0;\nint out = 0;\n\nsem_t mutex;    // For mutual exclusion\nsem_t empty;    // Counts empty slots\nsem_t full;     // Counts full slots\n\nvoid *producer(void *arg) {\n    int item = 0;\n    for (int i = 0; i < 10; ++i) { // Produces 10 items\n        item = i + 1;\n        sem_wait(&empty);\n        sem_wait(&mutex);\n        \n        buffer[in] = item;\n        in = (in + 1) % BUFFER_SIZE;\n        \n        sem_post(&mutex);\n        sem_post(&full);\n    }\n    return NULL;\n}\n\nvoid *consumer(void *arg) {\n    int item;\n    for (int i = 0; i < 10; ++i) { // Consumes 10 items\n        sem_wait(&mutex); // (1) - Modified order\n        sem_wait(&full);  // (2) - Modified order\n        \n        item = buffer[out];\n        out = (out + 1) % BUFFER_SIZE;\n        \n        sem_post(&mutex);\n        sem_post(&empty);\n    }\n    return NULL;\n}\n\n// (הסמפורים מאותחלים כראוי בפונקציית main, לדוגמה:\n// sem_init(&mutex, 0, 1);\n// sem_init(&empty, 0, BUFFER_SIZE);\n// sem_init(&full, 0, 0);)\n```\n\nמהי התוצאה הסבירה ביותר של סדר הפעולות המוצג בפונקציית הצרכן (`consumer`)?",
+      "code_snippet": null,
+      "options": [
+        "א. התוכנית תעבוד כשורה, היצרן והצרכן יסיימו את עבודתם ללא בעיות.",
+        "ב. התוכנית עלולה להיכנס למצב של קיפאון (deadlock) כאשר הצרכן מנסה לצרוך פריט ממאגר ריק.",
+        "ג. התוכנית עלולה להיכנס למצב של מרוץ נתונים (race condition) בגישה למאגר המשותף.",
+        "ד. הצרכן יצרוך פריטים לא תקינים (garbage values) מהמאגר.",
+        "ה. היצרן יחסום את עצמו באופן קבוע בניסיון לייצר פריטים."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "במצב הרגיל והנכון של פתרון בעיית היצרן-צרכן עם סמפורים, הצרכן מבצע `sem_wait(&full)` לפני `sem_wait(&mutex)`. זה מבטיח שהצרכן ימתין לפריט רק אם המאגר ריק, ורק לאחר מכן יתפוס את המנעול לגישה בטוחה למאגר.\n\nבקטע הקוד הנתון, סדר הפעולות בפונקציית הצרכן הפוך: `sem_wait(&mutex)` ואז `sem_wait(&full)`. הנה תרחיש שיוביל לקיפאון:\n1.  המאגר ריק לחלוטין. ערך הסמפור `full` הוא 0.\n2.  חוט (thread) צרכן מתחיל לרוץ ומבצע `sem_wait(&mutex)`. הוא מצליח לרכוש את המנעול `mutex` (שערכו ההתחלתי הוא 1).\n3.  מיד לאחר מכן, הצרכן מנסה לבצע `sem_wait(&full)`. מאחר ו-`full` הוא 0 (המאגר ריק), הצרכן ייחסם וימתין ש-`full` יהיה גדול מ-0.\n4.  כעת, הצרכן מחזיק במנעול `mutex` וחסום בהמתנה לפריט.\n5.  אם חוט יצרן כלשהו ינסה לייצר פריט, הוא יגיע ל-`sem_wait(&mutex)` ויחסם, מכיוון שהמנעול `mutex` מוחזק ע\"י הצרכן.\n\nכתוצאה מכך, היצרן לא יוכל להוסיף פריט למאגר ולבצע `sem_post(&full)` (פעולה שהייתה משחררת את הצרכן), והצרכן לא יוכל לשחרר את `mutex` (כי הוא מחכה ש-`full` יגדל). זהו מצב קלאסי של קיפאון (deadlock), שבו שני חוטים מחכים זה לזה למשאב שהשני מחזיק.\n\nלכן, התשובה הנכונה היא ב'."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

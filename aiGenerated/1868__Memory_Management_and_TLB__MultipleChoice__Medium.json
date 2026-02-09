@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Memory Management and TLB",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 21:20:28",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1050,
+      "output_tokens": 438,
+      "total_tokens": 2871
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Memory Management",
+      "TLB",
+      "Paging"
+    ],
+    "content": {
+      "text": "בהינתן מערכת הפעלה המשתמשת בדפדוף (paging) ו-TLB, ובהנחה שאין Page Fault, מהו המספר המינימלי של גישות לזיכרון הראשי (RAM) הנדרשות על מנת לבצע גישה לנתון (data access) במקרה של TLB Miss?",
+      "code_snippet": null,
+      "options": [
+        "א. 1",
+        "ב. 2",
+        "ג. 3",
+        "ד. 4",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "במקרה של TLB Miss, יחידת ניהול הזיכרון (MMU) נדרשת לגשת לטבלת הדפים בזיכרון הראשי (RAM) על מנת למצוא את המסגרת הפיזית המתאימה לדף הווירטואלי. זוהי גישת זיכרון אחת. לאחר מכן, ה-MMU מעדכנת את ה-TLB עם המיפוי החדש ומבצעת מחדש את הגישה לזיכרון, הפעם ישירות למיקום הפיזי של הנתון ב-RAM. זוהי גישת זיכרון שנייה. סך הכל, שתי גישות לזיכרון הראשי נדרשות במצב זה."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

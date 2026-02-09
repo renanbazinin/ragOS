@@ -1,0 +1,64 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Condition Variables",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 07:38:04",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3816,
+      "output_tokens": 2782,
+      "total_tokens": 14693
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "Open",
+    "topic": [
+      "Synchronization",
+      "Condition Variables",
+      "Mutexes",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "מערכת מנהלת מאגר של `N` משאבים זהים. תהליכים יכולים לבקש כמות מסוימת של משאבים (`k`) מהמאגר, ולהחזיר אותם לאחר שימוש. אם אין מספיק משאבים זמינים במאגר, התהליך המבקש צריך להמתין עד שיתפנו מספיק משאבים. כאשר תהליך מחזיר משאבים, יש להודיע לתהליכים הממתינים על מנת שינסו שוב לרכוש משאבים.\n\nנתון שלד קוד ב-C/C++ המשתמש במנעול (mutex) ומשתנה תנאי (condition variable) לניהול מאגר המשאבים. יש להשלים את המימוש עבור הפונקציות `acquire_resources(int k)` ו-`release_resources(int k)`.",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h> // For sleep, if needed for example usage\n\n#define TOTAL_RESOURCES 10\n\nint available_resources = TOTAL_RESOURCES;\npthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;\npthread_cond_t cond = PTHREAD_COND_INITIALIZER;\n\nvoid acquire_resources(int k) {\n    // השלם כאן את המימוש\n}\n\nvoid release_resources(int k) {\n    // השלם כאן את המימוש\n}\n",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "7.1",
+        "text": "מימוש הפונקציות: השלימו את המימוש הנכון והבטוח עבור הפונקציות `acquire_resources(int k)` ו-`release_resources(int k)` בקטע הקוד הנתון.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "7.2",
+        "text": "`signal` מול `broadcast`: בפונקציה `release_resources`, האם עדיף להשתמש ב-`pthread_cond_signal(&cond)` או ב-`pthread_cond_broadcast(&cond)`? נמקו את בחירתכם והסבירו אילו בעיות (כגון קיפאון, רעב או חוסר יעילות) עלולות להתעורר כתוצאה מהבחירה האחרת.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "7.3",
+        "text": "נכונות ובטיחות: האם המימוש שהשלמתם בסעיף 1 מונע מצבי מרוץ (race conditions) וקיפאון (deadlocks)? הסבירו.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "7.4",
+        "text": "רעב (Starvation): האם המימוש שהשלמתם בסעיף 1 עלול לגרום לרעב של תהליכים מסוימים? אם כן, תארו תרחיש כזה. אם לא, הסבירו מדוע.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "פתרון:\n\n7.1 מימוש הפונקציות:\n```c\nvoid acquire_resources(int k) {\n    pthread_mutex_lock(&mtx);\n    // לולאת while חיונית לטיפול בהתעוררויות שווא ולבדיקה חוזרת של התנאי\n    while (available_resources < k) {\n        pthread_cond_wait(&cond, &mtx);\n    }\n    available_resources -= k;\n    pthread_mutex_unlock(&mtx);\n}\n\nvoid release_resources(int k) {\n    pthread_mutex_lock(&mtx);\n    available_resources += k;\n    // שימוש ב-broadcast בטוח יותר במקרה זה\n    pthread_cond_broadcast(&cond);\n    pthread_mutex_unlock(&mtx);\n}\n```\n\n7.2 `signal` מול `broadcast`:\n**בחירה**: `pthread_cond_broadcast(&cond)`.\n**נימוק**: במקרה זה, תהליכים שונים ממתינים לתנאים שונים (כמות משאבים `k` שונה). אם נשתמש ב-`pthread_cond_signal`, רק תהליך אחד יתעורר. ייתכן שהתהליך שהתעורר אינו זה שיוכל לרכוש את המשאבים (כי הוא זקוק ליותר משאבים ממה שהתפנה, או שתהליך אחר שזקוק לפחות משאבים היה יכול לרכוש אותם). במצב כזה, התהליך שהתעורר יבדוק את התנאי שוב, יגלה שהמשאבים עדיין לא מספיקים לו, ויחזור למצב המתנה. בינתיים, התהליכים האחרים, שיכלו אולי לרכוש את המשאבים, נשארים רדומים. זה יכול להוביל לחוסר יעילות ואף לרעב.\n**בעיות עם `signal`**:\n*   **חוסר יעילות**: אם תהליך עם דרישה גדולה מתעורר אך לא יכול לרכוש, הוא חוזר לישון מבלי ששחרר אף תהליך אחר. המערכת נשארת במצב שבו משאבים זמינים אך לא מנוצלים על ידי תהליכים שיכלו להשתמש בהם.\n*   **רעב**: תהליכים עם דרישות קטנות יותר, שיכלו לרכוש את המשאבים, עלולים לסבול מרעב אם תהליכים עם דרישות גדולות יותר מתעוררים שוב ושוב וחוזרים לישון, והתהליכים ה\"קטנים\" לעולם לא מקבלים הזדמנות להתעורר ולבדוק את התנאי שלהם.\n*   **קיפאון (לא ישיר)**: לא קיפאון במובן הקלאסי של חסימה הדדית, אך המערכת יכולה להגיע למצב בו משאבים זמינים אך אף תהליך לא מתעורר לזהות זאת, אם התהליך ה\"לא נכון\" הוא היחיד שמתעורר וחוזר לישון, ואין קריאות `signal` נוספות שיעירו תהליכים אחרים.\n\n7.3 נכונות ובטיחות:\n*   **מצבי מרוץ (Race Conditions)**: המימוש מונע מצבי מרוץ. כל הגישה למשתנה המשותף `available_resources` מתבצעת בתוך קטע קריטי המוגן על ידי המוטקס `mtx`. ה-`pthread_mutex_lock` וה-`pthread_mutex_unlock` מבטיחים בלעדיות. ה-`pthread_cond_wait` משחרר את המוטקס באופן אטומי לפני הכניסה למצב שינה ורוכש אותו מחדש לאחר ההתעוררות, מה שמבטיח שרק תהליך אחד יכול לשנות את `available_resources` בכל רגע נתון.\n*   **קיפאון (Deadlocks)**: המימוש אינו גורם לקיפאון. יש רק מוטקס אחד, והוא נרכש ומשוחרר בסדר נכון (lock לפני שינוי/המתנה, unlock אחרי שינוי/התעוררות). אין שרשרת המתנה מעגלית על מוטקסים. `pthread_cond_wait` משחרר את המוטקס בזמן ההמתנה, ובכך מאפשר לתהליכים אחרים לרכוש אותו ולבצע פעולות (כמו `release_resources`) שיכולות לשנות את התנאי ולאפשר לתהליכים הממתינים להמשיך.\n\n7.4 רעב (Starvation):\n*   **כן, רעב אפשרי** גם עם שימוש ב-`pthread_cond_broadcast`.\n*   **הסבר**: למרות ש-`pthread_cond_broadcast` מעיר את כל התהליכים הממתינים, אין הבטחה לסדר שבו התהליכים יתעוררו, ירכשו מחדש את המוטקס, ויבדקו את התנאי. אם יש תהליך שדורש כמות גדולה מאוד של משאבים, וכל פעם שמשאבים מתפנים, הם נתפסים על ידי תהליכים אחרים הדורשים כמויות קטנות יותר (או שתמיד משתחררת כמות קטנה מכדי לספק את התהליך ה\"רעב\"), אז התהליך ה\"רעב\" עלול לעולם לא להצליח לרכוש את המשאבים הנדרשים לו.\n*   **תרחיש רעב עם `broadcast`**:\n    1.  `available_resources = 10`.\n    2.  תהליך A מבקש 8 משאבים ונכנס למצב המתנה (אין מספיק, כי תהליך אחר כבר תפס 3).\n    3.  תהליך B מבקש 7 משאבים ונכנס למצב המתנה.\n    4.  תהליך C מבקש 3 משאבים ונכנס למצב המתנה.\n    5.  תהליך D רוכש 2 משאבים. `available_resources` יורד ל-8.\n    6.  תהליך D משחרר 2 משאבים. `available_resources` חוזר ל-10. הוא קורא ל-`pthread_cond_broadcast`.\n    7.  A, B, C מתעוררים. המערכת בוחרת להריץ את C ראשון. C רוכש 3 משאבים. `available_resources` יורד ל-7.\n    8.  B רץ, בודק את התנאי (7 < 7?), לא יכול לרכוש, וחוזר לישון.\n    9.  A רץ, בודק את התנאי (7 < 8?), לא יכול לרכוש, וחוזר לישון.\n    10. תהליך E (חדש) רוכש 3 משאבים. `available_resources` יורד ל-4.\n    11. תהליך E משחרר 3 משאבים. `available_resources` חוזר ל-7. הוא קורא ל-`pthread_cond_broadcast`.\n    12. A, B מתעוררים שוב. נניח שתהליך F (חדש) רוכש 3 משאבים (אם יצליח לרכוש את המוטקס לפני A/B). `available_resources` יורד ל-4.\n    בתרחיש זה, A ו-B עשויים להמשיך ולהפסיד לתהליכים אחרים הדורשים כמויות קטנות יותר, או שתמיד משתחררת כמות קטנה מכדי לספק אותם, וכך הם לעולם לא יצליחו לרכוש את מבוקשם. כדי למנוע רעב מוחלט במקרים כאלה, נדרשים מנגנוני תזמון מורכבים יותר (כגון תורי עדיפויות או מנגנוני \"הזדקנות\" - aging)."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

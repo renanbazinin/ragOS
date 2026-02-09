@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Processes and Memory Management",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 20:05:39",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1034,
+      "output_tokens": 388,
+      "total_tokens": 2487
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Memory Management",
+      "Paging",
+      "Virtual Memory",
+      "Processes"
+    ],
+    "content": {
+      "text": "מהי מטרתה העיקרית של טבלת דפים (Page Table) במערכת הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. לשמור את הכתובות הפיזיות של כל הזיכרון הראשי.",
+        "ב. למפות כתובות וירטואליות לכתובות פיזיות עבור תהליך.",
+        "ג. לאחסן קבצי מערכת הפעלה על הדיסק.",
+        "ד. לנהל את הקצאת המעבד בין תהליכים שונים.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "טבלת דפים היא מבנה נתונים המשמש את מערכת ההפעלה והחומרה (MMU) כדי לתרגם כתובות זיכרון וירטואליות, המשמשות תהליכים, לכתובות זיכרון פיזיות בזיכרון הראשי. לכל תהליך יש טבלת דפים משלו המאפשרת לו גישה לזיכרון הפיזי בצורה מבודדת ובטוחה."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

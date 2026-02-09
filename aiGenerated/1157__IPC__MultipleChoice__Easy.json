@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "IPC",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 08:20:57",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1139,
+      "output_tokens": 397,
+      "total_tokens": 2954
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "IPC",
+      "Pipes"
+    ],
+    "content": {
+      "text": "איזו טענה נכונה לגבי צינור (pipe) במערכת הפעלה יוניקסית?",
+      "code_snippet": null,
+      "options": [
+        "א. הוא מאפשר תקשורת דו-כיוונית בין שני תהליכים לא קשורים.",
+        "ב. הוא מאפשר תקשורת חד-כיוונית בין שני תהליכים קשורים (לרוב אב ובן).",
+        "ג. הוא מאפשר תקשורת דו-כיוונית בין שני תהליכים קשורים.",
+        "ד. הוא מאפשר תקשורת חד-כיוונית בין שני תהליכים לא קשורים.",
+        "ה. הוא משמש בעיקר לסנכרון בין תהליכים, לא להעברת נתונים."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "צינורות (pipes) במערכות יוניקסיות הם מנגנון לתקשורת חד-כיוונית (unidirectional) בין תהליכים. הם משמשים לרוב לתקשורת בין תהליך אב לתהליך בן שנוצר ממנו, שכן הם מורשים רק בין תהליכים קשורים (related processes) שירשו את מתארי הקבצים של הצינור."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

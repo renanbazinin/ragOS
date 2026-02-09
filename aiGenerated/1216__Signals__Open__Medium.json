@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Signals",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 08:44:42",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2023,
+      "output_tokens": 2036,
+      "total_tokens": 6476
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Signals",
+      "Signal Handling",
+      "Critical Sections"
+    ],
+    "content": {
+      "text": "כתוב תוכנית C המטפלת באות SIGINT (לחיצה על Ctrl+C). התוכנית צריכה לכלול:\n1. פונקציית מטפל לאות SIGINT אשר תדפיס הודעה ותגדיל מונה גלובלי.\n2. לולאה אינסופית בפונקציה הראשית (main) המגדילה מונה אחר ומדפיסה את ערכו.\n3. קטע קריטי בתוך הלולאה הראשית, המדמה פעולה ארוכה, אשר חייב להיות מוגן מפני קטיעה על ידי SIGINT. כלומר, אם SIGINT מגיע בזמן שהתוכנית נמצאת בקטע הקריטי, הטיפול באות צריך להידחות עד ליציאה מהקטע הקריטי.\nהסבר את הקוד שכתבת ואת הלוגיקה שמאחורי הגנה על הקטע הקריטי.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון כולל הגדרת מטפל לאות SIGINT באמצעות `sigaction` והגנה על קטע קריטי באמצעות `sigprocmask`.\n\n**הקוד המלא:**\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <signal.h>\n#include <unistd.h> // For sleep\n\nvolatile int sigint_count = 0;\nvolatile int main_loop_count = 0;\n\nvoid sigint_handler(int signum) {\n    if (signum == SIGINT) {\n        printf(\"\\nCaught SIGINT! (Count: %d)\\n\", ++sigint_count);\n    }\n}\n\nint main() {\n    struct sigaction sa;\n    sigset_t block_mask, old_mask;\n\n    // 1. Setup SIGINT handler\n    sa.sa_handler = sigint_handler;\n    sigemptyset(&sa.sa_mask); // No additional signals blocked inside handler\n    sa.sa_flags = 0; // No special flags\n    if (sigaction(SIGINT, &sa, NULL) == -1) {\n        perror(\"sigaction\");\n        exit(EXIT_FAILURE);\n    }\n\n    // Prepare a signal set to block SIGINT\n    sigemptyset(&block_mask);\n    sigaddset(&block_mask, SIGINT);\n\n    printf(\"Program started. Press Ctrl+C to send SIGINT.\\n\");\n    printf(\"Entering main loop...\\n\");\n\n    while (1) {\n        main_loop_count++;\n        printf(\"Main loop iteration: %d\\n\", main_loop_count);\n\n        // Simulate some work before critical section\n        sleep(1);\n\n        // --- Critical Section Start ---\n        printf(\"  Entering critical section...\\n\");\n\n        // Block SIGINT before entering critical section\n        if (sigprocmask(SIG_BLOCK, &block_mask, &old_mask) == -1) {\n            perror(\"sigprocmask BLOCK\");\n            exit(EXIT_FAILURE);\n        }\n\n        // Simulate critical work (should not be interrupted by SIGINT)\n        printf(\"  Performing critical work...\\n\");\n        sleep(3); // Long operation\n        printf(\"  Critical work finished.\\n\");\n\n        // Unblock SIGINT after exiting critical section\n        if (sigprocmask(SIG_SETMASK, &old_mask, NULL) == -1) {\n            perror(\"sigprocmask UNBLOCK\");\n            exit(EXIT_FAILURE);\n        }\n        printf(\"  Exited critical section.\\n\");\n        // --- Critical Section End ---\n\n        printf(\"Main loop continues...\\n\");\n        sleep(1);\n    }\n\n    return 0;\n}\n```\n\n**הסבר הקוד:**\n1.  **מטפל האותות (`sigint_handler`):**\n    *   פונקציה זו נקראת כאשר אות SIGINT מתקבל.\n    *   היא מדפיסה הודעה ומגדילה את המונה הגלובלי `sigint_count`. המונה הוכרז כ-`volatile` כדי להבטיח שהקומפיילר לא יבצע אופטימיזציות שעלולות למנוע עדכון נכון של המשתנה על ידי המטפל.\n\n2.  **הגדרת מטפל SIGINT (`main`):**\n    *   משתמשים במבנה `struct sigaction` כדי להגדיר את המטפל. זוהי הדרך המודרנית והמומלצת לטיפול באותות, לעומת `signal()`, מכיוון שהיא מספקת שליטה רבה יותר (כמו הגדרת מסכת אותות נוספת במהלך ביצוע המטפל).\n    *   `sa.sa_handler` מצביע לפונקציית המטפל שלנו (`sigint_handler`).\n    *   `sigemptyset(&sa.sa_mask)` מבטיח שאף אות נוסף לא ייחסם באופן אוטומטי בזמן שהמטפל רץ (מלבד האות המטופל עצמו, SIGINT, שנחסם כברירת מחדל בזמן הטיפול בו).\n    *   `sigaction(SIGINT, &sa, NULL)` רושם את המטפל שלנו עבור SIGINT.\n\n3.  **הגנה על קטע קריטי (`main`):**\n    *   **הכנת מסכה לחסימה:** יוצרים קבוצת אותות `block_mask` ומוסיפים אליה את SIGINT באמצעות `sigaddset`.\n    *   **כניסה לקטע קריטי:** לפני הכניסה לקטע הקריטי, קוראים ל-`sigprocmask(SIG_BLOCK, &block_mask, &old_mask)`.\n        *   `SIG_BLOCK` מציין שאנו רוצים להוסיף את האותות ב-`block_mask` למסכת האותות הנוכחית של התהליך.\n        *   `&old_mask` משמש לשמירת מסכת האותות שהייתה פעילה לפני החסימה. זה חשוב כדי שנוכל לשחזר אותה במדויק ביציאה מהקטע הקריטי.\n        *   בנקודה זו, SIGINT נחסם. אם אות SIGINT יגיע עכשיו, הוא לא יטופל מיד אלא יישאר ממתין (pending) וייטופל רק כאשר האות יבוטל חסימתו.\n    *   **ביצוע עבודה קריטית:** מדמים עבודה ארוכה באמצעות `sleep(3)`.\n    *   **יציאה מהקטע הקריטי:** לאחר סיום העבודה הקריטית, קוראים ל-`sigprocmask(SIG_SETMASK, &old_mask, NULL)`.\n        *   `SIG_SETMASK` מציין שאנו רוצים להגדיר את מסכת האותות של התהליך למסכה ששמרנו ב-`old_mask`. פעולה זו מבטלת את חסימת SIGINT (ומחזירה את כל האותות למצבם המקורי לפני הכניסה לקטע הקריטי).\n        *   אם SIGINT הגיע בזמן שהוא חסום, הוא יסופק כעת לתהליך ויטופל על ידי `sigint_handler`.\n\n**לוגיקה:**\nהשימוש ב-`sigprocmask` מאפשר לנו ליצור \"חלונות\" קריטיים בתוכנית שבהם אנו לא רוצים שאותות ספציפיים יפריעו למהלך התקין של הביצוע. על ידי חסימת SIGINT לפני הכניסה לקטע הקריטי ושחרור החסימה ביציאה ממנו, אנו מבטיחים שפעולות רגישות לא יופרעו באופן אסינכרוני. אם אות מגיע בזמן שהוא חסום, הוא נשאר במצב \"ממתין\" (pending) ומועבר למטפל רק כאשר האות משוחרר מחסימה."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

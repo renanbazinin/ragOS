@@ -1,0 +1,57 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Copy-on-Write",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 08:59:03",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3509,
+      "output_tokens": 2894,
+      "total_tokens": 11632
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Memory Management",
+      "Copy-on-Write",
+      "Process Management"
+    ],
+    "content": {
+      "text": "שאלה זו עוסקת במנגנון Copy-on-Write (CoW), המשמש לרוב במערכות הפעלה כדי לייעל את יצירת תהליכים חדשים באמצעות קריאת המערכת `fork()`. במקום להעתיק את כל מרחב הכתובות של תהליך האב לתהליך הבן מיד, CoW מאפשר לשני התהליכים לחלוק את אותם דפי זיכרון פיזיים, ורק כאשר אחד מהם מנסה לכתוב לדף משותף, הדף מועתק.\n\nנתבונן בקטע הקוד הבא:\n\nהניחו שגודל דף זיכרון הוא 4096 בתים (PAGE_SIZE = 4096).",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\n#define PAGE_SIZE 4096 // Assume a page size of 4KB\n\nint shared_data[PAGE_SIZE / sizeof(int)]; // An array that fits exactly one page\nint another_shared_data[PAGE_SIZE / sizeof(int)]; // Another array, also one page\n\nint main() {\n    printf(\"Parent (PID %d): Initializing data...\\n\", getpid());\n    for (int i = 0; i < PAGE_SIZE / sizeof(int); ++i) {\n        shared_data[i] = i;\n        another_shared_data[i] = i * 2;\n    }\n\n    printf(\"Parent (PID %d): Data initialized. shared_data[0]=%d, another_shared_data[0]=%d\\n\", getpid(), shared_data[0], another_shared_data[0]);\n\n    pid_t pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        exit(1);\n    } else if (pid == 0) { // Child process\n        printf(\"Child (PID %d): After fork. shared_data[0]=%d, another_shared_data[0]=%d\\n\", getpid(), shared_data[0], another_shared_data[0]);\n        \n        // Child modifies shared_data\n        shared_data[0] = 1000;\n        printf(\"Child (PID %d): Modified shared_data[0] to %d\\n\", getpid(), shared_data[0]);\n        \n        // Child does NOT modify another_shared_data\n        \n        exit(0);\n    } else { // Parent process\n        printf(\"Parent (PID %d): After fork. shared_data[0]=%d, another_shared_data[0]=%d\\n\", getpid(), shared_data[0], another_shared_data[0]);\n        \n        // Parent modifies another_shared_data\n        another_shared_data[0] = 2000;\n        printf(\"Parent (PID %d): Modified another_shared_data[0] to %d\\n\", getpid(), another_shared_data[0]);\n        \n        // Parent does NOT modify shared_data\n        \n        wait(NULL); // Wait for child to finish\n        printf(\"Parent (PID %d): Child finished. shared_data[0]=%d, another_shared_data[0]=%d\\n\", getpid(), shared_data[0], another_shared_data[0]);\n    }\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "תארו בקצרה את מנגנון ה-Copy-on-Write (CoW) ואת יתרונותיו העיקריים בהקשר של יצירת תהליכים עם `fork()`.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "בהתבסס על קטע הקוד הנתון ובהנחה שמערכת ההפעלה מממשת Copy-on-Write:\nא. כמה דפי זיכרון פיזיים מוקצים עבור המשתנים `shared_data` ו-`another_shared_data` יחד, מיד לאחר השורה `printf(\"Parent (PID %d): Data initialized...\\n\", getpid());` ולפני קריאת `fork()`? נמקו.\nב. כמה דפי זיכרון פיזיים מוקצים עבור המשתנים `shared_data` ו-`another_shared_data` יחד, מיד לאחר קריאת `fork()` (בתהליך האב או הבן), ולפני כל פעולת כתיבה לאחד מהם? נמקו.\nג. כמה דפי זיכרון פיזיים מוקצים עבור המשתנים `shared_data` ו-`another_shared_data` יחד, לאחר ששני התהליכים (האב והבן) סיימו את פעולות הכתיבה שלהם (כלומר, לאחר השורה `printf(\"Child (PID %d): Modified shared_data[0] to %d\\n\", getpid(), shared_data[0]);` בתהליך הבן, ולאחר השורה `printf(\"Parent (PID %d): Modified another_shared_data[0] to %d\\n\", getpid(), another_shared_data[0]);` בתהליך האב)? נמקו.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.3",
+        "text": "תארו את שינויי הרשאות הגישה (read/write) בדפי הטבלה של תהליך האב עבור הדף המכיל את `shared_data` בשני מצבים:\nא. מיד לאחר קריאת `fork()`, ולפני שהבן מבצע את הכתיבה ל-`shared_data`.\nב. לאחר שהבן ביצע את הכתיבה ל-`shared_data`.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.1. מנגנון Copy-on-Write (CoW) הוא אסטרטגיה לניהול זיכרון המאפשרת למספר תהליכים לשתף דפי זיכרון פיזיים. כאשר תהליך חדש נוצר באמצעות `fork()`, במקום להעתיק מיד את כל דפי הזיכרון של תהליך האב לתהליך הבן, שניהם מקבלים הפניות (references) לאותם דפים פיזיים. דפים אלו מסומנים כקריאה בלבד (Read-Only) בטבלאות הדפים של שני התהליכים.\nהיתרון העיקרי הוא חיסכון משמעותי בזמן ובזיכרון. זמן ה-fork מהיר יותר מכיוון שלא מתבצעת העתקה מיידית של זיכרון רב, וזיכרון פיזי נחסך כל עוד התהליכים חולקים את אותם דפים. העתקה בפועל מתרחשת רק כאשר אחד התהליכים מנסה לכתוב לדף משותף. במקרה כזה, מתרחשת תקלת דף (page fault), מערכת ההפעלה מעתיקה את הדף הנתון לדף פיזי חדש, מעדכנת את טבלת הדפים של התהליך הכותב כך שתצביע לדף החדש, ומשנה את הרשאותיו לקריאה-וכתיבה (Read-Write). הדף המקורי נשאר עם הרשאות קריאה-בלבד עבור התהליך השני (אם הוא עדיין משותף).\n\n1.2.\nא. לפני `fork()`:\n`shared_data` הוא מערך בגודל PAGE_SIZE / sizeof(int) * sizeof(int) = PAGE_SIZE, ולכן תופס דף זיכרון פיזי אחד.\n`another_shared_data` הוא גם מערך בגודל PAGE_SIZE / sizeof(int) * sizeof(int) = PAGE_SIZE, ולכן תופס דף זיכרון פיזי אחד.\nסה\"כ: 2 דפי זיכרון פיזיים. (הנימוק הוא שכל מערך תופס דף אחד בדיוק, ושניהם מאותחלים ונגישים).\n\nב. מיד לאחר `fork()` ולפני כתיבה:\nמנגנון CoW פועל. תהליך הבן יורש את מרחב הכתובות הווירטואלי של האב, אך הדפים הפיזיים עצמם משותפים. טבלאות הדפים של האב והבן מצביעות על אותם 2 דפים פיזיים, אך עם הרשאות קריאה בלבד.\nלכן, עדיין מוקצים 2 דפי זיכרון פיזיים בלבד עבור המשתנים הללו.\n\nג. לאחר ששני התהליכים סיימו את פעולות הכתיבה:\nכאשר הבן כותב ל-`shared_data[0]`, מתרחשת תקלת דף. מערכת ההפעלה מעתיקה את הדף המכיל את `shared_data` לדף פיזי חדש עבור הבן. כעת, יש דף פיזי עבור `shared_data` של האב, ודף פיזי נפרד עבור `shared_data` של הבן. (סה\"כ 2 דפים עבור `shared_data`).\nכאשר האב כותב ל-`another_shared_data[0]`, מתרחשת תקלת דף. מערכת ההפעלה מעתיקה את הדף המכיל את `another_shared_data` לדף פיזי חדש עבור האב. כעת, יש דף פיזי עבור `another_shared_data` של הבן (שנותר מקורי), ודף פיזי נפרד עבור `another_shared_data` של האב. (סה\"כ 2 דפים עבור `another_shared_data`).\nסה\"כ: 4 דפי זיכרון פיזיים עבור המשתנים הללו.\n\n1.3.\nא. מיד לאחר קריאת `fork()`, ולפני שהבן מבצע את הכתיבה ל-`shared_data`:\nבטבלת הדפים של תהליך האב, עבור הדף הווירטואלי המכיל את `shared_data`, ההרשאות יהיו קריאה בלבד (Read-Only). זאת מכיוון שהדף משותף עם תהליך הבן באמצעות מנגנון CoW, וכל ניסיון כתיבה יגרום לתקלת דף כדי לאפשר העתקה.\n\nב. לאחר שהבן ביצע את הכתיבה ל-`shared_data`:\nכאשר הבן מנסה לכתוב ל-`shared_data`, מתרחשת תקלת דף. מערכת ההפעלה יוצרת עותק פיזי של הדף המכיל את `shared_data` עבור הבן, ומשנה את טבלת הדפים של הבן כך שתצביע על הדף החדש עם הרשאות קריאה-וכתיבה.\nבטבלת הדפים של תהליך האב, עבור הדף הווירטואלי המכיל את `shared_data`, ההרשאות יישארו קריאה בלבד (Read-Only). האב עדיין מצביע על הדף הפיזי המקורי. כיוון שהאב לא ניסה לכתוב לדף זה, אין צורך לשנות את הרשאותיו או להעתיק אותו עבור האב. אם האב ינסה לכתוב לדף זה מאוחר יותר, רק אז תתרחש תקלת דף ותיווצר עבורו עותק משלו."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

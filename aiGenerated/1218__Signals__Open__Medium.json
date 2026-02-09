@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Signals",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 08:45:38",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2023,
+      "output_tokens": 1866,
+      "total_tokens": 7040
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Signals"
+    ],
+    "content": {
+      "text": "כתבו תוכנית C המטפלת באות SIGINT (המקביל ללחיצה על Ctrl+C). מטפל האות צריך להדפיס הודעה מתאימה ולצאת מהתוכנית בצורה נקייה.\nהתוכנית צריכה לבצע לולאה אינסופית המדפיסה \"Working normally...\".\nבשלב מסוים, התוכנית נכנסת ל\"קטע קריטי\" למשך 5 שניות, שבו היא מבצעת פעולה רגישה (לדוגמה, מדפיסה \"Critical operation...\"). במהלך קטע קריטי זה, התוכנית אסורה להיקטע על ידי SIGINT. כלומר, אם SIGINT מתקבל במהלך הקטע הקריטי, הוא צריך להיות חסום ולא יטופל מיד.\nלאחר שהקטע הקריטי מסתיים, התוכנית חוזרת למצב \"Working normally...\" וצריכה להיות מסוגלת לטפל ב-SIGINT שוב. אם SIGINT התקבל בזמן שהיה חסום, הוא צריך להיות מטופל מיד עם סיום הקטע הקריטי ושחרור החסימה.\nהציגו את קוד המקור המלא של התוכנית והסבירו את הלוגיקה והשימוש בפונקציות המתאימות.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון כולל שלושה מרכיבים עיקריים:\n\n1.  **הגדרת מטפל אות (Signal Handler) עבור `SIGINT`**:\n    *   פונקציית `sigint_handler` מוגדרת כמטפל האות. כאשר `SIGINT` מתקבל, פונקציה זו תופעל. היא מדפיסה הודעה ויוצאת מהתוכנית בצורה נקייה באמצעות `exit(0)`.\n    *   הפונקציה `sigaction` משמשת להתקנת המטפל. אנו מאתחלים את המבנה `sa` עם הפונקציה שלנו (`sa.sa_handler = sigint_handler`), מרוקנים את מסכת האותות של המטפל (`sigemptyset(&sa.sa_mask)`) כדי שלא יחסום אותות נוספים בזמן הריצה שלו, ומגדירים את הדגל `SA_RESTART` כדי שמערכות קריאות שנקטעו על ידי האות יופעלו מחדש אוטומטית.\n\n2.  **חסימת `SIGINT` לפני הקטע הקריטי**:\n    *   לפני הכניסה לקטע הקריטי, אנו רוצים למנוע מ-`SIGINT` לקטוע את התהליך.\n    *   אנו יוצרים סט אותות (`sigset_t blocked_signals`) ומוסיפים אליו את `SIGINT` באמצעות `sigaddset`.\n    *   הפונקציה `sigprocmask` נקראת עם `SIG_BLOCK` כדי להוסיף את האותות בסט `blocked_signals` למסכת האותות של התהליך הנוכחי. כלומר, `SIGINT` נחסם כעת. אם `SIGINT` יתקבל בזמן זה, הוא לא יופעל מיד אלא יישאר במצב \"ממתין\" (pending).\n\n3.  **שחרור חסימת `SIGINT` לאחר הקטע הקריטי**:\n    *   לאחר שהקטע הקריטי מסתיים, אנו רוצים שהתוכנית תחזור להיות רגישה ל-`SIGINT`.\n    *   שוב נקרא לפונקציה `sigprocmask`, הפעם עם `SIG_UNBLOCK`, כדי להסיר את `SIGINT` ממסכת האותות של התהליך.\n    *   ברגע ש-`SIGINT` משוחרר מחסימה, אם הוא התקבל בזמן שהיה חסום (כלומר, היה \"ממתין\"), הוא יטופל מיד על ידי המטפל שהוגדר.\n    *   התוכנית מדפיסה הודעות כדי להמחיש מתי היא נכנסת ויוצאת מהקטע הקריטי ומתי האותות נחסמים ומשוחררים. הלולאה הראשית מדפיסה \"Working normally...\" ומדי פעם נכנסת לקטע הקריטי.\n\nהפתרון מדגים כיצד ניתן לשלוט על קבלת אותות באופן דינמי במהלך ריצת התוכנית, ובכך להגן על קטעים קריטיים מפני הפרעות לא רצויות תוך שמירה על יכולת תגובה לאותות בשאר זמני הריצה.\n\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <signal.h>\n#include <unistd.h> // For sleep\n\n// Signal handler for SIGINT\nvoid sigint_handler(int signo) {\n    printf(\"\\n[Handler] SIGINT received. Exiting gracefully.\\n\");\n    exit(0);\n}\n\nint main() {\n    struct sigaction sa;\n    sigset_t blocked_signals; // Set for signals to block\n\n    // 1. Set up the SIGINT handler\n    sa.sa_handler = sigint_handler;\n    sigemptyset(&sa.sa_mask); // Don't block any additional signals within the handler\n    sa.sa_flags = SA_RESTART; // Restart interrupted system calls\n    if (sigaction(SIGINT, &sa, NULL) == -1) {\n        perror(\"sigaction\");\n        exit(1);\n    }\n\n    printf(\"Program started. Press Ctrl+C to exit (outside critical section).\\n\");\n\n    while (1) {\n        // Normal operation loop\n        printf(\"Working normally...\\n\");\n        sleep(1);\n\n        // Simulate entering a critical section every few seconds\n        // Using a simple counter for demonstration, instead of rand()\n        static int counter = 0;\n        if (counter++ % 5 == 0) { // Enter critical section every 5 seconds\n            printf(\"\\n--- Entering CRITICAL SECTION ---\\n\");\n\n            // 2. Block SIGINT before critical section\n            sigemptyset(&blocked_signals);\n            sigaddset(&blocked_signals, SIGINT);\n            if (sigprocmask(SIG_BLOCK, &blocked_signals, NULL) == -1) {\n                perror(\"sigprocmask SIG_BLOCK\");\n                exit(1);\n            }\n            printf(\"SIGINT is now BLOCKED.\\n\");\n\n            // Critical operation (simulated with sleep)\n            for (int i = 0; i < 5; ++i) {\n                printf(\"Critical operation... %d/5\\n\", i + 1);\n                sleep(1);\n            }\n\n            printf(\"SIGINT will now be UNBLOCKED.\\n\");\n            // 3. Unblock SIGINT after critical section\n            if (sigprocmask(SIG_UNBLOCK, &blocked_signals, NULL) == -1) {\n                perror(\"sigprocmask SIG_UNBLOCK\");\n                exit(1);\n            }\n            printf(\"--- Exiting CRITICAL SECTION ---\\n\");\n            printf(\"SIGINT is now UNBLOCKED. If pending, it will be delivered now.\\n\\n\");\n        }\n    }\n\n    return 0; // Should not be reached\n}\n```"
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

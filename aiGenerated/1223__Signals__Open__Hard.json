@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Signals",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 08:49:27",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3748,
+      "output_tokens": 2456,
+      "total_tokens": 14162
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Signals",
+      "Process Management",
+      "Concurrency",
+      "Error Handling"
+    ],
+    "content": {
+      "text": "נתון קטע קוד C המממש תקשורת בין תהליך אב לתהליך בן. תהליך האב יוצר תהליך בן, והבן מבצע פעולה כלשהי (מודגמת על ידי `sleep`), שולח אות `SIGUSR1` לאב, ולאחר מכן יוצא. תהליך האב אמור לטפל באות `SIGUSR1` על ידי הגדלת מונה גלובלי, להמתין לסיום תהליך הבן, ולהדפיס את הערך הסופי של המונה.\n\nהקוד הנתון אינו כתוב בצורה חסינה ויציבה, ועלול להציג התנהגות שגויה או לא צפויה במצבים מסוימים.\n\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <signal.h>\n#include <sys/wait.h>\n\nvolatile int sig_count = 0; // מונה לקבלת אותות SIGUSR1\n\nvoid sigusr1_handler(int signo) {\n    sig_count++;\n    printf(\"Parent: SIGUSR1 received! Current count: %d\\n\", sig_count); \n}\n\nint main() {\n    pid_t pid;\n\n    // הגדרת מטפל לאות SIGUSR1\n    signal(SIGUSR1, sigusr1_handler); \n\n    pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        exit(1);\n    } else if (pid == 0) { // תהליך הבן\n        printf(\"Child (%d): Starting work...\\n\", getpid());\n        sleep(2); // מדמה עבודה\n        printf(\"Child (%d): Sending SIGUSR1 to parent (%d)...\\n\", getpid(), getppid());\n        kill(getppid(), SIGUSR1);\n        printf(\"Child (%d): Exiting.\\n\", getpid());\n        exit(0);\n    } else { // תהליך האב\n        printf(\"Parent (%d): Child created with PID %d. Waiting for child...\\n\", getpid(), pid);\n        \n        int status;\n        waitpid(pid, &status, 0); \n\n        printf(\"Parent (%d): Child %d terminated. Final SIGUSR1 count: %d\\n\", getpid(), pid, sig_count);\n    }\n\n    return 0;\n}\n```\n\n**שאלות:**\n1.  זהו ותארו לפחות שתי בעיות קריטיות בקוד הנתון, והסבירו מדוע הן בעייתיות.\n2.  תקנו את הקוד כך שיפעל באופן אמין ונכון. יש להשתמש ב-`sigaction` ובדגלים המתאימים. הסבירו את התיקונים שביצעתם.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "חלק א': זיהוי בעיות\n\n1.  **שימוש ב-`signal()` במקום `sigaction()`:** הפונקציה `signal()` היא פונקציה מורשת (legacy) בעלת התנהגות לא אמינה ולא ניתנת לחיזוי במערכות יוניקס מודרניות. לדוגמה, במערכות מסוימות, לאחר קבלת אות, המטפל מתאפס (מוגדר מחדש כ-`SIG_DFL`), מה שמחייב הגדרה חוזרת של המטפל בתוך המטפל עצמו, וזה יוצר חלון זמן שבו אותות נוספים מאותו סוג לא יטופלו או יגרמו לסיום התהליך. `sigaction()` מספקת שליטה מדויקת יותר על התנהגות האות, כולל מסכות אותות בתוך המטפל, ודגלים כמו `SA_RESTART` ו-`SA_SIGINFO`, והיא הדרך המועדפת והאמינה לטיפול באותות.\n\n2.  **קריאה ל-`printf()` בתוך מטפל אותות (Signal Handler):** הפונקציה `printf()` אינה \"async-signal-safe\". המשמעות היא שהיא אינה מובטחת לפעול בצורה תקינה ובטוחה כאשר היא נקראת מתוך מטפל אותות, במיוחד אם הקריאה לאות קוטעת קריאה אחרת ל-`printf()` או לפונקציית I/O אחרת במקביל בחוט הראשי. קריאה כזו עלולה להוביל למצבי מירוץ, לנעילה (deadlock) אם `printf` מנסה לרכוש מנעול שנתפס כבר על ידי החוט הראשי, או לפלט משובש/לא שלם. כלל אצבע הוא שמטפל אותות צריך לבצע את המינימום ההכרחי של פעולות, ורק כאלו שהן async-signal-safe (כמו הגדרת דגל `volatile sig_atomic_t` או כתיבה ל-pipe).\n\n3.  **הפרעה לקריאת מערכת `waitpid()`:** קריאת המערכת `waitpid()` יכולה להיות מופרעת על ידי אות. אם אות `SIGUSR1` מגיע בזמן ש-`waitpid()` חוסמת, הפונקציה `waitpid()` תחזור עם ערך `EINTR` ב-`errno` (ותחזיר -1), במקום להמתין לסיום הבן. הקוד הנתון אינו מטפל במצב זה, ולכן אם `waitpid()` מופרעת, התהליך האב ימשיך הלאה כאילו הבן סיים (או ייתקע בתלות בהתנהגות ברירת המחדל של `signal`), מה שעלול להוביל להדפסת המונה לפני שהבן באמת סיים, או שהבן יהפוך ל\"זומבי\" אם האב לא יקרא ל-`waitpid` שוב. יש לטפל בהפרעות אלה באופן מפורש.\n\nחלק ב': קוד מתוקן והסברים\n\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <signal.h>\n#include <sys/wait.h>\n#include <errno.h> // נדרש עבור errno\n\n// נשתמש ב-sig_atomic_t עבור משתנים שמשותפים בין מטפל אותות לחוט הראשי.\n// זה מבטיח שהגישה למשתנה תהיה אטומית ולא תיקטע באמצע על ידי אות.\nvolatile sig_atomic_t sig_count = 0; \n\nvoid sigusr1_handler(int signo) {\n    sig_count++;\n    // נמנעים מקריאה ל-printf בתוך המטפל, מכיוון שזו אינה פונקציה async-signal-safe.\n    // הפעולה היחידה הבטוחה כאן היא עדכון משתנה sig_atomic_t.\n}\n\nint main() {\n    pid_t pid;\n    struct sigaction sa;\n\n    // 1. הגדרת מטפל לאות SIGUSR1 באמצעות sigaction()\n    // זה מבטיח טיפול אמין באותות.\n    sa.sa_handler = sigusr1_handler;\n    sigemptyset(&sa.sa_mask); // מנקה את מסכת האותות - לא חוסם אותות נוספים בזמן הטיפול.\n    sa.sa_flags = 0; // אין צורך בדגלים מיוחדים כמו SA_RESTART עבור מטפל זה,\n                     // כיוון שהוא רק מעדכן מונה. (SA_RESTART רלוונטי יותר לקריאות מערכת)\n    if (sigaction(SIGUSR1, &sa, NULL) == -1) {\n        perror(\"sigaction SIGUSR1 failed\");\n        exit(1);\n    }\n\n    pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        exit(1);\n    } else if (pid == 0) { // תהליך הבן\n        printf(\"Child (%d): Starting work...\\n\", getpid());\n        sleep(2); // מדמה עבודה\n        printf(\"Child (%d): Sending SIGUSR1 to parent (%d)...\\n\", getpid(), getppid());\n        kill(getppid(), SIGUSR1);\n        printf(\"Child (%d): Exiting.\\n\", getpid());\n        exit(0);\n    } else { // תהליך האב\n        printf(\"Parent (%d): Child created with PID %d. Waiting for child...\\n\", getpid(), pid);\n        \n        // 3. טיפול אמין בהפרעות לקריאת המערכת waitpid()\n        // נשתמש בלולאה כדי להבטיח ש-waitpid() תמתין לילד עד לסיומו,\n        // גם אם היא מופרעת על ידי אות (SIGUSR1 במקרה זה).\n        int status;\n        int result;\n        do {\n            result = waitpid(pid, &status, 0);\n            if (result == -1 && errno == EINTR) {\n                printf(\"Parent (%d): waitpid interrupted by signal, retrying...\\n\", getpid());\n            } else if (result == -1) {\n                perror(\"waitpid failed\"); // שגיאה אמיתית שאינה EINTR\n                exit(1);\n            }\n        } while (result == -1 && errno == EINTR);\n\n        printf(\"Parent (%d): Child %d terminated. Final SIGUSR1 count: %d\\n\", getpid(), pid, sig_count);\n    }\n\n    return 0;\n}\n```"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

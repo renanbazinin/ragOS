@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "RAID and File Systems",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 20:04:13",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1011,
+      "output_tokens": 513,
+      "total_tokens": 4564
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "RAID",
+      "File Systems",
+      "I/O"
+    ],
+    "content": {
+      "text": "נתון שרת עם 4 דיסקים קשיחים בגודל 2TB כל אחד. איזו תצורת RAID תאפשר להתמודד באופן *מובטח* עם קלקול של *שני דיסקים כלשהם*, תוך מתן שטח האחסון המקסימלי האפשרי בתנאים אלו?",
+      "code_snippet": null,
+      "options": [
+        "א. RAID-0",
+        "ב. RAID-1",
+        "ג. RAID-5",
+        "ד. RAID-6",
+        "ה. RAID-10"
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ד",
+      "explanation": "RAID-6 מתוכנן לספק עמידות לכשל של עד שני דיסקים בו זמנית, על ידי שימוש בשני בלוקי Parity נפרדים. עבור 4 דיסקים בגודל 2TB כל אחד, תצורת RAID-6 תספק שטח אחסון שמיש של (4-2) * 2TB = 4TB.\nRAID-10 אמנם מספק גם הוא 4TB שטח אחסון שמיש (שכן הוא משלב שני מערכי RAID-1 של 2 דיסקים כל אחד, ובכל מערך RAID-1 יש דיסק אחד שמיש), אך הוא אינו מבטיח עמידות לכשל של *כל* שני דיסקים, שכן אם שני דיסקים באותו זוג מראה נכשלים, המערך קורס.\nRAID-0 אינו מספק עמידות לכשל כלל. RAID-1 מספק עמידות לכשל של דיסק אחד בלבד (במירור יחיד). RAID-5 מספק עמידות לכשל של דיסק אחד בלבד."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

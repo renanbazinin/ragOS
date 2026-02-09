@@ -1,0 +1,49 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "System Calls",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 07:20:56",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3372,
+      "output_tokens": 2270,
+      "total_tokens": 10372
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "System Calls"
+    ],
+    "content": {
+      "text": "מערכות הפעלה מודרניות מפרידות בין מרחב כתובות של יישומים (מצב משתמש) לבין מרחב כתובות של הליבה (מצב ליבה). תוכניות משתמש זקוקות לעיתים קרובות לגשת למשאבים או לבצע פעולות הדורשות הרשאות מיוחדות, אשר זמינות רק במצב ליבה. לשם כך, הן משתמשות בקריאות מערכת.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "הסבר בפירוט מהו ההבדל המהותי בין קריאת מערכת (System Call) לבין קריאת פונקציה רגילה (Regular Function Call) בתוכנית C/C++. התייחס להבדלים ברמת הביצוע, שינוי מצב המעבד (user/kernel mode), ולצורך בקריאות מערכת.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "נתון קטע הקוד הבא ב-C:\n```c\n#include <stdio.h>\n#include <unistd.h>\n#include <sys/wait.h>\n#include <fcntl.h> // For open\n\nint main() {\n    pid_t pid;\n    int fd;\n    char message[] = \"Hello from OS exam!\\n\";\n\n    fd = open(\"output.txt\", O_CREAT | O_WRONLY | O_TRUNC, 0644);\n    if (fd == -1) {\n        perror(\"open\");\n        return 1;\n    }\n\n    pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork\");\n        close(fd);\n        return 1;\n    } else if (pid == 0) { // Child process\n        write(fd, message, sizeof(message) - 1);\n        printf(\"Child process wrote to file.\\n\");\n        _exit(0); // Use _exit for child processes\n    } else { // Parent process\n        wait(NULL);\n        printf(\"Parent process waited for child.\\n\");\n        close(fd);\n    }\n\n    return 0;\n}\n```\nזהה את כל קריאות המערכת בקטע הקוד הנ\"ל. עבור כל קריאת מערכת שזיהית, הסבר בקצרה מדוע היא נחשבת לקריאת מערכת ומהי מטרתה הספציפית בקוד זה.",
+        "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n#include <sys/wait.h>\n#include <fcntl.h> // For open\n\nint main() {\n    pid_t pid;\n    int fd;\n    char message[] = \"Hello from OS exam!\\n\";\n\n    fd = open(\"output.txt\", O_CREAT | O_WRONLY | O_TRUNC, 0644);\n    if (fd == -1) {\n        perror(\"open\");\n        return 1;\n    }\n\n    pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork\");\n        close(fd);\n        return 1;\n    }\n    else if (pid == 0) { // Child process\n        write(fd, message, sizeof(message) - 1);\n        printf(\"Child process wrote to file.\\n\");\n        _exit(0); // Use _exit for child processes\n    }\n    else { // Parent process\n        wait(NULL);\n        printf(\"Parent process waited for child.\\n\");\n        close(fd);\n    }\n\n    return 0;\n}",
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "10.1. ההבדל המהותי בין קריאת מערכת לקריאת פונקציה רגילה טמון במנגנון הביצוע ובשינוי מצב המעבד:\n*   **קריאת פונקציה רגילה:** זוהי קפיצה פשוטה בתוך קוד המשתמש, המתבצעת באותו מרחב כתובות ובאותו מצב מעבד (user mode). אין מעורבות של הליבה או שינוי הרשאות. המעבד פשוט שומר את כתובת החזרה וקופץ לתחילת הפונקציה, ומבצע את הקוד שלה. מטרתה היא לארגן קוד, להגדיל קריאות ושימוש חוזר. תקורה נמוכה מאוד.\n*   **קריאת מערכת:** דורשת מעבר ממצב משתמש למצב ליבה (kernel mode). תהליך זה מתבצע באמצעות פקודת חומרה מיוחדת (כגון `syscall` או `int` ב-x86) המפעילה \"מלכודת\" (trap) או פסיקת תוכנה. המעבד עובר למצב ליבה, שומר את הקונטקסט של תהליך המשתמש (כדי שיוכל לחזור אליו), ומעביר את השליטה למטפל בקריאות המערכת בתוך הליבה. הליבה מבצעת את הפעולה המבוקשת (למשל, גישה לחומרה, ניהול משאבים, יצירת תהליכים) עם ההרשאות המתאימות. בסיום הפעולה, הליבה משחזרת את קונטקסט המשתמש ומחזירה את השליטה לתהליך המשתמש, לרוב עם ערך החזרה המציין הצלחה או כשלון. הצורך בקריאות מערכת נובע מכך שפעולות רבות (כגון I/O, ניהול זיכרון, יצירת תהליכים) דורשות גישה למשאבי חומרה או תוכנה מוגנים, שרק הליבה מורשית לטפל בהם מטעמי אבטחה ויציבות המערכת. תהליך זה כרוך בתקורה גבוהה יותר מקריאת פונקציה רגילה.\n\n10.2. קריאות המערכת בקטע הקוד והסבר מטרתן:\n*   `open()`: זוהי קריאת מערכת. מטרתה לפתוח קובץ בשם \"output.txt\" (או ליצור אותו אם אינו קיים) עם הרשאות כתיבה וקיטום, ולהחזיר מתאר קובץ (`fd`). פתיחת קבצים היא פעולת קלט/פלט הדורשת גישה למערכת הקבצים, שהיא משאב מערכת המנוהל על ידי הליבה.\n*   `fork()`: זוהי קריאת מערכת. מטרתה ליצור תהליך בן חדש, שהוא כמעט עותק זהה של תהליך האב. יצירת תהליכים היא פעולה מיוחסת הדורשת ניהול משאבי מערכת (כגון PID וזיכרון) על ידי הליבה.\n*   `write()`: זוהי קריאת מערכת. מטרתה לכתוב נתונים (ההודעה \"Hello from OS exam!\\n\") למתאר הקובץ (`fd`) שצוין. כתיבה לקבצים היא פעולת קלט/פלט הדורשת גישה למערכת הקבצים או להתקן פלט, המנוהלים על ידי הליבה.\n*   `_exit()`: זוהי קריאת מערכת. מטרתה לסיים את התהליך הנוכחי (במקרה זה, תהליך הבן) באופן מיידי, ולשחרר את משאביו במערכת ההפעלה, ללא ביצוע ניקוי חוצצים של ספריית C. סיום תהליך הוא פעולה מיוחסת הדורשת שחרור משאבים ועדכון טבלאות תהליכים על ידי הליבה.\n*   `wait()`: זוהי קריאת מערכת. מטרתה לגרום לתהליך האב להמתין לסיום ביצועו של אחד מילדיו. המתנה לתהליכים אחרים וניהול מצבם היא פעולה מיוחסת של הליבה.\n*   `close()`: זוהי קריאת מערכת. מטרתה לסגור מתאר קובץ, ובכך לשחרר את המשאבים הקשורים אליו במערכת ההפעלה. זוהי פעולת קלט/פלט וניהול משאבים המנוהלת על ידי הליבה.\n*   `printf()` ו-`perror()`: אלו אינן קריאות מערכת ישירות, אלא פונקציות ספרייה (מ-`stdio.h`). הן משתמשות בקריאות מערכת (כגון `write()`) מאחורי הקלעים כדי לבצע את פעולות הפלט או להדפיס הודעות שגיאה, אך הן עצמן מהוות שכבת הפשטה מעל קריאות המערכת."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

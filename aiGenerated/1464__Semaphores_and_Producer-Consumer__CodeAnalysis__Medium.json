@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Producer-Consumer",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 10:29:25",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1632,
+      "output_tokens": 1137,
+      "total_tokens": 5936
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Semaphores",
+      "Producer-Consumer",
+      "Concurrency",
+      "Deadlock"
+    ],
+    "content": {
+      "text": "נתונה מימוש של בעיית Producer-Consumer באמצעות סמפורים, עם גודל באפר BUFFER_SIZE.\nהסמפורים mutex, empty, ו-full מאותחלים כראוי (mutex=1, empty=BUFFER_SIZE, full=0).\nלהלן קטע הקוד של פונקציית ה-producer:\n\nמה יקרה אם הבאפר יתמלא לחלוטין (כלומר, ה-producer יצר BUFFER_SIZE פריטים וה-consumer טרם צרך אף אחד), ולאחר מכן ה-producer ינסה לייצר פריט נוסף?",
+      "code_snippet": "#include <semaphore.h>\n#define BUFFER_SIZE 5\n\n// ... global buffer and indices (in, out) ...\nsem_t mutex; // Initialized to 1\nsem_t empty; // Initialized to BUFFER_SIZE\nsem_t full;  // Initialized to 0\n\nvoid *producer(void *arg) {\n    int item;\n    while (1) { // Assume infinite production\n        item = produce_item(); // function that generates an item\n\n        // *** THE CRITICAL SECTION FOR THE QUESTION ***\n        sem_wait(&mutex);  // (1) Acquire mutex first\n        sem_wait(&empty); // (2) Then check for empty slots\n\n        // Add item to buffer\n        buffer[in] = item;\n        in = (in + 1) % BUFFER_SIZE;\n\n        sem_post(&mutex);\n        sem_post(&full);\n    }\n    return NULL;\n}\n\n// Consumer function (standard implementation, not shown for brevity)\n// void *consumer(void *arg) {\n//     sem_wait(&full);\n//     sem_wait(&mutex);\n//     // Remove item from buffer\n//     sem_post(&mutex);\n//     sem_post(&empty);\n//     return NULL;\n// }",
+      "options": [
+        "א. ה-producer ימתין על הסמפור empty, והמערכת תמשיך לתפקד כרגיל כאשר ה-consumer יפנה מקום.",
+        "ב. תתרחש Deadlock. ה-producer יחזיק את ה-mutex וינסה להמתין על empty, בעוד שה-consumer לא יוכל לצרוך פריטים מכיוון שהוא זקוק ל-mutex.",
+        "ג. ה-producer ימשיך להוסיף פריטים לבאפר, מה שיגרום לגלישת באפר (Buffer Overflow) ולשגיאות בלתי צפויות.",
+        "ד. ה-producer יקרוס מיד בניסיון להמתין על הסמפור empty.",
+        "ה. המערכת תעבוד באופן תקין, אך תיווצר תחרות (race condition) על הגישה לבאפר."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "במצב רגיל, ה-producer מבצע `sem_wait(&empty)` לפני `sem_wait(&mutex)`. סדר זה מבטיח שה-producer ימתין אם הבאפר מלא, לפני שהוא מנסה לרכוש את נעילת ה-mutex.\nבמקרה הנתון, הסדר הפוך: ה-producer רוכש את ה-`mutex` (על ידי `sem_wait(&mutex)`), ולאחר מכן מנסה להמתין על `empty` (על ידי `sem_wait(&empty)`).\nאם הבאפר מלא לחלוטין, ערך הסמפור `empty` הוא 0. כאשר ה-producer יגיע ל-`sem_wait(&empty)`, הוא ימתין. אך מכיוון שהוא מחזיק כבר את ה-`mutex`, הוא מונע מכל תהליך אחר (כולל ה-consumer) לרכוש את ה-`mutex` ולגשת לבאפר.\nה-consumer, שצריך את ה-`mutex` כדי לצרוך פריט ולשחרר מקום בבאפר (ובכך להגדיל את ערך `empty`), לא יוכל להמשיך. מצב זה יוצר Deadlock: ה-producer ממתין ל-consumer שישחרר מקום, וה-consumer ממתין ל-producer שישחרר את ה-`mutex`.\nלכן, התשובה הנכונה היא ב'."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

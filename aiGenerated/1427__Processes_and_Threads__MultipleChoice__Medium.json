@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Processes and Threads",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 10:13:59",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1710,
+      "output_tokens": 1448,
+      "total_tokens": 6831
+    }
+  },
+  "question": {
+    "id": 6,
+    "type": "MultipleChoice",
+    "topic": [
+      "Processes",
+      "Threads",
+      "Memory Management",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המכילה משתנה גלובלי `int global_data;` ופונקציה `void *worker(void *arg)` המכילה משתנה מקומי `int local_data;`.\nמה נכון לגבי הנגישות והשיתוף של `global_data` ושל `local_data` (של פונקציית worker) כאשר:\n1. תהליך חדש נוצר באמצעות `fork()` מתוך פונקציית `main`, ולאחר מכן תהליך הבן קורא לפונקציה `worker`?\n2. תהליכון חדש נוצר באמצעות `pthread_create()` מתוך פונקציית `main`, כאשר פונקציית `worker` היא פונקציית הכניסה של התהליכון?",
+      "code_snippet": "int global_data = 10; // Global variable\n\nvoid *worker(void *arg) {\n    int local_data = 20; // Local variable on the stack of the calling context\n    // ... operations with global_data and local_data ...\n    return NULL;\n}\n\nint main() {\n    // Example of fork scenario:\n    // pid_t pid = fork();\n    // if (pid == 0) { // Child process\n    //     worker(NULL);\n    // }\n\n    // Example of pthread_create scenario:\n    // pthread_t tid;\n    // pthread_create(&tid, NULL, worker, NULL);\n    // pthread_join(tid, NULL);\n    return 0;\n}",
+      "options": [
+        "א. בעת `fork()`: `global_data` משוכפל. `local_data` (של ה-worker) נוצר באופן עצמאי במחסנית של תהליך הבן.\n   בעת `pthread_create()`: `global_data` משותף. `local_data` (של ה-worker) נוצר באופן עצמאי במחסנית של התהליכון החדש.",
+        "ב. בעת `fork()`: `global_data` משותף. `local_data` (של ה-worker) נוצר באופן עצמאי במחסנית של תהליך הבן.\n   בעת `pthread_create()`: `global_data` משוכפל. `local_data` (של ה-worker) נוצר באופן עצמאי במחסנית של התהליכון החדש.",
+        "ג. בעת `fork()`: `global_data` משוכפל. `local_data` (של ה-worker) משותף עם האב.\n   בעת `pthread_create()`: `global_data` משותף. `local_data` (של ה-worker) משותף עם התהליכון הראשי.",
+        "ד. בעת `fork()`: `global_data` משותף. `local_data` (של ה-worker) משותף עם האב.\n   בעת `pthread_create()`: `global_data` משוכפל. `local_data` (של ה-worker) משוכפל."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": false,
+      "correct_option": "א",
+      "explanation": "התשובה הנכונה היא א'. הנה ההסבר:\n\n**במקרה של `fork()` (יצירת תהליך בן):**\n*   **`global_data`**: כאשר קוראים ל-`fork()`, מערכת ההפעלה יוצרת עותק כמעט זהה של מרחב הכתובות של תהליך האב עבור תהליך הבן. זה כולל את קטע הנתונים (data segment) בו מאוחסנים משתנים גלובליים. לרוב, מנגנון Copy-on-Write (CoW) משמש לייעול, כך שדפי הזיכרון משותפים לקריאה בלבד עד שאחד התהליכים מנסה לשנות אותם, ואז נוצר עותק פרטי. לכן, `global_data` משוכפל, ושינויים בו בתהליך הבן לא ישפיעו על ערכו בתהליך האב, ולהיפך.\n*   **`local_data` (בפונקציה `worker`)**: כאשר תהליך הבן מריץ את פונקציית `worker`, המשתנה המקומי `local_data` נוצר על גבי המחסנית הייעודית של תהליך הבן. לכל תהליך יש מחסנית משלו, ולכן `local_data` זה עצמאי לחלוטין ואינו משותף עם `local_data` שנוצר אם האב גם קורא לפונקציה `worker`.\n\n**במקרה של `pthread_create()` (יצירת תהליכון חדש):**\n*   **`global_data`**: תהליכונים באותו תהליך חולקים את אותו מרחב כתובות זיכרון. זה כולל את קטע הנתונים (data segment) ואת קטע הערימה (heap). לכן, `global_data` משותף בין כל התהליכונים. שינוי בערכו על ידי תהליכון אחד יהיה גלוי ונגיש לכל שאר התהליכונים באופן מיידי.\n*   **`local_data` (בפונקציה `worker`)**: כל תהליכון מקבל מחסנית (stack) משלו. כאשר תהליכון חדש מריץ את פונקציית `worker`, המשתנה המקומי `local_data` נוצר על גבי המחסנית הספציפית של אותו תהליכון. לכן, `local_data` הוא עצמאי לכל תהליכון, ושינוי בו לא ישפיע על משתנה באותו שם בתהליכון אחר."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

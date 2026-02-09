@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Scheduling",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 09:05:20",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1023,
+      "output_tokens": 483,
+      "total_tokens": 3166
+    }
+  },
+  "question": {
+    "id": 6,
+    "type": "MultipleChoice",
+    "topic": [
+      "Scheduling",
+      "CPU Scheduling",
+      "Priority Scheduling"
+    ],
+    "content": {
+      "text": "שקול מערכת המשתמשת באלגוריתם תזמון מעבד מבוסס עדיפויות (preemptive) ללא מנגנון הזדקנות (aging). איזו מהטענות הבאות נכונה בהכרח?",
+      "code_snippet": null,
+      "options": [
+        "א. רעב (starvation) אינו אפשרי אם לכל התהליכים יש זמני ריצה סופיים.",
+        "ב. רעב (starvation) אפשרי עבור תהליכים בעלי עדיפות נמוכה.",
+        "ג. זמן ההמתנה הממוצע הוא תמיד אופטימלי.",
+        "ד. זמן התגובה תמיד אופטימלי."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב. רעב (starvation) אפשרי עבור תהליכים בעלי עדיפות נמוכה.",
+      "explanation": "התשובה הנכונה היא ב'. באלגוריתם תזמון מבוסס עדיפויות (preemptive) ללא מנגנון הזדקנות (aging), תהליכים בעלי עדיפות נמוכה עלולים לסבול מרעב (starvation). אם יש זרם קבוע של תהליכים בעלי עדיפות גבוהה יותר, או שתהליך בעל עדיפות גבוהה רץ זמן רב, תהליכים בעלי עדיפות נמוכה עלולים לעולם לא לקבל זמן מעבד. מנגנון הזדקנות נועד בדיוק למנוע מצב זה על ידי הגברת עדיפותם של תהליכים הממתינים זמן רב."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

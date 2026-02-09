@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Copy-on-Write",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 08:50:50",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 967,
+      "output_tokens": 359,
+      "total_tokens": 2285
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Virtual Memory",
+      "Memory Management",
+      "Copy-on-Write"
+    ],
+    "content": {
+      "text": "מתי בפועל מתבצעת העתקת דף זיכרון בשיטת Copy-on-Write (CoW)?",
+      "code_snippet": null,
+      "options": [
+        "א. מיד עם יצירת התהליך החדש (לדוגמה, בעת קריאה ל-fork()).",
+        "ב. כאשר אחד התהליכים מנסה לכתוב לדף זיכרון משותף.",
+        "ג. כאשר תהליך מנסה לקרוא מדף זיכרון משותף.",
+        "ד. רק כאשר כל התהליכים המשתפים את הדף מסיימים את ריצתם."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב. מנגנון Copy-on-Write נועד לחסוך ביצירת עותקים מיותרים של דפי זיכרון. דפים משותפים מסומנים כקריאה בלבד, ורק כאשר תהליך מנסה לבצע פעולת כתיבה לדף משותף, מבוצעת העתקה של הדף עבורו."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

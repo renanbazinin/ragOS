@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "CPU Scheduling and Context Switching",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 11:45:02",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1035,
+      "output_tokens": 439,
+      "total_tokens": 2726
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "CPU Scheduling",
+      "Context Switching",
+      "Interrupts"
+    ],
+    "content": {
+      "text": "במערכת הפעלה המשתמשת בתזמון מעבד מונע (pre-emptive CPU scheduling), מהו הגורם העיקרי להתרחשות החלפת קשר (context switch) כאשר תהליך מגיע לסוף קצבת הזמן (time slice) שלו?",
+      "code_snippet": null,
+      "options": [
+        "א. התהליך מסיים את ריצתו ויוצא מרצון.",
+        "ב. התהליך מבצע קריאת מערכת שדורשת המתנה.",
+        "ג. פסיקת שעון (timer interrupt) מופעלת על ידי החומרה.",
+        "ד. תהליך בעל עדיפות גבוהה יותר הופך לזמין.",
+        "ה. אף אחת מהתשובות אינה נכונה."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג'. במערכת הפעלה עם תזמון מונע, פסיקת שעון (timer interrupt) היא המנגנון שבו החומרה מודיעה למערכת ההפעלה שקצבת הזמן שהוקצתה לתהליך הנוכחי הסתיימה. זה מאפשר למערכת ההפעלה להשתלט בחזרה על המעבד, לבצע החלפת קשר ולבחור תהליך אחר להרצה, גם אם התהליך הקודם לא סיים את עבודתו או נכנס למצב המתנה מרצונו."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

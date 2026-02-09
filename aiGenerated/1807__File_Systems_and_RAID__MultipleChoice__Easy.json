@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "File Systems and RAID",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 21:00:19",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1064,
+      "output_tokens": 424,
+      "total_tokens": 2341
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "File Systems",
+      "RAID"
+    ],
+    "content": {
+      "text": "מהי התכונה העיקרית של RAID 1 (Mirroring)?",
+      "code_snippet": null,
+      "options": [
+        "א. הוא מחלק נתונים לבלוקים ומוסיף מידע זוגיות (parity) על פני מספר דיסקים כדי לשפר ביצועים ויתירות.",
+        "ב. הוא משכפל נתונים באופן זהה על פני שני דיסקים או יותר, ומספק יתירות מלאה במקרה של כשל דיסק.",
+        "ג. הוא משלב נתונים על פני מספר דיסקים (striping) כדי להגדיל את מהירות הקריאה והכתיבה ללא יתירות.",
+        "ד. הוא משתמש בדיסק אחד בלבד ומספק ביצועים מיטביים ללא יתירות כלל.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב'. כפי שנלמד, RAID 1, המכונה גם Mirroring, משכפל את כל הנתונים באופן זהה על פני שני דיסקים או יותר. תצורה זו מספקת יתירות מלאה - אם אחד הדיסקים כושל, הנתונים עדיין זמינים במלואם מהדיסק המראה (mirror), מה שמבטיח זמינות נתונים גבוהה."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "System Calls",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 07:16:59",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 2209,
+      "total_tokens": 11932
+    }
+  },
+  "question": {
+    "id": 6,
+    "type": "MultipleChoice",
+    "topic": [
+      "System Calls",
+      "Process Management",
+      "File Descriptors",
+      "FD_CLOEXEC"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא:\n```c\n#include <unistd.h>\n#include <fcntl.h>\n#include <sys/wait.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h> // For strlen\n\nint main() {\n    int pipefd[2];\n    pid_t pid;\n\n    if (pipe(pipefd) == -1) {\n        perror(\"pipe\");\n        return 1;\n    }\n\n    pid = fork();\n\n    if (pid == -1) {\n        perror(\"fork\");\n        return 1;\n    }\n\n    if (pid == 0) { // תהליך הבן\n        close(pipefd[1]); // סגירת קצה הכתיבה של הצינור בתהליך הבן\n\n        // ניתוב stdin (FD 0) לקצה הקריאה של הצינור\n        if (dup2(pipefd[0], STDIN_FILENO) == -1) {\n            perror(\"dup2\");\n            return 1;\n        }\n        close(pipefd[0]); // סגירת מתאר הקובץ המקורי של קצה הקריאה\n\n        // הגדרת הדגל FD_CLOEXEC על STDIN_FILENO\n        if (fcntl(STDIN_FILENO, F_SETFD, fcntl(STDIN_FILENO, F_GETFD) | FD_CLOEXEC) == -1) {\n            perror(\"fcntl FD_CLOEXEC on STDIN_FILENO\");\n            return 1;\n        }\n\n        // ביצוע execve לתוכנית 'cat' שתנסה לקרוא מ-stdin\n        char *args[] = {\"/usr/bin/cat\", NULL};\n        execve(args[0], args, NULL);\n        perror(\"execve\"); // אם execve נכשל\n        return 1;\n    } else { // תהליך האב\n        close(pipefd[0]); // סגירת קצה הקריאה של הצינור בתהליך האב\n\n        const char *msg = \"Hello from parent!\\n\";\n        write(pipefd[1], msg, strlen(msg));\n        close(pipefd[1]); // סגירת קצה הכתיבה, מאותת על EOF לבן\n\n        wait(NULL); // המתנה לסיום תהליך הבן\n    }\n\n    return 0;\n}\n```\nבהתבסס על קטע הקוד שלעיל, מה תהיה התוצאה הסבירה ביותר כאשר התוכנית תורץ?",
+      "code_snippet": "#include <unistd.h>\n#include <fcntl.h>\n#include <sys/wait.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h> // For strlen\n\nint main() {\n    int pipefd[2];\n    pid_t pid;\n\n    if (pipe(pipefd) == -1) {\n        perror(\"pipe\");\n        return 1;\n    }\n\n    pid = fork();\n\n    if (pid == -1) {\n        perror(\"fork\");\n        return 1;\n    }\n\n    if (pid == 0) { // תהליך הבן\n        close(pipefd[1]); // סגירת קצה הכתיבה של הצינור בתהליך הבן\n\n        // ניתוב stdin (FD 0) לקצה הקריאה של הצינור\n        if (dup2(pipefd[0], STDIN_FILENO) == -1) {\n            perror(\"dup2\");\n            return 1;\n        }\n        close(pipefd[0]); // סגירת מתאר הקובץ המקורי של קצה הקריאה\n\n        // הגדרת הדגל FD_CLOEXEC על STDIN_FILENO\n        if (fcntl(STDIN_FILENO, F_SETFD, fcntl(STDIN_FILENO, F_GETFD) | FD_CLOEXEC) == -1) {\n            perror(\"fcntl FD_CLOEXEC on STDIN_FILENO\");\n            return 1;\n        }\n\n        // ביצוע execve לתוכנית 'cat' שתנסה לקרוא מ-stdin\n        char *args[] = {\"/usr/bin/cat\", NULL};\n        execve(args[0], args, NULL);\n        perror(\"execve\"); // אם execve נכשל\n        return 1;\n    } else { // תהליך האב\n        close(pipefd[0]); // סגירת קצה הקריאה של הצינור בתהליך האב\n\n        const char *msg = \"Hello from parent!\\n\";\n        write(pipefd[1], msg, strlen(msg));\n        close(pipefd[1]); // סגירת קצה הכתיבה, מאותת על EOF לבן\n\n        wait(NULL); // המתנה לסיום תהליך הבן\n    }\n\n    return 0;\n}\n",
+      "options": [
+        "א. התוכנית `cat` תדפיס \"Hello from parent!\" למסך ותהליך האב ימתין לבן שיסיים.",
+        "ב. התוכנית `cat` לא תקבל קלט מ-stdin ותסיים מיד, ותהליך האב ימתין לבן שיסיים.",
+        "ג. קריאת ה-`write` בתהליך האב תיכשל עם `EPIPE` מכיוון שקצה הקריאה של הצינור נסגר מוקדם מדי.",
+        "ד. קריאת ה-`execve` בתהליך הבן תיכשל עם `EACCES` מכיוון שמתאר הקובץ 0 נסגר.",
+        "ה. התוכנית תקרוס בתהליך הבן כאשר `cat` תנסה לקרוא ממתאר קובץ לא חוקי."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "התשובה הנכונה היא ב'. ננתח את שלבי הפעולה:\n1.  `pipe()` יוצר צינור עם שני מתארי קובץ, `pipefd[0]` (לקריאה) ו-`pipefd[1]` (לכתיבה). בשלב זה, דגל `FD_CLOEXEC` אינו מוגדר על אף אחד מהם.\n2.  `fork()` יוצר תהליך בן. שני מתארי הקובץ הללו עוברים בירושה לבן, וגם בהם דגל `FD_CLOEXEC` אינו מוגדר.\n3.  בתהליך הבן, `close(pipefd[1])` סוגר את קצה הכתיבה.\n4.  `dup2(pipefd[0], STDIN_FILENO)` משכפל את `pipefd[0]` למתאר קובץ 0 (STDIN_FILENO). חשוב לזכור ש-`dup2` אינו מעתיק את דגל `FD_CLOEXEC` ממתאר המקור (`pipefd[0]`) למתאר היעד (`STDIN_FILENO`). לכן, בשלב זה, `STDIN_FILENO` עדיין לא מוגדר עם `FD_CLOEXEC`.\n5.  `close(pipefd[0])` סוגר את מתאר הקובץ המקורי של קצה הקריאה. כעת, רק `STDIN_FILENO` (FD 0) עדיין פתוח ומצביע על קצה הקריאה של הצינור.\n6.  `fcntl(STDIN_FILENO, F_SETFD, fcntl(STDIN_FILENO, F_GETFD) | FD_CLOEXEC)`: בשלב זה, דגל `FD_CLOEXEC` מוגדר במפורש על `STDIN_FILENO` (FD 0).\n7.  `execve()`: מכיוון שדגל `FD_CLOEXEC` מוגדר על `STDIN_FILENO`, מתאר קובץ זה ייסגר אוטומטית על ידי מערכת ההפעלה *לפני* שתוכנית `cat` תתחיל לפעול.\nכתוצאה מכך, כאשר `cat` תתחיל לרוץ, ה-`stdin` שלה (FD 0) יהיה סגור. `cat` תנסה לקרוא קלט, אך תקבל מיד אינדיקציה לסיום קובץ (EOF) או שגיאה של מתאר קובץ לא חוקי, ותסיים את פעולתה מבלי להדפיס את ההודעה מהאב."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "IPC",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 08:22:12",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1196,
+      "output_tokens": 535,
+      "total_tokens": 3531
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "IPC",
+      "Shared Memory",
+      "Synchronization",
+      "Semaphores",
+      "Mutexes"
+    ],
+    "content": {
+      "text": "שני תהליכים, P1 ו-P2, מעוניינים להעביר ביניהם כמויות גדולות של מידע באופן מהיר ויעיל, תוך כדי הבטחה שרק תהליך אחד יגש לאזור מסוים בזיכרון המשותף בכל רגע נתון. איזה שילוב של מנגנוני IPC יתאים ביותר לדרישות אלו?",
+      "code_snippet": null,
+      "options": [
+        "א. צינורות (Pipes)",
+        "ב. זיכרון משותף בלבד (Shared Memory only)",
+        "ג. תורי הודעות (Message Queues)",
+        "ד. זיכרון משותף ומנעולים (mutexes) או סמפורים (semaphores)",
+        "ה. סוקטים (Sockets)"
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ד. זיכרון משותף ומנעולים (mutexes) או סמפורים (semaphores)",
+      "explanation": "כדי להעביר כמויות גדולות של מידע באופן מהיר ויעיל בין תהליכים באותה מכונה, זיכרון משותף (Shared Memory) הוא המנגנון המועדף מכיוון שהוא מאפשר גישה ישירה לנתונים ללא צורך בהעתקות מיותרות. עם זאת, זיכרון משותף כשלעצמו אינו מספק מנגנוני סנכרון. כדי להבטיח שרק תהליך אחד יגש לאזור המשותף בכל רגע נתון ולמנוע תנאי מירוץ (race conditions) וחוסר עקביות בנתונים, יש צורך להשתמש במנגנוני סנכרון כמו מנעולים (mutexes) או סמפורים (semaphores) יחד עם הזיכרון המשותף."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

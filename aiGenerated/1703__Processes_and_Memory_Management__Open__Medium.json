@@ -1,0 +1,64 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Processes and Memory Management",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 20:08:54",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1726,
+      "output_tokens": 2231,
+      "total_tokens": 9687
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Processes",
+      "Memory Management",
+      "Virtual Memory",
+      "Copy-on-Write"
+    ],
+    "content": {
+      "text": "נתונה מערכת הפעלה המיישמת מנגנון Copy-on-Write (CoW) עבור דפי זיכרון לאחר יצירת תהליך חדש (fork). גודל הדף במערכת הוא 4KB. תהליך אב (Parent) מבצע את הקוד הבא:",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\n#define ARRAY_SIZE (1024 * 10) // 40KB, 10 pages\n\nint main() {\n    int *arr = (int *)malloc(ARRAY_SIZE * sizeof(int));\n    if (arr == NULL) {\n        perror(\"malloc failed\");\n        return 1;\n    }\n\n    // Initialize array\n    for (int i = 0; i < ARRAY_SIZE; i++) {\n        arr[i] = i;\n    }\n\n    pid_t pid = fork();\n\n    if (pid == -1) {\n        perror(\"fork failed\");\n        return 1;\n    } else if (pid == 0) { // Child process\n        printf(\"Child process: Modifying array...\\n\");\n        // Child modifies elements in the first half, hitting distinct pages\n        for (int i = 0; i < ARRAY_SIZE / 2; i += (4096 / sizeof(int))) { \n            arr[i] = -i;\n        }\n        printf(\"Child process: Finished modifying.\\n\");\n        exit(0);\n    } else { // Parent process\n        printf(\"Parent process: Waiting for child...\\n\");\n        wait(NULL);\n        printf(\"Parent process: Child finished. Modifying array...\\n\");\n        // Parent modifies elements in the second half, hitting distinct pages\n        for (int i = ARRAY_SIZE / 2; i < ARRAY_SIZE; i += (4096 / sizeof(int))) { \n            arr[i] = i * 2;\n        }\n        printf(\"Parent process: Finished modifying.\\n\");\n    }\n\n    free(arr);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "כמה דפים פיזיים יוקצו לזיכרון עבור המערך `arr` מיד לאחר ביצוע ה-`malloc` והאתחול, ולפני קריאת ה-`fork()`? נמק.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "מיד לאחר קריאת ה-`fork()` (ובטרם אחד מהתהליכים שינה זיכרון), כמה דפים פיזיים משותפים יהיו בין האב לבן? מה יהיה מצב טבלאות הדפים של האב והבן עבור דפים אלו?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.3",
+        "text": "כאשר תהליך הבן משנה את הדפים בחציו הראשון של המערך (לדוגמה, `arr[0]`), תאר את התהליך ברמת ה-MMU וטבלאות הדפים. כמה דפים פיזיים חדשים יוקצו במקרה שכל שינוי מתבצע בדף שונה?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.4",
+        "text": "לאחר ששני התהליכים (האב והבן) סיימו את פעולתם, כמה דפים פיזיים בסך הכל יוקצו עבור המערך `arr`? נמק.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": 20,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "חישובים מקדימים:\n*   גודל המערך `ARRAY_SIZE * sizeof(int)` הוא `1024 * 10 * 4 = 40960` בתים.\n*   גודל דף הוא 4KB = 4096 בתים.\n*   מספר הדפים הנדרשים למערך הוא `40960 / 4096 = 10` דפים.\n*   הקוד משנה 5 דפים שונים בחצי הראשון על ידי הבן ו-5 דפים שונים בחצי השני על ידי האב, על ידי דילוג של `4096 / sizeof(int)` איברים כדי להבטיח נגיעה בדף פיזי חדש בכל איטרציה.\n\n1.  **לפני `fork()`:** המערך `arr` בגודל 40960 בתים דורש 10 דפים פיזיים. לאחר ה-`malloc` והאתחול, 10 דפים פיזיים אכן יוקצו ויכילו את נתוני המערך.\n\n2.  **מיד לאחר `fork()`:** במערכת עם CoW, תהליך הבן מקבל עותק של טבלת הדפים של האב. כל הרשומות בטבלאות הדפים של האב ושל הבן, המצביעות על דפי הזיכרון של המערך `arr`, יצביעו על אותם 10 דפים פיזיים מקוריים. דפים אלו יסומנו כ-'קריאה בלבד' (read-only) או 'CoW'. בשלב זה, הדפים הפיזיים עצמם אינם משוכפלים, אלא משותפים בין האב לבן. לכן, יהיו 10 דפים פיזיים משותפים.\n\n3.  **שינוי על ידי הבן:** כאשר תהליך הבן מנסה לשנות את אחד מאיברי המערך בחציו הראשון (לדוגמה, `arr[0]`, שנמצא בדף הווירטואלי הראשון), מתרחשת 'הפרעת דף' (page fault) מכיוון שהדף מסומן כ-CoW (קריאה בלבד). ה-MMU (Memory Management Unit) מזהה זאת, ומערכת ההפעלה מבצעת את הפעולות הבאות:\n    *   מקצה דף פיזי חדש עבור הבן (לדוגמה, דף פיזי מס' 10).\n    *   מעתיקה את תוכן הדף הפיזי המקורי (שעליו הצביעו האב והבן - דף פיזי מס' 0) לדף הפיזי החדש (דף פיזי מס' 10).\n    *   מעדכנת את רשומת טבלת הדפים של הבן עבור הדף הווירטואלי המתאים (דף 0) כך שתצביע על הדף הפיזי החדש (דף 10) ומסמנת אותו כ-'קריאה וכתיבה' (read/write).\n    *   רשומת טבלת הדפים של האב עבור אותו דף וירטואלי נשארת מצביעה על הדף הפיזי המקורי (דף 0) ועדיין מסומנת כ-CoW (או R/W אם אין יותר תהליכים שחולקים אותו ב-CoW).\n    *   מכיוון שהבן משנה 5 דפים וירטואליים שונים (דפים 0-4), יוקצו 5 דפים פיזיים חדשים עבור הבן.\n\n4.  **לאחר ששני התהליכים סיימו:**\n    *   בתחילה הוקצו 10 דפים פיזיים עבור המערך `arr`.\n    *   כאשר הבן שינה 5 דפים שונים בחציו הראשון של המערך, הוקצו 5 דפים פיזיים חדשים עבור הבן. הדפים הפיזיים המקוריים (0-4) נשמרים בזיכרון הפיזי, והאב עדיין מצביע עליהם (במצב CoW או R/W).\n    *   כאשר האב שינה 5 דפים שונים בחציו השני של המערך, הוקצו 5 דפים פיזיים חדשים עבור האב. הדפים הפיזיים המקוריים (5-9) נשמרים בזיכרון הפיזי, והבן עדיין מצביע עליהם (במצב CoW או R/W).\n    *   בסך הכל, יהיו בשימוש 10 דפים פיזיים מקוריים (ששימשו כבסיס לעותקי ה-CoW) + 5 דפים פיזיים חדשים שהוקצו לבן + 5 דפים פיזיים חדשים שהוקצו לאב = 20 דפים פיזיים בסך הכל עבור המערך `arr`."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

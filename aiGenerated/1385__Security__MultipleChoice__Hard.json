@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "Security",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 09:45:52",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 968,
+      "output_tokens": 1029,
+      "total_tokens": 4680
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Security",
+      "TOCTTOU",
+      "Race Conditions",
+      "Privilege Escalation",
+      "setuid"
+    ],
+    "content": {
+      "text": "תוכנית `setuid root` (כלומר, ה-UID האפקטיבי שלה הוא 0) מיועדת לרשום הודעות לוג לקובץ מסוים. התוכנית מקבלת נתיב קובץ כארגומנט ומבצעת את הפעולות הבאות בסדר זה:\n1. היא בודקת באמצעות `access(filepath, W_OK)` האם ל-UID האמיתי של המשתמש המריץ את התוכנית יש הרשאת כתיבה לקובץ `filepath`.\n2. אם הבדיקה מצליחה (הפונקציה חוזרת 0), היא פותחת את הקובץ `filepath` במצב הוספה (O_APPEND) וכתיבה בלבד (O_WRONLY) באמצעות `open()`.\n\nבהינתן קטע הקוד המפושט הבא, איזו טענה לגבי תוכנית זו נכונה?",
+      "code_snippet": "char *filepath = ...; // provided by user input\n\n// Check if the real user has write permission\nif (access(filepath, W_OK) == 0) {\n    // This check is performed using the real UID\n\n    // If check passes, open the file with effective root privileges\n    int fd = open(filepath, O_APPEND | O_WRONLY);\n    // This open is performed using the effective UID (root)\n    if (fd != -1) {\n        // write data to fd\n        close(fd);\n    }\n}",
+      "options": [
+        "א. התוכנית בטוחה מפני התקפות ניצול הרשאות (privilege escalation), מכיוון שהיא בודקת את הרשאות המשתמש האמיתי לפני הכתיבה.",
+        "ב. התוכנית פגיעה להתקפת TOCTTOU (Time-of-Check-to-Time-of-Use), כאשר תוקף יכול להחליף את הקובץ (לדוגמה, באמצעות קישור סימבולי) בין הבדיקה לפתיחה.",
+        "ג. התוכנית פגיעה להתקפת Buffer Overflow בקריאת `filepath`, מה שעלול לאפשר לתוקף להריץ קוד זדוני עם הרשאות root.",
+        "ד. התוכנית פגיעה להתקפת Path Traversal, כאשר תוקף יכול להשתמש ב-\"../\" ב-`filepath` כדי לכתוב מחוץ לתיקייה המיועדת."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "התשובה הנכונה היא ב'. התוכנית פגיעה להתקפת TOCTTOU (Time-of-Check-to-Time-of-Use). תוקף יכול ליצור קישור סימבולי (symlink) המצביע בתחילה לקובץ בבעלותו ועם הרשאות כתיבה עבורו. הוא יריץ את התוכנית עם נתיב הקישור הסימבולי. הקריאה ל-`access()` תעקוב אחר הקישור הסימבולי ותצליח (כי הקישור הצביע לקובץ שהתוקף יכול לכתוב אליו). מיד לאחר מכן, ורגע לפני הקריאה ל-`open()`, התוקף יכול לשנות במהירות את הקישור הסימבולי כך שיצביע לקובץ מערכת רגיש (לדוגמה, `/etc/shadow`). מכיוון שה-`open()` יתבצע עם ה-UID האפקטיבי של root, הוא יצליח לפתוח את הקובץ הרגיש לכתיבה, ובכך לאפשר לתוקף להוסיף תוכן לקובץ שהוא לא היה אמור לגעת בו. שאר האפשרויות אינן מתארות את הפגיעות הספציפית בגלל המבנה `access` ואז `open`."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

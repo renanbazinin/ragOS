@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory and Copy-on-Write",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 11:17:21",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 975,
+      "output_tokens": 1913,
+      "total_tokens": 11754
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Virtual Memory",
+      "Copy-on-Write",
+      "Process Management"
+    ],
+    "content": {
+      "text": "נתונה המערכת הבאה המשתמשת בזיכרון וירטואלי ובמנגנון Copy-on-Write (CoW). גודל דף זיכרון הוא 4KB. המערך הגלובלי `arr` ממוקם בזיכרון וירטואלי באופן רציף, והוא מתפרש על פני 4 דפים פיזיים שונים בתחילה. כל הדפים מאותחלים לאפס. להלן קטע קוד המתאר את פעולות האב והבן:\n\nלאחר קריאת ה-`fork()`:\n1. תהליך הבן (child) מבצע כתיבה לכל אחד מהדפים המכילים את המערך `arr` (כלומר, כתיבה לכתובת וירטואלית בתוך כל אחד מ-4 הדפים). \n2. תהליך הבן מסיים את ריצתו באמצעות `_exit(0)`. \n3. תהליך האב (parent) ממתין לסיום הבן באמצעות `wait(NULL)`. \n4. תהליך האב מבצע כתיבה לכתובת וירטואלית בתוך הדף הראשון (P0) ובתוך הדף השלישי (P2) של המערך `arr`. \n\nכמה דפים פיזיים בסך הכל יהיו מוקצים בזיכרון עבור המערך `arr` של תהליך האב, מיד לפני סיום תהליך האב (כלומר, לפני `return 0;`)?",
+      "code_snippet": "#include <unistd.h>\n#include <stdio.h>\n#include <sys/wait.h>\n#include <stdlib.h> // For _exit\n\n#define PAGE_SIZE 4096 // bytes\n#define INT_PER_PAGE (PAGE_SIZE / sizeof(int)) // 1024 integers\n#define ARRAY_SIZE (INT_PER_PAGE * 4) // 4 pages worth of integers\n\nint arr[ARRAY_SIZE]; // Global array, implicitly initialized to 0\n\nint main() {\n    // Initial state: arr occupies 4 pages (P0, P1, P2, P3).\n    // Each page has ref_count = 1.\n\n    pid_t pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        return 1;\n    }\n\n    if (pid == 0) { // Child process\n        // Child modifies all 4 pages\n        arr[0] = 10;                       // Modifies P0\n        arr[INT_PER_PAGE] = 20;            // Modifies P1\n        arr[INT_PER_PAGE * 2] = 30;        // Modifies P2\n        arr[INT_PER_PAGE * 3] = 40;        // Modifies P3\n        _exit(0); // Child terminates\n    } else { // Parent process\n        wait(NULL); // Parent waits for child to terminate\n\n        // Parent modifies P0 and P2\n        arr[0] = 100;                      // Modifies P0\n        arr[INT_PER_PAGE * 2] = 300;       // Modifies P2\n    }\n    return 0;\n}",
+      "options": [
+        "א. 0",
+        "ב. 1",
+        "ג. 2",
+        "ד. 3",
+        "ה. 4"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "הסבר:\n1.  **מצב התחלתי**: המערך `arr` תופס 4 דפים פיזיים (נכנה אותם P0, P1, P2, P3). לכל אחד מהם מונה הפניות של 1.\n2.  **לאחר `fork()`**: תהליך האב והבן חולקים את 4 הדפים הללו. מונה ההפניות של P0, P1, P2, P3 עולה ל-2.\n3.  **ביצוע תהליך הבן**: הבן כותב לכתובת וירטואלית בתוך כל אחד מ-4 הדפים. כתוצאה מכך, מנגנון ה-CoW מופעל עבור כל דף:\n    *   עבור P0 (המכיל את `arr[0]`), נוצר דף חדש P0_C לבן. מונה ההפניות של P0_C הוא 1. מונה ההפניות של P0 המקורי יורד ל-1 (כעת רק האב משתמש בו).\n    *   באופן דומה, נוצרים P1_C, P2_C, P3_C עבור הדפים P1, P2, P3 בהתאמה (המכילים את `arr[INT_PER_PAGE]`, `arr[INT_PER_PAGE * 2]`, `arr[INT_PER_PAGE * 3]`), ומוני ההפניות של P1, P2, P3 המקוריים יורדים ל-1.\n4.  **סיום תהליך הבן (`_exit(0)`)**: הבן מסיים את ריצתו. כל הדפים הפרטיים שלו (P0_C, P1_C, P2_C, P3_C) משוחררים. בנוסף, מוני ההפניות של הדפים המקוריים (P0, P1, P2, P3) יורדים מ-1 ל-0. מכיוון שמוני ההפניות שלהם הגיעו ל-0, גם הדפים המקוריים הללו משוחררים מהזיכרון הפיזי.\n    *   בשלב זה, *אף דף פיזי* המגבה את המערך `arr` אינו מוקצה עבור תהליך האב. הכתובות הוירטואליות עדיין קיימות, אך אינן ממפות לדפים פיזיים.\n5.  **ביצוע תהליך האב (לאחר `wait(NULL)`)**:\n    *   האב כותב ל-`arr[0]` (נמצא בדף P0). מכיוון שדף P0 המקורי שוחרר, המערכת מקצה דף פיזי חדש (נכנה אותו P0_P) עבור תהליך האב בכתובת הוירטואלית של P0.\n    *   האב כותב ל-`arr[INT_PER_PAGE * 2]` (נמצא בדף P2). מכיוון שדף P2 המקורי שוחרר, המערכת מקצה דף פיזי חדש (נכנה אותו P2_P) עבור תהליך האב בכתובת הוירטואלית של P2.\n    *   הדפים P1 ו-P3 אינם משוּנים על ידי האב. מכיוון שהדפים הפיזיים המקוריים P1 ו-P3 שוחררו כבר לאחר סיום הבן, ואין כתיבה אליהם על ידי האב, לא יוקצו עבורם דפים פיזיים חדשים ספציפית למערך `arr` בגלל פעולות אלו (הם עשויים להיות ממופים לדפי אפס-על-פי-דרישה אם יקראו, אך אינם נחשבים 'מוקצים' במובן של החזקת נתוני המערך כתוצאה מכתיבה או CoW).\n\nלכן, בסיום תהליך האב, רק שני דפים פיזיים (P0_P ו-P2_P) יהיו מוקצים עבור המערך `arr` של תהליך האב."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

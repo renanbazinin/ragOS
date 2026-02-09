@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Memory Management and TLB",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 21:20:47",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1050,
+      "output_tokens": 538,
+      "total_tokens": 2841
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Memory Management",
+      "TLB",
+      "Virtual Memory"
+    ],
+    "content": {
+      "text": "נתונה מערכת הפעלה המשתמשת בזיכרון וירטואלי וב-TLB. זמן גישה לזיכרון פיזי הוא 100ns, וזמן גישה ל-TLB הוא 10ns. בהינתן TLB hit ratio של 90%, מהו זמן הגישה האפקטיבי הממוצע לזיכרון?",
+      "code_snippet": null,
+      "options": [
+        "א. 110ns",
+        "ב. 120ns",
+        "ג. 100ns",
+        "ד. 210ns",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב. זמן גישה אפקטיבי מחושב כ: (Hit Ratio * זמן גישה במקרה של Hit) + (Miss Ratio * זמן גישה במקרה של Miss).\nבמקרה של TLB hit, הגישה כוללת: גישה ל-TLB + גישה לזיכרון פיזי = 10ns + 100ns = 110ns.\nבמקרה של TLB miss, הגישה כוללת: גישה ל-TLB + גישה לטבלת הדפים (שדורשת גישה לזיכרון פיזי) + גישה לזיכרון פיזי (עבור הנתונים) = 10ns + 100ns + 100ns = 210ns.\nבהינתן Hit Ratio של 90% (0.9) ו-Miss Ratio של 10% (0.1):\nזמן גישה אפקטיבי = (0.9 * 110ns) + (0.1 * 210ns) = 99ns + 21ns = 120ns."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

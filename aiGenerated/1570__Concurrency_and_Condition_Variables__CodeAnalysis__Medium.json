@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency and Condition Variables",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 11:33:52",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2951,
+      "output_tokens": 2363,
+      "total_tokens": 11597
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Concurrency",
+      "Condition Variables",
+      "Mutexes",
+      "Pthreads"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המשתמשת ב-pthreads, mutexes ו-condition variables כדי לסנכרן בין תהליך ראשי (main thread) למספר תהליכי עובד (worker threads). תהליכי העובד אמורים להמתין לאות התחלה מהתהליך הראשי, לבצע עבודה, ולאחר מכן לסמן לתהליך הראשי שסיימו.\n\nענו על השאלות הבאות בהתבסס על הקוד:\n1. מהו הפלט הצפוי של התוכנית כפי שהיא?\n2. האם התוכנית תסיים את ריצתה? אם לא, הסבר מדוע.\n3. תקנו את הקוד כך שיפעל כמצופה.",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h> // עבור sleep\n\n#define NUM_THREADS 3 // מספר תהליכי עובד לצורך דוגמה קצרה\n\npthread_mutex_t mutex = PTHREAD_MUTIALIZER;\npthread_cond_t start_cond = PTHREAD_COND_INITIALIZER; // משתנה תנאי לאות התחלה\npthread_cond_t done_cond = PTHREAD_COND_INITIALIZER;  // משתנה תנאי לאות סיום עבודה\n\nint threads_ready = 0;          // מספר תהליכים מוכנים להתחלה\nint threads_finished = 0;       // מספר תהליכים שסיימו עבודה\nint start_signal_received = 0;  // דגל המציין אם אות ההתחלה נשלח\n\nvoid *worker_thread(void *arg) {\n    long id = (long)arg;\n\n    // --- חלק 1: המתנה לאות התחלה ---\n    pthread_mutex_lock(&mutex);\n    threads_ready++;\n    printf(\"תהליך עובד %ld: מוכן. סה\\\"כ מוכנים: %d\\n\", id, threads_ready);\n\n    // אם כל העובדים מוכנים, סמן לתהליך הראשי\n    if (threads_ready == NUM_THREADS) {\n        pthread_cond_signal(&start_cond); // סמן לראשי שכולם מוכנים\n    }\n\n    // המתן לאות התחלה מהתהליך הראשי\n    while (!start_signal_received) { // לולאה לטיפול בהתעוררויות שווא\n        pthread_cond_wait(&start_cond, &mutex); // נכון: ממתין על start_cond\n    }\n    pthread_mutex_unlock(&mutex);\n\n    // --- חלק 2: ביצוע עבודה ---\n    printf(\"תהליך עובד %ld: מתחיל עבודה...\\n\", id);\n    sleep(1); // הדמיית עבודה\n    printf(\"תהליך עובד %ld: סיים עבודה.\\n\", id);\n\n    // --- חלק 3: סימון סיום עבודה ---\n    pthread_mutex_lock(&mutex);\n    threads_finished++;\n    printf(\"תהליך עובד %ld: סיים. סה\\\"כ סיימו: %d\\n\", id, threads_finished);\n\n    if (threads_finished == NUM_THREADS) {\n        pthread_cond_signal(&done_cond); // סמן לראשי שכולם סיימו\n    }\n    pthread_mutex_unlock(&mutex);\n\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n    long i;\n\n    // יצירת תהליכי עובד\n    for (i = 0; i < NUM_THREADS; i++) {\n        pthread_create(&threads[i], NULL, worker_thread, (void *)i);\n    }\n\n    // --- התהליך הראשי ממתין שכל העובדים יהיו מוכנים ---\n    pthread_mutex_lock(&mutex);\n    printf(\"ראשי: ממתין שעובדים יהיו מוכנים...\\n\");\n    while (threads_ready < NUM_THREADS) {\n        pthread_cond_wait(&start_cond, &mutex);\n    }\n    printf(\"ראשי: כל העובדים מוכנים. שולח אות התחלה...\\n\");\n    start_signal_received = 1;\n    pthread_cond_broadcast(&done_cond); // !!! שגיאה: אמור להיות start_cond\n    pthread_mutex_unlock(&mutex);\n\n    // --- התהליך הראשי ממתין שכל העובדים יסיימו ---\n    pthread_mutex_lock(&mutex);\n    printf(\"ראשי: ממתין שעובדים יסיימו...\\n\");\n    while (threads_finished < NUM_THREADS) {\n        pthread_cond_wait(&done_cond, &mutex);\n    }\n    printf(\"ראשי: כל העובדים סיימו. יוצא.\\n\");\n    pthread_mutex_unlock(&mutex);\n\n    // הצטרפות לחוטים (לצורך ניקוי משאבים, לא קריטי לשאלה זו)\n    for (i = 0; i < NUM_THREADS; i++) {\n        pthread_join(threads[i], NULL);\n    }\n\n    pthread_mutex_destroy(&mutex);\n    pthread_cond_destroy(&start_cond);\n    pthread_cond_destroy(&done_cond);\n\n    return 0;\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.  **פלט צפוי:**\n    *   התוכנית תתחיל, ותהליכי העובד ייצרו פלט כגון (הסדר בין העובדים יכול להשתנות):\n        \"תהליך עובד 0: מוכן. סה\"כ מוכנים: 1\"\n        \"תהליך עובד 1: מוכן. סה\"כ מוכנים: 2\"\n        \"תהליך עובד 2: מוכן. סה\"כ מוכנים: 3\"\n    *   התהליך הראשי ייצור פלט:\n        \"ראשי: ממתין שעובדים יהיו מוכנים...\"\n        \"ראשי: כל העובדים מוכנים. שולח אות התחלה...\"\n    *   לאחר מכן, התוכנית תיתקע ולא תמשיך לייצר פלט נוסף.\n\n2.  **האם התוכנית תסיים את ריצתה? אם לא, הסבר מדוע.**\n    *   לא, התוכנית לא תסיים את ריצתה ותיתקע במצב של קיפאון (deadlock).\n    *   הסיבה לכך היא שבשורה `pthread_cond_broadcast(&done_cond);` בתהליך הראשי, התהליך הראשי מנסה לשלוח אות התחלה לכל תהליכי העובד. עם זאת, הוא משתמש בטעות במשתנה התנאי `done_cond` במקום במשתנה התנאי הנכון `start_cond`.\n    *   תהליכי העובד, כפי שמוצג בקוד, ממתינים לאות התחלה על משתנה התנאי `start_cond` (בשורה `pthread_cond_wait(&start_cond, &mutex);`).\n    *   כתוצאה מכך, תהליכי העובד לעולם לא יתעוררו מההמתנה שלהם, מכיוון שהאות נשלח למשתנה תנאי שונה מזה שהם ממתינים עליו. הם יישארו חסומים ב-`pthread_cond_wait`.\n    *   תהליכי העובד נשארים חסומים, לעולם לא יתחילו לבצע את עבודתם, ולכן גם לא יגיעו לשלב שבו הם מסמנים סיום עבודה (הגדלת `threads_finished` וקריאה ל-`pthread_cond_signal(&done_cond)`).\n    *   התהליך הראשי, לאחר ששלח את האות השגוי, ממשיך להמתין שכל העובדים יסיימו את עבודתם (בשורה `while (threads_finished < NUM_THREADS) { pthread_cond_wait(&done_cond, &mutex); }`). מאחר שהעובדים לעולם לא מסיימים, התהליך הראשי ממתין ללא סוף.\n    *   זהו מצב קיפאון: העובדים ממתינים לאות שאינו מגיע, והראשי ממתין לסיום עבודה שלעולם לא יקרה.\n\n3.  **תיקון הקוד:**\n    *   התיקון הנדרש הוא לשנות את השורה השגויה בתהליך הראשי:\n        `pthread_cond_broadcast(&done_cond);`\n        לשורה הנכונה:\n        `pthread_cond_broadcast(&start_cond);`\n    *   לאחר תיקון זה, התהליך הראשי ישלח את אות ההתחלה למשתנה התנאי הנכון, תהליכי העובד יתעוררו, יבצעו את עבודתם, יסמנו סיום, והתהליך הראשי יתעורר ויסיים את ריצתו כמצופה."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

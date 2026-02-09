@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "IPC and Processes",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 19:42:09",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2411,
+      "output_tokens": 1759,
+      "total_tokens": 7019
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "IPC",
+      "Processes",
+      "Pipes"
+    ],
+    "content": {
+      "text": "כתבו תוכנית C המשתמשת במנגנוני IPC של מערכת ההפעלה (fork ו-pipe) על מנת לתקשר בין תהליכים.\nתהליך האב יצור תהליך בן. האב ישלח סדרת מספרים שלמים חיוביים (בתוספת -1 כסימן לסיום) אל הבן דרך צינור (pipe). הבן יקרא את המספרים, יחשב את סכום המספרים החיוביים שקיבל, וישלח את הסכום חזרה לאב דרך צינור נפרד. האב ימתין לסיום הבן וידפיס את הסכום שהתקבל.\n\nהשלימו את קטע הקוד הבא בהתאם לדרישות. יש להקפיד על סגירה נכונה של כל קצוות הצינורות וטיפול בשגיאות בסיסי.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h> // For wait()\n\nint main() {\n    int pipe_parent_to_child[2]; // Parent writes, child reads\n    int pipe_child_to_parent[2]; // Child writes, parent reads\n    pid_t pid;\n\n    // Create pipes\n    if (pipe(pipe_parent_to_child) == -1 || pipe(pipe_child_to_parent) == -1) {\n        perror(\"pipe failed\");\n        exit(EXIT_FAILURE);\n    }\n\n    pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        exit(EXIT_FAILURE);\n    }\n\n    if (pid == 0) { // Child process\n        // TODO: Implement child process logic\n        // 1. Close unused pipe ends\n        // 2. Read numbers from parent until -1 is received\n        // 3. Calculate sum of received positive numbers\n        // 4. Write the sum back to the parent\n        // 5. Close remaining pipe ends\n        exit(EXIT_SUCCESS);\n    } else { // Parent process\n        // TODO: Implement parent process logic\n        // 1. Close unused pipe ends\n        // 2. Define an array of numbers (e.g., {10, 20, 30, 40, 50, -1})\n        // 3. Write numbers to child, including -1 as a termination signal\n        // 4. Wait for child to complete\n        // 5. Read the sum from the child\n        // 6. Print the received sum\n        // 7. Close remaining pipe ends\n    }\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון כולל יצירת שני צינורות, אחד לתקשורת מהאב לבן ואחד מהבן לאב. תהליך האב שולח סדרת מספרים, כולל ערך סיום (-1), וממתין לתוצאה מהבן. תהליך הבן קורא את המספרים, סוכם אותם עד קבלת ערך הסיום, ושולח את הסכום חזרה. חשוב לסגור את קצוות הצינורות שאינם בשימוש בכל תהליך כדי למנוע קיפאון (deadlock) ולשחרר משאבים. האב חייב להמתין לבן (`wait(NULL)`) לפני ניסיון לקרוא את התוצאה, כדי להבטיח שהבן סיים את חישוביו וכתב את הסכום.\n\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\nint main() {\n    int pipe_parent_to_child[2]; // Parent writes, child reads\n    int pipe_child_to_parent[2]; // Child writes, parent reads\n    pid_t pid;\n\n    // Create pipes\n    if (pipe(pipe_parent_to_child) == -1 || pipe(pipe_child_to_parent) == -1) {\n        perror(\"pipe failed\");\n        exit(EXIT_FAILURE);\n    }\n\n    pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        exit(EXIT_FAILURE);\n    }\n\n    if (pid == 0) { // Child process\n        // Close unused pipe ends\n        close(pipe_parent_to_child[1]); // Child doesn't write to this pipe\n        close(pipe_child_to_parent[0]); // Child doesn't read from this pipe\n\n        int num;\n        int sum = 0;\n\n        // Read numbers from parent and calculate sum\n        // Loop until -1 is received or read fails\n        while (read(pipe_parent_to_child[0], &num, sizeof(num)) > 0 && num != -1) {\n            sum += num;\n        }\n\n        // Write sum back to parent\n        write(pipe_child_to_parent[1], &sum, sizeof(sum));\n\n        // Close remaining pipe ends\n        close(pipe_parent_to_child[0]);\n        close(pipe_child_to_parent[1]);\n\n        exit(EXIT_SUCCESS);\n    } else { // Parent process\n        // Close unused pipe ends\n        close(pipe_parent_to_child[0]); // Parent doesn't read from this pipe\n        close(pipe_child_to_parent[1]); // Parent doesn't write to this pipe\n\n        int numbers[] = {10, 20, 30, 40, 50, -1}; // Numbers to send, -1 signals end\n        int i;\n        int received_sum;\n\n        // Write numbers to child\n        for (i = 0; numbers[i] != -1; i++) {\n            write(pipe_parent_to_child[1], &numbers[i], sizeof(numbers[i]));\n        }\n        // Send the termination signal (-1)\n        write(pipe_parent_to_child[1], &numbers[i], sizeof(numbers[i])); \n\n        // Wait for child to finish\n        wait(NULL);\n        \n        // Read sum from child\n        read(pipe_child_to_parent[0], &received_sum, sizeof(received_sum));\n\n        printf(\"Parent received sum from child: %d\\n\", received_sum);\n\n        // Close remaining pipe ends\n        close(pipe_parent_to_child[1]);\n        close(pipe_child_to_parent[0]);\n    }\n\n    return 0;\n}\n```"
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

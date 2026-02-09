@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Deadlocks and Synchronization",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 11:51:12",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1163,
+      "output_tokens": 1313,
+      "total_tokens": 7109
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "Deadlocks",
+      "Synchronization",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "בהינתן קטע הקוד הבא המייצג את פעולתו של חוט (thread) בשם `thread_func1`, איזו מהאפשרויות הבאות עבור מימוש `thread_func2` תמנע קיפאון (deadlock) בצורה היעילה ביותר, וזאת תוך כדי מתן גישה לשני המשאבים (mutexA ו-mutexB) לשני החוטים?",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n\npthread_mutex_t mutexA;\npthread_mutex_t mutexB;\n\nvoid *thread_func1(void *arg) {\n    printf(\"Thread 1: Trying to lock mutexA...\\n\");\n    pthread_mutex_lock(&mutexA);\n    printf(\"Thread 1: Locked mutexA. Trying to lock mutexB...\\n\");\n    pthread_mutex_lock(&mutexB);\n    printf(\"Thread 1: Locked mutexB. Doing work...\\n\");\n    // Critical section 1\n    pthread_mutex_unlock(&mutexB);\n    printf(\"Thread 1: Unlocked mutexB.\\n\");\n    pthread_mutex_unlock(&mutexA);\n    printf(\"Thread 1: Unlocked mutexA.\\n\");\n    return NULL;\n}\n\n// void *thread_func2(void *arg) { ... } // מימוש משתנה לפי האפשרויות",
+      "options": [
+        "א. מימוש `thread_func2` יבצע: \n```c\n    pthread_mutex_lock(&mutexB);\n    pthread_mutex_lock(&mutexA);\n    // ... קטע קריטי ...\n    pthread_mutex_unlock(&mutexA);\n    pthread_mutex_unlock(&mutexB);\n```",
+        "ב. מימוש `thread_func2` יבצע: \n```c\n    pthread_mutex_lock(&mutexA);\n    pthread_mutex_lock(&mutexB);\n    // ... קטע קריטי ...\n    pthread_mutex_unlock(&mutexB);\n    pthread_mutex_unlock(&mutexA);\n```",
+        "ג. מימוש `thread_func2` ישתמש בפונקציות `pthread_mutex_trylock` עבור שני המשאבים, עם לוגיקה לביטול נעילה (rollback) במקרה של כישלון (לדוגמה, אם לא מצליח לנעול את המשאב השני, משחרר את הראשון ומנסה שוב).",
+        "ד. מימוש `thread_func2` ישתמש ב-mutex יחיד וגלובלי שיגן על הגישה לכל אחד משני המשאבים `mutexA` ו-`mutexB` הנפרדים, ויחליף אותם."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "התשובה הנכונה היא ב'. קיפאון (deadlock) מתרחש כאשר קבוצת תהליכים (או חוטים) ממתינה זה לזה במעגל לקבלת משאבים. אחד התנאים ההכרחיים לקיפאון הוא 'המתנה מעגלית' (Circular Wait). על מנת למנוע תנאי זה, יש לוודא שכל החוטים המעוניינים באותם משאבים ירכשו אותם באותו סדר קבוע מראש. במקרה זה, `thread_func1` רוכש קודם את `mutexA` ולאחר מכן את `mutexB`. לכן, על מנת למנוע קיפאון, גם `thread_func2` צריך לרכוש את המשאבים באותו סדר – קודם `mutexA` ולאחר מכן `mutexB`. \n\nא. מימוש בסדר הפוך (B ואז A) יוביל למצב קלאסי של קיפאון אם שני החוטים ירוצו בו-זמנית ויצליחו לנעול את המוטקס הראשון שלהם (חוט 1 את A, חוט 2 את B) לפני שהשני יצליח לנעול את המוטקס השני שהוא זקוק לו. \n\nג. שימוש ב-`trylock` עם לוגיקה לביטול נעילה (rollback) הוא אמנם שיטה למניעת קיפאון (deadlock avoidance), אך היא מורכבת יותר ליישום ויכולה להוביל ל-livelock או בזבוז משאבים עקב ניסיונות חוזרים ונשנים, ולרוב פחות יעילה או פשוטה ליישום מאשר הקפדה על סדר נעילה קבוע, בפרט במקרה כזה. \n\nד. שימוש ב-mutex גלובלי יחיד בהחלט ימנע קיפאון, אך הוא יפחית באופן דרמטי את רמת המקביליות במערכת (Concurrency), שכן אף חוט לא יוכל לגשת לאף אחד מהמשאבים אם ה-mutex הגלובלי נעול, גם אם הוא זקוק רק למשאב אחד. לכן, זו אינה הדרך היעילה ביותר במובן של שמירה על רמת מקביליות סבירה."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

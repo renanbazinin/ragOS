@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Processes and Memory Management",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 20:05:03",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1034,
+      "output_tokens": 360,
+      "total_tokens": 2445
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Processes",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "מה כולל תהליך (process) במערכת הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. רק את קוד התוכנית והנתונים הגלובליים שלה.",
+        "ב. רק את מצב המעבד (CPU state) והמחסנית (stack).",
+        "ג. את קוד התוכנית, הנתונים שלה, המחסנית, הערימה (heap) ומצב המעבד.",
+        "ד. רק את מערכת הקבצים של המשתמש.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג. תהליך (process) הוא מופע של תוכנית בהרצה. הוא כולל את מרחב הכתובות הפרטי שלו (קוד התוכנית, הנתונים שלה, הערימה והמחסנית), את מצב המעבד (כמו מונה התוכנית ורשמים אחרים), וכן משאבי מערכת הפעלה נוספים כמו קבצים פתוחים וסיגנלים."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

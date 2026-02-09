@@ -1,0 +1,51 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency and Condition Variables",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 11:36:49",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2951,
+      "output_tokens": 1405,
+      "total_tokens": 8888
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Concurrency",
+      "Condition Variables",
+      "Threads",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה המנסה לממש מחסום (barrier) באמצעות משתני תנאי (condition variables) ונעילה (mutex). מטרת המחסום היא להבטיח שכל NUM_THREADS יגיעו לנקודה מסוימת לפני שמי מהם ימשיך הלאה.\n\nקראו את הקוד בעיון וענו על השאלות הבאות:",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <unistd.h> // For sleep\n\n#define NUM_THREADS 5\n\npthread_mutex_t barrier_mutex;\npthread_cond_t barrier_cond;\nint arrived_count = 0;\n\nvoid *thread_func(void *arg) {\n    long tid = (long)arg;\n\n    printf(\"Thread %ld: Started and doing some work.\\n\", tid);\n    sleep(1); // Simulate work\n\n    pthread_mutex_lock(&barrier_mutex);\n    arrived_count++;\n    printf(\"Thread %ld: Arrived at barrier. Arrived count: %d/%d\\n\", tid, arrived_count, NUM_THREADS);\n\n    if (arrived_count < NUM_THREADS) {\n        // Wait for other threads to arrive\n        pthread_cond_wait(&barrier_cond, &barrier_mutex);\n        printf(\"Thread %ld: Woke up from barrier wait.\\n\", tid);\n    } else {\n        // Last thread arrived, signal all waiting threads\n        printf(\"Thread %ld: Last thread arrived. Signaling ONE waiting thread.\\n\", tid);\n        pthread_cond_signal(&barrier_cond); // INTENTIONAL ERROR: Should be broadcast\n    }\n\n    pthread_mutex_unlock(&barrier_mutex);\n\n    printf(\"Thread %ld: Passed barrier and continuing.\\n\", tid);\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n    pthread_mutex_init(&barrier_mutex, NULL);\n    pthread_cond_init(&barrier_cond, NULL);\n\n    printf(\"Main: Creating %d threads...\\n\", NUM_THREADS);\n    for (long i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, thread_func, (void *)i);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Main: All threads finished (or tried to).\\n\");\n\n    pthread_mutex_destroy(&barrier_mutex);\n    pthread_cond_destroy(&barrier_cond);\n\n    return 0;\n}"
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "מהו הפלט הצפוי של התוכנית? האם כל ה-NUM_THREADS יצליחו לעבור את המחסום ולהשלים את ריצתם? נמקו את תשובתכם.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "במידה וישנה בעיה במימוש המחסום, ציינו מהי השורה בקוד שגורמת לבעיה והציעו תיקון שיבטיח שכל ה-NUM_THREADS יעברו את המחסום כראוי.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1. הפלט הצפוי יראה את כל ה-NUM_THREADS מגיעים למחסום. התהליך האחרון שיגיע למחסום (לדוגמה, Thread 4) ידפיס \"Last thread arrived. Signaling ONE waiting thread.\" ויקרא ל-`pthread_cond_signal`. קריאה זו תעיר רק אחד מהתהליכים הממתינים (לדוגמה, Thread 0). תהליך זה (Thread 0) ידפיס \"Woke up from barrier wait.\" וימשיך ל-\"Passed barrier\".\nהבעיה היא ששאר התהליכים (Thread 1, Thread 2, Thread 3) יישארו במצב המתנה (waiting) על משתנה התנאי `barrier_cond` ולא יתעוררו לעולם, מכיוון ש-`pthread_cond_signal` מעירה רק תהליך אחד. כתוצאה מכך, התוכנית תיתקע (deadlock) ולא כל ה-NUM_THREADS יצליחו לעבור את המחסום ולהשלים את ריצתם. תהליך ה-main ימתין ללא סוף ב-`pthread_join` עבור התהליכים התקועים.\n\n2. השורה הבעייתית היא:\n`pthread_cond_signal(&barrier_cond);`\nהתיקון הנדרש הוא להחליף את הקריאה ל-`pthread_cond_signal` בקריאה ל-`pthread_cond_broadcast` כדי להעיר את כל התהליכים הממתינים על משתנה התנאי.\nהשורה המתוקנת צריכה להיות:\n`pthread_cond_broadcast(&barrier_cond);`\nתיקון זה יבטיח שברגע שהתהליך האחרון מגיע למחסום, כל התהליכים הממתינים יתעוררו וימשיכו הלאה, ובכך המחסום יתפקד כמצופה."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Scheduling and Processes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 21:05:48",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1031,
+      "output_tokens": 420,
+      "total_tokens": 2639
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "MultipleChoice",
+    "topic": [
+      "Scheduling",
+      "Processes",
+      "Process States"
+    ],
+    "content": {
+      "text": "מה קורה לתהליך כאשר הוא מבצע פעולת קלט/פלט חוסמת (blocking I/O)?",
+      "code_snippet": null,
+      "options": [
+        "א. הוא נשאר במצב ריצה (Running) וממתין לסיום הפעולה.",
+        "ב. הוא עובר למצב מוכן (Ready) וממתין לתזמון מחדש.",
+        "ג. הוא עובר למצב המתנה (Waiting) עד לסיום פעולת הקלט/פלט.",
+        "ד. הוא מסיים את ריצתו (Terminated) מכיוון שאינו יכול להמשיך.",
+        "ה. מערכת ההפעלה הורגת את התהליך (Kills the process) כדי לפנות משאבים."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג'. כאשר תהליך מבצע פעולת קלט/פלט חוסמת, הוא אינו יכול להמשיך בריצתו עד לסיום הפעולה. לכן, מערכת ההפעלה מעבירה אותו למצב המתנה (Waiting/Blocked) ושומרת את הקשרו, ומאפשרת למעבד להריץ תהליכים אחרים. רק לאחר סיום פעולת הקלט/פלט, התהליך יעבור למצב מוכן (Ready) וימתין לתזמון מחדש."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

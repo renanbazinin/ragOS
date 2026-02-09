@@ -1,0 +1,52 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Deadlocks",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 20:46:44",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4285,
+      "output_tokens": 2516,
+      "total_tokens": 11034
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Semaphores",
+      "Deadlocks",
+      "Concurrency",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המדמה מצב בו שני תהליכונים (threads) מנסים לגשת לשני משאבים שונים (Resource 1, Resource 2). כל משאב מוגן על ידי סמפור בינארי. התוכנית יוצרת שני תהליכונים, אחד מטיפוס A ואחד מטיפוס B, המבצעים פעולות על המשאבים.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <semaphore.h>\n#include <unistd.h> // For sleep\n\nsem_t resource1_sem;\nsem_t resource2_sem;\n\nvoid* thread_func_A(void* arg) {\n    printf(\"Thread A: Trying to acquire Resource 1...\\n\");\n    sem_wait(&resource1_sem);\n    printf(\"Thread A: Acquired Resource 1. Trying to acquire Resource 2...\\n\");\n    sleep(1); // Simulate work or context switch\n    sem_wait(&resource2_sem);\n    printf(\"Thread A: Acquired Resource 2. Using resources...\\n\");\n    // Critical section\n    sleep(2);\n    printf(\"Thread A: Releasing Resource 2...\\n\");\n    sem_post(&resource2_sem);\n    printf(\"Thread A: Releasing Resource 1...\\n\");\n    sem_post(&resource1_sem);\n    printf(\"Thread A: Finished.\\n\");\n    return NULL;\n}\n\nvoid* thread_func_B(void* arg) {\n    printf(\"Thread B: Trying to acquire Resource 2...\\n\");\n    sem_wait(&resource2_sem);\n    printf(\"Thread B: Acquired Resource 2. Trying to acquire Resource 1...\\n\");\n    sleep(1); // Simulate work or context switch\n    sem_wait(&resource1_sem);\n    printf(\"Thread B: Acquired Resource 1. Using resources...\\n\");\n    // Critical section\n    sleep(2);\n    printf(\"Thread B: Releasing Resource 1...\\n\");\n    sem_post(&resource1_sem);\n    printf(\"Thread B: Releasing Resource 2...\\n\");\n    sem_post(&resource2_sem);\n    printf(\"Thread B: Finished.\\n\");\n    return NULL;\n}\n\nint main() {\n    sem_init(&resource1_sem, 0, 1);\n    sem_init(&resource2_sem, 0, 1);\n\n    pthread_t tidA, tidB;\n\n    pthread_create(&tidA, NULL, thread_func_A, NULL);\n    pthread_create(&tidB, NULL, thread_func_B, NULL);\n\n    pthread_join(tidA, NULL);\n    pthread_join(tidB, NULL);\n\n    sem_destroy(&resource1_sem);\n    sem_destroy(&resource2_sem);\n\n    printf(\"Main: All threads finished.\\n\");\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "האם קיים סיכון לקיפאון (deadlock) בתוכנית זו? אם כן, תאר/י במפורט רצף אירועים (interleaving) בין התהליכונים שיכול להוביל לקיפאון, והסבר/י מדוע הוא מתרחש.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "תקן/י את הקוד כדי למנוע קיפאון, תוך שמירה על העיקרון ששני התהליכונים זקוקים לשני המשאבים כדי לבצע את עבודתם. ספק/י את הקוד המתוקן (רק את הפונקציות thread_func_A ו-thread_func_B) והסבר/י מדוע התיקון מונע קיפאון.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.  **כן, קיים סיכון לקיפאון (deadlock) בתוכנית זו.** קיפאון יכול להתרחש כאשר מתקיימים ארבעת התנאים של קיפאון: מניעה הדדית (Mutual Exclusion), החזקה והמתנה (Hold and Wait), אי-דריסה (No Preemption), והמתנה מעגלית (Circular Wait). במקרה זה, המתנה מעגלית היא הגורם המרכזי.\n\n    **רצף אירועים לדוגמה שיוביל לקיפאון:**\n    *   **תהליכון A** מתחיל ומבצע `sem_wait(&resource1_sem);` ומשיג את `Resource 1`. (Resource 1 = 0)\n    *   מתרחש מיתוג הקשר (context switch).\n    *   **תהליכון B** מתחיל ומבצע `sem_wait(&resource2_sem);` ומשיג את `Resource 2`. (Resource 2 = 0)\n    *   מתרחש מיתוג הקשר.\n    *   **תהליכון A** ממשיך, ולאחר ה-`sleep(1);` הוא מבצע `sem_wait(&resource2_sem);`. `Resource 2` כרגע מוחזק על ידי תהליכון B, ולכן תהליכון A נחסם וממתין לשחרורו.\n    *   מתרחש מיתוג הקשר.\n    *   **תהליכון B** ממשיך, ולאחר ה-`sleep(1);` הוא מבצע `sem_wait(&resource1_sem);`. `Resource 1` כרגע מוחזק על ידי תהליכון A, ולכן תהליכון B נחסם וממתין לשחרורו.\n\n    בשלב זה, תהליכון A מחזיק ב-Resource 1 וממתין ל-Resource 2, בעוד שתהליכון B מחזיק ב-Resource 2 וממתין ל-Resource 1. נוצרה המתנה מעגלית, ושני התהליכונים חסומים לנצח – קיפאון.\n\n2.  **תיקון הקוד למניעת קיפאון:**\n    כדי למנוע קיפאון, יש לשבור את תנאי ההמתנה המעגלית. הדרך הנפוצה והפשוטה ביותר לעשות זאת במקרה זה היא לכפות סדר עקבי של רכישת משאבים על כל התהליכונים. כלומר, כל התהליכונים ינסו לרכוש את המשאבים באותו סדר (לדוגמה, תמיד Resource 1 ואז Resource 2).\n\n    **קוד מתוקן (רק הפונקציות הרלוונטיות):**\n    ```c\n#include <stdio.h>\n#include <pthread.h>\n#include <semaphore.h>\n#include <unistd.h> // For sleep\n\nextern sem_t resource1_sem;\nextern sem_t resource2_sem;\n\nvoid* thread_func_A(void* arg) {\n    printf(\"Thread A: Trying to acquire Resource 1...\\n\");\n    sem_wait(&resource1_sem);\n    printf(\"Thread A: Acquired Resource 1. Trying to acquire Resource 2...\\n\");\n    sleep(1); // Simulate work or context switch\n    sem_wait(&resource2_sem);\n    printf(\"Thread A: Acquired Resource 2. Using resources...\\n\");\n    // Critical section\n    sleep(2);\n    printf(\"Thread A: Releasing Resource 2...\\n\");\n    sem_post(&resource2_sem);\n    printf(\"Thread A: Releasing Resource 1...\\n\");\n    sem_post(&resource1_sem);\n    printf(\"Thread A: Finished.\\n\");\n    return NULL;\n}\n\nvoid* thread_func_B(void* arg) {\n    printf(\"Thread B: Trying to acquire Resource 1...\\n\"); // Changed order: acquire R1 first\n    sem_wait(&resource1_sem);\n    printf(\"Thread B: Acquired Resource 1. Trying to acquire Resource 2...\\n\");\n    sleep(1); // Simulate work or context switch\n    sem_wait(&resource2_sem);\n    printf(\"Thread B: Acquired Resource 2. Using resources...\\n\");\n    // Critical section\n    sleep(2);\n    printf(\"Thread B: Releasing Resource 2...\\n\");\n    sem_post(&resource2_sem);\n    printf(\"Thread B: Releasing Resource 1...\\n\");\n    sem_post(&resource1_sem);\n    printf(\"Thread B: Finished.\\n\");\n    return NULL;\n}\n    ```\n\n    **הסבר מדוע התיקון מונע קיפאון:**\n    על ידי אכיפת סדר רכישת משאבים עקבי (תמיד Resource 1 ואז Resource 2) עבור כל התהליכונים, אנו מבטיחים שלא ייווצר מצב של המתנה מעגלית. אם תהליכון A יחזיק ב-Resource 1 וימתין ל-Resource 2, ותהליכון B יצטרך גם הוא את Resource 1, הוא ימתין עד שתהליכון A ישחרר אותו (לאחר שרכש ושחרר את Resource 2). לעולם לא יקרה מצב שבו תהליכון אחד מחזיק ב-Resource X וממתין ל-Resource Y, בעוד שתהליכון אחר מחזיק ב-Resource Y וממתין ל-Resource X, מכיוון ששניהם ינסו לרכוש את Resource X ראשון. הדבר מונע את תנאי ההמתנה המעגלית ובכך מונע קיפאון."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Context Switching",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 07:02:53",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 956,
+      "output_tokens": 357,
+      "total_tokens": 2840
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Context Switching",
+      "Processes"
+    ],
+    "content": {
+      "text": "מהו המידע העיקרי שמערכת ההפעלה שומרת ומשחזרת במהלך החלפת הקשר (context switch)?",
+      "code_snippet": null,
+      "options": [
+        "א. תוכן זיכרון ה-RAM המלא של התהליך.",
+        "ב. נתוני קלט/פלט ממכשירים חיצוניים.",
+        "ג. מצב המעבד (כגון רגיסטרים, מונה תוכנית ומצביע מחסנית).",
+        "ד. רשימת קבצים פתוחים בלבד.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג'. החלפת הקשר כרוכה בשמירת המצב הנוכחי של התהליך הרץ (כולל רגיסטרים של המעבד, מונה התוכנית ומצביע המחסנית) וטעינת המצב השמור של התהליך הבא שירוץ. זה מאפשר לתהליך שהופסק להמשיך מהנקודה שבה עצר."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

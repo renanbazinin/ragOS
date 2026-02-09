@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency and Condition Variables",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 11:37:20",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3819,
+      "output_tokens": 2452,
+      "total_tokens": 11193
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Concurrency",
+      "Condition Variables",
+      "Synchronization",
+      "Producer-Consumer"
+    ],
+    "content": {
+      "text": "נתבונן במימוש הבא של בעיית יצרן-צרכן (Producer-Consumer) המשתמש בחוצץ חסום (Bounded Buffer) ובמנגנוני סנכרון הכוללים מנעול הדדי (Mutex) ומשתני תנאי (Condition Variables). הקוד מיועד לתמוך בריצה מקבילה של מספר חוטי יצרן ומספר חוטי צרכן. \n\nא. האם מימוש זה של בעיית היצרן-צרכן נכון ועמיד (robust) תחת כל התנאים, ובפרט בנוכחות התעוררויות כוזבות (spurious wakeups) וריבוי חוטים? נמקו את תשובתכם בפירוט והסבירו אילו בעיות עלולות לצוץ.\nב. אם המימוש אינו נכון, הציעו תיקון מינימלי לקוד שיפתור את הבעיות שזיהיתם בסעיף א'. הציגו את הקוד המתוקן והסבירו מדוע התיקון שלכם מבטיח נכונות ועמידות.",
+      "code_snippet": "#include <iostream>\n#include <queue>\n#include <thread>\n#include <mutex>\n#include <condition_variable>\n#include <chrono>\n\nconst int BUFFER_SIZE = 5;\nstd::queue<int> buffer;\nstd::mutex mtx;\nstd::condition_variable not_empty;\nstd::condition_variable not_full;\n\nvoid producer(int id) {\n    for (int i = 0; i < 10; ++i) {\n        std::unique_lock<std::mutex> lock(mtx);\n        // בדיקת התנאי לפני המתנה\n        if (buffer.size() == BUFFER_SIZE) { // בדוק אם החוצץ מלא\n            std::cout << \"Producer \" << id << \" waiting (buffer full)...\\n\";\n            not_full.wait(lock);\n        }\n        \n        int item = id * 100 + i;\n        buffer.push(item);\n        std::cout << \"Producer \" << id << \" produced: \" << item << \" (size: \" << buffer.size() << \")\\n\";\n        not_empty.notify_one(); // איתות לצרכן אחד\n        lock.unlock(); // שחרור המנעול\n        std::this_thread::sleep_for(std::chrono::milliseconds(50));\n    }\n}\n\nvoid consumer(int id) {\n    for (int i = 0; i < 10; ++i) {\n        std::unique_lock<std::mutex> lock(mtx);\n        // בדיקת התנאי לפני המתנה\n        if (buffer.empty()) { // בדוק אם החוצץ ריק\n            std::cout << \"Consumer \" << id << \" waiting (buffer empty)...\\n\";\n            not_empty.wait(lock);\n        }\n        \n        int item = buffer.front();\n        buffer.pop();\n        std::cout << \"Consumer \" << id << \" consumed: \" << item << \" (size: \" << buffer.size() << \")\\n\";\n        not_full.notify_one(); // איתות ליצרן אחד\n        lock.unlock(); // שחרור המנעול\n        std::this_thread::sleep_for(std::chrono::milliseconds(100));\n    }\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "א. המימוש הנתון אינו נכון ואינו עמיד (robust). קיימות מספר בעיות פוטנציאליות, במיוחד בתרחישים של ריבוי חוטים ו/או התעוררויות כוזבות (spurious wakeups):\n\n1.  **התעוררות כוזבת (Spurious Wakeups)**: משתני תנאי (condition variables) יכולים להעיר חוטים הממתינים ללא איתות מפורש (spurious wakeup), כלומר, גם כאשר התנאי (הפרדיקט) לא השתנה. אם חוט מתעורר מהמתנה כוזבת, והוא בודק את התנאי באמצעות `if` במקום `while`, הוא עלול להמשיך בביצוע כאילו התנאי התקיים, אף שעדיין לא. לדוגמה, חוט צרכן יכול להתעורר באופן כוזב, למצוא את החוצץ עדיין ריק, ולנסות לגשת לפריט (buffer.front()) מה שיוביל לשגיאת זמן ריצה או התנהגות בלתי צפויה.\n2.  **ריבוי חוטים ממתינים (Multiple Waiting Threads)**: כאשר ישנם מספר חוטי יצרן או צרכן הממתינים על אותו משתנה תנאי, `notify_one()` מעיר רק חוט אחד. אם, לדוגמה, שני חוטי צרכן ממתינים על `not_empty` והחוצץ ריק, ויצרן מכניס פריט אחד ומאותת באמצעות `not_empty.notify_one()`, אחד הצרכנים יתעורר. הוא יבדוק את התנאי עם `if`, ימצא שהחוצץ אינו ריק, יצרוך את הפריט וישחרר את המנעול. אם מיד לאחר מכן חוט הצרכן השני מתעורר (לדוגמה, בגלל תזמון לא רצוי שבו הוא קיבל CPU מיד, או בגלל התעוררות כוזבת), הוא ימצא את החוצץ שוב ריק, אך בגלל השימוש ב-`if` במקום `while`, הוא לא יבדוק מחדש את התנאי וינסה לצרוך מחוצץ ריק, מה שיוביל לשגיאה.\n3.  **מצב מירוץ עקיף**: גם ללא התעוררויות כוזבות, בתרחיש של ריבוי חוטים, חוט שהתעורר יכול לאבד את המנעול לפני שהוא בודק את התנאי, וחוט אחר יכול לשנות את מצב המערכת. כאשר החוט הראשון יקבל את המנעול בחזרה וימשיך, בדיקת ה-`if` לא תבטיח שהתנאי עדיין מתקיים.\n\nב. **תיקון מינימלי**: \nהתיקון המינימלי והנכון הוא להחליף את כל המופעים של `if` ב-`while` בבדיקת התנאים לפני הקריאה ל-`wait()` עבור שני משתני התנאי.\n\n**קוד מתוקן**:\n```cpp\n#include <iostream>\n#include <queue>\n#include <thread>\n#include <mutex>\n#include <condition_variable>\n#include <chrono>\n\nconst int BUFFER_SIZE = 5;\nstd::queue<int> buffer;\nstd::mutex mtx;\nstd::condition_variable not_empty;\nstd::condition_variable not_full;\n\nvoid producer(int id) {\n    for (int i = 0; i < 10; ++i) {\n        std::unique_lock<std::mutex> lock(mtx);\n        // בדיקת התנאי בלולאת while\n        while (buffer.size() == BUFFER_SIZE) { // בדוק אם החוצץ מלא\n            std::cout << \"Producer \" << id << \" waiting (buffer full)...\\n\";\n            not_full.wait(lock);\n        }\n        \n        int item = id * 100 + i;\n        buffer.push(item);\n        std::cout << \"Producer \" << id << \" produced: \" << item << \" (size: \" << buffer.size() << \")\\n\";\n        not_empty.notify_one(); \n        lock.unlock(); \n        std::this_thread::sleep_for(std::chrono::milliseconds(50));\n    }\n}\n\nvoid consumer(int id) {\n    for (int i = 0; i < 10; ++i) {\n        std::unique_lock<std::mutex> lock(mtx);\n        // בדיקת התנאי בלולאת while\n        while (buffer.empty()) { // בדוק אם החוצץ ריק\n            std::cout << \"Consumer \" << id << \" waiting (buffer empty)...\\n\";\n            not_empty.wait(lock);\n        }\n        \n        int item = buffer.front();\n        buffer.pop();\n        std::cout << \"Consumer \" << id << \" consumed: \" << item << \" (size: \" << buffer.size() << \")\\n\";\n        not_full.notify_one(); \n        lock.unlock(); \n        std::this_thread::sleep_for(std::chrono::milliseconds(100));\n    }\n}\n```\n\n**הסבר לתיקון**:\nהחלפת `if` ב-`while` מבטיחה שהחוט יבדוק מחדש את התנאי (הפרדיקט) לאחר שהתעורר מהמתנה. רק אם התנאי אכן מתקיים, החוט ימשיך בביצוע. זה מגן מפני התעוררויות כוזבות (spurious wakeups) ומבטיח שהחוט לא ימשיך לבצע פעולה על מצב שגוי (למשל, צריכה מחוצץ ריק או ייצור לחוצץ מלא). כלומר, גם אם החוט מתעורר, הוא לא יצא מלולאת ה-`while` אלא אם כן התנאי מתקיים באמת. זהו העיקרון המנחה והנכון בשימוש במשתני תנאי: תמיד לבדוק את הפרדיקט בלולאת `while` לאחר חזרה מ-`wait()`."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Context Switching and Threads",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 21:56:07",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 985,
+      "output_tokens": 459,
+      "total_tokens": 2551
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Context Switching",
+      "Threads"
+    ],
+    "content": {
+      "text": "מה הופך החלפת הקשר בין שני חוטים (threads) באותו תהליך (process) למהירה יותר בדרך כלל מהחלפת הקשר בין שני תהליכים שונים?",
+      "code_snippet": null,
+      "options": [
+        "א. חוטים אינם דורשים שמירה של מצב המעבד (CPU state).",
+        "ב. החלפת הקשר בין חוטים אינה דורשת מעורבות של מערכת ההפעלה.",
+        "ג. החוטים חולקים את אותו מרחב כתובות, ולכן אין צורך להחליף את מפות הזיכרון או לרוקן את ה-TLB.",
+        "ד. חוטים אינם משתמשים בערימה (stack) נפרדת."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג'. החלפת הקשר בין חוטים באותו תהליך מהירה יותר מכיוון שהם חולקים את אותו מרחב כתובות לוגי. אין צורך לשנות את מפות הזיכרון או לרוקן את ה-Translation Lookaside Buffer (TLB), מה שחוסך זמן רב. רק מצב המעבד הספציפי לחוט (כגון רגיסטרים, מונה תוכנית ומצביע ערימה) צריך להישמר ולשוחזר, בעוד שבהחלפת הקשר בין תהליכים יש צורך להחליף גם את מפות הזיכרון ולרוקן את ה-TLB."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

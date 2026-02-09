@@ -1,0 +1,52 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Synchronization and Deadlocks",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 09:57:09",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3054,
+      "output_tokens": 3302,
+      "total_tokens": 11995
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Synchronization",
+      "Deadlocks",
+      "Semaphores",
+      "Mutexes",
+      "Resource Allocation"
+    ],
+    "content": {
+      "text": "בספרייה מסוימת קיימים שני סוגי משאבים: N שולחנות לימוד (Desks) ו-M מחשבים (Computers). סטודנטים מגיעים לספרייה וזקוקים למשאבים אלו.\nקיימים שני סוגי סטודנטים הזקוקים לשני המשאבים:\n1.  **סטודנט מסוג A:** זקוק לשולחן, ולאחר מכן למחשב. (סדר רכישה: שולחן -> מחשב).\n2.  **סטודנט מסוג B:** זקוק למחשב, ולאחר מכן לשולחן. (סדר רכישה: מחשב -> שולחן).\n\nהקוד הבא מציג מימוש ראשוני של פונקציות לרכישה ושחרור של המשאבים, וכן פונקציות המדמות את פעולת הסטודנטים:\n",
+      "code_snippet": "#include <semaphore.h>\n#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h> // For sleep\n\n// Global semaphores for individual resources\nsem_t desks_sem;     // Initialized to N\nsem_t computers_sem; // Initialized to M\n\nvoid init_library(int num_desks, int num_computers) {\n    sem_init(&desks_sem, 0, num_desks);\n    sem_init(&computers_sem, 0, num_computers);\n    printf(\"Library initialized with %d desks and %d computers.\\n\", num_desks, num_computers);\n}\n\nvoid destroy_library() {\n    sem_destroy(&desks_sem);\n    sem_destroy(&computers_sem);\n    printf(\"Library destroyed.\\n\");\n}\n\nvoid acquire_desk() {\n    sem_wait(&desks_sem);\n    // printf(\"Acquired a desk.\\n\");\n}\n\nvoid release_desk() {\n    sem_post(&desks_sem);\n    // printf(\"Released a desk.\\n\");\n}\n\nvoid acquire_computer() {\n    sem_wait(&computers_sem);\n    // printf(\"Acquired a computer.\\n\");\n}\n\nvoid release_computer() {\n    sem_post(&computers_sem);\n    // printf(\"Released a computer.\\n\");\n}\n\n// Student Type A: Needs Desk then Computer\nvoid* student_type_A_task(void* arg) {\n    printf(\"Student A: Attempting to acquire desk...\\n\");\n    acquire_desk();\n    printf(\"Student A: Desk acquired. Attempting to acquire computer...\\n\");\n    // Simulate some work or delay\n    sleep(1);\n    acquire_computer();\n    printf(\"Student A: Computer acquired. Using both resources...\\n\");\n    // Simulate usage\n    sleep(2);\n    release_computer();\n    printf(\"Student A: Computer released. Releasing desk...\\n\");\n    release_desk();\n    printf(\"Student A: Desk released. Task finished.\\n\");\n    return NULL;\n}\n\n// Student Type B: Needs Computer then Desk\nvoid* student_type_B_task(void* arg) {\n    printf(\"Student B: Attempting to acquire computer...\\n\");\n    acquire_computer();\n    printf(\"Student B: Computer acquired. Attempting to acquire desk...\\n\");\n    // Simulate some work or delay\n    sleep(1);\n    acquire_desk();\n    printf(\"Student B: Desk acquired. Using both resources...\\n\");\n    // Simulate usage\n    sleep(2);\n    release_desk();\n    printf(\"Student B: Desk released. Releasing computer...\\n\");\n    release_computer();\n    printf(\"Student B: Computer released. Task finished.\\n\");\n    return NULL;\n}\n"
+    },
+    "sub_questions": [
+      {
+        "id": "a",
+        "text": "האם המימוש המוצג עלול להוביל לקיפאון (Deadlock)? אם כן, הסבירו מדוע, ותארו תרחיש ספציפי שיוביל לקיפאון.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "b",
+        "text": "הציעו פתרון מתוקן (באמצעות קוד C/C++), המונע קיפאון ועדיין מאפשר לשני סוגי הסטודנטים לבצע את משימתם, תוך ניסיון לשמור על רמת מקביליות סבירה. הסבירו את הפתרון שלכם.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": 15,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "א. כן, המימוש המוצג עלול להוביל לקיפאון. קיפאון יתרחש כאשר מתקיימים ארבעת התנאים של קופמן: מניעה הדדית (Mutual Exclusion), החזקה והמתנה (Hold and Wait), אי-הפקעה (No Preemption) והמתנה מעגלית (Circular Wait). במקרה זה:\n*   **מניעה הדדית:** כל משאב (שולחן או מחשב) נתפס באופן בלעדי על ידי סטודנט אחד באמצעות הסמפורים (`sem_wait`).\n*   **החזקה והמתנה:** סטודנט מסוג A יכול לתפוס שולחן ולהמתין למחשב, בעוד סטודנט מסוג B יכול לתפוס מחשב ולהמתין לשולחן. כלומר, חוט מחזיק במשאב אחד וממתין למשאב נוסף.\n*   **אי-הפקעה:** לא ניתן להפקיע משאב מסטודנט שמחזיק בו; רק הסטודנט עצמו יכול לשחרר את המשאב באמצעות `sem_post`.\n*   **המתנה מעגלית:** תרחיש קיפאון יכול להתרחש כך:\n    1.  סטודנט A (מחלקה א') מתחיל: קורא ל-`acquire_desk()`, תופס שולחן. (נניח שולחן 1).\n    2.  סטודנט B (מחלקה ב') מתחיל: קורא ל-`acquire_computer()`, תופס מחשב. (נניח מחשב 1).\n    3.  סטודנט A ממשיך: קורא ל-`acquire_computer()`, אך מחשב 1 תפוס על ידי B. סטודנט A נחסם וממתין למחשב.\n    4.  סטודנט B ממשיך: קורא ל-`acquire_desk()`, אך שולחן 1 תפוס על ידי A. סטודנט B נחסם וממתין לשולחן.\n    בשלב זה, שני הסטודנטים חסומים באופן הדדי, ונוצרת המתנה מעגלית: A מחכה ל-B, ו-B מחכה ל-A. אף אחד מהם לא יכול להמשיך או לשחרר את המשאב שהוא מחזיק, והמערכת נכנסת למצב קיפאון.\n\nב. הפתרון המוצע מונע קיפאון על ידי שבירת תנאי ההמתנה המעגלית. הוא עושה זאת באמצעות הוספת מנעול גלובלי (mutex) בשם `pair_acquisition_mutex`, אשר מגן על הקטע הקריטי שבו סטודנט רוכש את *שני* המשאבים הנדרשים לו. הפתרון מאפשר לסטודנטים שצריכים רק משאב אחד (שולחן בלבד או מחשב בלבד) להמשיך לפעול באופן עצמאי.\n\nכאשר סטודנט מסוג A או B זקוק לשולחן ולמחשב, עליו לרכוש תחילה את ה-`pair_acquisition_mutex`. מנעול זה מבטיח שרק סטודנט אחד יוכל להיות בשלב רכישת שני המשאבים (שולחן וגם מחשב) בכל רגע נתון. ברגע שהסטודנט מחזיק במנעול הגלובלי, הוא יכול לרכוש את השולחן והמחשב (בסדר המועדף עליו) בבטחה, מבלי לחשוש מקיפאון, כיוון שאף סטודנט אחר לא יכול להתחיל תהליך רכישת זוג משאבים במקביל. לאחר רכישת שני המשאבים, הסטודנט משחרר את ה-`pair_acquisition_mutex`, ומאפשר לסטודנטים אחרים לנסות לרכוש זוג משאבים.\n\nהפתרון שומר על רמת מקביליות סבירה מכיוון שה-`pair_acquisition_mutex` נתפס רק לזמן קצר מאוד – רק לצורך רכישת שני הסמפורים. השימוש במשאבים עצמם (שולחן ומחשב) מתבצע במקביל, וסטודנטים הזקוקים רק למשאב בודד (שולחן או מחשב) אינם מושפעים כלל מהמנעול הגלובלי ויכולים לרכוש ולשחרר משאבים אלו באופן חופשי.\n\n```c\n#include <semaphore.h>\n#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h> // For sleep\n\n// Global semaphores for individual resources\nsem_t desks_sem;     // Initialized to N\nsem_t computers_sem; // Initialized to M\n\n// Global mutex to protect the critical section of acquiring *both* resources\n// This serializes the acquisition of pairs, preventing circular wait\npthread_mutex_t pair_acquisition_mutex;\n\nvoid init_library_safe(int num_desks, int num_computers) {\n    sem_init(&desks_sem, 0, num_desks);\n    sem_init(&computers_sem, 0, num_computers);\n    pthread_mutex_init(&pair_acquisition_mutex, NULL);\n    printf(\"Library (safe) initialized with %d desks and %d computers.\\n\", num_desks, num_computers);\n}\n\nvoid destroy_library_safe() {\n    sem_destroy(&desks_sem);\n    sem_destroy(&computers_sem);\n    pthread_mutex_destroy(&pair_acquisition_mutex);\n    printf(\"Library (safe) destroyed.\\n\");\n}\n\n// Functions for single resource acquisition/release (for students needing only one)\n// These are not changed as they don't cause deadlocks on their own.\nvoid acquire_desk_single() { sem_wait(&desks_sem); printf(\"Acquired a desk (single).\\n\"); }\nvoid release_desk_single() { sem_post(&desks_sem); printf(\"Released a desk (single).\\n\"); }\nvoid acquire_computer_single() { sem_wait(&computers_sem); printf(\"Acquired a computer (single).\\n\"); }\nvoid release_computer_single() { sem_post(&computers_sem); printf(\"Released a computer (single).\\n\"); }\n\n// Student Type A: Needs Desk then Computer (SAFE)\nvoid* student_type_A_task_safe(void* arg) {\n    printf(\"Student A (safe): Attempting to acquire both resources...\\n\");\n    pthread_mutex_lock(&pair_acquisition_mutex); // Acquire global lock for paired acquisition\n    sem_wait(&desks_sem);                        // Acquire desk\n    sem_wait(&computers_sem);                    // Acquire computer\n    pthread_mutex_unlock(&pair_acquisition_mutex); // Release global lock\n\n    printf(\"Student A (safe): Desk and Computer acquired. Using both resources...\\n\");\n    // Simulate usage\n    sleep(2);\n\n    sem_post(&computers_sem);\n    printf(\"Student A (safe): Computer released. Releasing desk...\\n\");\n    sem_post(&desks_sem);\n    printf(\"Student A (safe): Desk released. Task finished.\\n\");\n    return NULL;\n}\n\n// Student Type B: Needs Computer then Desk (SAFE)\nvoid* student_type_B_task_safe(void* arg) {\n    printf(\"Student B (safe): Attempting to acquire both resources...\\n\");\n    pthread_mutex_lock(&pair_acquisition_mutex); // Acquire global lock for paired acquisition\n    sem_wait(&computers_sem);                    // Acquire computer\n    sem_wait(&desks_sem);                        // Acquire desk\n    pthread_mutex_unlock(&pair_acquisition_mutex); // Release global lock\n\n    printf(\"Student B (safe): Computer and Desk acquired. Using both resources...\\n\");\n    // Simulate usage\n    sleep(2);\n\n    sem_post(&desks_sem);\n    printf(\"Student B (safe): Desk released. Releasing computer...\\n\");\n    sem_post(&computers_sem);\n    printf(\"Student B (safe): Computer released. Task finished.\\n\");\n    return NULL;\n}\n```\n"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

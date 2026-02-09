@@ -1,0 +1,58 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Deadlocks",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 20:37:47",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4395,
+      "output_tokens": 4465,
+      "total_tokens": 17623
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Semaphores",
+      "Deadlocks",
+      "Synchronization",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "במערכת הפעלה, קיפאון (deadlock) הוא מצב לא רצוי שבו קבוצת תהליכים חוסמת זה את זה באופן הדדי, כך שאף אחד מהם לא יכול להמשיך בביצוע. שאלת בחינה זו בוחנת את הבנתכם בשימוש בסמפורים למניעת קיפאון במערכת המאפשרת הקצאת משאבים מרובים.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "נתונה מערכת עם שלושה משאבים ייחודיים, R1, R2 ו-R3, כאשר לכל משאב יש יחידה אחת בלבד. במערכת פועלים שלושה סוגי חוטים (תהליכונים): T1, T2 ו-T3. כל חוט זקוק לשני משאבים מתוך השלושה כדי לבצע את משימתו, ורוכש אותם בסדר קבוע:\n*   חוטים מסוג T1 רוכשים את R1, ולאחר מכן את R2.\n*   חוטים מסוג T2 רוכשים את R2, ולאחר מכן את R3.\n*   חוטים מסוג T3 רוכשים את R3, ולאחר מכן את R1.\n\nממשו את הפונקציות `acquire_resources` ו-`release_resources` עבור כל אחד מסוגי החוטים באמצעות סמפורים בינאריים. הסבירו בקצרה כיצד ייתכן קיפאון במערכת זו.",
+        "code_snippet": "typedef struct {\n    // Semaphores for R1, R2, R3\n    sem_t R1_sem;\n    sem_t R2_sem;\n    sem_t R3_sem;\n} ResourceSystem;\n\nvoid init_system(ResourceSystem *sys) {\n    sem_init(&sys->R1_sem, 0, 1);\n    sem_init(&sys->R2_sem, 0, 1);\n    sem_init(&sys->R3_sem, 0, 1);\n}\n\nvoid destroy_system(ResourceSystem *sys) {\n    sem_destroy(&sys->R1_sem);\n    sem_destroy(&sys->R2_sem);\n    sem_destroy(&sys->R3_sem);\n}\n\n// Functions for Thread Type T1\nvoid acquire_resources_T1(ResourceSystem *sys) {\n    // TODO: Implement resource acquisition for T1\n}\nvoid release_resources_T1(ResourceSystem *sys) {\n    // TODO: Implement resource release for T1\n}\n\n// Functions for Thread Type T2\nvoid acquire_resources_T2(ResourceSystem *sys) {\n    // TODO: Implement resource acquisition for T2\n}\nvoid release_resources_T2(ResourceSystem *sys) {\n    // TODO: Implement resource release for T2\n}\n\n// Functions for Thread Type T3\nvoid acquire_resources_T3(ResourceSystem *sys) {\n    // TODO: Implement resource acquisition for T3\n}\nvoid release_resources_T3(ResourceSystem *sys) {\n    // TODO: Implement resource release for T3\n}\n",
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "שנו את המימוש מסעיף 1.1 כך שהמערכת תהיה חופשית מקיפאון. עליכם לשמור על הסדר הלוגי של רכישת המשאבים עבור כל סוג חוט (לדוגמה, חוט T1 חייב לרכוש את R1 לפני R2, אך אתם רשאים להוסיף מנגנוני סנכרון חיצוניים). הסבירו את מנגנון מניעת הקיפאון שבחרתם ומדוע הוא עובד.",
+        "code_snippet": "typedef struct {\n    // Semaphores for R1, R2, R3\n    sem_t R1_sem;\n    sem_t R2_sem;\n    sem_t R3_sem;\n    // TODO: Add any additional synchronization objects needed\n    sem_t global_acq_lock;\n} ResourceSystemDeadlockFree;\n\nvoid init_system_df(ResourceSystemDeadlockFree *sys) {\n    sem_init(&sys->R1_sem, 0, 1);\n    sem_init(&sys->R2_sem, 0, 1);\n    sem_init(&sys->R3_sem, 0, 1);\n    // TODO: Initialize additional objects\n    sem_init(&sys->global_acq_lock, 0, 1);\n}\n\nvoid destroy_system_df(ResourceSystemDeadlockFree *sys) {\n    sem_destroy(&sys->R1_sem);\n    sem_destroy(&sys->R2_sem);\n    sem_destroy(&sys->R3_sem);\n    // TODO: Destroy additional objects\n    sem_destroy(&sys->global_acq_lock);\n}\n\n// Functions for Thread Type T1\nvoid acquire_resources_T1_df(ResourceSystemDeadlockFree *sys) {\n    // TODO: Implement resource acquisition for T1 (deadlock-free)\n}\nvoid release_resources_T1_df(ResourceSystemDeadlockFree *sys) {\n    // TODO: Implement resource release for T1 (deadlock-free)\n}\n\n// Functions for Thread Type T2\nvoid acquire_resources_T2_df(ResourceSystemDeadlockFree *sys) {\n    // TODO: Implement resource acquisition for T2 (deadlock-free)\n}\nvoid release_resources_T2_df(ResourceSystemDeadlockFree *sys) {\n    // TODO: Implement resource release for T2 (deadlock-free)\n}\n\n// Functions for Thread Type T3\nvoid acquire_resources_T3_df(ResourceSystemDeadlockFree *sys) {\n    // TODO: Implement resource acquisition for T3 (deadlock-free)\n}\nvoid release_resources_T3_df(ResourceSystemDeadlockFree *sys) {\n    // TODO: Implement resource release for T3 (deadlock-free)\n}\n",
+        "options": null
+      },
+      {
+        "id": "1.3",
+        "text": "נתחו את פתרון מניעת הקיפאון שהצעתם בסעיף 1.2. מהם היתרונות והחסרונות שלו מבחינת רמת מקביליות (concurrency) והוגנות (fairness)?",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "### סעיף 1.1: מימוש עם פוטנציאל לקיפאון והסבר\n\n**מימוש:**\n```c\n// Functions for Thread Type T1\nvoid acquire_resources_T1(ResourceSystem *sys) {\n    sem_wait(&sys->R1_sem); // Acquire R1\n    sem_wait(&sys->R2_sem); // Acquire R2\n}\nvoid release_resources_T1(ResourceSystem *sys) {\n    sem_post(&sys->R2_sem); // Release R2\n    sem_post(&sys->R1_sem); // Release R1\n}\n\n// Functions for Thread Type T2\nvoid acquire_resources_T2(ResourceSystem *sys) {\n    sem_wait(&sys->R2_sem); // Acquire R2\n    sem_wait(&sys->R3_sem); // Acquire R3\n}\nvoid release_resources_T2(ResourceSystem *sys) {\n    sem_post(&sys->R3_sem); // Release R3\n    sem_post(&sys->R2_sem); // Release R2\n}\n\n// Functions for Thread Type T3\nvoid acquire_resources_T3(ResourceSystem *sys) {\n    sem_wait(&sys->R3_sem); // Acquire R3\n    sem_wait(&sys->R1_sem); // Acquire R1\n}\nvoid release_resources_T3(ResourceSystem *sys) {\n    sem_post(&sys->R1_sem); // Release R1\n    sem_post(&sys->R3_sem); // Release R3\n}\n```\n\n**הסבר לקיפאון:**\nהמערכת המתוארת יכולה להיקלע למצב של קיפאון עקב התקיימות ארבעת התנאים ההכרחיים לקיפאון:\n1.  **מניעה הדדית (Mutual Exclusion):** כל משאב (R1, R2, R3) הוא יחיד ומוגן על ידי סמפור בינארי, כך שרק חוט אחד יכול להחזיק בו בזמן נתון. זהו תנאי מובנה בשימוש בסמפורים בינאריים. \n2.  **החזקה והמתנה (Hold and Wait):** חוטים רוכשים משאב אחד ומחזיקים בו בזמן שהם ממתינים למשאב נוסף. לדוגמה, חוט מסוג T1 רוכש את R1 וממתין ל-R2. \n3.  **אי-הפקעה (No Preemption):** משאבים אינם נלקחים מחוט בכוח; הם משוחררים רק מרצון על ידי החוט שהחזיק בהם לאחר שסיים את השימוש. \n4.  **המתנה מעגלית (Circular Wait):** זהו התנאי המרכזי שמוביל לקיפאון כאן. נניח שמתרחש התרחיש הבא:\n    *   חוט T1 רוכש את R1.\n    *   חוט T2 רוכש את R2.\n    *   חוט T3 רוכש את R3.\n    \n    כעת, כל חוט מחזיק במשאב הראשון שהוא זקוק לו וממתין למשאב השני. חוט T1 ממתין ל-R2 (שמוחזק על ידי T2), חוט T2 ממתין ל-R3 (שמוחזק על ידי T3), וחוט T3 ממתין ל-R1 (שמוחזק על ידי T1). נוצרת שרשרת המתנה מעגלית שבה אף חוט לא יכול להמשיך, והמערכת נכנסת לקיפאון.\n\n### סעיף 1.2: מימוש ללא קיפאון והסבר\n\nכדי למנוע קיפאון תוך שמירה על הסדר הלוגי של רכישת המשאבים לכל סוג חוט, נשתמש במנגנון מניעת קיפאון המבוסס על מניעת התנאי של 'החזקה והמתנה' (Hold and Wait). נבטיח שחוט שרוצה לרכוש משאבים ירכוש את כל המשאבים הנדרשים לו באופן אטומי, או שלא ירכוש אף אחד מהם. ניתן לעשות זאת באמצעות סמפור בינארי גלובלי נוסף (נכנה אותו `global_acq_lock`) שיגן על כל שלבי רכישת המשאבים.\n\n**מימוש:**\n```c\n// Functions for Thread Type T1\nvoid acquire_resources_T1_df(ResourceSystemDeadlockFree *sys) {\n    sem_wait(&sys->global_acq_lock); // Acquire global lock before attempting to get resources\n    sem_wait(&sys->R1_sem);          // Acquire R1\n    sem_wait(&sys->R2_sem);          // Acquire R2\n    sem_post(&sys->global_acq_lock); // Release global lock after all resources acquired\n}\nvoid release_resources_T1_df(ResourceSystemDeadlockFree *sys) {\n    sem_post(&sys->R2_sem); // Release R2\n    sem_post(&sys->R1_sem); // Release R1\n}\n\n// Functions for Thread Type T2\nvoid acquire_resources_T2_df(ResourceSystemDeadlockFree *sys) {\n    sem_wait(&sys->global_acq_lock); // Acquire global lock\n    sem_wait(&sys->R2_sem);          // Acquire R2\n    sem_wait(&sys->R3_sem);          // Acquire R3\n    sem_post(&sys->global_acq_lock); // Release global lock\n}\nvoid release_resources_T2_df(ResourceSystemDeadlockFree *sys) {\n    sem_post(&sys->R3_sem); // Release R3\n    sem_post(&sys->R2_sem); // Release R2\n}\n\n// Functions for Thread Type T3\nvoid acquire_resources_T3_df(ResourceSystemDeadlockFree *sys) {\n    sem_wait(&sys->global_acq_lock); // Acquire global lock\n    sem_wait(&sys->R3_sem);          // Acquire R3\n    sem_wait(&sys->R1_sem);          // Acquire R1\n    sem_post(&sys->global_acq_lock); // Release global lock\n}\nvoid release_resources_T3_df(ResourceSystemDeadlockFree *sys) {\n    sem_post(&sys->R1_sem); // Release R1\n    sem_post(&sys->R3_sem); // Release R3\n}\n```\n\n**הסבר למנגנון מניעת הקיפאון:**\nהוספת הסמפור הבינארי `global_acq_lock` מבטיחה שרק חוט אחד יוכל להיכנס לקטע הקריטי של רכישת המשאבים (החל מ-`sem_wait(&sys->global_acq_lock)` ועד ל-`sem_post(&sys->global_acq_lock)`). כלומר, חוט אחד בלבד יכול לנסות לרכוש את R1, R2 ו-R3 בכל רגע נתון. \n\nכאשר חוט רוכש את `global_acq_lock`, הוא ממשיך לרכוש את שני המשאבים הספציפיים שלו (לדוגמה, T1 רוכש את R1 ואז את R2). אם אחד מהמשאבים הללו אינו זמין, החוט ייחסם ב-`sem_wait` המתאים. עם זאת, מכיוון שאף חוט אחר לא יכול להיכנס לקטע רכישת המשאבים עד שהחוט הנוכחי ישחרר את `global_acq_lock`, לא יכול להיווצר מצב שבו חוט מחזיק במשאב אחד וממתין למשאב שני שמוחזק על ידי חוט אחר שגם הוא ממתין למשאב (כלומר, לא ייווצר מצב של Hold and Wait שמוביל למעגל). ברגע שחוט רוכש את `global_acq_lock`, הוא או רוכש את כל המשאבים שלו בהצלחה ומשחרר את `global_acq_lock` (ומאפשר לחוט הבא לנסות לרכוש), או שהוא נחסם על משאב ספציפי ו-`global_acq_lock` נשאר תפוס עד שהוא יצליח לרכוש את המשאב החסר (או עד שייכנס למצב של רעב, אם יאפשר זאת). \n\nבמקרה זה, התנאי 'החזקה והמתנה' נמנע בצורה יעילה: חוט רוכש את כל המשאבים שלו בבת אחת (מנקודת מבט של חוטים אחרים, המשאבים נרכשים באופן 'אטומי' בתוך הקטע המוגן על ידי `global_acq_lock`) לפני שהוא משחרר את האפשרות לחוטים אחרים להתחיל לרכוש משאבים. זה מבטיח שלא תהיה שרשרת המתנה מעגלית.\n\n### סעיף 1.3: ניתוח הפתרון\n\n**יתרונות:**\n*   **מניעת קיפאון מובטחת:** הפתרון מבטיח באופן מוחלט שלא ייווצר קיפאון במערכת, שכן הוא מונע את התנאי ההכרחי של 'החזקה והמתנה' (ובעקיפין גם את המתנה מעגלית). כל חוט רוכש את כל המשאבים הדרושים לו ב'טרנזקציה' אחת מוגנת. \n*   **פשטות יחסית:** המימוש פשוט יחסית להבנה וליישום, ודורש הוספת סמפור בינארי אחד בלבד.\n\n**חסרונות:**\n*   **מקביליות נמוכה (Low Concurrency):** זהו החיסרון המשמעותי ביותר. מכיוון שרק חוט אחד יכול להיכנס לקטע הקריטי של רכישת משאבים בכל רגע נתון (הודות ל-`global_acq_lock`), המערכת פועלת כמעט בסדרתיות בכל הנוגע לרכישת משאבים. חוטים אחרים הממתינים לרכוש משאבים יחסמו על `global_acq_lock` גם אם המשאבים שהם זקוקים להם פנויים לחלוטין. זה עלול להפחית באופן דרמטי את ביצועי המערכת בסביבות עם חוטים רבים או עם משאבים נפרדים רבים.\n*   **רעב (Starvation) אפשרי:** אם ישנם חוטים רבים הממתינים ל-`global_acq_lock`, וסדר השחרור של הסמפור אינו הוגן (תלוי במימוש הסמפור של מערכת ההפעלה), ייתכן שחוט מסוים ימתין ללא הגבלת זמן כדי לרכוש את המנעול הגלובלי, ובכך לא יוכל לרכוש את המשאבים שלו ולבצע את עבודתו. עם זאת, במימושי סמפורים רבים, ישנה רמה מסוימת של הוגנות בניהול תורי ההמתנה.\n*   **הגבלה על גמישות:** הפתרון מחייב שכל המשאבים הדרושים לחוט יהיו ידועים מראש לפני שהוא מתחיל בתהליך הרכישה, ואינו מאפשר רכישה דינמית של משאבים על בסיס מצב המערכת או החלטות ביניים."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

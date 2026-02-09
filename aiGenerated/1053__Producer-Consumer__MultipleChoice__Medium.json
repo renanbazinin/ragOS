@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Producer-Consumer",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 07:39:40",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 887,
+      "output_tokens": 958,
+      "total_tokens": 3692
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Producer-Consumer",
+      "Synchronization",
+      "Concurrency",
+      "Semaphores"
+    ],
+    "content": {
+      "text": "בהינתן בעיית היצרן-צרכן עם חוצץ בגודל סופי, ושימוש במנעול (mutex) ובסמפורים `empty` ו-`full` לצורך סנכרון, איזה מהסדרים הבאים הוא הנכון עבור קטע הקוד של היצרן (Producer) כדי למנוע קיפאון (deadlock) ולוודא תקינות?\n\nהנחות:\nsem_t empty;   // מאותחל ל-BUFFER_SIZE\nsem_t full;    // מאותחל ל-0\npthread_mutex_t mutex; // מאותחל\nbuffer_insert(item); // פונקציה להכנסת פריט לחוצץ",
+      "code_snippet": null,
+      "options": [
+        "pthread_mutex_lock(&mutex);\nsem_wait(&empty);\nbuffer_insert(item);\nsem_post(&empty);\npthread_mutex_unlock(&mutex);",
+        "sem_wait(&empty);\npthread_mutex_lock(&mutex);\nbuffer_insert(item);\npthread_mutex_unlock(&mutex);\nsem_post(&full);",
+        "sem_wait(&full);\npthread_mutex_lock(&mutex);\nbuffer_insert(item);\npthread_mutex_unlock(&mutex);\nsem_post(&empty);",
+        "pthread_mutex_lock(&mutex);\nsem_wait(&full);\nbuffer_insert(item);\nsem_post(&full);\npthread_mutex_unlock(&mutex);"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "sem_wait(&empty);\npthread_mutex_lock(&mutex);\nbuffer_insert(item);\npthread_mutex_unlock(&mutex);\nsem_post(&full);",
+      "explanation": "התשובה הנכונה היא אופציה 2.\nהיצרן צריך קודם כל לוודא שיש מקום פנוי בחוצץ על ידי קריאה ל-`sem_wait(&empty)`. אם לא היה מקום פנוי, היצרן היה נחסם. פעולה זו מקטינה את מספר המקומות הפנויים.\nלאחר מכן, הוא צריך לרכוש את המנעול (mutex) כדי להבטיח גישה בלעדית לחוצץ בזמן הכנסת הפריט. זה מונע מצב של תנאי מרוץ (race condition) בזמן הגישה לחוצץ.\nלאחר הכנסת הפריט, המנעול משוחרר.\nלבסוף, היצרן מאותת (signal) על כך שנוסף פריט לחוצץ על ידי קריאה ל-`sem_post(&full)`, מה שיכול לשחרר צרכן אם הוא ממתין. פעולה זו מגדילה את מספר הפריטים המלאים.\n\nסדר הפעולות `sem_wait(&empty)` ואחריו `pthread_mutex_lock(&mutex)` קריטי למניעת קיפאון (deadlock). אם המוטקס היה נרכש לפני הסמפור `empty` (כמו באופציה 1), ויצרן היה מנסה להכניס פריט לחוצץ מלא, הוא היה מחזיק את המוטקס ונחסם בהמתנה ל-`empty`. מצב זה היה מונע מהצרכן, שאולי היה צריך את המוטקס כדי לגשת לחוצץ ולצרוך פריט (ובכך לאפשר ליצרן להתקדם), מלהתקדם, ומוביל לקיפאון. אופציות 3 ו-4 משתמשות בסמפור `full` במקום `empty` עבור היצרן, וזה שגוי במהותו."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

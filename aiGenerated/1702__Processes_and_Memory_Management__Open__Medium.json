@@ -1,0 +1,64 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Processes and Memory Management",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 20:08:21",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1726,
+      "output_tokens": 2547,
+      "total_tokens": 10260
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Processes",
+      "Memory Management",
+      "Copy-On-Write",
+      "Paging"
+    ],
+    "content": {
+      "text": "נתונה מערכת הפעלה המשתמשת בזיכרון וירטואלי ובמנגנון דפדוף (paging) עם גודל דף של 4KB. המערכת תומכת במנגנון Copy-On-Write (COW) עבור יצירת תהליכים חדשים באמצעות `fork()`. נתונה תוכנית ה-C הבאה:\n\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\n#define ARRAY_SIZE (1024 * 1024) // 1M integers\nint global_array[ARRAY_SIZE]; // 4MB if int is 4 bytes\n\nint main() {\n    // Initialize the array\n    for (int i = 0; i < ARRAY_SIZE; i++) {\n        global_array[i] = i;\n    }\n\n    printf(\"Initial array filled. PID: %d\\n\", getpid());\n\n    pid_t pid = fork();\n\n    if (pid == 0) { // Child process\n        printf(\"Child process %d starting. Parent PID: %d\\n\", getpid(), getppid());\n        // Child modifies the first half of the array\n        for (int i = 0; i < ARRAY_SIZE / 2; i++) {\n            global_array[i] = -i;\n        }\n        printf(\"Child process %d finished modifying. Exiting.\\n\", getpid());\n        exit(0);\n    } else if (pid > 0) { // Parent process\n        printf(\"Parent process %d forked child %d.\\n\", getpid(), pid);\n        sleep(2); // Give child time to modify and exit\n\n        // Parent modifies the second half of the array\n        for (int i = ARRAY_SIZE / 2; i < ARRAY_SIZE; i++) {\n            global_array[i] = i * 2;\n        }\n        printf(\"Parent process %d finished modifying. Waiting for child.\\n\", getpid());\n        wait(NULL); // Wait for child to finish\n        printf(\"Parent process %d finished.\\n\", getpid());\n    } else {\n        perror(\"fork failed\");\n        return 1;\n    }\n    return 0;\n}\n```\n\nבהתבסס על הקוד לעיל, ענו על השאלות הבאות. הניחו כי `sizeof(int)` הוא 4 בתים ושיש להתייחס רק לזיכרון הפיזי התפוס על ידי המערך `global_array` (כלומר, התעלמו מזיכרון עבור קוד, מחסנית, ערימה, טבלאות דפים וכו').",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "כמה מסגרות פיזיות (physical frames) תופס המערך `global_array` בזיכרון מיד לאחר שלב האתחול (שורות 10-13), אך לפני קריאת ה-`fork()`?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "כמה מסגרות פיזיות *נוספות* נדרשות למערך `global_array` מיד לאחר קריאת ה-`fork()` (שורה 17), אך לפני שאיזהו מהתהליכים משנה את המערך?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.3",
+        "text": "כמה מסגרות פיזיות *בסך הכל* תפוסות בזיכרון על ידי המערך `global_array` (הן עבור תהליך האב והן עבור תהליך הבן) לאחר שהתהליך הבן מסיים לשנות את החצי הראשון של המערך (שורות 23-26), אך לפני שהתהליך האב משנה את החצי השני (שורות 32-35)?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.4",
+        "text": "כמה מסגרות פיזיות *בסך הכל* תפוסות בזיכרון על ידי המערך `global_array` (עבור תהליך האב בלבד) לאחר שהתהליך האב מסיים לשנות את החצי השני של המערך (שורות 32-35), ובינתיים התהליך הבן כבר סיים את ריצתו ויצא מהמערכת?",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": 25,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "חישובים ראשוניים:\n*   גודל המערך `global_array`: `ARRAY_SIZE * sizeof(int) = (1024 * 1024) * 4` בתים = `4 * 1024 * 1024` בתים = 4MB.\n*   גודל דף: 4KB = `4 * 1024` בתים.\n*   מספר הדפים שהמערך תופס: `4MB / 4KB = (4 * 1024 * 1024) / (4 * 1024) = 1024` דפים.\n\nתשובות לשאלות:\n\n1.  **מיד לאחר האתחול ולפני `fork()`:**\n    המערך מאותחל במלואו, ולכן כל 1024 הדפים שלו נטענים לזיכרון הפיזי.\n    **מספר מסגרות פיזיות:** 1024 מסגרות.\n\n2.  **מיד לאחר `fork()` ולפני שינוי כלשהו:**\n    כאשר `fork()` נקרא, נוצר תהליך בן. בזכות מנגנון ה-Copy-On-Write (COW), תהליך הבן אינו מקבל עותק מיידי של כל זיכרון האב. במקום זאת, דפי הזיכרון משותפים בין האב והבן, ומסומנים כקריאה בלבד (read-only). עותק נוצר רק כאשר אחד מהתהליכים מנסה לכתוב לדף משותף.\n    לכן, מיד לאחר ה-`fork()`, לא נוצרות מסגרות פיזיות נוספות עבור המערך.\n    **מספר מסגרות פיזיות נוספות:** 0 מסגרות.\n\n3.  **לאחר שהבן שינה את החצי הראשון, ולפני שהאב שינה את החצי השני:**\n    התהליך הבן משנה את החצי הראשון של המערך (`global_array[0]` עד `global_array[ARRAY_SIZE/2 - 1]`).\n    גודל החצי הראשון: `(ARRAY_SIZE / 2) * 4` בתים = 2MB.\n    מספר הדפים בחצי הראשון: `2MB / 4KB = 512` דפים.\n    כאשר הבן כותב לדפים אלו, מנגנון ה-COW נכנס לפעולה: עבור כל אחד מ-512 הדפים המשותפים בחצי הראשון, נוצר עותק חדש בזיכרון הפיזי עבור הבן. הבן כותב לעותקים אלו. האב ממשיך להצביע על הדפים המקוריים.\n    מספר המסגרות הפיזיות הכולל כעת: 1024 (הדפים המקוריים של האב) + 512 (העתקים החדשים שנוצרו עבור הבן) = 1536 מסגרות.\n    **מספר מסגרות פיזיות בסך הכל:** 1536 מסגרות.\n\n4.  **לאחר שהאב שינה את החצי השני, והבן יצא מהמערכת:**\n    *   התהליך הבן סיים את ריצתו ויצא. כל המשאבים שהוקצו לו, כולל 512 המסגרות הפיזיות שנוצרו עבורו בגלל COW, משוחררים וחוזרים לבריכת המסגרות הפנויות.\n    *   בשלב זה, תהליך האב עדיין מחזיק ב-1024 המסגרות המקוריות (F_0 עד F_1023, כאשר F_i הוא מסגרת פיזית המכילה את דף i).\n    *   התהליך האב משנה את החצי השני של המערך (`global_array[ARRAY_SIZE/2]` עד `global_array[ARRAY_SIZE - 1]`). זה כולל 512 דפים (P_512 עד P_1023). \n    *   כאשר האב כותב לדפים אלו, מנגנון ה-COW נכנס לפעולה שוב: עבור כל אחד מ-512 הדפים המקוריים בחצי השני (הדפים P_512 עד P_1023, הממופים למסגרות F_512 עד F_1023), נוצר עותק חדש בזיכרון הפיזי עבור האב (נגיד F_512' עד F_1023'). האב כותב לעותקים אלו. הדפים המקוריים (F_512 עד F_1023) משוחררים כעת מכיוון שאין להם יותר הפניות. \n    *   לכן, בסיום, האב מחזיק ב-512 הדפים המקוריים של החצי הראשון (הממופים למסגרות F_0 עד F_511) וב-512 הדפים החדשים שנוצרו עבור החצי השני (הממופים למסגרות F_512' עד F_1023').\n    **מספר מסגרות פיזיות בסך הכל:** 512 (דפים מקוריים של החצי הראשון) + 512 (דפים חדשים של החצי השני) = 1024 מסגרות."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

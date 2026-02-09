@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Processes and Threads",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 10:20:16",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2789,
+      "output_tokens": 2744,
+      "total_tokens": 15003
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Processes",
+      "Threads",
+      "Concurrency",
+      "System Calls",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה המממשת שימוש בתהליכונים (threads) ובתהליכים (processes).\nנתחו את הקוד והסבירו את התנהגותו. יש להניח שכל קריאות המערכת מצליחות, ושתהליכונים שנוצרו לפני קריאת `fork()` מספיקים לבצע מספר איטרציות לפני שהתהליך הראשי קורא ל-`fork()`.\n\nבפרט, התייחסו לשאלות הבאות:\n1. מהם הערכים הסופיים האפשריים של `g_val` בתהליך האב ובתהליך הבן?\n2. האם צפויות בעיות כלשהן בריצת התוכנית, ובאיזה תהליך? אם כן, הסבירו את הסיבה וההשלכות.\n3. כמה תהליכונים בסך הכל ירוצו בפועל בכל אחד מהתהליכים (אב ובן) החל מנקודת הקריאה ל-`fork()` ועד לסיום התוכנית כולה?",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <pthread.h>\n#include <sys/wait.h>\n\n#define NUM_ITERATIONS_PER_THREAD 5\n\nint g_val = 0;\npthread_mutex_t m;\n\nvoid* thread_func(void* arg) {\n    long thread_id_arg = (long)arg;\n    for (int i = 0; i < NUM_ITERATIONS_PER_THREAD; ++i) {\n        pthread_mutex_lock(&m);\n        g_val++;\n        printf(\"PID %d, TID (pthread_self) %lu, g_val %d, arg_id %ld\\n\", getpid(), (unsigned long)pthread_self(), g_val, thread_id_arg);\n        pthread_mutex_unlock(&m);\n        usleep(10000); // 10ms\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_mutex_init(&m, NULL); // Default mutex (PTHREAD_PROCESS_PRIVATE)\n\n    // Parent creates 2 threads\n    pthread_t parent_tids[2];\n    for (long i = 0; i < 2; ++i) {\n        pthread_create(&parent_tids[i], NULL, thread_func, (void*)i);\n    }\n\n    usleep(50000); // Allow parent threads to run and potentially hold the mutex\n\n    pid_t pid = fork();\n\n    if (pid == -1) {\n        perror(\"fork failed\");\n        exit(EXIT_FAILURE);\n    }\n\n    if (pid == 0) { // Child process\n        printf(\"Child (PID %d) started. Initial g_val: %d\\n\", getpid(), g_val);\n\n        // Child creates 2 new threads\n        pthread_t child_tids[2];\n        for (long i = 0; i < 2; ++i) {\n            pthread_create(&child_tids[i], NULL, thread_func, (void*)(i + 100)); // Use different IDs for child threads\n        }\n\n        // Child joins its own 2 threads\n        for (int i = 0; i < 2; ++i) {\n            pthread_join(child_tids[i], NULL);\n        }\n        printf(\"Child (PID %d) finished. Final g_val: %d\\n\", getpid(), g_val);\n\n    } else { // Parent process\n        printf(\"Parent (PID %d) continued. Initial g_val: %d\\n\", getpid(), g_val);\n\n        // Parent joins its original 2 threads\n        for (int i = 0; i < 2; ++i) {\n            pthread_join(parent_tids[i], NULL);\n        }\n        wait(NULL); // Wait for the child process to finish\n        printf(\"Parent (PID %d) finished. Final g_val: %d\\n\", getpid(), g_val);\n    }\n\n    pthread_mutex_destroy(&m);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "ניתוח והסבר:\n\n1.  **שכפול משתנה גלובלי (`g_val`)**:\n    כאשר נקראת פונקציית `fork()`, מרחב הזיכרון של התהליך המשוכפל (הבן) הוא עותק מדויק של מרחב הזיכרון של התהליך המקורי (האב) בנקודת הזמן של הקריאה. לכן, המשתנה הגלובלי `g_val` משוכפל. לתהליך האב יש עותק משלו, ולתהליך הבן יש עותק משלו. שינויים ב-`g_val` בתהליך אחד לא ישפיעו על העותק של `g_val` בתהליך האחר.\n    *   **ערכים סופיים של `g_val`**:\n        שני התהליכונים באב יבצעו 5 איטרציות כל אחד, ובסה\"כ 10 איטרציות. שני התהליכונים בבן יבצעו 5 איטרציות כל אחד, ובסה\"כ 10 איטרציות. מכיוון ש-`usleep(50000)` מאפשר לתהליכוני האב לרוץ זמן מה לפני ה-`fork()`, הערך של `g_val` בתהליך האב יכול להיות בין 0 ל-10 כאשר ה-`fork()` מתרחש (כולל). נסמן ערך זה כ-X.\n        *   **בתהליך האב**: יתחיל עם `g_val` השווה ל-0. יבצע 10 הגדלות. לכן, הערך הסופי של `g_val` בתהליך האב יהיה **10**.\n        *   **בתהליך הבן**: יתחיל עם `g_val` השווה ל-X (הערך שהיה ב-`g_val` של האב בזמן ה-`fork()`). הבן יבצע 10 הגדלות נוספות באמצעות התהליכונים שלו. לכן, הערך הסופי של `g_val` בתהליך הבן יהיה **X + 10**. מאחר ש-X יכול להיות בין 0 ל-10, הערך הסופי של `g_val` בתהליך הבן יכול להיות בין **10 ל-20**.\n\n2.  **בעיות צפויות - תקיעה (Deadlock) בגלל המוטקס בתהליך הבן**:\n    *   **התנהגות `fork()` עם תהליכונים**: כאשר `fork()` נקראת, רק התהליכון שקרא ל-`fork()` (במקרה זה, התהליכון הראשי של `main`) משוכפל לתהליך הבן. התהליכונים האחרים שנוצרו באב לפני ה-`fork()` (`parent_tids[0]` ו-`parent_tids[1]`) אינם משוכפלים ואינם קיימים בתהליך הבן.\n    *   **מצב המוטקס (`pthread_mutex_t m`)**: זהו המוקד העיקרי לבעיה. המוטקס `m` הוא אובייקט `PTHREAD_PROCESS_PRIVATE` כברירת מחדל, כלומר הוא מיועד לשימוש בתוך תהליך בודד. כאשר `fork()` נקראת, המוטקס משוכפל יחד עם שאר מרחב הזיכרון. אם בנקודת הזמן המדויקת שבה `fork()` נקראת, אחד מתהליכוני האב החזיק את המנעול (כלומר, היה בין `pthread_mutex_lock` ל-`pthread_mutex_unlock`), אזי העותק של המוטקס בתהליך הבן יהיה במצב \"נעול\". הבעיה היא שאף תהליכון בתהליך הבן אינו \"הבעלים\" של מנעול זה. ה-`usleep(50000)` לפני ה-`fork()` מעלה מאוד את הסבירות שאחד מתהליכוני האב יחזיק את המנעול בזמן ה-`fork()`.\n    *   **תקיעה בתהליך הבן**: כאשר התהליכונים החדשים של הבן (`child_tids[0]` ו-`child_tids[1]`) ינסו לקרוא ל-`pthread_mutex_lock(&m)`, הם ימצאו את המוטקס במצב נעול (אם הוא היה נעול בזמן ה-`fork`). מכיוון שאף תהליכון בבן אינו הבעלים של המנעול, והמנעול אינו משוחרר באופן אוטומטי, התהליכונים של הבן ייכנסו למצב המתנה אינסופי (deadlock). הם לא יצליחו להמשיך, והקריאות ל-`pthread_join` בתהליך הבן לעולם לא יחזרו. כתוצאה מכך, **התהליך הבן ייתקע ולא יסיים את ריצתו**.\n    *   **השפעה על האב**: התהליך האב ימשיך לרוץ כרגיל. התהליכונים המקוריים שלו יסיימו את עבודתם, האב ימתין לבן באמצעות `wait(NULL)`, אך מכיוון שהבן תקוע, **האב ימתין לו ללא הגבלה** (אלא אם כן התוכנית תופסק באופן חיצוני).\n\n3.  **מספר התהליכונים הפועלים בפועל (החל מנקודת הקריאה ל-`fork()` ועד לסיום)**:\n    *   **בתהליך האב**: מיד לאחר ה-`fork()`, התהליך האב ממשיך עם התהליכון הראשי שלו ו-2 התהליכונים שנוצרו קודם לכן. בסך הכל **3 תהליכונים** פעילים בו זמנית. שלושתם יסיימו את ריצתם כרגיל.\n    *   **בתהליך הבן**: מיד לאחר ה-`fork()`, התהליך הבן מכיל רק את התהליכון הראשי (שהוא העותק של התהליכון הראשי של האב שקרא ל-`fork()`). 2 התהליכונים שנוצרו באב לא קיימים בבן. לאחר מכן, הבן יוצר 2 תהליכונים חדשים. לכן, בתהליך הבן יהיו **3 תהליכונים** פעילים בו זמנית (הראשי ושני התהליכונים החדשים). עם זאת, כפי שהוסבר לעיל, שני התהליכונים החדשים ייתקעו בניסיון לנעול את המוטקס, והתהליך כולו יתקע."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

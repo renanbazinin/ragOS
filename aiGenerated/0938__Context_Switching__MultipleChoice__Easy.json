@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Context Switching",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 07:03:02",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 956,
+      "output_tokens": 437,
+      "total_tokens": 2619
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Context Switching",
+      "Processes"
+    ],
+    "content": {
+      "text": "מהו המידע העיקרי שנשמר ונשחזר במהלך החלפת הקשר (context switch) בין שני תהליכים?",
+      "code_snippet": null,
+      "options": [
+        "א. רק תוכן הרגיסטרים הכלליים של המעבד.",
+        "ב. רק מצביע המחסנית (stack pointer) ורגיסטר מונה התוכנית (program counter).",
+        "ג. מצב המעבד (רגיסטרים, מונה תוכנית, מצביע מחסנית) ומידע ניהול זיכרון (כמו מצביע לטבלת הדפים).",
+        "ד. רק מידע אודות התקני קלט/פלט שהתהליך משתמש בהם.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג'. במהלך החלפת הקשר, מערכת ההפעלה שומרת את כל המידע החיוני למצב הביצוע של התהליך היוצא, וטוענת את המידע עבור התהליך הנכנס. זה כולל את מצב המעבד (כל הרגיסטרים, כולל מונה התוכנית ומצביע המחסנית) וכן את הקשר ניהול הזיכרון של התהליך (לדוגמה, על ידי עדכון הרגיסטר המצביע לטבלת הדפים הנוכחית של התהליך)."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

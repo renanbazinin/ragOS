@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Threads and Synchronization",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 19:45:44",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1971,
+      "output_tokens": 1268,
+      "total_tokens": 7362
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Threads",
+      "Synchronization",
+      "Race Conditions",
+      "Mutexes"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה המשתמשת בחוטים (threads) ובמנעול (mutex) כדי לעדכן משתנה משותף `counter`. התוכנית יוצרת ארבעה חוטים, כאשר חוטים בעלי מזהה זוגי (0 ו-2) מבצעים את העדכון של `counter` תחת הגנת המנעול, ואילו חוטים בעלי מזהה אי-זוגי (1 ו-3) מעדכנים את `counter` ללא שימוש במנעול. כל חוט מבצע 50,000 איטרציות.\nמהו טווח הערכים האפשריים עבור המשתנה `counter` בסיום ריצת התוכנית הראשית?",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <stdbool.h>\n\nvolatile int counter = 0;\npthread_mutex_t lock;\n\nvoid* worker(void* arg) {\n    long thread_id_val = (long)arg;\n    bool is_even_thread = (thread_id_val % 2 == 0);\n    for (int i = 0; i < 50000; ++i) {\n        if (is_even_thread) {\n            pthread_mutex_lock(&lock);\n            counter++;\n            pthread_mutex_unlock(&lock);\n        } else {\n            // Odd threads don't use mutex, leading to race condition\n            counter++;\n        }\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t tids[4];\n    pthread_mutex_init(&lock, NULL);\n\n    // Create 4 threads, passing their index as argument\n    for (long i = 0; i < 4; ++i) {\n        pthread_create(&tids[i], NULL, worker, (void*)i);\n    }\n\n    for (int i = 0; i < 4; ++i) {\n        pthread_join(tids[i], NULL);\n    }\n\n    printf(\"Final counter value: %d\\n\", counter);\n    pthread_mutex_destroy(&lock);\n    return 0;\n}",
+      "options": [
+        "א. תמיד 200000.",
+        "ב. תמיד 100000.",
+        "ג. ערך כלשהו בין 100000 ל-200000, כולל הקצוות.",
+        "ד. ערך כלשהו בין 0 ל-100000, כולל הקצוות.",
+        "ה. ערך כלשהו בין 150000 ל-200000, כולל הקצוות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "הפתרון הנכון הוא ג'. בתוכנית זו, שני חוטים (ID 0 ו-2) מעדכנים את המשתנה `counter` תוך שימוש נכון במנעול (mutex). כל אחד מהם מבצע 50,000 הגדלות, ובסך הכל הם יבצעו 100,000 הגדלות מוגנות. הגדלות אלו מובטחות ולא ילכו לאיבוד עקב תנאי מירוץ.\nשני החוטים האחרים (ID 1 ו-3) מעדכנים את `counter` ללא הגנת מנעול. כל אחד מהם מנסה לבצע 50,000 הגדלות. מכיוון שפעולת ההגדלה (`counter++`) אינה אטומית ומורכבת מקריאה, שינוי וכתיבה, כאשר מספר חוטים מבצעים אותה ללא סנכרון, עלולים להתרחש תנאי מירוץ (race conditions) שיובילו לאיבוד חלק מההגדלות.\nלכן, 100,000 ההגדלות מהחוטים המוגנים יבוצעו בוודאות. 100,000 ההגדלות מהחוטים הלא מוגנים יבוצעו באופן חלקי בלבד, או במקרה הטוב (והנדיר) כולן. במקרה הגרוע, ייתכן שכל ההגדלות הלא מוגנות ילכו לאיבוד בפועל (למרות שהן מנסות להתבצע). לכן, הערך המינימלי האפשרי עבור `counter` הוא 100,000 (מכל ההגדלות המוגנות). הערך המקסימלי האפשרי הוא 200,000 (אם בנס לא אבדו הגדלות מהחוטים הלא מוגנים). לפיכך, טווח הערכים האפשרי הוא בין 100,000 ל-200,000, כולל שני הקצוות."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Scheduling",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 09:10:34",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1598,
+      "output_tokens": 812,
+      "total_tokens": 3717
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Scheduling",
+      "CPU Scheduling"
+    ],
+    "content": {
+      "text": "מהו תזמון מקדים (preemptive scheduling) בהקשר של מערכות הפעלה? הסבירו בקצרה מהו ההבדל המהותי בינו לבין תזמון לא מקדים (non-preemptive scheduling), ותנו דוגמה לכל אחד מסוגי התזמון.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": 10,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "תזמון מקדים (Preemptive Scheduling):\nזהו מנגנון תזמון שבו מערכת ההפעלה יכולה להפסיק באופן יזום תהליך או חוט שרץ כעת על המעבד, גם אם הוא לא סיים את משימתו או לא ויתר מרצון על המעבד. הפסקה זו מתרחשת בדרך כלל כאשר תהליך בעל עדיפות גבוהה יותר הופך למוכן לריצה, או כאשר תם קוואנטום הזמן (time slice) שהוקצה לתהליך הנוכחי. המטרה היא להבטיח הוגנות, רספונסיביות ולמנוע מצב שבו תהליך אחד משתלט על המעבד לזמן רב מדי.\n\nהבדל מהותי מתזמון לא מקדים (Non-Preemptive Scheduling):\nבתזמון לא מקדים, ברגע שתהליך מקבל את המעבד, הוא ממשיך לרוץ ללא הפרעה עד שהוא מסיים את משימתו, נכנס למצב המתנה (למשל, מחכה לקלט/פלט), או מוותר מרצון על המעבד. מערכת ההפעלה אינה יכולה להפסיק אותו באופן יזום באמצע ריצתו.\n\nדוגמאות:\n*   **אלגוריתמי תזמון מקדימים:**\n    *   **Round Robin (RR):** כל תהליך מקבל קוואנטום זמן קבוע. אם הוא לא מסיים בזמן זה, הוא נקטע ומועבר לסוף התור.\n    *   **Shortest Remaining Time First (SRTF):** גרסה מקדימה של SJF. אם תהליך חדש מגיע והזמן הנותר שלו קצר יותר מהזמן הנותר לתהליך שרץ, התהליך הנוכחי נקטע.\n    *   **Priority Scheduling (Preemptive):** אם תהליך בעל עדיפות גבוהה יותר הופך למוכן לריצה, הוא קוטע את התהליך שרץ כעת.\n\n*   **אלגוריתמי תזמון לא מקדימים:**\n    *   **First Come First Served (FCFS) / First In First Out (FIFO):** התהליך הראשון שמגיע לתור הרצה מקבל את המעבד ורץ עד לסיום או כניסה למצב המתנה.\n    *   **Shortest Job First (SJF) (Non-Preemptive):** התהליך עם זמן הריצה הקצר ביותר נבחר לרוץ, ולאחר שהתחיל, הוא ממשיך לרוץ עד לסיום."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

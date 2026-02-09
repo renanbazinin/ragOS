@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory and Paging",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 20:48:13",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 949,
+      "output_tokens": 424,
+      "total_tokens": 3252
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Virtual Memory",
+      "Paging"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של שיטת ה-paging במערכות זיכרון וירטואלי?",
+      "code_snippet": null,
+      "options": [
+        "א. לאפשר לתהליכים להשתמש בזיכרון וירטואלי גדול יותר מהזיכרון הפיזי הזמין, וכן למפות כתובות וירטואליות לכתובות פיזיות לא רציפות.",
+        "ב. להגביר את מהירות הגישה לזיכרון על ידי שימוש במטמון (cache).",
+        "ג. לספק מנגנון להחלפת תהליכים (context switch) יעילה יותר.",
+        "ד. למנוע פרגמנטציה פנימית בזיכרון הפיזי."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "א. כפי שנלמד, שיטת ה-paging מאפשרת למערכת ההפעלה למפות מרחב כתובות וירטואלי רציף לזיכרון פיזי שאינו רציף, ובכך לאפשר לתהליכים להשתמש בזיכרון וירטואלי גדול יותר מהזיכרון הפיזי הקיים. היא גם פותרת בעיות של פרגמנטציה חיצונית. אפשרויות ב', ג' ו-ד' אינן המטרה העיקרית של paging."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

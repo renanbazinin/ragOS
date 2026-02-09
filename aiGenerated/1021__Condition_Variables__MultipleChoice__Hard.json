@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Condition Variables",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 07:27:24",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 1424,
+      "total_tokens": 8046
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Condition Variables",
+      "Synchronization",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא המשתמש במשתני תנאי (condition variables) ובמנעולים (mutexes) לתיאום בין תהליכי יצרן וצרכן. הקוד מתאר תרחיש שבו תהליך צרכן ממתין למשאב שמופק על ידי תהליך יצרן. איזה מהבאים מתאר נכונה את הבעיה העיקרית בקוד זה?",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h>\n\npthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;\npthread_cond_t cond_var = PTHREAD_COND_INITIALIZER;\nint shared_resource_available = 0; // The shared resource count\n\nvoid* consumer_thread(void* arg) {\n    pthread_mutex_lock(&mtx);\n    // The problematic line: 'if' instead of 'while'\n    if (shared_resource_available == 0) { \n        pthread_cond_wait(&cond_var, &mtx);\n    }\n    // After waking up or if resource was available initially\n    if (shared_resource_available > 0) {\n        shared_resource_available--;\n        printf(\"Consumer consumed. Remaining: %d\\n\", shared_resource_available);\n    } else {\n        // This path is problematic: consumer woke up but couldn't consume.\n        printf(\"Consumer woke up but resource not available. Remaining: %d\\n\", shared_resource_available);\n    }\n    pthread_mutex_unlock(&mtx);\n    return NULL;\n}\n\nvoid* producer_thread(void* arg) {\n    sleep(1); // Give consumer a chance to start and potentially wait\n    pthread_mutex_lock(&mtx);\n    shared_resource_available++;\n    printf(\"Producer produced. Available: %d\\n\", shared_resource_available);\n    pthread_cond_signal(&cond_var);\n    pthread_mutex_unlock(&mtx);\n    return NULL;\n}\n\n// Assume main creates one consumer and one producer thread. For example:\n// int main() {\n//     pthread_t p_tid, c_tid;\n//     pthread_create(&c_tid, NULL, consumer_thread, NULL);\n//     pthread_create(&p_tid, NULL, producer_thread, NULL);\n//     pthread_join(c_tid, NULL);\n//     pthread_join(p_tid, NULL);\n//     return 0;\n// }",
+      "options": [
+        "א. הקוד עלול להיכנס למצב של Deadlock מכיוון שהיצרן קורא ל-`pthread_cond_signal` לפני שהצרכן תופס את המנעול, מה שמונע מהאות להגיע לצרכן.",
+        "ב. הצרכן עלול להתעורר מקריאת ה-`pthread_cond_wait` באופן שווא (spurious wakeup) או לאחר שהתנאי המקורי שהוביל להמתנה (כלומר, `shared_resource_available == 0`) כבר אינו מתקיים, מבלי לבדוק מחדש את התנאי ולכן ימשיך בביצוע כאילו המשאב זמין.",
+        "ג. הקוד סובל מבעיית Race Condition שבה שני תהליכים מנסים לעדכן את `shared_resource_available` בו זמנית ללא הגנה של מנעול, מה שיוביל לערך שגוי.",
+        "ד. היצרן עלול לקרוא ל-`pthread_cond_signal` מבלי להחזיק את המנעול, מה שיוביל להתנהגות בלתי מוגדרת (undefined behavior)."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "הבעיה העיקרית בקוד היא השימוש ב-`if (shared_resource_available == 0)` במקום `while (shared_resource_available == 0)` לפני הקריאה ל-`pthread_cond_wait`. משתני תנאי חשופים ל\"התעוררויות שווא\" (spurious wakeups), שבהן תהליך מתעורר מ-`wait` למרות שלא נשלח אליו אות (`signal` או `broadcast`). בנוסף, גם אם נשלח אות, ייתכן שהתנאי שהוביל להמתנה כבר אינו מתקיים כאשר התהליך המתעורר תופס מחדש את המנעול ובודק את התנאי. לדוגמה, אם מספר צרכנים ממתינים ו-`pthread_cond_broadcast` היה בשימוש, או אם תהליך אחר שינה את המצב במהירות בין שליחת האות לבין בדיקת התנאי מחדש על ידי התהליך שהתעורר.\n\nשימוש ב-`if` גורם לכך שהתהליך לא יבדוק מחדש את התנאי לאחר ההתעוררות מ-`wait`, וימשיך בביצוע הקוד כאילו המשאב זמין, גם אם בפועל הוא אינו זמין (למשל, בגלל התעוררות שווא או בגלל שצרכן אחר צרך את המשאב בינתיים). במקרה זה, הוא יגיע ל-`if (shared_resource_available > 0)` השני, יראה שאין משאב זמין, ולא יצרוך, אך הוא כבר עבר את שלב הבדיקה הראשוני ו\"בזבז\" התעוררות. שימוש ב-`while` מבטיח שהתהליך יחזור למצב המתנה אם התנאי עדיין לא מתקיים."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Signals",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 08:44:00",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2023,
+      "output_tokens": 2225,
+      "total_tokens": 8583
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Signals",
+      "Signal Handling",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "כתבו תוכנית C שמדפיסה מונה בלולאה אינסופית. הגדירו מטפל אות עבור SIGINT (Ctrl+C) כך שכל קבלת אות תגדיל מונה גלובלי אחר ותדפיס הודעה. לאחר מכן, ענו על השאלות הבאות:\n\n1. הסבירו מהו התוצר הצפוי על המסך כאשר המשתמש לוחץ על Ctrl+C מספר פעמים, וכיצד המונה הגלובלי `counter` מושפע.\n2. זהו בעיה פוטנציאלית אחת (לפחות) בטיפול באותות בתוכנית זו והסבירו מדוע היא בעיה. הציעו פתרון לבעיה זו והסבירו כיצד הפתרון שלכם משפר את אמינות התוכנית.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <signal.h>\n\nvolatile int counter = 0;\nvolatile int sig_count = 0;\n\nvoid sigint_handler(int signum) {\n    printf(\"\\nSignal %d received! (Handler count: %d)\\n\", signum, ++sig_count);\n    counter++; \n}\n\nint main() {\n    struct sigaction sa;\n    sa.sa_handler = sigint_handler;\n    sigemptyset(&sa.sa_mask);\n    sa.sa_flags = 0; \n\n    if (sigaction(SIGINT, &sa, NULL) == -1) {\n        perror(\"sigaction\");\n        exit(EXIT_FAILURE);\n    }\n\n    printf(\"Program running. Press Ctrl+C to send SIGINT.\\n\");\n    while (1) {\n        printf(\"Main loop counter: %d\\n\", counter);\n        sleep(1);\n    }\n\n    return 0;\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1. כאשר המשתמש לוחץ על Ctrl+C, נשלח אות SIGINT לתהליך. המטפל `sigint_handler` יופעל. הוא יגדיל את המונה `sig_count`, ידפיס הודעה, ויגדיל את המונה הגלובלי `counter`. לאחר שהמטפל יסיים, התוכנית תחזור לביצוע מנקודת הקטיעה (בדרך כלל לאחר קריאת `sleep`) ותמשיך להדפיס את ערך `counter` המעודכן בלולאה הראשית. אם המשתמש ילחץ על Ctrl+C מספר פעמים, המטפל יופעל שוב ושוב, `sig_count` וגם `counter` יוגדלו בהתאמה, והודעות האות יודפסו. המונה הגלובלי `counter` יציג את מספר הפעמים שהאות התקבל, בתוספת ערך ההתחלתי שלו.\n\n2. ישנן שתי בעיות פוטנציאליות עיקריות במטפל האותות הנתון:\n   א. **אי-אטומיות של `counter++`**: הפעולה `counter++` אינה אטומית. היא מורכבת בדרך כלל משלוש פעולות: קריאת הערך של `counter` מהזיכרון, הגדלת הערך, וכתיבת הערך החדש לזיכרון. אם אות נוסף מגיע (או אם המטפל נקטע על ידי אות אחר) בזמן שפעולה זו מתבצעת, וחוט הביצוע עובר למטפל אחר או חוזר למטפל זהה (במקרה של אותות מסוימים ודגלים מסוימים ב-`sigaction`), ייתכן שהערך הסופי של `counter` יהיה שגוי (למשל, שתי הגדלות יתורגמו כהגדלה אחת). כדי למנוע זאת, יש להשתמש בטיפוס `sig_atomic_t` עבור משתנים שמשותפים בין המטפל לתוכנית הראשית ומשתנים בתוך המטפל עצמו. טיפוס זה מבטיח שקריאה וכתיבה למשתנה תהיה אטומית. עם זאת, יש לזכור שגם פעולות על `sig_atomic_t` הן אטומיות רק עבור קריאה/כתיבה בודדת, לא עבור פעולות מורכבות כמו `++` או `-=` שהן למעשה RMW.\n   ב. **פונקציות לא בטוחות לאותות (non-async-signal-safe functions)**: הפונקציה `printf()` אינה בטוחה לשימוש בתוך מטפל אותות. פונקציות כמו `printf` אינן מובטחות להיות reentrant, והן עשויות להשתמש ב-buffers או במנעולים גלובליים. אם `printf` נקרא מתוך המטפל בזמן שהתוכנית הראשית הייתה באמצע קריאה ל-`printf` (או כל פונקציה אחרת המשתמשת במשאבים משותפים), הדבר עלול להוביל למצב של deadlock, corruption של נתונים, או התנהגות בלתי צפויה. יש להשתמש רק בפונקציות המוגדרות כ-async-signal-safe בתוך מטפלי אותות (לדוגמה, `write()` במקום `printf()`).\n\n**פתרון מוצע לבעיה אטומיות:**\nכדי לטפל בבעיית האי-אטומיות של `counter++`, נשנה את הטיפוס של `counter` ל-`volatile sig_atomic_t`. ה-`volatile` מבטיח שהקומפיילר לא יבצע אופטימיזציות שימנעו קריאה וכתיבה ישירה לזיכרון בכל גישה, וה-`sig_atomic_t` מציין למערכת שפעולות קריאה וכתיבה על משתנה זה צריכות להיות אטומיות. על אף שפעולת `++` היא קריאה-שינוי-כתיבה, עבור `sig_atomic_t` ברוב המעבדים המודרניים, הקומפיילר ינסה לייצר קוד אטומי לפעולה זו, או שלפחות יבטיח שהיא לא תקטע באופן שיפגע בשלמות הנתונים. אם נדרשת אטומיות מוחלטת לפעולות RMW מורכבות, יש להשתמש בפקודות אטומיות מפורשות (כמו `__sync_fetch_and_add` ב-GCC/Clang).\n\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <signal.h>\n\nvolatile sig_atomic_t counter = 0; // Changed to sig_atomic_t\nvolatile sig_atomic_t sig_count = 0; // Changed to sig_atomic_t\n\nvoid sigint_handler(int signum) {\n    // printf is not async-signal-safe. For robust production code,\n    // one should use async-signal-safe functions like write().\n    // Example of safer output:\n    // char msg[50];\n    // int len = snprintf(msg, sizeof(msg), \"\\nSignal %d received! (Handler count: %d)\\n\", signum, ++sig_count);\n    // write(STDOUT_FILENO, msg, len);\n\n    sig_count++; // This operation is now more robust on sig_atomic_t\n    counter++;   // This operation is now more robust on sig_atomic_t\n    // For demonstration, keeping printf to show output, but acknowledging it's unsafe.\n    printf(\"\\nSignal %d received! (Handler count: %d)\\n\", signum, sig_count);\n}\n\nint main() {\n    struct sigaction sa;\n    sa.sa_handler = sigint_handler;\n    sigemptyset(&sa.sa_mask);\n    sa.sa_flags = 0; \n\n    if (sigaction(SIGINT, &sa, NULL) == -1) {\n        perror(\"sigaction\");\n        exit(EXIT_FAILURE);\n    }\n\n    printf(\"Program running. Press Ctrl+C to send SIGINT.\\n\");\n    while (1) {\n        printf(\"Main loop counter: %d\\n\", counter);\n        sleep(1);\n    }\n\n    return 0;\n}\n```\n\nהשימוש ב-`volatile sig_atomic_t` מבטיח שפעולות קריאה וכתיבה על המשתנה יתבצעו באופן אטומי, מה שמקטין משמעותית את הסיכון לשגיאות עקב קטיעה במטפל אותות. זהו שיפור באמינות התוכנית מכיוון שהוא מבטיח שהערכים של המונים המשותפים יישמרו בצורה נכונה גם תחת קבלת אותות תכופה."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "Networking",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 09:40:36",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 893,
+      "output_tokens": 541,
+      "total_tokens": 2374
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Networking",
+      "TCP/IP",
+      "Protocols"
+    ],
+    "content": {
+      "text": "איזו מהטענות הבאות נכונה לגבי ההבדלים בין פרוטוקולי TCP ו-UDP?",
+      "code_snippet": null,
+      "options": [
+        "א. TCP מבטיח מסירה מהימנה ובסדר הנכון של הודעות, בעוד ש-UDP אינו עושה זאת.",
+        "ב. UDP משתמש בלחיצת יד משולשת (three-way handshake) ליצירת חיבור, בעוד ש-TCP אינו משתמש בה.",
+        "ג. TCP משמש בדרך כלל ליישומי זמן אמת כמו הזרמת וידאו עקב השהיה נמוכה.",
+        "ד. UDP מספק מנגנוני בקרת עומס (congestion control), בעוד ש-TCP מסתמך על שכבת היישום לצורך זה."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "א. נכון. TCP הוא פרוטוקול מוכוון חיבור (connection-oriented) המבטיח מסירה מהימנה, בקרת סדר, בקרת זרימה ובקרת עומס. UDP הוא פרוטוקול ללא חיבור (connectionless) המציע שירות 'best-effort' ללא הבטחות אלו, ולכן מתאים ליישומים הדורשים השהיה נמוכה על חשבון אמינות. טענה ב' שגויה - TCP הוא הפרוטוקול המשתמש בלחיצת יד משולשת. טענה ג' שגויה - UDP הוא המועדף ליישומי זמן אמת עקב השהיה נמוכה יותר והיעדר מנגנוני אמינות שעלולים לעכב את העברת הנתונים. טענה ד' שגויה - TCP הוא הפרוטוקול המספק מנגנוני בקרת עומס, בעוד ש-UDP אינו כולל אותם באופן מובנה."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

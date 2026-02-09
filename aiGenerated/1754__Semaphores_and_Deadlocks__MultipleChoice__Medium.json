@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Deadlocks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 20:32:46",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1047,
+      "output_tokens": 1142,
+      "total_tokens": 5035
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Semaphores",
+      "Deadlocks",
+      "Synchronization",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא המשתמש בסמפורים (sem_t) ובחוטים (pthread) לצורך סנכרון:\n\nבהנחה ששני החוטים (thread_func1 ו-thread_func2) מופעלים במקביל, איזו טענה נכונה לגבי ריצת הקוד?",
+      "code_snippet": "#include <pthread.h>\n#include <semaphore.h>\n#include <stdio.h>\n#include <unistd.h> // For sleep\n\nsem_t s1;\nsem_t s2;\n\nvoid* thread_func1(void* arg) {\n    printf(\"Thread 1: Trying to acquire s1...\\n\");\n    sem_wait(&s1);\n    printf(\"Thread 1: Acquired s1. Trying to acquire s2...\\n\");\n    sleep(1); // Simulate work or context switch\n    sem_wait(&s2);\n    printf(\"Thread 1: Acquired s2. Doing work...\\n\");\n    sem_post(&s2);\n    sem_post(&s1);\n    printf(\"Thread 1: Released s2 and s1.\\n\");\n    return NULL;\n}\n\nvoid* thread_func2(void* arg) {\n    printf(\"Thread 2: Trying to acquire s2...\\n\");\n    sem_wait(&s2);\n    printf(\"Thread 2: Acquired s2. Trying to acquire s1...\\n\");\n    sleep(1); // Simulate work or context switch\n    sem_wait(&s1);\n    printf(\"Thread 2: Acquired s1. Doing work...\\n\");\n    sem_post(&s1);\n    sem_post(&s2);\n    printf(\"Thread 2: Released s1 and s2.\\n\");\n    return NULL;\n}\n\nint main() {\n    sem_init(&s1, 0, 1);\n    sem_init(&s2, 0, 1);\n\n    pthread_t t1, t2;\n    pthread_create(&t1, NULL, thread_func1, NULL);\n    pthread_create(&t2, NULL, thread_func2, NULL);\n\n    pthread_join(t1, NULL);\n    pthread_join(t2, NULL);\n\n    sem_destroy(&s1);\n    sem_destroy(&s2);\n    return 0;\n}",
+      "options": [
+        "א. הקוד ירוץ תמיד בהצלחה ללא כל בעיות סנכרון.",
+        "ב. יתכן מצב של קיפאון (Deadlock).",
+        "ג. יתכן מצב של הרעבה (Starvation) אך לא קיפאון.",
+        "ד. הקוד ירוץ תמיד, אך סדר ההדפסה אינו מובטח."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב. יתכן מצב של קיפאון (Deadlock).\nהקוד מדגים מצב קלאסי של קיפאון עקב תלות מעגלית (Circular Wait). חוט 1 מנסה לרכוש את s1 ואז את s2. חוט 2 מנסה לרכוש את s2 ואז את s1. אם חוט 1 ירכוש את s1 וחוט 2 ירכוש את s2 בערך באותו הזמן, שניהם יחזיקו במשאב אחד וינסו לרכוש את המשאב השני שמוחזק על ידי החוט האחר, וכך יכנסו למצב של קיפאון.\nארבעת תנאי הקיפאון מתקיימים:\n1.  **הדדיות (Mutual Exclusion):** הסמפורים מאפשרים גישה בלעדית למשאב.\n2.  **החזקה והמתנה (Hold and Wait):** כל חוט מחזיק בסמפור אחד וממתין לשני.\n3.  **אי-דריסה (No Preemption):** לא ניתן לקחת סמפור מחוט שמחזיק בו בכוח.\n4.  **המתנה מעגלית (Circular Wait):** חוט 1 ממתין למשאב שחוט 2 מחזיק, וחוט 2 ממתין למשאב שחוט 1 מחזיק."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

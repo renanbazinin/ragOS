@@ -1,0 +1,59 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Synchronization and Concurrency",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 21:14:48",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4132,
+      "output_tokens": 3408,
+      "total_tokens": 13957
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Concurrency",
+      "Deadlock",
+      "Mutexes",
+      "Pthreads"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה המדמה גישה לשני משאבים משותפים, A ו-B, על ידי מספר חוטים. כל משאב מוגן על ידי מנעול נפרד (`mutexA` ו-`mutexB`). חלק מהחוטים (לדוגמה, אלו המריצים את `worker_func1`) מנסים לרכוש את המנעולים בסדר מסוים, בעוד שחוטים אחרים (המריצים את `worker_func2`) מנסים לרכוש אותם בסדר הפוך. נתון שכל קריאות המערכת מצליחות, ושהחוטים רצים בסביבה מרובת מעבדים או שניתן להניח שמתזמן מערכת ההפעלה יכול להחליף חוטים בכל נקודה. יש לנתח את התוכנית ולענות על השאלות הבאות.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <unistd.h> // For usleep\n\n#define NUM_THREADS 4\n#define OPERATIONS_PER_THREAD 2\n\npthread_mutex_t mutexA;\npthread_mutex_t mutexB;\n\nint resourceA_data = 0;\nint resourceB_data = 0;\n\nvoid* worker_func1(void* arg) {\n    long thread_id = (long)arg;\n    for (int i = 0; i < OPERATIONS_PER_THREAD; ++i) {\n        printf(\"Thread %ld (func1) trying to acquire mutexA...\\n\", thread_id);\n        pthread_mutex_lock(&mutexA);\n        printf(\"Thread %ld (func1) acquired mutexA, trying to acquire mutexB...\\n\", thread_id);\n        usleep(10000); // Simulate work or delay\n        pthread_mutex_lock(&mutexB);\n        printf(\"Thread %ld (func1) acquired mutexB. Performing operation...\\n\", thread_id);\n\n        // Critical section\n        resourceA_data++;\n        resourceB_data++;\n        printf(\"Thread %ld (func1) updated resources: A=%d, B=%d\\n\", thread_id, resourceA_data, resourceB_data);\n\n        pthread_mutex_unlock(&mutexB);\n        printf(\"Thread %ld (func1) released mutexB.\\n\", thread_id);\n        pthread_mutex_unlock(&mutexA);\n        printf(\"Thread %ld (func1) released mutexA.\\n\", thread_id);\n        usleep(50000); // Simulate other work\n    }\n    return NULL;\n}\n\nvoid* worker_func2(void* arg) {\n    long thread_id = (long)arg;\n    for (int i = 0; i < OPERATIONS_PER_THREAD; ++i) {\n        printf(\"Thread %ld (func2) trying to acquire mutexB...\\n\", thread_id);\n        pthread_mutex_lock(&mutexB);\n        printf(\"Thread %ld (func2) acquired mutexB, trying to acquire mutexA...\\n\", thread_id);\n        usleep(10000); // Simulate work or delay\n        pthread_mutex_lock(&mutexA);\n        printf(\"Thread %ld (func2) acquired mutexA. Performing operation...\\n\", thread_id);\n\n        // Critical section\n        resourceA_data++;\n        resourceB_data++;\n        printf(\"Thread %ld (func2) updated resources: A=%d, B=%d\\n\", thread_id, resourceA_data, resourceB_data);\n\n        pthread_mutex_unlock(&mutexA);\n        printf(\"Thread %ld (func2) released mutexA.\\n\", thread_id);\n        pthread_mutex_unlock(&mutexB);\n        printf(\"Thread %ld (func2) released mutexB.\\n\", thread_id);\n        usleep(50000); // Simulate other work\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    pthread_mutex_init(&mutexA, NULL);\n    pthread_mutex_init(&mutexB, NULL);\n\n    // Create threads, some running func1, some func2\n    for (long i = 0; i < NUM_THREADS / 2; ++i) {\n        pthread_create(&threads[i], NULL, worker_func1, (void*)i);\n    }\n    for (long i = NUM_THREADS / 2; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, worker_func2, (void*)i);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"All threads finished. Final resources: A=%d, B=%d\\n\", resourceA_data, resourceB_data);\n\n    pthread_mutex_destroy(&mutexA);\n    pthread_mutex_destroy(&mutexB);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "8.1",
+        "text": "האם ייתכן מצב של קיפאון (deadlock) בריצת התוכנית? אם כן, תאר בקצרה מצב תזמון ספציפי (sequence of events) שיוביל לקיפאון. אם לא, הסבר מדוע.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.2",
+        "text": "הסבר, על בסיס ארבעת התנאים של Coffman (או תנאים מקבילים מלימודי הקורס), מדוע מתרחש קיפאון במקרה זה.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.3",
+        "text": "תקן את הקוד כך שימנע קיפאון ורעב (starvation), תוך שמירה על רמת מקביליות סבירה. הצג את הקוד המתוקן (ניתן לשנות את הפונקציות `worker_func1` ו-`worker_func2` ואת המשתנים הגלובליים, אך לא את פונקציית `main` או את מספר החוטים). יש להסביר בקצרה מדוע התיקון עובד.",
+        "code_snippet": "void* worker_func1(void* arg) {\n    // Your corrected code here\n}\n\nvoid* worker_func2(void* arg) {\n    // Your corrected code here\n}",
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "8.1: כן, בהחלט ייתכן מצב של קיפאון (deadlock).\nתרחיש לדוגמה:\n1. חוט T1 (המריץ את `worker_func1`) מצליח לרכוש את `mutexA`.\n2. מתזמן מערכת ההפעלה מבצע החלפת הקשר (context switch).\n3. חוט T2 (המריץ את `worker_func2`) מצליח לרכוש את `mutexB`.\n4. מתזמן מערכת ההפעלה מבצע החלפת הקשר.\n5. חוט T1 מנסה כעת לרכוש את `mutexB`, אך הוא נעול על ידי T2. T1 נכנס למצב המתנה.\n6. מתזמן מערכת ההפעלה מבצע החלפת הקשר.\n7. חוט T2 מנסה כעת לרכוש את `mutexA`, אך הוא נעול על ידי T1. T2 נכנס למצב המתנה.\nבשלב זה, T1 ממתין ל-T2 שישחרר את `mutexB`, ו-T2 ממתין ל-T1 שישחרר את `mutexA`. שניהם חסומים לצמיתות, ונוצר קיפאון.\n\n8.2: הקיפאון מתרחש מכיוון שכל ארבעת התנאים של Coffman מתקיימים:\n1. **הדרה הדדית (Mutual Exclusion)**: המנעולים (`mutexA`, `mutexB`) אוכפים הדרה הדדית. רק חוט אחד יכול להחזיק במנעול בכל רגע נתון.\n2. **החזקה והמתנה (Hold and Wait)**: חוטים מחזיקים במשאב אחד (מנעול) תוך כדי המתנה למשאב אחר. לדוגמה, T1 מחזיק ב-`mutexA` וממתין ל-`mutexB`, ו-T2 מחזיק ב-`mutexB` וממתין ל-`mutexA`.\n3. **אי-נשללות (No Preemption)**: המנעולים אינם ניתנים לשלילה. חוטים משחררים אותם מרצונם החופשי לאחר שסיימו להשתמש בהם. מערכת ההפעלה אינה יכולה לכפות על חוט לשחרר מנעול שהוא מחזיק.\n4. **המתנה מעגלית (Circular Wait)**: קיים מעגל המתנה. T1 ממתין למשאב שמוחזק על ידי T2, ו-T2 ממתין למשאב שמוחזק על ידי T1. זה יוצר שרשרת המתנה מעגלית.\n\n8.3: התיקון הנפוץ והפשוט ביותר למצב זה הוא לאכוף סדר אחיד לרכישת המנעולים (ordered resource acquisition). כל החוטים ינסו לרכוש את המנעולים באותו סדר, לדוגמה, תמיד קודם `mutexA` ואז `mutexB`. זה מונע את תנאי ה'המתנה המעגלית'.\n\nקוד מתוקן:\n```c\nvoid* worker_func1(void* arg) {\n    long thread_id = (long)arg;\n    for (int i = 0; i < OPERATIONS_PER_THREAD; ++i) {\n        printf(\"Thread %ld (func1) trying to acquire mutexA...\\n\", thread_id);\n        pthread_mutex_lock(&mutexA);\n        printf(\"Thread %ld (func1) acquired mutexA, trying to acquire mutexB...\\n\", thread_id);\n        usleep(10000); \n        pthread_mutex_lock(&mutexB);\n        printf(\"Thread %ld (func1) acquired mutexB. Performing operation...\\n\", thread_id);\n\n        // Critical section\n        resourceA_data++;\n        resourceB_data++;\n        printf(\"Thread %ld (func1) updated resources: A=%d, B=%d\\n\", thread_id, resourceA_data, resourceB_data);\n\n        pthread_mutex_unlock(&mutexB);\n        printf(\"Thread %ld (func1) released mutexB.\\n\", thread_id);\n        pthread_mutex_unlock(&mutexA);\n        printf(\"Thread %ld (func1) released mutexA.\\n\", thread_id);\n        usleep(50000); \n    }\n    return NULL;\n}\n\nvoid* worker_func2(void* arg) {\n    long thread_id = (long)arg;\n    for (int i = 0; i < OPERATIONS_PER_THREAD; ++i) {\n        printf(\"Thread %ld (func2) trying to acquire mutexA...\\n\", thread_id); // Changed order\n        pthread_mutex_lock(&mutexA); // Changed order\n        printf(\"Thread %ld (func2) acquired mutexA, trying to acquire mutexB...\\n\", thread_id); // Changed order\n        usleep(10000); \n        pthread_mutex_lock(&mutexB);\n        printf(\"Thread %ld (func2) acquired mutexB. Performing operation...\\n\", thread_id);\n\n        // Critical section\n        resourceA_data++;\n        resourceB_data++;\n        printf(\"Thread %ld (func2) updated resources: A=%d, B=%d\\n\", thread_id, resourceA_data, resourceB_data);\n\n        pthread_mutex_unlock(&mutexB);\n        printf(\"Thread %ld (func2) released mutexB.\\n\", thread_id);\n        pthread_mutex_unlock(&mutexA);\n        printf(\"Thread %ld (func2) released mutexA.\\n\", thread_id);\n        usleep(50000); \n    }\n    return NULL;\n}\n```\n\n**הסבר לתיקון**: על ידי כך ששתי הפונקציות, `worker_func1` ו-`worker_func2`, רוכשות את המנעולים באותו סדר (`mutexA` ואז `mutexB`), אנו מבטלים את האפשרות להמתנה מעגלית. לעולם לא ייווצר מצב שבו חוט אחד מחזיק ב-`mutexA` וממתין ל-`mutexB`, בעוד חוט אחר מחזיק ב-`mutexB` וממתין ל-`mutexA`. כל החוטים ימתינו ל-`mutexA` אם הוא תפוס, ורק לאחר שישיגו אותו, ימתינו ל-`mutexB`. זה מבטיח שאם חוט כבר מחזיק ב-`mutexB`, הוא גם מחזיק ב-`mutexA` (או כבר שחרר אותו), ולכן לא ימתין ל-`mutexA` ובכך לא ישלים מעגל המתנה. גישה זו גם מונעת רעב במקרה זה, שכן כל החוטים מתחרים על אותם משאבים באותו סדר, ואין העדפה מובנית שתמנע מחוט מסוים לרכוש את המשאבים לאורך זמן (בהנחה שמתזמן המערכת הוגן).\n",
+      "difficulty_estimation": "Hard"
+    }
+  }
+}

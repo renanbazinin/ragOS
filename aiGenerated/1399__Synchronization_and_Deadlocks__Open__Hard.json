@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Synchronization and Deadlocks",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 09:55:09",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3054,
+      "output_tokens": 2178,
+      "total_tokens": 10724
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Synchronization",
+      "Deadlocks",
+      "Mutexes",
+      "Condition Variables",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתונה מערכת ובה N חוטים המבצעים משימה הדורשת גישה לשני משאבים, ResourceA ו-ResourceB. כדי למנוע קיפאון כתוצאה מסדר תפיסה שונה, הוחלט על סדר תפיסה גלובלי קבוע: תחילה ResourceA ולאחר מכן ResourceB. בנוסף, קיימת מגבלה על מספר המשימות הפעילות בו-זמנית: עד K משימות לכל היותר. חוט המעוניין לבצע משימה חייב להמתין אם יש כבר K משימות פעילות. להלן מימוש מוצע לפונקציה `perform_task` המבצעת את המשימה. נניח ש-`mutexA`, `mutexB`, `counter_mutex`, `active_tasks`, ו-`cond_can_start` מוגדרים ומאותחלים כראוי כמשאבים גלובליים.\n\nא. האם המימוש המוצע עלול לגרום לקיפאון (Deadlock)? אם כן, תארו תרחיש ספציפי המוביל לקיפאון והסבירו מדוע הוא מתרחש.\nב. הציעו פתרון מתוקן לבעיה שזיהיתם בסעיף א', והסבירו מדוע הפתרון שלכם מונע קיפאון.",
+      "code_snippet": "pthread_mutex_t mutexA;\npthread_mutex_t mutexB;\npthread_mutex_t counter_mutex;\npthread_cond_t cond_can_start;\nint active_tasks = 0;\nconst int K = 5; // Example threshold\n\nvoid perform_task() {\n    // Stage 1: Control concurrent task limit\n    pthread_mutex_lock(&counter_mutex);\n    while (active_tasks >= K) {\n        pthread_cond_wait(&cond_can_start, &counter_mutex);\n    }\n    active_tasks++;\n    pthread_mutex_unlock(&counter_mutex);\n\n    // Stage 2: Acquire resources\n    pthread_mutex_lock(&mutexA);\n    pthread_mutex_lock(&mutexB);\n\n    // Perform actual task work (critical section)\n    // ... do some work ...\n\n    // Stage 3: Release resources\n    pthread_mutex_unlock(&mutexB);\n    pthread_mutex_unlock(&mutexA);\n\n    // Stage 4: Decrement active task counter and signal\n    pthread_mutex_lock(&counter_mutex); \n    active_tasks--;\n    pthread_cond_signal(&cond_can_start); // Or pthread_cond_broadcast\n    pthread_mutex_unlock(&counter_mutex);\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "א. כן, המימוש המוצע עלול לגרום לקיפאון (Deadlock).\n\n**תרחיש לקיפאון:**\n1.  נניח ש-K חוטים (לדוגמה, חוטים T1...TK) מצליחים לעבור את שלב 1 (בקרת מגבלת משימות מקבילות). כל אחד מהם תופס את `counter_mutex`, מעדכן את `active_tasks`, ומשחרר את `counter_mutex`. כעת `active_tasks` שווה ל-K.\n2.  החוטים T1...TK ממשיכים לשלב 2, תופסים את `mutexA` ולאחר מכן את `mutexB`, ומבצעים את עבודת המשימה.\n3.  חוט נוסף, נניח T(K+1), מגיע ומתחיל לבצע את `perform_task`.\n4.  חוט T(K+1) מגיע לשלב 1: הוא תופס בהצלחה את `counter_mutex`. הוא בודק את `active_tasks` ומוצא ש-`active_tasks == K`. לכן, הוא נכנס ללולאת ה-`while` וקורא ל-`pthread_cond_wait(&cond_can_start, &counter_mutex)`. קריאה זו משחררת אטומית את `counter_mutex` ומכניסה את חוט T(K+1) למצב שינה, בהמתנה לאות על `cond_can_start`.\n5.  בינתיים, החוטים T1...TK מסיימים את עבודת המשימה שלהם ומשחררים את `mutexB` ואת `mutexA` (שלב 3).\n6.  כעת, החוטים T1...TK מנסים להיכנס לשלב 4: לעדכן את המונה ולשגר אות. לשם כך, כל אחד מהם מנסה לתפוס את `counter_mutex`.\n7.  אבל, `counter_mutex` נתפס על ידי חוט T(K+1) כאשר הוא יתעורר מ-`pthread_cond_wait` (הפעולה `pthread_cond_wait` משחררת את המנעול לפני הכניסה למצב שינה, אך תנסה לתפוס אותו בחזרה לפני שהיא חוזרת). כלומר, `counter_mutex` למעשה מוחזק על ידי חוט T(K+1) הממתין לאות, וחוטים T1...TK אינם יכולים לתפוס אותו.\n8.  לכן, החוטים T1...TK נחסמים בהמתנה ל-`counter_mutex`.\n9.  חוט T(K+1) ממתין לאות על `cond_can_start`. האות הזה יכול להישלח רק על ידי אחד מהחוטים T1...TK לאחר שישחררו את `counter_mutex`.\n10. נוצר מצב של תלות מעגלית (circular wait): חוט T(K+1) ממתין לאות מ-T1...TK, והחוטים T1...TK ממתינים ל-`counter_mutex` שמוחזק על ידי T(K+1). זהו מצב של קיפאון.\n\nב. הפתרון לבעיה הוא לשחרר את `counter_mutex` מוקדם יותר, מיד לאחר עדכון `active_tasks` והיציאה משלב בקרת המגבלה, ורק לאחר שכל המשאבים האחרים שוחררו, לתפוס אותו שוב על מנת לעדכן את `active_tasks` ולשלוח אות. בצורה זו, אין חפיפה בין המנעולים.\n\n**מימוש מתוקן של `perform_task`:**\n```c\nvoid perform_task_corrected() {\n    // Stage 1: Control concurrent task limit\n    pthread_mutex_lock(&counter_mutex);\n    while (active_tasks >= K) {\n        pthread_cond_wait(&cond_can_start, &counter_mutex);\n    }\n    active_tasks++;\n    pthread_mutex_unlock(&counter_mutex); // Release counter_mutex early\n\n    // Stage 2: Acquire resources\n    pthread_mutex_lock(&mutexA);\n    pthread_mutex_lock(&mutexB);\n\n    // Perform actual task work (critical section)\n    // ... do some work ...\n\n    // Stage 3: Release resources\n    pthread_mutex_unlock(&mutexB);\n    pthread_mutex_unlock(&mutexA);\n\n    // Stage 4: Decrement active task counter and signal\n    pthread_mutex_lock(&counter_mutex); // Re-acquire counter_mutex\n    active_tasks--;\n    pthread_cond_signal(&cond_can_start); // Or pthread_cond_broadcast\n    pthread_mutex_unlock(&counter_mutex);\n}\n```\n\n**הסבר מדוע הפתרון מונע קיפאון:**\nבפתרון המתוקן, `counter_mutex` משוחרר מיד לאחר שחוט קיבל אישור להתחיל במשימה (כלומר, `active_tasks` עודכן והחוט יצא מהלולאה). הדבר מבטיח ש-`counter_mutex` אינו מוחזק בזמן שהחוט מנסה לתפוס את `mutexA` ו-`mutexB`. וחשוב מכך, הוא אינו מוחזק בזמן שחוט ממתין על `cond_can_start`. כאשר חוטים מסיימים את המשימה שלהם, הם משחררים את `mutexA` ו-`mutexB` *לפני* שהם מנסים לתפוס מחדש את `counter_mutex`. באופן זה, אין מצב שבו חוט מחזיק ב-`counter_mutex` ונחסם בהמתנה למנעולים אחרים, או שחוט מחזיק במנעולים אחרים ונחסם בהמתנה ל-`counter_mutex` כדי לשחרר חוטים אחרים. כלומר, לא נוצרת תלות מעגלית בין המנעולים, והקיפאון נמנע."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

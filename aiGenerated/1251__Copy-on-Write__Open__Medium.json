@@ -1,0 +1,51 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Copy-on-Write",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 08:57:57",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3509,
+      "output_tokens": 1993,
+      "total_tokens": 10805
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Memory Management",
+      "Copy-on-Write",
+      "Processes"
+    ],
+    "content": {
+      "text": "מנגנון Copy-on-Write (CoW) הוא אסטרטגיה נפוצה לניהול זיכרון במערכות הפעלה, במיוחד בעת יצירת תהליכים חדשים באמצעות `fork()`. מנגנון זה מאפשר לתהליכים שונים לחלוק עמודי זיכרון פיזיים עד שאחד מהם מנסה לשנות את התוכן של עמוד כזה, ובשלב זה נוצר עותק פרטי של העמוד עבור התהליך המבקש את השינוי.\n\nנתבונן בקטע הקוד המצורף. ענו על השאלות הבאות בהתבסס על הבנתכם את מנגנון Copy-on-Write וכיצד הוא בא לידי ביטוי בקוד זה:",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\nint global_var = 10;\n\nint main() {\n    int local_var = 20;\n    pid_t pid;\n\n    printf(\"Initial values: global_var = %d, local_var = %d (PID: %d)\\n\", global_var, local_var, getpid());\n\n    pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        exit(1);\n    } else if (pid == 0) { // Child process\n        printf(\"Child process (PID: %d) before modification: global_var = %d, local_var = %d\\n\", getpid(), global_var, local_var);\n        global_var = 100; // Modify global_var\n        local_var = 200;  // Modify local_var\n        printf(\"Child process (PID: %d) after modification: global_var = %d, local_var = %d\\n\", getpid(), global_var, local_var);\n        exit(0);\n    } else { // Parent process\n        sleep(1); // Give child a chance to run and modify\n        printf(\"Parent process (PID: %d) after child's potential modification: global_var = %d, local_var = %d\\n\", getpid(), global_var, local_var);\n        wait(NULL); // Wait for child to finish\n        printf(\"Parent process (PID: %d) after waiting for child: global_var = %d, local_var = %d\\n\", getpid(), global_var, local_var);\n    }\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "מיד לאחר קריאת המערכת `fork()` ובטרם בוצעו שינויים כלשהם על ידי תהליך הבן או האב, תארו את מצב עמודי הזיכרון עבור המשתנים `global_var` ו-`local_var` בהקשר של מנגנון CoW. מהם ערכי ביטי ההרשאות (permissions bits) בטבלאות הדפים של תהליך האב והבן עבור העמודים המכילים משתנים אלו? אילו עמודים פיזיים משותפים, ואילו עמודים פרטיים?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "תארו בפירוט את השלבים המתרחשים כאשר תהליך הבן מבצע את השורות `global_var = 100;` ו-`local_var = 200;`. מתי נוצרים עותקים של עמודים? אילו עמודים? מה יהיו הערכים הסופיים של `global_var` ו-`local_var` בתהליך האב ובתהליך הבן לאחר ששני התהליכים סיימו את פעולות הכתיבה שלהם (כלומר, לאחר שהבן סיים את השינויים ולפני שהאב מדפיס את ערכיו בפעם האחרונה)?",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.1: מיד לאחר קריאת המערכת `fork()`, מערכת ההפעלה יוצרת מרחב כתובות וירטואלי חדש עבור תהליך הבן. עם זאת, במקום להעתיק את כל הזיכרון הפיזי של תהליך האב, מנגנון CoW גורם לכך שגם תהליך האב וגם תהליך הבן יפנו לאותם עמודים פיזיים המכילים את המשתנים `global_var` (שנמצא במקטע הנתונים) ו-`local_var` (שנמצא במחסנית). ביטי ההרשאות (permissions bits) בטבלאות הדפים של שני התהליכים עבור עמודים אלו יוגדרו כ-READ-ONLY (קריאה בלבד). אף עמוד פיזי אינו פרטי בשלב זה; כל העמודים המכילים את הנתונים המשותפים הם משותפים ומוגנים מפני כתיבה.\n\n1.2: כאשר תהליך הבן מבצע את השורה `global_var = 100;`:\n   - תהליך הבן מנסה לכתוב לכתובת הווירטואלית של `global_var`.\n   - ה-MMU (Memory Management Unit) בודק את ערך ביט ההרשאה עבור העמוד הווירטואלי הזה בטבלת הדפים של תהליך הבן ומגלה שהעמוד מסומן כ-READ-ONLY.\n   - נוצרת \"הפרעת עמוד\" (Page Fault).\n   - מטפל הפרעות העמוד של הליבה מזהה שמדובר בהפרעת CoW.\n   - הליבה מקצה עמוד פיזי חדש.\n   - תוכן העמוד הפיזי המקורי (שהיה משותף) מועתק לעמוד הפיזי החדש.\n   - ערך בטבלת הדפים של תהליך הבן עבור העמוד המכיל את `global_var` מתעדכן כך שיצביע לעמוד הפיזי החדש, וביט ההרשאה מוגדר ל-READ/WRITE (קריאה וכתיבה).\n   - מונה ההתייחסויות (reference count) לעמוד הפיזי המקורי יורד באחד. אם הוא מגיע ל-1 (כלומר, רק האב עדיין מפנה אליו), הרשאות העמוד הפיזי המקורי משתנות ל-READ/WRITE עבור תהליך האב. אם נותרו הפניות נוספות (למשל, ילדים אחרים שנוצרו), הרשאות העמוד הפיזי המקורי נשארות READ-ONLY עד שרק תהליך אחד מפנה אליו.\n   - הפקודה `global_var = 100;` מבוצעת מחדש, והפעם הכתיבה מתבצעת בהצלחה לעותק הפרטי של תהליך הבן.\n\nאותו תהליך בדיוק מתרחש כאשר תהליך הבן מבצע את השורה `local_var = 200;`. עמוד פיזי חדש יוקצה עבור העמוד המכיל את `local_var` במחסנית של הבן, תוכן העמוד המקורי יועתק אליו, ו-`200` ייכתב לעותק הפרטי הזה.\n\n**הערכים הסופיים לאחר שינויי הבן (לפני ההדפסה האחרונה של האב):**\n- **בתהליך הבן:** `global_var = 100`, `local_var = 200`\n- **בתהליך האב:** `global_var = 10`, `local_var = 20` (העותקים שלהם לא שונו על ידי הבן)."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Deadlocks and Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 21:34:33",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4085,
+      "output_tokens": 2149,
+      "total_tokens": 11456
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Deadlocks",
+      "Mutexes",
+      "Concurrency",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "מערכת הפעלה מנהלת שני משאבים בלעדיים, משאב A ומשאב B. שני סוגים של משימות (Task X ו-Task Y) דורשות גישה למשאבים אלו. Task X תמיד מנסה לתפוס את משאב A ואז את משאב B. Task Y תמיד מנסה לתפוס את משאב B ואז את משאב A. הגישה למשאבים מוגנת באמצעות מנעולים (mutexes). להלן קוד C המממש את ההתנהגות של שתי המשימות:",
+      "code_snippet": "void* taskX(void* arg) {\n    printf(\"Task X: Trying to acquire mutexA...\\n\");\n    pthread_mutex_lock(&mutexA);\n    printf(\"Task X: Acquired mutexA. Trying to acquire mutexB...\\n\");\n    sleep(1); // Simulate work\n    pthread_mutex_lock(&mutexB);\n    printf(\"Task X: Acquired mutexB. Performing work.\\n\");\n    // Critical section\n    printf(\"Task X: Releasing mutexB.\\n\");\n    pthread_mutex_unlock(&mutexB);\n    printf(\"Task X: Releasing mutexA.\\n\");\n    pthread_mutex_unlock(&mutexA);\n    printf(\"Task X: Finished.\\n\");\n    return NULL;\n}\n\nvoid* taskY(void* arg) {\n    printf(\"Task Y: Trying to acquire mutexB...\\n\");\n    pthread_mutex_lock(&mutexB);\n    printf(\"Task Y: Acquired mutexB. Trying to acquire mutexA...\\n\");\n    sleep(1); // Simulate work\n    pthread_mutex_lock(&mutexA);\n    printf(\"Task Y: Acquired mutexA. Performing work.\\n\");\n    // Critical section\n    printf(\"Task Y: Releasing mutexA.\\n\");\n    pthread_mutex_unlock(&mutexA);\n    printf(\"Task Y: Releasing mutexB.\\n\");\n    pthread_mutex_unlock(&mutexB);\n    printf(\"Task Y: Finished.\\n\");\n    return NULL;\n}\n\n// main function, mutex initialization, and thread creation are omitted for brevity, assume they are correctly implemented.\n// pthread_mutex_t mutexA, mutexB; are global and initialized.",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "האם קיים מצב של קיפאון (deadlock) בקוד הנתון? אם כן, תאר/י תרחיש ספציפי (רצף פעולות) שבו הקיפאון מתרחש והסבר/י מדוע הוא מתקיים.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "הצע/י תיקון לקוד הנתון שימנע את הקיפאון, תוך שמירה על העיקרון שמשימות מסוג X צריכות לגשת לשני המשאבים, וכך גם משימות מסוג Y. כתוב/כתבי את הקוד המתוקן והסבר/י בקצרה את עיקרון התיקון.",
+        "code_snippet": "void* taskX_fixed(void* arg) {\n    // Original order: Acquire A, then B\n    printf(\"Task X (fixed): Trying to acquire mutexA...\\n\");\n    pthread_mutex_lock(&mutexA);\n    printf(\"Task X (fixed): Acquired mutexA. Trying to acquire mutexB...\\n\");\n    sleep(1); // Simulate work\n    pthread_mutex_lock(&mutexB);\n    printf(\"Task X (fixed): Acquired mutexB. Performing work.\\n\");\n    // Critical section\n    printf(\"Task X (fixed): Releasing mutexB.\\n\");\n    pthread_mutex_unlock(&mutexB);\n    printf(\"Task X (fixed): Releasing mutexA.\\n\");\n    pthread_mutex_unlock(&mutexA);\n    printf(\"Task X (fixed): Finished.\\n\");\n    return NULL;\n}\n\nvoid* taskY_fixed(void* arg) {\n    // Fixed order: Acquire A, then B (was B then A)\n    printf(\"Task Y (fixed): Trying to acquire mutexA...\\n\"); // Changed order\n    pthread_mutex_lock(&mutexA); // Changed order\n    printf(\"Task Y (fixed): Acquired mutexA. Trying to acquire mutexB...\\n\");\n    sleep(1); // Simulate work\n    pthread_mutex_lock(&mutexB);\n    printf(\"Task Y (fixed): Acquired mutexB. Performing work.\\n\");\n    // Critical section\n    printf(\"Task Y (fixed): Releasing mutexB.\\n\");\n    pthread_mutex_unlock(&mutexB);\n    printf(\"Task Y (fixed): Releasing mutexA.\\n\");\n    pthread_mutex_unlock(&mutexA);\n    printf(\"Task Y (fixed): Finished.\\n\");\n    return NULL;\n}",
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1. כן, קיים מצב של קיפאון (deadlock) בקוד הנתון. קיפאון מתרחש כאשר ארבעת התנאים של הוופמן מתקיימים: מניעה הדדית (mutexes), החזק והמתן (חוטים מחזיקים במשאבים וממתינים לאחרים), אי-הפקעה (משאבים אינם נלקחים בכוח), והמתנה מעגלית. במקרה זה, תנאי ההמתנה המעגלית הוא הגורם הישיר לקיפאון.\n\nתרחיש ספציפי לקיפאון:\nא. חוט Task X מתחיל ונועל בהצלחה את `mutexA`.\nב. חוט Task Y מתחיל ונועל בהצלחה את `mutexB`.\nג. Task X מנסה כעת לנעול את `mutexB`, אך הוא כבר נעול על ידי Task Y, ולכן Task X נחסם וממתין ל-`mutexB`.\nד. Task Y מנסה כעת לנעול את `mutexA`, אך הוא כבר נעול על ידי Task X, ולכן Task Y נחסם וממתין ל-`mutexA`.\n\nבשלב זה, שני החוטים חסומים באופן הדדי: Task X מחזיק ב-`mutexA` וממתין ל-`mutexB` שמוחזק על ידי Task Y, ו-Task Y מחזיק ב-`mutexB` וממתין ל-`mutexA` שמוחזק על ידי Task X. אף אחד מהם לא יכול להמשיך, והמערכת נכנסת למצב קיפאון.\n\n2. כדי למנוע קיפאון, יש למנוע את תנאי ההמתנה המעגלית (circular wait). הדרך הנפוצה והיעילה ביותר היא להקצות סדר גלובלי (total ordering) לתפיסת המנעולים. כלומר, כל החוטים במערכת חייבים לתפוס את המנעולים באותו סדר. במקרה זה, נחליט שכל החוטים תמיד יתפסו קודם את `mutexA` ואז את `mutexB`. בכך אנו מבטיחים שלעולם לא יווצר מעגל המתנה.\n\nהקוד המתוקן כולל שינוי בפונקציה `taskY` כך שתתפוס את `mutexA` לפני `mutexB`, בדומה ל-`taskX`.\n\nעיקרון התיקון: על ידי אכיפת סדר תפיסת מנעולים אחיד (לדוגמה, תמיד קודם `mutexA` ואז `mutexB`), אנו מבטלים את האפשרות להיווצרות המתנה מעגלית. אם Task X תופס את `mutexA` וממתין ל-`mutexB`, ו-Task Y מנסה לתפוס את `mutexA` (לפני `mutexB`), הוא ייחסם על `mutexA` עד ש-Task X ישחרר אותו. Task Y לעולם לא יוכל לתפוס את `mutexB` לפני `mutexA` ובכך ליצור את המעגל שהוביל לקיפאון. במקום קיפאון, נקבל המתנה סדרתית, שבה חוט אחד יסיים את עבודתו וישחרר את המשאבים לפני שהחוט השני יוכל לתפוס אותם."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

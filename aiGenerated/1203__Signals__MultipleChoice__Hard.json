@@ -1,0 +1,46 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Signals",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 08:40:09",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 968,
+      "output_tokens": 1753,
+      "total_tokens": 7805
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Signals",
+      "Process Management",
+      "Fork",
+      "Signal Masking",
+      "sigsuspend"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא המטפל באותות. מה יהיה הערך הסופי של המשתנה הגלובלי `sig_count` עבור תהליך האב ועבור תהליך הבן, לאחר שכל אחד מהם יצא מקריאת ה-`sigsuspend` (אם יצא), בהנחה שהתוכנית רצה בסביבת לינוקס ואין הפרעות חיצוניות (למשל, SIGINT)?",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <signal.h>\n#include <sys/types.h>\n#include <sys/wait.h>\n\nvolatile sig_atomic_t sig_count = 0;\n\nvoid sig_handler(int signo) {\n    if (signo == SIGUSR1) {\n        sig_count++;\n        printf(\"[%d] SIGUSR1 received, count = %d\\n\", getpid(), sig_count);\n    }\n}\n\nint main() {\n    struct sigaction sa;\n    sa.sa_handler = sig_handler;\n    sigemptyset(&sa.sa_mask);\n    sa.sa_flags = 0; \n    if (sigaction(SIGUSR1, &sa, NULL) == -1) {\n        perror(\"sigaction\");\n        exit(EXIT_FAILURE);\n    }\n\n    sigset_t block_mask;\n    sigemptyset(&block_mask);\n    sigaddset(&block_mask, SIGUSR1);\n    \n    // Block SIGUSR1\n    if (sigprocmask(SIG_BLOCK, &block_mask, NULL) == -1) {\n        perror(\"sigprocmask block\");\n        exit(EXIT_FAILURE);\n    }\n\n    printf(\"[%d] SIGUSR1 blocked. Sending SIGUSR1 to self...\\n\", getpid());\n    kill(getpid(), SIGUSR1); // Parent sends SIGUSR1 to itself while it's blocked\n\n    pid_t pid = fork();\n\n    if (pid == -1) {\n        perror(\"fork\");\n        exit(EXIT_FAILURE);\n    } else if (pid == 0) { // Child process\n        printf(\"[%d] Child: SIGUSR1 mask inherited.\\n\", getpid());\n        \n        sigset_t suspend_mask;\n        sigemptyset(&suspend_mask); // Empty mask means all signals (including SIGUSR1) are unblocked during suspend\n\n        printf(\"[%d] Child: Calling sigsuspend...\\n\", getpid());\n        sigsuspend(&suspend_mask); // Child waits for a signal\n        \n        printf(\"[%d] Child: sigsuspend returned. Final count = %d\\n\", getpid(), sig_count); // This line won't be reached\n    } else { // Parent process\n        printf(\"[%d] Parent: Child PID is %d. SIGUSR1 mask inherited.\\n\", getpid(), pid);\n        \n        sigset_t suspend_mask;\n        sigemptyset(&suspend_mask); // Empty mask means all signals (including SIGUSR1) are unblocked during suspend\n\n        printf(\"[%d] Parent: Calling sigsuspend...\\n\", getpid());\n        sigsuspend(&suspend_mask); // Parent waits for a signal\n        \n        printf(\"[%d] Parent: sigsuspend returned. Final count = %d\\n\", getpid(), sig_count);\n        wait(NULL); // Wait for child to finish (though child will hang)\n        printf(\"[%d] Parent: Child finished (or hung). Parent exiting.\\n\", getpid());\n    }\n\n    return 0;\n}",
+      "options": [
+        "א. תהליך האב: `sig_count` יהיה 1. תהליך הבן: `sig_count` יהיה 1.",
+        "ב. תהליך האב: `sig_count` יהיה 1. תהליך הבן: לא יצא מ-`sigsuspend` ולכן `sig_count` יישאר 0.",
+        "ג. תהליך האב: לא יצא מ-`sigsuspend` ולכן `sig_count` יישאר 0. תהליך הבן: `sig_count` יהיה 1.",
+        "ד. תהליך האב: `sig_count` יהיה 0. תהליך הבן: `sig_count` יהיה 0.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ההסבר:\n1.  **הגדרת מטפל וחסימת האות**: תהליך האב מגדיר מטפל לאות SIGUSR1 וחוסם אותו באמצעות `sigprocmask`.\n2.  **שליחת אות לאב לפני fork**: האב שולח לעצמו את האות SIGUSR1 באמצעות `kill(getpid(), SIGUSR1)` בזמן שהאות חסום. כתוצאה מכך, האות SIGUSR1 נרשם כאות ממתין (pending) עבור תהליך האב.\n3.  **קריאה ל-fork**: כאשר `fork()` נקרא, תהליך הבן יורש את מטפל האותות ואת מסכת האותות (signal mask) מתהליך האב. עם זאת, **אותות ממתינים (pending signals) אינם עוברים בירושה לתהליך הבן; הם מתאפסים עבור הבן**.\n4.  **תהליך האב**: \n    *   כאשר האב קורא ל-`sigsuspend(&suspend_mask)` עם מסכה ריקה, הוא מבטל זמנית את חסימת כל האותות (כולל SIGUSR1).\n    *   מכיוון שהאות SIGUSR1 היה ממתין עבור האב, הוא נמסר מיד למטפל.\n    *   המטפל `sig_handler` מופעל, מעלה את `sig_count` ל-1, ו-`sigsuspend` חוזר.\n    *   לכן, `sig_count` של האב יהיה 1.\n5.  **תהליך הבן**:\n    *   כאשר הבן קורא ל-`sigsuspend(&suspend_mask)`, הוא גם מבטל זמנית את חסימת כל האותות.\n    *   אבל, מכיוון שהאות SIGUSR1 לא עבר בירושה כאות ממתין (pending) לבן, ואיש לא שלח לו SIGUSR1 נוסף, אין אות ממתין עבור הבן.\n    *   לכן, תהליך הבן ימתין ללא הגבלת זמן בתוך `sigsuspend` (כי אין הפרעות חיצוניות).\n    *   המטפל לא יופעל, ו-`sig_count` של הבן יישאר 0."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

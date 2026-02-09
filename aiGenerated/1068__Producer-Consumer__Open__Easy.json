@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Producer-Consumer",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 07:44:44",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3452,
+      "output_tokens": 1398,
+      "total_tokens": 8778
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Synchronization",
+      "Producer-Consumer",
+      "Semaphores",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתונה בעיית יצרן-צרכן קלאסית. ישנו חוצץ משותף (buffer) בגודל קבוע N אליו יצרנים מוסיפים פריטים וצרכנים מוציאים פריטים. יש לממש את פונקציות היצרן (`producer`) והצרכן (`consumer`) כך שיפעלו באופן מסונכרן ובטוח, תוך שימוש בסמפורים בלבד. יש להניח כי קיימות פונקציות `produce_item()` המייצרת פריט חדש ו-`consume_item(Item item)` הצורכת פריט, ופונקציות אלו בטוחות לשימוש במקביל. יש להגדיר את הסמפורים הגלובליים הנדרשים ולציין את ערכי האתחול שלהם.",
+      "code_snippet": "#include <semaphore.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <pthread.h> // Assuming pthreads for thread creation\n\n#define N 10 // Buffer size\n\n// Shared buffer and indices\ntypedef int Item; // Example item type\nItem shared_buffer[N];\nint in = 0; // Next producer slot\nint out = 0; // Next consumer slot\n\n// Helper functions (assume they exist and are thread-safe)\nItem produce_item() {\n    // Simulates item production\n    static int counter = 0;\n    return counter++;\n}\n\nvoid consume_item(Item item) {\n    // Simulates item consumption\n    printf(\"Consumed item: %d\\\\n\", item);\n}\n\n// Global semaphores to be defined and initialized in the solution.\n// sem_t empty;\n// sem_t full;\n// sem_t mutex;\n\nvoid* producer(void* arg) {\n    while (1) {\n        // Implement producer logic here using semaphores and the shared_buffer\n    }\n    return NULL;\n}\n\nvoid* consumer(void* arg) {\n    while (1) {\n        // Implement consumer logic here using semaphores and the shared_buffer\n    }\n    return NULL;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון משתמש בשלושה סמפורים: `mutex` המשמש להגנה על הגישה לחוצץ המשותף (ערך אתחול 1), `empty` המונה את מספר המקומות הפנויים בחוצץ (ערך אתחול N), ו-`full` המונה את מספר הפריטים המלאים בחוצץ (ערך אתחול 0).\nהיצרן ממתין למקום פנוי (`sem_wait(&empty)`), רוכש מנעול לגישה לחוצץ (`sem_wait(&mutex)`), מוסיף פריט לחוצץ (`shared_buffer`), משחרר את המנעול (`sem_post(&mutex)`), ומאותת שיש כעת פריט נוסף בחוצץ (`sem_post(&full)`).\nהצרכן ממתין לפריט זמין בחוצץ (`sem_wait(&full)`), רוכש מנעול לגישה לחוצץ (`sem_wait(&mutex)`), מוציא פריט מהחוצץ (`shared_buffer`), משחרר את המנעול (`sem_post(&mutex)`), ומאותת שיש כעת מקום פנוי נוסף בחוצץ (`sem_post(&empty)`). לאחר מכן, הצרכן צורך את הפריט.",
+      "code_snippet": "// Global semaphores (initialization values in comments)\nsem_t empty;   // init to N (10)\nsem_t full;    // init to 0\nsem_t mutex;   // init to 1\n\n// Function to initialize semaphores (would be called once at program start)\nvoid init_semaphores() {\n    sem_init(&empty, 0, N);\n    sem_init(&full, 0, 0);\n    sem_init(&mutex, 0, 1);\n}\n\nvoid* producer(void* arg) {\n    while (1) {\n        Item item = produce_item();\n\n        sem_wait(&empty); // Wait for an empty slot\n        sem_wait(&mutex); // Acquire lock for buffer access\n\n        shared_buffer[in] = item;\n        in = (in + 1) % N;\n        printf(\"Produced item: %d (in=%d)\\\\n\", item, in); // Added for clarity\n\n        sem_post(&mutex); // Release lock\n        sem_post(&full);  // Signal that a slot is full\n    }\n    return NULL;\n}\n\nvoid* consumer(void* arg) {\n    while (1) {\n        Item item;\n\n        sem_wait(&full);  // Wait for an item to be available\n        sem_wait(&mutex); // Acquire lock for buffer access\n\n        item = shared_buffer[out];\n        out = (out + 1) % N;\n        printf(\"Removing item: %d (out=%d)\\\\n\", item, out); // Added for clarity\n\n        sem_post(&mutex); // Release lock\n        sem_post(&empty); // Signal that a slot is empty\n\n        consume_item(item);\n    }\n    return NULL;\n}"
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

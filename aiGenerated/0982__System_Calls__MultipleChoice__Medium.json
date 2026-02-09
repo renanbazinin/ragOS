@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "System Calls",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 07:14:37",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1165,
+      "output_tokens": 431,
+      "total_tokens": 2756
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "System Calls",
+      "Operating System Fundamentals",
+      "Kernel Modes"
+    ],
+    "content": {
+      "text": "מהי הסיבה העיקרית לכך שקריאת מערכת (System Call) גורמת למעבר ממצב משתמש (User Mode) למצב קרנל (Kernel Mode)?",
+      "code_snippet": null,
+      "options": [
+        "א. כדי לאפשר גישה לזיכרון של תהליכים אחרים.",
+        "ב. כדי לבצע פעולות הדורשות הרשאות מיוחדות של מערכת ההפעלה.",
+        "ג. כדי להגדיל את מהירות ביצוע התוכנית.",
+        "ד. כדי לאפשר לתהליך לגשת ישירות לחומרת המחשב.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב. קריאות מערכת מאפשרות לתהליכי משתמש לבקש שירותים ממערכת ההפעלה. שירותים אלה כוללים גישה לחומרה, ניהול קבצים, יצירת תהליכים ועוד. פעולות אלו דורשות הרשאות גבוהות יותר מאשר אלו הזמינות במצב משתמש, ולכן נדרש מעבר למצב קרנל, שם למערכת ההפעלה יש גישה בלתי מוגבלת למשאבי המערכת כדי לבצע את המבוקש בצורה בטוחה ומבוקרת."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

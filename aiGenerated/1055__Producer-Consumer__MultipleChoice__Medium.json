@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Producer-Consumer",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 07:40:02",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 887,
+      "output_tokens": 378,
+      "total_tokens": 2359
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Concurrency",
+      "Synchronization",
+      "Producer-Consumer"
+    ],
+    "content": {
+      "text": "מה מייצג סמפור ה-\"empty\" בפתרון בעיית ה-Producer-Consumer עם גודל חוצץ מוגבל (bounded buffer) באמצעות סמפורים?",
+      "code_snippet": null,
+      "options": [
+        "מספר הפריטים הנוכחי בחוצץ.",
+        "מספר המקומות הפנויים הנוכחי בחוצץ.",
+        "הקיבולת המקסימלית של החוצץ.",
+        "מספר הצרכנים הממתינים לצרך פריט."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "מספר המקומות הפנויים הנוכחי בחוצץ.",
+      "explanation": "סמפור ה-\"empty\" מאותחל לרוב לגודל החוצץ הכולל (N). הוא משמש את ה-Producer כדי להמתין למקום פנוי בחוצץ לפני הוספת פריט, ומצביע על מספר המקומות הפנויים שנותרו בחוצץ. ה-Consumer מגדיל את ערכו לאחר צריכת פריט, ובכך מאותת ל-Producer שנוצר מקום פנוי חדש."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

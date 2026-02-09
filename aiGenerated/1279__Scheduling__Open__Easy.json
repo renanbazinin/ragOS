@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Scheduling",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 09:09:57",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1598,
+      "output_tokens": 639,
+      "total_tokens": 3886
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Scheduling",
+      "CPU Scheduling"
+    ],
+    "content": {
+      "text": "תאר את אלגוריתם תזמון המעבד Round-Robin (RR). מהו הפרמטר העיקרי שמשפיע על התנהגותו וכיצד הוא משפיע על ביצועי המערכת?",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "אלגוריתם Round-Robin (RR) הוא אלגוריתם תזמון פרה-אמפטי (preemptive) שבו כל תהליך מקבל זמן מעבד למשך תקופה קצובה וקבועה מראש הנקראת 'קוונטום זמן' (time quantum). כאשר קוונטום הזמן של תהליך מסתיים, הוא נקטע ומועבר לסוף תור התהליכים המוכנים לריצה, והמעבד עובר לתהליך הבא בתור.\n\nהפרמטר העיקרי שמשפיע על התנהגותו של RR הוא גודל קוונטום הזמן.\n\nהשפעה על ביצועי המערכת:\n-   **קוונטום זמן קטן מאוד:** גורם להחלפות הקשר (context switches) רבות, מה שמגדיל את התקורה (overhead) של המערכת ומפחית את יעילות המעבד. מצד שני, הוא מספק זמן תגובה (response time) מהיר יותר לתהליכים אינטראקטיביים, מכיוון שכל תהליך מקבל הזדמנות לרוץ לעיתים קרובות.\n-   **קוונטום זמן גדול מאוד:** יגרום ל-RR להתנהג בדומה לאלגוריתם FCFS (First Come First Served), שכן תהליכים רבים יסיימו את ריצתם בתוך קוונטום אחד. זה מפחית את התקורה של החלפות הקשר אך עלול לפגוע בזמן התגובה עבור תהליכים אינטראקטיביים קצרים, שייאלצו להמתין לתהליכים ארוכים יותר שיסיימו את קוונטום הזמן שלהם.\n\nבחירת קוונטום זמן אופטימלי היא קריטית ומשפיעה על האיזון בין זמן תגובה לתפוקה (throughput) של המערכת."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

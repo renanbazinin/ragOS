@@ -1,0 +1,57 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Threads and Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 20:24:07",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2951,
+      "output_tokens": 1760,
+      "total_tokens": 9407
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Threads",
+      "Mutexes",
+      "Concurrency",
+      "Race Conditions"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה, המשתמשת בתהליכונים (threads) ובמנעולים (mutexes) כדי לעדכן מונה משותף:\nענו על השאלות הבאות:",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n\n#define NUM_THREADS 5\n#define NUM_ITERATIONS 100000\n\nint shared_counter = 0;\npthread_mutex_t counter_mutex;\n\nvoid* thread_function(void* arg) {\n    long thread_id = (long)arg;\n    for (int i = 0; i < NUM_ITERATIONS; ++i) {\n        pthread_mutex_lock(&counter_mutex);\n        shared_counter++;\n        pthread_mutex_unlock(&counter_mutex);\n    }\n    printf(\"Thread %ld finished. Counter value after its work: %d\\n\", thread_id, shared_counter);\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n    pthread_mutex_init(&counter_mutex, NULL);\n\n    for (long i = 0; i < NUM_THREADS; ++i) {\n        if (pthread_create(&threads[i], NULL, thread_function, (void*)i) != 0) {\n            perror(\"Failed to create thread\");\n            return 1;\n        }\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        if (pthread_join(threads[i], NULL) != 0) {\n            perror(\"Failed to join thread\");\n            return 1;\n        }\n    }\n\n    printf(\"Main thread: All threads finished. Final shared_counter value: %d\\n\", shared_counter);\n\n    pthread_mutex_destroy(&counter_mutex);\n\n    return 0;\n}"
+    },
+    "sub_questions": [
+      {
+        "id": "7.1",
+        "text": "מה יהיה הערך הסופי של המונה המשותף `shared_counter` לאחר שכל התהליכונים יסיימו את עבודתם?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "7.2",
+        "text": "כמה פעמים בסך הכל תתבצע קריאה מוצלחת לפונקציה `pthread_mutex_lock` על ידי כל התהליכונים יחד?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "7.3",
+        "text": "בהנחה שהשורות `pthread_mutex_lock(&counter_mutex);` ו-`pthread_mutex_unlock(&counter_mutex);` בתוך `thread_function` היו מוכנסות להערה (כלומר, המנעול לא היה בשימוש), מהם הערכים המינימליים והמקסימליים האפשריים עבור `shared_counter` בסיום התוכנית? נמקו את תשובתכם.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.  **ערך סופי של `shared_counter`:**\n    כל תהליכון מבצע `NUM_ITERATIONS` פעולות הגדלה. ישנם `NUM_THREADS` תהליכונים. מכיוון שהגישה למונה המשותף `shared_counter` מוגנת על ידי מנעול (mutex), כל פעולת הגדלה (`shared_counter++`) היא אטומית ובטוחה מפני תנאי מרוץ. לכן, כל הגדלה נספרת במדויק.\n    הערך הסופי יהיה `NUM_THREADS * NUM_ITERATIONS = 5 * 100000 = 500000`.\n\n2.  **מספר קריאות ל-`pthread_mutex_lock`:**\n    כל תהליכון מבצע לולאה של `NUM_ITERATIONS` פעמים. בכל איטרציה, הוא קורא ל-`pthread_mutex_lock` פעם אחת (ולאחריה `pthread_mutex_unlock`).\n    לכן, מספר הקריאות המוצלחות הכולל ל-`pthread_mutex_lock` יהיה `NUM_THREADS * NUM_ITERATIONS = 5 * 100000 = 500000`.\n\n3.  **ערכים מינימליים ומקסימליים ללא mutex:**\n    אם המנעול לא היה בשימוש, היינו מקבלים תנאי מרוץ (race condition) בעת עדכון `shared_counter++`. פעולת ההגדלה `shared_counter++` אינה אטומית וכוללת מספר שלבים: קריאת הערך הנוכחי, הגדלתו באחד, וכתיבת הערך החדש בחזרה.\n    *   **ערך מקסימלי:** במקרה הטוב ביותר, כל פעולת הגדלה של כל תהליכון תתבצע במלואה מבלי שאף תהליכון אחר יפריע לה. מצב זה שקול למצב שבו המנעול היה בשימוש, ולכן הערך המקסימלי האפשרי הוא `NUM_THREADS * NUM_ITERATIONS = 500000`.\n    *   **ערך מינימלי:** במקרה הגרוע ביותר, יכולים להתרחש מצבים שבהם מספר תהליכונים קוראים את אותו ערך של `shared_counter`, מגדילים אותו, וכותבים אותו בחזרה, ובכך \"דורסים\" את העדכונים של תהליכונים אחרים. לדוגמה, אם `shared_counter` הוא 0, תהליכון A קורא 0, תהליכון B קורא 0. שניהם מגדילים את הערך שקראו ל-1, ושניהם כותבים 1 בחזרה ל-`shared_counter`. בפועל, שתי פעולות הגדלה הביאו למונה בערך 1 במקום 2.\n        המקרה הקיצוני ביותר הוא שרק הגדלה אחת מכל קבוצה של ניסיונות בו-זמניים של תהליכונים שורדת. כלומר, בכל פעם ש-`NUM_THREADS` תהליכונים מנסים להגדיל את המונה, רק אחד מהם מצליח לשנות את הערך בפועל. מצב זה יכול לחזור על עצמו בכל `NUM_ITERATIONS` של כל תהליכון. לכן, הערך המינימלי האפשרי הוא `NUM_ITERATIONS = 100000`. זה המצב שבו בפועל רק הגדלות של תהליכון אחד \"שורדות\" בכל סבב של גישה לזיכרון."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

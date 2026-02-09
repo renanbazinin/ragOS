@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory and Copy-on-Write",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 11:14:44",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 975,
+      "output_tokens": 1933,
+      "total_tokens": 9625
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "Virtual Memory",
+      "Copy-on-Write",
+      "Process Management"
+    ],
+    "content": {
+      "text": "נתונה תוכנית ה-C הבאה המשתמשת בזיכרון וירטואלי ובמנגנון Copy-on-Write (CoW). הניחו כי גודל דף זיכרון הוא 4096 בתים (4KB) וכי המערך `global_array` מיושר לגבול דף ומתחיל בכתובת וירטואלית חדשה. כמו כן, הניחו כי כל פעולת כתיבה (למשל, השמה למערך) תגרום לפסיקת דף (page fault) אם הדף אינו ניתן לכתיבה או אם הוא מוגן ב-CoW. מהו המספר המרבי של דפים פיזיים שונים (distinct physical pages) אשר יאוחסנו בזיכרון הפיזי בו-זמנית בכל נקודה במהלך ריצת התוכנית? (התעלמו מדפים המשמשים עבור קוד התוכנית, מחסנית, ערימה, או מבני נתונים של מערכת ההפעלה, והתייחסו רק לדפים המאחסנים את `global_array`).",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\n#define PAGE_SIZE 4096\n#define ARRAY_SIZE (2 * PAGE_SIZE) // Array spans exactly two pages\n\nint global_array[ARRAY_SIZE / sizeof(int)];\n\nint main() {\n    for (int i = 0; i < ARRAY_SIZE / sizeof(int); ++i) {\n        global_array[i] = i;\n    }\n\n    pid_t pid = fork();\n\n    if (pid == -1) {\n        perror(\"fork failed\");\n        return 1;\n    } else if (pid == 0) { // Child process\n        // Child reads from first page, writes to second page\n        printf(\"Child: Reading %d (from page 0)\\n\", global_array[0]);\n        global_array[ARRAY_SIZE / sizeof(int) - 1] = 999; // Write to last element (page 1)\n        printf(\"Child: Wrote to last element (in page 1)\\n\");\n        exit(0);\n    } else { // Parent process\n        wait(NULL);\n        global_array[0] = 100; // Write to first element (page 0)\n        printf(\"Parent: Wrote to first element (in page 0)\\n\");\n    }\n\n    return 0;\n}",
+      "options": [
+        "א. 2",
+        "ב. 3",
+        "ג. 4",
+        "ד. 5",
+        "ה. 6"
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "נתח את שלבי ריצת התוכנית והשפעתם על דפי הזיכרון הפיזיים:\n1.  **אתחול המערך ב-Parent (לפני `fork()`):** המערך `global_array` בגודל `2 * PAGE_SIZE` מאוחסן בשני דפים פיזיים. נקרא להם `P0_orig` (לדף הראשון) ו-`P1_orig` (לדף השני). \n    *   מספר דפים פיזיים: 2 (`P0_orig`, `P1_orig`).\n2.  **קריאה ל-`fork()`:** נוצר תהליך בן. טבלאות הדפים של הבן מוגדרות כך שהן מצביעות לאותם דפים פיזיים (`P0_orig`, `P1_orig`) כמו האב, אך עם הגנת כתיבה (CoW). \n    *   מספר דפים פיזיים: נשאר 2.\n3.  **תהליך הבן מבצע פעולות:**\n    *   `printf(\"Child: Reading %d (from page 0)\\n\", global_array[0]);`: קריאה מדף `P0_orig`. אין שינוי, אין CoW fault.\n    *   `global_array[ARRAY_SIZE / sizeof(int) - 1] = 999;` (כתיבה לדף 1): פעולת כתיבה זו מופנית לדף `P1_orig`, אשר מוגן ב-CoW.\n        *   מתרחשת פסיקת דף (CoW fault).\n        *   מערכת ההפעלה מקצה דף פיזי חדש, נקרא לו `C1_copy`.\n        *   תוכן הדף `P1_orig` מועתק ל-`C1_copy`.\n        *   ערך טבלת הדפים של הבן עבור דף 1 מתעדכן להצביע על `C1_copy`.\n        *   הכתיבה של הערך `999` מתבצעת כעת ל-`C1_copy`.\n        *   בנקודה זו, הדפים הפיזיים הקיימים הם: `P0_orig` (משותף לאב ולבן עבור דף 0), `P1_orig` (דף 1 המקורי, שעדיין נגיש לאב), ו-`C1_copy` (עותק של דף 1 עבור הבן). \n        *   **מספר דפים פיזיים עכשווי: 3** (`P0_orig`, `P1_orig`, `C1_copy`). זהו השיא הזמני הראשון.\n    *   `exit(0);`: הבן מסיים. משאבי הזיכרון שלו משוחררים. הדף `C1_copy` אינו מופנה יותר על ידי אף תהליך וניתן לשחזור. הדף `P0_orig` עדיין מופנה על ידי האב.\n        *   מספר דפים פיזיים: חוזר ל-2 (`P0_orig`, `P1_orig`) תחת האב.\n4.  **תהליך האב מבצע פעולות (לאחר `wait(NULL)`):**\n    *   `global_array[0] = 100;` (כתיבה לדף 0): פעולת כתיבה זו מופנית לדף `P0_orig`, אשר מוגן ב-CoW.\n        *   מתרחשת פסיקת דף (CoW fault).\n        *   מערכת ההפעלה מקצה דף פיזי חדש, נקרא לו `P0_copy`.\n        *   תוכן הדף `P0_orig` מועתק ל-`P0_copy`.\n        *   ערך טבלת הדפים של האב עבור דף 0 מתעדכן להצביע על `P0_copy`.\n        *   הכתיבה של הערך `100` מתבצעת כעת ל-`P0_copy`.\n        *   בנקודה זו, הדפים הפיזיים הקיימים הם: `P0_copy` (העותק של דף 0 עבור האב) ו-`P1_orig` (דף 1 המקורי, שעדיין נגיש לאב). הדף `P0_orig` אינו מופנה יותר על ידי אף תהליך וניתן לשחזור.\n        *   מספר דפים פיזיים עכשווי: 2 (`P0_copy`, `P1_orig`).\n\nהמספר המרבי של דפים פיזיים שונים שהתקיימו בו-זמנית בזיכרון הפיזי במהלך הריצה הוא 3 (בשלב שבו הבן יצר את העותק שלו לדף 1, לפני שהאב יצר את העותק שלו לדף 0)."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

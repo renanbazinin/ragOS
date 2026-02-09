@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "IPC",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 08:20:38",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1139,
+      "output_tokens": 460,
+      "total_tokens": 3776
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "IPC"
+    ],
+    "content": {
+      "text": "איזו טענה נכונה לגבי צינורות (pipes) במערכת הפעלה Unix/Linux?",
+      "code_snippet": null,
+      "options": [
+        "א. צינורות לא-שמיים (unnamed pipes) משמשים לתקשורת חד-כיוונית (unidirectional) בין תהליכים בעלי קשר אב-בן.",
+        "ב. צינורות מאפשרים תקשורת דו-כיוונית (bidirectional) בין כל שני תהליכים באמצעות צינור יחיד.",
+        "ג. צינורות לא-שמיים (unnamed pipes) יכולים לשמש לתקשורת בין כל שני תהליכים במערכת, גם אם אין להם קשר אב-בן.",
+        "ד. צינורות הם מנגנון לתקשורת דרך זיכרון משותף (shared memory)."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "צינורות לא-שמיים (unnamed pipes) אכן משמשים לתקשורת חד-כיוונית בין תהליך אב לתהליכי הבן שלו. כדי לאפשר תקשורת דו-כיוונית, יש צורך בשני צינורות נפרדים. צינורות אינם מנגנון המבוסס על זיכרון משותף, והם אינם יכולים לשמש לתקשורת בין תהליכים שאין להם קשר אב-בן (לשם כך קיימים צינורות שמיים - named pipes/FIFOs)."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Context Switching",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 07:06:13",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 947,
+      "total_tokens": 4026
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Context Switching",
+      "Memory Management",
+      "TLB",
+      "Cache Performance"
+    ],
+    "content": {
+      "text": "בהינתן מערכת הפעלה מודרנית המשתמשת ב-Translation Lookaside Buffer (TLB) ובמטמוני נתונים (data caches), איזו מהטענות הבאות מתארת בצורה המדויקת ביותר את ההשפעה של החלפת הקשר (Context Switching) על ביצועי הזיכרון?",
+      "code_snippet": null,
+      "options": [
+        "א. החלפת קשר בין תהליכים (process context switch) תמיד מחייבת ריקון מלא של ה-TLB, בעוד שהחלפת קשר בין תהליכונים (thread context switch) באותו תהליך לעולם אינה משפיעה על ה-TLB.",
+        "ב. גם החלפת קשר בין תהליכים וגם החלפת קשר בין תהליכונים מחייבות תמיד ריקון מלא של ה-TLB עקב שינויים באזורי הזיכרון הפעילים.",
+        "ג. החלפת קשר בין תהליכים בדרך כלל דורשת פסילה של ערכי ה-TLB (לדוגמה, על ידי שינוי רשם בסיס טבלת הדפים), בעוד שהחלפת קשר בין תהליכונים *באותו תהליך* בדרך כלל אינה דורשת זאת, אך שתיהן יכולות להשפיע משמעותית על ביצועי מטמוני הנתונים.",
+        "ד. ריקון ה-TLB רלוונטי רק להחלפות קשר במצב משתמש (user-mode), ולא להחלפות קשר במצב גרעין (kernel-mode).",
+        "ה. העלות העיקרית של כל החלפת קשר היא תמיד שמירה ושחזור של אוגרים כלליים (general-purpose registers), כאשר השפעות ה-TLB/מטמון זניחות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "החלפת קשר בין תהליכים (process context switch) כרוכה בדרך כלל בשינוי מרחב הכתובות הוירטואלי הפעיל. שינוי זה מחייב פסילה (invalidation) של ערכי ה-TLB הישנים (שמתייחסים למרחב הכתובות של התהליך הקודם) כדי למנוע שימוש בתרגומי כתובות שגויים. הדבר מתבצע לרוב על ידי שינוי רשם בסיס טבלת הדפים (page table base register), מה שגורם ל-TLB להתייחס לכל הערכים הקודמים כלא תקפים, או על ידי ריקון מפורש של ה-TLB. לעומת זאת, החלפת קשר בין תהליכונים (thread context switch) *באותו תהליך* אינה משנה את מרחב הכתובות הוירטואלי, ולכן אינה דורשת פסילה של ה-TLB. עם זאת, בשני המקרים, כאשר תהליך/תהליכון חדש מתחיל לרוץ, הוא ניגש לנתונים שונים ואולי לקוד שונה, מה שמוביל לגישה לכתובות זיכרון שונות. גישות אלו עלולות לגרום ל-cache misses רבים (data cache ו-instruction cache) עד שהמטמונים יתמלאו בנתונים הרלוונטיים לתהליך/תהליכון החדש, ובכך להשפיע משמעותית על הביצועים. לכן, תשובה ג' היא המדויקת ביותר."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

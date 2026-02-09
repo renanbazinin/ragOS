@@ -1,0 +1,51 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "IPC and Processes",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 19:40:58",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2411,
+      "output_tokens": 1851,
+      "total_tokens": 8327
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "IPC",
+      "Processes",
+      "Pipes"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה בשפת C, המשתמשת ב-`fork()` וב-`pipe()` לתקשורת בין תהליכים:\n\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <string.h>\n#include <sys/wait.h>\n\n#define MSG_SIZE 20\n\nint main() {\n    int pipefd[2];\n    pid_t pid;\n    char buffer[MSG_SIZE];\n    const char *message = \"Hello from child!\";\n\n    if (pipe(pipefd) == -1) {\n        perror(\"pipe\");\n        exit(EXIT_FAILURE);\n    }\n\n    pid = fork();\n\n    if (pid == -1) {\n        perror(\"fork\");\n        exit(EXIT_FAILURE);\n    }\n\n    if (pid == 0) { // Child process\n        close(pipefd[0]); // Close unused read end\n        printf(\"Child (PID %d): Writing message...\\n\", getpid());\n        write(pipefd[1], message, strlen(message) + 1);\n        close(pipefd[1]); // Close write end\n        printf(\"Child (PID %d): Message written and pipe closed.\\n\", getpid());\n        exit(EXIT_SUCCESS);\n    } else { // Parent process\n        // close(pipefd[1]); // THIS LINE IS INTENTIONALLY COMMENTED OUT\n        printf(\"Parent (PID %d): Waiting for child message...\\n\", getpid());\n        ssize_t bytes_read = read(pipefd[0], buffer, MSG_SIZE);\n        if (bytes_read > 0) {\n            printf(\"Parent (PID %d): Received message: \\\"%s\\\"\\n\", buffer);\n        } else {\n            printf(\"Parent (PID %d): First read returned %zd bytes.\\n\", getpid(), bytes_read);\n        }\n        \n        printf(\"Parent (PID %d): Attempting to read again...\\n\", getpid());\n        bytes_read = read(pipefd[0], buffer, MSG_SIZE); \n        if (bytes_read > 0) {\n            printf(\"Parent (PID %d): Received second message: \\\"%s\\\"\\n\", buffer);\n        } else if (bytes_read == 0) {\n            printf(\"Parent (PID %d): Second read returned 0 bytes (EOF).\\n\", getpid());\n        } else {\n            perror(\"Parent: Second read error\");\n        }\n\n        close(pipefd[0]); // Close read end\n        wait(NULL); // Wait for child to terminate\n        printf(\"Parent (PID %d): Child terminated and parent pipe read end closed.\\n\", getpid());\n    }\n\n    return 0;\n}\n```",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "מה יהיה הפלט המלא של התוכנית כאשר היא תורץ? הסבירו כל שלב בפלט.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "האם התוכנית תסיים את ריצתה באופן תקין? אם לא, מדוע, וכיצד ניתן לתקן זאת?",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.1:\n**פלט מהתהליך הבן (Child):**\n*   `Child (PID <child_pid>): Writing message...`\n*   `Child (PID <child_pid>): Message written and pipe closed.`\nהתהליך הבן כותב את ההודעה ל-pipe ומיד סוגר את קצה הכתיבה (`pipefd[1]`). לאחר מכן הוא מסיים את ריצתו בהצלחה.\n\n**פלט מהתהליך האב (Parent):**\n*   `Parent (PID <parent_pid>): Waiting for child message...`\n*   `Parent (PID <parent_pid>): Received message: \"Hello from child!\"`\nהתהליך האב קורא את ההודעה שנכתבה על ידי הבן. קריאה זו מצליחה מכיוון שהבן כבר כתב את ההודעה.\n*   `Parent (PID <parent_pid>): Attempting to read again...`\n*   **התוכנית תיתקע כאן (תחסום לנצח) בקריאה השנייה.**\nהסיבה לכך היא שהפונקציה `read()` על pipe תחזיר 0 (EOF) רק כאשר *כל* קצוות הכתיבה של ה-pipe נסגרו. במקרה זה, התהליך הבן סגר את קצה הכתיבה שלו (`pipefd[1]`), אך התהליך האב *לא* סגר את קצה הכתיבה שלו (`pipefd[1]`). מכיוון שהתהליך האב עדיין מחזיק קצה כתיבה פתוח ל-pipe, מערכת ההפעלה מניחה שייתכן שעוד נתונים ייכתבו ל-pipe, ולכן קריאה זו של האב תחסום ולא תחזיר EOF.\n\n1.2:\n**האם התוכנית תסיים את ריצתה באופן תקין?**\nלא, התוכנית *לא* תסיים את ריצתה באופן תקין. התהליך האב ייתקע (יחסום) בקריאה השנייה מ-pipe ולא יגיע לשורת ה-`wait(NULL)` או לשורות הסיום.\n\n**מדוע?**\nכפי שהוסבר לעיל, ה-`read()` השני בתהליך האב יחסום מכיוון שהתהליך האב עצמו עדיין מחזיק קצה כתיבה פתוח ל-pipe (`pipefd[1]`). כל עוד קיים לפחות קצה כתיבה אחד פתוח עבור ה-pipe, קריאה מצידו השני של ה-pipe תחסום אם אין נתונים זמינים, במקום להחזיר EOF.\n\n**כיצד ניתן לתקן זאת?**\nהתיקון הוא פשוט: התהליך האב חייב לסגור את קצה הכתיבה של ה-pipe שלו (`pipefd[1]`) מיד לאחר ה-`fork()` ולפני שהוא מנסה לקרוא מה-pipe. יש להסיר את ההערה משורה 40 בתוכנית המקורית (או להוסיף את השורה): \n```c\n// Parent process\nclose(pipefd[1]); // Add this line\nprintf(\"Parent (PID %d): Waiting for child message...\\n\", getpid());\n// ... rest of parent code\n```\nברגע שהתהליך האב סוגר את `pipefd[1]`, התהליך הבן סוגר את `pipefd[1]` שלו, ואז כל קצוות הכתיבה נסגרים. בקריאה השנייה, כאשר אין יותר נתונים ב-pipe וכל קצוות הכתיבה סגורים, `read()` תחזיר 0 (EOF) כצפוי, והתוכנית תמשיך ותסיים את ריצתה."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

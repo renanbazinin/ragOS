@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Processes and Memory Management",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 20:04:44",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1034,
+      "output_tokens": 462,
+      "total_tokens": 3263
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Processes",
+      "Memory Management",
+      "Virtual Memory"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של זיכרון וירטואלי (Virtual Memory) במערכת הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. להגדיל את מהירות הגישה לזיכרון הפיזי.",
+        "ב. לאפשר למספר תהליכים לחלוק את אותו מרחב כתובות פיזי ללא הפרעה.",
+        "ג. לספק לכל תהליך אשליה של מרחב כתובות פרטי ורציף, גדול יותר מהזיכרון הפיזי הזמין.",
+        "ד. למנוע גישה לא מורשית לנתונים על ידי משתמשים שונים.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "זיכרון וירטואלי (Virtual Memory) מספק לכל תהליך אשליה שיש לו גישה למרחב זיכרון לוגי רציף ופרטי משלו, ללא קשר לגודל הזיכרון הפיזי בפועל או מיקומו. זה מאפשר מספר יתרונות מרכזיים: הגנה והפרדה בין תהליכים (כל תהליך פועל במרחב כתובות משלו), פישוט ניהול הזיכרון עבור המתכנת, ואפשרות להריץ תוכניות שגודלן עולה על הזיכרון הפיזי הזמין (על ידי שימוש בדיסק – swapping)."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

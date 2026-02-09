@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Producer-Consumer",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 10:26:52",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1632,
+      "output_tokens": 1790,
+      "total_tokens": 6260
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Semaphores",
+      "Producer-Consumer",
+      "Concurrency",
+      "Deadlock"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא, המממש בעיית יצרן-צרכן (Producer-Consumer) עם סמפורים. התוכנית מנסה לסנכרן גישה למאגר חלופי (bounded buffer) בין מספר תהליכי יצרן ותהליכי צרכן.\nבהנחה ש-BUFFER_SIZE גדול מ-0, ונוצרו מספר תהליכי יצרן ותהליכי צרכן, איזו מהטענות הבאות נכונה לגבי התנהגות הקוד?",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <semaphore.h>\n#include <stdlib.h>\n#include <unistd.h> // For usleep\n\n#define BUFFER_SIZE 5\nint buffer[BUFFER_SIZE];\nint in = 0;\nint out = 0;\n\nsem_t mutex;    // Controls access to the buffer\nsem_t empty;    // Counts empty slots in the buffer\nsem_t full;     // Counts full slots in the buffer\n\nvoid *producer(void *arg) {\n    int item;\n    for (int i = 0; i < 10; ++i) { // Produce 10 items\n        item = rand() % 100; // Generate a random item\n\n        // INCORRECT ORDER: acquire mutex first, then check for empty slot\n        sem_wait(&mutex); // Acquire mutex for critical section\n        sem_wait(&empty); // Wait if buffer is full\n\n        // Critical section\n        buffer[in] = item;\n        printf(\"Producer produced: %d at %d\\n\", item, in);\n        in = (in + 1) % BUFFER_SIZE;\n\n        sem_post(&mutex); // Release mutex\n        sem_post(&full);  // Signal that a slot is full\n        usleep(100000); // Simulate work\n    }\n    return NULL;\n}\n\nvoid *consumer(void *arg) {\n    int item;\n    for (int i = 0; i < 10; ++i) { // Consume 10 items\n        // INCORRECT ORDER: acquire mutex first, then check for full slot\n        sem_wait(&mutex); // Acquire mutex for critical section\n        sem_wait(&full);  // Wait if buffer is empty\n\n        // Critical section\n        item = buffer[out];\n        printf(\"Consumer consumed: %d from %d\\n\", item, out);\n        out = (out + 1) % BUFFER_SIZE;\n\n        sem_post(&mutex); // Release mutex\n        sem_post(&empty); // Signal that a slot is empty\n        usleep(150000); // Simulate work\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t prod_threads[2], cons_threads[2];\n\n    sem_init(&mutex, 0, 1);\n    sem_init(&empty, 0, BUFFER_SIZE);\n    sem_init(&full, 0, 0);\n\n    for (int i = 0; i < 2; ++i) {\n        pthread_create(&prod_threads[i], NULL, producer, NULL);\n        pthread_create(&cons_threads[i], NULL, consumer, NULL);\n    }\n\n    for (int i = 0; i < 2; ++i) {\n        pthread_join(prod_threads[i], NULL);\n        pthread_join(cons_threads[i], NULL);\n    }\n\n    sem_destroy(&mutex);\n    sem_destroy(&empty);\n    sem_destroy(&full);\n\n    printf(\"All threads finished.\\n\");\n    return 0;\n}",
+      "options": [
+        "א. התוכנית תעבוד באופן תקין ותייצר ותצרוך את כל הפריטים בהצלחה.",
+        "ב. התוכנית עלולה להיכנס למצב של Deadlock.",
+        "ג. התוכנית תסבול מ-Race Condition בגישה למאגר.",
+        "ד. תהליכי הצרכן עלולים לסבול מ-Starvation.",
+        "ה. תהליכי היצרן עלולים לסבול מ-Starvation."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב. הקוד סובל מבעיית Deadlock עקב סדר שגוי של פעולות `sem_wait`.\n\nבתהליך היצרן: הוא קורא ל-`sem_wait(&mutex)` ואז ל-`sem_wait(&empty)`. אם המאגר מלא (כלומר `empty` שווה 0), היצרן יחסם ב-`sem_wait(&empty)` *כאשר הוא מחזיק את ה-`mutex`*.\n\nבאופן דומה, בתהליך הצרכן: הוא קורא ל-`sem_wait(&mutex)` ואז ל-`sem_wait(&full)`. אם המאגר ריק (כלומר `full` שווה 0), הצרכן יחסם ב-`sem_wait(&full)` *כאשר הוא מחזיק את ה-`mutex`*.\n\nתרחיש Deadlock לדוגמה:\n1.  היצרן הראשון ממלא את המאגר עד הסוף. לאחר מכן, הוא מנסה לייצר פריט נוסף.\n2.  הוא קורא ל-`sem_wait(&mutex)` ומצליח לרכוש את המוטקס.\n3.  הוא קורא ל-`sem_wait(&empty)`. מכיוון שהמאגר מלא, `empty` הוא 0, והיצרן נחסם, *אך הוא עדיין מחזיק ב-`mutex`*.\n4.  כעת, כל תהליך צרכן שמנסה לצרוך פריט יצטרך קודם כל לרכוש את ה-`mutex` על ידי קריאה ל-`sem_wait(&mutex)`. מכיוון שהיצרן עדיין מחזיק בו, הצרכנים ייחסמו גם הם, וימתינו למוטקס שלעולם לא ישוחרר על ידי היצרן החסום.\n5.  כך נוצר Deadlock – היצרן ממתין ל-`empty` (שישוחרר על ידי צרכן) והצרכנים ממתינים ל-`mutex` (שישוחרר על ידי היצרן).\n\nהסדר הנכון לפתרון בעיית יצרן-צרכן עם סמפורים הוא:\nיצרן: `sem_wait(&empty)`, `sem_wait(&mutex)`, ... `sem_post(&mutex)`, `sem_post(&full)`.\nצרכן: `sem_wait(&full)`, `sem_wait(&mutex)`, ... `sem_post(&mutex)`, `sem_post(&empty)`.\nסדר זה מבטיח שהתהליך לא יחזיק את המוטקס אם הוא עומד להיחסם על סמפור תנאי אחר."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

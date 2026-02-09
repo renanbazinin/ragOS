@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Paging and TLB",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 10:01:11",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1143,
+      "output_tokens": 649,
+      "total_tokens": 3081
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Paging",
+      "TLB",
+      "Memory Management",
+      "Virtual Memory"
+    ],
+    "content": {
+      "text": "תהליך מנסה לגשת לכתובת וירטואלית. ה-TLB נבדק ונמצאה החטאה (TLB Miss). עם זאת, הדף אליו מתייחסת הכתובת נמצא בזיכרון הפיזי (RAM) ומסומן כ-valid בטבלת הדפים של התהליך. מהי הפעולה הבאה שתתבצע על ידי חומרת ניהול הזיכרון (MMU)?",
+      "code_snippet": null,
+      "options": [
+        "א. תיווצר מיד תקלת עמוד (Page Fault) והמעבד יעבור למצב ליבה (kernel mode).",
+        "ב. ה-MMU יגש לטבלת הדפים (Page Table) בזיכרון הראשי (RAM) כדי למצוא את מספר המסגרת הפיזית המתאימה.",
+        "ג. מערכת ההפעלה תצטרך לטעון את הדף מהדיסק לזיכרון הפיזי.",
+        "ד. התהליך יסיים את פעולתו עקב ניסיון גישה לכתובת לא חוקית.",
+        "ה. ה-MMU יבצע עדכון של ה-TLB מבלי לגשת לטבלת הדפים, על בסיס מידע קודם."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "כאשר מתרחשת החטאת TLB (TLB Miss) אך הדף הרצוי נמצא בזיכרון הפיזי (כלומר, ה-PTE שלו מסומן כ-valid בטבלת הדפים), ה-MMU אינו מפעיל תקלת עמוד. במקום זאת, הוא ניגש לטבלת הדפים הנמצאת בזיכרון הראשי (RAM) כדי לאחזר את ערך ה-PTE. ערך זה מכיל את מספר המסגרת הפיזית (PFN) שבה נמצא הדף. לאחר מכן, ה-MMU מעדכן את ה-TLB עם הרשומה החדשה (הכתובת הווירטואלית והפיזית המתאימה), וממשיך בתרגום הכתובת. רק אם הדף אינו נמצא בזיכרון הפיזי (כלומר, ה-PTE מסומן כ-invalid), תתרחש תקלת עמוד."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

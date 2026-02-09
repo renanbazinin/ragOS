@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Condition Variables",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 07:34:01",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2619,
+      "output_tokens": 1589,
+      "total_tokens": 7007
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "Open",
+    "topic": [
+      "Condition Variables",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "שקול תרחיש שבו תהליך ראשי (main thread) משיק NUM_WORKERS חוטי עבודה (worker threads). כל חוט עבודה מבצע חישוב כלשהו ולאחר מכן מאותת על סיום עבודתו. התהליך הראשי חייב להמתין שכל חוטי העבודה יסיימו את משימותיהם לפני הדפסת הודעת סיכום סופית ויציאה.\n\nיש ליישם מנגנון סנכרון זה באמצעות pthread_mutex_t ו-pthread_cond_t ב-C/C++.\nהסבר מדוע התהליך הראשי חייב להשתמש בלולאת while סביב pthread_cond_wait במקום בפקודת if.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <unistd.h> // For sleep\n\n#define NUM_WORKERS 5\n\npthread_mutex_t mutex;\npthread_cond_t cond;\nint completed_workers = 0;\n\nvoid *worker_function(void *arg) {\n    long id = (long)arg;\n    printf(\"Worker %ld: Starting task...\\n\", id);\n    sleep(1 + (id % 3)); // Simulate work\n    printf(\"Worker %ld: Task completed.\\n\", id);\n\n    pthread_mutex_lock(&mutex);\n    completed_workers++;\n    printf(\"Worker %ld: completed_workers = %d\\n\", id, completed_workers);\n    if (completed_workers == NUM_WORKERS) {\n        pthread_cond_signal(&cond); // Signal only when the condition is met\n    }\n    pthread_mutex_unlock(&mutex);\n\n    return NULL;\n}\n\nint main() {\n    pthread_t workers[NUM_WORKERS];\n    long i;\n\n    pthread_mutex_init(&mutex, NULL);\n    pthread_cond_init(&cond, NULL);\n\n    printf(\"Main thread: Launching worker threads...\\n\");\n    for (i = 0; i < NUM_WORKERS; i++) {\n        pthread_create(&workers[i], NULL, worker_function, (void *)i);\n    }\n\n    pthread_mutex_lock(&mutex);\n    printf(\"Main thread: Waiting for all workers to complete...\\n\");\n    // The crucial while loop\n    while (completed_workers < NUM_WORKERS) {\n        pthread_cond_wait(&cond, &mutex);\n    }\n    pthread_mutex_unlock(&mutex);\n\n    printf(\"Main thread: All %d workers have completed. Final summary.\\n\", NUM_WORKERS);\n\n    // Join workers (optional for this specific question, but good practice)\n    for (i = 0; i < NUM_WORKERS; i++) {\n        pthread_join(workers[i], NULL);\n    }\n\n    pthread_mutex_destroy(&mutex);\n    pthread_cond_destroy(&cond);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הסבר:\nהפתרון משתמש במנעול (mutex) כדי להגן על המונה המשותף `completed_workers` ועל משתנה התנאי (condition variable) `cond`.\n\n1.  **אתחול:** המנעול ומשתנה התנאי מאותחלים ב-`main`.\n2.  **חוטי עבודה:**\n    *   כל חוט עבודה (`worker_function`) מבצע את משימתו (מדומה באמצעות `sleep`).\n    *   לאחר סיום המשימה, הוא נועל את המוטקס (`pthread_mutex_lock`).\n    *   מגדיל את המונה `completed_workers`.\n    *   אם המונה מגיע ל-`NUM_WORKERS` (כלומר, כל העובדים סיימו), הוא מאותת למשתנה התנאי באמצעות `pthread_cond_signal`. אות זה מעיר חוט אחד שממתין על משתנה התנאי (במקרה זה, התהליך הראשי).\n    *   משחרר את המוטקס (`pthread_mutex_unlock`).\n3.  **התהליך הראשי:**\n    *   התהליך הראשי נועל את המוטקס לפני בדיקת התנאי.\n    *   **לולאת `while` עבור `pthread_cond_wait`:** זהו החלק הקריטי. התהליך הראשי ממתין בתוך לולאת `while` שבודקת האם `completed_workers` קטן מ-`NUM_WORKERS`.\n        *   `pthread_cond_wait` משחרר אוטומטית את המוטקס ומכניס את התהליך למצב שינה.\n        *   כאשר התהליך מתעורר (בין אם בגלל `signal`/`broadcast` או בגלל \"התעוררות שווא\" - spurious wakeup), הוא רוכש מחדש את המוטקס.\n        *   הלולאה בודקת שוב את התנאי (`completed_workers < NUM_WORKERS`).\n        *   **חשיבות הלולאה:** ללא לולאה, אם התהליך הראשי יתעורר מהמתנה עקב \"התעוררות שווא\" (spurious wakeup) או אם התנאי לא באמת התקיים (לדוגמה, חוט אחר כבר טיפל בתנאי), הוא עלול להמשיך לפני שכל העובדים סיימו, מה שיוביל לשגיאה לוגית. הלולאה מבטיחה שהתהליך הראשי ימשיך רק כאשר התנאי באמת מתקיים.\n    *   לאחר שהלולאה מסתיימת (כלומר, `completed_workers == NUM_WORKERS`), התהליך הראשי משחרר את המוטקס וממשיך בביצוע.\n\nהשימוש ב-`pthread_cond_signal` מתאים כאן מכיוון שרק חוט אחד (התהליך הראשי) ממתין לתנאי הספציפי הזה. אם היו מספר חוטים הממתינים לאותו תנאי, ייתכן ש-`pthread_cond_broadcast` היה נחוץ כדי להעיר את כולם."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

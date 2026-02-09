@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "Networking",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 09:39:54",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 987,
+      "output_tokens": 364,
+      "total_tokens": 2472
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Networking",
+      "IP Address"
+    ],
+    "content": {
+      "text": "מהי מטרתה העיקרית של כתובת IP?",
+      "code_snippet": null,
+      "options": [
+        "א. זיהוי ייחודי של תהליך (process) במחשב.",
+        "ב. זיהוי ייחודי של מכשיר (device) ברשת.",
+        "ג. זיהוי ייחודי של משתמש (user) במערכת ההפעלה.",
+        "ד. זיהוי ייחודי של יישום (application) על ידי מספר פורט."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "כתובת IP היא מזהה ייחודי עבור מכשיר המחובר לרשת (כמו מחשב, טלפון חכם, שרת) המאפשר לו לתקשר עם מכשירים אחרים באותה רשת או ברשתות אחרות (האינטרנט). היא אינה מזהה תהליכים או משתמשים, ואף על פי שהיא חלק חיוני מתקשורת יישומים, היא עצמה אינה מזהה את היישום אלא את המכשיר שעליו היישום רץ."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

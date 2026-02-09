@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Context Switching and Threads",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 21:54:43",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 985,
+      "output_tokens": 496,
+      "total_tokens": 2852
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Context Switching",
+      "Threads"
+    ],
+    "content": {
+      "text": "מהו היתרון העיקרי של החלפת קשר (context switch) בין חוטים (threads) באותו תהליך, בהשוואה להחלפת קשר בין תהליכים (processes)?",
+      "code_snippet": null,
+      "options": [
+        "א. החלפת קשר בין חוטים אינה דורשת שינוי של רשומות המעבד.",
+        "ב. החלפת קשר בין חוטים מהירה יותר מכיוון שהם חולקים את אותו מרחב זיכרון ומשאבים אחרים.",
+        "ג. חוטים אינם זקוקים למצב ליבה (kernel mode) לצורך החלפת קשר.",
+        "ד. החלפת קשר בין חוטים דורשת שמירת מצב רב יותר מאשר החלפה בין תהליכים.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב'. החלפת קשר בין חוטים (threads) באותו תהליך מהירה יותר מהחלפת קשר בין תהליכים (processes) מכיוון שחוטים חולקים את אותו מרחב זיכרון, קבצים פתוחים ומשאבים אחרים של התהליך האב. לכן, מערכת ההפעלה צריכה לשמור ולשחזר פחות מצב (רק את הקשר הספציפי לחוט כמו רשומות המעבד, מונה התוכנית והמחסנית) בהשוואה להחלפה בין תהליכים, הדורשת שמירה ושחזור של כל מרחב הכתובות, טבלאות דפים וכו'."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

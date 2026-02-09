@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Context Switching",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 07:06:48",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 730,
+      "total_tokens": 4614
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Context Switching",
+      "Memory Management",
+      "Performance"
+    ],
+    "content": {
+      "text": "בהשוואה למעבר הקשר (context switch) בין שני תהליכונים (threads) השייכים לאותו תהליך (process), מהי התרומה המשמעותית ביותר לעלות הגבוהה יותר של מעבר הקשר בין שני תהליכים נפרדים?",
+      "code_snippet": null,
+      "options": [
+        "א. שמירה ושחזור של אוגרי המעבד (CPU registers) ואוגרי נקודה צפה (floating point registers).",
+        "ב. החלפת מחסנית הליבה (kernel stack) של התהליך הנוכחי במחסנית של התהליך הבא.",
+        "ג. ניקוי (flush) של ה-Translation Lookaside Buffer (TLB).",
+        "ד. עדכון מצביע התוכנית (Program Counter) והחלפת מפתחי הזיכרון (memory keys).",
+        "ה. הצורך לטעון מחדש נתונים לזיכרון המטמון (CPU cache) עקב שינוי מרחב הכתובות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "מעבר הקשר בין תהליכים שונים כרוך בהחלפת מרחב הכתובות הווירטואלי, מה שמחייב עדכון של אוגר בסיס טבלת הדפים (כמו CR3 במעבדי x86). עדכון זה גורם בדרך כלל לניקוי (flush) מלא של ה-Translation Lookaside Buffer (TLB), אשר מאחסן תרגומי כתובות וירטואליות לפיזיות במטמון. ניקוי ה-TLB הוא פעולה יקרה, שכן הוא מבטל את כל התרגומים שנוצרו עבור התהליך הקודם, ומאלץ את המעבד לבצע מחדש את תהליך תרגום הכתובות באמצעות טבלאות הדפים עבור התהליך החדש, מה שמוסיף לעלות משמעותית. לעומת זאת, במעבר קשר בין תהליכונים באותו תהליך, מרחב הכתובות הווירטואלי נשאר זהה, ולכן אין צורך בניקוי TLB מלא. למרות ששמירת אוגרים והחלפת מחסניות הם חלק משני סוגי מעברי הקשר, וטעינה מחדש של נתונים למטמון (cache) היא אכן תוצאה של מעבר בין מרחבי כתובות שונים, ניקוי ה-TLB הוא פעולה ישירה ויקרה במיוחד המבדילה בין עלות מעבר הקשר בין תהליכים לעלות מעבר הקשר בין תהליכונים באותו תהליך."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

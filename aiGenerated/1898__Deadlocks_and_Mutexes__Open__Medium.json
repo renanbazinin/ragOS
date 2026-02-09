@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Deadlocks and Mutexes",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 21:38:30",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2445,
+      "output_tokens": 1354,
+      "total_tokens": 5942
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Deadlocks",
+      "Mutexes",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "שני תהליכונים (threads), T1 ו-T2, צריכים לגשת לשני משאבים משותפים, R1 ו-R2. כל משאב מוגן על ידי mutex משלו: M1 עבור R1 ו-M2 עבור R2.\nהקוד הבא מתאר את אופן הפעולה של T1 ו-T2:\n\nא. הסבר מדוע ייתכן קיפאון (deadlock) בתרחיש המתואר.\nב. הצע פתרון פשוט למניעת קיפאון, ועדכן את קוד התוכנית בהתאם לפתרון שהצעת.",
+      "code_snippet": "pthread_mutex_t M1;\npthread_mutex_t M2;\n\nvoid* thread_T1(void* arg) {\n    pthread_mutex_lock(&M1);\n    // Access R1\n    pthread_mutex_lock(&M2);\n    // Access R2\n    // Perform work with R1 and R2\n    pthread_mutex_unlock(&M2);\n    pthread_mutex_unlock(&M1);\n    return NULL;\n}\n\nvoid* thread_T2(void* arg) {\n    pthread_mutex_lock(&M2);\n    // Access R2\n    pthread_mutex_lock(&M1);\n    // Access R1\n    // Perform work with R1 and R2\n    pthread_mutex_unlock(&M1);\n    pthread_mutex_unlock(&M2);\n    return NULL;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "א. קיפאון (deadlock) ייתכן בתרחיש המתואר מכיוון שמתקיימים כל ארבעת התנאים ההכרחיים לקיפאון:\n1.  **מניעה הדדית (Mutual Exclusion):** כל משאב (M1 ו-M2) מוגן על ידי mutex, כלומר רק תהליכון אחד יכול להחזיק בו זמנית.\n2.  **החזקה והמתנה (Hold and Wait):** תהליכון T1 מחזיק ב-M1 וממתין ל-M2. תהליכון T2 מחזיק ב-M2 וממתין ל-M1.\n3.  **אי-הפקעה (No Preemption):** לא ניתן להפקיע mutex מתהליכון שמחזיק בו; רק התהליכון שמחזיק בו יכול לשחרר אותו.\n4.  **המתנה מעגלית (Circular Wait):** T1 ממתין למשאב (M2) שמוחזק על ידי T2, ו-T2 ממתין למשאב (M1) שמוחזק על ידי T1, יוצר מעגל המתנה.\n\nתרחיש לדוגמה:\n1.  T1 מבצע `pthread_mutex_lock(&M1);` (תופס את M1).\n2.  T2 מבצע `pthread_mutex_lock(&M2);` (תופס את M2).\n3.  T1 מנסה לבצע `pthread_mutex_lock(&M2);` אך נחסם מכיוון ש-M2 מוחזק על ידי T2.\n4.  T2 מנסה לבצע `pthread_mutex_lock(&M1);` אך נחסם מכיוון ש-M1 מוחזק על ידי T1.\nשני התהליכונים חסומים זה לזה, ונוצר קיפאון.\n\nב. הפתרון הפשוט ביותר למניעת קיפאון במקרה זה הוא להבטיח סדר עקבי של רכישת מנעולים (consistent locking order) עבור כל התהליכונים. אם כל התהליכונים ינסו לרכוש את M1 לפני M2 (או לחלופין M2 לפני M1), לא ייווצר מצב של המתנה מעגלית.\n\nקוד מעודכן:\n```c\npthread_mutex_t M1;\npthread_mutex_t M2;\n\nvoid* thread_T1(void* arg) {\n    pthread_mutex_lock(&M1); // Acquire M1 first\n    // Access R1\n    pthread_mutex_lock(&M2); // Then acquire M2\n    // Access R2\n    // Perform work with R1 and R2\n    pthread_mutex_unlock(&M2);\n    pthread_mutex_unlock(&M1);\n    return NULL;\n}\n\nvoid* thread_T2(void* arg) {\n    pthread_mutex_lock(&M1); // Acquire M1 first (consistent order)\n    // Access R1\n    pthread_mutex_lock(&M2); // Then acquire M2\n    // Access R2\n    // Perform work with R1 and R2\n    pthread_mutex_unlock(&M2);\n    pthread_mutex_unlock(&M1);\n    return NULL;\n}\n```\nבפתרון זה, תהליכון שמחזיק ב-M1 וממתין ל-M2 לא יכול להיות במצב שבו תהליכון אחר מחזיק ב-M2 וממתין ל-M1, מכיוון שגם התהליכון השני ינסה לרכוש את M1 תחילה. זה מונע את תנאי ההמתנה המעגלית."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

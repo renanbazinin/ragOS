@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Processes and Memory Management",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 20:12:30",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3064,
+      "output_tokens": 3080,
+      "total_tokens": 13289
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Processes",
+      "Memory Management",
+      "System Calls",
+      "Copy-on-Write",
+      "Virtual Memory"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה בשם `prog1`.\nהריצו את התוכנית. תהליך האב המקורי (התהליך שהריץ את `prog1` לראשונה) קיבל את מזהה התהליך 100.\nהתוכנית `prog2` היא תוכנית פשוטה המכילה רק `int main() { return 0; }`.\nיש להניח שכל קריאות המערכת הצליחו. לא נוצרים תהליכים בקטעי קוד אחרים במערכת, וכל תהליך מקבל מזהה הגדול ב-1 מהתהליך שנוצר לפניו.\nהמערכת משתמשת בזיכרון וירטואלי עם מנגנון Copy-on-Write (COW) עבור דפים ניתנים לכתיבה (writable pages). דפי קוד (text segments) של אותה תוכנית משותפים (shared) בין תהליכים שונים.\nהקוד והנתונים הגלובליים (text segment + data segment) של התוכנית `prog1` תופסים יחד דף פיזי אחד. המחסנית ההתחלתית שלה תופסת דף פיזי אחד.\nהקוד והנתונים הגלובליים של התוכנית `prog2` תופסים יחד דף פיזי אחד. המחסנית ההתחלתית שלה תופסת דף פיזי אחד.\nאין הקצאות זיכרון נוספות מה-heap או מה-stack מעבר למינימום הנדרש עבור הפונקציות ומשתנים קיימים.\nכמה דפים פיזיים (frames) בסך הכל תפוסים במרחב המשתמש (user space) במערכת ההפעלה בנקודת הזמן שבה כל קריאות ה-`execvp` הסתיימו בהצלחה, אך אף תהליך לא החל לבצע פקודות מתוך `prog2`, וכל התהליכים (כולל אלה שלא קראו ל-`execvp`) עדיין רצים ולא סיימו את פעולתם?",
+      "code_snippet": "1 #include <stdio.h>\n2 #include <stdlib.h>\n3 #include <unistd.h>\n4 #include <sys/wait.h>\n5 \n6 int global_var = 10; \n7 \n8 int main() {\n9     pid_t pid_main = getpid();\n10    int local_var = 20; \n11\n12    printf(\"Main process %d starting. Global: %d, Local: %d\\n\", pid_main, global_var, local_var);\n13\n14    pid_t child1_pid = fork();\n15    if (child1_pid == 0) { // Child 1\n16        printf(\"Child 1 (%d) created by %d. Global: %d, Local: %d\\n\", getpid(), getppid(), global_var, local_var);\n17        // Modify variables to trigger COW\n18        global_var = 100; \n19        local_var = 200;  \n20        printf(\"Child 1 (%d) modified. Global: %d, Local: %d\\n\", getpid(), getppid(), global_var, local_var);\n21\n22        pid_t child1_1_pid = fork();\n23        if (child1_1_pid == 0) { // Grandchild 1.1\n24            printf(\"Grandchild 1.1 (%d) created by %d. Global: %d, Local: %d\\n\", getpid(), getppid(), global_var, local_var);\n25            char* args[] = { \"prog2\", NULL };\n26            printf(\"Grandchild 1.1 (%d) execing prog2\\n\", getpid());\n27            execvp(args[0], args); // Replaces address space\n28            perror(\"execvp failed\"); \n29            exit(1);\n30        } else if (child1_1_pid > 0) { // Child 1 continues\n31            // Child 1 waits for Grandchild 1.1 (for simplicity, assume waits happen later)\n32        }\n33        // Child 1 will exit later, but is running at the snapshot time\n34    } else if (child1_pid > 0) { // Main process continues\n35        pid_t child2_pid = fork();\n36        if (child2_pid == 0) { // Child 2\n37            printf(\"Child 2 (%d) created by %d. Global: %d, Local: %d\\n\", getpid(), getppid(), global_var, local_var);\n38            char* args[] = { \"prog2\", NULL };\n39            printf(\"Child 2 (%d) execing prog2\\n\", getpid());\n40            execvp(args[0], args); // Replaces address space\n41            perror(\"execvp failed\"); \n42            exit(1);\n43        } else if (child2_pid > 0) { // Main process continues\n44            // Main process will wait for children later, but is running at the snapshot time\n45        }\n46    }\n47\n48    // All processes are running at this point for the memory calculation\n49    // The waits are commented out or happen after the snapshot for the memory calculation\n50    // while (wait(NULL) > 0); \n51    // exit(0);\n52    return 0;\n53}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "נתח את הקוד של `prog1` ואת התהליכים הנוצרים:\n\n1.  **תהליך ראשי (P, PID=100)**:\n    *   זיכרון התחלתי: דף קוד/נתונים גלובליים של `prog1` (1 פריים), דף מחסנית התחלתית של `prog1` (1 פריים). סה\"כ 2 פריימים.\n    *   ערכי `global_var` ו-`local_var` הם 10 ו-20 בהתאמה.\n\n2.  **`fork()` ראשון (בשורה 14)**:\n    *   יוצר **תהליך בן 1 (C1, PID=101)**.\n    *   C1 יורש את מרחב הכתובות של P במנגנון COW. בשלב זה, C1 חולק את אותם פריימים פיזיים עם P.\n    *   C1 משנה את `global_var = 100` (שורה 18): דף הקוד/נתונים הגלובליים המשותף (שמכיל את `global_var`) מועתק עבור C1. (+1 פריים עבור `C1_code_data`).\n    *   C1 משנה את `local_var = 200` (שורה 19): דף המחסנית המשותף מועתק עבור C1. (+1 פריים עבור `C1_stack`).\n    *   בשלב זה, ל-P יש 2 פריימים משלו, ול-C1 יש 2 פריימים משלו. סה\"כ 4 פריימים (P: `P_code_data`, `P_stack`; C1: `C1_code_data`, `C1_stack`).\n\n3.  **`fork()` שני מ-C1 (בשורה 22)**:\n    *   יוצר **תהליך נכד 1.1 (GC1.1, PID=102)**.\n    *   GC1.1 יורש את מרחב הכתובות של C1 במנגנון COW. בשלב זה, GC1.1 חולק את אותם פריימים פיזיים עם C1.\n    *   GC1.1 קורא ל-`execvp(\"prog2\", ...)` (שורה 27). קריאה זו מחליפה את כל מרחב הכתובות של GC1.1. הדפים של `prog1` (שירש מ-C1) משוחררים.\n    *   GC1.1 טוען את `prog2`. הוא מקבל דף קוד/נתונים גלובליים של `prog2` (1 פריים) ודף מחסנית התחלתית של `prog2` (1 פריים). סה\"כ 2 פריימים חדשים עבור GC1.1.\n\n4.  **`fork()` שלישי מ-P (בשורה 35)**:\n    *   יוצר **תהליך בן 2 (C2, PID=103)**.\n    *   C2 יורש את מרחב הכתובות של P במנגנון COW. בשלב זה, C2 חולק את אותם פריימים פיזיים עם P.\n    *   C2 קורא ל-`execvp(\"prog2\", ...)` (שורה 40). קריאה זו מחליפה את כל מרחב הכתובות של C2. הדפים של `prog1` (שירש מ-P) משוחררים.\n    *   C2 טוען את `prog2`. הוא מקבל דף קוד/נתונים גלובליים של `prog2` (1 פריים) ודף מחסנית התחלתית של `prog2` (1 פריים). סה\"כ 2 פריימים חדשים עבור C2.\n\n**סיכום מצב הפריימים בנקודת הזמן הנדרשת:**\nבנקודת הזמן הנדרשת, כל התהליכים (P, C1, GC1.1, C2) עדיין רצים.\n\n*   **P (PID=100)**: עדיין רץ, לא קרא ל-`execvp`.\n    *   תופס 2 פריימים: פריים אחד עבור קוד/נתונים גלובליים של `prog1`, ופריים אחד עבור המחסנית שלו.\n\n*   **C1 (PID=101)**: עדיין רץ, לא קרא ל-`execvp`.\n    *   תופס 2 פריימים: פריים אחד עבור קוד/נתונים גלובליים של `prog1` (עותק שלו בגלל COW), ופריים אחד עבור המחסנית שלו (עותק שלו בגלל COW).\n    *   פריימים אלה נפרדים מהפריימים של P.\n\n*   **GC1.1 (PID=102)**: רץ את `prog2`.\n    *   תופס פריים אחד עבור המחסנית שלו (`GC1.1_prog2_stack`).\n\n*   **C2 (PID=103)**: רץ את `prog2`.\n    *   תופס פריים אחד עבור המחסנית שלו (`C2_prog2_stack`).\n\n**שיתוף דפי קוד/נתונים גלובליים של `prog2`:**\nהשאלה מציינת שדפי קוד (text segments) של אותה תוכנית משותפים בין תהליכים שונים. מכיוון שגם GC1.1 וגם C2 מריצים את `prog2`, דף הקוד/נתונים הגלובליים של `prog2` משותף ביניהם.\n\n*   פריים אחד עבור קוד/נתונים גלובליים של `prog2` משותף ל-GC1.1 ול-C2.\n\n**סה\"כ פריימים פיזיים במרחב המשתמש:**\n*   פריימים עבור P: 2\n*   פריימים עבור C1: 2\n*   פריים מחסנית עבור GC1.1: 1\n*   פריים מחסנית עבור C2: 1\n*   פריים קוד/נתונים גלובליים משותף עבור `prog2` (משותף בין GC1.1 ו-C2): 1\n\nסה\"כ = 2 (P) + 2 (C1) + 1 (GC1.1 stack) + 1 (C2 stack) + 1 (shared prog2 code/data) = **7 פריימים**."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

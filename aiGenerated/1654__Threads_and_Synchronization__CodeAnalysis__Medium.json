@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Threads and Synchronization",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 19:45:03",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1971,
+      "output_tokens": 1448,
+      "total_tokens": 5716
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Threads",
+      "Synchronization",
+      "Race Conditions",
+      "Mutexes"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה בשפת C המשתמשת בחוטים (threads) כדי להגדיל מונה גלובלי משותף. עיין בקוד וענה על השאלות הבאות:\n\nא. מהו הערך הסופי *המצופה* של המשתנה `counter` לאחר שכל החוטים סיימו את ריצתם? נמק.\nב. מהו הערך הסופי *האפשרי בפועל* שיתקבל בהרצה של התוכנית? האם הוא יהיה שונה מהערך המצופה, ולמה? הסבר את הסיבה לכך תוך התייחסות לבעיית סנכרון ספציפית.\nג. הצע פתרון לקטע הקוד על מנת להבטיח שהתוכנית תדפיס תמיד את הערך הסופי המצופה. כלול את השינויים בקוד המקורי.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\n#define NUM_THREADS 5\n#define ITERATIONS_PER_THREAD 100000\n\nint counter = 0;\n\nvoid *thread_function(void *arg) {\n    for (int i = 0; i < ITERATIONS_PER_THREAD; ++i) {\n        counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, thread_function, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    return 0;\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "א. הערך הסופי המצופה של `counter` הוא `NUM_THREADS * ITERATIONS_PER_THREAD`, כלומר 5 * 100,000 = 500,000. ציפייה זו נובעת מכך שכל חוט מבצע 100,000 הגדלות, וישנם 5 חוטים, כך שבסה\"כ אמורות להתבצע 500,000 הגדלות.\n\nב. הערך הסופי האפשרי בפועל יהיה בדרך כלל *נמוך יותר* מהערך המצופה, והוא יהיה *לא דטרמיניסטי* (כלומר, ישתנה בין הרצות שונות). הסיבה לכך היא תנאי מרוץ (race condition) על המשתנה הגלובלי `counter`. הפעולה `counter++` אינה פעולה אטומית. היא מורכבת משלושה שלבים:\n1. קריאת הערך הנוכחי של `counter` לתוך אוגר.\n2. הגדלת הערך באוגר.\n3. כתיבת הערך החדש מהאוגר בחזרה ל-`counter`.\nכאשר מספר חוטים מנסים לבצע פעולה זו במקביל ללא סנכרון, ייתכן שחוט אחד יקרא את הערך, ובטרם יספיק לכתוב את הערך המוגדל בחזרה, חוט אחר יקרא גם הוא את אותו ערך ישן. במצב כזה, אחת ההגדלות עלולה ללכת לאיבוד. לדוגמה: אם `counter` הוא 10, חוט A קורא 10, חוט B קורא 10. חוט A מגדיל ל-11 וכותב. חוט B מגדיל ל-11 וכותב. התוצאה הסופית היא 11 במקום 12.\n\nג. כדי להבטיח שהתוכנית תדפיס תמיד את הערך הסופי המצופה, יש להגן על הגישה למשתנה המשותף `counter` באמצעות מנגנון סנכרון, כגון מנעול (mutex). יש ליצור אובייקט `pthread_mutex_t`, לאתחל אותו, לנעול אותו לפני הגישה ל-`counter` ולשחרר אותו לאחר מכן.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\n#define NUM_THREADS 5\n#define ITERATIONS_PER_THREAD 100000\n\nint counter = 0;\npthread_mutex_t mutex; // Declare a mutex\n\nvoid *thread_function(void *arg) {\n    for (int i = 0; i < ITERATIONS_PER_THREAD; ++i) {\n        pthread_mutex_lock(&mutex);   // Acquire the lock\n        counter++;\n        pthread_mutex_unlock(&mutex); // Release the lock\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    pthread_mutex_init(&mutex, NULL); // Initialize the mutex\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, thread_function, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    pthread_mutex_destroy(&mutex); // Destroy the mutex\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    return 0;\n}"
+    },
+    "difficulty_estimation": "Medium"
+  }
+}
