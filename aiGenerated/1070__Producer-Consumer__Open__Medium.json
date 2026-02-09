@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Producer-Consumer",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-09 20:27:00",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1877,
+      "output_tokens": 1995,
+      "total_tokens": 9113
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "Open",
+    "topic": [
+      "Producer-Consumer",
+      "Synchronization",
+      "Condition Variables",
+      "Mutexes"
+    ],
+    "content": {
+      "text": "בעיית היצרן-צרכן היא בעיה קלאסית במערכות הפעלה, המערבת תהליכים (או ת'רדים) המשתפים חיץ בגודל קבוע. לרוב, החיץ הוא בגודל N > 1. נתבונן במקרה מיוחד בו החיץ הוא בגודל 1 בלבד, כלומר היצרן יכול להניח פריט אחד בלבד בחיץ, והצרכן חייב לצרוך אותו לפני שהיצרן יוכל להניח פריט נוסף.\n\nא. כתוב קוד C/C++ המממש את בעיית היצרן-צרכן עבור חיץ בגודל 1, תוך שימוש במנגנוני סנכרון של mutex ו-condition variables (Pthreads).\nב. הסבר מדוע פתרון זה, המבוסס על mutex ו-condition variables, יעיל ומתאים במיוחד למקרה של חיץ בגודל 1, וכיצד הוא שונה מהגישה הטיפוסית המשתמשת בסמפורים (Counting Semaphores) עבור חיץ בגודל כללי (N > 1).",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": 15,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "פתרון:\n\nא. קוד C/C++ לבעיית יצרן-צרכן עם חיץ בגודל 1 באמצעות mutex ו-condition variables:\n```c\n#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h> // For usleep\n\n#define NUM_ITEMS 5 // Total items to produce/consume\n\n// Shared buffer\nint buffer;\nint item_count = 0; // 0 if empty, 1 if full\n\n// Synchronization primitives\npthread_mutex_t mutex;\npthread_cond_t can_produce; // Signal when buffer is empty (producer can produce)\npthread_cond_t can_consume; // Signal when buffer is full (consumer can consume)\n\nvoid *producer(void *arg) {\n    for (int i = 0; i < NUM_ITEMS; i++) {\n        pthread_mutex_lock(&mutex);\n\n        while (item_count == 1) { // Buffer is full, wait for consumer\n            pthread_cond_wait(&can_produce, &mutex);\n        }\n\n        buffer = i + 1; // Produce item\n        item_count = 1;\n        printf(\"Producer produced: %d\\n\", buffer);\n\n        pthread_cond_signal(&can_consume); // Signal consumer that buffer is full\n        pthread_mutex_unlock(&mutex);\n\n        // Simulate work\n        usleep(rand() % 100000);\n    }\n    return NULL;\n}\n\nvoid *consumer(void *arg) {\n    for (int i = 0; i < NUM_ITEMS; i++) {\n        pthread_mutex_lock(&mutex);\n\n        while (item_count == 0) { // Buffer is empty, wait for producer\n            pthread_cond_wait(&can_consume, &mutex);\n        }\n\n        int consumed_item = buffer; // Consume item\n        item_count = 0;\n        printf(\"Consumer consumed: %d\\n\", consumed_item);\n\n        pthread_cond_signal(&can_produce); // Signal producer that buffer is empty\n        pthread_mutex_unlock(&mutex);\n\n        // Simulate work\n        usleep(rand() % 150000);\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t prod_tid, cons_tid;\n\n    // Initialize synchronization primitives\n    pthread_mutex_init(&mutex, NULL);\n    pthread_cond_init(&can_produce, NULL);\n    pthread_cond_init(&can_consume, NULL);\n\n    // Create threads\n    pthread_create(&prod_tid, NULL, producer, NULL);\n    pthread_create(&cons_tid, NULL, consumer, NULL);\n\n    // Join threads\n    pthread_join(prod_tid, NULL);\n    pthread_join(cons_tid, NULL);\n\n    // Destroy synchronization primitives\n    pthread_mutex_destroy(&mutex);\n    pthread_cond_destroy(&can_produce);\n    pthread_cond_destroy(&can_consume);\n\n    return 0;\n}\n```\n\nב. הסבר יעילות והשוואה לסמפורים:\n\nבמקרה של חיץ בגודל יחיד (N=1), אנו זקוקים לשני מצבים ברורים: החיץ מלא או החיץ ריק. כלומר, יש רק מצב אחד שמעניין כל אחד מהצדדים (היצרן מחכה לריק, הצרכן מחכה למלא). מנגנוני ה-mutex ו-condition variables מתאימים באופן טבעי למצבים אלו:\n1.  **Mutex (מנעול הדדי)**: משמש להבטחת גישה בלעדית לחיץ המשותף ולמשתנה `item_count` המציין את מצב החיץ. זהו המרכיב הקלאסי לסנכרון גישה למשאב משותף.\n2.  **Condition Variables (משתני תנאי)**:\n    *   `can_produce`: משמש לאותת ליצרן כאשר החיץ ריק (כלומר, הצרכן צרך פריט). היצרן ממתין על משתנה תנאי זה כאשר החיץ מלא (`item_count == 1`).\n    *   `can_consume`: משמש לאותת לצרכן כאשר החיץ מלא (כלומר, היצרן הניח פריט). הצרכן ממתין על משתנה תנאי זה כאשר החיץ ריק (`item_count == 0`).\n\nהשימוש בשני משתני תנאי נפרדים מאפשר הפרדה ברורה בין תנאי ההמתנה של היצרן והצרכן, ומונע 'התעוררויות שווא' (spurious wakeups) מיותרות. כאשר היצרן מסיים לייצר, הוא מאותת רק לצרכן. כאשר הצרכן מסיים לצרוך, הוא מאותת רק ליצרן.\n\n**השוואה לסמפורים:**\nבפתרון הסטנדרטי עם סמפורים עבור חיץ בגודל כללי (N > 1):\n*   **Mutex סמפור בינארי**: משמש גם הוא להבטחת גישה בלעדית לחיץ.\n*   **`empty` סמפור מונה**: מאותחל ל-N, ומשמש לספור מקומות פנויים בחיץ. היצרן מבצע `wait` עליו לפני ייצור, ומבצע `signal` על `full` לאחר ייצור.\n*   **`full` סמפור מונה**: מאותחל ל-0, ומשמש לספור פריטים מלאים בחיץ. הצרכן מבצע `wait` עליו לפני צריכה, ומבצע `signal` על `empty` לאחר צריכה.\n\nעבור N=1, סמפורים יכולים לשמש באופן דומה, כאשר `empty` מאותחל ל-1 ו-`full` מאותחל ל-0. אך השימוש ב-condition variables נחשב לרוב אינטואיטיבי וברור יותר במצבים בהם יש תנאים ספציפיים שצריכים להתקיים כדי שפעולה כלשהי תתבצע (לדוגמה, 'החיץ ריק' או 'החיץ מלא'). סמפורים הם מונים גנריים יותר, בעוד ש-condition variables משמשים באופן מפורש להמתנה על תנאי מסוים. במקרה של N=1, שבו התנאים הם בוליאניים (מלא/ריק), הבהירות של משתני התנאי בולטת."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

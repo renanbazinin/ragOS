@@ -1,0 +1,61 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Synchronization and Concurrency",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-09 21:08:03",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4132,
+      "output_tokens": 4264,
+      "total_tokens": 25182
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Concurrency",
+      "Threads",
+      "Deadlock",
+      "Condition Variables",
+      "Semaphores",
+      "Race Conditions"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה, המנסה לתאם את קידום המונה המשותף `counter` על ידי `T` חוטים, כאשר כל חוט מקדם את המונה `N` פעמים. המטרה היא שקידום המונה יתבצע בסדר עוקב: חוט 0 יקדם, ואז חוט 1, וכן הלאה עד חוט T-1, ואז שוב חוט 0, וחוזר חלילה, עד שכל החוטים סיימו את כל הקידומים (סה\"כ T*N קידומים).\nהקוד המצורף מכיל שגיאת סנכרון שעלולה למנוע מהתוכנית לסיים את ריצתה או לגרום לתוצאה שגויה. ניתן להניח שכל קריאות המערכת הצליחו וכי ערכי T,N גדולים מ-1.\n",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h> // For usleep, though not strictly needed for the bug\n\n#define T 3 // Example: 3 threads\n#define N 2 // Example: each increments twice\n\nint counter = 0;\npthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;\npthread_cond_t conds[T]; // One condition variable per thread\nint next_thread_id = 0; // Tracks whose turn it is\n\nvoid* thread_func(void* arg) {\n    long my_id = (long)arg;\n\n    for (int i = 0; i < N; ++i) {\n        pthread_mutex_lock(&mutex);\n\n        // Wait for my turn\n        while (my_id != next_thread_id) {\n            pthread_cond_wait(&conds[my_id], &mutex);\n        }\n\n        // It's my turn\n        ++counter;\n        printf(\"Thread %ld: counter = %d\\n\", my_id, counter);\n\n        // Pass turn to the next thread\n        next_thread_id = (next_thread_id + 1) % T;\n        pthread_cond_signal(&conds[next_thread_id]); // Signal the next thread\n\n        pthread_mutex_unlock(&mutex);\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[T];\n\n    for (int i = 0; i < T; ++i) {\n        pthread_cond_init(&conds[i], NULL);\n    }\n\n    // Start threads\n    for (long i = 0; i < T; ++i) {\n        pthread_create(&threads[i], NULL, thread_func, (void*)i);\n    }\n\n    // Join threads\n    for (int i = 0; i < T; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    for (int i = 0; i < T; ++i) {\n        pthread_cond_destroy(&conds[i]);\n    }\n    pthread_mutex_destroy(&mutex);\n\n    return 0;\n}\n",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "8.1",
+        "text": "זהו את שגיאת הסנכרון הספציפית בקוד המצורף. מהי הבעיה וכיצד היא עלולה להוביל להתנהגות שגויה (כגון קיפאון או תוצאה לא נכונה)?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.2",
+        "text": "תארו תרחיש תזמון ספציפי (sequence of events) המדגים כיצד השגיאה שזיהיתם בסעיף 8.1 אכן מתרחשת ומובילה לקיפאון או לתוצאה שגויה. כללו את ערכי המשתנים הרלוונטיים (כמו `counter`, `next_thread_id`) בכל שלב.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.3",
+        "text": "ספקו גרסה מתוקנת של הפונקציה `thread_func` (וכל שינוי נדרש במשתנים גלובליים או בפונקציית `main`) שפותרת את שגיאת הסנכרון, ומבטיחה שהקידומים יתבצעו בסדר הנכון וללא קיפאון. הסבירו מדוע התיקון שלכם עובד.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "8.1: השגיאה בתוכנית היא מצב מרוץ (race condition) שעלול להוביל לקיפאון (deadlock) עקב איתות שאבד (lost signal). הבעיה נובעת מהשימוש ב-`pthread_cond_signal` לתיאום תור קפדני בין חוטים. כאשר חוט `X` מסיים את תורו ומאתת לחוט `Y` באמצעות `pthread_cond_signal(&conds[Y])`, הוא מצפה שחוט `Y` ימתין על המשתנה `conds[Y]`. עם זאת, `pthread_cond_signal` הוא איתות חולף (transient) – אם אף חוט לא ממתין על משתנה התנאי הספציפי ברגע שהאיתות נשלח, האיתות אובד. אם מתזמן המערכת (scheduler) מאפשר לחוט `X` לסיים את תורו ולאותת לחוט `Y`, אך חוט `Y` עדיין לא הגיע לקריאה ל-`pthread_cond_wait` עבור התור הנוכחי שלו (למשל, כי חוט `Y` היה עסוק בביצוע פעולות אחרות, או בגלל ריצה מהירה של חוט `X`), האיתות נשלח אך לא נקלט על ידי אף חוט ממתין - ובכך הוא \"אובד\". כאשר חוט `Y` יגיע לבסוף לקריאה ל-`pthread_cond_wait(&conds[Y], &mutex)`, הוא ימתין ללא הגבלת זמן, מכיוון שהאיתות שלו כבר נשלח ואבד. מצב זה יגרום לקיפאון, שכן חוט `Y` לא יתקדם, ולא יוכל לאותת לחוט הבא בתור, וכך הלאה, מה שיעצור את התקדמות התוכנית כולה.\n\n8.2: נניח `T=2` ו-`N=2`. נתאר תרחיש שבו מתרחש קיפאון:\n\n*   **מצב התחלתי:** `counter = 0`, `next_thread_id = 0`.\n\n1.  **חוט 0 (`my_id=0`) מתחיל:**\n    *   נועל את `mutex`.\n    *   **איטרציה `i=0`:** התנאי `my_id != next_thread_id` הוא שקר (0 == 0). לא ממתין.\n    *   `++counter;` (`counter` = 1).\n    *   `next_thread_id = (0+1)%2 = 1;`.\n    *   `pthread_cond_signal(&conds[1]);` (איתות נשלח ל-`conds[1]`).\n    *   `pthread_mutex_unlock(&mutex);`.\n\n2.  **מתזמן המערכת מאפשר לחוט 0 להמשיך לרוץ מיד (לפני שחוט 1 הספיק להתחיל לרוץ או להגיע לנקודת ההמתנה שלו).**\n    *   חוט 0 נועל שוב את `mutex`.\n    *   **איטרציה `i=1`:** התנאי `my_id != next_thread_id` הוא אמת (0 != 1).\n    *   חוט 0 קורא ל-`pthread_cond_wait(&conds[0], &mutex);`. חוט 0 נכנס למצב המתנה, ומשחרר את המוטקס.\n\n3.  **מתזמן המערכת מאפשר לחוט 1 (`my_id=1`) להתחיל לרוץ.**\n    *   חוט 1 נועל את `mutex` (ששוחרר על ידי חוט 0).\n    *   **איטרציה `i=0`:** התנאי `my_id != next_thread_id` הוא אמת (1 != 1 הוא שקר, אבל `next_thread_id` הוא 1, אז `my_id == next_thread_id` הוא אמת). לא ממתין.\n    *   `++counter;` (`counter` = 2).\n    *   `next_thread_id = (1+1)%2 = 0;`.\n    *   `pthread_cond_signal(&conds[0]);` (איתות נשלח ל-`conds[0]`). איתות זה מעיר את חוט 0.\n    *   `pthread_mutex_unlock(&mutex);`.\n\n4.  **מתזמן המערכת מאפשר לחוט 1 להמשיך לרוץ מיד (לפני שחוט 0 הספיק להתעורר, לרכוש מחדש את המוטקס ולבדוק את התנאי).**\n    *   חוט 1 נועל שוב את `mutex`.\n    *   **איטרציה `i=1`:** התנאי `my_id != next_thread_id` הוא אמת (1 != 0).\n    *   חוט 1 קורא ל-`pthread_cond_wait(&conds[1], &mutex);`. חוט 1 נכנס למצב המתנה, ומשחרר את המוטקס.\n\n    **בשלב זה, חוט 0 וחוט 1 שניהם ממתינים על משתני התנאי שלהם (`conds[0]` ו-`conds[1]` בהתאמה).**\n    *   חוט 0 מתעורר (עקב האיתות משלב 3) ומנסה לרכוש את המוטקס (ששוחרר על ידי חוט 1). הוא רוכש אותו.\n    *   חוט 0 בודק שוב את התנאי: `my_id != next_thread_id` (0 != 0 הוא שקר, כלומר התור שלו).\n    *   `++counter;` (`counter` = 3).\n    *   `next_thread_id = (0+1)%2 = 1;`.\n    *   `pthread_cond_signal(&conds[1]);` (איתות נשלח ל-`conds[1]`). איתות זה מעיר את חוט 1.\n    *   `pthread_mutex_unlock(&mutex);`.\n\n    **חוט 0 מסיים את הלולאה ויוצא מהפונקציה.**\n\n5.  **כעת, חוט 1 מתעורר (עקב האיתות משלב 4).**\n    *   חוט 1 מנסה לרכוש את המוטקס. הוא רוכש אותו.\n    *   חוט 1 בודק שוב את התנאי: `my_id != next_thread_id` (1 != 1 הוא שקר, כלומר התור שלו).\n    *   `++counter;` (`counter` = 4).\n    *   `next_thread_id = (1+1)%2 = 0;`.\n    *   `pthread_cond_signal(&conds[0]);` (איתות נשלח ל-`conds[0]`). **כאן האיתות אובד, כי חוט 0 כבר סיים את ריצתו ואינו ממתין על `conds[0]`.**\n    *   `pthread_mutex_unlock(&mutex);`.\n\n    **חוט 1 מסיים את הלולאה ויוצא מהפונקציה.**\n\n    **תוצאה:** התוכנית מסיימת, אך במקרה זה, האיתות האחרון אבד. אם `N` היה גדול יותר, והיתה סבירות שחוט כלשהו יסיים את כל איטרציות ה-`N` שלו ויצא לפני שהחוט הבא בתור הספיק להתחיל את האיטרציה הראשונה שלו, היינו נתקעים בקיפאון.\n\n8.3: התיקון הנכון לדפוס תיאום מסוג \"תור\" (turn-taking) הוא שימוש במערך סמפורים, אחד עבור כל חוט. סמפורים מספקים מנגנון איתות \"עמיד\" (persistent signal) – אם מתבצעת פעולת `sem_post` כאשר אין חוטים ממתינים, ערך הסמפור עולה, והאיתות נשמר עד שחוט כלשהו יבצע `sem_wait`. זאת בניגוד ל-`pthread_cond_signal` שאיתותיו \"חולפים\" (transient) ואובדים אם אין חוט שממתין עליהם באותו רגע. השימוש בסמפורים מבטל את הצורך במשתנה `next_thread_id` וגם במנגנון המוטקס/condition variable עבור התיאום הספציפי הזה.\n\n**שינויים נדרשים:**\n\n**1. שינויים במשתנים גלובליים (יש להחליף את ההגדרות הקיימות):**\n    *   יש להסיר את `pthread_mutex_t mutex;` ואת `pthread_cond_t conds[T];`.\n    *   יש להוסיף את `sem_t sems[T];` (וכן לכלול `#include <semaphore.h>`).\n    *   אין צורך ב-`int next_thread_id;`.\n\n**2. שינויים בפונקציה `main` (יש להחליף את קטעי הקוד הרלוונטיים):**\n    *   יש להסיר את לולאת אתחול `pthread_cond_init` ואת קריאת `pthread_mutex_destroy` ו-`pthread_cond_destroy`.\n    *   יש לאתחל את הסמפורים באופן הבא:\n        ```c\n        // Initialize semaphores\n        sem_init(&sems[0], 0, 1); // חוט 0 מתחיל עם הרשאה (ערך 1)\n        for (int i = 1; i < T; ++i) {\n            sem_init(&sems[i], 0, 0); // שאר החוטים מתחילים בהמתנה (ערך 0)\n        }\n        ```\n\n**3. גרסה מתוקנת של `thread_func` (יש להחליף את גוף הפונקציה הקיים):**\n```c\n#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <semaphore.h> // נדרש עבור sem_t\n\n// משתנים גלובליים (הגדרות אלו יהיו בקובץ הראשי, כאן רק לצורך הדגמה)\n// extern int counter;\n// extern sem_t sems[T]; // T הוא קבוע מוגדר מראש\n\nvoid* thread_func(void* arg) {\n    long my_id = (long)arg;\n\n    for (int i = 0; i < N; ++i) {\n        sem_wait(&sems[my_id]); // המתן לתורך (קבל הרשאה מהסמפור הספציפי לחוט זה)\n\n        // זה התור שלי - בצע את הפעולה.\n        // המונה מוגן באופן מרומז על ידי תוריות הסמפורים (רק חוט אחד פעיל בכל רגע).\n        ++counter;\n        printf(\"Thread %ld: counter = %d\\n\", my_id, counter);\n\n        // העבר את התור לחוט הבא\n        sem_post(&sems[(my_id + 1) % T]); // סמן את הסמפור של החוט הבא\n    }\n    return NULL;\n}\n```\n\n**הסבר מדוע התיקון עובד:**\nהשימוש בסמפורים מבטיח שכל איתות שנשלח על ידי `sem_post` נשמר (על ידי הגדלת ערך הסמפור) עד שחוט אחר יקלוט אותו באמצעות `sem_wait`. כך, גם אם חוט שמקבל תור אינו ממתין באופן מיידי, האיתות לא אובד, והוא יקבל את ההרשאה להמשיך ברגע שיגיע ל-`sem_wait`. אתחול הסמפורים מבטיח שחוט 0 יתחיל ראשון, ולאחר מכן כל חוט יעביר את התור באופן מפורש לחוט הבא בסדר העוקב, ובכך נמנעים מצבי מרוץ וקיפאונות הקשורים לאובדן איתותים."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

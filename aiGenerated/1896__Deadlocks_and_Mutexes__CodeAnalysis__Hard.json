@@ -1,0 +1,50 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Deadlocks and Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-09 21:11:53",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4004,
+      "output_tokens": 2179,
+      "total_tokens": 11103
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Deadlocks",
+      "Mutexes",
+      "Synchronization",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתון קטע קוד המדמה שני תהליכונים (threads) המנסים לגשת לשני משאבים שונים, המוגנים באמצעות מנעולי הדדיות (mutexes). כל תהליכון זקוק לשני המשאבים כדי להשלים את פעולתו. הקוד נראה כדלקמן:",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h> // For sleep\n\npthread_mutex_t mutexA;\npthread_mutex_t mutexB;\n\nvoid* thread_func_1(void* arg) {\n    printf(\"Thread 1: Attempting to lock mutexA...\\n\");\n    pthread_mutex_lock(&mutexA);\n    printf(\"Thread 1: Locked mutexA. Sleeping...\\n\");\n    sleep(1); // Simulate work or delay\n    printf(\"Thread 1: Attempting to lock mutexB...\\n\");\n    pthread_mutex_lock(&mutexB);\n    printf(\"Thread 1: Locked mutexB. Both mutexes acquired.\\n\");\n\n    // Critical section\n    printf(\"Thread 1: In critical section with both mutexes.\\n\");\n    sleep(1);\n\n    pthread_mutex_unlock(&mutexB);\n    printf(\"Thread 1: Unlocked mutexB.\\n\");\n    pthread_mutex_unlock(&mutexA);\n    printf(\"Thread 1: Unlocked mutexA. Exiting.\\n\");\n    return NULL;\n}\n\nvoid* thread_func_2(void* arg) {\n    printf(\"Thread 2: Attempting to lock mutexB...\\n\");\n    pthread_mutex_lock(&mutexB);\n    printf(\"Thread 2: Locked mutexB. Sleeping...\\n\");\n    sleep(1); // Simulate work or delay\n    printf(\"Thread 2: Attempting to lock mutexA...\\n\");\n    pthread_mutex_lock(&mutexA);\n    printf(\"Thread 2: Locked mutexA. Both mutexes acquired.\\n\");\n\n    // Critical section\n    printf(\"Thread 2: In critical section with both mutexes.\\n\");\n    sleep(1);\n\n    pthread_mutex_unlock(&mutexA);\n    printf(\"Thread 2: Unlocked mutexA.\\n\");\n    pthread_mutex_unlock(&mutexB);\n    printf(\"Thread 2: Unlocked mutexB. Exiting.\\n\");\n    return NULL;\n}\n\nint main() {\n    pthread_t tid1, tid2;\n\n    pthread_mutex_init(&mutexA, NULL);\n    pthread_mutex_init(&mutexB, NULL);\n\n    pthread_create(&tid1, NULL, thread_func_1, NULL);\n    pthread_create(&tid2, NULL, thread_func_2, NULL);\n\n    pthread_join(tid1, NULL);\n    pthread_join(tid2, NULL);\n\n    pthread_mutex_destroy(&mutexA);\n    pthread_mutex_destroy(&mutexB);\n\n    printf(\"Main: All threads finished.\\n\");\n    return 0;\n}"
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "האם קטע הקוד הנתון עלול להוביל למצב של קיפאון (Deadlock)? אם כן, תאר/י תרחיש ספציפי (רצף פעולות של התהליכונים) המוביל לקיפאון זה.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "כיצד ניתן לתקן את הקוד כדי למנוע קיפאון, תוך שמירה על המטרה המקורית של גישה לשני המשאבים? ספק/י את קטע הקוד המתוקן (רק את הפונקציה שצריך לשנות) והסבר/י בקצרה את הפתרון.",
+        "code_snippet": "void* thread_func_2(void* arg) {\n    printf(\"Thread 2: Attempting to lock mutexA...\\n\");\n    pthread_mutex_lock(&mutexA);\n    printf(\"Thread 2: Locked mutexA. Sleeping...\\n\");\n    sleep(1); // Simulate work or delay\n    printf(\"Thread 2: Attempting to lock mutexB...\\n\");\n    pthread_mutex_lock(&mutexB);\n    printf(\"Thread 2: Locked mutexB. Both mutexes acquired.\\n\");\n\n    // Critical section\n    printf(\"Thread 2: In critical section with both mutexes.\\n\");\n    sleep(1);\n\n    pthread_mutex_unlock(&mutexB);\n    printf(\"Thread 2: Unlocked mutexB.\\n\");\n    pthread_mutex_unlock(&mutexA);\n    printf(\"Thread 2: Unlocked mutexA. Exiting.\\n\");\n    return NULL;\n}"
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.1: כן, קטע הקוד עלול להוביל למצב של קיפאון (Deadlock). תרחיש לדוגמה:\n   1. תהליכון 1 (thread_func_1) מתחיל ונועל בהצלחה את mutexA.\n   2. מיד לאחר מכן, תהליכון 2 (thread_func_2) מתחיל ונועל בהצלחה את mutexB.\n   3. תהליכון 1 מנסה כעת לנעול את mutexB, אך הוא כבר נעול על ידי תהליכון 2. תהליכון 1 נחסם וממתין ל-mutexB.\n   4. תהליכון 2 מנסה כעת לנעול את mutexA, אך הוא כבר נעול על ידי תהליכון 1. תהליכון 2 נחסם וממתין ל-mutexA.\n   במצב זה, שני התהליכונים ממתינים זה לזה באופן הדדי, ואיש מהם לא יכול להמשיך או לשחרר את המנעול שברשותו. זוהי דוגמה קלאסית לקיפאון הנגרם על ידי תלות מעגלית במשאבים (Circular Wait).\n\n1.2: כדי למנוע קיפאון, יש להבטיח שכל התהליכונים ירכשו את המשאבים באותו סדר. זוהי אסטרטגיה ידועה למניעת קיפאון הנקראת 'Resource Ordering'. במקרה זה, נקבע סדר גלובלי: תמיד לרכוש קודם את mutexA, ולאחר מכן את mutexB. על ידי כך, אנו שוברים את תנאי ה'המתנה המעגלית' (Circular Wait).\nהקוד המתוקן לפונקציה `thread_func_2` יראה כך:\n```c\nvoid* thread_func_2(void* arg) {\n    printf(\"Thread 2: Attempting to lock mutexA...\\n\");\n    pthread_mutex_lock(&mutexA);\n    printf(\"Thread 2: Locked mutexA. Sleeping...\\n\");\n    sleep(1); // Simulate work or delay\n    printf(\"Thread 2: Attempting to lock mutexB...\\n\");\n    pthread_mutex_lock(&mutexB);\n    printf(\"Thread 2: Locked mutexB. Both mutexes acquired.\\n\");\n\n    // Critical section\n    printf(\"Thread 2: In critical section with both mutexes.\\n\");\n    sleep(1);\n\n    pthread_mutex_unlock(&mutexB);\n    printf(\"Thread 2: Unlocked mutexB.\\n\");\n    pthread_mutex_unlock(&mutexA);\n    printf(\"Thread 2: Unlocked mutexA. Exiting.\\n\");\n    return NULL;\n}\n```\nההסבר: על ידי אכיפת סדר רכישה עקבי (mutexA ואז mutexB) עבור שני התהליכונים (כמו ב-`thread_func_1`), אנו מבטיחים שלעולם לא ייווצר מצב שבו תהליכון אחד מחזיק ב-mutexA וממתין ל-mutexB, בעוד תהליכון אחר מחזיק ב-mutexB וממתין ל-mutexA. תהליכון שיצליח לתפוס את mutexA קודם ימשיך לתפוס את mutexB, והתהליכון השני ימתין בסבלנות עד ששניהם ישוחררו. זה מונע את התלות המעגלית ובכך את הקיפאון."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

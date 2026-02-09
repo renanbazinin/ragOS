@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Deadlocks",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-09 21:01:41",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4395,
+      "output_tokens": 3262,
+      "total_tokens": 21704
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Semaphores",
+      "Deadlocks",
+      "Concurrency",
+      "Resource Allocation",
+      "Starvation"
+    ],
+    "content": {
+      "text": "במערכת נתונה קיימים N תהליכוני עבודה (worker threads) ו-M משאבים ייחודיים ולא ניתנים לשיתוף (R0, R1, ..., RM-1). כל משאב מוגן על ידי סמפור בינארי. כל תהליכון עבודה מבצע משימה המורכבת משני שלבים:\n\n1.  **שלב 1**: התהליכון צריך לרכוש שני משאבים ספציפיים, `R_a` ו-`R_b` (כאשר `R_a != R_b`). לאחר רכישת שניהם, הוא מבצע עבודה ראשונית כלשהי. לאחר מכן, הוא משחרר את `R_a`.\n2.  **שלב 2**: בעודו *עדיין מחזיק את `R_b`*, התהליכון צריך לרכוש משאב ספציפי שלישי, `R_c` (כאשר `R_c != R_b` וגם `R_c != R_a`). לאחר רכישת `R_c`, הוא מבצע עבודה נוספת. לבסוף, הוא משחרר את `R_b` ואת `R_c`.\n\nיש לממש את הפונקציות הבאות תוך שימוש בסמפורים מסוג POSIX (`sem_t`) בלבד (ללא שימוש ב-mutexes, condition variables, או פעולות אטומיות מפורשות אחרות מעבר למה שסמפורים מספקים). הפתרון חייב להבטיח:\n*   **מניעה הדדית (Mutual Exclusion)**: כל משאב מוחזק על ידי לכל היותר תהליכון אחד בכל רגע נתון.\n*   **חופש מקיפאון (Deadlock Freedom)**: המערכת לעולם לא תיכנס למצב שבו אף תהליכון אינו יכול להתקדם.\n*   **חופש מהרעבה (Starvation Freedom)**: כל תהליכון יצליח בסופו של דבר להשלים את משימתו.\n\nיש לספק הסבר מפורט מדוע הפתרון שלכם עומד בדרישות אלו.",
+      "code_snippet": "/* הגדרות גלובליות */\n#include <semaphore.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h> // For sleep\n#include <algorithm> // For std::min/max\n\n#define MAX_RESOURCES 10 // מספר מירבי של משאבים\n\nsem_t resource_semaphores[MAX_RESOURCES]; // סמפור בינארי לכל משאב\n// סמפורים גלובליים נוספים נדרשים כאן\nsem_t global_turnstile; // לדוגמה\n\n// פונקציית אתחול\nvoid init_resources(int num_resources) {\n    for (int i = 0; i < num_resources; ++i) {\n        sem_init(&resource_semaphores[i], 0, 1);\n    }\n    // אתחול סמפורים נוספים\n    sem_init(&global_turnstile, 0, 1);\n}\n\n// פונקציית ניקוי\nvoid destroy_resources(int num_resources) {\n    for (int i = 0; i < num_resources; ++i) {\n        sem_destroy(&resource_semaphores[i]);\n    }\n    // השמדת סמפורים נוספים\n    sem_destroy(&global_turnstile);\n}\n\n// פונקציה 1: רכישת R_a ו-R_b\nvoid acquire_initial_pair(int ra, int rb) {\n    // יש להשלים את הקוד כאן\n}\n\n// פונקציה 2: שחרור R_a (עדיין מחזיק את R_b)\nvoid release_one_and_prepare_for_third(int ra) {\n    // יש להשלים את הקוד כאן\n}\n\n// פונקציה 3: רכישת R_c (כאשר R_b עדיין מוחזק)\nvoid acquire_third_and_finish(int rb_held, int rc) {\n    // יש להשלים את הקוד כאן\n}\n\n// פונקציה 4: שחרור R_b ו-R_c\nvoid release_final_pair(int rb, int rc) {\n    // יש להשלים את הקוד כאן\n}\n",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון מתבסס על שילוב של סדר רכישת משאבים גלובלי (לפי אינדקסים עולים) ושימוש בסמפור 'סבסבת' (turnstile) גלובלי למניעת רעבה (livelock) במקרים מורכבים של רכישה.\n\n**הקוד המוצע:**\n```c\nvoid acquire_initial_pair(int ra, int rb) {\n    // תמיד רוכשים בסדר עולה של האינדקסים כדי למנוע קיפאון ראשוני.\n    int first_res = std::min(ra, rb);\n    int second_res = std::max(ra, rb);\n    sem_wait(&resource_semaphores[first_res]);\n    sem_wait(&resource_semaphores[second_res]);\n}\n\nvoid release_one_and_prepare_for_third(int ra) {\n    sem_post(&resource_semaphores[ra]);\n}\n\nvoid acquire_third_and_finish(int rb_held, int rc) {\n    // זהו החלק הקריטי. אנו מחזיקים ב-rb_held וצריכים את rc.\n    // אם rb_held < rc, הרכישה פשוטה ותואמת את הסדר הגלובלי.\n    if (rb_held < rc) {\n        sem_wait(&resource_semaphores[rc]);\n    } else { // rb_held > rc. מצב זה מפר את כלל הרכישה בסדר עולה (רוכשים אינדקס נמוך יותר לאחר אינדקס גבוה יותר).\n        // כדי לשמור על חופש מקיפאון במקרה זה, יש לרכוש את המשאבים בסדר עולה.\n        // המשמעות היא שיש לשחרר את rb_held, לרכוש את rc, ואז לרכוש מחדש את rb_held.\n        // רצף פעולות זה עלול להוביל לרעבה (livelock) אם מספר תהליכונים מנסים לבצע אותו בו זמנית.\n        // סמפור ה-global_turnstile מונע רעבה על ידי סריאליזציה של ניסיונות לבצע רצף רכישה מחדש מסוכן זה.\n        sem_wait(&global_turnstile); // רק תהליכון אחד יכול לנסות לבצע רכישה מחדש מורכבת זו בכל פעם.\n\n        sem_post(&resource_semaphores[rb_held]); // שחרור rb_held\n        sem_wait(&resource_semaphores[rc]);      // רכישת rc\n        sem_wait(&resource_semaphores[rb_held]); // רכישת rb_held מחדש\n\n        sem_post(&global_turnstile); // מאפשר לתהליכון הבא לנסות\n    }\n}\n\nvoid release_final_pair(int rb, int rc) {\n    sem_post(&resource_semaphores[rb]);\n    sem_post(&resource_semaphores[rc]);\n}\n```\n\n**הסבר מפורט על עמידה בדרישות:**\n\n1.  **מניעה הדדית (Mutual Exclusion)**:\n    *   כל משאב (`R0` עד `RM-1`) מוגן על ידי סמפור בינארי ייעודי (`resource_semaphores[i]`).\n    *   סמפור בינארי מבטיח כי רק תהליכון אחד יכול לבצע `sem_wait` בהצלחה על סמפור מסוים בכל רגע נתון. כל תהליכון אחר שינסה לרכוש את אותו משאב ימתין. לכן, מובטח שכל משאב מוחזק על ידי לכל היותר תהליכון אחד.\n\n2.  **חופש מקיפאון (Deadlock Freedom)**:\n    *   **רכישה ראשונית (`acquire_initial_pair`)**: רכישת המשאבים `R_a` ו-`R_b` מתבצעת תמיד בסדר עולה של האינדקסים שלהם (כלומר, `min(ra, rb)` ואז `max(ra, rb)`). אסטרטגיה זו מונעת את תנאי ה\"המתנה מעגלית\" (Circular Wait), שהוא תנאי הכרחי לקיפאון. על ידי אכיפת סדר גלובלי, לא יכול להיווצר מצב שבו תהליכון A ממתין למשאב שמוחזק על ידי תהליכון B, בעוד תהליכון B ממתין למשאב שמוחזק על ידי תהליכון A, ובכך נוצר מעגל המתנה.\n    *   **רכישה בשלב השני (`acquire_third_and_finish`)**:\n        *   **מקרה `rb_held < rc`**: רכישת `R_c` מתבצעת כאשר המשאב המוחזק (`R_b`) בעל אינדקס נמוך יותר מהמשאב הנרכש (`R_c`). זה תואם את הסדר הגלובלי העולה, ולכן אינו מפר את כלל מניעת הקיפאון.\n        *   **מקרה `rb_held > rc`**: במקרה זה, המשאב המוחזק (`R_b`) בעל אינדקס גבוה יותר מהמשאב הנרכש (`R_c`). רכישה ישירה של `R_c` הייתה מפרה את הסדר הגלובלי ועלולה להוביל לקיפאון (לדוגמה, תהליכון T1 מחזיק `R_2` וממתין ל-`R_1`, בעוד תהליכון T2 מחזיק `R_1` וממתין ל-`R_2`). כדי למנוע זאת, התהליכון משחרר באופן זמני את `R_b`, רוכש את `R_c`, ואז רוכש מחדש את `R_b`. רצף פעולות זה מתבצע תחת הגנה של סמפור ה-`global_turnstile`. סמפור זה מבטיח כי רק תהליכון אחד יכול לבצע את רצף השחרור-רכישה-רכישה מחדש המסוכן בכל רגע נתון. בכך, הוא מונע מצב שבו מספר תהליכונים מנסים לבצע את הפעולה הזו בו זמנית ועלולים להיכנס לקיפאון או לרעבה הדדית. ה-`global_turnstile` מונע את התנאי של \"המתנה מעגלית\" על ידי סריאליזציה של ניסיונות אלה, ובכך מבטיח שכל תהליכון שמגיע למצב זה יצליח בסופו של דבר לרכוש את המשאבים הנדרשים בסדר הנכון.\n\n3.  **חופש מהרעבה (Starvation Freedom)**:\n    *   סמפורי POSIX (כמו `sem_t`) ממומשים בדרך כלל עם תור FIFO (First-In, First-Out) עבור תהליכונים הממתינים על הסמפור. המשמעות היא שתהליכון הממתין זמן רב יותר על סמפור יקבל את המשאב או את הרשאת הכניסה לקטע קריטי לפני תהליכונים שהגיעו מאוחר יותר.\n    *   **עבור רכישת משאבים רגילה**: תהליכונים הממתינים על `resource_semaphores[i]` יקבלו גישה לפי סדר הגעתם, ובכך מובטח חופש מהרעבה.\n    *   **עבור המקרה המורכב (`rb_held > rc`)**: סמפור ה-`global_turnstile` מבטיח שגם תהליכונים המגיעים למקרה זה יקבלו את ההזדמנות לבצע את רצף השחרור-רכישה-רכישה מחדש. מכיוון שה-`global_turnstile` הוא גם סמפור POSIX (ולכן פועל ב-FIFO), אף תהליכון לא יורעב בהמתנה לכניסה לקטע קריטי זה. ברגע שתהליכון נכנס לקטע קריטי זה, הוא משלים את רכישת המשאבים ומשחרר את ה-`global_turnstile`, ובכך מאפשר לתהליכון הבא להתקדם. זה מונע רעבה ומבטיח שכל תהליכון יסיים את משימתו בסופו של דבר."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

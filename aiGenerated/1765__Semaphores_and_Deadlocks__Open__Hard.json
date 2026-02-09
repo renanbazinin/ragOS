@@ -1,0 +1,52 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Deadlocks",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-09 21:03:29",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4395,
+      "output_tokens": 3941,
+      "total_tokens": 13689
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Semaphores",
+      "Deadlocks",
+      "Concurrency",
+      "Resource Allocation"
+    ],
+    "content": {
+      "text": "נניח שיש לנו שלושה סוגי משאבים מוגבלים: R1, R2 ו-R3, כאשר מכל סוג יש רק יחידה אחת. מספר תהליכונים (חוטים) צריכים לבצע משימות שונות, וכל משימה דורשת גישה לשני משאבים שונים מתוך השלושה. משימה A דורשת את R1 ו-R2. משימה B דורשת את R2 ו-R3. משימה C דורשת את R3 ו-R1. המשאבים מוגנים באמצעות סמפורים בינאריים, כאשר לכל משאב יש סמפור משלו. להלן מימוש חלקי של פונקציות המדמות את ביצוע המשימות, כפי שחוטים שונים עשויים לקרוא להן. שימו לב לסדר רכישת המשאבים בכל פונקציה:",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <semaphore.h>\n#include <unistd.h> // For sleep\n\n// Semaphores for resources\nsem_t R1_sem;\nsem_t R2_sem;\nsem_t R3_sem;\n\nvoid init_resources() {\n    sem_init(&R1_sem, 0, 1);\n    sem_init(&R2_sem, 0, 1);\n    sem_init(&R3_sem, 0, 1);\n}\n\nvoid destroy_resources() {\n    sem_destroy(&R1_sem);\n    sem_destroy(&R2_sem);\n    sem_destroy(&R3_sem);\n}\n\nvoid taskA() {\n    printf(\"TaskA: Trying to acquire R1...\\n\");\n    sem_wait(&R1_sem);\n    printf(\"TaskA: R1 acquired. Trying to acquire R2...\\n\");\n    sem_wait(&R2_sem);\n    printf(\"TaskA: R2 acquired. Performing work...\\n\");\n    // Simulate work\n    sleep(1);\n    printf(\"TaskA: Releasing R2...\\n\");\n    sem_post(&R2_sem);\n    printf(\"TaskA: Releasing R1...\\n\");\n    sem_post(&R1_sem);\n    printf(\"TaskA: Done.\\n\");\n}\n\nvoid taskB() {\n    printf(\"TaskB: Trying to acquire R2...\\n\");\n    sem_wait(&R2_sem);\n    printf(\"TaskB: R2 acquired. Trying to acquire R3...\\n\");\n    sem_wait(&R3_sem);\n    printf(\"TaskB: R3 acquired. Performing work...\\n\");\n    // Simulate work\n    sleep(1);\n    printf(\"TaskB: Releasing R3...\\n\");\n    sem_post(&R3_sem);\n    printf(\"TaskB: Releasing R2...\\n\");\n    sem_post(&R2_sem);\n    printf(\"TaskB: Done.\\n\");\n}\n\nvoid taskC() {\n    printf(\"TaskC: Trying to acquire R3...\\n\");\n    sem_wait(&R3_sem);\n    printf(\"TaskC: R3 acquired. Trying to acquire R1...\\n\");\n    sem_wait(&R1_sem);\n    printf(\"TaskC: R1 acquired. Performing work...\\n\");\n    // Simulate work\n    sleep(1);\n    printf(\"TaskC: Releasing R1...\\n\");\n    sem_post(&R1_sem);\n    printf(\"TaskC: Releasing R3...\\n\");\n    sem_post(&R3_sem);\n    printf(\"TaskC: Done.\\n\");\n}\n\n/* Example main to run threads (not part of question's code snippet):\nint main() {\n    init_resources();\n    pthread_t tid[3];\n    pthread_create(&tid[0], NULL, (void *(*)(void *))taskA, NULL);\n    pthread_create(&tid[1], NULL, (void *(*)(void *))taskB, NULL);\n    pthread_create(&tid[2], NULL, (void *(*)(void *))taskC, NULL);\n\n    for (int i = 0; i < 3; ++i) {\n        pthread_join(tid[i], NULL);\n    }\n    destroy_resources();\n    return 0;\n}\n*/",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "בהתבסס על הקוד הנתון, האם המימוש עלול להוביל לקיפאון (deadlock)? אם כן, הסבירו בפירוט את תנאי הקיפאון וספקו רצף אירועים ספציפי (לדוגמה: 'TaskA רוכש R1, TaskB רוכש R2, ...') שיוביל לקיפאון. אם לא, הסבירו מדוע.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "שנו את הקוד של הפונקציות `taskA`, `taskB`, ו-`taskC` כך שימנעו קיפאון באופן עקבי, תוך שימוש בסמפורים בלבד. עליכם להבטיח מניעה הדדית בגישה לכל משאב. הציגו את הקוד המתוקן, נמקו את פתרונכם והסבירו מדוע הוא מונע קיפאון. האם הפתרון שלכם מבטיח גם חופש מהרעבה (starvation-free)? נמקו.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.1. כן, המימוש הנתון עלול להוביל לקיפאון (deadlock).\n\n**תנאי קיפאון (Conditions for Deadlock):**\n1.  **מניעה הדדית (Mutual Exclusion)**: כל משאב (R1, R2, R3) מוגן על ידי סמפור בינארי, מה שמבטיח שרק חוט אחד יכול להחזיק במשאב נתון בכל רגע נתון. תנאי זה מתקיים.\n2.  **החזקה והמתנה (Hold and Wait)**: חוטים מחזיקים במשאב אחד (למשל, `taskA` מחזיק ב-R1) וממתינים למשאב נוסף (למשל, `taskA` ממתין ל-R2). תנאי זה מתקיים.\n3.  **ללא דריסה (No Preemption)**: לא ניתן לקחת משאב מחוט שמחזיק בו; יש לשחרר אותו באופן יזום על ידי החוט עצמו. תנאי זה מתקיים.\n4.  **המתנה מעגלית (Circular Wait)**: זהו התנאי שמתקיים כאן ומוביל לקיפאון.\n\n**רצף אירועים שיוביל לקיפאון:**\nנניח את רצף האירועים הבא:\n*   `TaskA` רוכש בהצלחה את `R1`. (קורא ל-`sem_wait(&R1_sem);`)\n*   `TaskB` רוכש בהצלחה את `R2`. (קורא ל-`sem_wait(&R2_sem);`)\n*   `TaskC` רוכש בהצלחה את `R3`. (קורא ל-`sem_wait(&R3_sem);`)\n\nבשלב זה:\n*   `TaskA` מחזיק ב-`R1` ומנסה לרכוש את `R2` (שמוחזק על ידי `TaskB`). `TaskA` נכנס למצב המתנה.\n*   `TaskB` מחזיק ב-`R2` ומנסה לרכוש את `R3` (שמוחזק על ידי `TaskC`). `TaskB` נכנס למצב המתנה.\n*   `TaskC` מחזיק ב-`R3` ומנסה לרכוש את `R1` (שמוחזק על ידי `TaskA`). `TaskC` נכנס למצב המתנה.\n\nנוצרה שרשרת המתנה מעגלית: `TaskA` ממתין ל-`TaskB`, `TaskB` ממתין ל-`TaskC`, ו-`TaskC` ממתין ל-`TaskA`. אף אחד מהחוטים לא יכול להמשיך, והמערכת נכנסת למצב קיפאון.\n\n1.2. כדי למנוע קיפאון, נשתמש בשיטת **היררכיית המשאבים (resource ordering)**. נקצה סדר גלובלי לכל משאב (לדוגמה: R1 < R2 < R3) ונוודא שכל החוטים רוכשים את המשאבים שלהם אך ורק בסדר עולה של המספר הסידורי. זה שובר את תנאי ההמתנה המעגלית.\n\n**קוד מתוקן:**\n```c\n#include <stdio.h>\n#include <pthread.h>\n#include <semaphore.h>\n#include <unistd.h> // For sleep\n\n// Semaphores for resources\nsem_t R1_sem; // Resource 1 (order 1)\nsem_t R2_sem; // Resource 2 (order 2)\nsem_t R3_sem; // Resource 3 (order 3)\n\nvoid init_resources() {\n    sem_init(&R1_sem, 0, 1);\n    sem_init(&R2_sem, 0, 1);\n    sem_init(&R3_sem, 0, 1);\n}\n\nvoid destroy_resources() {\n    sem_destroy(&R1_sem);\n    sem_destroy(&R2_sem);\n    sem_destroy(&R3_sem);\n}\n\nvoid taskA_fixed() { // Needs R1, R2. Order: R1 then R2.\n    printf(\"TaskA: Trying to acquire R1 (order 1)...\\n\");\n    sem_wait(&R1_sem);\n    printf(\"TaskA: R1 acquired. Trying to acquire R2 (order 2)...\\n\");\n    sem_wait(&R2_sem);\n    printf(\"TaskA: R2 acquired. Performing work...\\n\");\n    sleep(1);\n    printf(\"TaskA: Releasing R2...\\n\");\n    sem_post(&R2_sem);\n    printf(\"TaskA: Releasing R1...\\n\");\n    sem_post(&R1_sem);\n    printf(\"TaskA: Done.\\n\");\n}\n\nvoid taskB_fixed() { // Needs R2, R3. Order: R2 then R3.\n    printf(\"TaskB: Trying to acquire R2 (order 2)...\\n\");\n    sem_wait(&R2_sem);\n    printf(\"TaskB: R2 acquired. Trying to acquire R3 (order 3)...\\n\");\n    sem_wait(&R3_sem);\n    printf(\"TaskB: R3 acquired. Performing work...\\n\");\n    sleep(1);\n    printf(\"TaskB: Releasing R3...\\n\");\n    sem_post(&R3_sem);\n    printf(\"TaskB: Releasing R2...\\n\");\n    sem_post(&R2_sem);\n    printf(\"TaskB: Done.\\n\");\n}\n\nvoid taskC_fixed() { // Needs R3, R1. Order: R1 then R3 (must be increasing order).\n    printf(\"TaskC: Trying to acquire R1 (order 1)...\\n\");\n    sem_wait(&R1_sem);\n    printf(\"TaskC: R1 acquired. Trying to acquire R3 (order 3)...\\n\");\n    sem_wait(&R3_sem);\n    printf(\"TaskC: R3 acquired. Performing work...\\n\");\n    sleep(1);\n    printf(\"TaskC: Releasing R3...\\n\");\n    sem_post(&R3_sem);\n    printf(\"TaskC: Releasing R1...\\n\");\n    sem_post(&R1_sem);\n    printf(\"TaskC: Done.\\n\");\n}\n```\n\n**הסבר למניעת קיפאון:**\nעל ידי אכיפת סדר רכישה עולה של המשאבים (R1 -> R2 -> R3), אנו מונעים את היווצרות שרשרת המתנה מעגלית. כל חוט רוכש את המשאבים שלו בסדר עולה של המספר הסידורי שלהם:\n*   `taskA_fixed` רוכש R1 ואז R2. (סדר 1 ואז 2)\n*   `taskB_fixed` רוכש R2 ואז R3. (סדר 2 ואז 3)\n*   `taskC_fixed` רוכש R1 ואז R3. (סדר 1 ואז 3)\n\nבכל מקרה, חוט לעולם לא יבקש משאב בעל מספר סידורי נמוך יותר ממשאב שכבר רכש. לכן, לא יכולה להיווצר שרשרת המתנה מעגלית שבה חוט A מחכה למשאב שמוחזק על ידי חוט B, שבתורו מחכה למשאב שמוחזק על ידי חוט C, וחוט C מחכה למשאב שמוחזק על ידי חוט A. אם חוט ממתין למשאב, הוא ממתין למשאב בעל מספר סידורי גבוה יותר, או שהמשאב יהיה פנוי. במצב כזה, אם נוצרת שרשרת המתנה, היא לעולם לא יכולה להיות מעגלית, מכיוון שהיא תמיד תתקדם לעבר משאבים בעלי סדר גבוה יותר. כלומר, לא יכול להיות מצב שבו חוט שמחזיק במשאב X וממתין למשאב Y, ימתין למשאב Y שבתורו מוחזק על ידי חוט אחר שממתין למשאב X או למשאב בעל סדר נמוך יותר.\n\n**האם הפתרון מבטיח חופש מהרעבה (starvation-free)?**\nהפתרון הזה, המבוסס על סדר משאבים ושימוש בסמפורים בינאריים פשוטים (כמו אלו של POSIX), **אינו מבטיח חופש מוחלט מהרעבה**. סמפורים בינאריים כאלה אינם מבטיחים הוגנות (fairness) בסדר שחרור החוטים הממתינים. ייתכן שחוט מסוים שממתין למשאב ימשיך להידחות שוב ושוב לטובת חוטים אחרים שגם הם ממתינים לאותו משאב, אם לוח הזמנים (scheduler) של מערכת ההפעלה אינו הוגן, או אם יש זרם קבוע של חוטים חדשים המבקשים את המשאב וזוכים בו לפני החוט המורעב. לדוגמה, אם `R1` פנוי, וגם `TaskA` וגם `TaskC` ממתינים לו, ייתכן ש-`TaskA` יזכה ב-`R1` שוב ושוב בעוד `TaskC` מורעב. כדי להבטיח חופש מהרעבה, נצטרך מנגנון נוסף של תור הוגן (fair queue) לכל משאב או סמפורים עם תכונות הוגנות מובנות (כמו למשל סמפורים במימוש עם תור FIFO)."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

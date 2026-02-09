@@ -1,0 +1,52 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Synchronization and Concurrency",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-09 21:06:31",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4132,
+      "output_tokens": 1986,
+      "total_tokens": 15413
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Concurrency",
+      "Threads",
+      "Deadlock",
+      "Condition Variables"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המשתמשת בחוטים (pthreads) ובמנגנוני סנכרון (mutex ו-condition variable) על מנת לקדם מונה גלובלי `counter` באופן מסודר. המטרה היא שכל חוט יקדם את המונה בתורו: חוט 0, ואז חוט 1, וכן הלאה עד חוט `NUM_THREADS-1`, ולאחר מכן שוב חוט 0, וכן הלאה, עד שכל חוט ביצע `INCREMENTS_PER_THREAD` קידומים. ניתן להניח שכל קריאות המערכת מצליחות. ענו על השאלות הבאות.",
+      "code_snippet": "1 #include <pthread.h>\n2 #include <stdio.h>\n3 #include <stdlib.h>\n4 #include <unistd.h> // For usleep\n5\n6 #define NUM_THREADS 4          // מספר החוטים\n7 #define INCREMENTS_PER_THREAD 2 // מספר הקידומים לכל חוט\n8\n9 int counter = 0;\n10 int current_turn = 0; // התור הנוכחי של איזה חוט מורשה לקדם\n11 pthread_mutex_t mutex;\n12 pthread_cond_t cond;\n13\n14 void* thread_func(void* arg) {\n15    long my_id = (long)arg;\n16\n17    for (int i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n18        pthread_mutex_lock(&mutex);\n19\n20        // חכה לתור שלך\n21        while (my_id != current_turn) {\n22            pthread_cond_wait(&cond, &mutex);\n23        }\n24\n25        // קדם את המונה\n26        counter++;\n27        printf(\"Thread %ld: counter = %d\\n\", my_id, counter);\n28\n29        // העבר את התור לחוט הבא\n30        current_turn = (current_turn + 1) % NUM_THREADS;\n31        \n32        // אותת לחוט הבא\n33        pthread_cond_signal(&cond); \n34\n35        pthread_mutex_unlock(&mutex);\n36    }\n37    return NULL;\n38}\n39\n40 int main() {\n41    pthread_t threads[NUM_THREADS];\n42    \n43    pthread_mutex_init(&mutex, NULL);\n44    pthread_cond_init(&cond, NULL);\n45\n46    // יצירת החוטים\n47    for (long i = 0; i < NUM_THREADS; ++i) {\n48        pthread_create(&threads[i], NULL, thread_func, (void*)i);\n49    }\n50    \n51    // המתנה לסיום כל החוטים\n52    for (int i = 0; i < NUM_THREADS; ++i) {\n53        pthread_join(threads[i], NULL);\n54    }\n55\n56    printf(\"Final counter value: %d\\n\", counter);\n57\n58    pthread_mutex_destroy(&mutex);\n59    pthread_cond_destroy(&cond);\n60\n61    return 0;\n62}"
+    },
+    "sub_questions": [
+      {
+        "id": "8.1",
+        "text": "הסבירו מהו הפלט האפשרי של התוכנית ומהן הבעיות שעלולות לקרות (כגון מצב מרוץ, קיפאון, או רעב) תחת תזמונים שונים של מערכת ההפעלה. נמקו את תשובתכם.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.2",
+        "text": "תקנו את התוכנית כך שתפעל באופן נכון ותבטיח שהמונה יקודם בסדר הרצוי וכל החוטים יסיימו את עבודתם. יש להשתמש אך ורק ב-mutex וב-condition variables, ללא שינוי מהותי במבנה התוכנית הקיים. ציינו במדויק איזה שינוי יש לבצע ומדוע הוא פותר את הבעיה.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "8.1: הפלט הצפוי של התוכנית, אם הייתה פועלת כהלכה, היה רצף של הדפסות בסדר עולה של המונה (לדוגמה: \"Thread 0: counter = 1\", \"Thread 1: counter = 2\", וכן הלאה), עד לערך סופי של `NUM_THREADS * INCREMENTS_PER_THREAD` (בדוגמה זו, 8). עם זאת, ככל הנראה התוכנית תיתקע (deadlock) ולא תסיים את ריצתה, ולכן לא תגיע להדפסת ה-Final counter value. הבעיה נובעת מהשימוש ב-`pthread_cond_signal` בשורה 33. כאשר חוט מסיים את תורו ומאותת באמצעות `pthread_cond_signal`, הוא מעיר רק חוט אחד מבין החוטים הממתינים על משתנה התנאי `cond`. אם החוט שהתעורר אינו החוט שהתור שלו הגיע (כלומר, `my_id != current_turn`), הוא יבדוק שוב את התנאי `while (my_id != current_turn)` ויחזור למצב המתנה. אם במקרה זה, החוט שהיה אמור להתעורר (זה ש-`current_turn` מצביע אליו) לא התעורר, ואף חוט אחר לא נשאר פעיל כדי לשנות את `current_turn` או לאותת שוב, המערכת תיכנס לקיפאון (deadlock). כל החוטים יהיו במצב המתנה, ואף אחד מהם לא יתעורר כדי להמשיך את שרשרת הקידומים. סדר התזמון של מערכת ההפעלה יכול בקלות להוביל למצב כזה, במיוחד כאשר ישנם מספר חוטים גדול יחסית הממתינים על אותו משתנה תנאי. לדוגמה, חוט 0 מסיים את תורו ומאותת. אם חוט 2 מתעורר במקום חוט 1, חוט 2 יחזור לישון. אם חוט 1 נשאר במצב המתנה ולא התעורר, המערכת תיתקע.\n\n8.2: כדי לתקן את התוכנית, יש לשנות את הקריאה ל-`pthread_cond_signal` בשורה 33 ל-`pthread_cond_broadcast`. הסיבה לכך היא ש-`pthread_cond_broadcast` מעירה את כל החוטים הממתינים על משתנה התנאי `cond`. באופן זה, גם אם חוטים שאינם בתורם מתעוררים, הם יבדקו את התנאי `while (my_id != current_turn)` ויחזרו לישון, אך החוט שהתור שלו אכן הגיע (זה ש-`my_id == current_turn` עבורו) יתעורר, ימצא את התנאי נכון, יבצע את הקידום וימשיך את שרשרת התורים. שינוי זה מבטיח שאף אות לא יאבד ושכל חוט יקבל את ההזדמנות לבצע את תורו כאשר הוא מגיע, ובכך מונע את מצב הקיפאון. \nהשינוי בקוד:\n`pthread_cond_broadcast(&cond);` במקום `pthread_cond_signal(&cond);` בשורה 33."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

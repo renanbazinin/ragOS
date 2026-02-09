@@ -1,0 +1,57 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Signals",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-09 20:34:06",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3748,
+      "output_tokens": 2991,
+      "total_tokens": 12908
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Signals",
+      "Process Management",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "תהליך אב (Parent) מתקין מטפל עבור האות SIGUSR1, חוסם את האות SIGUSR1, ולאחר מכן מבצע `fork()` ליצירת תהליך בן (Child). תהליך הבן יורש את מסכת האותות החסומים ואת ה-disposition של המטפל. קטע הקוד הבא מראה את המימוש:",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <signal.h>\n#include <sys/wait.h>\n#include <errno.h>\n\nvolatile int sigusr1_received_child = 0;\n\nvoid child_sigusr1_handler(int signo) {\n    printf(\"Child PID %d: Received SIGUSR1 in handler.\\n\", getpid());\n    sigusr1_received_child = 1;\n}\n\nint main() {\n    pid_t pid;\n    sigset_t parent_block_mask, child_wait_mask;\n\n    // 1. Parent sets up SIGUSR1 handler\n    struct sigaction sa;\n    sa.sa_handler = child_sigusr1_handler;\n    sigemptyset(&sa.sa_mask);\n    sa.sa_flags = 0;\n    if (sigaction(SIGUSR1, &sa, NULL) == -1) {\n        perror(\"sigaction parent\");\n        exit(EXIT_FAILURE);\n    }\n    printf(\"Parent PID %d: SIGUSR1 handler installed.\\n\", getpid());\n\n    // 2. Parent blocks SIGUSR1\n    sigemptyset(&parent_block_mask);\n    sigaddset(&parent_block_mask, SIGUSR1);\n    if (sigprocmask(SIG_BLOCK, &parent_block_mask, NULL) == -1) {\n        perror(\"sigprocmask BLOCK parent\");\n        exit(EXIT_FAILURE);\n    }\n    printf(\"Parent PID %d: SIGUSR1 blocked.\\n\", getpid());\n\n    pid = fork();\n\n    if (pid == -1) {\n        perror(\"fork\");\n        exit(EXIT_FAILURE);\n    } else if (pid == 0) { // Child process\n        printf(\"Child PID %d: Started. SIGUSR1 should be blocked and handler inherited.\\n\", getpid());\n\n        // Child wants to wait for SIGUSR1 using sigsuspend.\n        // It *incorrectly* uses its current blocked mask for sigsuspend.\n        sigprocmask(SIG_SETMASK, NULL, &child_wait_mask); // Get current mask (which has SIGUSR1 blocked)\n        printf(\"Child PID %d: Attempting to wait for SIGUSR1 with sigsuspend using its current mask...\\n\", getpid());\n\n        if (sigsuspend(&child_wait_mask) == -1 && errno != EINTR) {\n             perror(\"sigsuspend child\");\n        }\n        printf(\"Child PID %d: sigsuspend returned.\\n\", getpid());\n\n        if (sigusr1_received_child) {\n            printf(\"Child PID %d: SIGUSR1 was handled.\\n\", getpid());\n        } else {\n            printf(\"Child PID %d: SIGUSR1 was NOT handled (or not received while unblocked).\\n\", getpid());\n        }\n\n        exit(EXIT_SUCCESS);\n    } else { // Parent process\n        printf(\"Parent PID %d: Child PID is %d.\\n\", getpid(), pid);\n\n        sleep(1); // Give child some time to reach sigsuspend\n\n        printf(\"Parent PID %d: Sending SIGUSR1 to child %d.\\n\", getpid(), pid);\n        if (kill(pid, SIGUSR1) == -1) {\n            perror(\"kill\");\n        }\n\n        int status;\n        if (waitpid(pid, &status, 0) == -1) {\n            perror(\"waitpid\");\n        }\n        if (WIFEXITED(status)) {\n            printf(\"Parent PID %d: Child exited with status %d.\\n\", getpid(), WEXITSTATUS(status));\n        }\n\n        sigset_t empty_mask;\n        sigemptyset(&empty_mask);\n        if (sigprocmask(SIG_SETMASK, &empty_mask, NULL) == -1) {\n            perror(\"sigprocmask UNBLOCK parent\");\n        }\n        printf(\"Parent PID %d: SIGUSR1 unblocked in parent.\\n\", getpid());\n    }\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "מה יהיה הפלט של תהליך הבן כאשר יופעל הקוד הנתון? הסבירו מדוע.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "מהי הדרך הנכונה עבור תהליך הבן להמתין לאות `SIGUSR1` באמצעות `sigsuspend`? תקנו את המשתנה `child_wait_mask` או הוסיפו משתנה חדש בקטע הקוד של תהליך הבן בהתאם.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.3",
+        "text": "שקלו תרחיש שבו תהליך הבן, במקום לקרוא ל-`sigsuspend`, מבצע מיד קריאה ל-`execve` כדי להריץ תוכנית אחרת. כיצד הדבר ישפיע על הטיפול ב-`SIGUSR1` אם האב שולח אותו לבן *לאחר* ה-`execve`?",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.  **פלט תהליך הבן ונימוק:**\n    *   תהליך הבן יירש את מסכת האותות החסומים מהאב, כלומר `SIGUSR1` יהיה חסום. הוא גם יירש את ה-disposition של המטפל (`child_sigusr1_handler`).\n    *   כאשר האב שולח `SIGUSR1` לבן, האות יהפוך ל-pending בתהליך הבן, אך הוא לא יימסר (delivered) מיד למטפל מכיוון שהוא חסום.\n    *   הקריאה `sigsuspend(&child_wait_mask)` בתהליך הבן שגויה במקרה זה. הפונקציה `sigsuspend` מקבלת מסכת אותות שבאופן זמני *תחליף* את המסכה הנוכחית של התהליך בזמן ההמתנה. מכיוון ש-`child_wait_mask` מכילה את `SIGUSR1` כחסום (כפי שירשה מהאב), האות `SIGUSR1` יישאר חסום גם בזמן ש-`sigsuspend` ממתין.\n    *   לכן, `SIGUSR1` לעולם לא יימסר למטפל בזמן שהתהליך נמצא ב-`sigsuspend`. תהליך הבן ימשיך להמתין ב-`sigsuspend` עד שאות אחר שלא חסום יימסר אליו, או עד שהתהליך יסתיים בדרך אחרת (למשל, על ידי `SIGKILL` או כאשר תהליך האב יסתיים והבן יקבל `SIGHUP` או ימות).\n    *   הפלט של תהליך הבן יהיה:\n        ```\n        Child PID <child_pid>: Started. SIGUSR1 should be blocked and handler inherited.\n        Child PID <child_pid>: Attempting to wait for SIGUSR1 with sigsuspend using its current mask...\n        ```\n        והתהליך ייתקע ב-`sigsuspend` (כלומר, הוא לא ימשיך להדפיס את השורות הבאות ולא יקלוט את האות `SIGUSR1`).\n\n2.  **דרך נכונה להמתנה ל-SIGUSR1 באמצעות `sigsuspend`:**\n    *   כדי ש-`sigsuspend` תאפשר קבלת `SIGUSR1`, יש להעביר לה מסכה שבה `SIGUSR1` *אינו* חסום. הדרך הנפוצה היא להעביר מסכה ריקה.\n    *   השינוי הנדרש בקוד הוא:\n        ```c\n        // Child process (inside the else if (pid == 0) block)\n        // ...\n        sigset_t empty_mask;\n        sigemptyset(&empty_mask); // Create an empty mask\n        printf(\"Child PID %d: Attempting to wait for SIGUSR1 with sigsuspend using an empty mask...\\n\", getpid());\n\n        if (sigsuspend(&empty_mask) == -1 && errno != EINTR) { // Pass the empty mask\n             perror(\"sigsuspend child\");\n        }\n        printf(\"Child PID %d: sigsuspend returned.\\n\", getpid());\n\n        if (sigusr1_received_child) {\n            printf(\"Child PID %d: SIGUSR1 was handled.\\n\", getpid());\n        } else {\n            printf(\"Child PID %d: SIGUSR1 was NOT handled (or not received while unblocked).\\n\", getpid());\n        }\n        // ...\n        ```\n    *   במקרה זה, `sigsuspend` תשנה באופן זמני את מסכת האותות של הבן למסכה הריקה (ובכך תסיר את החסימה מ-`SIGUSR1`), תמתין, וכאשר `SIGUSR1` יימסר, היא תחזיר את המסכה המקורית (שבה `SIGUSR1` חסום) ותחזיר -1 עם `errno` שווה ל-`EINTR`. המטפל יופעל, והדגל `sigusr1_received_child` יתעדכן, ולבסוף יודפס \"Child PID <child_pid>: SIGUSR1 was handled.\"\n\n3.  **השפעת `execve` על טיפול באותות:**\n    *   כאשר תהליך מבצע קריאה ל-`execve`, ה-image של התוכנית הנוכחית מוחלף בתוכנית חדשה.\n    *   **מסכת האותות החסומים (Signal Mask):** מסכת האותות החסומים *נשמרת* לאחר קריאת `execve`. כלומר, אם `SIGUSR1` היה חסום בתהליך הבן לפני ה-`execve`, הוא יישאר חסום גם בתוכנית החדשה שרצה.\n    *   **מטפלי האותות (Signal Dispositions):** מטפלי האותות *מאופסים* לערך ברירת המחדל שלהם (default disposition) עבור כל האותות, למעט אותות שהוגדרו להיות `SIG_IGN` (התעלמות). כלומר, המטפל `child_sigusr1_handler` שהותקן על ידי האב (וירש על ידי הבן) יבוטל, והטיפול ב-`SIGUSR1` יחזור להתנהגות ברירת המחדל, שהיא בדרך כלל סיום התהליך (`terminate`).\n    *   לכן, אם האב ישלח `SIGUSR1` לבן *לאחר* ה-`execve`:\n        *   אם `SIGUSR1` עדיין חסום (כפי שירש), האות יהפוך ל-pending אך לא יימסר. התוכנית החדשה תמשיך לרוץ עד שתבטל את חסימת האות.\n        *   אם התוכנית החדשה תבטל את חסימת `SIGUSR1` (או אם הוא לא היה חסום מלכתחילה), האות יימסר מיד. מכיוון שהמטפל אופס לברירת המחדל, תהליך הבן יסתיים (terminate) כתוצאה מקבלת `SIGUSR1`."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

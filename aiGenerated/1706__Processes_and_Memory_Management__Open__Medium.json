@@ -1,0 +1,57 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Processes and Memory Management",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-09 20:59:22",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1726,
+      "output_tokens": 1332,
+      "total_tokens": 5637
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "Open",
+    "topic": [
+      "Processes",
+      "Memory Management",
+      "Copy-on-Write"
+    ],
+    "content": {
+      "text": "נתונה מערכת הפעלה המשתמשת בזיכרון וירטואלי עם גודל דף של 4KB. המערכת מיישמת מנגנון Copy-on-Write (CoW) יעיל עבור תהליכי fork(). נתבונן בקטע הקוד הבא:\n\nבהתבסס על הקוד והנתונים לעיל, ובהנחה שכל משתנה (`global_var`, `local_var`, `*heap_var`) ממוקם בדף זיכרון וירטואלי נפרד, ושהקצאת הזיכרון באמצעות `malloc` תופסת דף זיכרון שלם (4KB), ענו על השאלות הבאות:",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\nint global_var = 10; // Global variable\n\nint main() {\n    int local_var = 20; // Stack variable\n    int *heap_var = (int *)malloc(sizeof(int)); // Heap variable\n    *heap_var = 30;\n\n    pid_t pid = fork();\n\n    if (pid == 0) { // Child process\n        global_var = 100;\n        local_var = 200;\n        *heap_var = 300;\n        printf(\"Child: global_var=%d, local_var=%d, *heap_var=%d\\n\", global_var, local_var, *heap_var);\n    } else if (pid > 0) { // Parent process\n        wait(NULL); // Wait for child to finish\n        printf(\"Parent: global_var=%d, local_var=%d, *heap_var=%d\\n\", global_var, local_var, *heap_var);\n    } else {\n        perror(\"fork failed\");\n        return 1;\n    }\n\n    free(heap_var);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "7.1",
+        "text": "כמה מסגרות פיזיות (physical frames) נדרשות עבור דפי הנתונים (data pages) של התהליך האב מיד לפני קריאת ה-`fork()`? יש לכלול את דפי המשתנים `global_var`, `local_var` ו-`*heap_var`.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "7.2",
+        "text": "כמה מסגרות פיזיות סך הכל תופסים דפי הנתונים של תהליכי האב והבן יחד, מיד לאחר קריאת ה-`fork()` ולפני כל שינוי של המשתנים על ידי מי מהתהליכים? נמקו.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "7.3",
+        "text": "כמה מסגרות פיזיות סך הכל תופסים דפי הנתונים של תהליכי האב והבן יחד, לאחר ששניהם סיימו את ביצועם (כלומר, לאחר שהבן שינה את כל המשתנים והאב המתין לו), וההדפסה בוצעה? נמקו.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "7.1. לפני קריאת ה-`fork()`, לתהליך האב יש 3 משתנים (`global_var`, `local_var`, ו-`*heap_var`). בהנחה שכל אחד מהם נמצא בדף זיכרון נפרד, נדרשות 3 מסגרות פיזיות עבור דפי הנתונים הללו.\n\n7.2. מיד לאחר קריאת ה-`fork()` ולפני כל שינוי, תהליך הבן הוא העתק כמעט זהה של תהליך האב. בזכות מנגנון ה-Copy-on-Write, שני התהליכים חולקים את אותן 3 מסגרות פיזיות עבור דפי הנתונים שלהם. לפיכך, סך הכל נדרשות עדיין 3 מסגרות פיזיות בלבד.\n\n7.3. תהליך הבן משנה את כל שלושת המשתנים: `global_var`, `local_var`, ו-`*heap_var`. כל שינוי כזה מפעיל את מנגנון ה-CoW: דף הזיכרון המשותף שעליו נמצא המשתנה הספציפי מועתק למסגרת פיזית חדשה עבור תהליך הבן. לכן, עבור כל אחד משלושת המשתנים, נוצרת מסגרת פיזית חדשה לבן. בסך הכל, יהיו 3 מסגרות פיזיות מקוריות שבהן נשארים הערכים של האב, ועוד 3 מסגרות פיזיות חדשות עבור הבן עם הערכים החדשים שלו. סך הכל 3 + 3 = 6 מסגרות פיזיות."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}
