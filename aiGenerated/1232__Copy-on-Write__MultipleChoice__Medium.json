@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Copy-on-Write",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 08:51:36",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1142,
+      "output_tokens": 897,
+      "total_tokens": 3865
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Copy-on-Write",
+      "Processes",
+      "Memory Management",
+      "Virtual Memory"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא המשתמש במנגנון Copy-on-Write (COW):\n\n```c\n#include <stdio.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\nint global_var = 10;\n\nint main() {\n    int local_var = 20;\n    pid_t pid = fork();\n\n    if (pid == 0) { // Child process\n        global_var = 100;\n        local_var = 200;\n        printf(\"Child: global_var = %d, local_var = %d\\n\", global_var, local_var);\n    } else if (pid > 0) { // Parent process\n        wait(NULL); // Wait for child to finish\n        printf(\"Parent: global_var = %d, local_var = %d\\n\", global_var, local_var);\n    }\n    return 0;\n}\n```\n\nאיזו טענה נכונה לגבי ערכי המשתנים `global_var` ו-`local_var` לאחר ביצוע קטע הקוד?",
+      "code_snippet": null,
+      "options": [
+        "א. בשני התהליכים (אב וילד), `global_var` יהיה 10 ו-`local_var` יהיה 20.",
+        "ב. בתהליך הילד `global_var` יהיה 100 ו-`local_var` יהיה 200. בתהליך האב `global_var` יהיה 10 ו-`local_var` יהיה 20.",
+        "ג. בשני התהליכים (אב וילד), `global_var` יהיה 100 ו-`local_var` יהיה 200.",
+        "ד. בתהליך הילד `global_var` יהיה 100 ו-`local_var` יהיה 200. בתהליך האב `global_var` יהיה 100 ו-`local_var` יהיה 20.",
+        "ה. אף אחת מהטענות אינה נכונה."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "הסבר: לאחר קריאת ()fork, תהליך האב והילד חולקים את אותם דפי זיכרון פיזיים, אך הם מסומנים כקריאה בלבד (read-only) בטבלאות הדפים שלהם, בזכות מנגנון Copy-on-Write (COW).\nכאשר תהליך הילד מנסה לשנות את `global_var` ו-`local_var`, מתרחשת תקלת דף (page fault). מערכת ההפעלה משכפלת את הדפים המכילים משתנים אלו עבור תהליך הילד, ומסמנת את העותקים החדשים כניתנים לכתיבה עבור הילד. תהליך האב ממשיך להצביע על הדפים המקוריים, אשר לא שונו על ידו.\nלכן, בתהליך הילד, הערכים ישתנו ל-100 ו-200 בהתאמה. בתהליך האב, הערכים יישארו כפי שהיו לפני ה-fork, כלומר 10 ו-20."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

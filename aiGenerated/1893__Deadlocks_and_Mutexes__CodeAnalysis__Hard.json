@@ -1,0 +1,51 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Deadlocks and Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 21:36:06",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4085,
+      "output_tokens": 2721,
+      "total_tokens": 16304
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Deadlocks",
+      "Mutexes",
+      "Synchronization",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "מערכת בנקאית מנהלת חשבונות בנק, כאשר כל חשבון מוגן על ידי מנעול (mutex) משלו כדי להבטיח עקביות בעת עדכון יתרה. הפונקציה `transfer` מיועדת להעביר סכום כסף מחשבון אחד לאחר. להלן מימוש ראשוני של הפונקציה:",
+      "code_snippet": "typedef struct {\n    int id;\n    int balance;\n    pthread_mutex_t mutex;\n} Account;\n\nvoid transfer(Account *from, Account *to, int amount) {\n    // תפיסת מנעול החשבון ממנו מעבירים\n    pthread_mutex_lock(&from->mutex);\n\n    // תפיסת מנעול החשבון אליו מעבירים\n    // (ייתכן כאן מיתוג הקשר)\n    pthread_mutex_lock(&to->mutex);\n\n    // בדיקת יתרה וביצוע ההעברה\n    if (from->balance >= amount) {\n        from->balance -= amount;\n        to->balance += amount;\n        printf(\"Transfer successful: %d from account %d to account %d. New balances: %d (acc %d), %d (acc %d)\\n\",\n               amount, from->id, to->id, from->balance, from->id, to->balance, to->id);\n    } else {\n        printf(\"Transfer failed: Insufficient funds in account %d for transfer of %d.\\n\", from->id, amount);\n    }\n\n    // שחרור מנעולים\n    pthread_mutex_unlock(&to->mutex);\n    pthread_mutex_unlock(&from->mutex);\n}"
+    },
+    "sub_questions": [
+      {
+        "id": "8.1",
+        "text": "הסבירו איזו בעיה עלולה להתרחש במימוש הנתון. תארו תרחיש ספציפי (עם שני חוטים) המדגים את הבעיה.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.2",
+        "text": "הציעו פתרון לבעיה ותקנו את קוד הפונקציה `transfer` בהתאם. נמקו את התיקון.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "### פתרון:\n\n**8.1. הבעיה ותיאור תרחיש קיפאון:**\n\nהבעיה שעלולה להתרחש במימוש הנתון היא **קיפאון (Deadlock)**. קיפאון מתרחש כאשר שני חוטים או יותר חוסמים זה את זה באופן הדדי, כאשר כל חוט ממתין למשאב שמוחזק על ידי חוט אחר, וכל אחד מהם לא יכול להמשיך את ריצתו.\n\n**תרחיש לדוגמה המדגים קיפאון:**\n\nנניח שיש לנו שני חשבונות בנק, `accountA` (עם `id=1`) ו-`accountB` (עם `id=2`), ושני חוטים, `T1` ו-`T2`.\n\n1.  **חוט `T1`** מתחיל לבצע העברה: `transfer(&accountA, &accountB, 100)`. הוא תופס בהצלחה את המנעול של `accountA` (`pthread_mutex_lock(&accountA->mutex)`).\n2.  מיד לאחר מכן, מתרחש **מיתוג הקשר (context switch)** לחוט `T2`.\n3.  **חוט `T2`** מתחיל לבצע העברה הפוכה: `transfer(&accountB, &accountA, 50)`. הוא תופס בהצלחה את המנעול של `accountB` (`pthread_mutex_lock(&accountB->mutex)`).\n4.  חוט `T2` מנסה כעת לתפוס את המנעול של `accountA` (`pthread_mutex_lock(&accountA->mutex)`). מכיוון שמנעול זה מוחזק על ידי `T1`, חוט `T2` **נחסם** בהמתנה.\n5.  מתרחש **מיתוג הקשר** בחזרה לחוט `T1`.\n6.  חוט `T1` מנסה כעת לתפוס את המנעול של `accountB` (`pthread_mutex_lock(&accountB->mutex)`). מכיוון שמנעול זה מוחזק על ידי `T2`, חוט `T1` **נחסם** בהמתנה.\n\nבשלב זה, `T1` ממתין ל-`accountB->mutex` שמוחזק על ידי `T2`, ו-`T2` ממתין ל-`accountA->mutex` שמוחזק על ידי `T1`. שניהם חסומים ולא יכולים להתקדם, מה שמוביל למצב של קיפאון.\n\n**8.2. פתרון ותיקון הקוד:**\n\nכדי למנוע קיפאון במקרה זה, יש לאכוף **סדר קבוע ומוגדר מראש לתפיסת המנעולים**. דרך נפוצה ויעילה לעשות זאת היא לתפוס את המנעול של האובייקט בעל הכתובת הנמוכה יותר בזיכרון קודם, ולאחר מכן את המנעול של האובייקט בעל הכתובת הגבוהה יותר. זה מבטיח שכל החוטים ינסו לתפוס את המנעולים באותו סדר, ובכך נמנע מעגל המתנה הדדי.\n\n**קוד הפונקציה `transfer` המתוקן:**\n```c\ntypedef struct {\n    int id;\n    int balance;\n    pthread_mutex_t mutex;\n} Account;\n\nvoid transfer(Account *from, Account *to, int amount) {\n    // טיפול במקרה של העברה עצמית כדי למנוע נעילה כפולה של אותו מנעול\n    if (from == to) {\n        if (from->balance >= amount) {\n            from->balance -= amount;\n            printf(\"Self-transfer successful: %d from account %d. New balance: %d (acc %d)\\n\",\n                   amount, from->id, from->balance, from->id);\n        } else {\n            printf(\"Self-transfer failed: Insufficient funds in account %d for transfer of %d.\\n\", from->id, amount);\n        }\n        return;\n    }\n\n    pthread_mutex_t *first_mutex, *second_mutex;\n    Account *first_acc_ptr, *second_acc_ptr;\n\n    // קביעת סדר תפיסת מנעולים עקבי על בסיס כתובות האובייקטים בזיכרון.\n    // תמיד ננעל את המנעול של החשבון בעל הכתובת הנמוכה יותר בזיכרון ראשון.\n    if (from < to) { // השוואת כתובות של מצביעים (pointers)\n        first_mutex = &from->mutex;\n        second_mutex = &to->mutex;\n        first_acc_ptr = from;\n        second_acc_ptr = to;\n    } else { // from > to (מכיוון שהמקרה from == to טופל כבר למעלה)\n        first_mutex = &to->mutex;\n        second_mutex = &from->mutex;\n        first_acc_ptr = to;\n        second_acc_ptr = from;\n    }\n\n    // תפיסת המנעול הראשון (לפי סדר הכתובות)\n    printf(\"Trying to lock account %d (first, address %p)\\n\", first_acc_ptr->id, (void*)first_acc_ptr);\n    pthread_mutex_lock(first_mutex);\n    printf(\"Locked account %d (first)\\n\", first_acc_ptr->id);\n\n    // תפיסת המנעול השני (לפי סדר הכתובות)\n    printf(\"Trying to lock account %d (second, address %p)\\n\", second_acc_ptr->id, (void*)second_acc_ptr);\n    pthread_mutex_lock(second_mutex);\n    printf(\"Locked account %d (second)\\n\", second_acc_ptr->id);\n\n    // לאחר שתפסנו את שני המנעולים בסדר עקבי, אנו יכולים לבצע את הלוגיקה בבטחה.\n    // הלוגיקה הפנימית של ההעברה נשארת זהה, תוך שימוש במצביעים המקוריים from ו-to.\n    if (from->balance >= amount) {\n        from->balance -= amount;\n        to->balance += amount;\n        printf(\"Transfer successful: %d from account %d to account %d. New balances: %d (acc %d), %d (acc %d)\\n\",\n               amount, from->id, to->id, from->balance, from->id, to->balance, to->id);\n    } else {\n        printf(\"Transfer failed: Insufficient funds in account %d for transfer of %d.\\n\", from->id, amount);\n    }\n\n    // שחרור מנעולים בסדר הפוך מסדר התפיסה (חשוב למנוע מצבי מירוץ)\n    printf(\"Unlocking account %d (second)\\n\", second_acc_ptr->id);\n    pthread_mutex_unlock(second_mutex);\n    printf(\"Unlocking account %d (first)\\n\", first_acc_ptr->id);\n    pthread_mutex_unlock(first_mutex);\n}\n```\n\n**נימוק לתיקון:**\n\nעל ידי השוואת כתובות האובייקטים `from` ו-`to` (או לחלופין, כתובות המנעולים שלהם), אנו מבטיחים שכל החוטים, ללא קשר לסדר שבו הם קיבלו את הפרמטרים `from` ו-`to` בקריאה המקורית לפונקציה, ינסו לתפוס את המנעולים של שני החשבונות באותו סדר גלובלי (לדוגמה, תמיד קודם את המנעול של החשבון בעל הכתובת הנמוכה יותר בזיכרון, ואז את המנעול של החשבון בעל הכתובת הגבוהה יותר). זה שובר את תנאי ה'המתנה מעגלית' (Circular Wait) מתוך ארבעת התנאים ההכרחיים לקיפאון (תנאי קופמן), ובכך מונע את הקיפאון. במקרה ש-`from` ו-`to` מצביעים על אותו חשבון, אין צורך בנעילת מנעולים כלל, וזהו מקרה קצה שיש לטפל בו בנפרד כדי למנוע ניסיון נעילה כפולה של אותו מנעול או נעילה עצמית."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

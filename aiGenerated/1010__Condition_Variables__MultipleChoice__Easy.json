@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Condition Variables",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 07:24:49",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 873,
+      "output_tokens": 408,
+      "total_tokens": 2425
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Synchronization",
+      "Condition Variables"
+    ],
+    "content": {
+      "text": "מהי הפעולה העיקרית של קריאה ל-`wait` על משתנה תנאי (condition variable), בהנחה שהמנעול (mutex) נרכש מראש?",
+      "code_snippet": null,
+      "options": [
+        "א. החוט משחרר את המנעול ונכנס למצב חסימה.",
+        "ב. החוט ממשיך בביצוע מבלי לשחרר את המנעול.",
+        "ג. החוט נכנס למצב חסימה בלבד, מבלי לשחרר את המנעול.",
+        "ד. החוט מנסה לרכוש מנעול נוסף ונכנס למצב חסימה."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "הפעולה `wait` על משתנה תנאי מבצעת שתי פעולות קריטיות: ראשית, היא משחררת את המנעול המשויך כדי לאפשר לחוטים אחרים לגשת למשאבים המשותפים ולשנות את התנאי. שנית, היא מכניסה את החוט למצב חסימה עד שחוט אחר יאותת לו (באמצעות `signal` או `broadcast`) שהתנאי אולי השתנה. כאשר החוט מתעורר, הוא רוכש מחדש את המנעול לפני שהוא ממשיך בביצוע."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

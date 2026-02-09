@@ -1,0 +1,51 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "System Calls",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 07:20:06",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3372,
+      "output_tokens": 2781,
+      "total_tokens": 13516
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "System Calls",
+      "Process Management",
+      "File I/O"
+    ],
+    "content": {
+      "text": "קריאות המערכת `fork()` ו-`execve()` הן אבני יסוד ביצירת תהליכים חדשים במערכות הפעלה דמויות יוניקס. בעוד ששתיהן קשורות ליצירת תהליכים, הן מבצעות תפקידים שונים ומשפיעות באופן שונה על משאבי התהליך.",
+      "code_snippet": "/* --- parent_child_exec.c --- */\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <fcntl.h>\n#include <sys/wait.h>\n\nint main() {\n    int fd;\n    pid_t pid;\n    char *args[] = {\"./child_program\", NULL};\n\n    // Open a file\n    fd = open(\"output.txt\", O_CREAT | O_WRONLY | O_TRUNC, 0644);\n    if (fd == -1) {\n        perror(\"open\");\n        exit(1);\n    }\n    printf(\"Parent: File 'output.txt' opened with fd %d.\\n\", fd);\n\n    // Write something from parent before fork\n    dprintf(fd, \"Parent writes before fork.\\n\");\n\n    pid = fork();\n\n    if (pid == -1) {\n        perror(\"fork\");\n        exit(1);\n    } else if (pid == 0) { // Child process\n        printf(\"Child: Process ID %d, Parent ID %d.\\n\", getpid(), getppid());\n        dprintf(fd, \"Child writes after fork, before exec.\\n\");\n        // DO NOT close fd here, so it is inherited by execve'd program\n        printf(\"Child: Not closing fd %d before exec, it should be inherited.\\n\", fd);\n        // Execute a new program\n        execve(args[0], args, NULL);\n        perror(\"execve\"); // execve only returns on error\n        exit(1);\n    } else { // Parent process\n        printf(\"Parent: Process ID %d, Child ID %d.\\n\", getpid(), pid);\n        dprintf(fd, \"Parent writes after fork.\\n\");\n        wait(NULL); // Wait for the child to finish\n        printf(\"Parent: Child finished.\\n\");\n        dprintf(fd, \"Parent writes after child finished.\\n\");\n        close(fd);\n        printf(\"Parent: Closed fd %d.\\n\", fd);\n    }\n\n    return 0;\n}\n\n/* --- child_program.c --- */\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <fcntl.h>\n\nint main() {\n    printf(\"child_program: Process ID %d, Parent ID %d.\\n\", getpid(), getppid());\n    // Try to write to the inherited file descriptor (assuming it's 3)\n    dprintf(3, \"child_program: writes to inherited FD (3).\\n\");\n    close(3); // Close the inherited FD\n    printf(\"child_program: Closed inherited FD (3).\\n\n\");\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "הסבר את ההבדלים העיקריים בין `fork()` לבין `execve()` בהקשר של יצירת תהליכים, ירושת קבצים פתוחים (file descriptors), ומרחב הכתובות של התהליך החדש. תאר כיצד קריאות אלו משולבות לרוב ליצירת תהליך חדש המריץ תוכנית שונה.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "נתון קטע הקוד לעיל בשני קבצים, `parent_child_exec.c` ו-`child_program.c`. התוכנית הראשית פותחת קובץ, מבצעת `fork()`, ולאחר מכן תהליך הבן מריץ את התוכנית השנייה (`child_program.c`) באמצעות `execve()`. נתח את הפלט הצפוי של התוכנית הכוללת (גם ל-stdout וגם לקובץ `output.txt`), והסבר מדוע הוא כזה. שים לב במיוחד לשינויים שקורים לקובץ הפתוח ולאופן שבו הוא מושפע מקריאות המערכת השונות.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "10.1. הסבר על ההבדלים בין `fork()` ל-`execve()`:\n*   **`fork()`**: יוצר עותק כמעט זהה של התהליך הקורא (הורה). תהליך הבן מקבל מרחב כתובות משלו שהוא עותק של מרחב הכתובות של ההורה (בדרך כלל בשיטת Copy-on-Write). כל ה-file descriptors הפתוחים אצל ההורה משוכפלים לבן, והם מצביעים על אותם תיאורי קבצים פתוחים (open file descriptions) בקרנל. המשמעות היא שהם חולקים את אותה עמדת קריאה/כתיבה (file offset) ואת אותם דגלי מצב קובץ (file status flags). שני התהליכים ממשיכים לרוץ מהנקודה שאחרי קריאת `fork()`.\n*   **`execve()`**: אינה יוצרת תהליך חדש, אלא מחליפה את תמונת התהליך הנוכחי (קוד, נתונים, ערימה, מחסנית) בתוכנית חדשה. ה-Process ID (PID) נשאר זהה. מרחב הכתובות של התהליך נמחק ומוחלף במרחב כתובות חדש עבור התוכנית החדשה. באופן מחדל, file descriptors פתוחים נשמרים (inherited) על ידי התוכנית החדשה (אלא אם דגל `FD_CLOEXEC` הוגדר עבורם).\n*   **שילוב**: בדרך כלל, `fork()` נקראת תחילה כדי ליצור תהליך חדש (הבן). לאחר מכן, תהליך הבן קורא ל-`execve()` כדי לטעון ולהריץ תוכנית שונה לחלוטין. ההורה לרוב ממתין לסיום הבן באמצעות `wait()` או `waitpid()`.\n\n10.2. ניתוח הפלט הצפוי:\n\n**פלט ל-`stdout` (מסוף):**\n```\nParent: File 'output.txt' opened with fd 3.\nParent: Process ID <parent_pid>, Child ID <child_pid>.\nChild: Process ID <child_pid>, Parent ID <parent_pid>.\nChild: Not closing fd 3 before exec, it should be inherited.\nchild_program: Process ID <child_pid>, Parent ID <parent_pid>.\nchild_program: Closed inherited FD (3).\nParent: Child finished.\nParent: Closed fd 3.\n```\n(סדר ההדפסות בין ההורה לבן/תוכנית הבן יכול להשתנות מעט בהתאם לתזמון המערכת, אך ההדפסות של הילד ותוכנית הילד יופיעו לפני שההורה מסיים את ההמתנה.)\n\n**פלט לקובץ `output.txt`:**\n```\nParent writes before fork.\nChild writes after fork, before exec.\nchild_program: writes to inherited FD (3).\nParent writes after fork.\nParent writes after child finished.\n```\n\n**הסבר:**\n1.  **פתיחת הקובץ והכתיבה הראשונה של ההורה**: התהליך ההורה פותח את `output.txt` עם דגל `O_TRUNC`, מוחק את תוכנו אם קיים, ומקבל file descriptor (בדרך כלל 3). הוא כותב \"Parent writes before fork.\" לקובץ. עמדת הכתיבה (file offset) מתקדמת.\n2.  **`fork()`**: נוצר תהליך בן. הבן מקבל עותק של טבלת ה-file descriptors של ההורה. לכן, גם לבן יש file descriptor 3, והוא מצביע על *אותו תיאור קובץ פתוח* (open file description) בקרנל כמו ה-fd 3 של ההורה. משמעות הדבר היא שהם חולקים את אותה עמדת כתיבה בקובץ.\n3.  **כתיבת הבן לפני `execve()`**: תהליך הבן כותב \"Child writes after fork, before exec.\" לקובץ. כתיבה זו מתבצעת בעמדת הכתיבה הנוכחית המשותפת, ולכן היא תצורף מיד לאחר הכתיבה הקודמת של ההורה. עמדת הכתיבה המשותפת מתקדמת.\n4.  **`execve()` בבן**: תהליך הבן מחליף את תמונת הזיכרון שלו בתוכנית `child_program.c`. מכיוון ש-file descriptor 3 לא נסגר על ידי הבן לפני ה-`execve()` (ולא הוגדר עליו דגל `FD_CLOEXEC`), התוכנית החדשה (`child_program`) יורשת את file descriptor 3. הוא עדיין מצביע על אותו תיאור קובץ פתוח, ולכן עדיין חולק את עמדת הכתיבה עם ההורה.\n5.  **כתיבת `child_program`**: התוכנית `child_program` כותבת \"child_program: writes to inherited FD (3).\" באמצעות `dprintf(3, ...)`. כתיבה זו ממשיכה לצרף נתונים לקובץ מאחר והיא משתמשת באותו file offset משותף.\n6.  **כתיבות ההורה לאחר `fork()` ולאחר סיום הבן**: התהליך ההורה ממשיך לרוץ במקביל. הוא כותב \"Parent writes after fork.\" לקובץ. כתיבה זו תופיע גם היא בעמדת הכתיבה המשותפת הנוכחית, שיכולה להיות כבר מתקדמת על ידי הבן/תוכנית הבן. לאחר מכן, ההורה ממתין לבן (`wait(NULL)`). כשהבן מסיים, ההורה כותב \"Parent writes after child finished.\" לקובץ. כל הכתיבות האלה מוסיפות לקובץ לפי הסדר שבו הקריאות ל-`dprintf` בוצעו בפועל על ידי המערכת (תלוי בתזמון).\n7.  **סגירת הקבצים**: גם הבן (לאחר ה-`execve`, בתוך `child_program`) וגם ההורה סוגרים את file descriptor 3. סגירה זו מפחיתה את מונה ההפניות לתיאור הקובץ הפתוח בקרנל. רק כאשר מונה ההפניות מגיע לאפס (כלומר, גם ההורה וגם הבן סגרו את ה-fd שלהם), הקובץ נסגר לגמרי על ידי מערכת ההפעלה."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "Security",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 09:44:42",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 968,
+      "output_tokens": 1469,
+      "total_tokens": 5266
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Security",
+      "Vulnerabilities",
+      "TOCTOU",
+      "setuid"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המוגדרת עם ביט setuid (לדוגמה, ל-root). התוכנית מקבלת שם קובץ כארגומנט ומטרתה לכתוב ליומן (log) בקובץ זה.\nהתוכנית מבצעת בדיקה האם הקובץ הוא קובץ רגיל לפני שהיא כותבת אליו, כפי שמוצג בקטע הקוד הבא:",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/stat.h>\n#include <string.h>\n#include <errno.h>\n\nint main(int argc, char *argv[]) {\n    if (argc != 2) {\n        fprintf(stderr, \"Usage: %s <filename>\\n\", argv[0]);\n        return 1;\n    }\n\n    char *filename = argv[1];\n    struct stat st;\n\n    // Time of Check\n    if (stat(filename, &st) == 0) {\n        if (S_ISREG(st.st_mode)) {\n            // Simulate a time delay, creating a TOCTOU window\n            sleep(1); // In a real scenario, this could be other operations\n\n            // Time of Use\n            FILE *f = fopen(filename, \"a\"); // This will open with effective UID (root)\n            if (f != NULL) {\n                fprintf(f, \"Logged by privileged program (EUID: %d).\\n\", geteuid());\n                fclose(f);\n                printf(\"Successfully logged to %s\\n\", filename);\n            } else {\n                perror(\"Error opening file for writing\");\n                return 1;\n            }\n        } else {\n            fprintf(stderr, \"Error: %s is not a regular file.\\n\", filename);\n            return 1;\n        }\n    } else {\n        perror(\"Error stating file\");\n        return 1;\n    }\n\n    return 0;\n}",
+      "options": [
+        "א. התוכנית פגיעה להתקפת Buffer Overflow מכיוון ש-filename אינו מוגבל באורכו, מה שמאפשר כתיבה מעבר לגבולות המאגר.",
+        "ב. התוכנית פגיעה להתקפת Race Condition מסוג TOCTOU (Time Of Check, Time Of Use), שבה תוקף יכול להחליף את הקובץ עם קישור סימבולי לקובץ מערכת רגיש (כמו /etc/shadow) לאחר הבדיקה ולפני הכתיבה.",
+        "ג. התוכנית פגיעה להתקפת Denial of Service (DoS) בכך שתוקף יכול למחוק את הקובץ לאחר הבדיקה ולפני הכתיבה, מה שיגרום לכשל ב-fopen.",
+        "ד. התוכנית פגיעה להתקפת Path Traversal אם filename מכיל רכיבים כמו ../, המאפשרים גישה לקבצים מחוץ לספרייה המיועדת.",
+        "ה. אין נקודת תורפה משמעותית בקוד זה, שכן הוא בודק את סוג הקובץ לפני הכתיבה."
+      ]
+    },
+    "sub_questions": null,
+    "points": 10,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב. התוכנית פגיעה להתקפת Race Condition מסוג TOCTOU (Time Of Check, Time Of Use), שבה תוקף יכול להחליף את הקובץ עם קישור סימבולי לקובץ מערכת רגיש (כמו /etc/shadow) לאחר הבדיקה ולפני הכתיבה.",
+      "explanation": "התשובה הנכונה היא ב'. הקוד סובל מנקודת תורפה מסוג TOCTOU (Time Of Check, Time Of Use). בין הקריאה ל-`stat` (הבדיקה - Time Of Check) לבין הקריאה ל-`fopen` (השימוש - Time Of Use), קיים חלון זמן (הממודל על ידי `sleep(1)`). במהלך חלון זמן זה, תוקף יכול להחליף את הקובץ המקורי (שנבדק ונמצא תקין) בקישור סימבולי (symlink) המצביע על קובץ מערכת רגיש, כגון `/etc/shadow`. מכיוון שהתוכנית פועלת עם הרשאות מוגברות (root, עקב `setuid`), קריאת ה-`fopen` תצליח לפתוח ולכתוב לקובץ הרגיש, ובכך תאפשר לתוקף להוסיף תוכן לקובץ זה ולהשיג פריצת אבטחה (לדוגמה, הוספת משתמש זדוני או שינוי סיסמאות).\nא. התקפת Buffer Overflow אינה רלוונטית כאן, שכן `filename` הוא מצביע ל-`argv[1]` ולא מועתק למאגר בגודל קבוע ללא בדיקת גבולות.\nג. אף שתוקף יכול למחוק את הקובץ ולגרום ל-DoS, זו פגיעות פחות חמורה מהיכולת לכתוב לקבצי מערכת רגישים עם הרשאות root.\nד. התקפת Path Traversal אינה רלוונטית באופן ישיר כאן מכיוון שגם אם נתיב מכיל `../`, ה-`stat` יבדוק את הקובץ הסופי וה-`fopen` יפתח אותו, אך זה לא הניצול העיקרי של ה-`setuid` וה-TOCTOU. הבעיה המרכזית היא שינוי סוג הקובץ (רגיל לקישור סימבולי) ולאו דווקא שינוי נתיב.\nה. יש בהחלט נקודת תורפה משמעותית, כפי שהוסבר."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

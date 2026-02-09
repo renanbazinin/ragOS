@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Signals",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 08:36:23",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1021,
+      "output_tokens": 341,
+      "total_tokens": 2431
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Signals"
+    ],
+    "content": {
+      "text": "איזה מהאותות הבאים לא ניתן לתפוס (catch) או להתעלם ממנו (ignore) על ידי תהליך?",
+      "code_snippet": null,
+      "options": [
+        "א. SIGINT",
+        "ב. SIGTERM",
+        "ג. SIGKILL",
+        "ד. SIGUSR1",
+        "ה. SIGCONT"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג. SIGKILL הוא אות מיוחד שנועד לאפשר למערכת ההפעלה או למשתמש לסיים תהליך באופן מיידי ובכוח. תהליכים אינם יכולים לתפוס, להתעלם או לחסום את האות SIGKILL, מה שמבטיח את סיומם. אותות כמו SIGINT ו-SIGTERM, לעומת זאת, ניתנים לתפיסה ולטיפול על ידי התהליך, מה שמאפשר לו לבצע ניקוי לפני סיום. SIGSTOP הוא אות נוסף שלא ניתן לתפוס/להתעלם, אך אינו מופיע באפשרויות."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

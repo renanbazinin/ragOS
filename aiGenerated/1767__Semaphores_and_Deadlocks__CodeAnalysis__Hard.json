@@ -1,0 +1,52 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Deadlocks",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 20:41:50",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4285,
+      "output_tokens": 2485,
+      "total_tokens": 11994
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Semaphores",
+      "Deadlocks",
+      "Concurrency",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המשתמשת בסמפורים בינאריים לסנכרון גישה לשני משאבים (sem_A ו-sem_B). שני חוטים (thread_func_1 ו-thread_func_2) מנסים לתפוס את המשאבים הללו. קראו את הקוד בעיון וענו על השאלות הבאות.",
+      "code_snippet": "```c\n#include <stdio.h>\n#include <pthread.h>\n#include <semaphore.h>\n#include <unistd.h> // For sleep\n\nsem_t sem_A;\nsem_t sem_B;\n\nvoid *thread_func_1(void *arg) {\n    printf(\"Thread 1: Trying to acquire sem_A...\\n\");\n    sem_wait(&sem_A);\n    printf(\"Thread 1: Acquired sem_A. Trying to acquire sem_B...\\n\");\n    sleep(1); // Simulate work or delay\n    sem_wait(&sem_B);\n    printf(\"Thread 1: Acquired both sem_A and sem_B. Working...\\n\");\n    // ... critical section ...\n    sem_post(&sem_B);\n    sem_post(&sem_A);\n    printf(\"Thread 1: Released both semaphores.\\n\");\n    return NULL;\n}\n\nvoid *thread_func_2(void *arg) {\n    printf(\"Thread 2: Trying to acquire sem_B...\\n\");\n    sem_wait(&sem_B);\n    printf(\"Thread 2: Acquired sem_B. Trying to acquire sem_A...\\n\");\n    sleep(1); // Simulate work or delay\n    sem_wait(&sem_A);\n    printf(\"Thread 2: Acquired both sem_B and sem_A. Working...\\n\");\n    // ... critical section ...\n    sem_post(&sem_A);\n    sem_post(&sem_B);\n    printf(\"Thread 2: Released both semaphores.\\n\");\n    return NULL;\n}\n\nint main() {\n    sem_init(&sem_A, 0, 1); // Binary semaphore, initial value 1\n    sem_init(&sem_B, 0, 1); // Binary semaphore, initial value 1\n\n    pthread_t t1, t2;\n\n    pthread_create(&t1, NULL, thread_func_1, NULL);\n    pthread_create(&t2, NULL, thread_func_2, NULL);\n\n    pthread_join(t1, NULL);\n    pthread_join(t2, NULL);\n\n    sem_destroy(&sem_A);\n    sem_destroy(&sem_B);\n\n    printf(\"Main: All threads finished.\\n\");\n    return 0;\n}\n```",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "8.1",
+        "text": "האם קיים חשש למצב קיפאון (Deadlock) בקוד הנתון? אם כן, תארו תרחיש ספציפי (כולל סדר הפעולות של החוטים) שבו מצב זה יכול להתרחש. אם לא, הסבירו מדוע.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.2",
+        "text": "תקנו את הקוד על מנת למנוע קיפאון, תוך שמירה על מקביליות מרבית ככל הניתן. הציגו את הקוד המתוקן והסבירו בקצרה מדוע התיקון מונע קיפאון.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "8.1. כן, קיים חשש למצב קיפאון (Deadlock) בקוד הנתון.\n\n**תרחיש קיפאון ספציפי (דוגמה):**\n1.  **מצב התחלתי:** `sem_A = 1`, `sem_B = 1`.\n2.  **חוט 1** מתחיל לרוץ ומבצע `sem_wait(&sem_A)`. הוא תופס את `sem_A`. כעת: `sem_A = 0`, `sem_B = 1`.\n3.  **המתזמן מעביר את הבקרה לחוט 2.**\n4.  **חוט 2** מתחיל לרוץ ומבצע `sem_wait(&sem_B)`. הוא תופס את `sem_B`. כעת: `sem_A = 0`, `sem_B = 0`.\n5.  **המתזמן מעביר את הבקרה בחזרה לחוט 1.**\n6.  **חוט 1** ממשיך ומנסה לבצע `sem_wait(&sem_B)`. הוא נחסם, מכיוון ש-`sem_B` כבר נתפס על ידי חוט 2 (ערכו 0).\n7.  **המתזמן מעביר את הבקרה בחזרה לחוט 2.**\n8.  **חוט 2** ממשיך ומנסה לבצע `sem_wait(&sem_A)`. הוא נחסם, מכיוון ש-`sem_A` כבר נתפס על ידי חוט 1 (ערכו 0).\n\nבנקודה זו, חוט 1 מחזיק ב-`sem_A` וממתין ל-`sem_B`, בעוד שחוט 2 מחזיק ב-`sem_B` וממתין ל-`sem_A`. נוצר מעגל המתנה (Circular Wait) ואין דרך עבור אף אחד מהחוטים להמשיך, מה שמוביל לקיפאון. התנאים הנוספים לקיפאון (Mutual Exclusion, Hold and Wait, No Preemption) מתקיימים אף הם.\n\n8.2. כדי למנוע קיפאון, יש לשבור את תנאי המעגל ההמתנה (Circular Wait). הדרך הנפוצה והיעילה ביותר במקרה זה היא לכפות סדר קבוע לרכישת המשאבים. כל החוטים ינסו לתפוס את `sem_A` לפני `sem_B` (או להיפך, העיקר שיהיה סדר עקבי).\n\n**קוד מתוקן:**\n```c\n#include <stdio.h>\n#include <pthread.h>\n#include <semaphore.h>\n#include <unistd.h> // For sleep\n\nsem_t sem_A;\nsem_t sem_B;\n\n// פונקציה מתוקנת עבור שני החוטים - רוכשים את sem_A ואז את sem_B\nvoid *thread_func_fixed(void *arg) {\n    long thread_id = (long)arg;\n    printf(\"Thread %ld: Trying to acquire sem_A...\\n\", thread_id);\n    sem_wait(&sem_A);\n    printf(\"Thread %ld: Acquired sem_A. Trying to acquire sem_B...\\n\", thread_id);\n    sleep(1); // Simulate work or delay\n    sem_wait(&sem_B);\n    printf(\"Thread %ld: Acquired both semaphores. Working...\\n\", thread_id);\n    // ... critical section ...\n    sem_post(&sem_B);\n    sem_post(&sem_A);\n    printf(\"Thread %ld: Released both semaphores.\\n\", thread_id);\n    return NULL;\n}\n\nint main() {\n    sem_init(&sem_A, 0, 1); // Binary semaphore, initial value 1\n    sem_init(&sem_B, 0, 1); // Binary semaphore, initial value 1\n\n    pthread_t t1, t2;\n\n    // שני החוטים מריצים כעת את אותה פונקציה עם סדר רכישה עקבי\n    pthread_create(&t1, NULL, thread_func_fixed, (void*)1);\n    pthread_create(&t2, NULL, thread_func_fixed, (void*)2);\n\n    pthread_join(t1, NULL);\n    pthread_join(t2, NULL);\n\n    sem_destroy(&sem_A);\n    sem_destroy(&sem_B);\n\n    printf(\"Main: All threads finished.\\n\");\n    return 0;\n}\n```\n\n**הסבר לתיקון:**\nהתיקון מונע קיפאון על ידי אכיפת סדר עקבי לרכישת המשאבים. שני החוטים מנסים כעת לתפוס את `sem_A` תחילה, ולאחר מכן את `sem_B`. בדרך זו, לא ייתכן מצב שבו חוט אחד מחזיק ב-`sem_A` וממתין ל-`sem_B`, ובמקביל חוט אחר מחזיק ב-`sem_B` וממתין ל-`sem_A`. אם חוט 1 תופס את `sem_A` וחוט 2 מנסה לתפוס אותו גם כן, חוט 2 ייחסם על `sem_A` עד שחוט 1 ישחרר אותו (לאחר שסיים את עבודתו ושיחרר את שני הסמפורים). לעולם לא ייווצר מעגל המתנה, ולכן לא יתרחש קיפאון. מקביליות נשמרת במידה המקסימלית האפשרית עבור גישה לשני משאבים אלו, שכן חוטים עדיין יכולים לרוץ במקביל אם הם לא מתנגשים על אותם סמפורים בו זמנית (לדוגמה, אם יש יותר משני משאבים וחוטים שונים רוכשים זוגות משאבים שונים, או אם חוט אחד מסיים את עבודתו לפני שחוט אחר מתחיל לתפוס משאבים).\n"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

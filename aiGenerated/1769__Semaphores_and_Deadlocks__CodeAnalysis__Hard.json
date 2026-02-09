@@ -1,0 +1,52 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Deadlocks",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 20:42:41",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4285,
+      "output_tokens": 2686,
+      "total_tokens": 9864
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Semaphores",
+      "Deadlocks",
+      "Synchronization",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C הבאה, המשתמשת בסמפורים (semaphores) לצורך סנכרון גישה למשאבים משותפים בין שני תהליכונים (threads) הפועלים במקביל. שני הסמפורים S1 ו-S2 מאותחלים לערך 1 (סמפורים בינאריים / מנעולים). התוכנית יוצרת שני תהליכונים, thread_func_A ו-thread_func_B, וממתינה לסיומם. יש להניח שקריאות המערכת `usleep` גורמות להשהיה מספקת על מנת לאפשר החלפות הקשר (context switches) בנקודות קריטיות.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <pthread.h>\n#include <semaphore.h>\n#include <unistd.h> // For usleep\n\n// שני סמפורים המשמשים כמנעולים\nsem_t S1;\nsem_t S2;\n\nvoid *thread_func_A(void *arg) {\n    printf(\"Thread A: Trying to acquire S1...\\n\");\n    sem_wait(&S1);\n    printf(\"Thread A: Acquired S1. Trying to acquire S2...\\n\");\n    usleep(100000); // 100ms\n    sem_wait(&S2);\n    printf(\"Thread A: Acquired S2. Critical section A...\\n\");\n    // Critical section work\n    usleep(50000); // 50ms\n    sem_post(&S2);\n    printf(\"Thread A: Released S2.\\n\");\n    sem_post(&S1);\n    printf(\"Thread A: Released S1. Exiting.\\n\");\n    return NULL;\n}\n\nvoid *thread_func_B(void *arg) {\n    printf(\"Thread B: Trying to acquire S2...\\n\");\n    sem_wait(&S2);\n    printf(\"Thread B: Acquired S2. Trying to acquire S1...\\n\");\n    usleep(100000); // 100ms\n    sem_wait(&S1);\n    printf(\"Thread B: Acquired S1. Critical section B...\\n\");\n    // Critical section work\n    usleep(50000); // 50ms\n    sem_post(&S1);\n    printf(\"Thread B: Released S1.\\n\");\n    sem_post(&S2);\n    printf(\"Thread B: Released S2. Exiting.\\n\");\n    return NULL;\n}\n\nint main() {\n    sem_init(&S1, 0, 1); // משותף בין תהליכונים של תהליך, ערך אתחול 1\n    sem_init(&S2, 0, 1); // משותף בין תהליכונים של תהליך, ערך אתחול 1\n\n    pthread_t tid[2];\n\n    printf(\"Main: Creating Thread A...\\n\");\n    pthread_create(&tid[0], NULL, thread_func_A, NULL);\n    printf(\"Main: Creating Thread B...\\n\");\n    pthread_create(&tid[1], NULL, thread_func_B, NULL);\n\n    pthread_join(tid[0], NULL);\n    pthread_join(tid[1], NULL);\n\n    sem_destroy(&S1);\n    sem_destroy(&S2);\n\n    printf(\"Main: All threads finished. Exiting.\\n\");\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "האם קיימת בתוכנית זו אפשרות לקיפאון (deadlock)? אם כן, תאר בפירוט מצב ריצה קונקרטי (sequence of operations) שבו הקיפאון אכן יתרחש, והסבר מדוע ארבעת התנאים ההכרחיים לקיפאון (Mutual Exclusion, Hold and Wait, No Preemption, Circular Wait) מתקיימים. אם לא, נמק מדוע אין חשש לקיפאון.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "אם זיהית בעיה של קיפאון בסעיף א', הצע פתרון לקוד המצורף כדי למנוע את הקיפאון. הצג את הקוד המתוקן (רק את הפונקציות `thread_func_A` ו-`thread_func_B`) והסבר בקצרה את עקרון הפתרון.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "10.1. כן, קיימת בתוכנית זו אפשרות לקיפאון (deadlock).\n\n**תיאור מצב ריצה לקיפאון:**\n1.  **Thread A** מתחיל לרוץ ומבצע `sem_wait(&S1)`. הוא מצליח לרכוש את S1.\n2.  הקשר עובר ל-**Thread B**. הוא מתחיל לרוץ ומבצע `sem_wait(&S2)`. הוא מצליח לרכוש את S2.\n3.  הקשר חוזר ל-**Thread A**. הוא מנסה לבצע `sem_wait(&S2)`. מכיוון ש-S2 מוחזק על ידי Thread B, Thread A נחסם וממתין לשחרור S2.\n4.  הקשר עובר ל-**Thread B**. הוא מנסה לבצע `sem_wait(&S1)`. מכיוון ש-S1 מוחזק על ידי Thread A, Thread B נחסם וממתין לשחרור S1.\nבשלב זה, שני התהליכונים חסומים זה לזה וממתינים למשאב שמוחזק על ידי השני, וכך נוצר קיפאון.\n\n**הסבר מדוע ארבעת התנאים לקיפאון מתקיימים:**\n*   **הדרה הדדית (Mutual Exclusion):** תנאי זה מתקיים מכיוון ש-S1 ו-S2 הם סמפורים בינאריים (או מנעולים), ורק תהליכון אחד יכול להחזיק כל סמפור נתון בזמן נתון. המשאבים (הסמפורים) אינם ניתנים לשיתוף במקביל.\n*   **החזקה והמתנה (Hold and Wait):** תנאי זה מתקיים. Thread A מחזיק ב-S1 וממתין ל-S2. Thread B מחזיק ב-S2 וממתין ל-S1. כל תהליכון מחזיק במשאב אחד לפחות וממתין למשאב נוסף.\n*   **אי-דריסה (No Preemption):** תנאי זה מתקיים. לא ניתן לקחת סמפור מתהליכון בכוח. תהליכון חייב לשחרר את הסמפורים באופן יזום באמצעות `sem_post`.\n*   **המתנה מעגלית (Circular Wait):** תנאי זה מתקיים. קיים מעגל של תהליכונים הממתינים זה לזה. Thread A ממתין ל-S2 שמוחזק על ידי Thread B, ו-Thread B ממתין ל-S1 שמוחזק על ידי Thread A.\n\n10.2. הפתרון הנפוץ למניעת קיפאון מסוג זה הוא הטלת סדר קבוע על רכישת המשאבים. כל התהליכונים המשתמשים במשאבים המשותפים חייבים לרכוש אותם באותו סדר. במקרה זה, על שני התהליכונים לרכוש תמיד את S1 ולאחר מכן את S2.\n\n**הקוד המתוקן:**\n```c\nvoid *thread_func_A(void *arg) {\n    printf(\"Thread A: Trying to acquire S1...\\n\");\n    sem_wait(&S1);\n    printf(\"Thread A: Acquired S1. Trying to acquire S2...\\n\");\n    usleep(100000); // 100ms\n    sem_wait(&S2);\n    printf(\"Thread A: Acquired S2. Critical section A...\\n\");\n    // Critical section work\n    usleep(50000); // 50ms\n    sem_post(&S2);\n    printf(\"Thread A: Released S2.\\n\");\n    sem_post(&S1);\n    printf(\"Thread A: Released S1. Exiting.\\n\");\n    return NULL;\n}\n\nvoid *thread_func_B(void *arg) {\n    printf(\"Thread B: Trying to acquire S1... (Fixed order)\\n\"); // Changed order\n    sem_wait(&S1);\n    printf(\"Thread B: Acquired S1. Trying to acquire S2...\\n\");\n    usleep(100000); // 100ms\n    sem_wait(&S2);\n    printf(\"Thread B: Acquired S2. Critical section B...\\n\");\n    // Critical section work\n    usleep(50000); // 50ms\n    sem_post(&S2);\n    printf(\"Thread B: Released S2.\\n\");\n    sem_post(&S1);\n    printf(\"Thread B: Released S1. Exiting.\\n\");\n    return NULL;\n}\n```\n\n**עקרון הפתרון:**\nעל ידי שינוי סדר רכישת הסמפורים בפונקציה `thread_func_B` כך שתתפוס קודם את S1 ואז את S2 (בדומה ל-`thread_func_A`), אנו מבטלים את התנאי של 'המתנה מעגלית' (Circular Wait). כעת, לא ייתכן מצב שבו A ממתין ל-S2 שמוחזק על ידי B, בזמן ש-B ממתין ל-S1 שמוחזק על ידי A, מכיוון ששניהם מנסים לרכוש את S1 קודם. אם S1 תפוס על ידי אחד התהליכונים, התהליכון השני ימתין לו ולא יוכל לרכוש את S2 (או כל משאב אחר) לפני ש-S1 ישוחרר. זה מבטיח שאף מעגל המתנה לא יוכל להיווצר, ובכך מונע קיפאון."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Producer-Consumer",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 07:40:53",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 970,
+      "output_tokens": 1392,
+      "total_tokens": 5039
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Producer-Consumer",
+      "Synchronization",
+      "Deadlock",
+      "Semaphores"
+    ],
+    "content": {
+      "text": "נתון קוד C++ המממש את בעיית היצרן-צרכן (Producer-Consumer) תוך שימוש בסמפורים וב-mutex. הקוד מציג באגים אפשריים. איזה מבין התרחישים הבאים יתרחש תמיד במערכת עם קוד זה, בהנחה שיש לפחות יצרן אחד וצרכן אחד?",
+      "code_snippet": "#include <iostream>\n#include <vector>\n#include <thread>\n#include <semaphore.h> // For POSIX semaphores\n#include <mutex>       // For std::mutex\n#include <chrono>      // For std::chrono::milliseconds\n\nconst int BUFFER_SIZE = 5;\nstd::vector<int> buffer;\nstd::mutex mtx; // General mutex for buffer access\n\nsem_t empty; // Counts empty slots\nsem_t full;  // Counts full slots\n\nvoid producer(int id) {\n    for (int i = 0; i < 10; ++i) {\n        std::this_thread::sleep_for(std::chrono::milliseconds(50));\n        \n        // PROBLEM: Mutex acquired before semaphore\n        mtx.lock(); // Acquire mutex first\n        sem_wait(&empty); // Wait for an empty slot\n\n        buffer.push_back(i);\n        std::cout << \"Producer \" << id << \" produced: \" << i << std::endl;\n\n        sem_post(&full); // Signal that a slot is full\n        mtx.unlock();   // Release mutex\n    }\n}\n\nvoid consumer(int id) {\n    for (int i = 0; i < 10; ++i) {\n        std::this_thread::sleep_for(std::chrono::milliseconds(100));\n\n        // PROBLEM: Mutex acquired before semaphore\n        mtx.lock(); // Acquire mutex first\n        sem_wait(&full); // Wait for a full slot\n\n        int item = buffer.front();\n        buffer.erase(buffer.begin());\n        std::cout << \"Consumer \" << id << \" consumed: \" << item << std::endl;\n\n        sem_post(&empty); // Signal that a slot is empty\n        mtx.unlock();   // Release mutex\n    }\n}\n\nint main() {\n    sem_init(&empty, 0, BUFFER_SIZE); // Initialize empty slots to BUFFER_SIZE\n    sem_init(&full, 0, 0);            // Initialize full slots to 0\n\n    std::thread p1(producer, 1);\n    std::thread c1(consumer, 1);\n\n    p1.join();\n    c1.join();\n\n    sem_destroy(&empty);\n    sem_destroy(&full);\n\n    return 0;\n}",
+      "options": [
+        "א. המערכת תבצע עבודה תקינה ותייצר ותצרוך פריטים ללא בעיות סנכרון.",
+        "ב. המערכת עלולה להיכנס למצב של Deadlock כאשר ה-buffer מלא והיצרן מנסה לייצר פריט נוסף.",
+        "ג. המערכת עלולה להיכנס למצב של Deadlock כאשר ה-buffer ריק והצרכן מנסה לצרוך פריט.",
+        "ד. המערכת עלולה להיכנס למצב של Deadlock הן כאשר ה-buffer מלא והיצרן מנסה לייצר, והן כאשר ה-buffer ריק והצרכן מנסה לצרוך.",
+        "ה. המערכת תיכנס למצב של Race Condition שיגרום לשגיאות בנתונים ב-buffer."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ד",
+      "explanation": "הקוד המוצג מכיל טעות קלאסית במנגנון הסנכרון של יצרן-צרכן. גם היצרן וגם הצרכן תופסים את ה-mutex (mtx.lock()) לפני שהם ממתינים לסמפור התנאי המתאים (sem_wait(&empty) עבור היצרן, sem_wait(&full) עבור הצרכן).\n\nאם ה-buffer מלא, היצרן יתפוס את ה-mutex וינסה לבצע sem_wait(&empty). מכיוון ש-empty הוא 0, היצרן ייכנס למצב המתנה ויחזיק את ה-mutex. כעת, אף צרכן לא יוכל לתפוס את ה-mutex כדי לגשת ל-buffer ולצרוך פריט, ולכן לא יוכל לשחרר את הסמפור empty. זה יוביל ל-Deadlock.\n\nבאופן דומה, אם ה-buffer ריק, הצרכן יתפוס את ה-mutex וינסה לבצע sem_wait(&full). מכיוון ש-full הוא 0, הצרכן ייכנס למצב המתנה ויחזיק את ה-mutex. כעת, אף יצרן לא יוכל לתפוס את ה-mutex כדי לגשת ל-buffer ולייצר פריט, ולכן לא יוכל לשחרר את הסמפור full. גם זה יוביל ל-Deadlock.\n\nהפתרון הנכון הוא לתפוס את סמפור התנאי (empty/full) לפני תפיסת ה-mutex, כדי למנוע מצב שבו תהליך ממתין לתנאי מסוים תוך כדי החזקת מנעול שמונע מתהליכים אחרים לשנות את אותו תנאי."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

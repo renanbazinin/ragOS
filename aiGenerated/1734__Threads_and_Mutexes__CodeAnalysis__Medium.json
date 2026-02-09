@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Threads and Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 20:23:39",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2951,
+      "output_tokens": 1480,
+      "total_tokens": 7411
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Threads",
+      "Mutexes",
+      "Synchronization",
+      "Race Conditions"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה המשתמשת בחוטים (threads) ובמנעול (mutex) כדי לעדכן משתנה גלובלי משותף.\nהתבוננו בקוד וציינו מה יהיה הפלט הסופי של התוכנית כפי שהיא כתובה כעת. הסבירו את תפקידו של המנעול (mutex) במניעת תנאי מרוץ (race condition) במקרה זה.\nאם נסיר את קריאות ה-`pthread_mutex_lock` וה-`pthread_mutex_unlock` (נשאיר אותן בהערה), מהו טווח הערכים האפשריים עבור `shared_counter` בסיום הריצה, ומדוע?",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\n#define NUM_THREADS 5\n#define ITERATIONS_PER_THREAD 100000\n\nint shared_counter = 0;\npthread_mutex_t counter_mutex;\n\nvoid* thread_func(void* arg) {\n    for (int i = 0; i < ITERATIONS_PER_THREAD; ++i) {\n        pthread_mutex_lock(&counter_mutex);\n        shared_counter++;\n        pthread_mutex_unlock(&counter_mutex);\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n    pthread_mutex_init(&counter_mutex, NULL);\n\n    printf(\"Starting counter value: %d\\n\", shared_counter);\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, thread_func, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final counter value: %d\\n\", shared_counter);\n\n    pthread_mutex_destroy(&counter_mutex);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הסבר:\n1.  **כאשר המנעול פעיל (כפי שהקוד כתוב כעת):**\n    הפלט הסופי יהיה `Final counter value: 500000`.\n    ההסבר לכך הוא שהמנעול (mutex) מבטיח בלעדיות הדדית (mutual exclusion) בזמן הגישה למשתנה המשותף `shared_counter`. בכל פעם שחוט מנסה לגשת למשתנה ולעדכן אותו, הוא קודם כל נועל את המנעול. אם המנעול כבר נעול על ידי חוט אחר, החוט הנוכחי ממתין עד שהמנעול ישוחרר. לאחר העדכון, החוט משחרר את המנעול. זה מבטיח שפעולת ה-\"shared_counter++\" (שהיא למעשה שלוש פעולות אטומיות: קריאה, שינוי, כתיבה) תתבצע במלואה על ידי חוט אחד בלבד בכל פעם. לכן, כל 500,000 העדכונים (5 חוטים * 100,000 איטרציות לחוט) יתבצעו כהלכה, והערך הסופי יהיה צפוי ונכון.\n\n2.  **כאשר קריאות ה-lock וה-unlock מושארות בהערה (כלומר, ללא מנעול):**\n    טווח הערכים האפשריים עבור `shared_counter` בסיום הריצה יהיה בין `1` ל-`499999` (כולל). (הערה: תיאורטית, הוא יכול להיות גם 0 אם אף חוט לא הספיק להשלים אפילו איטרציה אחת לפני שכולם סיימו, אבל זה מאוד לא סביר עם 500,000 איטרציות. כמו כן, הוא לא יכול להיות 500000 כי זה בדיוק המצב של מנעול).\n    ההסבר לכך הוא שמתקיים תנאי מרוץ (race condition). פעולת ה-\"shared_counter++\" אינה אטומית. היא מורכבת משלבים:\n    א. קריאת הערך של `shared_counter` לתוך אוגר.\n    ב. הגדלת הערך באוגר.\n    ג. כתיבת הערך מהאוגר בחזרה ל-`shared_counter`.\n    כאשר מספר חוטים מנסים לבצע פעולה זו בו-זמנית, ייתכן שחוט אחד יקרא את הערך, לפני שהוא מספיק לכתוב בחזרה את הערך המוגדל, חוט אחר יקרא גם הוא את אותו הערך הישן, יגדיל אותו ויכתוב אותו בחזרה. במקרה כזה, אחת מההגדלות \"תאבד\" (overwritten). \n    לדוגמה, אם `shared_counter` הוא 10.\n    - חוט A קורא 10.\n    - חוט B קורא 10.\n    - חוט A מגדיל ל-11 וכותב 11.\n    - חוט B מגדיל ל-11 וכותב 11.\n    בפועל, `shared_counter` הוגדל פעם אחת בלבד, למרות ששני חוטים ביצעו את פעולת ההגדלה. כתוצאה מכך, הערך הסופי יהיה נמוך מהצפוי (500,000) ובלתי צפוי, תלוי בתזמון המדויק של החוטים."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

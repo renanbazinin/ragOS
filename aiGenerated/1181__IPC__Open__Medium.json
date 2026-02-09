@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "IPC",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 08:29:30",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2071,
+      "output_tokens": 1714,
+      "total_tokens": 9304
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "IPC",
+      "Shared Memory",
+      "Semaphores",
+      "Producer-Consumer"
+    ],
+    "content": {
+      "text": "תכנן מערכת תקשורת בין שני תהליכים (Producer-Consumer) המשתמשים בזיכרון משותף ובסמפורים. תהליך ה-Producer מייצר מספרים שלמים ומכניס אותם למאגר מעגלי משותף (shared circular buffer) בגודל N. תהליך ה-Consumer קורא מספרים מהמאגר, מסכם אותם ומדפיס את הסכום.\n\nא. הסבר אילו מנגנוני IPC נדרשים למערכת זו, ומה תפקידו של כל מנגנון.\nב. כתוב קטע קוד ב-C/C++ עבור תהליך ה-Producer, המדגים את השימוש במנגנונים אלו לצורך הכנסת פריט למאגר. הנח שהמאגר והסמפורים כבר נוצרו ואותחלו כראוי.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <sys/ipc.h>\n#include <sys/shm.h>\n#include <sys/sem.h>\n\n#define BUFFER_SIZE 10    // גודל המאגר\n#define MUTEX_SEM_NUM 0   // מספר סמפור ה-mutex בקבוצה\n#define EMPTY_SEM_NUM 1   // מספר סמפור ה-empty בקבוצה\n#define FULL_SEM_NUM 2    // מספר סמפור ה-full בקבוצה\n\n// מבנה הנתונים המשותף\ntypedef struct {\n    int buffer[BUFFER_SIZE];\n    int in;  // מצביע למקום הבא להכנסה\n    int out; // מצביע למקום הבא לקריאה\n} SharedData;\n\n// פונקציות עזר לביצוע פעולות סמפור\nvoid sem_wait(int sem_id, int sem_num) {\n    struct sembuf sb = {sem_num, -1, 0}; // Decrement semaphore, wait if 0\n    if (semop(sem_id, &sb, 1) == -1) {\n        perror(\"semop wait\");\n        exit(EXIT_FAILURE);\n    }\n}\n\nvoid sem_post(int sem_id, int sem_num) {\n    struct sembuf sb = {sem_num, 1, 0}; // Increment semaphore\n    if (semop(sem_id, &sb, 1) == -1) {\n        perror(\"semop post\");\n        exit(EXIT_FAILURE);\n    }\n}\n\n// קטע קוד המדגים את לוגיקת ה-Producer להכנסת פריט\n// הנחה: 'sem_id' הוא ה-ID של קבוצת הסמפורים\n// הנחה: 'shared_data' הוא מצביע לזיכרון המשותף\nvoid producer_insert_item(int sem_id, SharedData *shared_data, int item_to_produce) {\n    // 1. המתנה למקום פנוי במאגר (סמפור 'empty')\n    sem_wait(sem_id, EMPTY_SEM_NUM);\n\n    // 2. כניסה למקטע קריטי (הגנה על הגישה למאגר - סמפור 'mutex')\n    sem_wait(sem_id, MUTEX_SEM_NUM);\n\n    // 3. הכנסת הפריט למאגר\n    shared_data->buffer[shared_data->in] = item_to_produce;\n    shared_data->in = (shared_data->in + 1) % BUFFER_SIZE;\n    // printf(\"Producer: Inserted item %d. Next 'in' index: %d\\n\", item_to_produce, shared_data->in); // ניתן להפעיל להדגמה\n\n    // 4. יציאה מהמקטע הקריטי\n    sem_post(sem_id, MUTEX_SEM_NUM);\n\n    // 5. איתות שהמאגר מכיל פריט נוסף (סמפור 'full')\n    sem_post(sem_id, FULL_SEM_NUM);\n}\n\n// הערה: ביישום מלא, יש צורך בקוד נוסף ליצירת זיכרון משותף וסמפורים, אתחולם,\n// וכן לולאה שמייצרת פריטים וקוראת לפונקציה producer_insert_item.",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "א. מנגנוני ה-IPC הנדרשים הם:\n1.  **זיכרון משותף (Shared Memory):** ישמש לאחסון המאגר המעגלי המשותף (circular buffer) בו ה-Producer מכניס נתונים וה-Consumer קורא נתונים. זהו מנגנון יעיל לתקשורת מהירה בין תהליכים באותה מכונה, שכן הוא מאפשר גישה ישירה לנתונים ללא העתקה דרך הליבה.\n2.  **סמפורים (Semaphores):** נדרשים לסנכרון גישה לזיכרון המשותף ולניהול מצב המאגר (ריק/מלא) כדי למנוע תנאי מרוץ (race conditions) וקיפאון (deadlock). נשתמש בשלושה סמפורים:\n    *   `mutex` (סמפור בינארי, מאותחל ל-1): מגן על הגישה למאגר עצמו (למשל, למצביעים `in` ו-`out` ולתוכן המאגר) כדי להבטיח שבכל רגע נתון רק תהליך אחד יבצע שינויים במאגר. סמפור זה מוגדר כ-`MUTEX_SEM_NUM` (0) בקוד.\n    *   `empty` (סמפור סופר, מאותחל ל-N, גודל המאגר): מציין את מספר המקומות הפנויים במאגר. ה-Producer מבצע `wait` עליו לפני הכנסת פריט, וה-Consumer מבצע `signal` עליו לאחר קריאת פריט. סמפור זה מוגדר כ-`EMPTY_SEM_NUM` (1) בקוד.\n    *   `full` (סמפור סופר, מאותחל ל-0): מציין את מספר הפריטים המלאים במאגר. ה-Consumer מבצע `wait` עליו לפני קריאת פריט, וה-Producer מבצע `signal` עליו לאחר הכנסת פריט. סמפור זה מוגדר כ-`FULL_SEM_NUM` (2) בקוד.\n\nב. קטע קוד לדוגמה עבור תהליך ה-Producer מצורף בשדה `code_snippet`."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Scheduling",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 09:06:22",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1023,
+      "output_tokens": 1002,
+      "total_tokens": 5026
+    }
+  },
+  "question": {
+    "id": 6,
+    "type": "MultipleChoice",
+    "topic": [
+      "Scheduling",
+      "CPU Scheduling",
+      "SRTF"
+    ],
+    "content": {
+      "text": "נתונים שלושה תהליכים עם זמני הגעה וזמני ריצה (Burst Time) כדלקמן:\n- P1: זמן הגעה = 0, זמן ריצה = 7\n- P2: זמן הגעה = 2, זמן ריצה = 4\n- P3: זמן הגעה = 4, זמן ריצה = 1\n\nמהו זמן ההמתנה הממוצע (Average Waiting Time) של התהליכים, אם מערכת ההפעלה משתמשת באלגוריתם תזמון Shortest Remaining Time First (SRTF)?",
+      "code_snippet": null,
+      "options": [
+        "א. 1.5",
+        "ב. 2",
+        "ג. 2.5",
+        "ד. 3",
+        "ה. אף אחת מהתשובות אינה נכונה"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב. 2",
+      "explanation": "נחשב את זמן ההמתנה הממוצע באמצעות אלגוריתם SRTF:\n\n1.  **זמן 0:** P1 מגיע (זמן ריצה 7). P1 מתחיל לרוץ.\n2.  **זמן 0-2:** P1 רץ. בזמן 2, P1 נותר עם זמן ריצה 5.\n3.  **זמן 2:** P2 מגיע (זמן ריצה 4). כעת יש שני תהליכים מוכנים: P1 (נותר 5), P2 (נותר 4). P2 קצר יותר, ולכן P2 דוחק את P1 ומתחיל לרוץ.\n4.  **זמן 2-4:** P2 רץ. בזמן 4, P2 נותר עם זמן ריצה 2.\n5.  **זמן 4:** P3 מגיע (זמן ריצה 1). כעת יש שלושה תהליכים מוכנים: P1 (נותר 5), P2 (נותר 2), P3 (נותר 1). P3 הוא הקצר ביותר, ולכן P3 דוחק את P2 ומתחיל לרוץ.\n6.  **זמן 4-5:** P3 רץ. P3 מסיים את ריצתו בזמן 5.\n7.  **זמן 5:** נותרו P1 (נותר 5), P2 (נותר 2). P2 קצר יותר, ולכן P2 ממשיך לרוץ.\n8.  **זמן 5-7:** P2 רץ. P2 מסיים את ריצתו בזמן 7.\n9.  **זמן 7:** נותר רק P1 (נותר 5). P1 מתחיל לרוץ.\n10. **זמן 7-12:** P1 רץ. P1 מסיים את ריצתו בזמן 12.\n\n**זמני סיום (Completion Times):**\n*   P3: 5\n*   P2: 7\n*   P1: 12\n\n**זמני מחזור (Turnaround Times = Completion Time - Arrival Time):**\n*   P1: 12 - 0 = 12\n*   P2: 7 - 2 = 5\n*   P3: 5 - 4 = 1\n\n**זמני המתנה (Waiting Times = Turnaround Time - Burst Time):**\n*   P1: 12 - 7 = 5\n*   P2: 5 - 4 = 1\n*   P3: 1 - 1 = 0\n\n**זמן המתנה ממוצע:** (5 + 1 + 0) / 3 = 6 / 3 = 2.\n\nלכן, התשובה הנכונה היא ב'."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

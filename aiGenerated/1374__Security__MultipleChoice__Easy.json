@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "Security",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 09:43:11",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1049,
+      "output_tokens": 460,
+      "total_tokens": 2695
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Security",
+      "Operating System Fundamentals",
+      "Privilege Levels"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של הפרדת מצב משתמש (user mode) ממצב ליבה (kernel mode) במערכת הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. כדי לאפשר למשתמשים שונים להריץ תוכניות במקביל.",
+        "ב. כדי למנוע מתוכניות משתמש לבצע פעולות מסוכנות שיכולות לפגוע במערכת כולה.",
+        "ג. כדי להגביל את כמות הזיכרון שתוכנית יכולה להשתמש בה.",
+        "ד. כדי לשפר את ביצועי המערכת על ידי הקצאת משאבים יעילה יותר."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "הפרדת מצב משתמש ממצב ליבה היא מנגנון אבטחה בסיסי שמטרתו להגן על מערכת ההפעלה ועל הנתונים שלה מפני תוכניות משתמש זדוניות או לא תקינות. במצב ליבה, למערכת ההפעלה יש גישה מלאה לחומרה ולכל הזיכרון, ואילו במצב משתמש, לתוכניות יש הרשאות מוגבלות. כל פעולה מסוכנת, כמו גישה ישירה לחומרה או שינוי הגדרות מערכת, חייבת לעבור דרך קריאת מערכת (system call) המבוצעת במצב ליבה, מה שמאפשר למערכת ההפעלה לאכוף מדיניות אבטחה."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

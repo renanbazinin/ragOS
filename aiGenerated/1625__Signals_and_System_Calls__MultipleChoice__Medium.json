@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Signals and System Calls",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 11:54:30",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 926,
+      "output_tokens": 997,
+      "total_tokens": 4309
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Signals",
+      "System Calls",
+      "Error Handling"
+    ],
+    "content": {
+      "text": "תהליך קורא לפונקציית מערכת חוסמת (blocking system call) כמו read() מקובץ/socket. בזמן ש-read() מבוצע, התהליך מקבל סיגנל (לדוגמה SIGINT) שעבורו הותקן handler. בהנחה שה-handler סיים את פעולתו, וקריאת המערכת read() לא הוגדרה עם הדגל SA_RESTART (או התנהגות דומה), מהי סבירות התוצאה של קריאת המערכת read()?",
+      "code_snippet": "#include <stdio.h>\n#include <unistd.h>\n#include <signal.h>\n#include <errno.h>\n#include <string.h> // For strerror\n\nvoid sig_handler(int signo) {\n    printf(\"Signal %d received! Handler executing...\\n\", signo);\n}\n\nint main() {\n    struct sigaction sa;\n    sa.sa_handler = sig_handler;\n    sigemptyset(&sa.sa_mask);\n    sa.sa_flags = 0; // Crucial: no SA_RESTART\n    if (sigaction(SIGINT, &sa, NULL) == -1) {\n        perror(\"sigaction\");\n        return 1;\n    }\n\n    char buffer[100];\n    printf(\"Process trying to read from stdin (waiting for input)...\\n\");\n    ssize_t bytes_read = read(STDIN_FILENO, buffer, sizeof(buffer)); // This is the call in question\n\n    if (bytes_read == -1) {\n        if (errno == EINTR) {\n            printf(\"Read was interrupted by a signal (errno == EINTR).\\n\");\n        } else {\n            perror(\"read error\");\n        }\n    } else if (bytes_read == 0) {\n        printf(\"End of file (EOF) reached.\\n\");\n    } else {\n        printf(\"Read %zd bytes: %.*s\\n\", bytes_read, (int)bytes_read, buffer);\n    }\n    return 0;\n}",
+      "options": [
+        "א. קריאת המערכת read() תמיד תושלם באופן מלא לאחר שה-handler יסיים את פעולתו, ללא כל אינדיקציה להפרעה.",
+        "ב. קריאת המערכת read() תחזור מיד עם ערך של 0, המציין סיום קובץ (EOF).",
+        "ג. קריאת המערכת read() תחזור עם ערך של -1, ומשתנה ה-errno יוגדר ל-EINTR.",
+        "ד. קריאת המערכת read() תופסק מיידית והתהליך יסיים את פעולתו (terminate).",
+        "ה. התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "כאשר תהליך מבצע קריאת מערכת חוסמת (כמו read()), ומקבל סיגנל שעבורו הותקן handler, מערכת ההפעלה מפסיקה את קריאת המערכת כדי לבצע את ה-handler. לאחר שה-handler חוזר, קריאת המערכת המקורית בדרך כלל חוזרת עם שגיאה. ללא הדגל SA_RESTART (או התנהגות דומה), קריאות מערכת רבות (כמו read, write, waitpid) יחזרו עם ערך של -1 ו-errno יוגדר ל-EINTR (Interrupted system call), מה שמציין שהפעולה הופרעה על ידי סיגנל. על המפתח לטפל במצב זה על ידי ניסיון חוזר לקריאה או טיפול אחר בשגיאה."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

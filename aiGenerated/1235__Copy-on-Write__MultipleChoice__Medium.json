@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Copy-on-Write",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 08:52:18",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1142,
+      "output_tokens": 1459,
+      "total_tokens": 5279
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Copy-on-Write",
+      "Virtual Memory",
+      "Processes",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "נתון קטע קוד ב-C:\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\nint global_var = 100;\n\nint main() {\n    pid_t pid;\n\n    printf(\"Initial global_var in parent: %d (Addr: %p)\\n\", global_var, &global_var);\n\n    pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        exit(1);\n    } else if (pid == 0) { // Child process\n        printf(\"Child process (PID: %d)\\n\", getpid());\n        global_var = 200; // Modify global_var\n        printf(\"global_var in child after modification: %d (Addr: %p)\\n\", global_var, &global_var);\n        exit(0);\n    } else { // Parent process\n        wait(NULL); // Wait for child to finish\n        printf(\"Parent process (PID: %d)\\n\", getpid());\n        printf(\"global_var in parent after child's modification: %d (Addr: %p)\\n\", global_var, &global_var);\n    }\n\n    return 0;\n}\n```\nבהנחה שמערכת ההפעלה מיישמת מנגנון Copy-on-Write (CoW) עבור אזורי נתונים הניתנים לכתיבה (writable data segments), מה יהיה הפלט הצפוי של התוכנית? (שימו לב לערכים ולכתובות הווירטואליות)\n",
+      "code_snippet": null,
+      "options": [
+        "א. \nInitial global_var in parent: 100 (Addr: 0x...)\nChild process (PID: ...)\nglobal_var in child after modification: 200 (Addr: 0x...)\nParent process (PID: ...)\nglobal_var in parent after child's modification: 200 (Addr: 0x...)\n",
+        "ב. \nInitial global_var in parent: 100 (Addr: 0xAAAA)\nChild process (PID: ...)\nglobal_var in child after modification: 200 (Addr: 0xAAAA)\nParent process (PID: ...)\nglobal_var in parent after child's modification: 100 (Addr: 0xAAAA)\n",
+        "ג. \nInitial global_var in parent: 100 (Addr: 0xAAAA)\nChild process (PID: ...)\nglobal_var in child after modification: 200 (Addr: 0xBBBB)\nParent process (PID: ...)\nglobal_var in parent after child's modification: 100 (Addr: 0xAAAA)\n",
+        "ד. \nInitial global_var in parent: 100 (Addr: 0xAAAA)\nChild process (PID: ...)\nglobal_var in child after modification: 100 (Addr: 0xAAAA)\nParent process (PID: ...)\nglobal_var in parent after child's modification: 100 (Addr: 0xAAAA)\n"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "כאשר תהליך אב מבצע ()fork, כל מרחב הזיכרון הווירטואלי שלו משוכפל עבור תהליך הבן. עם זאת, במנגנון Copy-on-Write (CoW), דפי זיכרון הניתנים לכתיבה (writable pages) אינם משוכפלים פיזית מיד, אלא מסומנים כדפי קריאה בלבד (read-only) ומשותפים בין האב לבן. כאשר תהליך הבן (או האב) מנסה לכתוב לדף כזה, נוצרת \"תקלת דף\" (page fault). מערכת ההפעלה מיירטת את התקלה, יוצרת עותק פיזי חדש של הדף עבור התהליך הכותב, מעדכנת את טבלת הדפים של אותו תהליך כך שתצביע לדף החדש, ומסמנת אותו כדף הניתן לכתיבה. כעת, התהליך יכול לכתוב לדף שלו מבלי להשפיע על התהליך השני.\n\nבמקרה זה, לאחר ה-fork, המשתנה `global_var` נמצא בדף זיכרון המשותף לאב ולבן. כאשר הבן משנה את ערך `global_var` ל-200, מתרחש אירוע CoW: נוצר עותק פיזי של הדף המכיל את `global_var` עבור הבן, והבן כותב לגרסה שלו. האב ממשיך להצביע לדף הפיזי המקורי, ולכן ערך `global_var` אצלו נשאר 100.\n\nחשוב לציין שהכתובות הווירטואליות של `global_var` בשני התהליכים נשארות זהות, מכיוון שמרחב הכתובות הווירטואלי משוכפל במלואו. הכתובות הפיזיות הן אלו שמשתנות לאחר פעולת ה-CoW. הפקודה `printf(\"... (Addr: %p)\\n\", ..., &global_var)` מדפיסה את הכתובת הווירטואלית, ולכן היא תהיה זהה בשני התהליכים. לכן, הפלט יציג את הכתובות הווירטואליות כאותן כתובות, אך את הערכים השונים (100 באב, 200 בבן)."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

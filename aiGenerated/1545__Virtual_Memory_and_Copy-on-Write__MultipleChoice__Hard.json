@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory and Copy-on-Write",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 11:19:06",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 975,
+      "output_tokens": 2588,
+      "total_tokens": 7970
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Virtual Memory",
+      "Copy-on-Write",
+      "Process Management"
+    ],
+    "content": {
+      "text": "נתונה מערכת הפעלה המשתמשת בזיכרון וירטואלי ובמנגנון Copy-on-Write (CoW), עם גודל דף של 4KB. תהליך אב (parent) מבצע את הקוד הבא:\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\n#define ARRAY_SIZE (16 * 1024) // 16KB\n\nint main() {\n    int *buffer = (int *)malloc(ARRAY_SIZE);\n    if (buffer == NULL) {\n        perror(\"malloc failed\");\n        return 1;\n    }\n\n    // Initialize the buffer (all pages become resident and R/W)\n    for (int i = 0; i < ARRAY_SIZE / sizeof(int); ++i) {\n        buffer[i] = 0;\n    }\n\n    pid_t pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        return 1;\n    } else if (pid == 0) { // Child process\n        printf(\"Child process: Modifying buffer[0]\\n\");\n        buffer[0] = 100; // This is on the first 4KB page (offset 0)\n        exit(0);\n    } else { // Parent process\n        // Wait for child to finish, then modify\n        wait(NULL);\n        printf(\"Parent process: Modifying buffer[5000/sizeof(int)]\\n\");\n        // Assuming sizeof(int) = 4, then 5000/4 = 1250. buffer[1250] is at offset 5000 bytes.\n        // This is on the second 4KB page (4096 < 5000 < 8192)\n        buffer[5000 / sizeof(int)] = 200;\n    }\n\n    // Assume the processes terminate cleanly, and we are interested in the peak physical page usage for 'buffer'\n    // after both modifications are complete.\n    // The buffer is guaranteed to be page-aligned.\n    return 0;\n}\n```\nבהתבסס על הקוד לעיל, ובהנחה ש-`sizeof(int)` הוא 4 בתים, כמה דפים פיזיים שונים בסך הכל (distinct physical pages) משמשים לגיבוי מערך ה-`buffer` *בסך הכל עבור שני התהליכים (האב והבן)*, לאחר ששניהם סיימו את פעולות הכתיבה שלהם?",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\n#define ARRAY_SIZE (16 * 1024) // 16KB\n\nint main() {\n    int *buffer = (int *)malloc(ARRAY_SIZE);\n    if (buffer == NULL) {\n        perror(\"malloc failed\");\n        return 1;\n    }\n\n    // Initialize the buffer (all pages become resident and R/W)\n    for (int i = 0; i < ARRAY_SIZE / sizeof(int); ++i) {\n        buffer[i] = 0;\n    }\n\n    pid_t pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        return 1;\n    } else if (pid == 0) { // Child process\n        printf(\"Child process: Modifying buffer[0]\\n\");\n        buffer[0] = 100; // This is on the first 4KB page (offset 0)\n        exit(0);\n    } else { // Parent process\n        // Wait for child to finish, then modify\n        wait(NULL);\n        printf(\"Parent process: Modifying buffer[5000/sizeof(int)]\\n\");\n        // Assuming sizeof(int) = 4, then 5000/4 = 1250. buffer[1250] is at offset 5000 bytes.\n        // This is on the second 4KB page (4096 < 5000 < 8192)\n        buffer[5000 / sizeof(int)] = 200;\n    }\n\n    // Assume the processes terminate cleanly, and we are interested in the peak physical page usage for 'buffer'\n    // after both modifications are complete.\n    // The buffer is guaranteed to be page-aligned.\n    return 0;\n}",
+      "options": [
+        "א. 4",
+        "ב. 5",
+        "ג. 6",
+        "ד. 8",
+        "ה. 2"
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "התשובה הנכונה היא ג. 6.\n\nהבה ננתח את מצב הזיכרון הפיזי והדפים הוירטואליים:\n1.  **לפני ה-`fork()`:** המערך `buffer` בגודל 16KB דורש 4 דפים פיזיים (16KB / 4KB לדף = 4 דפים). נניח אלו הם P_phys0, P_phys1, P_phys2, P_phys3. תהליך האב מאתחל את המערך, כך שכל 4 הדפים הפיזיים הללו מאוכלסים וזמינים לכתיבה (R/W).\n2.  **לאחר ה-`fork()`:** תהליך הבן נוצר. עקב מנגנון CoW, בתחילה, טבלאות הדפים של האב והבן מצביעות על אותם 4 דפים פיזיים (P_phys0 עד P_phys3). כל הערכים בטבלאות הדפים (PTEs) עבור דפים אלו מסומנים כקריאה בלבד (Read-Only) או עם דגל CoW, ומונה ההתייחסויות לדפים הפיזיים הללו הוא 2.\n3.  **כתיבה של הבן ל-`buffer[0]`:** כתובת `buffer[0]` נמצאת בדף הראשון של המערך (P0, טווח כתובות 0-4095). כאשר הבן מנסה לכתוב ל-`buffer[0]`, מתרחשת Page Fault (עקב דגל ה-CoW/R/O). מערכת ההפעלה מבצעת את הפעולות הבאות:\n    *   יוצרת עותק חדש של הדף הפיזי P_phys0. נכנה אותו P_phys0_child_copy.\n    *   מעדכנת את ה-PTE של הבן עבור דף P0 שיצביע על P_phys0_child_copy ומסמנת אותו כ-R/W.\n    *   מונה ההתייחסויות של P_phys0 יורד ל-1 (רק האב עדיין מצביע עליו עבור הדף הוירטואלי P0).\n    *   בשלב זה, הבן משתמש ב-P_phys0_child_copy, ואילו האב עדיין משתמש ב-P_phys0 המקורי.\n4.  **כתיבה של האב ל-`buffer[5000 / sizeof(int)]`:** כתובת `buffer[5000]` נמצאת בדף השני של המערך (P1, טווח כתובות 4096-8191), מכיוון ש-4096 בתים (גודל דף אחד) < 5000 בתים < 8192 בתים (גודל שני דפים). כאשר האב מנסה לכתוב לכתובת זו, מתרחשת Page Fault (שוב, עקב דגל ה-CoW/R/O). מערכת ההפעלה מבצעת את הפעולות הבאות:\n    *   יוצרת עותק חדש של הדף הפיזי P_phys1. נכנה אותו P_phys1_parent_copy.\n    *   מעדכנת את ה-PTE של האב עבור דף P1 שיצביע על P_phys1_parent_copy ומסמנת אותו כ-R/W.\n    *   מונה ההתייחסויות של P_phys1 יורד ל-1 (רק הבן עדיין מצביע עליו עבור הדף הוירטואלי P1).\n    *   בשלב זה, האב משתמש ב-P_phys1_parent_copy, ואילו הבן עדיין משתמש ב-P_phys1 המקורי.\n5.  **דפים P2 ו-P3:** דפים אלו (טווח כתובות 8192-12287 ו-12288-16383 בהתאמה) לא שונו על ידי אף אחד מהתהליכים. לכן, גם טבלת הדפים של האב וגם זו של הבן עדיין מצביעות על הדפים הפיזיים המקוריים P_phys2 ו-P_phys3, והם עדיין מסומנים כ-CoW/R/O, עם מונה התייחסויות של 2.\n\n**ספירת הדפים הפיזיים השונים:**\n*   **P_phys0_child_copy:** הדף החדש שנוצר עבור הבן (לדף הוירטואלי P0).\n*   **P_phys0:** הדף המקורי, שהאב עדיין משתמש בו (לדף הוירטואלי P0).\n*   **P_phys1_parent_copy:** הדף החדש שנוצר עבור האב (לדף הוירטואלי P1).\n*   **P_phys1:** הדף המקורי, שהבן עדיין משתמש בו (לדף הוירטואלי P1).\n*   **P_phys2:** הדף המקורי, שמשותף לשני התהליכים (לדף הוירטואלי P2).\n*   **P_phys3:** הדף המקורי, שמשותף לשני התהליכים (לדף הוירטואלי P3).\n\nסה\"כ 6 דפים פיזיים שונים משמשים לגיבוי מערך ה-`buffer` עבור שני התהליכים."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

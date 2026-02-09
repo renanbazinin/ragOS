@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Memory Management and Page Replacement",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 10:44:57",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 941,
+      "output_tokens": 414,
+      "total_tokens": 2718
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Memory Management",
+      "Page Replacement",
+      "Clock Algorithm"
+    ],
+    "content": {
+      "text": "באלגוריתם החלפת הדפים Clock (Second Chance), דף נבחר על ידי המצביע. מה קורה לדף זה אם ביט ה-Reference שלו מוגדר ל-1?",
+      "code_snippet": null,
+      "options": [
+        "א. הדף מוחלף מיד, שכן הוא נבחר על ידי המצביע.",
+        "ב. ביט ה-Reference שלו מתאפס, המצביע מתקדם, והדף נשאר בזיכרון.",
+        "ג. הדף נכתב לדיסק רק אם ביט ה-Dirty שלו מוגדר ל-1.",
+        "ד. הדף מועבר לראש התור, כאילו נעשה בו שימוש לאחרונה."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "באלגוריתם Clock, כאשר המצביע (ה'מחוג') נתקל בדף שביט ה-Reference שלו מוגדר ל-1, הדף מקבל 'הזדמנות שנייה'. ביט ה-Reference שלו מתאפס ל-0, והמצביע ממשיך לדף הבא. הדף עצמו נשאר בזיכרון ולא מוחלף מיד. הוא יוחלף רק אם המצביע יחזור אליו וה-Reference bit שלו יהיה 0."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Signals",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 08:40:40",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 968,
+      "output_tokens": 1968,
+      "total_tokens": 8148
+    }
+  },
+  "question": {
+    "id": 6,
+    "type": "MultipleChoice",
+    "topic": [
+      "Signals",
+      "Process Management",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתבונן בקוד C הבא:\n\n```c\n#include <signal.h>\n#include <stdio.h>\n#include <unistd.h>\n#include <string.h>\n\nvoid sig_handler(int signum) {\n    // מטפל פשוט, אינו משנה מצב גלובלי או קורא לפונקציות לא-ריאנטרנטיות\n}\n\nint main() {\n    sigset_t block_mask, pending_mask;\n    struct sigaction sa;\n\n    // התקנת מטפלים עבור SIGUSR1 ו-SIGUSR2\n    memset(&sa, 0, sizeof(sa));\n    sa.sa_handler = sig_handler;\n    sigaction(SIGUSR1, &sa, NULL);\n    sigaction(SIGUSR2, &sa, NULL);\n\n    // חסימת SIGUSR1\n    sigemptyset(&block_mask);\n    sigaddset(&block_mask, SIGUSR1);\n    sigprocmask(SIG_BLOCK, &block_mask, NULL);\n\n    // שליחת SIGUSR1\n    kill(getpid(), SIGUSR1);\n\n    // חסימת SIGUSR2 (SIGUSR1 נשאר חסום)\n    sigemptyset(&block_mask);\n    sigaddset(&block_mask, SIGUSR2);\n    sigprocmask(SIG_BLOCK, &block_mask, NULL);\n\n    // שליחת SIGUSR2\n    kill(getpid(), SIGUSR2);\n\n    // נקודה X\n\n    // הסרת חסימה מ-SIGUSR1\n    sigemptyset(&block_mask);\n    sigaddset(&block_mask, SIGUSR1);\n    sigprocmask(SIG_UNBLOCK, &block_mask, NULL);\n\n    // נקודה Y\n\n    // הסרת חסימה מ-SIGUSR2\n    sigemptyset(&block_mask);\n    sigaddset(&block_mask, SIGUSR2);\n    sigprocmask(SIG_UNBLOCK, &block_mask, NULL);\n\n    // נקודה Z\n    \n    return 0;\n}\n```\n\nאיזו טענה מתארת נכונה את מצב האותות הממתינים (pending signals) ואת סדר הפעלת המטפלים (handlers) בנקודות X, Y ו-Z?",
+      "code_snippet": "#include <signal.h>\n#include <stdio.h>\n#include <unistd.h>\n#include <string.h>\n\nvoid sig_handler(int signum) {\n    // מטפל פשוט, אינו משנה מצב גלובלי או קורא לפונקציות לא-ריאנטרנטיות\n}\n\nint main() {\n    sigset_t block_mask, pending_mask;\n    struct sigaction sa;\n\n    // התקנת מטפלים עבור SIGUSR1 ו-SIGUSR2\n    memset(&sa, 0, sizeof(sa));\n    sa.sa_handler = sig_handler;\n    sigaction(SIGUSR1, &sa, NULL);\n    sigaction(SIGUSR2, &sa, NULL);\n\n    // חסימת SIGUSR1\n    sigemptyset(&block_mask);\n    sigaddset(&block_mask, SIGUSR1);\n    sigprocmask(SIG_BLOCK, &block_mask, NULL);\n\n    // שליחת SIGUSR1\n    kill(getpid(), SIGUSR1);\n\n    // חסימת SIGUSR2 (SIGUSR1 נשאר חסום)\n    sigemptyset(&block_mask);\n    sigaddset(&block_mask, SIGUSR2);\n    sigprocmask(SIG_BLOCK, &block_mask, NULL);\n\n    // שליחת SIGUSR2\n    kill(getpid(), SIGUSR2);\n\n    // נקודה X\n\n    // הסרת חסימה מ-SIGUSR1\n    sigemptyset(&block_mask);\n    sigaddset(&block_mask, SIGUSR1);\n    sigprocmask(SIG_UNBLOCK, &block_mask, NULL);\n\n    // נקודה Y\n\n    // הסרת חסימה מ-SIGUSR2\n    sigemptyset(&block_mask);\n    sigaddset(&block_mask, SIGUSR2);\n    sigprocmask(SIG_UNBLOCK, &block_mask, NULL);\n\n    // נקודה Z\n    \n    return 0;\n}",
+      "options": [
+        "א. בנקודה X, רק SIGUSR1 ממתין. המטפל של SIGUSR1 יופעל רק לאחר ההגעה לנקודה Y, והמטפל של SIGUSR2 יופעל רק לאחר ההגעה לנקודה Z.",
+        "ב. בנקודה X, גם SIGUSR1 וגם SIGUSR2 ממתינים. המטפל של SIGUSR1 יופעל מיד לאחר הסרת חסימתו (לפני ההגעה ל-Y), והמטפל של SIGUSR2 יופעל מיד לאחר הסרת חסימתו (לפני ההגעה ל-Z).",
+        "ג. בנקודה X, גם SIGUSR1 וגם SIGUSR2 ממתינים. המטפל של SIGUSR1 יופעל בנקודה Y, והמטפל של SIGUSR2 יופעל בנקודה Z.",
+        "ד. בנקודה X, רק SIGUSR2 ממתין. המטפל של SIGUSR1 יופעל מיד לאחר הסרת חסימתו (לפני ההגעה ל-Y), והמטפל של SIGUSR2 יופעל מיד לאחר הסרת חסימתו (לפני ההגעה ל-Z).",
+        "ה. אף אחת מהטענות האחרות אינה נכונה."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "הסבר:\n1.  **מצב האותות בנקודה X**:\n    *   לאחר חסימת SIGUSR1 ושליחתו, הוא נכנס למצב ממתין (pending) מכיוון שהוא חסום.\n    *   לאחר מכן, חוסמים את SIGUSR2 (בזמן ש-SIGUSR1 עדיין חסום) ושולחים אותו. גם הוא נכנס למצב ממתין מכיוון שהוא חסום.\n    *   לכן, בנקודה X, גם SIGUSR1 וגם SIGUSR2 ממתינים (pending) ושניהם חסומים על ידי מסיכת החסימה של התהליך.\n2.  **הפעלת המטפל של SIGUSR1 (לפני נקודה Y)**:\n    *   כאשר SIGUSR1 מוסר ממסיכת החסימה באמצעות `sigprocmask(SIG_UNBLOCK, ...)`, הוא הופך להיות גם ממתין וגם לא חסום.\n    *   מערכת ההפעלה תספק את האות באופן מיידי ותפעיל את המטפל של SIGUSR1. פעולה זו מתרחשת *לפני* שהקריאה ל-`sigprocmask` חוזרת, ולכן *לפני* שהתהליך ממשיך בביצוע הקוד ומגיע לנקודה Y.\n3.  **הפעלת המטפל של SIGUSR2 (לפני נקודה Z)**:\n    *   באופן דומה, כאשר SIGUSR2 מוסר ממסיכת החסימה, הוא הופך להיות ממתין ולא חסום.\n    *   מערכת ההפעלה תספק את האות באופן מיידי ותפעיל את המטפל של SIGUSR2. פעולה זו מתרחשת *לפני* שהקריאה ל-`sigprocmask` חוזרת, ולכן *לפני* שהתהליך ממשיך בביצוע הקוד ומגיע לנקודה Z.\n\nבהתבסס על ניתוח זה, הטענה הנכונה היא ב'."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

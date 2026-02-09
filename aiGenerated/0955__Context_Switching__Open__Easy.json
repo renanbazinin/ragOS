@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Context Switching",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 07:06:57",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2777,
+      "output_tokens": 440,
+      "total_tokens": 4354
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Context Switching",
+      "Process Management"
+    ],
+    "content": {
+      "text": "הסבר בקצרה מהו מעבר הקשר (Context Switch) במערכת הפעלה, לשם מה הוא נחוץ, וציין שני רכיבים מרכזיים של מצב התהליך (process state) שנשמרים ומשוחזרים במהלך מעבר הקשר.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "מעבר הקשר (Context Switch) הוא התהליך שבו מערכת ההפעלה שומרת את מצבו הנוכחי של תהליך או חוט (כולל ערכי הרגיסטרים של המעבד, מונה התוכנית, מצביע המחסנית ומידע ניהול זיכרון), ולאחר מכן טוענת את מצבו השמור של תהליך או חוט אחר. תהליך זה נחוץ כדי לאפשר למעבד יחיד לשתף את זמנו בין מספר תהליכים או חוטים, ובכך ליצור אשליה של ריבוי משימות וביצוע מקבילי (concurrency).\n\nשני רכיבים מרכזיים שנשמרים ומשוחזרים במהלך מעבר הקשר הם:\n1. רגיסטרי המעבד (CPU Registers), כולל מונה התוכנית (Program Counter) ומצביע המחסנית (Stack Pointer).\n2. מידע ניהול הזיכרון (Memory Management Information), כגון טבלת הדפים של התהליך (Page Table Base Register)."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

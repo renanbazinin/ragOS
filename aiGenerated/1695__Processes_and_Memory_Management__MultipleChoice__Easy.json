@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Processes and Memory Management",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 20:05:56",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1034,
+      "output_tokens": 375,
+      "total_tokens": 1993
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Processes",
+      "Memory Management",
+      "Virtual Memory"
+    ],
+    "content": {
+      "text": "מהי זיכרון וירטואלי (Virtual Memory)?",
+      "code_snippet": null,
+      "options": [
+        "א. זיכרון פיזי המשמש ישירות את המעבד.",
+        "ב. חלק מהדיסק הקשיח המשמש לאחסון זמני של נתונים.",
+        "ג. הפשטה של זיכרון המעניקה לכל תהליך אשליה של מרחב זיכרון פרטי ורציף משלו.",
+        "ד. זיכרון המשמש את ליבת מערכת ההפעלה בלבד.",
+        "ה. אף אחת מהתשובות האחרות אינה נכונה."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג. זיכרון וירטואלי הוא מנגנון המאפשר לכל תהליך לראות מרחב כתובות זיכרון גדול ורציף, מבלי להיות מודע לזיכרון הפיזי האמיתי ולחלוקה שלו בין תהליכים שונים. הוא ממופה לזיכרון פיזי ו/או לדיסק ומספק הגנה וגמישות בניהול זיכרון."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

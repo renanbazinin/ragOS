@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "IPC",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 08:24:37",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 968,
+      "output_tokens": 1297,
+      "total_tokens": 6072
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "IPC",
+      "Synchronization",
+      "Semaphores",
+      "Deadlock"
+    ],
+    "content": {
+      "text": "תהליך יצרן-צרכן משתמש בזיכרון משותף (Shared Memory) כחוצץ מעגלי, ובשלושה סמפורים: `mutex` (סמפור בינארי להדרה הדדית), `empty` (סמפור מונה המאותת על מקומות פנויים), ו-`full` (סמפור מונה המאותת על מקומות תפוסים). נתון קטע הקוד הבא עבור לולאת הטיפול בחוצץ עבור תהליכי היצרן והצרכן:\n\nבהנחה שהסמפורים אותחלו כראוי (לדוגמה, `mutex` ל-1, `empty` לגודל החוצץ, `full` ל-0), איזו מהטענות הבאות נכונה לגבי קטע קוד זה?",
+      "code_snippet": "/* קטע קוד עבור תהליך היצרן */\nvoid producer_process() {\n    /* ... קוד אתחול ... */\n    while (true) {\n        // ייצור פריט\n        sem_wait(mutex);      // (1)\n        sem_wait(empty);      // (2)\n        // הוספת פריט לחוצץ המשותף\n        sem_post(full);       // (3)\n        sem_post(mutex);      // (4)\n    }\n}\n\n/* קטע קוד עבור תהליך הצרכן */\nvoid consumer_process() {\n    /* ... קוד אתחול ... */\n    while (true) {\n        sem_wait(mutex);      // (A)\n        sem_wait(full);       // (B)\n        // הסרת פריט מהחוצץ המשותף\n        sem_post(empty);      // (C)\n        sem_post(mutex);      // (D)\n        // צריכת פריט\n    }\n}",
+      "options": [
+        "א. הקוד נכון לחלוטין ויבטיח סנכרון נכון ללא בעיות.",
+        "ב. הקוד עלול לגרום למצב של קיפאון (Deadlock) כאשר החוצץ מלא לחלוטין או ריק לחלוטין.",
+        "ג. הקוד עלול לגרום לתנאי מרוץ (Race Condition) בגישה לנתונים בחוצץ המשותף.",
+        "ד. הקוד עלול לגרום לרעב (Starvation) של תהליכים, אך לא לקיפאון.",
+        "ה. הקוד אינו מבטיח שפעולות ההכנסה וההוצאה מהחוצץ יתבצעו באופן אטומי."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "התשובה הנכונה היא ב'.\nבקוד המוצג, תהליך היצרן תופס את המנעול `mutex` (שורה 1) *לפני* שהוא ממתין למקום פנוי בחוצץ (שורה 2). אם החוצץ מלא לחלוטין, היצרן יתקע בהמתנה ל-`empty` כשהוא מחזיק את ה-`mutex`.\nבאופן דומה, תהליך הצרכן תופס את המנעול `mutex` (שורה A) *לפני* שהוא ממתין לפריט תפוס בחוצץ (שורה B). אם החוצץ ריק לחלוטין, הצרכן יתקע בהמתנה ל-`full` כשהוא מחזיק את ה-`mutex`.\n\nמצב זה מוביל לקיפאון (Deadlock):\n1.  **כשהחוצץ מלא:** היצרן תופס `mutex`, מנסה `sem_wait(empty)` ונתקע. הצרכן מנסה `sem_wait(mutex)` ונתקע כי היצרן מחזיק בו. הצרכן הוא היחיד שיכול להגדיל את `empty` (על ידי צריכת פריט), אך הוא אינו יכול לרוץ.\n2.  **כשהחוצץ ריק:** הצרכן תופס `mutex`, מנסה `sem_wait(full)` ונתקע. היצרן מנסה `sem_wait(mutex)` ונתקע כי הצרכן מחזיק בו. היצרן הוא היחיד שיכול להגדיל את `full` (על ידי ייצור פריט), אך הוא אינו יכול לרוץ.\n\nהפתרון הנכון הוא לתפוס את סמפורי ה-'count' (`empty`/`full`) *לפני* תפיסת ה-`mutex`, ולאחר מכן לשחרר את ה-`mutex` *לפני* שחרור סמפורי ה-'count'. לדוגמה, עבור היצרן:\n`sem_wait(empty);`\n`sem_wait(mutex);`\n`// add item`\n`sem_post(mutex);`\n`sem_post(full);`\nוסדר דומה עבור הצרכן."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

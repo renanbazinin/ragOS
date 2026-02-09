@@ -1,0 +1,65 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions and Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 11:22:42",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3651,
+      "output_tokens": 2341,
+      "total_tokens": 7557
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Race Conditions",
+      "Mutexes",
+      "Concurrency",
+      "Threads",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C/C++ המשתמשת ב-pthreads ליצירת מספר תהליכונים (threads) המעדכנים משתנה גלובלי משותף. עיין בקוד והשב על השאלות הבאות:",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <unistd.h> // For usleep (not strictly needed for race, but good for context switching demo)\n\n#define NUM_THREADS 5\n#define ITERATIONS_PER_THREAD 100000\n\nlong long counter = 0; // Global shared variable\n\nvoid* increment_counter(void* arg) {\n    for (int i = 0; i < ITERATIONS_PER_THREAD; ++i) {\n        counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    printf(\"Initial counter value: %lld\\n\", counter);\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        if (pthread_create(&threads[i], NULL, increment_counter, NULL) != 0) {\n            perror(\"Failed to create thread\");\n            return 1;\n        }\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        if (pthread_join(threads[i], NULL) != 0) {\n            perror(\"Failed to join thread\");\n            return 1;\n        }\n    }\n\n    printf(\"Final counter value: %lld\\n\", counter);\n    printf(\"Expected counter value: %lld\\n\", (long long)NUM_THREADS * ITERATIONS_PER_THREAD);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "7.1",
+        "text": "האם קיימת בתוכנית זו בעיית מרוץ (Race Condition)? אם כן, הסבר מדוע וציין מהי הפעולה הקריטית הגורמת לכך.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "7.2",
+        "text": "מהו הערך הסופי הצפוי של המונה (counter) לאחר סיום כל התהליכונים? האם ייתכן שהתוכנית תדפיס ערך שונה מהערך הצפוי? אם כן, תאר תרחיש קצר (ב-2-3 שלבים) שיכול להוביל לערך שגוי.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "7.3",
+        "text": "כיצד ניתן לפתור את בעיית המרוץ באמצעות מנעול (Mutex)? הסבר את העיקרון של השימוש במנעול במקרה זה.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "7.4",
+        "text": "כתוב את קטע הקוד המתוקן המדגים את השימוש במנעול כדי למנוע את בעיית המרוץ (כלול רק את השינויים הנדרשים לפונקציה `increment_counter` ול-`main` בנוגע למוטקס).",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "7.1. כן, קיימת בתוכנית זו בעיית מרוץ (Race Condition). הפעולה הקריטית היא העדכון של המשתנה הגלובלי `counter` באמצעות `counter++`. פעולה זו אינה אטומית, אלא מורכבת משלושה שלבים:\n   1. קריאת הערך הנוכחי של `counter` לתוך רגיסטר.\n   2. הגדלת הערך ברגיסטר באחד.\n   3. כתיבת הערך המעודכן מהרגיסטר בחזרה ל-`counter` בזיכרון.\n   כאשר מספר תהליכונים מנסים לבצע פעולה זו במקביל, ייתכן שיתרחש שילוב לא רצוי של הפעולות (interleaving), כך שעדכונים של תהליכון אחד ידרסו על ידי עדכונים של תהליכון אחר, מה שיוביל לאובדן עדכונים.\n\n7.2. הערך הסופי הצפוי של המונה הוא `NUM_THREADS * ITERATIONS_PER_THREAD = 5 * 100000 = 500000`. כן, ייתכן שהתוכנית תדפיס ערך שונה מהערך הצפוי, וברוב המקרים הוא יהיה נמוך יותר. תרחיש לדוגמה שיוביל לערך שגוי:\n   1. `counter` שווה ל-100.\n   2. תהליכון A קורא את `counter` (מקבל 100). לפני שהוא מספיק להגדיל ולכתוב, מתבצע מיתוג הקשר.\n   3. תהליכון B קורא את `counter` (גם הוא מקבל 100).\n   4. תהליכון B מגדיל את ערכו ל-101 וכותב אותו בחזרה ל-`counter`. כעת `counter` שווה 101.\n   5. תהליכון A ממשיך מאיפה שהפסיק, מגדיל את ערכו (100) ל-101 וכותב אותו בחזרה ל-`counter`. כעת `counter` עדיין שווה 101.\n   במקרה זה, שתי פעולות הגדלה בוצעו, אך `counter` גדל רק באחד, מה שמהווה אובדן של עדכון.\n\n7.3. כדי לפתור את בעיית המרוץ, ניתן להשתמש במנעול (Mutex – Mutual Exclusion). מנעול מבטיח שרק תהליכון אחד יוכל להיכנס לקטע קריטי (critical section) בכל רגע נתון. העיקרון הוא כזה:\n   1. לפני כל גישה למשתנה המשותף `counter` בתוך הקטע הקריטי, התהליכון מנסה לנעול את המוטקס (באמצעות `pthread_mutex_lock`).\n   2. אם המוטקס פנוי, התהליכון נועל אותו וממשיך לבצע את הפעולות בקטע הקריטי.\n   3. אם המוטקס נעול על ידי תהליכון אחר, התהליכון הנוכחי נחסם (מושהה) עד שהמוטקס ישוחרר.\n   4. לאחר שהתהליכון מסיים את הפעולות בקטע הקריטי, הוא משחרר את המוטקס (באמצעות `pthread_mutex_unlock`), ובכך מאפשר לתהליכונים אחרים שניסו להיכנס לקטע הקריטי להמשיך.\n   פעולה זו מבטיחה שכל עדכון ל-`counter` יתבצע באופן אטומי, ללא הפרעה מתהליכונים אחרים.\n\n7.4. קטע הקוד המתוקן:\n```c\n#include <stdio.h>\n#include <pthread.h>\n\n#define NUM_THREADS 5\n#define ITERATIONS_PER_THREAD 100000\n\nlong long counter = 0; // Global shared variable\npthread_mutex_t counter_mutex; // Declare a mutex\n\nvoid* increment_counter(void* arg) {\n    for (int i = 0; i < ITERATIONS_PER_THREAD; ++i) {\n        pthread_mutex_lock(&counter_mutex); // Lock the mutex before accessing critical section\n        counter++; // Critical section\n        pthread_mutex_unlock(&counter_mutex); // Unlock the mutex after critical section\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    // Initialize the mutex\n    if (pthread_mutex_init(&counter_mutex, NULL) != 0) {\n        perror(\"Failed to initialize mutex\");\n        return 1;\n    }\n\n    printf(\"Initial counter value: %lld\\n\", counter);\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        if (pthread_create(&threads[i], NULL, increment_counter, NULL) != 0) {\n            perror(\"Failed to create thread\");\n            // Clean up mutex before exiting on error\n            pthread_mutex_destroy(&counter_mutex);\n            return 1;\n        }\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        if (pthread_join(threads[i], NULL) != 0) {\n            perror(\"Failed to join thread\");\n            // Clean up mutex before exiting on error\n            pthread_mutex_destroy(&counter_mutex);\n            return 1;\n        }\n    }\n\n    printf(\"Final counter value: %lld\\n\", counter);\n    printf(\"Expected counter value: %lld\\n\", (long long)NUM_THREADS * ITERATIONS_PER_THREAD);\n\n    // Destroy the mutex after use\n    pthread_mutex_destroy(&counter_mutex);\n\n    return 0;\n}\n```",
+      "difficulty_estimation": "Medium"
+    }
+  }
+}

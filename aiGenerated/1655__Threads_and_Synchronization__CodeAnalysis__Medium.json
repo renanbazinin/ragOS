@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Threads and Synchronization",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 19:45:21",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1971,
+      "output_tokens": 1495,
+      "total_tokens": 5866
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Threads",
+      "Synchronization",
+      "Race Conditions",
+      "Mutexes"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המשתמשת בחוטים (threads) כדי להגדיל משתנה גלובלי משותף. קראו את קטע הקוד ונתחו את התנהגותו:\n1. מהו הערך הסופי ה *צפוי* של המשתנה `counter` לאחר שכל החוטים סיימו את פעולתם?\n2. האם הערך הסופי המודפס תמיד יהיה שווה לערך הצפוי? אם לא, הסבירו מדוע (ציינו את סוג הבעיה) ומהו ה *טווח האפשרי* של ערכים שונים שעלולים להתקבל.\n3. תקנו את קטע הקוד (רק את הפונקציה `increment_counter` ואת `main` במידת הצורך) על מנת להבטיח שהערך הסופי של `counter` יהיה תמיד הערך הצפוי, תוך שימוש במנגנון סנכרון מתאים (mutex).",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\n#define NUM_THREADS 5\n#define ITERATIONS_PER_THREAD 100000\n\nlong long counter = 0;\n\nvoid* increment_counter(void* arg) {\n    for (int i = 0; i < ITERATIONS_PER_THREAD; ++i) {\n        counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, increment_counter, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final counter value: %lld\\n\", counter);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1. הערך הסופי ה *צפוי* של המשתנה `counter` הוא `NUM_THREADS * ITERATIONS_PER_THREAD = 5 * 100000 = 500000`.\n\n2. לא, הערך הסופי המודפס לא תמיד יהיה שווה לערך הצפוי. הסיבה לכך היא *תנאי מרוץ (race condition)*. הפעולה `counter++` אינה אטומית; היא מורכבת ממספר פעולות מכונה (קריאת הערך של `counter` לתוך אוגר, הגדלת האוגר, וכתיבת הערך המעודכן חזרה לזיכרון). כאשר מספר חוטים מבצעים פעולה זו במקביל, ייתכן שחוט אחד יקרא את הערך, חוט אחר יקרא את אותו ערך לפני שהחוט הראשון הספיק לכתוב את ערכו החדש, וכך יאבדו עדכונים. לדוגמה, אם `counter` הוא 10, חוט A קורא 10, חוט B קורא 10. חוט A מגדיל ל-11 וכותב 11. חוט B מגדיל ל-11 וכותב 11. למרות שבוצעו שתי הגדלות, `counter` הוא רק 11 במקום 12.\n   טווח הערכים האפשריים הוא בין 1 (במקרה הקיצוני שכל החוטים קוראים 0, מגדילים ל-1, ורק אחד מהם מצליח לכתוב 1 לפני שכולם מסיימים) לבין הערך הצפוי (500000). לרוב, הערך יהיה קטן מהצפוי אך גדול מ-1.\n\n3. כדי לתקן את הקוד ולהבטיח סנכרון נכון, יש להשתמש ב-mutex (מנעול) כדי להגן על הגישה למשתנה המשותף `counter`. כל חוט יצטרך לתפוס את המנעול לפני הגישה ל`counter` ולשחרר אותו מיד לאחר מכן. בנוסף, יש לאתחל ולשחרר את המוטקס בתוכנית הראשית.\n\n   **קוד מתוקן:**",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\n#define NUM_THREADS 5\n#define ITERATIONS_PER_THREAD 100000\n\nlong long counter = 0;\npthread_mutex_t mutex; // הצהרה על מוטקס גלובלי\n\nvoid* increment_counter(void* arg) {\n    for (int i = 0; i < ITERATIONS_PER_THREAD; ++i) {\n        pthread_mutex_lock(&mutex);   // נעל את המוטקס לפני הגישה למשתנה המשותף\n        counter++;\n        pthread_mutex_unlock(&mutex); // שחרר את המוטקס לאחר הגישה\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n    pthread_mutex_init(&mutex, NULL); // אתחל את המוטקס\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, increment_counter, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final counter value: %lld\\n\", counter);\n\n    pthread_mutex_destroy(&mutex); // שחרר את משאבי המוטקס\n\n    return 0;\n}",
+      "difficulty_estimation": "Medium"
+    }
+  }
+}

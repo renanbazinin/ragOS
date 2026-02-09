@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Atomic Operations",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 09:27:41",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 1346,
+      "total_tokens": 5645
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Atomic Operations",
+      "Memory Orderings",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא המדגים תקשורת בין שני תהליכים (threads) באמצעות משתנה אטומי ומשתנה רגיל:\n\n```cpp\n#include <atomic>\n#include <thread>\n#include <iostream>\n\nstd::atomic<bool> data_ready(false);\nint shared_data = 0;\n\nvoid producer() {\n    shared_data = 42; // (1) Non-atomic write to shared_data\n    data_ready.store(true, /* memory_order_store */); // (2) Atomic write to flag\n}\n\nvoid consumer() {\n    while (!data_ready.load(/* memory_order_load */)) {\n        // spin\n    }\n    std::cout << \"Data: \" << shared_data << std::endl; // (3) Non-atomic read from shared_data\n}\n\nint main() {\n    std::thread p(producer);\n    std::thread c(consumer);\n\n    p.join();\n    c.join();\n\n    return 0;\n}\n```\n\nכדי להבטיח את הנראות (visibility) הנכונה של הערך שנכתב ל-`shared_data` על ידי ה-`producer` ל-`consumer` (כלומר, שה-`consumer` יקרא 42 ולא 0 או ערך שגוי אחר), איזה סדר זיכרון (memory order) מינימלי יש להשתמש עבור הפעולות `data_ready.store()` ו-`data_ready.load()` בהתאמה?",
+      "code_snippet": null,
+      "options": [
+        "א. `std::memory_order_relaxed` עבור `store` ו-`std::memory_order_relaxed` עבור `load`.",
+        "ב. `std::memory_order_release` עבור `store` ו-`std::memory_order_acquire` עבור `load`.",
+        "ג. `std::memory_order_acquire` עבור `store` ו-`std::memory_order_release` עבור `load`.",
+        "ד. `std::memory_order_seq_cst` עבור `store` ו-`std::memory_order_relaxed` עבור `load`.",
+        "ה. `std::memory_order_relaxed` עבור `store` ו-`std::memory_order_seq_cst` עבור `load`."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "כדי להבטיח שהכתיבה ל-`shared_data` (פעולה 1) ב-`producer` תיראה על ידי ה-`consumer` רק לאחר שה-`consumer` קורא את `data_ready` כ-`true` (פעולה 3), עלינו ליצור יחס 'happens-before' בין פעולה 1 לפעולה 3.\n\n1.  **`data_ready.store(true, std::memory_order_release)`**: שימוש ב-`std::memory_order_release` עבור פעולת ה-`store` מבטיח שכל פעולות הזיכרון שקדמו לה ב-`producer` (כולל הכתיבה ל-`shared_data`) יהיו גלויות (flushed) לזיכרון הראשי לפני שה-`store` עצמו מתבצע.\n\n2.  **`data_ready.load(std::memory_order_acquire)`**: שימוש ב-`std::memory_order_acquire` עבור פעולת ה-`load` מבטיח שכל פעולות הזיכרון שיבואו אחריה ב-`consumer` (כולל הקריאה מ-`shared_data`) יתבצעו רק לאחר שה-`load` עצמו ימשוך את הערכים העדכניים ביותר מהזיכרון הראשי. יתר על כן, הוא יוצר יחס 'synchronizes-with' עם ה-`release` store המתאים.\n\nהשילוב של `release` ל-`store` ו-`acquire` ל-`load` יוצר את מחסום הזיכרון הנדרש: כל מה שקרה לפני ה-`release` ב-`producer` ייראה לכל מה שקורה אחרי ה-`acquire` ב-`consumer`. זהו הסדר המינימלי הנדרש להבטחת נראות נכונה של הנתונים הלא-אטומיים.\n\n*   `std::memory_order_relaxed` אינו מספק שום הבטחות סדר ביחס לפעולות זיכרון אחרות, ולכן לא יבטיח את נראות `shared_data`.\n*   החלפה בין `acquire` ו-`release` (אפשרות ג) תהיה שגויה, שכן `acquire` על `store` ו-`release` על `load` אינם יוצרים את יחס הסנכרון הרצוי.\n*   `std::memory_order_seq_cst` (עקביות סדרתיות) תבטיח את הנראות הנדרשת, אך היא חזקה יותר מהמינימום הנדרש (release-acquire) ודורשת יותר תקורה, ולכן אינה התשובה הנכונה לשאלה על סדר זיכרון *מינימלי*."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

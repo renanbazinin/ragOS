@@ -1,0 +1,57 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions and Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 11:21:06",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3651,
+      "output_tokens": 1897,
+      "total_tokens": 9646
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Race Conditions",
+      "Mutexes",
+      "Concurrency",
+      "Pthreads"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה, המשתמשת בתהליכונים (threads) כדי להגדיל מונה משותף. התוכנית מריצה מספר תהליכונים, כאשר כל אחד מהם מגדיל מונה גלובלי מספר רב של פעמים.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\n#define NUM_THREADS 5\n#define ITERATIONS_PER_THREAD 100000\n\nint counter = 0; // Global shared variable\n\nvoid *increment_counter(void *arg) {\n    for (int i = 0; i < ITERATIONS_PER_THREAD; i++) {\n        counter++; // Critical section without protection\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    printf(\"Starting counter value: %d\\n\", counter);\n\n    for (int i = 0; i < NUM_THREADS; i++) {\n        pthread_create(&threads[i], NULL, increment_counter, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; i++) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final counter value (without mutex): %d\\n\", counter);\n\n    return 0;\n}"
+    },
+    "sub_questions": [
+      {
+        "id": "7.1",
+        "text": "מהו הערך הסופי *הצפוי* של המונה (counter) אם לא היו תנאי מרוץ? ציין *ערך אפשרי אחד* השונה מזה הצפוי, שיכול להתקבל בפועל כתוצאה מתנאי מרוץ (race condition). הסבר *מדוע* מתרחש תנאי מרוץ בקטע הקוד הזה.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "7.2",
+        "text": "שנה את קטע הקוד של הפונקציה `increment_counter` ואת הפונקציה `main` כך שישתמשו ב-mutex כדי למנוע את תנאי המרוץ ולהבטיח שהמונה יגיע לערכו הסופי הנכון. הצג את הקוד *המלא* של הפונקציות `increment_counter` ו-`main` לאחר השינוי.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "7.3",
+        "text": "הסבר כיצד השימוש ב-mutex בקוד המתוקן מונע את תנאי המרוץ ומבטיח את תקינות ערך המונה.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "7.1. הערך הסופי *הצפוי* של המונה אם לא היו תנאי מרוץ הוא: NUM_THREADS * ITERATIONS_PER_THREAD = 5 * 100,000 = 500,000.\nערך אפשרי אחד שונה מזה הצפוי, שיכול להתקבל בפועל כתוצאה מתנאי מרוץ הוא כל מספר שהוא נמוך מ-500,000, לדוגמה 480,237 (הערך המדויק ישתנה בין הרצות שונות).\nתנאי מרוץ מתרחש כאן מכיוון שהפעולה `counter++` אינה פעולה אטומית. היא מורכבת משלושה שלבים: 1. קריאת הערך הנוכחי של `counter` לתוך רגיסטר של המעבד. 2. הגדלת הערך ברגיסטר באחד. 3. כתיבת הערך המוגדל בחזרה לזיכרון בכתובת של `counter`. אם שני תהליכונים (או יותר) מנסים לבצע את הפעולה הזו בו-זמנית, ייתכן ששניהם יקראו את אותו ערך התחלתי של `counter`, יגדילו אותו כל אחד בנפרד, ולאחר מכן שניהם יכתבו בחזרה את הערך המוגדל. במקרה כזה, הגדלה אחת תאבד, והמונה לא ישקף את כל הפעולות שבוצעו.\n\n7.2. הנה הקוד המלא של הפונקציות `increment_counter` ו-`main` לאחר השינוי, עם שימוש ב-mutex:\n```c\n#include <stdio.h>\n#include <pthread.h>\n\n#define NUM_THREADS 5\n#define ITERATIONS_PER_THREAD 100000\n\nint counter = 0;\npthread_mutex_t mutex; // Declare mutex\n\nvoid *increment_counter(void *arg) {\n    for (int i = 0; i < ITERATIONS_PER_THREAD; i++) {\n        pthread_mutex_lock(&mutex);   // Lock mutex\n        counter++;                    // Critical section\n        pthread_mutex_unlock(&mutex); // Unlock mutex\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    pthread_mutex_init(&mutex, NULL); // Initialize mutex\n\n    printf(\"Starting counter value: %d\\n\", counter);\n\n    for (int i = 0; i < NUM_THREADS; i++) {\n        pthread_create(&threads[i], NULL, increment_counter, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; i++) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final counter value (with mutex): %d\\n\", counter);\n\n    pthread_mutex_destroy(&mutex); // Destroy mutex\n\n    return 0;\n}\n```\n\n7.3. השימוש ב-mutex בקוד המתוקן מונע את תנאי המרוץ ומבטיח את תקינות ערך המונה באופן הבא:\nה-mutex (מנגנון הדדיות) מבטיח בלעדיות הדדית (mutual exclusion) על הקטע הקריטי. כאשר תהליכון קורא לפונקציה `pthread_mutex_lock(&mutex)`, הוא מנסה לנעול את ה-mutex. אם ה-mutex אינו נעול על ידי תהליכון אחר, התהליכון הנוכחי רוכש את הנעילה וממשיך בביצוע הקטע הקריטי (`counter++`). אם ה-mutex כבר נעול על ידי תהליכון אחר, התהליכון המנסה לנעול ייחסם (יעבור למצב המתנה) עד שהתהליכון שמחזיק בנעילה ישחרר אותה באמצעות `pthread_mutex_unlock(&mutex)`.\nעל ידי עטיפת הפעולה `counter++` בקריאות ל-`pthread_mutex_lock()` ו-`pthread_mutex_unlock()`, אנו מבטיחים שרק תהליכון אחד בכל רגע נתון יוכל לגשת ולשנות את המשתנה המשותף `counter`. זה מונע מצב שבו מספר תהליכונים קוראים את אותו ערך או דורסים זה את השינויים של זה, ובכך מבטיח שכל פעולת הגדלה תתבצע במלואה ובאופן אטומי מנקודת מבטם של התהליכונים האחרים, מה שמוביל לערך סופי נכון של המונה."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

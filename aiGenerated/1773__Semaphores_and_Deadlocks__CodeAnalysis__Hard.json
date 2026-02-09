@@ -1,0 +1,58 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Deadlocks",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 20:45:23",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4285,
+      "output_tokens": 3217,
+      "total_tokens": 15520
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Semaphores",
+      "Deadlocks",
+      "Concurrency",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתונה בעיית הפילוסופים הסועדים, בה N פילוסופים חולקים N מזלגות. כל פילוסוף צריך שני מזלגות כדי לאכול – את המזלג שמשמאלו ואת המזלג שמימינו. פילוסופים מבלים את זמנם בחשיבה ואכילה לסירוגין. הקוד הבא מציג מימוש ב-C/C++ לבעיה זו באמצעות סמפורים בינאריים, כאשר כל מזלג מיוצג על ידי סמפור.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <semaphore.h>\n#include <unistd.h> // For sleep\n\n#define N_PHILOSOPHERS 5\n\nsem_t forks[N_PHILOSOPHERS];\n\nvoid *philosopher(void *arg) {\n    int id = *(int *)arg;\n    int left_fork = id;\n    int right_fork = (id + 1) % N_PHILOSOPHERS;\n\n    while (1) {\n        // Thinking\n        printf(\"Philosopher %d is thinking.\\n\", id);\n        sleep(1);\n\n        // Pick up forks\n        printf(\"Philosopher %d wants to pick up fork %d (left).\\n\", id, left_fork);\n        sem_wait(&forks[left_fork]);\n        printf(\"Philosopher %d picked up fork %d (left).\\n\", id, left_fork);\n\n        printf(\"Philosopher %d wants to pick up fork %d (right).\\n\", id, right_fork);\n        sem_wait(&forks[right_fork]);\n        printf(\"Philosopher %d picked up fork %d (right).\\n\", id, right_fork);\n\n        // Eating\n        printf(\"Philosopher %d is eating.\\n\", id);\n        sleep(1);\n\n        // Put down forks\n        printf(\"Philosopher %d puts down fork %d (left).\\n\", id, left_fork);\n        sem_post(&forks[left_fork]);\n        printf(\"Philosopher %d puts down fork %d (right).\\n\", id, right_fork);\n        sem_post(&forks[right_fork]);\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t philo_threads[N_PHILOSOPHERS];\n    int ids[N_PHILOSOPHERS];\n\n    for (int i = 0; i < N_PHILOSOPHERS; ++i) {\n        sem_init(&forks[i], 0, 1); // Initialize each fork semaphore to 1\n    }\n\n    for (int i = 0; i < N_PHILOSOPHERS; ++i) {\n        ids[i] = i;\n        pthread_create(&philo_threads[i], NULL, philosopher, &ids[i]);\n    }\n\n    for (int i = 0; i < N_PHILOSOPHERS; ++i) {\n        pthread_join(philo_threads[i], NULL);\n    }\n\n    for (int i = 0; i < N_PHILOSOPHERS; ++i) {\n        sem_destroy(&forks[i]);\n    }\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "8.1",
+        "text": "א. האם קיים מצב של קיפאון (deadlock) במימוש הנתון? אם כן, תאר/י תרחיש ספציפי (רצף אירועים) המוביל לקיפאון עבור N=5 פילוסופים.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.2",
+        "text": "ב. הסבר/י מדוע התרחיש שתואר בסעיף א' אכן מוביל לקיפאון, תוך התייחסות לארבעת התנאים ההכרחיים לקיפאון (Mutual Exclusion, Hold and Wait, No Preemption, Circular Wait).",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.3",
+        "text": "ג. תקן/תקני את פונקציית philosopher כך שתמנע קיפאון. הסבר/י את השינוי שביצעת וכיצד הוא מונע את הקיפאון, תוך התייחסות לאחד מהתנאים ההכרחיים לקיפאון שהוסרו.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "פתרון:\n\nא. כן, קיים מצב של קיפאון (deadlock) במימוש הנתון. תרחיש ספציפי המוביל לקיפאון עבור N=5 פילוסופים:\n1. כל הפילוסופים (0, 1, 2, 3, 4) מתחילים לחשוב.\n2. כל פילוסוף מנסה לתפוס את המזלג השמאלי שלו ומצליח:\n   - פילוסוף 0 תופס את מזלג 0.\n   - פילוסוף 1 תופס את מזלג 1.\n   - פילוסוף 2 תופס את מזלג 2.\n   - פילוסוף 3 תופס את מזלג 3.\n   - פילוסוף 4 תופס את מזלג 4.\n3. בשלב זה, כל פילוסוף מחזיק במזלג אחד (השמאלי שלו) ומנסה לתפוס את המזלג השני (הימני שלו) אשר מוחזק על ידי הפילוסוף הבא בתור:\n   - פילוסוף 0 ממתין למזלג 1 (המוחזק ע\"י פילוסוף 1).\n   - פילוסוף 1 ממתין למזלג 2 (המוחזק ע\"י פילוסוף 2).\n   - פילוסוף 2 ממתין למזלג 3 (המוחזק ע\"י פילוסוף 3).\n   - פילוסוף 3 ממתין למזלג 4 (המוחזק ע\"י פילוסוף 4).\n   - פילוסוף 4 ממתין למזלג 0 (המוחזק ע\"י פילוסוף 0).\n4. נוצר מעגל המתנה (circular wait), וכל הפילוסופים חסומים לצמיתות, מה שמוביל לקיפאון.\n\nב. התרחיש שתואר בסעיף א' אכן מוביל לקיפאון מכיוון שהוא מקיים את ארבעת התנאים ההכרחיים לקיפאון:\n1. **הדרה הדדית (Mutual Exclusion):** כל מזלג הוא משאב בלעדי. רק פילוסוף אחד יכול להחזיק במזלג נתון בזמן נתון, מכיוון שהסמפור של כל מזלג מאותחל ל-1.\n2. **החזקה והמתנה (Hold and Wait):** כל פילוסוף תופס מזלג אחד (השמאלי שלו) וממתין למזלג נוסף (הימני שלו) המוחזק כבר על ידי פילוסוף אחר.\n3. **אי-הפקעה (No Preemption):** לא ניתן להפקיע מזלג מפילוסוף שמחזיק בו; פילוסוף חייב לשחרר את המזלג מרצונו באמצעות קריאה ל-`sem_post`.\n4. **המתנה מעגלית (Circular Wait):** נוצרת שרשרת מעגלית של פילוסופים, שבה כל פילוסוף בשרשרת ממתין למשאב שמוחזק על ידי הפילוסוף הבא בשרשרת. בתרחיש שתואר, פילוסוף 0 ממתין למזלג 1 (שמוחזק ע\"י 1), פילוסוף 1 ממתין למזלג 2 (שמוחזק ע\"י 2), וכן הלאה, עד שפילוסוף 4 ממתין למזלג 0 (שמוחזק ע\"י 0).\n\nג. תיקון פונקציית `philosopher` למניעת קיפאון:\nישנן מספר דרכים למנוע קיפאון. אחת הדרכים הנפוצות היא לשבור את תנאי \"המתנה מעגלית\". ניתן לעשות זאת על ידי שינוי סדר תפיסת המשאבים עבור פילוסוף אחד (או יותר), ובכך למנוע היווצרות של מעגל המתנה. לדוגמה, נגרום לפילוסופים בעלי ID זוגי לתפוס תחילה את המזלג השמאלי ואז את הימני, ולפילוסופים בעלי ID אי-זוגי לתפוס תחילה את המזלג הימני ואז את השמאלי.\n\nקוד מתוקן עבור פונקציית `philosopher`:\n```c\nvoid *philosopher(void *arg) {\n    int id = *(int *)arg;\n    int left_fork = id;\n    int right_fork = (id + 1) % N_PHILOSOPHERS;\n\n    while (1) {\n        printf(\"Philosopher %d is thinking.\\n\", id);\n        sleep(1);\n\n        if (id % 2 == 0) { // Even philosophers pick left then right\n            printf(\"Philosopher %d wants to pick up fork %d (left).\\n\", id, left_fork);\n            sem_wait(&forks[left_fork]);\n            printf(\"Philosopher %d picked up fork %d (left).\\n\", id, left_fork);\n\n            printf(\"Philosopher %d wants to pick up fork %d (right).\\n\", id, right_fork);\n            sem_wait(&forks[right_fork]);\n            printf(\"Philosopher %d picked up fork %d (right).\\n\", id, right_fork);\n        } else { // Odd philosophers pick right then left\n            printf(\"Philosopher %d wants to pick up fork %d (right).\\n\", id, right_fork);\n            sem_wait(&forks[right_fork]);\n            printf(\"Philosopher %d picked up fork %d (right).\\n\", id, right_fork);\n\n            printf(\"Philosopher %d wants to pick up fork %d (left).\\n\", id, left_fork);\n            sem_wait(&forks[left_fork]);\n            printf(\"Philosopher %d picked up fork %d (left).\\n\", id, left_fork);\n        }\n\n        printf(\"Philosopher %d is eating.\\n\", id);\n        sleep(1);\n\n        // Always put down in a consistent order (or reversed if desired, as long as it's consistent)\n        sem_post(&forks[left_fork]);\n        printf(\"Philosopher %d puts down fork %d (left).\\n\", id, left_fork);\n        sem_post(&forks[right_fork]);\n        printf(\"Philosopher %d puts down fork %d (right).\\n\", id, right_fork);\n    }\n    return NULL;\n}\n```\n\nהסבר לתיקון:\nהתיקון שובר את תנאי **ההמתנה המעגלית**. על ידי כך שפילוסופים עם ID זוגי תופסים תחילה את המזלג השמאלי ואז את הימני, ופילוסופים עם ID אי-זוגי תופסים תחילה את המזלג הימני ואז את השמאלי, אנו מבטיחים שלא תיווצר שרשרת המתנה מעגלית. לדוגמה, פילוסוף 0 (זוגי) ינסה לתפוס את מזלג 0 ואז את מזלג 1. פילוסוף 1 (אי-זוגי) ינסה לתפוס את מזלג 2 ואז את מזלג 1. אם פילוסוף 0 תפס את מזלג 0 ופילוסוף 1 תפס את מזלג 2, אף אחד מהם לא ימתין למזלג שהשני כבר מחזיק בו כדי להשלים את תפיסת שני המזלגות בסדר שעלול ליצור מעגל. במקום זאת, פילוסוף 0 ימתין למזלג 1, ופילוסוף 1 ימתין למזלג 1 (לאחר שתפס את 2). זה מבטיח שלפחות פילוסוף אחד יוכל להשלים את תפיסת שני המזלגות ולאכול, ובכך לשחרר משאבים, ומונע את הקיפאון."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

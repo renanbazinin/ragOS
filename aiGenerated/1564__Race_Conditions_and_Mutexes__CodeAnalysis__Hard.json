@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions and Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 11:30:12",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5488,
+      "output_tokens": 2482,
+      "total_tokens": 18651
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Race Conditions",
+      "Mutexes",
+      "Concurrency",
+      "Invariants",
+      "Deadlock Prevention"
+    ],
+    "content": {
+      "text": "במערכת בנקאות מנוהלות חשבונות בנק מרובים. לכל חשבון יש יתרה (balance) ומנעול (mutex) משלו. בנוסף, קיים משתנה גלובלי `global_total_balance` שאמור לשקף בכל רגע נתון את סכום היתרות של כל החשבונות במערכת, והוא מוגן על ידי מנעול משלו (`global_total_balance_mutex`).\n\nהקוד הבא מציג את מבנה החשבון ואת פונקציית `transfer_problematic` שמטרתה להעביר סכום כסף מחשבון אחד לאחר. הפונקציה מנסה למנוע קיפאון על ידי רכישת המנעולים של החשבונות בסדר עקבי (לפי ID).\n\nההנחה היא שפונקציות האתחול `init_bank_account` ו-`init_bank_system` מאתחלות את המערכת כהלכה, כולל המנעולים ו-`global_total_balance` לסכום ההתחלתי הנכון של כל החשבונות.\n\nשאלה: האם פונקציית `transfer_problematic` שומרת על האינווריאנט (invariant) לפיו `global_total_balance` תמיד שווה לסכום היתרות של כל החשבונות במערכת? אם לא, תארו את תרחיש המירוץ (race condition) האפשרי והסבירו מדוע הוא מתרחש. בנוסף, הציעו פתרון מתוקן לפונקציה `transfer`.",
+      "code_snippet": "typedef struct {\n    int balance;\n    pthread_mutex_t mutex;\n    int id; // For consistent locking order\n} BankAccount;\n\n// Global variables (assume initialized correctly by init_bank_system)\n// BankAccount accounts[NUM_ACCOUNTS];\n// int global_total_balance; // Sum of all accounts.balance\n// pthread_mutex_t global_total_balance_mutex;\n\nbool transfer_problematic(BankAccount* from_acc, BankAccount* to_acc, int amount) {\n    if (from_acc == to_acc || amount <= 0) {\n        return false; // Invalid transfer\n    }\n\n    // Acquire locks in a consistent order to prevent deadlock\n    BankAccount *first_lock_acc = (from_acc->id < to_acc->id) ? from_acc : to_acc;\n    BankAccount *second_lock_acc = (from_acc->id < to_acc->id) ? to_acc : from_acc;\n\n    pthread_mutex_lock(&first_lock_acc->mutex);\n    pthread_mutex_lock(&second_lock_acc->mutex);\n\n    bool success = false;\n    if (from_acc->balance >= amount) {\n        from_acc->balance -= amount;\n        // At this point, from_acc->balance has been updated, but to_acc->balance has not.\n        // The sum of from_acc->balance and to_acc->balance is temporarily inconsistent.\n        // The global_total_balance variable is not updated by this function\n        // as a transfer is a zero-sum operation for the total system balance.\n        to_acc->balance += amount;\n        success = true;\n    }\n\n    pthread_mutex_unlock(&second_lock_acc->mutex);\n    pthread_mutex_unlock(&first_lock_acc->mutex);\n\n    return success;\n}"
+    },
+    "sub_questions": null,
+    "points": 20,
+    "solution": {
+      "is_present_in_file": false,
+      "correct_option": null,
+      "explanation": "פונקציית `transfer_problematic` אינה שומרת על האינווריאנט לפיו `global_total_balance` תמיד שווה לסכום היתרות של כל החשבונות במערכת, אם קיים חוט אחר המנסה לבדוק או לחשב את סכום היתרות הכולל של המערכת.\n\n**תרחיש מירוץ (Race Condition):**\nהבעיה נובעת מכך שהפונקציה מבצעת שני עדכונים נפרדים (הפחתה מחשבון המקור והוספה לחשבון היעד) כאשר ביניהם ישנו חלון זמן קריטי. למרות שהמנעולים של שני החשבונות נתפסים בו-זמנית (בסדר עקבי למניעת קיפאון), האינווריאנט הגלובלי (סכום כל החשבונות) מושפע באופן זמני. העברה היא פעולה סכום-אפס מבחינת סך הכסף במערכת, ולכן `global_total_balance` לא אמור להשתנות.\n\nנניח שחוט (Thread A) מריץ `transfer_problematic(acc1, acc2, 10)`. נניח בהתחלה `acc1.balance = 100`, `acc2.balance = 100`, ו-`global_total_balance = 200`. \n1. Thread A תופס את המנעולים של `acc1` ו-`acc2` (בהתאם לסדר ה-ID שלהם).\n2. Thread A מבצע `acc1->balance -= 10;` (כעת `acc1.balance = 90`).\n3. **כאן נפתח חלון מירוץ:** אם בשלב זה חוט אחר (Thread B) מנסה לבדוק את האינווריאנט הגלובלי על ידי סכימת יתרות כל החשבונות (למשל, פונקציה כמו `get_total_system_balance_by_summing_accounts()` שתופסת מנעולים של חשבונות בודדים בזה אחר זה וסוכמת את יתרותיהם), הוא יראה את `acc1.balance = 90` ואת `acc2.balance = 100` (אם הוא קורא את `acc2.balance` לפני ש-Thread A מעדכן אותו). סכום היתרות שיחושב על ידי Thread B יהיה `90 + 100 = 190`, וזה אינו תואם את `global_total_balance` (שעדיין 200), וגם אינו הסכום הנכון של המערכת (שצריך להיות 200).\n4. Thread A ממשיך ומבצע `to_acc->balance += 10;` (כעת `acc2.balance = 110`).\n5. Thread A משחרר את המנעולים של `acc1` ו-`acc2`.\n\nהבעיה היא שהאינווריאנט הגלובלי נשבר באופן זמני, וחוטים אחרים יכולים להבחין בכך ולקבל נתונים לא עקביים.\n\n**פתרון מתוקן:**\nכדי לשמור על האינווריאנט הגלובלי, יש צורך להגן על כל פעולה שמשנה את יתרות החשבונות (ובכך משפיעה על הסכום הכולל) באמצעות מנעול גלובלי, או להבטיח אטומיות ברמה גבוהה יותר. מכיוון שהעברה היא פעולה סכום-אפס, `global_total_balance` אינו משתנה, אך כדי למנוע מחוטים אחרים לראות מצב ביניים לא עקבי, יש לתפוס את המנעול הגלובלי `global_total_balance_mutex` לפני תפיסת מנעולי החשבונות, ולשחרר אותו רק לאחר סיום כל העדכונים.\n\n```c\nbool transfer_fixed(BankAccount* from_acc, BankAccount* to_acc, int amount) {\n    if (from_acc == to_acc || amount <= 0) {\n        return false;\n    }\n\n    // Acquire the global lock first to ensure system-wide atomicity for the invariant.\n    // This prevents other threads from observing an inconsistent state\n    // of the total sum of accounts during the transfer.\n    pthread_mutex_lock(&global_total_balance_mutex);\n\n    // Acquire account locks in a consistent order to prevent deadlock\n    BankAccount *first_lock_acc = (from_acc->id < to_acc->id) ? from_acc : to_acc;\n    BankAccount *second_lock_acc = (from_acc->id < to_acc->id) ? to_acc : from_acc;\n\n    pthread_mutex_lock(&first_lock_acc->mutex);\n    pthread_mutex_lock(&second_lock_acc->mutex);\n\n    bool success = false;\n    if (from_acc->balance >= amount) {\n        from_acc->balance -= amount;\n        to_acc->balance += amount;\n        // global_total_balance does not change during a transfer, so no explicit update is needed here.\n        // The global lock ensures that any read of global_total_balance or sum of accounts\n        // will see a consistent state.\n        success = true;\n    }\n\n    pthread_mutex_unlock(&second_lock_acc->mutex);\n    pthread_mutex_unlock(&first_lock_acc->mutex);\n\n    pthread_mutex_unlock(&global_total_balance_mutex);\n    return success;\n}\n```\n\n**הערה חשובה:** פתרון זה מונע את תרחיש המירוץ על האינווריאנט הגלובלי, אך הופך את `global_total_balance_mutex` לנקודת צוואר בקבוק (bottleneck) שעלולה לפגוע בביצועים, שכן כל פעולת העברה (ואולי גם פעולות אחרות שמשנות את סכום היתרות הכולל) תדרוש תפיסה של מנעול גלובלי זה. פתרונות מתקדמים יותר עשויים לכלול שימוש במנעולים לקריאה/כתיבה (Reader-Writer Locks) או גישות ללא מנעולים (lock-free) עבור סכימה גלובלית, אך אלו מורכבים יותר ליישום."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

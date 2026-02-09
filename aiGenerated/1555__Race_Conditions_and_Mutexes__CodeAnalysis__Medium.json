@@ -1,0 +1,52 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions and Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 11:23:02",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3651,
+      "output_tokens": 1761,
+      "total_tokens": 8100
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Race Conditions",
+      "Mutexes",
+      "Concurrency",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה, המשתמשת במספר תהליכונים (threads) כדי להגדיל מונה משותף. שימו לב ששורות הקשורות ל-mutex מוערות כברירת מחדל.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\n#define NUM_THREADS 5\n#define ITERATIONS_PER_THREAD 100000\n\nint counter = 0;\npthread_mutex_t mutex; // המוטקס יאותחל ויושמד ב-main\n\nvoid* thread_func(void* arg) {\n    for (int i = 0; i < ITERATIONS_PER_THREAD; ++i) {\n        // שחררו הערה על השורות הבאות כדי להפעיל הגנה באמצעות mutex\n        // pthread_mutex_lock(&mutex);\n        counter++;\n        // pthread_mutex_unlock(&mutex);\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n    \n    // שחררו הערה על השורות הבאות כדי להפעיל הגנה באמצעות mutex\n    // pthread_mutex_init(&mutex, NULL);\n\n    printf(\"Starting threads...\\n\");\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        if (pthread_create(&threads[i], NULL, thread_func, NULL) != 0) {\n            perror(\"Failed to create thread\");\n            return 1;\n        }\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        if (pthread_join(threads[i], NULL) != 0) {\n            perror(\"Failed to join thread\");\n            return 1;\n        }\n    }\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    // שחררו הערה על השורות הבאות כדי להפעיל הגנה באמצעות mutex\n    // pthread_mutex_destroy(&mutex);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "7.1",
+        "text": "בהתבסס על הקוד הנתון, כאשר שורות ה-mutex (שורות 11-12, 15-16, 26, 40) מוערות, מהו הערך הסופי הצפוי של המונה `counter`? האם הערך יהיה קבוע או משתנה בין הרצות שונות? הסבירו.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "7.2",
+        "text": "כעת, הסירו את ההערות משורות ה-mutex (שורות 11-12, 15-16, 26, 40). מהו הערך הסופי הצפוי של המונה `counter`? האם הערך יהיה קבוע או משתנה בין הרצות שונות? הסבירו מדוע השימוש ב-mutex משנה את התוצאה.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "### פתרון לשאלה 7.1: מצב מרוץ (Race Condition)\n\n**הערך הסופי הצפוי:** הערך הסופי התיאורטי של המונה `counter` אמור להיות `NUM_THREADS * ITERATIONS_PER_THREAD` = `5 * 100000` = `500000`. עם זאת, בפועל, הערך יהיה **נמוך מהצפוי ומשתנה בין הרצות שונות**.\n\n**הסבר:** פעולת `counter++` אינה אטומית. היא מורכבת משלושה שלבים ברמת מכונה:\n1.  קריאת הערך הנוכחי של `counter` לתוך אוגר.\n2.  הגדלת הערך באוגר באחד.\n3.  כתיבת הערך המעודכן מהאוגר בחזרה לזיכרון `counter`.\n\nכאשר מספר תהליכונים מבצעים פעולה זו בו זמנית ללא סנכרון, הפעולות שלהם יכולות להתערבב (interleave). לדוגמה, תהליכון A יכול לקרוא את `counter`, ותהליכון B יכול גם הוא לקרוא את `counter` (לפני ש-A הספיק לכתוב את ערכו המעודכן). אם שניהם מגדילים את הערך באוגרים שלהם ולאחר מכן כותבים אותו בחזרה לזיכרון, אחת מההגדלות תאבד. מצב זה נקרא **מצב מרוץ (Race Condition)**. כתוצאה מכך, המונה הסופי יהיה נמוך מהערך המצופה, ומכיוון שסדר הריצה של התהליכונים אינו דטרמיניסטי, הערך הסופי ישתנה בין הרצות שונות.\n\n### פתרון לשאלה 7.2: הגנה באמצעות Mutex\n\n**הערך הסופי הצפוי:** לאחר הסרת ההערות משורות ה-mutex, הערך הסופי של המונה `counter` יהיה **בדיוק 500000**, והוא יהיה **קבוע ודטרמיניסטי** בין הרצות שונות.\n\n**הסבר:** השימוש ב-`pthread_mutex_lock(&mutex)` וב-`pthread_mutex_unlock(&mutex)` יוצר **אזור קריטי (Critical Section)** סביב הפעולה `counter++`. Mutex (קיצור של Mutual Exclusion) מבטיח שרק תהליכון אחד יכול להיכנס לאזור הקריטי בכל רגע נתון. כאשר תהליכון מנסה להיכנס לאזור הקריטי, הוא מנסה לנעול את המוטקס באמצעות `pthread_mutex_lock`:\n*   אם המוטקס פנוי, התהליכון נועל אותו וממשיך לבצע את הפעולות באזור הקריטי.\n*   אם המוטקס נעול על ידי תהליכון אחר, התהליכון הנוכחי נחסם (מושהה) עד שהמוטקס ישוחרר.\n\nלאחר סיום הפעולות באזור הקריטי, התהליכון משחרר את המוטקס באמצעות `pthread_mutex_unlock`, ומאפשר לתהליכונים אחרים, אם יש כאלה שממתינים, לנסות לנעול אותו ולהיכנס לאזור הקריטי. מנגנון זה מבטיח כי פעולת `counter++` תתבצע באופן אטומי מבחינת הגישה לזיכרון המשותף, מונע את התערבות הפעולות של תהליכונים שונים, ובכך פותר את מצב המרוץ ומבטיח שהמונה יגיע לערכו הנכון והצפוי."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

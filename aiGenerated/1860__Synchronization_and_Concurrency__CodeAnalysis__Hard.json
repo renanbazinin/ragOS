@@ -1,0 +1,63 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Synchronization and Concurrency",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 21:16:00",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4132,
+      "output_tokens": 3671,
+      "total_tokens": 12942
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Concurrency",
+      "Deadlock",
+      "Mutexes"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המדמה מערכת בנקאית פשוטה עם שני חשבונות. מספר חוטים מבצעים העברות כספים בין החשבונות. כל חשבון מוגן על ידי מנעול (mutex) משלו כדי להבטיח עקביות. יש להניח שכל קריאות המערכת הצליחו. ערכי הקבועים NUM_ACCOUNTS, NUM_THREADS, NUM_TRANSFERS_PER_THREAD הם כפי שמוגדרים בקוד.",
+      "code_snippet": "1 #include <pthread.h>\n2 #include <stdio.h>\n3 #include <unistd.h> // For usleep\n4\n5 #define NUM_ACCOUNTS 2\n6 #define NUM_THREADS 4\n7 #define NUM_TRANSFERS_PER_THREAD 1000\n8\n9 typedef struct {\n10    long balance;\n11    pthread_mutex_t lock;\n12 } Account;\n13\n14 Account accounts[NUM_ACCOUNTS];\n15\n16 void init_accounts() {\n17    for (int i = 0; i < NUM_ACCOUNTS; ++i) {\n18        accounts[i].balance = 1000; // Initial balance\n19        pthread_mutex_init(&accounts[i].lock, NULL);\n20    }\n21 }\n22\n23 void transfer(int from_account_idx, int to_account_idx, long amount) {\n24    pthread_mutex_lock(&accounts[from_account_idx].lock);\n25    pthread_mutex_lock(&accounts[to_account_idx].lock);\n26\n27    if (accounts[from_account_idx].balance >= amount) {\n28        accounts[from_account_idx].balance -= amount;\n29        accounts[to_account_idx].balance += amount;\n30    }\n31\n32    pthread_mutex_unlock(&accounts[to_account_idx].lock);\n33    pthread_mutex_unlock(&accounts[from_account_idx].lock);\n34 }\n35\n36 void* thread_func(void* arg) {\n37    int thread_id = *(int*)arg;\n38    for (int i = 0; i < NUM_TRANSFERS_PER_THREAD; ++i) {\n39        // Threads 0,2 transfer from 0 to 1\n40        // Threads 1,3 transfer from 1 to 0\n41        if (thread_id % 2 == 0) {\n42            transfer(0, 1, 10);\n43        } else {\n44            transfer(1, 0, 10);\n45        }\n46        // usleep(10); // To increase chances of interleaving\n47    }\n48    return NULL;\n49 }\n50\n51 int main() {\n52    init_accounts();\n53    pthread_t threads[NUM_THREADS];\n54    int thread_ids[NUM_THREADS];\n55\n56    printf(\"Initial balances: Account 0 = %ld, Account 1 = %ld\\n\", accounts[0].balance, accounts[1].balance);\n57\n58    for (int i = 0; i < NUM_THREADS; ++i) {\n59        thread_ids[i] = i;\n60        pthread_create(&threads[i], NULL, thread_func, &thread_ids[i]);\n61    }\n62\n63    for (int i = 0; i < NUM_THREADS; ++i) {\n64        pthread_join(threads[i], NULL);\n65    }\n66\n67    printf(\"Final balances: Account 0 = %ld, Account 1 = %ld\\n\", accounts[0].balance, accounts[1].balance);\n68    printf(\"Total balance: %ld\\n\", accounts[0].balance + accounts[1].balance);\n69\n70    // Cleanup mutexes\n71    for (int i = 0; i < NUM_ACCOUNTS; ++i) {\n72        pthread_mutex_destroy(&accounts[i].lock);\n73    }\n74\n75    return 0;\n76 }"
+    },
+    "sub_questions": [
+      {
+        "id": "8.1",
+        "text": "מהו הערך הסופי הצפוי של המאזנים של חשבון 0 וחשבון 1, ומהו סך כל המאזנים? האם התוכנית תמיד תגיע לערכים אלו? הסבירו מדוע.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.2",
+        "text": "תארו רצף פעולות ספציפי (לדוגמה, צעד אחר צעד של איזה חוט מריץ איזו שורה) שיוביל למצב של קיפאון (deadlock) בתוכנית זו. ציינו אילו חוטים מעורבים ובאילו מנעולים הם ממתינים.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.3",
+        "text": "הציעו תיקון לקוד הפונקציה `transfer` כדי למנוע קיפאון, תוך שמירה על נכונות ההעברות ושלמות הנתונים. כתבו את הקוד המתוקן והסבירו את פתרונכם.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.4",
+        "text": "נניח שבמקום הפתרון שהצעתם בסעיף הקודם, נוסיף מנעול גלובלי יחיד `pthread_mutex_t global_lock;` ונגן על כל הפונקציה `transfer` איתו (כלומר, נבצע `pthread_mutex_lock(&global_lock);` בתחילת `transfer` ו-`pthread_mutex_unlock(&global_lock);` בסופה). מה תהיינה ההשלכות של שינוי זה על נכונות התוכנית ועל ביצועיה (performance)? הסבירו.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "8.1: הערך הסופי הצפוי של חשבון 0 הוא 1000 ושל חשבון 1 הוא 1000. סך כל המאזנים יהיה 2000.\nהתוכנית לא תמיד תגיע לערכים אלו, ולמעשה, היא עלולה להיתקע במצב של קיפאון (deadlock).\nהתוכנית מדמה העברות כספים. סך כל הכסף במערכת צריך להישאר קבוע (2 * 1000 = 2000). ישנם 4 חוטים: חוטים 0 ו-2 מעבירים מ-0 ל-1. חוטים 1 ו-3 מעבירים מ-1 ל-0. כל חוט מבצע NUM_TRANSFERS_PER_THREAD העברות של 10 יחידות כסף. סה\"כ העברות מ-0 ל-1: 2 * 1000 = 2000. סה\"כ העברות מ-1 ל-0: 2 * 1000 = 2000. לכן, אם כל ההעברות יתבצעו כראוי, המאזנים הסופיים צריכים לחזור לערכי ההתחלה שלהם.\nעם זאת, קיימת סכנה לקיפאון מכיוון שחוטים שונים מנסים לנעול את המנעולים של החשבונות בסדר שונה. חוט המעביר מ-0 ל-1 ינסה לנעול את `accounts[0].lock` ואז את `accounts[1].lock`. חוט המעביר מ-1 ל-0 ינסה לנעול את `accounts[1].lock` ואז את `accounts[0].lock`. סדר נעילה שונה זה מוביל לקיפאון.\n\n8.2: רצף פעולות שיוביל לקיפאון (deadlock):\nנניח שחוט A (לדוגמה, `thread_id = 0`) מנסה להעביר מ-0 ל-1, וחוט B (לדוגמה, `thread_id = 1`) מנסה להעביר מ-1 ל-0.\n1.  **חוט A** מבצע `pthread_mutex_lock(&accounts[0].lock);` (שורה 24 בקוד המקורי של `transfer`). חוט A נועל בהצלחה את מנעול חשבון 0.\n2.  **חוט B** מבצע `pthread_mutex_lock(&accounts[1].lock);` (שורה 24 בקוד המקורי של `transfer`). חוט B נועל בהצלחה את מנעול חשבון 1.\n3.  **חוט A** מנסה לבצע `pthread_mutex_lock(&accounts[1].lock);` (שורה 25 בקוד המקורי של `transfer`). מנעול חשבון 1 נעול על ידי חוט B, ולכן חוט A נכנס למצב המתנה.\n4.  **חוט B** מנסה לבצע `pthread_mutex_lock(&accounts[0].lock);` (שורה 25 בקוד המקורי של `transfer`). מנעול חשבון 0 נעול על ידי חוט A, ולכן חוט B נכנס למצב המתנה.\nבשלב זה, חוט A ממתין לחוט B לשחרר את מנעול חשבון 1, וחוט B ממתין לחוט A לשחרר את מנעול חשבון 0. נוצר מעגל המתנה הדדי – מצב של קיפאון. שני החוטים תקועים ואינם יכולים להמשיך.\n\n8.3: כדי למנוע קיפאון, יש להבטיח שכל החוטים ירכשו את המנעולים תמיד באותו סדר. שיטה נפוצה היא להקצות סדר גלובלי למשאבים (במקרה זה, לחשבונות) ולרכוש את המנעולים לפי סדר זה.\nאפשרות אחת היא לרכוש תמיד את המנעול של החשבון בעל האינדקס הקטן יותר ראשון, ואז את המנעול של החשבון בעל האינדקס הגדול יותר.\nהקוד המתוקן לפונקציה `transfer`:\n```c\nvoid transfer(int from_account_idx, int to_account_idx, long amount) {\n    pthread_mutex_t* lock1_ptr = &accounts[from_account_idx].lock;\n    pthread_mutex_t* lock2_ptr = &accounts[to_account_idx].lock;\n\n    // Ensure consistent lock order: always lock the smaller index first\n    // Assuming from_account_idx != to_account_idx based on problem setup.\n    if (from_account_idx < to_account_idx) {\n        pthread_mutex_lock(lock1_ptr);\n        pthread_mutex_lock(lock2_ptr);\n    } else { // from_account_idx > to_account_idx\n        pthread_mutex_lock(lock2_ptr);\n        pthread_mutex_lock(lock1_ptr);\n    }\n\n    // Critical section\n    if (accounts[from_account_idx].balance >= amount) {\n        accounts[from_account_idx].balance -= amount;\n        accounts[to_account_idx].balance += amount;\n    }\n\n    // Unlock in reverse order of locking\n    if (from_account_idx < to_account_idx) {\n        pthread_mutex_unlock(lock2_ptr);\n        pthread_mutex_unlock(lock1_ptr);\n    } else {\n        pthread_mutex_unlock(lock1_ptr);\n        pthread_mutex_unlock(lock2_ptr);\n    }\n}\n```\nהסבר: הפתרון מבטיח שכל זוג מנעולים (עבור `from_account_idx` ו-`to_account_idx`) יירכשו תמיד באותו סדר. אם `from_account_idx` קטן מ-`to_account_idx`, ננעל קודם את `accounts[from_account_idx].lock` ואז את `accounts[to_account_idx].lock`. אם `to_account_idx` קטן מ-`from_account_idx`, ננעל קודם את `accounts[to_account_idx].lock` ואז את `accounts[from_account_idx].lock`. באופן זה, לא יכול להיווצר מצב בו חוט אחד מחזיק במנעול A וממתין למנעול B, בעוד חוט אחר מחזיק במנעול B וממתין למנעול A, ובכך נמנע הקיפאון. יש לשים לב שהמקרה שבו `from_account_idx == to_account_idx` לא קריטי כאן מכיוון שבהגדרת הבעיה האינדקסים תמיד שונים, אך אם היה צורך להתייחס אליו הוא היה דורש טיפול מיוחד (לדוגמה, אין צורך לנעול שני מנעולים).\n\n8.4: אם נוסיף מנעול גלובלי יחיד `global_lock` שיגן על כל הפונקציה `transfer`:\n**נכונות:** הפתרון ימנע קיפאונות וגם יבטיח את נכונות ההעברות. מכיוון שרק חוט אחד יוכל להיכנס לפונקציה `transfer` בכל רגע נתון, לא תהיה שום אפשרות לסדר נעילה לא עקבי או למצב מרוץ כלשהו בתוך הפונקציה. כל העברה תתבצע בצורה אטומית לחלוטין.\n**ביצועים:** תהיה פגיעה משמעותית בביצועים. רכישת מנעול גלובלי יחיד עבור כל פעולת `transfer` הופכת את כל מערכת הבנק למקבילית-טורית (effectively serial). במקום לאפשר לחוטים לבצע פעולות שאינן מתנגשות במקביל (לדוגמה, העברה בין חשבון 0 ל-1 ופעולה אחרת שאינה קשורה, או אפילו שתי העברות שונות לחלוטין אם היו יותר חשבונות), השימוש במנעול גלובלי יגרום לכך שרק חוט אחד יוכל לבצע פעולה כלשהי במערכת הבנקאית כולה בכל רגע נתון. זה יוצר צוואר בקבוק (bottleneck) חמור ומפחית מאוד את רמת המקביליות האפשרית, גם אם המערכת רצה על מספר רב של מעבדים."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

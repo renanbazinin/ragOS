@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Producer-Consumer",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 07:42:20",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 970,
+      "output_tokens": 1531,
+      "total_tokens": 6322
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Producer-Consumer",
+      "Synchronization",
+      "Semaphores",
+      "Deadlock"
+    ],
+    "content": {
+      "text": "נתונה בעיית מפיק-צרכן (Producer-Consumer) עם חיץ חסום בגודל N, הממומשת באמצעות סמפורים כדלקמן:\n\n```c\n#define N 10 // גודל החיץ\n\nSemaphore mutex = 1; // מנעול להגנה על גישה לחיץ המשותף\nSemaphore empty = N; // מונה מקומות ריקים בחיץ\nSemaphore full = 0;  // מונה מקומות מלאים בחיץ\n\nvoid producer() {\n    Item item;\n    while (true) {\n        item = produce_item(); // יצירת פריט\n        wait(mutex);           // **(1) תפיסת mutex לפני בדיקת empty**\n        wait(empty);           // המתן אם החיץ מלא\n        add_item_to_buffer(item); // הוסף פריט לחיץ\n        signal(mutex);         // שחרור mutex\n        signal(full);          // אותת שהחיץ מכיל פריט נוסף\n    }\n}\n\nvoid consumer() {\n    Item item;\n    while (true) {\n        wait(mutex);           // **(2) תפיסת mutex לפני בדיקת full**\n        wait(full);            // המתן אם החיץ ריק\n        item = remove_item_from_buffer(); // הוצא פריט מהחיץ\n        signal(mutex);         // שחרור mutex\n        signal(empty);         // אותת שהחיץ מכיל מקום ריק נוסף\n        consume_item(item);    // עיבוד הפריט\n    }\n}\n```\n\nאיזו בעיה עיקרית עלולה להיווצר כתוצאה מהסדר הנתון של פעולות ה-`wait` בקוד המפיק והצרכן?",
+      "code_snippet": null,
+      "options": [
+        "א. תנאי מרוץ (Race Condition) שיוביל לשחיתות נתונים בחיץ.",
+        "ב. קיפאון (Deadlock) של המערכת.",
+        "ג. הרעבה (Starvation) של תהליכי המפיק או הצרכן.",
+        "ד. בזבוז משאבי מעבד עקב המתנה פעילה (Busy-waiting).",
+        "ה. הקוד נכון ויתפקד ללא בעיות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "הבעיה העיקרית בקוד המוצג היא קיפאון (Deadlock). ננתח את שני המקרים המובילים לקיפאון:\n\n1.  **החיץ מלא (או כמעט מלא):**\n    *   תהליך מפיק (Producer) יבצע `wait(mutex)` ויצליח לתפוס את המנעול (כי `mutex` מתחיל ב-1). כעת, המפיק מחזיק את ה-`mutex`.\n    *   לאחר מכן, המפיק ינסה לבצע `wait(empty)`. מכיוון שהחיץ מלא, הסמפור `empty` יהיה בערך 0, והמפיק ייחסם בהמתנה ל-`empty`.\n    *   בשלב זה, המפיק מחזיק את ה-`mutex` וחסום בהמתנה ל-`empty`. אף תהליך צרכן לא יוכל להפחית את `empty` (על ידי `signal(empty)`) כי הוא לא יכול לגשת לחיץ.\n    *   אם תהליך צרכן (Consumer) ינסה לרוץ, הוא יבצע `wait(mutex)` וייחסם מיד, מכיוון שה-`mutex` מוחזק על ידי המפיק.\n    *   נוצר מצב של קיפאון: המפיק מחכה ל-`empty` (שניתן לשחרר רק על ידי צרכן), והצרכן מחכה ל-`mutex` (שמוחזק על ידי המפיק). אף אחד מהם לא יכול להתקדם.\n\n2.  **החיץ ריק (או כמעט ריק):**\n    *   תהליך צרכן (Consumer) יבצע `wait(mutex)` ויצליח לתפוס את המנעול. כעת, הצרכן מחזיק את ה-`mutex`.\n    *   לאחר מכן, הצרכן ינסה לבצע `wait(full)`. מכיוון שהחיץ ריק, הסמפור `full` יהיה בערך 0, והצרכן ייחסם בהמתנה ל-`full`.\n    *   בשלב זה, הצרכן מחזיק את ה-`mutex` וחסום בהמתנה ל-`full`. אף תהליך מפיק לא יוכל להגדיל את `full` (על ידי `signal(full)`) כי הוא לא יכול לגשת לחיץ.\n    *   אם תהליך מפיק (Producer) ינסה לרוץ, הוא יבצע `wait(mutex)` וייחסם מיד, מכיוון שה-`mutex` מוחזק על ידי הצרכן.\n    *   נוצר מצב של קיפאון: הצרכן מחכה ל-`full` (שניתן לשחרר רק על ידי מפיק), והמפיק מחכה ל-`mutex` (שמוחזק על ידי הצרכן). אף אחד מהם לא יכול להתקדם.\n\nהסדר הנכון של פעולות ה-`wait` הוא: `wait(empty)` ואז `wait(mutex)` עבור המפיק, ו-`wait(full)` ואז `wait(mutex)` עבור הצרכן. זה מבטיח שהתהליכים יבדקו קודם את תנאי המלאות/ריקות של החיץ לפני שהם תופסים את המנעול, ובכך מונעים מצב שבו תהליך מחזיק משאב (mutex) וחסום בהמתנה למשאב אחר (empty/full) שרק התהליך השני יכול לשחרר."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

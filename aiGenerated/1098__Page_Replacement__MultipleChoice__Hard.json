@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Page Replacement",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 07:55:27",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 520,
+      "total_tokens": 4888
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Page Replacement",
+      "Virtual Memory",
+      "Belady's Anomaly"
+    ],
+    "content": {
+      "text": "אנו חוקרים את תופעת 'אנומליה של בילדי' (Belady's Anomaly), שבה הגדלת מספר מסגרות הדף הזמינות בזיכרון הפיזי עלולה להוביל באופן מפתיע לעלייה במספר פסיקות הדף (page faults). אילו מאלגוריתמי החלפת הדפים הבאים יכולים להציג את האנומליה של בילדי?",
+      "code_snippet": null,
+      "options": [
+        "א. LRU (Least Recently Used) בלבד.",
+        "ב. Optimal בלבד.",
+        "ג. FIFO (First-In, First-Out) בלבד.",
+        "ד. LFU (Least Frequently Used) בלבד.",
+        "ה. FIFO וגם LFU."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ה",
+      "explanation": "אנומליה של בילדי מתרחשת באלגוריתמים שאינם 'אלגוריתמי מחסנית' (Stack Algorithms). אלגוריתם LRU ו-Optimal הם אלגוריתמי מחסנית, ולכן אינם סובלים מאנומליה זו – הגדלת מספר המסגרות לעולם לא תגרום לעלייה במספר פסיקות הדף עבורם. לעומת זאת, אלגוריתם FIFO ידוע כמי שסובל מאנומליה של בילדי. גם אלגוריתם LFU אינו אלגוריתם מחסנית, ולכן הוא גם יכול להציג את האנומליה, במיוחד בתרחישים מסוימים של רצפי גישה וכללי שבירת שוויון. לכן, התשובה הנכונה היא שגם FIFO וגם LFU יכולים להציג את אנומליה של בילדי."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

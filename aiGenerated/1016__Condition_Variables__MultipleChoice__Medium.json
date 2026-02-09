@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Condition Variables",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 07:25:56",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 983,
+      "output_tokens": 1008,
+      "total_tokens": 6337
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Condition Variables",
+      "Synchronization",
+      "Concurrency",
+      "Race Conditions"
+    ],
+    "content": {
+      "text": "נתון קטע קוד המשתמש במשתנה תנאי `cond` ובמנעול `m`. חוט חישוב `Thread A` אמור להמתין לאות מחוט חישוב `Thread B`.\n\nאם `Thread B` מריץ את הפונקציה `thread_B_func` וקורא ל-`pthread_cond_signal(&cond)` לפני ש-`Thread A` הספיק לקרוא ל-`pthread_cond_wait(&cond, &m)` בפונקציה `thread_A_func` (כאשר הפרדיקט `ready` מוגדר ל-0 בהתחלה), ובהנחה ש-`thread_A_func` אינה בודקת את הפרדיקט (`ready`) בלולאה לפני הקריאה ל-`wait`, איזה מהבאים הוא התרחיש הסביר ביותר?",
+      "code_snippet": "```c\n#include <pthread.h>\n#include <stdio.h>\n\npthread_mutex_t m = PTHREAD_MUTEX_INITIALIZER;\npthread_cond_t cond = PTHREAD_COND_INITIALIZER;\nint ready = 0; // The predicate\n\nvoid* thread_A_func(void* arg) {\n    pthread_mutex_lock(&m);\n    printf(\"Thread A: Attempting to wait...\\n\");\n    // Missing: while (ready == 0) { ... }\n    pthread_cond_wait(&cond, &m); // Potentially waits indefinitely if signal was lost\n    printf(\"Thread A: Woke up. Ready is %d.\\n\", ready);\n    pthread_mutex_unlock(&m);\n    return NULL;\n}\n\nvoid* thread_B_func(void* arg) {\n    pthread_mutex_lock(&m);\n    ready = 1;\n    printf(\"Thread B: Set ready to %d. Signaling...\\n\", ready);\n    pthread_cond_signal(&cond);\n    pthread_mutex_unlock(&m);\n    return NULL;\n}\n```",
+      "options": [
+        "א. `Thread A` יתעורר מיד לאחר הקריאה ל-`pthread_cond_wait` כי האות נשמר.",
+        "ב. `Thread A` יתעורר מיד לאחר הקריאה ל-`pthread_cond_wait` כי המנעול `m` מונע אובדן אותות.",
+        "ג. `Thread A` ימתין ללא הגבלת זמן (deadlock) מכיוון שהאות נשלח ואבד לפני שחוט A החל להמתין.",
+        "ד. `Thread A` ימתין ללא הגבלת זמן (deadlock) מכיוון ש-`pthread_cond_signal` דורש שחוטים ימתינו כבר.",
+        "ה. התוכנית תקרוס עקב שימוש לא נכון במשתנה תנאי."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג'. משתני תנאי אינם שומרים אותות (signals). אם `pthread_cond_signal` נקרא כאשר אין חוטים הממתינים על משתנה התנאי, האות אובד. במקרה זה, כאשר `Thread A` יגיע לבסוף לקרוא ל-`pthread_cond_wait` (לאחר שהאות כבר נשלח ואבד, והפרדיקט `ready` הפך ל-1), הוא ימתין ללא הגבלת זמן. הסיבה לכך היא שאין אף אחד שיאותת לו שוב, ו-`Thread A` אינו בודק את הפרדיקט (`ready`) בלולאה (`while`) לפני הכניסה ל-`wait`, שהייתה מאפשרת לו לזהות שהתנאי כבר מתקיים ולהימנע מההמתנה. זהו מצב קלאסי של 'lost signal'."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

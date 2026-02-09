@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Memory Management and Page Replacement",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 10:45:07",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 941,
+      "output_tokens": 764,
+      "total_tokens": 3148
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Memory Management",
+      "Page Replacement",
+      "LRU"
+    ],
+    "content": {
+      "text": "נתונה סדרת גישה לדפים (reference string) וזיכרון ראשי בעל 3 מסגרות פנויות. כמה אירועי page fault יתרחשו בשימוש באלגוריתם החלפת הדפים LRU (Least Recently Used) עבור סדרת הגישה הבאה: 1, 2, 3, 4, 1, 2, 5, 1, 2, 3, 4, 5?",
+      "code_snippet": null,
+      "options": [
+        "א. 6",
+        "ב. 7",
+        "ג. 8",
+        "ד. 9",
+        "ה. 10"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "נספור את אירועי ה-page fault עבור סדרת הגישה: 1, 2, 3, 4, 1, 2, 5, 1, 2, 3, 4, 5 ו-3 מסגרות, בשימוש באלגוריתם LRU:\n\n1.  **1**: [1, _, _] - Fault (מסגרת 1 מתמלאת)\n2.  **2**: [1, 2, _] - Fault (מסגרת 2 מתמלאת)\n3.  **3**: [1, 2, 3] - Fault (מסגרת 3 מתמלאת)\n4.  **4**: [4, 1, 2] - Fault (3 הוא הדף שהיה בשימוש הכי פחות לאחרונה, מוחלף ע\"י 4)\n5.  **1**: [4, 1, 2] - Hit\n6.  **2**: [4, 1, 2] - Hit\n7.  **5**: [5, 2, 1] - Fault (4 הוא הדף שהיה בשימוש הכי פחות לאחרונה, מוחלף ע\"י 5)\n8.  **1**: [5, 2, 1] - Hit\n9.  **2**: [5, 2, 1] - Hit\n10. **3**: [3, 1, 2] - Fault (5 הוא הדף שהיה בשימוש הכי פחות לאחרונה, מוחלף ע\"י 3)\n11. **4**: [4, 3, 1] - Fault (2 הוא הדף שהיה בשימוש הכי פחות לאחרונה, מוחלף ע\"י 4)\n12. **5**: [5, 4, 3] - Fault (1 הוא הדף שהיה בשימוש הכי פחות לאחרונה, מוחלף ע\"י 5)\n\nסה\"כ 8 אירועי page fault."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

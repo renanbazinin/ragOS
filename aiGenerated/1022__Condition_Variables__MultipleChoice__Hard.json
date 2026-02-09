@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Condition Variables",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 07:27:51",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 1120,
+      "total_tokens": 6632
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Condition Variables",
+      "Synchronization",
+      "Concurrency",
+      "Starvation"
+    ],
+    "content": {
+      "text": "נתבונן בקטע הקוד הבא, המשתמש במשתני תנאי (condition variables) ובמנעולים (mutexes) לצורך סנכרון מספר תהליכי עבודה (worker threads) המחכים שמנהל (manager thread) יסיים משימה מסוימת. מהי הטענה הנכונה ביותר לגבי התנהגות הקוד המוצג?",
+      "code_snippet": "#include <iostream>\n#include <thread>\n#include <mutex>\n#include <condition_variable>\n#include <vector>\n#include <chrono>\n\nstd::mutex mtx;\nstd::condition_variable cv;\nbool manager_finished = false; // התנאי המשותף\n\nvoid worker_thread(int id) {\n    std::unique_lock<std::mutex> lock(mtx);\n    std::cout << \"Worker \" << id << \" is waiting...\" << std::endl;\n    while (!manager_finished) { // בדיקת התנאי בלולאה\n        cv.wait(lock);\n    }\n    std::cout << \"Worker \" << id << \" finished waiting and proceeds.\" << std::endl;\n}\n\nvoid manager_thread() {\n    // משימת המנהל (סימולציה)\n    std::this_thread::sleep_for(std::chrono::milliseconds(500));\n    std::unique_lock<std::mutex> lock(mtx);\n    manager_finished = true; // שינוי התנאי\n    std::cout << \"Manager finished task. Notifying one worker.\" << std::endl;\n    cv.notify_one(); // קריאה ל-notify_one\n}\n\nint main() {\n    const int NUM_WORKERS = 3; // מספר תהליכי העבודה\n    std::vector<std::thread> workers;\n    for (int i = 0; i < NUM_WORKERS; ++i) {\n        workers.emplace_back(worker_thread, i + 1);\n    }\n    std::thread manager(manager_thread);\n\n    manager.join();\n    for (auto& w : workers) {\n        w.join();\n    }\n    std::cout << \"All threads finished.\" << std::endl;\n    return 0;\n}",
+      "options": [
+        "א. כל תהליכי העבודה יתעוררו וימשיכו בביצועם לאחר שהמנהל יסיים את משימתו.",
+        "ב. רק תהליך עבודה אחד מובטח שיתעורר וימשיך בביצועו, בעוד ששאר תהליכי העבודה עלולים להישאר חסומים ללא סוף (starvation).",
+        "ג. התוכנית תקרוס עקב Deadlock מכיוון שהמנהל משחרר את המנעול לפני הקריאה ל-notify_one().",
+        "ד. התוכנית תסבול מ-Spurious Wakeups תכופים, אך לא תהיה בעיה של נכונות (correctness)."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "התשובה הנכונה היא ב'. כאשר manager_thread משנה את התנאי manager_finished ל-true וקורא ל-cv.notify_one(), רק אחד מתהליכי העבודה הממתינים על משתנה התנאי cv יתעורר. תהליך זה יתפוס את המנעול, יבדוק את התנאי (manager_finished שהוא כעת true), וימשיך בביצועו. שאר תהליכי העבודה (שניים במקרה זה, מתוך שלושה) יישארו חסומים על cv.wait() מכיוון ש-notify_one() מעירה רק תהליך אחד, ולאחר מכן לא מתבצעת שום קריאה נוספת ל-notify_one() או notify_all() שתעיר אותם. מכיוון שהתנאי manager_finished נשאר true ואינו משתנה חזרה ל-false, תהליכים אלו לא יתעוררו לעולם, מצב הנקרא Starvation (הרעבה). כדי לפתור בעיה זו ולאפשר לכל התהליכים להמשיך, המנהל צריך לקרוא ל-cv.notify_all() במקום cv.notify_one()."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

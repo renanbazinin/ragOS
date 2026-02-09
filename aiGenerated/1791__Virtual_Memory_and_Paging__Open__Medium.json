@@ -1,0 +1,83 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory and Paging",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 20:49:32",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2075,
+      "output_tokens": 1297,
+      "total_tokens": 7161
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Virtual Memory",
+      "Paging",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "נתונה מערכת עם זיכרון וירטואלי של 2GB, גודל דף של 8KB, וזיכרון פיזי של 256MB. כל כניסה בטבלת הדפים (PTE) מכילה מספר מסגרת פיזית (PFN) ושלושה ביטים נוספים (valid, dirty, accessed), ונדרש שהיא תהיה מיושרת לגודל הסטנדרטי הבא בחזקת 2 בתים (לדוגמה, 16 ביטים מתיישרים ל-2 בתים, 18 ביטים מתיישרים ל-4 בתים).",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "מהם הגדלים של ה-VPN וה-PFN?",
+        "code_snippet": null,
+        "options": null,
+        "solution": {
+          "is_present_in_file": true,
+          "correct_option": null,
+          "explanation": "1. חישוב VPN:\n   גודל זיכרון וירטואלי: 2GB = 2^31 בתים, לכן נדרשים 31 ביטים עבור כתובת וירטואלית.\n   גודל דף: 8KB = 2^13 בתים, לכן נדרשים 13 ביטים עבור ההיסט (offset).\n   גודל VPN = אורך כתובת וירטואלית - אורך היסט = 31 - 13 = 18 ביטים.\n\n   חישוב PFN:\n   גודל זיכרון פיזי: 256MB = 2^28 בתים, לכן נדרשים 28 ביטים עבור כתובת פיזית.\n   אורך היסט דף: 13 ביטים (זהה לגודל הדף).\n   גודל PFN = אורך כתובת פיזית - אורך היסט = 28 - 13 = 15 ביטים."
+        }
+      },
+      {
+        "id": "10.2",
+        "text": "מהו גודלה המינימלי של כניסה בטבלת הדפים (PTE) בבתים?",
+        "code_snippet": null,
+        "options": null,
+        "solution": {
+          "is_present_in_file": true,
+          "correct_option": null,
+          "explanation": "2. גודל PFN הוא 15 ביטים.\n   ביטים נוספים: 3 ביטים עבור valid, dirty, accessed.\n   סה\"כ ביטים ל-PTE = 15 (PFN) + 3 (ביטים נוספים) = 18 ביטים.\n   בהתאם לדרישת היישור לגודל הבא בחזקת 2 בתים (כלומר 1, 2, 4, 8 בתים וכו'), 18 ביטים מתיישרים ל-32 ביטים (שהם 4 בתים).\n   לכן, גודל PTE הוא 4 בתים."
+        }
+      },
+      {
+        "id": "10.3",
+        "text": "כמה זיכרון פיזי תתפוס טבלת דפים (לינארית) של תהליך, במינימום?",
+        "code_snippet": null,
+        "options": null,
+        "solution": {
+          "is_present_in_file": true,
+          "correct_option": null,
+          "explanation": "3. מספר הדפים הוירטואליים בתהליך = 2^VPN = 2^18 דפים.\n   גודל טבלת הדפים = מספר דפים וירטואליים * גודל PTE = 2^18 דפים * 4 בתים/לכניסה = 2^18 * 2^2 בתים = 2^20 בתים = 1MB.\n   לכן, טבלת דפים לינארית תתפוס 1MB זיכרון פיזי."
+        }
+      },
+      {
+        "id": "10.4",
+        "text": "כמה מסגרות (frames) יכול הזיכרון הפיזי להכיל?",
+        "code_snippet": null,
+        "options": null,
+        "solution": {
+          "is_present_in_file": true,
+          "correct_option": null,
+          "explanation": "4. מספר המסגרות בזיכרון הפיזי = גודל זיכרון פיזי / גודל דף.\n   מספר המסגרות = 256MB / 8KB = (2^28 בתים) / (2^13 בתים) = 2^(28-13) = 2^15 מסגרות.\n   לכן, הזיכרון הפיזי יכול להכיל 2^15 מסגרות."
+        }
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": null
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

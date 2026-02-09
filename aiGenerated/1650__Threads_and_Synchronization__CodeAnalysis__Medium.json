@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Threads and Synchronization",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 19:43:39",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1971,
+      "output_tokens": 1422,
+      "total_tokens": 5743
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Threads",
+      "Synchronization",
+      "Race Conditions",
+      "Mutexes"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המשתמשת בחוטים (threads) כדי להגדיל משתנה גלובלי. קראו את הקוד בעיון. מהי הבעיה המרכזית הקיימת בתוכנית זו, וכיצד היא באה לידי ביטוי בפלט הסופי? הסבירו מדוע הפלט אינו צפוי ויכול להשתנות בין הרצות שונות. הציעו פתרון לבעיה זו באמצעות מנגנון סנכרון מתאים (לדוגמה, mutex), והראו כיצד תשנו את הקוד כדי ליישם אותו.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <stdlib.h>\n\n#define NUM_THREADS 5\n#define INCREMENTS_PER_THREAD 100000\n\nint counter = 0;\n\nvoid *incrementer(void *arg) {\n    for (int i = 0; i < INCREMENTS_PER_THREAD; i++) {\n        counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    for (int i = 0; i < NUM_THREADS; i++) {\n        if (pthread_create(&threads[i], NULL, incrementer, NULL) != 0) {\n            perror(\"Failed to create thread\");\n            return EXIT_FAILURE;\n        }\n    }\n\n    for (int i = 0; i < NUM_THREADS; i++) {\n        if (pthread_join(threads[i], NULL) != 0) {\n            perror(\"Failed to join thread\");\n            return EXIT_FAILURE;\n        }\n    }\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    return EXIT_SUCCESS;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הבעיה המרכזית בתוכנית היא תנאי מירוץ (Race Condition). הפעולה `counter++` אינה אטומית; היא מורכבת משלוש פעולות ברמה נמוכה יותר: קריאת הערך הנוכחי של `counter`, הגדלת הערך, וכתיבת הערך החדש בחזרה ל-`counter`. כאשר מספר חוטים מנסים לבצע את הפעולה הזו בו זמנית ללא סנכרון, ייתכן ששני חוטים יקראו את אותו ערך של `counter`, שניהם יגדילו אותו, ושניהם יכתבו בחזרה את הערך החדש. במקרה כזה, אחת ההגדלות \"תאבד\" והמונה לא ישקף את המספר הנכון של ההגדלות שבוצעו.\nהפלט הצפוי (הנכון) היה אמור להיות `NUM_THREADS * INCREMENTS_PER_THREAD = 5 * 100000 = 500000`. אולם, בגלל תנאי המירוץ, הפלט הסופי יהיה כמעט תמיד נמוך מ-500000 וישתנה בין הרצות שונות של התוכנית, שכן סדר הביצוע של פעולות הקריאה/כתיבה משתנה בכל פעם.\n\nפתרון לבעיה זו הוא שימוש במנעול (mutex) כדי להבטיח שרק חוט אחד יוכל לגשת למשתנה `counter` בכל רגע נתון. כך נהפוך את פעולת ההגדלה לאטומית מבחינה לוגית.\n\nלהלן הקוד המתוקן:",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <stdlib.h>\n\n#define NUM_THREADS 5\n#define INCREMENTS_PER_THREAD 100000\n\nint counter = 0;\npthread_mutex_t counter_mutex; // Declare mutex\n\nvoid *incrementer(void *arg) {\n    for (int i = 0; i < INCREMENTS_PER_THREAD; i++) {\n        pthread_mutex_lock(&counter_mutex); // Lock\n        counter++;\n        pthread_mutex_unlock(&counter_mutex); // Unlock\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    // Initialize mutex\n    if (pthread_mutex_init(&counter_mutex, NULL) != 0) {\n        perror(\"Failed to initialize mutex\");\n        return EXIT_FAILURE;\n    }\n\n    for (int i = 0; i < NUM_THREADS; i++) {\n        if (pthread_create(&threads[i], NULL, incrementer, NULL) != 0) {\n            perror(\"Failed to create thread\");\n            pthread_mutex_destroy(&counter_mutex); // Clean up mutex on error\n            return EXIT_FAILURE;\n        }\n    }\n\n    for (int i = 0; i < NUM_THREADS; i++) {\n        if (pthread_join(threads[i], NULL) != 0) {\n            perror(\"Failed to join thread\");\n            pthread_mutex_destroy(&counter_mutex); // Clean up mutex on error\n            return EXIT_FAILURE;\n        }\n    }\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    // Destroy mutex\n    pthread_mutex_destroy(&counter_mutex);\n\n    return EXIT_SUCCESS;\n}"
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

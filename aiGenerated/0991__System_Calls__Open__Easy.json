@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "System Calls",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 07:17:30",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4164,
+      "output_tokens": 971,
+      "total_tokens": 6938
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "System Calls"
+    ],
+    "content": {
+      "text": "הסבירו מהי קריאת מערכת (System Call) ומדוע תוכניות ברמת המשתמש (user-level programs) צריכות להשתמש בהן כדי לבצע פעולות מסוימות, במקום לקרוא ישירות לפונקציות ליבה (kernel functions). תנו דוגמה פשוטה בשפת C לקריאת מערכת ותארו בקצרה את מטרתה.",
+      "code_snippet": "```c\n#include <unistd.h> // עבור קריאת המערכת write\n#include <string.h> // עבור strlen\n\nint main() {\n    const char *message = \"Hello, System Calls!\\n\";\n    // write היא קריאת מערכת\n    write(1, message, strlen(message)); \n    return 0;\n}\n```",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "קריאת מערכת (System Call) היא הדרך הפרוגרמטית שבה תוכנית הפועלת במרחב המשתמש (user space) יכולה לבקש שירות מהליבה (kernel) של מערכת ההפעלה. היא מהווה ממשק בין תוכניות המשתמש לבין שירותי הליבה.\n\n**מדוע הן נחוצות?**\n1.  **הגנה ואבטחה:** תוכניות משתמש פועלות במצב משתמש (user mode) עם הרשאות מוגבלות, בעוד הליבה פועלת במצב ליבה (kernel mode) עם הרשאות מלאות. גישה ישירה לחומרה, למשאבי מערכת קריטיים או לנתונים רגישים של הליבה אסורה מטעמי אבטחה ויציבות. קריאות מערכת מספקות ממשק מבוקר ובטוח לגישה לשירותים אלו.\n2.  **הפשטה (Abstraction):** קריאות מערכת מפשטות את המורכבות של חומרת המחשב ומספקות ממשק אחיד ונוח למפתחי תוכנה, כך שאינם צריכים להכיר את הפרטים הספציפיים של כל התקן חומרה.\n3.  **ניהול משאבים:** הליבה היא האחראית לניהול משאבי המערכת המשותפים (כמו מעבד, זיכרון, התקני קלט/פלט וקבצים). קריאות מערכת מאפשרות לתוכניות משתמש לבקש הקצאה או שימוש במשאבים אלו בצורה מבוקרת.\n\n**דוגמה בשפת C:**\n```c\n#include <unistd.h> // עבור קריאת המערכת write\n#include <string.h> // עבור strlen\n\nint main() {\n    const char *message = \"Hello, System Calls!\\n\";\n    // write היא קריאת מערכת\n    write(1, message, strlen(message)); \n    return 0;\n}\n```\n**מטרת הדוגמה:**\nהפונקציה `write` היא קריאת מערכת המשמשת לכתיבת נתונים לתיאור קובץ (file descriptor). בדוגמה זו, אנו כותבים את המחרוזת \"Hello, System Calls!\\n\" ל-`stdout` (שמיוצג על ידי תיאור הקובץ `1`), שהוא בדרך כלל מסוף הפלט. קריאת מערכת זו מדגימה כיצד תוכנית משתמש משתמשת בשירות של הליבה (כתיבה להתקן פלט) מבלי לגשת ישירות לחומרה, תוך שמירה על עקרונות ההגנה והאבטחה של מערכת ההפעלה."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

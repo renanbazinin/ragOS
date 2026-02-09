@@ -1,0 +1,58 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Deadlocks and Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 21:32:30",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4085,
+      "output_tokens": 2721,
+      "total_tokens": 11751
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Deadlocks",
+      "Mutexes",
+      "Synchronization",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתונה מערכת המשתמשת בשלושה מנעולים (mutexes) מסוג pthread_mutex_t: resource1_mutex, resource2_mutex, ו-coordinator_mutex. המערכת מנהלת שני משאבים משותפים, data1 ו-data2, באמצעות שתי פונקציות עיקריות, update_both_resources, המופעלות על ידי חוטים שונים. הפונקציה update_both_resources מקבלת מזהה חוט (thread_id) וסוג פעולה (type). סוג הפעולה קובע את סדר תפיסת המנעולים. הנה הקוד הממומש:",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h> // For usleep\n\npthread_mutex_t resource1_mutex;\npthread_mutex_t resource2_mutex;\npthread_mutex_t coordinator_mutex; // A mutex to coordinate access to resource pairs\n\nint data1 = 0;\nint data2 = 0;\n\n// Function that needs to modify both data1 and data2\nvoid update_both_resources(int thread_id, int type) {\n    if (type == 0) { // Standard order: coordinator -> resource1 -> resource2\n        pthread_mutex_lock(&coordinator_mutex);\n        printf(\"Thread %d acquired coordinator_mutex (type 0)\\n\", thread_id);\n        usleep(50);\n\n        pthread_mutex_lock(&resource1_mutex);\n        printf(\"Thread %d acquired resource1_mutex (type 0)\\n\", thread_id);\n        usleep(50);\n\n        pthread_mutex_lock(&resource2_mutex);\n        printf(\"Thread %d acquired resource2_mutex (type 0)\\n\", thread_id);\n\n        data1++;\n        data2++;\n        printf(\"Thread %d: data1=%d, data2=%d\\n\", thread_id, data1, data2);\n\n        pthread_mutex_unlock(&resource2_mutex);\n        pthread_mutex_unlock(&resource1_mutex);\n        pthread_mutex_unlock(&coordinator_mutex);\n    } else { // Reversed order (mistake): resource1 -> coordinator -> resource2\n        pthread_mutex_lock(&resource1_mutex);\n        printf(\"Thread %d acquired resource1_mutex (type 1)\\n\", thread_id);\n        usleep(50);\n\n        pthread_mutex_lock(&coordinator_mutex); // This is the problematic part\n        printf(\"Thread %d acquired coordinator_mutex (type 1)\\n\", thread_id);\n        usleep(50);\n\n        pthread_mutex_lock(&resource2_mutex);\n        printf(\"Thread %d acquired resource2_mutex (type 1)\\n\", thread_id);\n\n        data1--;\n        data2--;\n        printf(\"Thread %d: data1=%d, data2=%d\\n\", thread_id, data1, data2);\n\n        pthread_mutex_unlock(&resource2_mutex);\n        pthread_mutex_unlock(&coordinator_mutex);\n        pthread_mutex_unlock(&resource1_mutex);\n    }\n}\n\nvoid* thread_task_A(void* arg) {\n    for (int i = 0; i < 3; ++i) {\n        update_both_resources(1, 0); // Type 0: coordinator -> resource1 -> resource2\n        usleep(100);\n    }\n    return NULL;\n}\n\nvoid* thread_task_B(void* arg) {\n    for (int i = 0; i < 3; ++i) {\n        update_both_resources(2, 1); // Type 1: resource1 -> coordinator -> resource2\n        usleep(100);\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t tid_A, tid_B;\n\n    pthread_mutex_init(&resource1_mutex, NULL);\n    pthread_mutex_init(&resource2_mutex, NULL);\n    pthread_mutex_init(&coordinator_mutex, NULL);\n\n    pthread_create(&tid_A, NULL, thread_task_A, NULL);\n    pthread_create(&tid_B, NULL, thread_task_B, NULL);\n\n    pthread_join(tid_A, NULL);\n    pthread_join(tid_B, NULL);\n\n    pthread_mutex_destroy(&resource1_mutex);\n    pthread_mutex_destroy(&resource2_mutex);\n    pthread_mutex_destroy(&coordinator_mutex);\n\n    printf(\"Final data1: %d, Final data2: %d\\n\", data1, data2);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "8.1",
+        "text": "תארו תרחיש ספציפי (רצף פעולות של החוטים) שיוביל למצב של קיפאון (Deadlock) בקוד הנתון.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.2",
+        "text": "הסבירו אילו מהתנאים ההכרחיים לקיפאון (מניעה הדדית, החזקה והמתנה, אי-דריסה, המתנה מעגלית) מתקיימים בתרחיש שתיארתם.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.3",
+        "text": "תקנו את פונקציית update_both_resources כך שתמנע קיפאון, תוך שמירה על הפונקציונליות המקורית. הציגו את הקוד המתוקן והסבירו בקצרה מדוע התיקון מונע קיפאון.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "8.1: תרחיש קיפאון אפשרי:\n1. חוט A (thread_task_A) מתחיל את הקריאה ל-update_both_resources עם type = 0.\n2. חוט A תופס את `coordinator_mutex`.\n3. חוט A מדפיס: \"Thread 1 acquired coordinator_mutex (type 0)\".\n4. חוט B (thread_task_B) מתחיל את הקריאה ל-update_both_resources עם type = 1.\n5. חוט B תופס את `resource1_mutex`.\n6. חוט B מדפיס: \"Thread 2 acquired resource1_mutex (type 1)\".\n7. חוט A מנסה לתפוס את `resource1_mutex`, אך הוא חסום מכיוון שחוט B מחזיק בו.\n8. חוט B מנסה לתפוס את `coordinator_mutex`, אך הוא חסום מכיוון שחוט A מחזיק בו.\nבשלב זה, חוט A ממתין ל-`resource1_mutex` שמוחזק על ידי חוט B, וחוט B ממתין ל-`coordinator_mutex` שמוחזק על ידי חוט A. נוצר מצב של קיפאון.\n\n8.2: התנאים ההכרחיים לקיפאון המתקיימים בתרחיש:\n*   **מניעה הדדית (Mutual Exclusion):** כל המנעולים (mutexes) הם אובייקטים המבטיחים מניעה הדדית; רק חוט אחד יכול להחזיק מנעול נתון בזמן נתון.\n*   **החזקה והמתנה (Hold and Wait):** חוט A מחזיק ב-`coordinator_mutex` וממתין ל-`resource1_mutex`. חוט B מחזיק ב-`resource1_mutex` וממתין ל-`coordinator_mutex`.\n*   **אי-דריסה (No Preemption):** המנעולים אינם ניתנים לדריסה. חוט לא יכול להכריח חוט אחר לשחרר מנעול שהוא מחזיק.\n*   **המתנה מעגלית (Circular Wait):** קיים מעגל המתנה: חוט A ממתין למשאב שמוחזק על ידי חוט B, וחוט B ממתין למשאב שמוחזק על ידי חוט A.\n\n8.3: תיקון פונקציית update_both_resources:\nכדי למנוע קיפאון, יש להקפיד על סדר תפיסת מנעולים עקבי עבור כל החוטים המשתמשים במשאבים משותפים. במקרה זה, הסדר הקנוני צריך להיות: `coordinator_mutex` -> `resource1_mutex` -> `resource2_mutex`.\n\n```c\nvoid update_both_resources_fixed(int thread_id, int type) {\n    // Always acquire in the same order: coordinator -> resource1 -> resource2\n    pthread_mutex_lock(&coordinator_mutex);\n    printf(\"Thread %d acquired coordinator_mutex\\n\", thread_id);\n    usleep(50);\n\n    pthread_mutex_lock(&resource1_mutex);\n    printf(\"Thread %d acquired resource1_mutex\\n\", thread_id);\n    usleep(50);\n\n    pthread_mutex_lock(&resource2_mutex);\n    printf(\"Thread %d acquired resource2_mutex\\n\", thread_id);\n\n    // Critical section - functionality remains the same\n    if (type == 0) {\n        data1++;\n        data2++;\n    } else { // type == 1\n        data1--;\n        data2--;\n    }\n    printf(\"Thread %d: data1=%d, data2=%d\\n\", thread_id, data1, data2);\n\n    pthread_mutex_unlock(&resource2_mutex);\n    pthread_mutex_unlock(&resource1_mutex);\n    pthread_mutex_unlock(&coordinator_mutex);\n}\n```\n\n**הסבר לתיקון:**\nהתיקון מונע קיפאון על ידי אכיפת סדר עקבי לתפיסת המנעולים עבור כל החוטים. כאשר כל החוטים מנסים לתפוס את המנעולים באותו סדר (לדוגמה: `coordinator_mutex` ואז `resource1_mutex` ואז `resource2_mutex`), לא יכול להיווצר מעגל המתנה. חוטים עשויים לחכות למנעולים, אך לא ייווצר מצב בו חוט A מחכה למנעול שחוט B מחזיק, וחוט B מחכה למנעול שחוט A מחזיק, מאחר שכל חוט ינסה לתפוס את המנעולים באותה היררכיה. הדבר מבטל את תנאי ה\"המתנה מעגלית\" ובכך מונע קיפאון."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

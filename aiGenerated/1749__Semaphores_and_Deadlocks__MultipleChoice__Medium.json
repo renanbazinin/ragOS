@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Deadlocks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 20:31:33",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1047,
+      "output_tokens": 768,
+      "total_tokens": 3637
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Semaphores",
+      "Deadlocks",
+      "Concurrency",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתון קוד C הבא המשתמש בסמפורים (semaphores) ובחוטים (threads). בהנחה ש-`s1` ו-`s2` הם סמפורים בינאריים (מונים 1) ושני החוטים רצים במקביל, האם ייתכן מצב של קיפאון (deadlock)?",
+      "code_snippet": "#include <semaphore.h>\n#include <pthread.h> // For thread context\n\nsem_t s1, s2; // Global semaphores, initialized to 1\n\nvoid* thread_func1(void* arg) {\n    // Thread 1 logic\n    sem_wait(&s1);\n    // ... do some work ...\n    sem_wait(&s2);\n    // ... critical section ...\n    sem_post(&s2);\n    sem_post(&s1);\n    return NULL;\n}\n\nvoid* thread_func2(void* arg) {\n    // Thread 2 logic\n    sem_wait(&s2);\n    // ... do some work ...\n    sem_wait(&s1);\n    // ... critical section ...\n    sem_post(&s1);\n    sem_post(&s2);\n    return NULL;\n}",
+      "options": [
+        "א. לא, מכיוון שכל חוט משחרר את הסמפורים שרכש.",
+        "ב. לא, מכיוון שכל סמפור נרכש רק פעם אחת.",
+        "ג. כן, ייתכן מצב של קיפאון.",
+        "ד. כן, אך רק אם חוט אחד מנסה לרכוש את אותו סמפור פעמיים."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "כן, ייתכן מצב של קיפאון. קיפאון יכול להתרחש כאשר חוט 1 רוכש את `s1` וחוט 2 רוכש את `s2` במקביל. לאחר מכן, חוט 1 ינסה לרכוש את `s2` (שכבר נרכש על ידי חוט 2), וחוט 2 ינסה לרכוש את `s1` (שכבר נרכש על ידי חוט 1). מצב זה יוצר תלות מעגלית (circular wait) שמונעת משני החוטים להמשיך, וכתוצאה מכך נגרם קיפאון. ארבעת תנאי הקיפאון מתקיימים: מניעה הדדית (mutual exclusion) על ידי הסמפורים, החזק והמתן (hold and wait) כאשר כל חוט מחזיק סמפור אחד וממתין לאחר, אי-הפקעה (no preemption) של הסמפורים, ותלות מעגלית (circular wait) בסדר רכישת הסמפורים."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

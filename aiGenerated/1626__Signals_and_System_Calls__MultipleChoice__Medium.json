@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Signals and System Calls",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 11:54:42",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 926,
+      "output_tokens": 653,
+      "total_tokens": 3202
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Signals",
+      "System Calls"
+    ],
+    "content": {
+      "text": "תהליך מבצע קריאת מערכת חוסמת (blocking system call) הניתנת להפרעה (interruptible), כגון `read()` מקובץ או socket. מהי התגובה הטיפוסית של מערכת ההפעלה כאשר התהליך מקבל סיגנל (לדוגמה, `SIGINT`) שעבורו מוגדר handler?",
+      "code_snippet": null,
+      "options": [
+        "א. קריאת המערכת תושלם בהצלחה, והסיגנל יטופל רק לאחר מכן.",
+        "ב. קריאת המערכת תיקטע ותחזור מיידית עם קוד שגיאה `EINTR`, והסיגנל יטופל מיד על ידי ה-handler.",
+        "ג. קריאת המערכת תיקטע, הסיגנל יטופל, וקריאת המערכת תופעל מחדש באופן אוטומטי.",
+        "ד. התהליך יופסק מיידית (terminated) על ידי מערכת ההפעלה, ללא קשר לטיפול בסיגנל.",
+        "ה. הסיגנל יידחה ויישמר לטיפול עתידי עד שקריאת המערכת תסתיים, ורק אז יטופל."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "אפשרות ב' היא הנכונה ביותר. כאשר תהליך מבצע קריאת מערכת חוסמת הניתנת להפרעה (כמו `read`, `write`, `select`, `sleep`), וסיגנל נשלח אליו ואינו חסום, מערכת ההפעלה מפסיקה את קריאת המערכת ומחזירה אותה עם קוד שגיאה `EINTR` (Interrupted system call). לאחר מכן, ה-handler של הסיגנל מופעל. אפשרות ג' מתארת מצב אפשרי אם הדגל `SA_RESTART` מוגדר עבור ה-handler של הסיגנל, אך זו לא התנהגות ברירת המחדל או התגובה הטיפוסית הישירה להפרעה, אלא התנהגות משנית לאחר ההפרעה. אפשרויות א', ד' ו-ה' אינן מתארות את ההתנהגות הסטנדרטית במקרה של סיגנל המפריע לקריאת מערכת חוסמת."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

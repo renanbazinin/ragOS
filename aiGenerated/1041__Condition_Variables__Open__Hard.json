@@ -1,0 +1,59 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Condition Variables",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 07:36:01",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3816,
+      "output_tokens": 2604,
+      "total_tokens": 14186
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Condition Variables",
+      "Synchronization",
+      "Concurrency",
+      "Deadlock",
+      "Starvation"
+    ],
+    "content": {
+      "text": "נתונה מחלקת `ResourcePool` המממשת מאגר משאבים מוגבל. המחלקה מאפשרת לחוטים (threads) לדרוש משאב (`acquire`) ולהחזיר אותו למאגר (`release`). קיבולת המאגר קבועה.\nבחנו את מימוש הפונקציות `acquire` ו-`release` בקטע הקוד הבא:",
+      "code_snippet": "#include <iostream>\n#include <queue>\n#include <mutex>\n#include <condition_variable>\n#include <thread>\n#include <vector>\n#include <chrono>\n\nclass Resource {\npublic:\n    int id;\n    Resource(int i) : id(i) {}\n    void use() {\n        std::this_thread::sleep_for(std::chrono::milliseconds(50));\n    }\n};\n\nclass ResourcePool {\npublic:\n    ResourcePool(int capacity) : capacity_(capacity) {\n        for (int i = 0; i < capacity_; ++i) {\n            available_resources_.push(Resource(i));\n        }\n        std::cout << \"ResourcePool created with capacity: \" << capacity_ << std::endl;\n    }\n\n    Resource acquire() {\n        std::unique_lock<std::mutex> lock(mtx_);\n        if (available_resources_.empty()) { // <--- Issue 1: Using if instead of while\n            std::cout << \"Thread \" << std::this_thread::get_id() << \" waiting for resource...\" << std::endl;\n            cv_.wait(lock);\n        }\n        \n        // Problem: If woken up spuriously or another thread got the resource, this might pop from an empty queue.\n        Resource r = available_resources_.front(); // DANGER: potential access to empty queue\n        available_resources_.pop();\n        std::cout << \"Thread \" << std::this_thread::get_id() << \" acquired resource \" << r.id << std::endl;\n        return r;\n    }\n\n    void release(Resource r) {\n        std::unique_lock<std::mutex> lock(mtx_);\n        available_resources_.push(r);\n        std::cout << \"Thread \" << std::this_thread::get_id() << \" released resource \" << r.id << std::endl;\n        cv_.notify_one(); // <--- Issue 2: Using notify_one\n    }\n\nprivate:\n    std::mutex mtx_;\n    std::condition_variable cv_;\n    std::queue<Resource> available_resources_;\n    int capacity_;\n};",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "זהו והסבירו את כל הבעיות (כגון תנאי מירוץ, קיפאון, רעב או התנהגות בלתי מוגדרת) העלולות להתרחש במימוש הנוכחי של פונקציות `acquire` ו-`release`. פרטו כיצד כל בעיה עלולה להתרחש.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "כתבו מחדש את פונקציות `acquire` ו-`release` כך שיפתרו את הבעיות שזיהיתם, תוך שמירה על הלוגיקה הכללית של המאגר.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.3",
+        "text": "הסבירו כיצד השינויים שביצעתם בפונקציות `acquire` ו-`release` פותרים את הבעיות שזיהיתם בשאלה 1.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.1: בעיות במימוש:\n1.  **בעיה ב-`acquire`: שימוש ב-`if` במקום `while` עבור התנאי:**\n    הפונקציה `acquire` משתמשת ב-`if (available_resources_.empty())` כדי לבדוק האם המאגר ריק לפני קריאה ל-`cv_.wait(lock)`. זוהי טעות נפוצה. `wait` יכולה להתעורר מסיבות שונות (spurious wakeups), או שמספר חוטים התעוררו מ-`notify_one`/`notify_all` אך רק אחד מהם הצליח לתפוס את המשאב. אם חוט מתעורר ומוצא שהמאגר עדיין ריק (כי משאב לא שוחרר, או שחוט אחר תפס אותו), הוא ימשיך לבצע `available_resources_.front()` ו-`available_resources_.pop()` על תור ריק. זה יוביל להתנהגות בלתי מוגדרת (Undefined Behavior) וקריסת התוכנית.\n2.  **בעיה ב-`release`: שימוש ב-`notify_one`:**\n    הפונקציה `release` משתמשת ב-`cv_.notify_one()`. במקרים מסוימים, ייתכן שחוט אחד בלבד יתעורר, אך אם ישנם מספר חוטים שממתינים למשאבים, וחוט ספציפי ששוחרר (לדוגמה, אם יש תנאים מורכבים יותר ממאגר פשוט, או אם החוט שהתעורר לא מוכן לפעול מיידית), `notify_one` עלול לגרום לרעב (starvation) של חוטים אחרים שגם ממתינים. עבור מאגר משאבים פשוט שבו כל משאב זהה, `notify_one` יכול לעבוד אם `acquire` משתמש ב-`while` בצורה נכונה. עם זאת, במצב הנתון עם ה-`if` ב-`acquire`, `notify_one` מחמיר את הבעיה בכך שהוא מעיר רק חוט אחד שעשוי להתנהג באופן שגוי. אם היינו רוצים להבטיח שכל חוט יקבל הזדמנות, `notify_all` היה עדיף (אף כי פחות יעיל). עבור תור פשוט, `notify_one` מספיק *אם* ה-`wait` משתמש ב-`while`.\n\n1.2: קוד מתוקן:\n```cpp\n#include <iostream>\n#include <queue>\n#include <mutex>\n#include <condition_variable>\n#include <thread>\n#include <vector>\n#include <chrono>\n\nclass Resource {\npublic:\n    int id;\n    Resource(int i) : id(i) {}\n    void use() {\n        std::this_thread::sleep_for(std::chrono::milliseconds(50));\n    }\n};\n\nclass ResourcePool {\npublic:\n    ResourcePool(int capacity) : capacity_(capacity) {\n        for (int i = 0; i < capacity_; ++i) {\n            available_resources_.push(Resource(i));\n        }\n        std::cout << \"ResourcePool created with capacity: \" << capacity_ << std::endl;\n    }\n\n    Resource acquire() {\n        std::unique_lock<std::mutex> lock(mtx_);\n        // Corrected: Use while loop for predicate check\n        while (available_resources_.empty()) {\n            std::cout << \"Thread \" << std::this_thread::get_id() << \" waiting for resource...\" << std::endl;\n            cv_.wait(lock);\n        }\n        \n        Resource r = available_resources_.front();\n        available_resources_.pop();\n        std::cout << \"Thread \" << std::this_thread::get_id() << \" acquired resource \" << r.id << std::endl;\n        return r;\n    }\n\n    void release(Resource r) {\n        std::unique_lock<std::mutex> lock(mtx_);\n        available_resources_.push(r);\n        std::cout << \"Thread \" << std::this_thread::get_id() << \" released resource \" << r.id << std::endl;\n        // For a simple resource pool where any resource is fine, notify_one is typically sufficient and more efficient.\n        // If there were different types of resources or complex waiting conditions, notify_all might be needed.\n        cv_.notify_one(); \n    }\n\nprivate:\n    std::mutex mtx_;\n    std::condition_variable cv_;\n    std::queue<Resource> available_resources_;\n    int capacity_;\n};\n```\n\n1.3: הסבר על פתרון הבעיות:\n1.  **תיקון ב-`acquire`: שימוש ב-`while` במקום `if`:**\n    החלפת ה-`if` ב-`while` בבדיקה `available_resources_.empty()` מבטיחה שגם אם חוט מתעורר (עקב spurious wakeup או כי חוט אחר שחרר משאב אך הוא נתפס כבר ע\"י חוט מהיר יותר), הוא יבדוק מחדש את התנאי. רק אם התנאי (המאגר אינו ריק) מתקיים, החוט ימשיך לבצע את הפעולות `front()` ו-`pop()`. זה מונע גישה לתור ריק ובכך מונע התנהגות בלתי מוגדרת וקריסות.\n2.  **תיקון ב-`release`: שימוש ב-`notify_one` (הסבר נוסף):**\n    במערכת שבה כל המשאבים זהים וכל חוט שממתין יכול להשתמש בכל משאב פנוי, `notify_one()` היא אסטרטגיה יעילה יותר מ-`notify_all()`. היא מעירה חוט אחד בלבד, וכך מונעת את התעוררותם של חוטים רבים נוספים שייאלצו מיד לבדוק את התנאי (באמצעות ה-`while` המתוקן) ולחזור לישון אם המשאב היחיד ששוחרר כבר נתפס. כל עוד ה-`acquire` משתמש ב-`while` בצורה נכונה, `notify_one` מספיק כדי למנוע קיפאון או רעב במקרה זה, מכיוון שכל שחרור משאב יבטיח שלפחות חוט אחד שממתין יקבל הזדמנות לבדוק את התנאי ולהתקדם."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "System Calls",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 07:21:53",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3498,
+      "output_tokens": 3746,
+      "total_tokens": 13126
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "System Calls",
+      "Process Management",
+      "Inter-Process Communication",
+      "File Descriptors"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המשתמשת במנגנוני יצירת תהליכים ותקשורת בין-תהליכית. התוכנית הראשית (parent) יוצרת צינור (pipe), ומיד לאחר מכן יוצרת תהליך בן (child) באמצעות `fork()`. התהליך האב כותב מחרוזת לצינור. התהליך הבן, לפני שיקרא מהצינור, מבצע `execve()` לתוכנית אחרת (child_program). לפני ה-`execve()`, הוא מפנה את קלטו הסטנדרטי (stdin) לקריאה מהצינור. התוכנית `child_program` פשוט קוראת מהקלט הסטנדרטי שלה ומדפיסה את מה שקראה לפלט הסטנדרטי. התהליך האב ממתין לסיום התהליך הבן.\n\nיש להניח שהתוכניות main.c ו-child_program.c מקומפלות בהתאמה לקבצים הרצים `main` ו-`child_program` ונמצאות באותה ספרייה. יש לנתח את הקוד ולענות על השאלות הבאות:",
+      "code_snippet": "/* main.c */\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n#include <string.h>\n\nint main() {\n    int pipefd[2]; // pipefd[0] for read, pipefd[1] for write\n    pid_t pid;\n    char *message = \"Hello from parent via pipe!\";\n    char *argv[] = {\"./child_program\", NULL};\n    char *envp[] = {NULL};\n\n    if (pipe(pipefd) == -1) {\n        perror(\"pipe\");\n        exit(EXIT_FAILURE);\n    }\n\n    pid = fork();\n    if (pid == -1) {\n        perror(\"fork\");\n        exit(EXIT_FAILURE);\n    }\n\n    if (pid == 0) { // Child process\n        close(pipefd[1]); // Close write end in child\n\n        // Redirect stdin to read from the pipe\n        if (dup2(pipefd[0], STDIN_FILENO) == -1) {\n            perror(\"dup2\");\n            exit(EXIT_FAILURE);\n        }\n        close(pipefd[0]); // Close the original read end\n\n        // Execute child_program\n        if (execve(argv[0], argv, envp) == -1) {\n            perror(\"execve\");\n            exit(EXIT_FAILURE);\n        }\n    } else { // Parent process\n        close(pipefd[0]); // Close read end in parent\n\n        // Write message to the pipe\n        write(pipefd[1], message, strlen(message));\n        close(pipefd[1]); // Close write end after writing\n\n        // Wait for child to terminate\n        wait(NULL);\n        printf(\"Parent: Child process finished.\\n\");\n    }\n\n    return 0;\n}\n\n/* child_program.c */\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n\nint main() {\n    char buffer[100];\n    ssize_t bytes_read;\n\n    printf(\"Child Program: Reading from stdin...\\n\");\n    bytes_read = read(STDIN_FILENO, buffer, sizeof(buffer) - 1);\n    if (bytes_read == -1) {\n        perror(\"read\");\n        exit(EXIT_FAILURE);\n    }\n    buffer[bytes_read] = '\\0'; // Null-terminate the string\n\n    printf(\"Child Program: Received: '%s'\\n\", buffer);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "מהו הפלט המדויק שיוצג על המסך כתוצאה מהרצת התוכנית כולה? נמק בפירוט את שלבי הביצוע.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "מה היה קורה (פלט, שגיאות, תקיעות) אם התהליך הבן לא היה סוגר את קצה הכתיבה של הצינור (`pipefd[1]`) לפני ה-`execve()`? נמק.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.3",
+        "text": "מה היה קורה (פלט, שגיאות, תקיעות) אם התהליך האב לא היה סוגר את קצה הקריאה של הצינור (`pipefd[0]`) לאחר ה-`fork()`? נמק.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.4",
+        "text": "האם ישנם תנאי מירוץ (race conditions) אפשריים במימוש הנוכחי של התוכנית? אם כן, תאר אותם וכיצד ניתן למנוע אותם. אם לא, הסבר מדוע.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.1. **פלט ותהליך ביצוע:**\nהפלט המדויק יהיה:\n```\nChild Program: Reading from stdin...\nChild Program: Received: 'Hello from parent via pipe!'\nParent: Child process finished.\n```\n**נימוק:**\n1.  **`pipe(pipefd)`**: נוצר צינור עם שני קצוות: `pipefd[0]` לקריאה ו-`pipefd[1]` לכתיבה.\n2.  **`fork()`**: נוצרים שני תהליכים: אב ובן. לכל אחד מהם יש עותק משלו של טבלת קבצים (file descriptor table), אך ה-file table entries (FTEs) מצביעים על אותם אובייקטי קבצים בקרנל. במקרה זה, שני התהליכים חולקים את אותו צינור.\n    *   תהליך אב: `pipefd[0]` (קריאה), `pipefd[1]` (כתיבה).\n    *   תהליך בן: `pipefd[0]` (קריאה), `pipefd[1]` (כתיבה).\n3.  **תהליך הבן (`pid == 0`)**:\n    *   `close(pipefd[1])`: התהליך הבן סוגר את קצה הכתיבה של הצינור. זה קריטי כדי ש-`read()` בסופו של דבר יחזיר 0 (EOF) כשהתהליך האב יסגור את קצה הכתיבה שלו.\n    *   `dup2(pipefd[0], STDIN_FILENO)`: קצה הקריאה של הצינור (`pipefd[0]`) מועתק ל-file descriptor מספר 0 (stdin). כעת, כל קריאה מ-stdin תגיע מהצינור.\n    *   `close(pipefd[0])`: ה-file descriptor המקורי של קצה הקריאה (`pipefd[0]`) נסגר, מכיוון שכבר יש עותק שלו ב-`STDIN_FILENO`.\n    *   `execve(argv[0], argv, envp)`: התהליך הבן מחליף את תמונת הזיכרון שלו בתוכנית `child_program`. חשוב לציין ש-file descriptors פתוחים נשמרים ב-`execve` כברירת מחדל, ולכן `STDIN_FILENO` (שמפנה כעת לצינור) נשאר פתוח ומפנה לקצה הקריאה של הצינור. תוכנית `child_program` מתחילה לרוץ.\n    *   `child_program` מדפיסה \"Child Program: Reading from stdin...\" ואז קוראת מ-`STDIN_FILENO`.\n4.  **תהליך האב (`pid > 0`)**:\n    *   `close(pipefd[0])`: התהליך האב סוגר את קצה הקריאה של הצינור, מכיוון שרק הבן אמור לקרוא.\n    *   `write(pipefd[1], message, strlen(message))`: התהליך האב כותב את המחרוזת \"Hello from parent via pipe!\" לצינור.\n    *   `close(pipefd[1])`: התהליך האב סוגר את קצה הכתיבה של הצינור. ברגע שכל קצוות הכתיבה של הצינור נסגרים (הבן סגר את שלו קודם, וכעת האב סגר את שלו), כל קריאה עתידית מקצה הקריאה של הצינור תחזיר 0 בתור מספר הבתים שנקראו (EOF).\n    *   `wait(NULL)`: התהליך האב ממתין שהתהליך הבן יסיים את ריצתו.\n    *   כאשר הבן מסיים, האב ממשיך ומדפיס \"Parent: Child process finished.\"\n\n1.2. **אם התהליך הבן לא היה סוגר את קצה הכתיבה (`pipefd[1]`) לפני ה-`execve()`:**\n*   **פלט/התנהגות:** התוכנית `child_program` הייתה נתקעת (blocking) בניסיון לקרוא מ-`STDIN_FILENO` (הצינור), ולא הייתה מקבלת את ההודעה. הסיבה היא שלמרות שהתהליך האב כותב את ההודעה וסוגר את קצה הכתיבה שלו, עדיין קיים file descriptor פתוח לקצה הכתיבה של הצינור בתהליך הבן (כי הוא לא נסגר לפני ה-`execve` ונשאר פתוח). כל עוד קיים לפחות file descriptor אחד פתוח לקצה הכתיבה של הצינור, קריאה מקצה הקריאה של הצינור תמתין לנתונים נוספים ולא תקבל EOF, גם אם הצינור ריק.\n*   **נימוק:** הכלל לזיהוי EOF בצינור הוא שכל קצוות הכתיבה הפתוחים של הצינור נסגרו. אם התהליך הבן שומר על `pipefd[1]` פתוח (כי הוא לא קרא לו `close`), אז למרות שהאב סיים לכתוב וסגר את שלו, ה-OS עדיין רואה שקיים פוטנציאל לכתיבה לצינור, ולכן קריאה מהצינור תמתין ללא הגבלת זמן. זה יוביל למצב של deadlock בו הבן ממתין לנתונים שהאב כבר סיים לכתוב וסגר את הצינור, אך ה-OS מונע את ה-EOF עקב ה-FD הפתוח בבן.\n\n1.3. **אם התהליך האב לא היה סוגר את קצה הקריאה (`pipefd[0]`) לאחר ה-`fork()`:**\n*   **פלט/התנהגות:** במקרה זה, התוכנית תרוץ כרגיל והפלט יהיה זהה.\n*   **נימוק:** התהליך האב אינו קורא מהצינור, וה-file descriptor `pipefd[0]` אומנם נשאר פתוח בתהליך האב, אך הוא אינו מפריע לתקשורת. כל עוד הבן סוגר את קצה הכתיבה שלו ומפנה את stdin לצינור, והאב כותב וסוגר את קצה הכתיבה שלו, התקשורת תתבצע כראוי. ה-file descriptor הפתוח שאינו בשימוש בתהליך האב הוא בזבוז קטן של משאבים, אך אינו משפיע על הלוגיקה של הצינור או על זיהוי EOF על ידי הבן. הבן מצפה שכל קצוות הכתיבה ייסגרו, והאב מצפה שכל קצוות הקריאה ייסגרו, וה-FD הנוסף של האב לקריאה אינו מפריע (הוא לא קצה כתיבה).\n\n1.4. **תנאי מירוץ (Race Conditions):**\n*   **האם קיימים?** במימוש הנוכחי, אין תנאי מירוץ קריטיים שיובילו להתנהגות בלתי צפויה או שגויה של התוכנית מבחינת העברת הנתונים והסיום.\n*   **נימוק:**\n    *   **כתיבה/קריאה לצינור**: צינורות (pipes) במערכות יוניקס ממומשים עם סמנטיקה שמונעת תנאי מירוץ על הנתונים. כתיבה לצינור היא אטומית עד לגודל מסוים (PIPE_BUF), וגם אם מספר תהליכים כותבים במקביל, הנתונים לא מתערבבים. קריאה היא גם סדרתית. במקרה שלנו, רק האב כותב ורק הבן קורא, כך שאין תחרות על הגישה לצינור.\n    *   **סדר פעולות**: כל הפעולות מתואמות באופן טבעי:\n        *   האב כותב לצינור ומיד סוגר את קצה הכתיבה.\n        *   הבן סוגר את קצה הכתיבה שלו, מפנה את stdin, ומבצע `execve`.\n        *   התוכנית `child_program` מתחילה וקוראת מ-stdin.\n        *   האב ממתין לילד.\n        הבן לא יכול לקרוא לפני שהאב כתב (אלא אם הצינור ריק, ואז הוא ימתין). ה-`wait()` של האב מבטיח שהאב לא יסיים לפני הבן. ה-`close()`ים הנכונים מבטיחים ש-EOF יזוהה כראוי.\n    *   **הזמנים היחסיים של ריצת התהליכים**: למרות שה-OS קובע את סדר הריצה של האב והבן, הצינור פועל כ-buffer. אם האב רץ קודם וכותב, הנתונים ממתינים בצינור. אם הבן רץ קודם ומנסה לקרוא, הוא נחסם עד שהאב יכתוב. לכן, אין תלות בסדר הריצה המדויק של שני התהליכים, והתוכנית תעבוד כצפוי.\n*   **מניעה (אם היו קיימים):** אם היו קיימים תנאי מירוץ, ניתן היה למנוע אותם באמצעות מנגנוני סנכרון מפורשים כמו סמפורים, מנעולים (mutexes) או שימוש בקריאות מערכת חוסמות (blocking system calls) כפי שהצינור עצמו עושה. במקרה זה, אין צורך במנגנונים נוספים."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

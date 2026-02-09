@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "System Calls",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 07:13:41",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1034,
+      "output_tokens": 367,
+      "total_tokens": 2421
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "System Calls"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של קריאת מערכת (system call)?",
+      "code_snippet": null,
+      "options": [
+        "א. לאפשר לתוכניות משתמש לגשת ישירות לחומרה.",
+        "ב. לאפשר לתוכניות משתמש לבקש שירותים מליבת מערכת ההפעלה.",
+        "ג. לאפשר למערכת ההפעלה לתקשר עם תוכניות משתמש.",
+        "ד. לנהל הקצאת זיכרון בתוך תוכנית משתמש."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב. קריאות מערכת הן הממשק שבאמצעותו תוכניות משתמש מבקשות שירותים מליבת מערכת ההפעלה. שירותים אלו כוללים גישה למשאבי חומרה, ניהול קבצים, יצירת תהליכים ועוד, והם מבוצעים במצב ליבה (kernel mode) כדי להבטיח את אבטחת ויציבות המערכת. גישה ישירה לחומרה אינה מותרת מטעמי אבטחה ויציבות."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

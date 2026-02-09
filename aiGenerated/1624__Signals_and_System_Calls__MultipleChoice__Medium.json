@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Signals and System Calls",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 11:54:13",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 926,
+      "output_tokens": 756,
+      "total_tokens": 3249
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Signals",
+      "System Calls"
+    ],
+    "content": {
+      "text": "מהי ההתנהגות הטיפוסית של קריאת מערכת חוסמת (לדוגמה, `read` או `wait`) כאשר היא נקטעת על ידי סיגנל עבורו הותקן מטפל (signal handler)?",
+      "code_snippet": "#include <unistd.h>\n#include <stdio.h>\n#include <signal.h>\n#include <errno.h> // For EINTR\n\nvoid handle_sigint(int sig) {\n    printf(\"Signal %d received!\\n\", sig);\n}\n\nint main() {\n    signal(SIGINT, handle_sigint);\n    char buffer[256];\n    printf(\"Process is about to call read(). Press Ctrl+C to send SIGINT.\\n\");\n    ssize_t bytes_read = read(STDIN_FILENO, buffer, sizeof(buffer));\n    if (bytes_read == -1) {\n        if (errno == EINTR) {\n            printf(\"read() was interrupted by a signal.\\n\");\n        } else {\n            perror(\"read failed\");\n        }\n    } else {\n        printf(\"read() completed successfully, %zd bytes.\\n\", bytes_read);\n    }\n    return 0;\n}",
+      "options": [
+        "א. קריאת המערכת מסתיימת בהצלחה ומחזירה את הערך שהייתה אמורה להחזיר.",
+        "ב. קריאת המערכת נקטעת ומחזירה -1, כאשר `errno` מוגדר ל-`EINTR`.",
+        "ג. התהליך מסיים את ריצתו באופן מיידי (termination).",
+        "ד. הסיגנל נדחה ומטופל רק לאחר שקריאת המערכת מסתיימת.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב. כאשר קריאת מערכת חוסמת (כגון `read`, `waitpid`, `sleep`) נקטעת על ידי סיגנל עבורו הותקן מטפל, ברירת המחדל היא שהקריאה תופסק, המטפל ירוץ, ולאחר מכן קריאת המערכת תחזור עם ערך של -1 ו-`errno` יוגדר ל-`EINTR` (Interrupted system call). תוכניות רבות צריכות לטפל במקרה זה על ידי ניסיון חוזר לבצע את קריאת המערכת. במקרים מסוימים, ניתן להגדיר את התנהגות הסיגנל כך שקריאת המערכת תופעל מחדש אוטומטית (SA_RESTART), אך ברירת המחדל היא `EINTR`."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

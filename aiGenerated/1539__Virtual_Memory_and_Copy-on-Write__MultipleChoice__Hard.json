@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory and Copy-on-Write",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 11:15:54",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 975,
+      "output_tokens": 2486,
+      "total_tokens": 9696
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Virtual Memory",
+      "Copy-on-Write",
+      "Process Management"
+    ],
+    "content": {
+      "text": "נתונה מערכת הפעלה המשתמשת בזיכרון וירטואלי עם דפדוף (paging) ו-Copy-on-Write (CoW) מופעל עבור יצירת תהליכים (fork). גודל דף הוא 4096 בתים (4KB).\nנתון קטע הקוד הבא:\n\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\n#define PAGE_SIZE 4096\n#define NUM_INT_PER_PAGE (PAGE_SIZE / sizeof(int))\n#define ARRAY_TOTAL_INTS (NUM_INT_PER_PAGE * 2) // מערך המשתרע על פני שני דפים בדיוק\n\nint main() {\n    int *arr = (int *)malloc(ARRAY_TOTAL_INTS * sizeof(int));\n    if (arr == NULL) {\n        perror(\"malloc failed\");\n        return 1;\n    }\n\n    for (int i = 0; i < ARRAY_TOTAL_INTS; ++i) {\n        arr[i] = i; // אתחול הנתונים\n    }\n\n    // נניח שכל הנתונים במערך arr נמצאים בזיכרון פיזי (RAM) בשלב זה.\n\n    pid_t pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        free(arr);\n        return 1;\n    } else if (pid == 0) { // תהליך הבן\n        // הבן משנה איבר בדף הראשון\n        arr[0] = 1000;\n        // הבן משנה איבר בדף השני\n        arr[NUM_INT_PER_PAGE] = 2000;\n        exit(0);\n    } else { // תהליך האב\n        wait(NULL); // האב ממתין שהבן יסיים\n\n        // לאחר שהבן סיים ויצא, האב משנה איבר בדף הראשון\n        arr[1] = 3000;\n        // האב משנה איבר בדף השני\n        arr[NUM_INT_PER_PAGE + 1] = 4000;\n    }\n\n    free(arr);\n    return 0;\n}\n```\n\nכמה מסגרות פיזיות (physical frames) שונות תומכות באזור הזיכרון של `arr` עבור תהליך האב, ברגע שתהליך האב מסיים את השינויים שלו (כלומר, לפני הקריאה ל-`free(arr)`)?",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\n#define PAGE_SIZE 4096\n#define NUM_INT_PER_PAGE (PAGE_SIZE / sizeof(int))\n#define ARRAY_TOTAL_INTS (NUM_INT_PER_PAGE * 2) // מערך המשתרע על פני שני דפים בדיוק\n\nint main() {\n    int *arr = (int *)malloc(ARRAY_TOTAL_INTS * sizeof(int));\n    if (arr == NULL) {\n        perror(\"malloc failed\");\n        return 1;\n    }\n\n    for (int i = 0; i < ARRAY_TOTAL_INTS; ++i) {\n        arr[i] = i; // אתחול הנתונים\n    }\n\n    // נניח שכל הנתונים במערך arr נמצאים בזיכרון פיזי (RAM) בשלב זה.\n\n    pid_t pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        free(arr);\n        return 1;\n    } else if (pid == 0) { // תהליך הבן\n        // הבן משנה איבר בדף הראשון\n        arr[0] = 1000;\n        // הבן משנה איבר בדף השני\n        arr[NUM_INT_PER_PAGE] = 2000;\n        exit(0);\n    } else { // תהליך האב\n        wait(NULL); // האב ממתין שהבן יסיים\n\n        // לאחר שהבן סיים ויצא, האב משנה איבר בדף הראשון\n        arr[1] = 3000;\n        // האב משנה איבר בדף השני\n        arr[NUM_INT_PER_PAGE + 1] = 4000;\n    }\n\n    free(arr);\n    return 0;\n}",
+      "options": [
+        "א. 0",
+        "ב. 1",
+        "ג. 2",
+        "ד. 3",
+        "ה. 4"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג. 2.\nנסביר את השלבים:\n1.  **לפני `fork()`:** המערך `arr` משתרע על פני שני דפים וירטואליים (נכנה אותם VP1 ו-VP2). מערכת ההפעלה מקצה שתי מסגרות פיזיות (PF1 ו-PF2) כדי לאחסן את הנתונים המאוחלנים של `arr`. טבלת הדפים של האב מפנה מ-VP1 ל-PF1 ומ-VP2 ל-PF2, עם הרשאות כתיבה.\n2.  **לאחר `fork()`:** תהליך הבן מקבל עותק של טבלת הדפים של האב. מכיוון ש-CoW מופעל, עבור כל הדפים הניתנים לכתיבה (כמו אלו של `arr`), מערכת ההפעלה משנה את הרשאות הכתיבה ב-PTE (Page Table Entry) הן בטבלת הדפים של האב והן בטבלת הדפים של הבן ל\"קריאה בלבד\" ומסמנת אותם בדגל CoW. גם האב וגם הבן מפנים כעת מ-VP1 ל-PF1 ומ-VP2 ל-PF2, אך עם דגלי CoW.\n3.  **תהליך הבן מבצע שינויים:**\n    *   `arr[0] = 1000`: הבן מנסה לכתוב לדף הראשון (VP1). מכיוון שה-PTE שלו מסומן CoW ו\"קריאה בלבד\", מתרחשת פסיקת דף (page fault). מערכת ההפעלה מקצה מסגרת פיזית חדשה (PF1'), מעתיקה אליה את התוכן של PF1, ומשנה את ה-PTE של הבן עבור VP1 כך שיפנה ל-PF1' ויהיה ניתן לכתיבה. ה-PTE של האב עבור VP1 עדיין מפנה ל-PF1 (CoW).\n    *   `arr[NUM_INT_PER_PAGE] = 2000`: הבן מנסה לכתוב לדף השני (VP2). תהליך דומה מתרחש: מערכת ההפעלה מקצה מסגרת פיזית חדשה (PF2'), מעתיקה אליה את התוכן של PF2, ומשנה את ה-PTE של הבן עבור VP2 כך שיפנה ל-PF2' ויהיה ניתן לכתיבה. ה-PTE של האב עבור VP2 עדיין מפנה ל-PF2 (CoW).\n    בשלב זה, בזיכרון הפיזי קיימות 4 מסגרות: PF1, PF2 (שלהן מפנה האב), ו-PF1', PF2' (שלהן מפנה הבן).\n4.  **תהליך הבן יוצא (`exit(0)`):** כאשר הבן מסיים, כל המשאבים שהוקצו לו, כולל המסגרות הפיזיות PF1' ו-PF2', משוחררים וחוזרים למאגר המסגרות הפנויות של מערכת ההפעלה. טבלת הדפים של האב נשארת כפי שהייתה: VP1 מפנה ל-PF1 (CoW) ו-VP2 מפנה ל-PF2 (CoW).\n5.  **תהליך האב מבצע שינויים:**\n    *   `arr[1] = 3000`: האב מנסה לכתוב לדף הראשון (VP1). מכיוון שה-PTE שלו מסומן CoW ו\"קריאה בלבד\" (מנקודה 2), מתרחשת פסיקת דף. מערכת ההפעלה מקצה מסגרת פיזית חדשה (PF1''), מעתיקה אליה את התוכן של PF1, ומשנה את ה-PTE של האב עבור VP1 כך שיפנה ל-PF1'' ויהיה ניתן לכתיבה.\n    *   `arr[NUM_INT_PER_PAGE + 1] = 4000`: האב מנסה לכתוב לדף השני (VP2). תהליך דומה מתרחש: מערכת ההפעלה מקצה מסגרת פיזית חדשה (PF2''), מעתיקה אליה את התוכן של PF2, ומשנה את ה-PTE של האב עבור VP2 כך שיפנה ל-PF2'' ויהיה ניתן לכתיבה.\n    בשלב זה, בזיכרון הפיזי קיימות 4 מסגרות: PF1, PF2 (המסגרות המקוריות, כעת לא בשימוש על ידי האב עבור `arr`), ו-PF1'', PF2'' (המסגרות החדשות שנוצרו עבור האב).\n6.  **מצב סופי עבור האב:** לאחר שכל השינויים בוצעו, טבלת הדפים של האב מפנה מ-VP1 ל-PF1'' ומ-VP2 ל-PF2''.\nלכן, שתי מסגרות פיזיות שונות (PF1'' ו-PF2'') תומכות באזור הזיכרון של `arr` עבור תהליך האב.\n"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

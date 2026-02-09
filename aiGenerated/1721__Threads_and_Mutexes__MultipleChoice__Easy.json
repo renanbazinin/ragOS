@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Threads and Mutexes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 20:19:24",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1131,
+      "output_tokens": 408,
+      "total_tokens": 2236
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Threads",
+      "Mutexes",
+      "Synchronization",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של שימוש ב-mutex (מנעול הדדי) בתוכנית מרובת חוטים?",
+      "code_snippet": null,
+      "options": [
+        "א. לשפר את ביצועי התוכנית על ידי הפעלת חוטים במקביל.",
+        "ב. למנוע מצבי מרוץ (race conditions) בגישה למשאבים משותפים.",
+        "ג. לאפשר לחוטים לתקשר ביניהם באמצעות הודעות.",
+        "ד. להבטיח שכל חוט יקבל זמן מעבד שווה.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "מנעול הדדי (mutex) משמש בעיקר להגן על קטעים קריטיים של קוד מפני גישה בו-זמנית של מספר חוטים, ובכך למנוע מצבי מרוץ ובעיות עקביות נתונים במשאבים משותפים. הוא אינו משפר ישירות את הביצועים (למעשה, הוא יכול להאט אותם מעט עקב תקורה), אינו מנגנון תקשורת ישיר ואינו קשור ישירות לתזמון חוטים."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

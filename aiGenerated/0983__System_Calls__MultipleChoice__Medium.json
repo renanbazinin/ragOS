@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "System Calls",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 07:14:48",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1165,
+      "output_tokens": 514,
+      "total_tokens": 3484
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "System Calls",
+      "Kernel Mode",
+      "User Mode"
+    ],
+    "content": {
+      "text": "מה מתרחש באופן מיידי כאשר תהליך משתמש מבצע קריאת מערכת (System Call) מוצלחת?",
+      "code_snippet": null,
+      "options": [
+        "א. המעבד עובר ממצב משתמש (User Mode) למצב קרנל (Kernel Mode) ומתחיל לבצע קוד בתוך הקרנל.",
+        "ב. התהליך עובר מיד למצב חסום (Blocked State) וממתין לזמני I/O.",
+        "ג. קוד בספריית זמן ריצה (Runtime Library) מבצע את הפעולה ישירות במרחב המשתמש.",
+        "ד. מתבצעת החלפת הקשר (Context Switch) לתהליך אחר, והתהליך המקורי ממתין לביצוע מחודש.",
+        "ה. אף אחת מהתשובות האחרות אינה נכונה."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "כאשר תהליך משתמש קורא לקריאת מערכת, הוא מפעיל מנגנון (לרוב פסיקת תוכנה או מלכודת - trap) שגורם למעבד לעבור ממצב משתמש (User Mode) למצב קרנל (Kernel Mode). במצב קרנל, מערכת ההפעלה מבצעת את הפעולה המבוקשת עבור התהליך. רק לאחר מכן, אם הפעולה מצריכה המתנה (כמו I/O), התהליך עשוי לעבור למצב חסום. קוד בספריית זמן ריצה הוא רק מעטפת קדמית לקריאת המערכת עצמה, ו-Context Switch אינו תוצאה מיידית והכרחית של כל קריאת מערכת."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

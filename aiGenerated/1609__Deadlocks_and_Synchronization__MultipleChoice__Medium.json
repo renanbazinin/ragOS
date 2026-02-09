@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Deadlocks and Synchronization",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 11:50:32",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1163,
+      "output_tokens": 838,
+      "total_tokens": 4260
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Deadlocks",
+      "Synchronization",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "בהינתן קוד ה-C הבא, המריץ שני חוטים במקביל (אחד מריץ את `thread_func1` והשני את `thread_func2`), איזו מהטענות הבאות נכונה לגבי ריצת התוכנית?",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h>\n\npthread_mutex_t mutex1 = PTHREAD_MUTEX_INITIALIZER;\npthread_mutex_t mutex2 = PTHREAD_MUTEX_INITIALIZER;\n\nvoid* thread_func1(void* arg) {\n    pthread_mutex_lock(&mutex1);\n    printf(\"Thread 1 acquired mutex1\\n\");\n    sleep(1); // Simulate work\n    pthread_mutex_lock(&mutex2);\n    printf(\"Thread 1 acquired mutex2\\n\");\n    // Do work\n    pthread_mutex_unlock(&mutex2);\n    pthread_mutex_unlock(&mutex1);\n    return NULL;\n}\n\nvoid* thread_func2(void* arg) {\n    pthread_mutex_lock(&mutex2);\n    printf(\"Thread 2 acquired mutex2\\n\");\n    sleep(1); // Simulate work\n    pthread_mutex_lock(&mutex1);\n    printf(\"Thread 2 acquired mutex1\\n\");\n    // Do work\n    pthread_mutex_unlock(&mutex1);\n    pthread_mutex_unlock(&mutex2);\n    return NULL;\n}",
+      "options": [
+        "א. התוכנית תמיד תרוץ בהצלחה ללא קיפאון (deadlock).",
+        "ב. התוכנית תמיד תיכנס למצב של קיפאון (deadlock).",
+        "ג. התוכנית עשויה להיכנס למצב של קיפאון (deadlock), בהתאם לתיזמון (scheduling) של החוטים.",
+        "ד. התוכנית לא תיכנס לקיפאון מכיוון שמנעולים (mutexes) הם ניתנים לכניסה חוזרת (reentrant).",
+        "ה. התוכנית תיכנס לקיפאון רק אם נסיר את קריאת ה-`sleep(1)`."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "הקוד מציג דוגמה קלאסית לקיפאון (deadlock) עקב תנאי 'המתנה מעגלית' (circular wait). חוט 1 מנסה לרכוש קודם את `mutex1` ואז את `mutex2`. חוט 2 מנסה לרכוש קודם את `mutex2` ואז את `mutex1`. אם חוט 1 ירכוש את `mutex1` וחוט 2 ירכוש את `mutex2` בטרם אחד מהם יצליח לרכוש את המנעול השני, שניהם ימתינו זה לזה באופן אינסופי, וייווצר קיפאון. מצב זה תלוי בתיזמון (scheduling) של מערכת ההפעלה, ולכן הקיפאון אינו מובטח אך אפשרי."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

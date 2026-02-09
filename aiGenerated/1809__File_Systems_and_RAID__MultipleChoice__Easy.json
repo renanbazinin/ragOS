@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "File Systems and RAID",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 21:00:34",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1064,
+      "output_tokens": 326,
+      "total_tokens": 2349
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "File Systems",
+      "RAID"
+    ],
+    "content": {
+      "text": "איזו רמת RAID מספקת פיצול נתונים (striping) לרוחב מספר דיסקים כדי לשפר ביצועים, אך אינה מספקת שום סוג של יתירות (redundancy) או סובלנות לתקלות?",
+      "code_snippet": null,
+      "options": [
+        "א. RAID 0",
+        "ב. RAID 1",
+        "ג. RAID 5",
+        "ד. RAID 10",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "א. RAID 0 (Striping) מפצל נתונים לרוחב מספר דיסקים כדי להגביר את מהירות הקריאה והכתיבה. עם זאת, הוא אינו כולל יתירות, ולכן כשל של דיסק אחד במערך יגרום לאובדן כל הנתונים."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Threads and Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 20:22:49",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2951,
+      "output_tokens": 1117,
+      "total_tokens": 7790
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Threads",
+      "Mutexes",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה, המשתמשת בחוטים (threads) ובמנעולים (mutexes).\nמהו טווח הערכים האפשריים עבור המשתנה הגלובלי `g_counter` בסיום ריצת התוכנית?",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\n#define NUM_ITERATIONS 100000\n\nint g_counter = 0;\npthread_mutex_t g_mutex;\n\nvoid* thread_func_A(void* arg) {\n    for (int i = 0; i < NUM_ITERATIONS; ++i) {\n        pthread_mutex_lock(&g_mutex);\n        g_counter++;\n        pthread_mutex_unlock(&g_mutex);\n    }\n    return NULL;\n}\n\nvoid* thread_func_B(void* arg) {\n    for (int i = 0; i < NUM_ITERATIONS; ++i) {\n        if (pthread_mutex_trylock(&g_mutex) == 0) { // Successfully acquired lock\n            g_counter--;\n            pthread_mutex_unlock(&g_mutex);\n        }\n        // If trylock fails, the decrement operation is skipped for this iteration\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t tid_A, tid_B;\n    pthread_mutex_init(&g_mutex, NULL);\n\n    pthread_create(&tid_A, NULL, thread_func_A, NULL);\n    pthread_create(&tid_B, NULL, thread_func_B, NULL);\n\n    pthread_join(tid_A, NULL);\n    pthread_join(tid_B, NULL);\n\n    printf(\"Final counter value: %d\\n\", g_counter);\n\n    pthread_mutex_destroy(&g_mutex);\n    return 0;\n}",
+      "options": [
+        "א. 0",
+        "ב. בין 0 ל-`NUM_ITERATIONS` (כולל)",
+        "ג. בין 0 ל-`2 * NUM_ITERATIONS` (כולל)",
+        "ד. `NUM_ITERATIONS`",
+        "ה. כל ערך אפשרי, תלוי בתזמון"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "החוט `thread_func_A` מבצע `NUM_ITERATIONS` פעולות הגדלה של `g_counter`. הוא תמיד נועל את המוטקס בהצלחה לפני ההגדלה ומשחרר אותו לאחריה.\nהחוט `thread_func_B` מבצע `NUM_ITERATIONS` ניסיונות הקטנה של `g_counter`. עם זאת, הוא משתמש ב-`pthread_mutex_trylock`. אם הניסיון לנעול את המוטקס נכשל (כי `thread_func_A` מחזיק בו באותו רגע), החוט `thread_func_B` מדלג על פעולת ההקטנה באותה איטרציה.\nלכן, מספר הפעולות שבהן `g_counter` יוגדל הוא בדיוק `NUM_ITERATIONS`.\nמספר הפעולות שבהן `g_counter` יוקטן יכול לנוע בין 0 (אם `thread_func_B` לעולם לא יצליח לנעול את המוטקס) לבין `NUM_ITERATIONS` (אם `thread_func_B` יצליח לנעול את המוטקס בכל ניסיון).\nלפיכך, הערך הסופי של `g_counter` יהיה: `NUM_ITERATIONS` (הגדלות) - `X` (הקטנות), כאשר `X` הוא מספר ההקטנות המוצלחות, ו-`0 <= X <= NUM_ITERATIONS`.\nהערך המינימלי האפשרי הוא כאשר `X = NUM_ITERATIONS`, כלומר `NUM_ITERATIONS - NUM_ITERATIONS = 0`.\nהערך המקסימלי האפשרי הוא כאשר `X = 0`, כלומר `NUM_ITERATIONS - 0 = NUM_ITERATIONS`.\nלכן, טווח הערכים האפשריים הוא בין 0 ל-`NUM_ITERATIONS` (כולל)."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

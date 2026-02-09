@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Page Replacement",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 07:52:20",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1059,
+      "output_tokens": 345,
+      "total_tokens": 2277
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Page Replacement",
+      "Virtual Memory",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "איזה/אילו אלגוריתם/ים להחלפת דפים עלול/עלולים לסבול מאנומליית בלאדי (Belady's Anomaly)?",
+      "code_snippet": null,
+      "options": [
+        "FIFO בלבד.",
+        "LRU בלבד.",
+        "FIFO ו-LRU.",
+        "LRU ואופטימלי (Optimal).",
+        "אף אחד מהנ\"ל."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "אנומליית בלאדי היא תופעה שבה הגדלת מספר מסגרות הדפים הזמינות בזיכרון הפיזי גורמת לעלייה במספר כשלי הדף (page faults). אלגוריתם FIFO (First-In, First-Out) ידוע כמי שסובל מאנומליה זו. לעומת זאת, אלגוריתמים כמו LRU (Least Recently Used) ואלגוריתם אופטימלי (Optimal) הם 'אלגוריתמי מחסנית' (stack algorithms) ואינם סובלים מאנומליה זו."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

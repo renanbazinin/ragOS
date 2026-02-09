@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Disks",
+    "topic_hint": "Disk Scheduling",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 09:28:35",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1032,
+      "output_tokens": 377,
+      "total_tokens": 2073
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Disk Scheduling",
+      "I/O"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של אלגוריתמי תזמון דיסקים?",
+      "code_snippet": null,
+      "options": [
+        "א. למנוע מצב של Deadlock בין תהליכים.",
+        "ב. להבטיח גישה הוגנת לדיסק לכל התהליכים.",
+        "ג. למזער את זמן הגישה הכולל לדיסק ולמקסם את תפוקת הדיסק.",
+        "ד. לנהל את הזיכרון הווירטואלי של המערכת.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "המטרה העיקרית של אלגוריתמי תזמון דיסקים היא לשפר את ביצועי הדיסק על ידי מזעור זמן הגישה (בעיקר זמן חיפוש וזמן סיבוב) ומקסום התפוקה (מספר הבקשות המטופלות ליחידת זמן). בעוד הגישה ההוגנת היא שיקול חשוב, היא לרוב משנית למטרות הביצועים."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

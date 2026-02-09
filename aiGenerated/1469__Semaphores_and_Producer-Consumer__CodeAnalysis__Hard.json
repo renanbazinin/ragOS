@@ -1,0 +1,55 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Producer-Consumer",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 10:33:26",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4898,
+      "output_tokens": 2497,
+      "total_tokens": 17119
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Semaphores",
+      "Producer-Consumer",
+      "Deadlocks",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "להלן מימוש לבעיית יצרן-צרכן, אשר עושה שימוש ב-4 סמפורים (full, empty, buffer_mutex, log_mutex) המאותחלים באופן הבא:\n\n*   `empty` מאותחל לגודל הבאפר (`BUFFER_SIZE`).\n*   `full` מאותחל ל-0.\n*   `buffer_mutex` מאותחל ל-1 (מנעול גישה לבאפר).\n*   `log_mutex` מאותחל ל-1 (מנעול לגישה למשאב לוג משותף).\n\nשימו לב: הקוד הנתון שונה מזה שנלמד בכיתה.\n\nהפתרון משתמש במבנים ופונקציות הבאות:\n*   `Item` – מבנה (struct) המייצג מוצר.\n*   `add_item` / `remove_item` – פונקציות להוספה והסרה של מוצר מהמחסן. פונקציות אלו אינן בטוחות לשימוש במקביל.\n*   `log_action` – פונקציה לרישום פעולה, בטוחה לשימוש במקביל (הגישה למשאב הלוג מוגנת על ידי `log_mutex`).",
+      "code_snippet": "void* producer(void* arg) {\n    Item item;\n\n    sem_wait(&log_mutex); // 1. Acquire log_mutex FIRST\n    log_action(\"Producer: Attempting to produce an item.\");\n\n    sem_wait(&empty);\n    sem_wait(&buffer_mutex);\n\n    add_item(item); // Critical section for buffer access\n\n    sem_post(&buffer_mutex);\n    sem_post(&full);\n\n    log_action(\"Producer: Item produced successfully.\");\n    sem_post(&log_mutex); // 9. Release log_mutex LAST\n\n    return NULL;\n}\n\nvoid* consumer(void* arg) {\n    Item item;\n\n    sem_wait(&buffer_mutex); // 1. Acquire buffer_mutex FIRST\n    sem_wait(&full);\n\n    item = remove_item(); // Critical section for buffer access\n\n    sem_post(&empty);\n    sem_post(&buffer_mutex);\n\n    sem_wait(&log_mutex); // 6. Acquire log_mutex\n    log_action(\"Consumer: Item consumed successfully.\");\n    sem_post(&log_mutex); // 8. Release log_mutex\n\n    return NULL;\n}"
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "האם המימוש הנתון פותר באופן נכון את בעיית יצרן-צרכן? אם כן, יש להוכיח שהפתרון עובד נכון, אחרת יש לתאר את התרחיש הבעייתי ולהסביר אותו.",
+        "code_snippet": null,
+        "options": [
+          "פותר נכון",
+          "לא פותר"
+        ]
+      },
+      {
+        "id": "1.2",
+        "text": "אם המימוש אינו נכון, הצע שינוי מינימלי לסדר קריאות ה-`sem_wait` בפונקציות ה-`producer` ו/או ה-`consumer` כדי לפתור את הבעיה, מבלי להציג בעיות סנכרון חדשות (כגון הרעבה, livelock). הצג את הקוד המתוקן והסבר בקצרה מדוע השינוי פותר את הבעיה.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "לא פותר",
+      "explanation": "1.1: המימוש הנתון אינו פותר נכון את בעיית יצרן-צרכן עקב תרחיש קיפאון (deadlock).\n\nתרחיש הקיפאון מתרחש באופן הבא:\nנניח גודל באפר `BUFFER_SIZE = 1` (לצורך הדגמה קלה של הקיפאון).\nאתחול סמפורים: `empty=1`, `full=0`, `buffer_mutex=1`, `log_mutex=1`.\n\n1.  **חוט יצרן (P1) מתחיל לרוץ:**\n    *   P1 מבצע `sem_wait(&log_mutex)`: `log_mutex` הופך ל-0. P1 מחזיק כעת ב-`log_mutex`.\n    *   P1 קורא ל-`log_action`.\n    *   **מתבצע החלף הקשר לחוט צרכן (C1).**\n\n2.  **חוט צרכן (C1) מתחיל לרוץ:**\n    *   C1 מבצע `sem_wait(&buffer_mutex)`: `buffer_mutex` הופך ל-0. C1 מחזיק כעת ב-`buffer_mutex`.\n    *   C1 מבצע `sem_wait(&full)`: `full` הוא 0 (הבאפר ריק). C1 נחסם וממתין ל-`full`. C1 עדיין מחזיק ב-`buffer_mutex`.\n\n3.  **מתבצע החלף הקשר בחזרה לחוט יצרן (P1):**\n    *   P1 מבצע `sem_wait(&empty)`: `empty` הוא 1 (הבאפר ריק). `empty` הופך ל-0. P1 מחזיק כעת ב-`log_mutex` וב-`empty`.\n    *   P1 מבצע `sem_wait(&buffer_mutex)`: `buffer_mutex` הוא 0 (מוחזק על ידי C1). P1 נחסם וממתין ל-`buffer_mutex`. P1 עדיין מחזיק ב-`log_mutex` וב-`empty`.\n\n**תוצאה:**\n*   חוט P1 מחזיק ב-`log_mutex` וב-`empty`, והוא ממתין ל-`buffer_mutex` (אשר מוחזק על ידי C1).\n*   חוט C1 מחזיק ב-`buffer_mutex`, והוא ממתין ל-`full` (אשר ישוחרר על ידי P1).\n\nנוצר מצב של קיפאון: P1 אינו יכול להמשיך להוסיף פריט ולשחרר את `full` מכיוון שהוא חסום על `buffer_mutex`. C1 אינו יכול להמשיך מכיוון שהוא חסום על `full`. זהו מעגל המתנה קלאסי (circular wait) המוביל לקיפאון.\n\n1.2: הבעיה נובעת מסדר תפיסת המשאבים השונה בין היצרן לצרכן: היצרן מנסה לתפוס `log_mutex` ואז `buffer_mutex` (דרך `empty`), בעוד הצרכן מנסה לתפוס `buffer_mutex` ואז `log_mutex` (דרך `full`). כדי למנוע קיפאון, יש לוודא שכל החוטים תופסים את המשאבים באותו סדר עקבי.\n\nהשינוי המינימלי והנכון ביותר הוא לתפוס את `log_mutex` רק לאחר שכל הפעולות הקשורות לבאפר הושלמו (כולל שחרור `buffer_mutex`), ובכך למנוע מצב בו `log_mutex` ו-`buffer_mutex` מוחזקים בו-זמנית על ידי חוטים שונים הממתינים זה לזה. סדר התפיסה העקבי יהיה: `empty`/`full` -> `buffer_mutex` -> `log_mutex` (אם `log_mutex` נדרש).\n\n**קוד מתוקן:**\n\n```c\nvoid* producer(void* arg) {\n    Item item;\n\n    sem_wait(&empty);\n    sem_wait(&buffer_mutex);\n\n    add_item(item); // Critical section for buffer access\n\n    sem_post(&buffer_mutex);\n    sem_post(&full);\n\n    // Acquire log_mutex *after* buffer operations are done\n    sem_wait(&log_mutex);\n    log_action(\"Producer: Item produced successfully.\");\n    sem_post(&log_mutex);\n\n    return NULL;\n}\n\nvoid* consumer(void* arg) {\n    Item item;\n\n    sem_wait(&full);\n    sem_wait(&buffer_mutex);\n\n    item = remove_item(); // Critical section for buffer access\n\n    sem_post(&empty);\n    sem_post(&buffer_mutex);\n\n    // Acquire log_mutex *after* buffer operations are done\n    sem_wait(&log_mutex);\n    log_action(\"Consumer: Item consumed successfully.\");\n    sem_post(&log_mutex);\n\n    return NULL;\n}\n```\n\n**הסבר לתיקון:**\nבמימוש המתוקן, גם היצרן וגם הצרכן תופסים את `log_mutex` רק לאחר שסיימו את כל הפעולות הקריטיות הקשורות לבאפר ושחררו את `buffer_mutex`. סדר תפיסת המשאבים הופך להיות עקבי: תחילה סמפורי הבאפר (`empty`/`full`), אחר כך `buffer_mutex`, ורק לבסוף `log_mutex`. פעולה זו מבטיחה ש-`log_mutex` ו-`buffer_mutex` לעולם לא יוחזקו בו-זמנית על ידי חוטים שונים הממתינים זה לזה, ובכך נמנע תנאי ההמתנה המעגלית ומונע קיפאון. שינוי זה אינו מציג בעיות סנכרון חדשות כמו הרעבה או livelock, מכיוון שהוא שומר על הפונקציונליות המקורית של יצרן-צרכן ורק מתקן את סדר תפיסת המנעולים הנוספים."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

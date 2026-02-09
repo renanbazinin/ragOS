@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "TLB",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 08:11:12",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3093,
+      "output_tokens": 394,
+      "total_tokens": 4293
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "TLB",
+      "Memory Management",
+      "Virtual Memory"
+    ],
+    "content": {
+      "text": "מהי מטרתו של ה-TLB (Translation Lookaside Buffer) ומהו יתרונו העיקרי במערכת הפעלה?",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "ה-TLB (Translation Lookaside Buffer) הוא זיכרון מטמון מהיר וקטן המאחסן תרגומים אחרונים של מספרי דפים וירטואליים למספרי מסגרות פיזיות. מטרתו העיקרית היא לזרז את תהליך תרגום הכתובות מכתובת וירטואלית לפיזית. היתרון העיקרי שלו הוא שהוא מפחית באופן משמעותי את מספר הגישות לזיכרון הראשי (RAM) הדרושות לתרגום כתובת. במקום לבצע 'הליכה' מלאה בטבלת הדפים בזיכרון הראשי עבור כל גישת זיכרון (מה שדורש מספר גישות ל-RAM), ה-TLB מאפשר למצוא את התרגום במהירות רבה יותר ברוב המקרים (TLB hit), ובכך מקצר את זמן הגישה לזיכרון ומשפר את ביצועי המערכת הכוללים."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

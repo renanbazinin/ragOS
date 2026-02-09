@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Threads and Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 20:21:28",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2951,
+      "output_tokens": 1391,
+      "total_tokens": 10572
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Threads",
+      "Mutexes",
+      "Race Conditions"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה, המשתמשת בחוטים (threads) ובמנגנון נעילה (mutex) כדי לעדכן משתנה גלובלי משותף.\nהניחו שכל קריאות המערכת מצליחות.\n\nמהו טווח הערכים האפשריים עבור המשתנה `global_counter` בסיום ריצת התוכנית? נמקו את תשובתכם.",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n\n#define NUM_THREADS 4\n#define INCREMENT_PER_THREAD 100000\n\nlong long global_counter = 0;\npthread_mutex_t counter_mutex;\n\n// פונקציית חוט המשתמשת ב-mutex\nvoid* thread_with_mutex(void* arg) {\n    for (int i = 0; i < INCREMENT_PER_THREAD; ++i) {\n        pthread_mutex_lock(&counter_mutex);\n        global_counter++;\n        pthread_mutex_unlock(&counter_mutex);\n    }\n    return NULL;\n}\n\n// פונקציית חוט שאינה משתמשת ב-mutex\nvoid* thread_without_mutex(void* arg) {\n    for (int i = 0; i < INCREMENT_PER_THREAD; ++i) {\n        global_counter++; // מצב מרוץ (race condition) כאן!\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n    pthread_mutex_init(&counter_mutex, NULL);\n\n    // יצירת 2 חוטים המוגנים באמצעות mutex\n    pthread_create(&threads[0], NULL, thread_with_mutex, NULL);\n    pthread_create(&threads[1], NULL, thread_with_mutex, NULL);\n\n    // יצירת 2 חוטים שאינם מוגנים באמצעות mutex\n    pthread_create(&threads[2], NULL, thread_without_mutex, NULL);\n    pthread_create(&threads[3], NULL, thread_without_mutex, NULL);\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final global_counter value: %lld\\n\", global_counter);\n\n    pthread_mutex_destroy(&counter_mutex);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הערך המקסימלי האפשרי עבור `global_counter` הוא 400,000.\nזאת מכיוון שבמקרה הטוב ביותר, כל 4 החוטים מבצעים 100,000 הגדלות כל אחד, וכל ההגדלות נספרות בהצלחה (ללא איבוד). סך הכל 4 * 100,000 = 400,000 הגדלות.\n\nהערך המינימלי האפשרי עבור `global_counter` הוא 200,001.\nההסבר לכך הוא כדלקמן:\nשני החוטים הראשונים (threads[0] ו-threads[1]) משתמשים ב-mutex כדי להגן על פעולת ההגדלה של `global_counter`. לכן, 200,000 ההגדלות שהם מבצעים מובטחות להיות אטומיות וייכללו בערך הסופי של המונה.\n\nשני החוטים הנותרים (threads[2] ו-threads[3]) אינם משתמשים ב-mutex. פעולת ההגדלה `global_counter++` אינה אטומית ומורכבת משלושה שלבים:\n1. קריאת הערך הנוכחי של `global_counter` לתוך אוגר.\n2. הגדלת הערך באוגר.\n3. כתיבת הערך מהאוגר בחזרה ל-`global_counter`.\nכתוצאה מכך, תיתכן תחרות (race condition) בין שני החוטים הללו, וגם בינם לבין החוטים המוגנים על ידי mutex (למרות שהחוטים המוגנים מונעים תחרות מצידם). במצב הגרוע ביותר של תחרות, שני חוטים שאינם מוגנים קוראים את אותו ערך, שניהם מגדילים אותו באופן לוקאלי, ושניהם כותבים את אותו ערך מוגדל בחזרה ל-`global_counter`. במקרה כזה, אחת משתי ההגדלות נאבדת.\nבמקרה הקיצוני ביותר, מתוך 200,000 ההגדלות המיועדות מהחוטים הלא מוגנים, רק הגדלה אחת תצליח לשנות את המונה בפועל (למשל, אם כל שאר 199,999 ההגדלות נמחקו על ידי כתיבה בו-זמנית של ערך זהה או קודם).\nלכן, הערך המינימלי יהיה סכום ההגדלות המובטחות (200,000) בתוספת לפחות הגדלה אחת מהחוטים הלא מוגנים (1).\nהטווח האפשרי הוא [200,001, 400,000]."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

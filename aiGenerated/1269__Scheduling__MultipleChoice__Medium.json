@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Scheduling",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 09:05:39",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1023,
+      "output_tokens": 435,
+      "total_tokens": 2404
+    }
+  },
+  "question": {
+    "id": 6,
+    "type": "MultipleChoice",
+    "topic": [
+      "Scheduling",
+      "CPU Scheduling"
+    ],
+    "content": {
+      "text": "איזה אלגוריתם תזמון מבטיח את זמן ההמתנה הממוצע המינימלי עבור קבוצת תהליכים נתונה, כאשר כל התהליכים מגיעים בו-זמנית?",
+      "code_snippet": null,
+      "options": [
+        "א. Round Robin (RR)",
+        "ב. First-Come, First-Served (FCFS)",
+        "ג. Shortest Job First (SJF)",
+        "ד. Priority Scheduling",
+        "ה. None of the above"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג. Shortest Job First (SJF)",
+      "explanation": "אלגוריתם Shortest Job First (SJF), כאשר כל התהליכים זמינים בו-זמנית, ידוע כאופטימלי מבחינת זמן ההמתנה הממוצע וזמן המחזור הממוצע. הוא עושה זאת על ידי ביצוע התהליך עם זמן הריצה הקצר ביותר קודם, מה שמפנה את המעבד מהר יותר לתהליכים אחרים, ובכך מקטין את ההמתנה הכוללת. RR ו-FCFS אינם אופטימליים במקרה זה. תזמון מבוסס עדיפויות יכול להיות אופטימלי רק אם העדיפויות מוגדרות כך שהן משקפות את זמני הריצה הקצרים ביותר, אך כשלעצמו, הוא לא מבטיח זאת."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions and Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 11:19:57",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3651,
+      "output_tokens": 1659,
+      "total_tokens": 8177
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Race Conditions",
+      "Mutexes",
+      "Concurrency",
+      "Pthreads"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה בשפת C/C++ המשתמשת ב-pthreads. התוכנית יוצרת מספר תהליכונים, כאשר כל אחד מהם מנסה להגדיל מונה גלובלי משותף מספר רב של פעמים.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <unistd.h>\n\n#define NUM_THREADS 5\n#define INCREMENTS_PER_THREAD 100000\n\nlong long global_counter = 0;\n\nvoid* increment_counter(void* arg) {\n    for (int i = 0; i < INCREMENTS_PER_THREAD; i++) {\n        global_counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    for (int i = 0; i < NUM_THREADS; i++) {\n        pthread_create(&threads[i], NULL, increment_counter, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; i++) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final counter value: %lld\\n\", global_counter);\n\n    return 0;\n}"
+    },
+    "sub_questions": [
+      {
+        "id": "7.1",
+        "text": "מהו הערך הסופי האפשרי של המשתנה `global_counter` לאחר סיום ריצת כל התהליכונים? האם הערך תמיד יהיה זהה בכל הרצה? הסבר.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "7.2",
+        "text": "זהה את תנאי המרוץ (Race Condition) הקיים בתוכנית והסבר מדוע הוא מתרחש. ציין את הקטע הקריטי (Critical Section) בקוד.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "7.3",
+        "text": "הצע פתרון לבעיה באמצעות שימוש ב-mutexים. כתוב את קטע הקוד המתוקן (רק את החלקים שצריך לשנות/להוסיף) והסבר כיצד ה-mutex פותר את תנאי המרוץ.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "7.1. הערך הצפוי של `global_counter` הוא `NUM_THREADS * INCREMENTS_PER_THREAD`, כלומר 5 * 100,000 = 500,000. עם זאת, בגלל תנאי מרוץ, הערך הסופי *לא* יהיה תמיד 500,000, ולרוב יהיה נמוך יותר. הסיבה היא שפעולת הקידום `global_counter++` אינה אטומית. היא מורכבת משלוש פעולות בסיסיות: 1. קריאת הערך הנוכחי של `global_counter` לרג'יסטר. 2. הגדלת הערך ברג'יסטר. 3. כתיבת הערך המעודכן מהרג'יסטר בחזרה לזיכרון. כאשר מספר תהליכונים מבצעים פעולה זו בו-זמנית, תהליכון אחד יכול לקרוא את הערך, ותהליכון אחר יכול לקדם ולכתוב ערך חדש לפני שהתהליכון הראשון יספיק לכתוב את הערך המעודכן שלו. כתוצאה מכך, חלק מהעדכונים הולכים לאיבוד.\n\n7.2. תנאי המרוץ מתרחש סביב המשתנה המשותף `global_counter` ובמיוחד בפעולה `global_counter++`. הוא מתרחש מכיוון שמספר תהליכונים ניגשים ומשנים משאב משותף (המונה הגלובלי) ללא מנגנון סנכרון מתאים, מה שמוביל לתוצאות בלתי צפויות ולא עקביות. הקטע הקריטי בקוד הוא השורה `global_counter++;`.\n\n7.3. כדי לפתור את תנאי המרוץ, יש להגן על הקטע הקריטי באמצעות mutex. יש לאתחל את ה-mutex לפני יצירת התהליכונים, לנעול אותו לפני הכניסה לקטע הקריטי, לשחרר אותו ביציאה מהקטע הקריטי, ולהשמיד אותו בסיום. להלן קטע הקוד המתוקן:\n```c\n// הגדרת המוטקס גלובלית\npthread_mutex_t counter_mutex;\n\nvoid* increment_counter(void* arg) {\n    for (int i = 0; i < INCREMENTS_PER_THREAD; i++) {\n        pthread_mutex_lock(&counter_mutex);   // נעל את המוטקס לפני גישה למשאב המשותף\n        global_counter++;\n        pthread_mutex_unlock(&counter_mutex); // שחרר את המוטקס אחרי הגישה למשאב המשותף\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n    pthread_mutex_init(&counter_mutex, NULL); // אתחל את המוטקס לפני יצירת התהליכונים\n\n    for (int i = 0; i < NUM_THREADS; i++) {\n        pthread_create(&threads[i], NULL, increment_counter, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; i++) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final counter value: %lld\\n\", global_counter);\n\n    pthread_mutex_destroy(&counter_mutex); // השמד את המוטקס בסיום\n    return 0;\n}\n```\nהמוטקס מבטיח שבכל רגע נתון, רק תהליכון אחד יוכל להיכנס לקטע הקריטי ולשנות את `global_counter`. תהליכונים אחרים שינסו להיכנס יחסמו עד שהמוטקס ישוחרר. זה מבטיח שהפעולה `global_counter++` תבוצע באופן אטומי מנקודת מבטם של התהליכונים, וכל העדכונים יישמרו, מה שיוביל לערך סופי נכון ועקבי של 500,000."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

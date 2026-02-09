@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "Networking",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 09:42:16",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 968,
+      "output_tokens": 742,
+      "total_tokens": 4924
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Networking",
+      "TCP",
+      "Socket Programming",
+      "Error Handling"
+    ],
+    "content": {
+      "text": "שרת TCP ממתין לחיבורים על פורט מסוים. לקוח מתחבר לשרת ושולח אליו בהצלחה 100 בתים. לאחר מכן, השרת סוגר את הסוקט שלו באמצעות `close()`. הלקוח, מבלי לבצע קריאות `recv()` נוספות שיעידו על סגירת השרת, מנסה לשלוח 100 בתים נוספים באמצעות `send()`. בהנחה שהלקוח לא מטפל בסיגנל `SIGPIPE`, ושיש מספיק מקום בבאפרים של ה-TCP בשני הצדדים לפני סגירת השרת. איזו מהטענות הבאות היא הנכונה ביותר לגבי הפעולה השנייה של הלקוח (`send()`):",
+      "code_snippet": null,
+      "options": [
+        "א. הלקוח יקבל שגיאה מיידית מ-`send()` עם `errno` שווה ל-`ECONNRESET`.",
+        "ב. הלקוח יקבל שגיאה מיידית מ-`send()` עם `errno` שווה ל-`EPIPE`.",
+        "ג. הלקוח יצליח לשלוח את הנתונים, אך השרת לא יקבל אותם.",
+        "ד. הלקוח יקרוס עקב קבלת סיגנל `SIGPIPE`.",
+        "ה. הלקוח יקבל שגיאה מיידית מ-`send()` עם `errno` שווה ל-`EWOULDBLOCK`."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ד",
+      "explanation": "כאשר השרת סוגר את הסוקט שלו באמצעות `close()`, הוא שולח פלח FIN (Finish) ללקוח. כאשר פלח ה-FIN מתקבל ומעובד על ידי ערימת ה-TCP של הלקוח, הקשר עובר למצב סגירה (למשל, `FIN_WAIT_2` בצד הלקוח). אם הלקוח מנסה לשלוח נתונים לאחר שהשרת סגר את צד הקבלה שלו (וה-FIN עובד), מערכת ההפעלה תשלח סיגנל `SIGPIPE` לתהליך הלקוח. מכיוון שהשאלה מניחה שהלקוח \"לא מטפל בסיגנל `SIGPIPE`\", הפעולה ברירת המחדל לסיגנל זה היא סיום התהליך (קריסה). אם הלקוח היה מטפל בסיגנל (למשל, מתעלם ממנו או חוסם אותו), קריאת ה-`send()` הייתה נכשלת ומחזירה -1, ו-`errno` היה נקבע ל-`EPIPE`."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

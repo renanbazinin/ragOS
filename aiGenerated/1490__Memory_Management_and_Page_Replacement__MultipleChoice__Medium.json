@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Memory Management and Page Replacement",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 10:45:26",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 941,
+      "output_tokens": 931,
+      "total_tokens": 5583
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Memory Management",
+      "Page Replacement",
+      "Virtual Memory"
+    ],
+    "content": {
+      "text": "נתונה סדרת הפניות לדפים הבאה: `7, 0, 1, 2, 0, 3, 0, 4, 2, 3, 0, 3, 2, 1, 2, 0, 1, 7, 0, 1`.\nכאשר ישנם 3 מסגרות זיכרון זמינות.\nכמה כשלים בדף (page faults) יגרמו על ידי אלגוריתם LRU (Least Recently Used)?",
+      "code_snippet": null,
+      "options": [
+        "א. 9",
+        "ב. 12",
+        "ג. 15",
+        "ד. 17",
+        "ה. אף אחת מהתשובות אינה נכונה."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "נספור את כשלים בדף עבור אלגוריתם LRU עם 3 מסגרות זיכרון:\nסדרת הפניות: `7, 0, 1, 2, 0, 3, 0, 4, 2, 3, 0, 3, 2, 1, 2, 0, 1, 7, 0, 1`\nמסגרות: [_, _, _]\n\n1.  `7`: [7, _, _] (PF - Page Fault)\n2.  `0`: [7, 0, _] (PF)\n3.  `1`: [7, 0, 1] (PF)\n4.  `2`: [0, 1, 2] (PF, 7 מוחלף כי הוא ה-LRU)\n5.  `0`: [1, 2, 0] (Hit - פגיעה)\n6.  `3`: [2, 0, 3] (PF, 1 מוחלף כי הוא ה-LRU)\n7.  `0`: [2, 3, 0] (Hit)\n8.  `4`: [3, 0, 4] (PF, 2 מוחלף כי הוא ה-LRU)\n9.  `2`: [0, 4, 2] (PF, 3 מוחלף כי הוא ה-LRU)\n10. `3`: [4, 2, 3] (PF, 0 מוחלף כי הוא ה-LRU)\n11. `0`: [2, 3, 0] (PF, 4 מוחלף כי הוא ה-LRU)\n12. `3`: [2, 0, 3] (Hit)\n13. `2`: [0, 3, 2] (Hit)\n14. `1`: [3, 2, 1] (PF, 0 מוחלף כי הוא ה-LRU)\n15. `2`: [3, 1, 2] (Hit)\n16. `0`: [1, 2, 0] (PF, 3 מוחלף כי הוא ה-LRU)\n17. `1`: [2, 0, 1] (Hit)\n18. `7`: [0, 1, 7] (PF, 2 מוחלף כי הוא ה-LRU)\n19. `0`: [1, 7, 0] (Hit)\n20. `1`: [7, 0, 1] (Hit)\n\nסה\"כ כשלים בדף: 12."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

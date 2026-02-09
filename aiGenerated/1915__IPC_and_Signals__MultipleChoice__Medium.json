@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "IPC and Signals",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 21:44:07",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1103,
+      "output_tokens": 1046,
+      "total_tokens": 4581
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "IPC",
+      "Signals",
+      "System Calls"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא המדגים תקשורת בין תהליכים (IPC) באמצעות סיגנלים. תהליך אב יוצר תהליך בן, ותהליך הבן נכנס למצב שינה. תהליך האב שולח סיגנל אל תהליך הבן. איזו מהטענות הבאות מתארת נכונה את התוצאה הסבירה ביותר של קטע הקוד?",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <signal.h>\n#include <sys/wait.h>\n\nvoid handle_sigusr1(int sig) {\n    // Signal handler for SIGUSR1\n    printf(\"Child: SIGUSR1 received!\\n\");\n}\n\nint main() {\n    pid_t pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        exit(1);\n    } else if (pid == 0) { // Child process\n        signal(SIGUSR1, handle_sigusr1); // Set up signal handler\n        printf(\"Child %d: Going to sleep for 10 seconds...\\n\", getpid());\n        unsigned int remaining = sleep(10);\n        printf(\"Child %d: sleep() returned %u\\n\", getpid(), remaining);\n        if (remaining > 0) {\n            printf(\"Child %d: Sleep was interrupted.\\n\", getpid());\n        }\n        exit(0);\n    } else { // Parent process\n        printf(\"Parent %d: Child PID is %d\\n\", getpid(), pid);\n        sleep(5); // Wait 5 seconds\n        printf(\"Parent %d: Sending SIGUSR1 to child %d\\n\", getpid(), pid);\n        kill(pid, SIGUSR1);\n        wait(NULL); // Wait for child to terminate\n        printf(\"Parent %d: Child terminated.\\n\", getpid());\n    }\n    return 0;\n}",
+      "options": [
+        "א. תהליך הבן ימשיך לישון למשך 10 השניות המלאות, והסיגנל יטופל רק לאחר השלמת השינה.",
+        "ב. תהליך הבן יתעורר מיד עם קבלת הסיגנל, וקריאת המערכת sleep() תחזיר את מספר השניות שנותרו.",
+        "ג. תהליך הבן יסיים את פעולתו מיד עם קבלת הסיגנל, מכיוון ש-SIGUSR1 הוא סיגנל סיום.",
+        "ד. הסיגנל יישמר בתור (queued) ויתבצע רק אם תהליך הבן יבצע קריאת מערכת pause() או sigsuspend().",
+        "ה. תהליך הבן יתעלם מהסיגנל לחלוטין מכיוון שהוא חוסם בקריאת מערכת."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "הסבר: קריאת המערכת `sleep()` ניתנת להפרעה על ידי סיגנלים. כאשר תהליך הבן מקבל את הסיגנל `SIGUSR1` (עבורו הותקן handler) בזמן שהוא ב-`sleep()`, מערכת ההפעלה מפסיקה את השינה של התהליך. ה-handler שהותקן עבור `SIGUSR1` מורץ, ולאחר שה-handler מסיים, `sleep()` חוזרת ומחזירה את מספר השניות שנותרו לשינה המקורית (בדוגמה זו, 5 שניות). זה מאפשר לתהליך להגיב לסיגנלים מבלי להמתין להשלמת קריאת מערכת חוסמת. לכן, תהליך הבן יתעורר לאחר 5 שניות, `sleep()` תחזיר 5, ויוצג פלט המעיד על כך שהשינה הופרעה."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

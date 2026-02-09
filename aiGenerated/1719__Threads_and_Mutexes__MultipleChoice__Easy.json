@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Threads and Mutexes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 20:19:10",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1131,
+      "output_tokens": 402,
+      "total_tokens": 3048
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Threads",
+      "Mutexes",
+      "Synchronization",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של שימוש ב-mutex (מנעול הדדי) בתכנות מרובה חוטים (multithreaded programming)?",
+      "code_snippet": null,
+      "options": [
+        "א. למנוע מצב מרוץ (race condition) ולהבטיח בלעדיות הדדית (mutual exclusion) בקטע קריטי (critical section).",
+        "ב. לשפר את ביצועי התוכנית על ידי פיצול עבודה בין חוטים שונים.",
+        "ג. ליצור חוטים חדשים במערכת ההפעלה.",
+        "ד. לתזמן את ריצת החוטים על ידי מערכת ההפעלה.",
+        "ה. אף אחת מהתשובות האחרות אינה נכונה."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "מטרתו העיקרית של mutex היא להגן על קטעים קריטיים בקוד מפני גישה סימולטנית של מספר חוטים. בכך, הוא מונע מצבי מרוץ (race conditions) ומבטיח שרק חוט אחד יוכל לבצע את הקטע הקריטי בכל רגע נתון, ובכך שומר על עקביות הנתונים המשותפים."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

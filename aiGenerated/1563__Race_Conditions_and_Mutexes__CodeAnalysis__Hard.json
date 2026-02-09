@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions and Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 11:29:15",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5488,
+      "output_tokens": 2199,
+      "total_tokens": 22481
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Race Conditions",
+      "Mutexes",
+      "Deadlock",
+      "Concurrency",
+      "Linked Lists"
+    ],
+    "content": {
+      "text": "נתונה רשימה מקושרת חד-כיוונית הממומשת באמצעות המבנים והפונקציות הבאות. מטרת המתכנת הייתה ליישם נעילה עדינה (fine-grained locking) על ידי שימוש בשני מנעולים נפרדים: `head_lock` להגנה על פעולות הקשורות לראש הרשימה, ו-`tail_lock` להגנה על פעולות הקשורות לסוף הרשימה.\n\nעיין/עייני בקוד המצורף, ובאופן ספציפי בפונקציות `list_add_head` ו-`list_remove_tail`.\n\nזהה/י את בעיית הסנכרון העיקרית שיכולה להתרחש במערכת מרובת חוטים המשתמשת במימוש זה. הסבר/י כיצד הבעיה מתרחשת, ותאר/י תרחיש ספציפי (sequence of events) שיוביל אליה.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <pthread.h>\n\n// מבנה לצומת ברשימה\ntypedef struct Node {\n    int data;\n    struct Node* next;\n} Node;\n\n// מבנה לרשימה מקושרת משותפת\ntypedef struct List {\n    Node* head;\n    Node* tail;\n    pthread_mutex_t head_lock;\n    pthread_mutex_t tail_lock;\n} List;\n\n// אתחול הרשימה\nvoid list_init(List* list) {\n    list->head = NULL;\n    list->tail = NULL;\n    pthread_mutex_init(&list->head_lock, NULL);\n    pthread_mutex_init(&list->tail_lock, NULL);\n}\n\n// הוספת איבר לראש הרשימה\nvoid list_add_head(List* list, int value) {\n    Node* new_node = (Node*)malloc(sizeof(Node));\n    if (new_node == NULL) {\n        perror(\"Failed to allocate new node\");\n        exit(EXIT_FAILURE);\n    }\n    new_node->data = value;\n    new_node->next = NULL;\n\n    pthread_mutex_lock(&list->head_lock);\n    if (list->head == NULL) { // הרשימה הייתה ריקה לפני ההוספה\n        list->head = new_node;\n        // נדרש לעדכן את list->tail, המוגן ע\"י tail_lock\n        pthread_mutex_lock(&list->tail_lock);\n        list->tail = new_node;\n        pthread_mutex_unlock(&list->tail_lock);\n    } else {\n        new_node->next = list->head;\n        list->head = new_node;\n    }\n    pthread_mutex_unlock(&list->head_lock);\n}\n\n// הסרת איבר מסוף הרשימה\nint list_remove_tail(List* list) {\n    int value = -1; // ערך ברירת מחדל לכישלון\n\n    pthread_mutex_lock(&list->tail_lock);\n\n    if (list->head == NULL) { // הרשימה ריקה\n        pthread_mutex_unlock(&list->tail_lock);\n        return value;\n    }\n\n    if (list->head == list->tail) { // הרשימה מכילה איבר יחיד\n        value = list->head->data;\n        free(list->head);\n        // נדרש לעדכן את list->head ל-NULL, המוגן ע\"י head_lock\n        pthread_mutex_lock(&list->head_lock);\n        list->head = NULL;\n        pthread_mutex_unlock(&list->head_lock);\n        list->tail = NULL; // list->tail מוגן ע\"י tail_lock\n    } else {\n        Node* current = list->head;\n        while (current->next != list->tail) {\n            current = current->next;\n        }\n        value = list->tail->data;\n        free(list->tail);\n        list->tail = current;\n        list->tail->next = NULL;\n    }\n    pthread_mutex_unlock(&list->tail_lock);\n    return value;\n}\n"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הבעיה העיקרית במימוש הנתון היא **קיפאון (Deadlock)**. הקיפאון נובע מסדר נעילה לא עקבי של המנעולים `head_lock` ו-`tail_lock`.\n\n*   פונקציית `list_add_head`, כאשר הרשימה ריקה, רוכשת תחילה את `head_lock` ולאחר מכן מנסה לרכוש את `tail_lock`.\n*   פונקציית `list_remove_tail`, כאשר הרשימה מכילה איבר יחיד, רוכשת תחילה את `tail_lock` ולאחר מכן מנסה לרכוש את `head_lock`.\n\n**תרחיש המוביל לקיפאון:**\nנניח שהרשימה ריקה בתחילה.\n\n1.  **חוט P (יצרן)** קורא לפונקציה `list_add_head` עם ערך כלשהו (לדוגמה, 10).\n    *   חוט P רוכש בהצלחה את `list->head_lock`.\n    *   חוט P יוצר צומת חדש (`node_10`) ומעדכן את `list->head = node_10`.\n    *   חוט P מגיע לשורה בה הוא מנסה לרכוש את `list->tail_lock` (`pthread_mutex_lock(&list->tail_lock);`).\n    *   **מתבצע מעבר הקשר (context switch) לחוט C.** (חוט P מחזיק כעת ב-`head_lock` וממתין ל-`tail_lock`).\n\n2.  **חוט C (צרכן)** קורא לפונקציה `list_remove_tail`.\n    *   נניח שחוט P הספיק לעדכן את `list->tail = node_10` לפני מעבר ההקשר (או שחוט אחר השלים פעולת הוספה לרשימה ריקה), כך שהרשימה מכילה כעת `node_10` וגם `list->tail = node_10`.\n    *   חוט C רוכש בהצלחה את `list->tail_lock`.\n    *   חוט C בודק אם `list->head == NULL`. הוא מוצא ש-`list->head` מצביע על `node_10`, ולכן התנאי מתגלה כשקר.\n    *   חוט C בודק אם `list->head == list->tail`. מכיוון ששניהם מצביעים על `node_10`, התנאי מתגלה כאמת (הרשימה מכילה איבר יחיד).\n    *   חוט C ממשיך לבצע את הלוגיקה של הסרת האיבר היחיד, כולל שחרור הזיכרון של `node_10`.\n    *   חוט C מגיע לשורה בה הוא מנסה לרכוש את `list->head_lock` (`pthread_mutex_lock(&list->head_lock);`).\n\n**בשלב זה:**\n*   חוט P מחזיק ב-`list->head_lock` וממתין ל-`list->tail_lock` (המוחזק על ידי C).\n*   חוט C מחזיק ב-`list->tail_lock` וממתין ל-`list->head_lock` (המוחזק על ידי P).\n\nשניהם חסומים לצמיתות, וזהו מצב של קיפאון.\n\n**הערה:** בנוסף לקיפאון, קיימת גם סכנה למצבי מרוץ (race conditions) ואי-עקביות בנתונים במעברי מצב הרשימה (מריקה לאיבר יחיד או מאיבר יחיד לריקה) שבהם מצביעי `head` ו-`tail` אינם עקביים באופן זמני. לדוגמה, אם חוט C יבצע `list_remove_tail` כאשר `list->head` כבר עודכן על ידי P אך `list->tail` עדיין `NULL`, חוט C עלול לנסות לגשת ל-`list->tail->data` (בתוך ה-`else` של `list_remove_tail`), מה שיוביל לקריסה. אך הקיפאון הוא בעיה מערכתית הנובעת ישירות מסדר הנעילה הלא עקבי ומשימוש בשני מנעולים נפרדים לפעולות לוגיות קשורות."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Context Switching",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 07:05:58",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 696,
+      "total_tokens": 5515
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "Context Switching",
+      "Processes",
+      "Virtual Memory"
+    ],
+    "content": {
+      "text": "במעבר הקשר (Context Switch) בין שני תהליכים (processes) שונים במערכת הפעלה מודרנית טיפוסית, איזה מהפעולות הבאות היא המרכזית ביותר שחייבת להתבצע על ידי תוכנת מערכת ההפעלה (ה-scheduler) כדי לאפשר לתהליך החדש לרוץ בסביבה לוגית שונה לחלוטין?",
+      "code_snippet": null,
+      "options": [
+        "א. שמירה ושחזור של כל האוגרים הכלליים (general-purpose registers) של ה-CPU.",
+        "ב. עדכון אוגר בסיס טבלת הדפים (CR3 / Page Table Base Register) לזה של התהליך הנכנס.",
+        "ג. שמירה ושחזור של מצב יחידת הנקודה הצפה (FPU state) של התהליך היוצא והנכנס, בהתאמה, בכל מעבר הקשר.",
+        "ד. החלפת המצביע למחסנית הליבה (kernel stack pointer) של התהליך היוצא למצביע של התהליך הנכנס."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "הסבר: במעבר הקשר בין תהליכים (processes), המערכת צריכה להחליף את כל הסביבה הלוגית של ה-CPU. אוגר בסיס טבלת הדפים (CR3) הוא האוגר שמצביע על טבלת הדפים השורשית של התהליך. כל תהליך במערכת הפעלה מודרנית מקבל מרחב כתובות וירטואלי משלו. החלפת CR3 היא הפעולה המרכזית שמאפשרת ל-CPU להתחיל להשתמש במרחב הכתובות הוירטואלי של התהליך החדש, ובכך ליצור את 'הסביבה הלוגית השונה לחלוטין' הנחוצה לתהליך אחר. אוגרים כלליים (א') ומחסנית הליבה (ד') חייבים גם הם להישמר ולהשתחזר/להתחלף, אך הם משתנים גם במעבר הקשר בין תהליכונים (threads) באותו תהליך, שאינם דורשים החלפת מרחב כתובות וירטואלי. שמירת מצב ה-FPU (ג') אינה מתבצעת בהכרח בכל מעבר הקשר אלא בדרך כלל באופן 'עצל' (lazy) רק כאשר התהליך היוצא השתמש ב-FPU."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

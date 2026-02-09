@@ -1,0 +1,84 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory and Paging",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 20:50:18",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2075,
+      "output_tokens": 1945,
+      "total_tokens": 9189
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Virtual Memory",
+      "Paging",
+      "Two-level Paging",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "נתונה מערכת עם זיכרון וירטואלי של 4GB, זיכרון פיזי של 512MB, וגודל דף של 4KB. המערכת משתמשת במנגנון זיכרון וירטואלי עם טבלת דפים דו-שכבתית (Two-level Paging). כל כניסה בטבלת הדפים (PTE) מכילה מספר מסגרת פיזית (PFN), ביט Valid, ביט Dirty, ביט Accessed, ועוד 3 ביטים להרשאות (Read/Write/Execute).",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "מהם הגדלים של ה-VPN וה-PFN (בביטים)?\nגודל VPN: ____ גודל PFN: ____",
+        "code_snippet": null,
+        "options": null,
+        "solution": {
+          "is_present_in_file": true,
+          "correct_option": null,
+          "explanation": "1. **כתובת וירטואלית (VA)**: 4GB = 2^32 בתים, כלומר 32 ביטים.\n2. **היסט דף (Page Offset)**: 4KB = 2^12 בתים, כלומר 12 ביטים.\n3. **VPN (Virtual Page Number)**: מספר ביטי VA - מספר ביטי היסט = 32 - 12 = 20 ביטים.\n4. **כתובת פיזית (PA)**: 512MB = 2^29 בתים, כלומר 29 ביטים.\n5. **PFN (Physical Frame Number)**: מספר ביטי PA - מספר ביטי היסט = 29 - 12 = 17 ביטים.\n\n**תשובה:** גודל VPN: 20 ביטים גודל PFN: 17 ביטים"
+        }
+      },
+      {
+        "id": "10.2",
+        "text": "כיצד מחולקים ביטי ה-VPN בין האינדקס של טבלת הדפים החיצונית (Page Directory Index) לבין האינדקס של טבלת הדפים הפנימית (Page Table Index), בהנחה שכל טבלת דפים (גם חיצונית וגם פנימית) תופסת דף פיזי יחיד?\nאינדקס חיצוני: ____ ביטים אינדקס פנימי: ____ ביטים",
+        "code_snippet": null,
+        "options": null,
+        "solution": {
+          "is_present_in_file": true,
+          "correct_option": null,
+          "explanation": "1. **גודל כניסה בטבלת הדפים (PTE)**: PFN (17 ביטים) + Valid (1) + Dirty (1) + Accessed (1) + הרשאות (3) = 23 ביטים בסך הכל.\n2. נעגל את 23 הביטים לגודל הסטנדרטי הקרוב ביותר (לרוב חזקה של 2 בבתים), שהוא 4 בתים (32 ביטים) לכניסה.\n3. **מספר כניסות לטבלת דפים בדף יחיד**: גודל דף / גודל PTE = 4KB / 4B = 1024 כניסות (2^10 כניסות).\n4. מכיוון שכל רמה בטבלת הדפים צריכה להכיל 2^10 כניסות, וגודל ה-VPN הוא 20 ביטים, אנו מחלקים את ה-VPN לשני אינדקסים של 10 ביטים כל אחד.\n\n**תשובה:** אינדקס חיצוני: 10 ביטים אינדקס פנימי: 10 ביטים"
+        }
+      },
+      {
+        "id": "10.3",
+        "text": "מהו הגודל המקסימלי *הפוטנציאלי* של מבנה טבלאות הדפים (PDT וכל ה-PTs) עבור תהליך יחיד, במקרה שכל הזיכרון הוירטואלי ממופה? (ב-MB)\nגודל מקסימלי: ____ MB",
+        "code_snippet": null,
+        "options": null,
+        "solution": {
+          "is_present_in_file": true,
+          "correct_option": null,
+          "explanation": "1. **מספר דפים וירטואליים**: גודל ה-VPN הוא 20 ביטים, כלומר ישנם 2^20 דפים וירטואליים.\n2. **מספר טבלאות דפים פנימיות (PTs)**: כל PT ממפה 2^10 דפים וירטואליים. לכן, נצטרך 2^20 / 2^10 = 2^10 = 1024 טבלאות PT.\n3. **זיכרון ל-PTs**: כל PT תופסת דף פיזי אחד (4KB). לכן, 1024 PTs יתפסו 1024 * 4KB = 4MB.\n4. **זיכרון לטבלת הדפים החיצונית (PDT)**: תמיד נדרשת PDT אחת, והיא תופסת דף פיזי אחד (4KB).\n5. **גודל מקסימלי כולל**: 4MB (עבור PTs) + 4KB (עבור PDT) = 4MB + 0.00390625MB ≈ 4.004MB.\n\n**תשובה:** גודל מקסימלי: 4.004 MB"
+        }
+      },
+      {
+        "id": "10.4",
+        "text": "כמה זיכרון פיזי *בפועל* יתפוס מבנה טבלאות הדפים (PDT וכל ה-PTs) עבור תהליך יחיד, אם הוא משתמש ב-100MB ממרחב הכתובות הוירטואלי שלו, והשימוש בדפים מפוזר באופן אקראי במרחב הוירטואלי? (ב-KB)\nגודל בפועל: ____ KB",
+        "code_snippet": null,
+        "options": null,
+        "solution": {
+          "is_present_in_file": true,
+          "correct_option": null,
+          "explanation": "1. **מספר דפים וירטואליים בשימוש**: 100MB / 4KB = (100 * 1024 KB) / 4KB = 25600 דפים.\n2. **מספר טבלאות דפים פנימיות (PTs) נחוצות**: כל PT מכסה 1024 דפים. לכן, נצטרך ceil(25600 / 1024) = 25 PTs.\n3. **זיכרון ל-PTs בפועל**: 25 PTs * 4KB/PT = 100KB.\n4. **זיכרון לטבלת הדפים החיצונית (PDT) בפועל**: תמיד נדרשת PDT אחת (כל עוד יש PTs), והיא תופסת דף פיזי אחד (4KB).\n5. **גודל בפועל כולל**: 100KB (עבור PTs) + 4KB (עבור PDT) = 104KB.\n\n**תשובה:** גודל בפועל: 104 KB"
+        }
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": null
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

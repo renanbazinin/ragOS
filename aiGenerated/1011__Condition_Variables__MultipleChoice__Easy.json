@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Condition Variables",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 07:24:58",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 873,
+      "output_tokens": 472,
+      "total_tokens": 2668
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Condition Variables",
+      "Synchronization",
+      "Threads"
+    ],
+    "content": {
+      "text": "מהי הפעולה העיקרית שמבצע חוט (thread) כאשר הוא קורא לפונקציה `pthread_cond_wait`?",
+      "code_snippet": null,
+      "options": [
+        "א. החוט נכנס למצב המתנה (sleep) עד שמשתנה התנאי מסומן (signaled), מבלי לשחרר את המנעול.",
+        "ב. החוט משחרר את המנעול המשויך למשתנה התנאי, נכנס למצב המתנה, וכאשר הוא מתעורר הוא רוכש מחדש את המנעול.",
+        "ג. החוט רוכש מחדש את המנעול המשויך למשתנה התנאי, ולאחר מכן נכנס למצב המתנה.",
+        "ד. החוט משחרר את המנעול המשויך למשתנה התנאי, ולאחר מכן ממשיך לרוץ."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב'. כאשר חוט קורא לפונקציה `pthread_cond_wait`, הוא משחרר באופן אטומי את המנעול שאותו הוא מחזיק, נכנס למצב המתנה עד שמשתנה התנאי מסומן על ידי חוט אחר (או בעקבות spurious wakeup). כאשר החוט מתעורר (בעקבות `signal` או `broadcast`), הוא רוכש מחדש את המנעול לפני שהוא חוזר מהקריאה לפונקציה. פעולה זו של שחרור המנעול וכניסה למצב המתנה חייבת להיות אטומית כדי למנוע מצבי מרוץ."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

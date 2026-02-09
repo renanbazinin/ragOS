@@ -1,0 +1,64 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions and Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 11:23:26",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3651,
+      "output_tokens": 1580,
+      "total_tokens": 9569
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Race Conditions",
+      "Mutexes",
+      "Concurrency",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתונה תוכנית ה-C הבאה המשתמשת בתהליכונים (threads):\n",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\n#define NUM_THREADS 5\n#define INCREMENTS_PER_THREAD 100000\n\nint counter = 0;\n\nvoid *thread_function(void *arg) {\n    for (int i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n        counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, thread_function, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    return 0;\n}\n",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "מהו הערך הסופי הצפוי של המונה (`counter`) לאחר סיום ריצת כל התהליכונים? האם תמיד יתקבל ערך זה? נמקו.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "זהו את תנאי המרוץ (race condition) הקיים בתוכנית והסבירו מדוע הוא מתרחש.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.3",
+        "text": "הציעו פתרון לבעיית תנאי המרוץ באמצעות שימוש ב-mutex. כתבו את קטע הקוד המתוקן והסבירו כיצד הוא פותר את הבעיה.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.4",
+        "text": "לאחר תיקון התוכנית עם mutex, מה יהיה הערך הסופי של המונה (`counter`)? האם הוא יהיה דטרמיניסטי?",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1. הערך הסופי הצפוי של המונה הוא `NUM_THREADS * INCREMENTS_PER_THREAD = 5 * 100000 = 500000`. אולם, ערך זה כמעט אף פעם לא יתקבל בפועל, והוא לא יהיה קבוע (דטרמיניסטי) בין הרצות שונות.\n2. תנאי המרוץ מתרחש בשורה `counter++;`. פעולה זו, למרות שנראית אטומית, מורכבת למעשה משלוש פעולות ברמת המעבד: קריאת ערך `counter` מהזיכרון לרג'יסטר, הגדלת הערך ברג'יסטר, וכתיבת הערך המוגדל בחזרה לזיכרון. כאשר מספר תהליכונים מנסים לבצע פעולה זו במקביל, ייתכן שתהליכון אחד יקרא את הערך, ותהליכון אחר יקרא את אותו ערך לפני שהתהליכון הראשון הספיק לכתוב בחזרה את הערך המוגדל. כתוצאה מכך, שתי פעולות הגדלה עלולות להיראות כפעולת הגדלה אחת בלבד, מה שמוביל לאובדן עדכונים ולערך סופי נמוך מהצפוי.\n3. כדי לפתור את תנאי המרוץ, נשתמש ב-mutex (מנעול הדדי) כדי להגן על הקטע הקריטי (הפעולה `counter++;`). הנה קטע הקוד המתוקן:\n```c\n#include <stdio.h>\n#include <pthread.h>\n\n#define NUM_THREADS 5\n#define INCREMENTS_PER_THREAD 100000\n\nint counter = 0;\npthread_mutex_t mutex; // הגדרת mutex\n\nvoid *thread_function(void *arg) {\n    for (int i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n        pthread_mutex_lock(&mutex); // נעילת mutex לפני גישה לקטע הקריטי\n        counter++;\n        pthread_mutex_unlock(&mutex); // שחרור mutex לאחר סיום הקטע הקריטי\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n    pthread_mutex_init(&mutex, NULL); // אתחול mutex\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, thread_function, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    pthread_mutex_destroy(&mutex); // השמדת mutex\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    return 0;\n}\n```\nה-mutex מבטיח שרק תהליכון אחד יוכל להיכנס לקטע הקריטי (בין `pthread_mutex_lock` ל-`pthread_mutex_unlock`) בכל רגע נתון. אם תהליכון אחר מנסה לנעול את ה-mutex כשהוא כבר נעול, הוא ייחסם עד שהתהליכון הנוכחי ישחרר אותו. בכך אנו מונעים את הגישה הבו-זמנית למשתנה המשותף `counter` ומבטיחים שכל פעולות ההגדלה יתבצעו כראוי.\n4. לאחר תיקון התוכנית עם mutex, הערך הסופי של המונה יהיה `500000`. ערך זה יהיה דטרמיניסטי (קבוע וצפוי) בכל הרצה של התוכנית."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

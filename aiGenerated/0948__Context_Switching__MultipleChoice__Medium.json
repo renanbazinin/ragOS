@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Context Switching",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 07:04:57",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1290,
+      "output_tokens": 662,
+      "total_tokens": 3905
+    }
+  },
+  "question": {
+    "id": 6,
+    "type": "MultipleChoice",
+    "topic": [
+      "Context Switching",
+      "Processes",
+      "Threads",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "מהו ההבדל המהותי ביותר בין החלפת הקשר (context switch) בין שני תהליכים (processes) שונים לבין החלפת הקשר בין שני חוטים (threads) השייכים לאותו תהליך?",
+      "code_snippet": null,
+      "options": [
+        "א. בהחלפת הקשר בין תהליכים נשמרים יותר אוגרי מעבד (CPU registers) מאשר בהחלפת הקשר בין חוטים.",
+        "ב. החלפת הקשר בין תהליכים מחייבת עדכון של מנגנון ניהול הזיכרון (MMU), בעוד שבין חוטים באותו תהליך אין צורך בכך.",
+        "ג. החלפת הקשר בין חוטים מהירה יותר מכיוון שהיא מתבצעת כולה במצב משתמש (user mode) וללא מעורבות הקרנל.",
+        "ד. בהחלפת הקשר בין תהליכים נשמר מצב ה-Stack Pointer, בעוד שבין חוטים אין צורך לשמור אותו.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "התשובה הנכונה היא ב'. ההבדל העיקרי בין החלפת הקשר בין תהליכים להחלפת הקשר בין חוטים באותו תהליך נובע מכך שתהליכים שונים מחזיקים במרחבי זיכרון וירטואליים נפרדים. כאשר מתבצעת החלפת הקשר בין תהליכים, על מערכת ההפעלה לשנות את מצב יחידת ניהול הזיכרון (MMU), ובפרט את כתובת טבלת הדפים (page table) הנוכחית, כדי שהמעבד יתחיל לעבוד עם מרחב הזיכרון של התהליך החדש. לעומת זאת, חוטים השייכים לאותו תהליך חולקים את אותו מרחב זיכרון וירטואלי (ואת אותה טבלת דפים), ולכן אין צורך לבצע שינוי זה במנגנון ה-MMU. בשני המקרים, יש לשמור ולשחזר את אוגרי המעבד (כולל Program Counter ו-Stack Pointer) ואת מצבם של האוגרים הספציפיים לכל חוט/תהליך."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

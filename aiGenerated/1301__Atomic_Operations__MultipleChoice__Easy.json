@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Atomic Operations",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 09:24:16",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1094,
+      "output_tokens": 466,
+      "total_tokens": 3125
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Atomic Operations",
+      "Concurrency",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "מהי התכונה העיקרית של פעולה אטומית (atomic operation) בהקשר של מערכות הפעלה ותכנות מקבילי?",
+      "code_snippet": null,
+      "options": [
+        "א. היא תמיד מהירה יותר מפעולה לא אטומית.",
+        "ב. היא יכולה להתבצע רק על ידי חוט (thread) אחד בכל רגע נתון.",
+        "ג. היא מתבצעת במלואה כפעולה יחידה ובלתי ניתנת לחלוקה (indivisible), כך ששום חוט אחר אינו יכול לראות את המערכת במצב ביניים במהלך ביצועה.",
+        "ד. היא דורשת קריאת מערכת (system call) לביצוע.",
+        "ה. היא מבטיחה ששני חוטים לא ינסו לגשת לאותו משתנה בו-זמנית."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג'. פעולה אטומית היא פעולה שמתבצעת במלואה כפעולה יחידה ובלתי ניתנת לחלוקה (indivisible). המשמעות היא שברגע שהיא מתחילה, היא חייבת להסתיים לפני שכל חוט אחר יוכל לגשת לנתונים שהיא משנה או לראות מצב ביניים שלה. זה מבטיח עקביות נתונים בסביבה מקבילית על ידי מניעת מצבים בלתי צפויים שנובעים מגישה חלקית או מופרעת לנתונים משותפים."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Threads and Synchronization",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 19:49:27",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3826,
+      "output_tokens": 2847,
+      "total_tokens": 15925
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Threads",
+      "Synchronization",
+      "Condition Variables",
+      "Deadlock",
+      "Livelock",
+      "Race Conditions"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C++ המשתמשת בחוטים (pthreads) ובמנגנוני סנכרון (מנעול ומשתנה תנאי) כדי לנסות לקדם מונה גלובלי counter באופן סדרתי. המטרה היא שכל חוט i (מ-0 ועד N_THREADS-1) יקדם את המונה בדיוק פעם אחת, וזאת רק כאשר ערך המונה שווה ל-i. כלומר, חוט 0 יקדם את המונה מ-0 ל-1, ואז חוט 1 יקדם את המונה מ-1 ל-2, וכן הלאה, עד שחוט N_THREADS-1 יקדם את המונה מ-N_THREADS-1 ל-N_THREADS. בסיום, ערך המונה הסופי אמור להיות N_THREADS.\n\nיש לנתח את הקוד המצורף ולענות על השאלות הבאות:",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <stdlib.h> // For malloc, free\n\n#define N_THREADS 5\n\nint counter = 0;\npthread_mutex_t mutex;\npthread_cond_t cond; // A single condition variable for all threads\n\nvoid* worker_thread(void* arg) {\n    int thread_id = *(int*)arg;\n    free(arg); // Clean up dynamically allocated ID\n\n    pthread_mutex_lock(&mutex);\n\n    // Threads wait here until it's their turn (counter == thread_id)\n    // The bug is in how they are signaled.\n    while (counter != thread_id) {\n        pthread_cond_wait(&cond, &mutex);\n    }\n\n    // Now it's this thread's turn.\n    printf(\"Thread %d incrementing counter from %d to %d\\n\", thread_id, counter, counter + 1);\n    counter++; // Increment the counter\n\n    // Buggy signaling: Only one arbitrary thread is woken up.\n    // If the wrong thread is woken, it goes back to wait, and the correct one might remain asleep.\n    pthread_cond_signal(&cond); // THIS IS THE BUG\n\n    pthread_mutex_unlock(&mutex);\n    \n    return NULL;\n}\n\nint main() {\n    pthread_t threads[N_THREADS];\n\n    pthread_mutex_init(&mutex, NULL);\n    pthread_cond_init(&cond, NULL);\n\n    for (int i = 0; i < N_THREADS; ++i) {\n        int* thread_id = malloc(sizeof(int));\n        if (thread_id == NULL) {\n            perror(\"malloc failed\");\n            exit(EXIT_FAILURE);\n        }\n        *thread_id = i;\n        pthread_create(&threads[i], NULL, worker_thread, (void*)thread_id);\n    }\n    \n    // Initial signal to wake up thread 0 (or whoever is first).\n    // This is necessary because counter starts at 0, and no thread will signal initially.\n    pthread_mutex_lock(&mutex);\n    pthread_cond_signal(&cond); \n    pthread_mutex_unlock(&mutex);\n\n    for (int i = 0; i < N_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    pthread_mutex_destroy(&mutex);\n    pthread_cond_destroy(&cond);\n\n    return 0;\n}"
+    },
+    "sub_questions": [
+      {
+        "id": "8.1",
+        "text": "מהי הבעיה המרכזית בקוד המצורף? הסבירו בפירוט מדוע הקוד אינו מבטיח את ההתקדמות הסדרתית הרצויה של המונה, וציינו אילו תרחישים בלתי רצויים (כגון קיפאון או ריצה שגויה) עלולים להתרחש.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.2",
+        "text": "תקנו את הקוד כך שיפעל באופן תקין ויבטיח את ההתקדמות הסדרתית של המונה כמפורט לעיל. יש להציג רק את הפונקציה worker_thread המתוקנת.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.3",
+        "text": "נניח שאין לנו אפשרות להשתמש ב-pthread_cond_broadcast (לדוגמה, בגלל מגבלות ביצועים או דרישות אחרות). כיצד ניתן לתקן את הקוד תוך שימוש ב-pthread_cond_signal בלבד, על ידי שימוש במערך של משתני תנאי (אחד לכל חוט)? יש להציג רק את הפונקציה worker_thread המתוקנת, ואת ההגדרות הגלובליות החדשות הנדרשות.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "8.1: הבעיה המרכזית בקוד היא השימוש ב-`pthread_cond_signal` במקום `pthread_cond_broadcast` (או מערך של משתני תנאי). כאשר `pthread_cond_signal` נקרא, הוא מעיר חוט אחד בלבד (שרירותי) מבין החוטים הממתינים על משתנה התנאי `cond`.\nאם החוט שהתעורר אינו החוט שערך ה-`thread_id` שלו תואם את ערך ה-`counter` הנוכחי (כלומר, `counter != thread_id`), הוא יבדוק מחדש את התנאי בלולאת ה-`while` ויחזור מיד למצב המתנה על `pthread_cond_wait`.\nהחוט ה\"נכון\" (זה ש-`thread_id` שלו שווה ל-`counter`) עלול להישאר במצב שינה ולא להתעורר לעולם, מכיוון שאין אף אחד שיעיר אותו ספציפית.\nתרחיש זה עלול להוביל ל**קיפאון (Deadlock)**, שבו כל החוטים ממתינים ואין חוט שיכול להתקדם ולשלוח איתות נוסף. במקרה הטוב, המונה ייתקע על ערך נמוך מ-`N_THREADS` וכל החוטים שעדיין לא קידמו את המונה ייתקעו. במקרה הפחות טוב, גם אם חוטים מתעוררים, אם הם לא החוטים הנכונים, הם יחזרו לישון, וייתכן שחוטים רבים יבצעו פעולות התעוררות ובדיקה מיותרות מבלי להתקדם, מה שיכול להיחשב כ**לייבלוק (Livelock)** או פשוט כריצה שגויה ולא יעילה.\n\n8.2: הפתרון הפשוט ביותר הוא להחליף את `pthread_cond_signal` ב-`pthread_cond_broadcast`. פעולה זו מעירה את כל החוטים הממתינים על `cond`. כל חוט יבדוק את התנאי `counter != thread_id`. רק החוט שערך ה-`thread_id` שלו שווה לערך ה-`counter` הנוכחי ימשיך בביצוע, בעוד שאר החוטים יחזרו למצב המתנה. זה מבטיח שהחוט הנכון תמיד יתקדם.\n\n```c\nvoid* worker_thread(void* arg) {\n    int thread_id = *(int*)arg;\n    free(arg);\n\n    pthread_mutex_lock(&mutex);\n\n    while (counter != thread_id) {\n        pthread_cond_wait(&cond, &mutex);\n    }\n\n    printf(\"Thread %d incrementing counter from %d to %d\\n\", thread_id, counter, counter + 1);\n    counter++;\n\n    pthread_cond_broadcast(&cond); // תיקון: שימוש ב-broadcast מעיר את כל החוטים הרלוונטיים\n\n    pthread_mutex_unlock(&mutex);\n    \n    return NULL;\n}\n```\n\n8.3: כדי להימנע משימוש ב-`pthread_cond_broadcast` ועדיין להבטיח התקדמות, ניתן להשתמש במערך של משתני תנאי, כאשר כל חוט ממתין על משתנה תנאי ספציפי משלו. כאשר חוט מסיים את תורו, הוא מאותת ספציפית לחוט הבא בתור.\n\n**הגדרות גלובליות חדשות (בנוסף ל-`counter` ו-`mutex` הקיימים):**\n```c\n// pthread_cond_t cond; // יש להחליף את זה\npthread_cond_t turn_cond[N_THREADS]; // מערך של משתני תנאי, אחד לכל חוט\n```\n\n**פונקציית `worker_thread` מתוקנת:**\n```c\nvoid* worker_thread(void* arg) {\n    int thread_id = *(int*)arg;\n    free(arg);\n\n    pthread_mutex_lock(&mutex);\n\n    // החוט ממתין על משתנה התנאי הספציפי שלו\n    while (counter != thread_id) {\n        pthread_cond_wait(&turn_cond[thread_id], &mutex);\n    }\n\n    printf(\"Thread %d incrementing counter from %d to %d\\n\", thread_id, counter, counter + 1);\n    counter++;\n\n    // מאותת ספציפית לחוט הבא בתור, אם קיים\n    if (counter < N_THREADS) { // ודא שיש חוט הבא לאותת לו\n        pthread_cond_signal(&turn_cond[counter]); // מאותת לחוט הבא\n    }\n\n    pthread_mutex_unlock(&mutex);\n    \n    return NULL;\n}\n```\n\n**אתחול משתני התנאי ב-`main`:**\nיש לאתחל את כל משתני התנאי במערך `turn_cond` ב-`main` בעזרת לולאה (במקום `pthread_cond_init(&cond, NULL)`):\n`for (int i = 0; i < N_THREADS; ++i) { pthread_cond_init(&turn_cond[i], NULL); }`\n\n**איתות התחלתי ב-`main`:**\nלאחר יצירת כל החוטים, יש לשלוח איתות התחלתי לחוט 0 כדי להתחיל את השרשרת (במקום `pthread_cond_signal(&cond)`):\n`pthread_mutex_lock(&mutex); pthread_cond_signal(&turn_cond[0]); pthread_mutex_unlock(&mutex);`\n\n**ניקוי משאבים ב-`main`:**\nיש להרוס את כל משתני התנאי במערך `turn_cond` בסיום הריצה (במקום `pthread_cond_destroy(&cond)`):\n`for (int i = 0; i < N_THREADS; ++i) { pthread_cond_destroy(&turn_cond[i]); }`"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Producer-Consumer",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 07:39:00",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1101,
+      "output_tokens": 418,
+      "total_tokens": 2600
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Producer-Consumer",
+      "Synchronization",
+      "Semaphores"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של שימוש בסמפורים בפתרון בעיית המפיק-צרכן?",
+      "code_snippet": null,
+      "options": [
+        "א. להבטיח גישה בלעדית (mutual exclusion) למאגר המשותף.",
+        "ב. לספור את מספר הפריטים הקיימים במאגר.",
+        "ג. לספור את מספר המקומות הפנויים במאגר.",
+        "ד. כל התשובות נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ד",
+      "explanation": "בפתרון בעיית המפיק-צרכן באמצעות סמפורים, אנו משתמשים בשלושה סמפורים שונים: סמפור בינארי (או mutex) להבטחת גישה בלעדית למאגר המשותף (כדי למנוע תנאי מרוץ), סמפור 'full' לספירת הפריטים הקיימים במאגר (כדי שהצרכן לא ינסה לקרוא ממאגר ריק), וסמפור 'empty' לספירת המקומות הפנויים במאגר (כדי שהמפיק לא ינסה לכתוב למאגר מלא). לכן, כל התשובות מתארות תפקידים נכונים של סמפורים בפתרון זה."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

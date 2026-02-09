@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Disks",
+    "topic_hint": "I/O",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 09:36:07",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 970,
+      "output_tokens": 1049,
+      "total_tokens": 3904
+    }
+  },
+  "question": {
+    "id": 6,
+    "type": "MultipleChoice",
+    "topic": [
+      "I/O",
+      "DMA",
+      "Cache Coherence"
+    ],
+    "content": {
+      "text": "תהליך משתמש מבצע קריאה (read) לקובץ, כאשר מנהל ההתקן של הקובץ משתמש ב-DMA (Direct Memory Access) להעברת נתונים ישירות מהחומרה אל באפר זיכרון במרחב המשתמש (user-space buffer). לאחר שקריאת ה-read חוזרת, התהליך ניגש מיד לנתונים בבאפר זה, כפי שמודגם בקטע הקוד:\n\n```c\nchar buffer[PAGE_SIZE];\nint fd = open(\"/dev/my_device\", O_RDONLY);\nif (fd < 0) { /* handle error */ }\n\nssize_t bytes_read = read(fd, buffer, PAGE_SIZE);\nif (bytes_read > 0) {\n    // Process data immediately after read returns\n    // Assume my_process_data reads from 'buffer'\n    my_process_data(buffer, bytes_read);\n}\nclose(fd);\n```\n\nבהנחה שמערכת ההפעלה משתמשת בזיכרון מטמון (cache) מסוג Write-Back עבור ה-CPU, ואין מנגנון מפורש של ניקוי/אינוולידציה של המטמון (cache flush/invalidate) עבור באפרי DMA, איזו בעיה עלולה להתרחש באופן סביר ביותר?",
+      "code_snippet": "char buffer[PAGE_SIZE];\nint fd = open(\"/dev/my_device\", O_RDONLY);\nif (fd < 0) { /* handle error */ }\n\nssize_t bytes_read = read(fd, buffer, PAGE_SIZE);\nif (bytes_read > 0) {\n    // Process data immediately after read returns\n    // Assume my_process_data reads from 'buffer'\n    my_process_data(buffer, bytes_read);\n}\nclose(fd);",
+      "options": [
+        "א. ה-read עלול לחסום לזמן בלתי מוגבל מכיוון שה-DMA לא מצליח לכתוב לזיכרון הפיזי.",
+        "ב. נתונים ישנים (stale data) עלולים להיקרא מהבאפר על ידי ה-CPU, מכיוון שה-CPU יקרא מהמטמון שלו ולא מהזיכרון הפיזי המעודכן על ידי DMA.",
+        "ג. ה-DMA עלול לדרוס נתונים חשובים במטמון ה-CPU לפני שהם נכתבים לזיכרון הראשי.",
+        "ד. פסיקות (interrupts) מההתקן עלולות להידחות, מה שיוביל לאובדן נתונים.",
+        "ה. הנתונים מהבאפר עלולים להיכתב לדיסק לפני שה-CPU מספיק לקרוא אותם."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "במערכת עם זיכרון מטמון (cache) מסוג Write-Back, ה-CPU קורא נתונים מהמטמון שלו אם הם זמינים שם, ומעדכן את המטמון לפני כתיבה לזיכרון הראשי. כאשר ה-DMA כותב נתונים ישירות לזיכרון הפיזי, הוא עוקף את מטמון ה-CPU. אם הבאפר אליו נכתבו הנתונים על ידי DMA נמצא כבר במטמון של ה-CPU (וייתכן שהוא מכיל נתונים ישנים או ריקים), ה-CPU יקרא את הגרסה הישנה או הלא מעודכנת מהמטמון שלו במקום את הגרסה החדשה שה-DMA כתב לזיכרון הראשי. ללא פעולת אינוולידציה מפורשת (cache invalidate) על אזור הזיכרון הזה לפני שה-CPU קורא ממנו, ה-CPU ימשיך להשתמש בנתונים הלא מעודכנים מהמטמון שלו. לכן, הבעיה הסבירה ביותר היא קריאת נתונים ישנים (stale data)."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

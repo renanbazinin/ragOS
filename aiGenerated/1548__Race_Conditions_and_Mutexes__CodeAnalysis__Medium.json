@@ -1,0 +1,52 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions and Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 11:20:17",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3651,
+      "output_tokens": 1629,
+      "total_tokens": 8408
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Concurrency",
+      "Race Conditions",
+      "Mutexes",
+      "Synchronization",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתונה פיסת הקוד הבאה המשתמשת בחוטים (threads) לביצוע פעולת ספירה משותפת. עיין בקוד וענה על השאלות:",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\n#define NUM_THREADS 5\n#define ITERATIONS_PER_THREAD 100000\n\nint counter = 0;\n\nvoid* incrementer(void* arg) {\n    for (int i = 0; i < ITERATIONS_PER_THREAD; ++i) {\n        counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, incrementer, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    return 0;\n}"
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "א. האם קיימת בעיית מרוץ (race condition) בקוד הנתון? אם כן, הסבר היכן היא מתרחשת ומדוע. מהו הערך הסופי הצפוי של המונה (counter) במידה ואין בעיית מרוץ? מהו הערך הסופי האפשרי בפועל?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "ב. הצע פתרון לבעיית המרוץ באמצעות שימוש במנגנון Mutex. הצג את השינויים הנדרשים בקוד.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.1. כן, קיימת בעיית מרוץ (race condition) בקוד הנתון. היא מתרחשת בשורה 12, בפעולה `counter++`. פעולה זו נראית אטומית, אך למעשה מורכבת משלוש פעולות ברמת המעבד: קריאת ערך המונה מהזיכרון, הגדלת הערך, וכתיבת הערך החדש בחזרה לזיכרון. כאשר מספר חוטים מנסים לבצע את הפעולה הזו בו-זמנית, ייתכן שחוט אחד יקרא את ערך המונה, חוט שני יקרא גם הוא את אותו ערך לפני שהחוט הראשון הספיק לכתוב את ערכו המוגדל בחזרה, ושניהם יגדילו את אותו ערך ויכתבו אותו בחזרה. כתוצאה מכך, אחת העדכונים 'תאבד'.\nהערך הסופי הצפוי של המונה במידה ואין בעיית מרוץ הוא: NUM_THREADS * ITERATIONS_PER_THREAD = 5 * 100000 = 500000.\nהערך הסופי האפשרי בפועל יהיה בדרך כלל נמוך מ-500000, ולעיתים רחוקות שווה לו, מכיוון שחלק מהעדכונים עלולים ללכת לאיבוד עקב מרוץ התנאים.\n\n1.2. כדי לפתור את בעיית המרוץ, נשתמש במנגנון Mutex (מנעול הדדי). Mutex מבטיח שרק חוט אחד יוכל להיכנס לקטע קריטי (critical section) בכל רגע נתון, ובכך מונע עדכונים בו-זמניים של המשתנה המשותף `counter`. הנה השינויים הנדרשים בקוד:\n\n```c\n#include <stdio.h>\n#include <pthread.h>\n\n#define NUM_THREADS 5\n#define ITERATIONS_PER_THREAD 100000\n\nint counter = 0;\npthread_mutex_t mutex; // הצהרה על משתנה mutex\n\nvoid* incrementer(void* arg) {\n    for (int i = 0; i < ITERATIONS_PER_THREAD; ++i) {\n        pthread_mutex_lock(&mutex);   // נעל את המוטקס לפני כניסה לקטע הקריטי\n        counter++;                     // קטע קריטי\n        pthread_mutex_unlock(&mutex); // שחרר את המוטקס לאחר היציאה מהקטע הקריטי\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    pthread_mutex_init(&mutex, NULL); // אתחל את המוטקס\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, incrementer, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    pthread_mutex_destroy(&mutex); // שחרר משאבי מוטקס\n\n    return 0;\n}\n```\nהשינויים כוללים:\n1.  הצהרה על משתנה מסוג `pthread_mutex_t` בשם `mutex` (שורה 9).\n2.  אתחול המוטקס באמצעות `pthread_mutex_init(&mutex, NULL)` לפני יצירת החוטים (שורה 21).\n3.  נעילת המוטקס באמצעות `pthread_mutex_lock(&mutex)` לפני הגישה למשתנה המשותף `counter` (שורה 13).\n4.  שחרור המוטקס באמצעות `pthread_mutex_unlock(&mutex)` לאחר סיום השימוש במשתנה המשותף `counter` (שורה 15).\n5.  שחרור משאבי המוטקס באמצעות `pthread_mutex_destroy(&mutex)` בסיום התוכנית (שורה 31).\nשינויים אלה מבטיחים שפעולת `counter++` תתבצע באופן אטומי, מה שיבטיח שהערך הסופי של `counter` יהיה 500000."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

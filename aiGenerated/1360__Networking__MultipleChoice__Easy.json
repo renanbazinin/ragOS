@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "Networking",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 09:40:14",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 987,
+      "output_tokens": 377,
+      "total_tokens": 2121
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Networking"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של כתובת IP (Internet Protocol)?",
+      "code_snippet": null,
+      "options": [
+        "א. לזהות תהליך ספציפי הפועל על מחשב.",
+        "ב. לזהות באופן ייחודי מכשיר (host) ברשת ולאפשר ניתוב חבילות נתונים אליו.",
+        "ג. להצפין נתונים לפני שליחתם דרך האינטרנט.",
+        "ד. לנהל את הזיכרון הווירטואלי של מערכת ההפעלה."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "כתובת IP משמשת לזיהוי ייחודי של מכשיר (כמו מחשב, שרת, או נתב) ברשת האינטרנט. מטרתה העיקרית היא לאפשר לנתבים (routers) לנתב חבילות נתונים אל היעד הנכון על בסיס כתובת זו. אפשרות א' מתארת פורט (port), ג' מתארת הצפנה, וד' מתארת ניהול זיכרון וירטואלי שהם נושאים אחרים."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

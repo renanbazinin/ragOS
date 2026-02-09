@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Signals",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 08:42:56",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4591,
+      "output_tokens": 1168,
+      "total_tokens": 7483
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Signals"
+    ],
+    "content": {
+      "text": "הסבר מהו אות (signal) בהקשר של מערכות הפעלה. ספק דוגמת קוד בשפת C המדגימה כיצד ללכוד את האות `SIGINT` (שנשלח בדרך כלל על ידי Ctrl+C) ולהדפיס הודעה במקום לסיים את התוכנית מיד. ודא שהתוכנית ממשיכה לרוץ לאחר קבלת האות, לפחות פעם אחת.",
+      "code_snippet": "```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <signal.h>\n#include <unistd.h> // For sleep\n\nvoid sigint_handler(int signo) {\n    printf(\"\\nReceived SIGINT! But I will not terminate immediately.\\n\");\n    // In a real application, you might set a flag to exit gracefully\n    // or perform cleanup before exiting.\n}\n\nint main() {\n    printf(\"Press Ctrl+C to send SIGINT...\\n\");\n\n    // Register the signal handler for SIGINT\n    if (signal(SIGINT, sigint_handler) == SIG_ERR) {\n        perror(\"signal\");\n        return 1;\n    }\n\n    // Loop indefinitely to keep the program running\n    // and allow catching multiple SIGINTs (though not recommended for sigaction)\n    for (int i = 0; i < 5; ++i) { // Loop a few times to show it continues\n        printf(\"Running... (iteration %d)\\n\", i + 1);\n        sleep(2);\n    }\n\n    printf(\"Program finished naturally.\\n\");\n    return 0;\n}\n```",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "אות (signal) במערכות הפעלה הוא למעשה הודעה אסינכרונית שנשלחת לתהליך על מנת להודיע לו על אירוע מסוים. אירועים אלו יכולים להיות פנימיים (למשל, חלוקה באפס) או חיצוניים (למשל, לחיצה על Ctrl+C, סיום תהליך בן, טיימר שפג). אותות מאפשרים לתהליכים להגיב לאירועים אלו בדרכים שונות – על ידי ביצוע פעולת ברירת מחדל (כמו סיום התהליך), התעלמות מהאות, או טיפול מותאם אישית באמצעות פונקציית מטפל (signal handler).\n\n**הסבר לקוד:**\n1.  **`#include <signal.h>`**: קובץ כותרת זה מספק את ההגדרות והפונקציות הנדרשות לטיפול באותות, כולל הפונקציה `signal()`.\n2.  **`sigint_handler(int signo)`**: זוהי פונקציית המטפל המותאמת אישית שלנו. כאשר האות `SIGINT` מתקבל, מערכת ההפעלה קוראת לפונקציה זו, והפרמטר `signo` יכיל את מספר האות (במקרה זה, `SIGINT`). בתוך הפונקציה, אנו מדפיסים הודעה המציינת שהאות התקבל.\n3.  **`signal(SIGINT, sigint_handler)`**: זוהי הפקודה העיקרית לרישום המטפל. היא אומרת למערכת ההפעלה שכאשר האות `SIGINT` (אות ההפרעה, בדרך כלל מופעל על ידי Ctrl+C) נשלח לתהליך זה, במקום לבצע את פעולת ברירת המחדל (שהיא סיום התהליך), יש לקרוא לפונקציה `sigint_handler`. אם הרישום נכשל, הפונקציה מחזירה `SIG_ERR`.\n4.  **לולאת `for` ב-`main`**: לולאה זו שומרת את התוכנית פועלת למספר איטרציות. היא מדפיסה הודעה כל שתי שניות וממתינה לאירוע. אלמלא לולאה זו, התוכנית הייתה מסתיימת מיד. אם המשתמש לוחץ על `Ctrl+C` במהלך ריצת הלולאה, האות `SIGINT` נשלח לתהליך. במקום שהתהליך יסתיים, פונקציית `sigint_handler` שלנו מופעלת, מדפיסה את ההודעה, והתהליך ממשיך לפעול בלולאה עד שהיא מסתיימת באופן טבעי."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

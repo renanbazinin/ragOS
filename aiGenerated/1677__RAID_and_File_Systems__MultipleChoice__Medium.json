@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "RAID and File Systems",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 20:02:02",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1011,
+      "output_tokens": 605,
+      "total_tokens": 4495
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "RAID",
+      "File Systems"
+    ],
+    "content": {
+      "text": "מערכת הפעלה נדרשת לאחסן מטא-דאטה קריטי עבור מערכת הקבצים שלה, הכרוך בפעולות כתיבה קטנות ואקראיות תכופות. מערך האחסון בנוי על 4 דיסקים זהים, והוא חייב להיות מסוגל לסבול תקלה של דיסק אחד ללא אובדן נתונים. איזו רמת RAID תספק את האיזון הטוב ביותר בין עמידות לתקלות (של דיסק יחיד) וביצועי כתיבה אקראיים קטנים הגבוהים ביותר?",
+      "code_snippet": null,
+      "options": [
+        "א. RAID-0",
+        "ב. RAID-1",
+        "ג. RAID-5",
+        "ד. RAID-10 (RAID 1+0)",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ד",
+      "explanation": "התשובה הנכונה היא ד. RAID-10. \nRAID-0 אינו מספק עמידות לתקלות כלל, ולכן נפסל. \nRAID-1 מספק עמידות לתקלות וביצועי כתיבה טובים עבור כתיבות קטנות ואקראיות, אך בשימוש ב-4 דיסקים, RAID-10 (שילוב של Striping ו-Mirroring) מספק ביצועים גבוהים יותר באופן משמעותי עבור כתיבות אקראיות קטנות (בזכות ה-striping בין זוגות מראה) תוך שמירה על עמידות לתקלה של דיסק יחיד (ואף יותר במקרים מסוימים). \nRAID-5 מספק עמידות לתקלות של דיסק יחיד, אך ביצועי הכתיבה שלו עבור כתיבות קטנות ואקראיות נמוכים יותר בהשוואה ל-RAID-1 או RAID-10, עקב הצורך לבצע פעולות Read-Modify-Write עבור נתוני ה-parity. לכן, RAID-10 הוא הבחירה הטובה ביותר לדרישות אלו."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

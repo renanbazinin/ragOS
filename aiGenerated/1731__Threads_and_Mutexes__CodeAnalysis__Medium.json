@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Threads and Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 20:22:27",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2951,
+      "output_tokens": 962,
+      "total_tokens": 6805
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Threads",
+      "Mutexes",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה, המשתמשת בחוטים וב-mutex:\n\nמהו הערך הסופי האפשרי של המשתנה `shared_counter` לאחר סיום ריצת התוכנית? נמק את תשובתך.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <unistd.h>\n\n#define NUM_THREADS 5\n#define INCREMENTS_PER_THREAD 100000\n\nlong long shared_counter = 0;\npthread_mutex_t mutex;\n\nvoid* thread_func(void* arg) {\n    for (int i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n        // Read phase\n        pthread_mutex_lock(&mutex);\n        long long temp = shared_counter; \n        pthread_mutex_unlock(&mutex);\n\n        // Modify phase (unprotected)\n        temp++; \n\n        // Write phase\n        pthread_mutex_lock(&mutex);\n        shared_counter = temp; \n        pthread_mutex_unlock(&mutex);\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n    pthread_mutex_init(&mutex, NULL);\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, thread_func, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final counter value: %lld\\n\", shared_counter);\n\n    pthread_mutex_destroy(&mutex);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הערך הסופי הצפוי (ללא תנאי מרוץ) של המשתנה `shared_counter` היה אמור להיות 5 * 100,000 = 500,000. עם זאת, הערך הסופי האפשרי של המשתנה `shared_counter` יהיה בלתי דטרמיניסטי ותמיד נמוך או שווה ל-500,000.\n\nהסיבה לכך היא שקיים תנאי מרוץ (race condition) בקוד. למרות השימוש ב-mutex, הפעולה האטומית של קריאה-שינוי-כתיבה (read-modify-write) אינה מוגנת במלואה. ה-mutex ננעל לצורך קריאת הערך לתוך משתנה זמני (`temp`), משוחרר מיד, ואז ננעל שוב לצורך כתיבת הערך המעודכן מתוך `temp` בחזרה ל-`shared_counter`. בזמן שה-mutex משוחרר בין הקריאה לכתיבה (במהלך שלב השינוי `temp++`), חוטים אחרים יכולים לקרוא את אותו ערך ישן של `shared_counter`, לבצע את העדכון שלהם, ולכתוב אותו בחזרה. מצב זה גורם ל'איבוד' (loss) של חלק מההגדלות (increments), מכיוון שחוטים שונים עשויים לעבוד על אותו ערך התחלתי של `shared_counter` במקביל ולדרוס את העדכונים של אחד של השני. כתוצאה מכך, חלק מההגדלות יאבדו, והערך הסופי יהיה נמוך מהערך הצפוי, ובלתי ניתן לחיזוי מדויק."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

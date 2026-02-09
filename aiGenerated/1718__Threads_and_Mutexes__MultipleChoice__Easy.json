@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Threads and Mutexes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 20:19:01",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1131,
+      "output_tokens": 478,
+      "total_tokens": 2284
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Threads",
+      "Mutexes",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של שימוש ב-mutex (מנעול הדדי) בתוכנית מרובת חוטים?",
+      "code_snippet": null,
+      "options": [
+        "א. להבטיח שכל החוטים ירוצו בסדר קבוע מראש.",
+        "ב. למנוע מצב של תחרות (race condition) בעת גישה למשאבים משותפים.",
+        "ג. להגדיל את מהירות הביצוע הכוללת של התוכנית.",
+        "ד. לאפשר לחוטים לתקשר ביניהם באמצעות הודעות.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "מנעול הדדי (mutex) משמש להגנה על קטעים קריטיים של קוד שבהם מתבצעת גישה למשאבים משותפים. מטרתו העיקרית היא למנוע מצבי תחרות (race conditions) שבהם מספר חוטים מנסים לגשת ולשנות את אותו משאב בו-זמנית, מה שעלול להוביל לנתונים שגויים או התנהגות בלתי צפויה. הוא מבטיח בלעדיות (mutual exclusion) לגישה למשאב המשותף. אפשרות ג' אינה נכונה מכיוון שלעיתים קרובות שימוש ב-mutex עלול להפחית את מהירות הביצוע עקב תקורה (overhead) וחסימה (blocking) של חוטים, אם כי הוא הכרחי לנכונות."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

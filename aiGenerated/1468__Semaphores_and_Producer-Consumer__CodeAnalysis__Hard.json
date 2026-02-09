@@ -1,0 +1,47 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Producer-Consumer",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 10:32:35",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4898,
+      "output_tokens": 2086,
+      "total_tokens": 26135
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Semaphores",
+      "Producer-Consumer",
+      "Deadlock",
+      "Concurrency",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "מערכת מרובת תהליכונים מיישמת את דפוס היצרן-צרכן. יצרנים מוסיפים פריטים למאגר משותף (buffer) וצרכנים מסירים פריטים מהמאגר. בנוסף, כל פעולת יצירה וצריכה נרשמת ביומן (log) משותף. הגישה למאגר מוגנת על ידי סמפור `buffer_mutex`, והגישה ליומן מוגנת על ידי סמפור `log_mutex`. כמו כן, קיימים סמפורים `empty` ו-`full` לניהול מצב המאגר.\n\nלהלן מימוש פונקציות היצרן והצרכן:\n",
+      "code_snippet": "// סמפורים מאותחלים:\n// sem_t empty;        // מאותחל ל-BUFFER_SIZE\n// sem_t full;         // מאותחל ל-0\n// sem_t buffer_mutex; // מאותחל ל-1\n// sem_t log_mutex;    // מאותחל ל-1\n\n// פונקציות עזר:\n// void add_item();          // מוסיפה פריט למאגר\n// Item remove_item();       // מסירה פריט מהמאגר\n// void write_to_log_producer(); // כותבת ליומן את פעולת היצרן\n// void write_to_log_consumer(); // כותבת ליומן את פעולת הצרכן\n\nvoid produce() {\n    sem_wait(&empty);\n    sem_wait(&buffer_mutex);\n    add_item();\n    sem_wait(&log_mutex);\n    write_to_log_producer();\n    sem_post(&log_mutex);\n    sem_post(&buffer_mutex);\n    sem_post(&full);\n}\n\nvoid consume() {\n    sem_wait(&full);\n    sem_wait(&log_mutex);\n    sem_wait(&buffer_mutex);\n    Item item = remove_item();\n    write_to_log_consumer();\n    sem_post(&buffer_mutex);\n    sem_post(&log_mutex);\n    sem_post(&empty);\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "101.1",
+        "text": "האם המימוש הנתון עלול להוביל למצב של קיפאון (Deadlock)? אם כן, תאר/י תרחיש ספציפי המוביל לקיפאון והסבר/י מדוע הוא מתרחש. אם לא, הסבר/י מדוע הפתרון חסין מפני קיפאון.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": 15,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "כן, המימוש הנתון עלול להוביל למצב של קיפאון (Deadlock).\n\n**הסבר:**\nהקיפאון מתרחש עקב המתנה מעגלית למשאבים (`buffer_mutex` ו-`log_mutex`) על ידי תהליכוני היצרן והצרכן, מכיוון שהם רוכשים את המשאבים הללו בסדר שונה:\n\n*   **סדר רכישת משאבים על ידי היצרן (`produce`):**\n    1.  `sem_wait(&empty)`\n    2.  `sem_wait(&buffer_mutex)`\n    3.  `sem_wait(&log_mutex)`\n\n*   **סדר רכישת משאבים על ידי הצרכן (`consume`):**\n    1.  `sem_wait(&full)`\n    2.  `sem_wait(&log_mutex)`\n    3.  `sem_wait(&buffer_mutex)`\n\n**תרחיש המוביל לקיפאון:**\nנניח שגודל המאגר (BUFFER_SIZE) הוא 2. נניח מצב התחלתי שבו המאגר מכיל פריט אחד:\n*   `empty = 1` (מקום פנוי אחד במאגר)\n*   `full = 1` (פריט אחד זמין במאגר)\n*   `buffer_mutex = 1`\n*   `log_mutex = 1`\n\n1.  **תהליכון יצרן P1 מתחיל לרוץ:**\n    *   `sem_wait(&empty);` // `empty` הופך ל-0. P1 ממשיך.\n    *   `sem_wait(&buffer_mutex);` // `buffer_mutex` הופך ל-0. P1 מחזיק כעת את `buffer_mutex`.\n    *   `add_item();` // P1 מוסיף פריט למאגר.\n    *   בשלב זה, P1 מחזיק ב-`buffer_mutex` ומתכוון לבקש את `log_mutex`.\n    *   **החלפת הקשר (Context switch).**\n\n2.  **תהליכון צרכן C1 מתחיל לרוץ:**\n    *   `sem_wait(&full);` // `full` הופך ל-0. C1 ממשיך.\n    *   `sem_wait(&log_mutex);` // `log_mutex` הופך ל-0. C1 מחזיק כעת את `log_mutex`.\n    *   בשלב זה, C1 מחזיק ב-`log_mutex` ומתכוון לבקש את `buffer_mutex`.\n    *   **החלפת הקשר (Context switch).**\n\n3.  **תהליכון יצרן P1 (ממשיך מנקודת העצירה):**\n    *   P1 מנסה לבצע `sem_wait(&log_mutex);`.\n    *   P1 נחסם מכיוון ש-`log_mutex` הוא 0 (מוחזק על ידי C1).\n    *   P1 מחזיק כעת ב-`buffer_mutex` וממתין ל-`log_mutex`.\n    *   **החלפת הקשר (Context switch).**\n\n4.  **תהליכון צרכן C1 (ממשיך מנקודת העצירה):**\n    *   C1 מנסה לבצע `sem_wait(&buffer_mutex);`.\n    *   C1 נחסם מכיוון ש-`buffer_mutex` הוא 0 (מוחזק על ידי P1).\n    *   C1 מחזיק כעת ב-`log_mutex` וממתין ל-`buffer_mutex`.\n\nבשלב זה, שני התהליכונים, P1 ו-C1, חסומים ללא הגבלת זמן, כאשר כל אחד מהם ממתין למשאב המוחזק על ידי האחר. זהו מצב של קיפאון (Deadlock).\n\n**פתרון אפשרי:**\nכדי למנוע קיפאון, יש לוודא שכל התהליכונים רוכשים את המוטקסים (`buffer_mutex` ו-`log_mutex`) באותו סדר עקבי. לדוגמה, תמיד לרכוש את `buffer_mutex` תחילה, ולאחר מכן את `log_mutex` (או להיפך, כל עוד הסדר קבוע לכולם).\n\n```c\n// מימוש מתוקן (לדוגמה: רכישה עקבית של buffer_mutex ואז log_mutex)\n\nvoid produce() {\n    sem_wait(&empty);\n    sem_wait(&buffer_mutex);\n    sem_wait(&log_mutex); // סדר רכישה עקבי\n    add_item();\n    write_to_log_producer();\n    sem_post(&log_mutex);\n    sem_post(&buffer_mutex);\n    sem_post(&full);\n}\n\nvoid consume() {\n    sem_wait(&full);\n    sem_wait(&buffer_mutex); // סדר רכישה עקבי\n    sem_wait(&log_mutex);    // סדר רכישה עקבי\n    Item item = remove_item();\n    write_to_log_consumer();\n    sem_post(&log_mutex);\n    sem_post(&buffer_mutex);\n    sem_post(&empty);\n}\n```"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

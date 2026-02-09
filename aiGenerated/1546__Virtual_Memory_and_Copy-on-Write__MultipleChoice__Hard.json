@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory and Copy-on-Write",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 11:19:38",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 975,
+      "output_tokens": 1576,
+      "total_tokens": 8358
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Virtual Memory",
+      "Copy-on-Write",
+      "Process Management",
+      "fork()"
+    ],
+    "content": {
+      "text": "בהינתן קטע הקוד הבא המופעל במערכת הפעלה התומכת בזיכרון וירטואלי ובמנגנון Copy-on-Write (CoW). גודל דף זיכרון הוא 4096 בתים (PAGE_SIZE).\n\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\n#define PAGE_SIZE 4096 // bytes\n#define ARRAY_SIZE (PAGE_SIZE / sizeof(int) * 3) // An array spanning 3 pages\n\nint main() {\n    int* shared_array = (int*) malloc(ARRAY_SIZE * sizeof(int));\n    if (shared_array == NULL) {\n        perror(\"malloc failed\");\n        return 1;\n    }\n\n    for (int i = 0; i < ARRAY_SIZE; i++) {\n        shared_array[i] = i; // Initialize parent's array\n    }\n\n    pid_t pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        return 1;\n    } else if (pid == 0) { // Child process\n        printf(\"Child process: Modifying...\\n\");\n        shared_array[0] = -1; // Modify first element (first page)\n        shared_array[ARRAY_SIZE / 2] = -2; // Modify middle element (second page)\n        // No modification to the third page by child\n        exit(0);\n    } else { // Parent process\n        printf(\"Parent process: Waiting for child...\\n\");\n        wait(NULL); // Wait for child to finish\n\n        printf(\"Parent process: Modifying...\\n\");\n        shared_array[PAGE_SIZE / sizeof(int)] = 100; // Modify an element on the second page\n        shared_array[ARRAY_SIZE - 1] = 200; // Modify last element (third page)\n    }\n\n    free(shared_array);\n    return 0;\n}\n```\n\nכמה דפי זיכרון פיזיים *חדשים* יוקצו כתוצאה מאירועי Copy-on-Write (CoW) במהלך ריצת התוכנית, מרגע הקריאה ל-`fork()` ועד סיום התוכנית הראשית (התהליך האב)?\nהנח כי:\n1. `sizeof(int)` הוא 4 בתים.\n2. הקצאת הזיכרון הראשונית באמצעות `malloc` יוצרת 3 דפים פיזיים.\n3. מערכת ההפעלה משתמשת במנגנון CoW סטנדרטי עבור דפי נתונים הניתנים לכתיבה לאחר `fork()`.\n4. דפים משוחררים מיד עם סיום תהליך ואינם נספרים כ\"חדשים\" אם הם שוחררו ואז הוקצו מחדש (אנו סופרים הקצאות חדשות בלבד).",
+      "code_snippet": null,
+      "options": [
+        "א. 2",
+        "ב. 3",
+        "ג. 4",
+        "ד. 5",
+        "ה. 6"
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "הסבר:\nבהתחלה, התהליך האב מקצה זיכרון בגודל 3 דפים באמצעות `malloc`. נסמן דפים אלו כ-P1, P2, P3.\nלאחר הקריאה ל-`fork()`:\n1.  **התהליך הבן משנה את `shared_array[0]` (בדף P1):** מכיוון שהדף משותף וסומן לקריאה בלבד לאחר ה-`fork()`, מתרחשת פסיקת CoW. נוצר דף פיזי חדש עבור התהליך הבן (נסמן כ-C1), ורק עותק זה משתנה.\n    *   **הקצאה חדשה 1.**\n2.  **התהליך הבן משנה את `shared_array[ARRAY_SIZE / 2]` (בדף P2):** שוב, מתרחשת פסיקת CoW. נוצר דף פיזי חדש עבור התהליך הבן (נסמן כ-C2), ורק עותק זה משתנה.\n    *   **הקצאה חדשה 2.**\n3.  התהליך הבן מסיים את ריצתו (בגלל `wait(NULL)` בתהליך האב). הדפים C1 ו-C2 משוחררים למערכת. ההנחיה היא שדפים משוחררים אינם נספרים כ'חדשים' אם הם שוחררו ואז הוקצו מחדש; אנו סופרים את מספר הפעמים שדף חדש *נוצר* בגלל CoW.\n4.  **התהליך האב משנה את `shared_array[PAGE_SIZE / sizeof(int)]` (בדף P2):** התהליך האב עדיין מפנה ל-P2 (שסומן לקריאה בלבד). מתרחשת פסיקת CoW. נוצר דף פיזי חדש עבור התהליך האב (נסמן כ-P2'), ורק עותק זה משתנה. הדף P2 המקורי משוחרר כעת (אין יותר הפניות אליו).\n    *   **הקצאה חדשה 3.**\n5.  **התהליך האב משנה את `shared_array[ARRAY_SIZE - 1]` (בדף P3):** התהליך האב עדיין מפנה ל-P3 (שסומן לקריאה בלבד). מתרחשת פסיקת CoW. נוצר דף פיזי חדש עבור התהליך האב (נסמן כ-P3'), ורק עותק זה משתנה. הדף P3 המקורי משוחרר כעת.\n    *   **הקצאה חדשה 4.**\n\nסה\"כ מספר הדפים הפיזיים ה*חדשים* שהוקצו כתוצאה מאירועי CoW הוא 4."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

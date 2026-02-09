@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Atomic Operations",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 09:28:05",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 1309,
+      "total_tokens": 6636
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Atomic Operations",
+      "Memory Model",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתבונן בקוד הבא המשתמש במשתנים אטומיים:\n```cpp\n#include <atomic>\n#include <thread>\n#include <vector>\n#include <iostream>\n\nstd::atomic<int> x{0};\nstd::atomic<int> y{0};\nstd::atomic<bool> flag{false};\n\nvoid thread_writer() {\n    x.store(1, std::memory_order_relaxed);\n    y.store(2, std::memory_order_relaxed);\n    flag.store(true, std::memory_order_release);\n}\n\nvoid thread_reader() {\n    while (!flag.load(std::memory_order_acquire)); // Loop until flag is true\n    int val_x = x.load(std::memory_order_relaxed);\n    int val_y = y.load(std::memory_order_relaxed);\n    // Assume this is where the question about val_x and val_y is asked.\n}\n```\nבהנחה ש-`thread_writer` רץ פעם אחת ו-`thread_reader` רץ פעם אחת (לאחר שה-writer החל לפעול), מהו הערך המובטח של `val_x` ו-`val_y` כאשר `thread_reader` יוצא מלולאת ה-`while`?",
+      "code_snippet": null,
+      "options": [
+        "א. `val_x` יכול להיות 0 או 1, ו-`val_y` יכול להיות 0 או 2. אין כל הבטחה לגבי ערכיהם.",
+        "ב. `val_x` מובטח להיות 1, אך `val_y` יכול להיות 0 או 2.",
+        "ג. `val_y` מובטח להיות 2, אך `val_x` יכול להיות 0 או 1.",
+        "ד. `val_x` מובטח להיות 1, ו-`val_y` מובטח להיות 2.",
+        "ה. ייתכן ש-`val_x` יהיה 0 ו-`val_y` יהיה 2, או ש-`val_x` יהיה 1 ו-`val_y` יהיה 0, אך לא שניהם 0."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ד",
+      "explanation": "המפתח לשאלה זו טמון בשימוש ב-`std::memory_order_release` עבור `flag.store(true)` ב-`thread_writer` וב-`std::memory_order_acquire` עבור `flag.load()` ב-`thread_reader`.\nעל פי מודל הזיכרון של C++, פעולת `store` עם `release` *מסנכרנת עם* (synchronizes-with) פעולת `load` עם `acquire` שקוראת את הערך שנכתב על ידי ה-`release` store. סנכרון זה יוצר יחס של \"קרה לפני\" (happens-before).\nבפרט, כל הפעולות שמתרחשות *לפני* ה-`release` store ב-`thread_writer` מובטחות להתקיים *לפני* כל הפעולות שמתרחשות *אחרי* ה-`acquire` load ב-`thread_reader`.\n\nב-`thread_writer`:\n1. `x.store(1, std::memory_order_relaxed);`\n2. `y.store(2, std::memory_order_relaxed);`\n3. `flag.store(true, std::memory_order_release);`\nפעולות 1 ו-2 מתרחשות *לפני* פעולה 3 ב-`thread_writer`.\n\nב-`thread_reader`:\n1. `while (!flag.load(std::memory_order_acquire));` (פעולה זו קוראת בסופו של דבר `true`)\n2. `int val_x = x.load(std::memory_order_relaxed);`\n3. `int val_y = y.load(std::memory_order_relaxed);`\n\nכאשר `flag.load(std::memory_order_acquire)` קורא בהצלחה `true`, הוא מסנכרן עם ה-`flag.store(true, std::memory_order_release)` ב-`thread_writer`. זה מבטיח שההשפעות של `x.store(1)` ו-`y.store(2)` (אשר התרחשו לפני ה-`release` store) יהיו גלויות ל-`thread_reader` *לאחר* ה-`acquire` load.\nלכן, `val_x` מובטח להיות 1, ו-`val_y` מובטח להיות 2. השימוש ב-`memory_order_relaxed` עבור `x` ו-`y` עצמם אינו מבטל הבטחה זו, מכיוון שצמד ה-`acquire`/`release` פועל כמעין גדר זיכרון (memory fence) עבור *כל* הפעולות הקודמות ב-thread המשחרר ועבור *כל* הפעולות הבאות ב-thread הרוכש."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

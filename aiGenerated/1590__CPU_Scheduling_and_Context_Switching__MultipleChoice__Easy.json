@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "CPU Scheduling and Context Switching",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 11:44:41",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1035,
+      "output_tokens": 436,
+      "total_tokens": 2775
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "CPU Scheduling",
+      "Context Switching"
+    ],
+    "content": {
+      "text": "איזה מידע נשמר בדרך כלל במהלך החלפת הקשר (context switch) על מנת לאפשר המשך תקין של ריצת התהליך מאוחר יותר?",
+      "code_snippet": null,
+      "options": [
+        "א. תוכן הזיכרון הווירטואלי המלא של התהליך.",
+        "ב. מצב האוגרים של המעבד (CPU registers) ומונה התוכנית (program counter).",
+        "ג. קוד התוכנית המלא של התהליך הנוכחי.",
+        "ד. רשימת הקבצים הפתוחים על ידי התהליך.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב. במהלך החלפת הקשר, מערכת ההפעלה שומרת את מצבו הנוכחי של התהליך שעוצר את ריצתו, הכולל בעיקר את תוכן האוגרים של המעבד (כמו אוגרים כלליים, אוגר מצב, ואוגר המחסנית) ואת מונה התוכנית (program counter), לתוך ה-Process Control Block (PCB) שלו. לאחר מכן, היא טוענת את מצב האוגרים ומונה התוכנית של התהליך החדש שאמור לרוץ. זה מאפשר לכל תהליך לחדש את ריצתו בדיוק מהנקודה שבה הפסיק."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Paging and TLB",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 10:01:20",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1143,
+      "output_tokens": 458,
+      "total_tokens": 2919
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Paging",
+      "TLB",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "תהליך מבצע גישה לכתובת וירטואלית. בהנחה שה-TLB החמיץ (TLB miss) אך רשומת טבלת הדפים (PTE) נמצאת בזיכרון הפיזי (RAM), וכמובן, הדף עצמו נמצא גם הוא בזיכרון הפיזי, כמה גישות לזיכרון הפיזי (RAM) נדרשות בסך הכל כדי להשלים את פעולת הגישה לנתונים?",
+      "code_snippet": null,
+      "options": [
+        "א. 1",
+        "ב. 2",
+        "ג. 3",
+        "ד. 4",
+        "ה. 0"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "כאשר מתרחש TLB miss, המעבד צריך לגשת לטבלת הדפים בזיכרון הפיזי (RAM) כדי למצוא את רשומת הדף (PTE) המתאימה. זוהי גישת זיכרון אחת. לאחר מכן, ה-PTE משמש לתרגום הכתובת הווירטואלית לכתובת פיזית, והמיפוי נשמר ב-TLB. לבסוף, המעבד ניגש שוב לזיכרון הפיזי כדי לקרוא או לכתוב את הנתונים בכתובת הפיזית המתורגמת. זוהי גישת זיכרון שנייה. סך הכל 2 גישות ל-RAM."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

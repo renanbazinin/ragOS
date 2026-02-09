@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Condition Variables",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 07:30:51",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1573,
+      "output_tokens": 794,
+      "total_tokens": 3913
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Condition Variables"
+    ],
+    "content": {
+      "text": "הסבירו מהי מטרתן של משתני תנאי (Condition Variables) בתכנות מקבילי. תארו כיצד פועלות הפונקציות `pthread_cond_wait` ו-`pthread_cond_signal` (או `pthread_cond_broadcast`), כולל האינטראקציה שלהן עם מנעולים (mutexes).",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "משתני תנאי (Condition Variables) הם אובייקטי סנכרון המאפשרים לחוטים להמתין עד שיתקיים תנאי מסוים, ומאפשרים לחוטים אחרים לאותת כאשר תנאי זה מתקיים. הם תמיד משמשים יחד עם מנעול (mutex) כדי להגן על הנתונים המשותפים שהתנאי תלוי בהם.\n\n*   **`pthread_cond_wait(cond, mutex)`**:\n    *   פונקציה זו משחררת את המנעול (mutex) המשויך למשתנה התנאי.\n    *   היא חוסמת את החוט הקורא עד שחוט אחר יאותת על משתנה התנאי.\n    *   כאשר החוט מתעורר (מבוטל חסימתו), הוא רוכש מחדש את המנעול לפני שהוא חוזר מהפונקציה.\n    *   חשוב לבדוק את התנאי בלולאה (לדוגמה, `while(condition_is_false) pthread_cond_wait(...)`) כדי לטפל בהתעוררויות שווא (spurious wakeups) ולוודא שהתנאי אכן מתקיים.\n\n*   **`pthread_cond_signal(cond)`**:\n    *   פונקציה זו מעירה חוט אחד (שרירותי) מבין החוטים הממתינים על משתנה התנאי.\n    *   היא אינה משחררת את המנעול; החוט המאותת צריך לשחרר את המנעול באופן מפורש לאחר האיתות, אם הוא עדיין מחזיק בו.\n\n*   **`pthread_cond_broadcast(cond)`**:\n    *   פונקציה זו מעירה את כל החוטים הממתינים על משתנה התנאי.\n    *   גם היא אינה משחררת את המנעול.\n\n**אינטראקציה עם מנעולים (mutexes)**: המנעול מגן על הנתונים המשותפים שעליהם מבוסס התנאי. הקריאה ל-`pthread_cond_wait` משחררת את המנעול וחוסמת את החוט באופן אטומי, ובכך מונעת תנאי מרוץ. כאשר `pthread_cond_wait` חוזרת, המנעול נרכש מחדש, מה שמבטיח גישה בלעדית לנתונים המשותפים לצורך בדיקת התנאי ושינויו."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

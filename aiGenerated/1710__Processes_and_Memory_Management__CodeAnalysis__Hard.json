@@ -1,0 +1,51 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Processes and Memory Management",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 20:13:21",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3064,
+      "output_tokens": 3681,
+      "total_tokens": 14976
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Processes",
+      "Memory Management",
+      "Copy-on-Write",
+      "System Calls"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה בשפת C. יש להניח שגודל דף זיכרון הוא 4KB, ושכל קריאות המערכת מצליחות. המערכת משתמשת במנגנון Copy-on-Write (COW) עבור דפי זיכרון שניתנים לכתיבה המשותפים בין אב לבן לאחר fork.\nתוכנית זו מורצת בתהליך שקיבל PID 100. תהליכים חדשים מקבלים PID הגדול ב-1 מזה שנוצר לפניהם.\n",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n#include <string.h>\n\n// Global variable in data segment\nint global_data = 100;\n// Uninitialized global variable in BSS segment\nint bss_data;\n\nvoid print_memory_info(const char* label, int* heap_ptr, int local_stack_val) {\n    printf(\"[%s] PID: %d, PPID: %d\\n\", label, getpid(), getppid());\n    printf(\"  Global (data) var addr: %p, value: %d\\n\", &global_data, global_data);\n    printf(\"  Global (bss) var addr: %p, value: %d\\n\", &bss_data, bss_data);\n    printf(\"  Stack var addr: %p, value: %d\\n\", &local_stack_val, local_stack_val);\n    if (heap_ptr) {\n        printf(\"  Heap var addr: %p, value: %d\\n\", heap_ptr, *heap_ptr);\n    } else {\n        printf(\"  Heap var: not allocated/null\\n\");\n    }\n    printf(\"\\n\");\n}\n\nint main(int argc, char *argv[]) {\n    // Initialize bss_data\n    bss_data = 50;\n\n    // Allocate on heap\n    int* heap_data = (int*)malloc(sizeof(int));\n    if (!heap_data) {\n        perror(\"malloc failed\");\n        exit(1);\n    }\n    *heap_data = 300;\n\n    // Local stack variable\n    int stack_var = 200;\n\n    print_memory_info(\"Initial (Before fork)\", heap_data, stack_var);\n\n    pid_t pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        exit(1);\n    } else if (pid == 0) { // Child process\n        // Child modifies its copies\n        global_data += 10;\n        bss_data += 5;\n        *heap_data += 20;\n        stack_var += 30; // Modify stack_var in child\n\n        printf(\"--- Child Process (%d) ---\\n\", getpid());\n        print_memory_info(\"Child (After modify)\", heap_data, stack_var);\n\n        // Child exits\n        printf(\"Child %d exiting.\\n\", getpid());\n        exit(0);\n    } else { // Parent process\n        // Parent modifies its copies\n        global_data += 1;\n        bss_data += 2;\n        *heap_data += 2;\n        stack_var += 3; // Modify stack_var in parent\n\n        sleep(1); // Give child a chance to run and print\n        printf(\"--- Parent Process (%d) ---\\n\", getpid());\n        print_memory_info(\"Parent (After modify & Child done)\", heap_data, stack_var);\n        \n        wait(NULL); // Wait for child to finish\n        printf(\"Parent %d exiting.\\n\", getpid());\n        free(heap_data); // Free parent's heap\n    }\n\n    return 0;\n}"
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "א. ציינו את כל הפלטים האפשריים של התוכנית. הסבירו במפורט מדוע ערכי הכתובות והמשתנים בכל תהליך הם כפי שהם, וכיצד הם מושפעים מקריאת ה-fork.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "ב. הניחו כי מיד לפני קריאת ה-`fork` (בשורה 35), תוכנית האב תופסת 3 דפי זיכרון פיזיים עבור קטע ה-text, 1 דף עבור קטע ה-data/bss, 1 דף עבור ה-heap, ו-1 דף עבור ה-stack (סה\"כ 6 דפים).\nכמה דפי זיכרון פיזיים (user space) לכל הפחות ולכל היותר יהיו תפוסים במערכת לאחר ששני התהליכים (האב והבן) סיימו את ביצוע הפונקציה `main` וטרם יצאו ממנה, אך לפני שהאב קורא ל-`free(heap_data)` (כלומר, לאחר שורת `print_memory_info` של האב).\nיש להניח שאף תהליך אחר במערכת אינו משתמש בזיכרון, ואין פעולות swapping. הסבירו את חישוביכם.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "### פתרון מפורט:\n\n**הנחות:**\n*   PID התחלתי: 100. הבן יקבל PID 101.\n*   גודל דף: 4KB.\n*   כתובות הזיכרון הן וירטואליות ונראות זהות לאב ולבן מיד לאחר ה-fork, אך הערכים יכולים להשתנות עקב COW.\n\n#### סעיף א: פלטים אפשריים והסבר\n\n**פלט אפשרי (הסדר בין פלט הבן לאב יכול להשתנות, אך הפלט של כל תהליך בפני עצמו הוא סדרתי):**\n\n```\n[Initial (Before fork)] PID: 100, PPID: <מזהה תהליך האב של 100>\n  Global (data) var addr: <כתובת של global_data>, value: 100\n  Global (bss) var addr: <כתובת של bss_data>, value: 50\n  Stack var addr: <כתובת של stack_var>, value: 200\n  Heap var addr: <כתובת של heap_data>, value: 300\n\n--- Child Process (101) ---\n[Child (After modify)] PID: 101, PPID: 100\n  Global (data) var addr: <אותה כתובת של global_data כמו באב>, value: 110\n  Global (bss) var addr: <אותה כתובת של bss_data כמו באב>, value: 55\n  Stack var addr: <אותה כתובת של stack_var כמו באב>, value: 230\n  Heap var addr: <אותה כתובת של heap_data כמו באב>, value: 320\n\nChild 101 exiting.\n--- Parent Process (100) ---\n[Parent (After modify & Child done)] PID: 100, PPID: <מזהה תהליך האב של 100>\n  Global (data) var addr: <אותה כתובת של global_data כמו בבן>, value: 101\n  Global (bss) var addr: <אותה כתובת של bss_data כמו בבן>, value: 52\n  Stack var addr: <אותה כתובת של stack_var כמו בבן>, value: 203\n  Heap var addr: <אותה כתובת של heap_data כמו בבן>, value: 302\n\nParent 100 exiting.\n```\n\n**הסבר:**\n\n1.  **לפני `fork`:** התהליך הראשי (PID 100) מדפיס את ערכי המשתנים הראשוניים ואת כתובותיהם הווירטואליות. כל המשתנים (גלובלי, BSS, מחסנית, ערימה) מאותחלים לערכיהם הראשוניים.\n2.  **לאחר `fork`:**\n    *   **כתובות וירטואליות:** הן עבור האב והן עבור הבן, מרחב הכתובות הווירטואלי משוכפל. לכן, כתובותיהם הווירטואליות של `global_data`, `bss_data`, `heap_data` ו-`stack_var` יהיו זהות בתהליך האב ובתהליך הבן. מערכת ההפעלה משתמשת בטבלאות דפים שונות כדי למפות את אותן כתובות וירטואליות לדפים פיזיים שונים במקרה של שינוי (COW).\n    *   **ערכי משתנים:**\n        *   **`global_data`, `bss_data`, `*heap_data`, `stack_var` (בבן):** כאשר הבן משנה את הערכים הללו (מוסיף 10, 5, 20, 30 בהתאמה), מתרחש מנגנון Copy-on-Write (COW). דפי הזיכרון הפיזיים המכילים את המשתנים הללו, שקודם לכן היו משותפים בין האב לבן במצב קריאה בלבד, משוכפלים. הבן מקבל עותק פרטי של הדף הפיזי ומשנה אותו. לכן, בבן נראה את הערכים החדשים: 110, 55, 320, 230.\n        *   **`global_data`, `bss_data`, `*heap_data`, `stack_var` (באב):** באופן דומה, כאשר האב משנה את הערכים הללו (מוסיף 1, 2, 2, 3 בהתאמה), גם כן מתרחש COW (אם לא התרחש כבר על ידי הבן). האב מקבל עותק פרטי של הדף הפיזי ומשנה אותו. לכן, באב נראה את הערכים החדשים: 101, 52, 302, 203.\n    *   **הערה על סדר הפלט:** הפקודה `sleep(1)` באב מבטיחה שהבן ירוץ וידפיס את הפלט שלו לפני שהאב יסיים את הדפסת המידע שלו. לכן, סביר לראות את הפלט של הבן לפני הפלט הסופי של האב.\n\n#### סעיף ב: חישוב דפי זיכרון פיזיים\n\n**מצב התחלתי (לפני fork, ב-PID 100):**\n*   Text: 3 דפים (קריאה בלבד)\n*   Data/BSS: 1 דף (כתיבה)\n*   Heap: 1 דף (כתיבה)\n*   Stack: 1 דף (כתיבה)\n*   **סה\"כ לפני fork: 6 דפים פיזיים.**\n\n**ניתוח לאחר fork ושינויים (לפני `free` באב):**\n\n1.  **Text Segment (קוד התוכנית):**\n    *   קטע ה-text הוא לקריאה בלבד ואינו משתנה. לכן, האב והבן **ימשיכו לשתף** את אותם 3 דפים פיזיים של ה-text.\n    *   מספר דפים: 3 (משותפים).\n2.  **Data/BSS Segment (`global_data`, `bss_data`):**\n    *   הדף המכיל את `global_data` ו-`bss_data` הוא דף הניתן לכתיבה. לפני ה-fork, דף זה היה משותף בין האב לבן במצב COW (קריאה בלבד).\n    *   הן האב והן הבן שינו את הערכים הללו.\n    *   עקב COW, כל שינוי על ידי אחד מהתהליכים יגרום לשכפול הדף. מכיוון ששניהם שינו, כל אחד מהם יקבל עותק פרטי של הדף.\n    *   מספר דפים: 1 (לאב) + 1 (לבן) = 2 דפים.\n3.  **Heap Segment (`heap_data`):**\n    *   הדף המכיל את `*heap_data` הוא דף הניתן לכתיבה. לפני ה-fork, דף זה היה משותף בין האב לבן במצב COW.\n    *   הן האב והן הבן שינו את הערך.\n    *   עקב COW, כל אחד יקבל עותק פרטי של הדף.\n    *   מספר דפים: 1 (לאב) + 1 (לבן) = 2 דפים.\n4.  **Stack Segment (`stack_var`, ומחסנית הפונקציות):**\n    *   הדף המכיל את `stack_var` ויתר המחסנית (שניהם בתוך `main`) הוא דף הניתן לכתיבה. לפני ה-fork, דף זה היה משותף בין האב לבן במצב COW.\n    *   הן האב והן הבן שינו את `stack_var` (וייתכן שדפים נוספים במחסנית אם היו קריאות לפונקציות נוספות, אך לפי המבנה הנוכחי זה אותו דף).\n    *   עקב COW, כל אחד יקבל עותק פרטי של הדף.\n    *   מספר דפים: 1 (לאב) + 1 (לבן) = 2 דפים.\n\n**חישוב סך הדפים הפיזיים (user space):**\n*   **מינימום ומקסימום:** בהינתן ההנחות המפורטות בשאלה כי לפני ה-fork כל קטע זיכרון (data/bss, heap, stack) תופס דף פיזי נפרד, הניתוח לעיל מדויק ואין הבדל בין מינימום למקסימום.\n    *   סה\"כ דפים: 3 (text משותף) + 2 (data/bss) + 2 (heap) + 2 (stack) = **9 דפים פיזיים.**\n    *   לכן, במקרה זה, המינימום והמקסימום זהים: **9 דפים פיזיים.**"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Memory Management and TLB",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 21:21:40",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1050,
+      "output_tokens": 562,
+      "total_tokens": 3181
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Memory Management",
+      "TLB",
+      "Context Switch"
+    ],
+    "content": {
+      "text": "מהי ההשלכה העיקרית של החלפת הקשר (Context Switch) על ה-Translation Lookaside Buffer (TLB)?",
+      "code_snippet": null,
+      "options": [
+        "א. ה-TLB מנוקה (flushed) כדי למנוע שימוש במיפויים שגויים השייכים לתהליך הקודם.",
+        "ב. אין השפעה על ה-TLB מכיוון שהוא מכיל מיפויים פיזיים בלבד.",
+        "ג. ה-TLB מעדכן אוטומטית את הערכים עבור התהליך החדש ללא צורך בניקוי.",
+        "ד. ה-TLB מורחב על מנת להכיל את המיפויים של התהליך החדש בנוסף לאלו של התהליך הישן.",
+        "ה. ה-TLB משמש כ-cache עבור טבלאות הדפים, ולכן הוא לא מושפע מהחלפת הקשר בין תהליכים."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "החלפת הקשר (Context Switch) גורמת למערכת ההפעלה להעביר את השליטה מתהליך אחד לאחר. מכיוון שה-TLB מכיל מיפויים מכתובות וירטואליות לכתובות פיזיות, והכתובות הווירטואליות של תהליכים שונים מפנות בדרך כלל לכתובות פיזיות שונות, יש לנקות (flush) את ה-TLB. ניקוי זה מונע שימוש במיפויים שגויים השייכים לתהליך הקודם על ידי התהליך החדש. במערכות מסוימות עם תמיכה ב-ASID (Address Space Identifier), ניתן להימנע מניקוי מלא של ה-TLB, אך באופן כללי, ניקוי הוא הפעולה הנדרשת או הנפוצה ביותר."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "System Calls",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 07:15:29",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 1103,
+      "total_tokens": 4854
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "System Calls",
+      "Process Management",
+      "File Descriptors"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא:\n\nלאחר קריאת ה-`execve()` בתהליך הבן, מהו המצב הנכון ביותר לגבי מתאר הקובץ `fd` (שנפתח על ידי האב) בתהליך הבן?",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <fcntl.h>\n#include <sys/wait.h>\n\nint main() {\n    int fd = open(\"shared_output.txt\", O_CREAT | O_WRONLY | O_TRUNC, 0644);\n    if (fd == -1) {\n        perror(\"open\");\n        return 1;\n    }\n\n    pid_t pid = fork();\n\n    if (pid == -1) {\n        perror(\"fork\");\n        return 1;\n    } else if (pid == 0) { // Child process\n        // This child process will execute a new program\n        char *args[] = {\"/bin/echo\", \"Hello from execve'd child!\", NULL};\n        char *envp[] = {NULL};\n        execve(\"/bin/echo\", args, envp);\n        // If execve fails\n        perror(\"execve\");\n        exit(1);\n    } else { // Parent process\n        wait(NULL); // Wait for the child to finish\n        // Parent continues...\n    }\n    close(fd); // Parent closes its file descriptor\n    return 0;\n}",
+      "options": [
+        "א. מתאר הקובץ `fd` נסגר אוטומטית בתהליך הבן כחלק מהחלפת תמונת התהליך על ידי `execve()`.",
+        "ב. מתאר הקובץ `fd` נשאר פתוח בתהליך הבן ומצביע על תיאור קובץ (file description) חדש, עצמאי לחלוטין מזה של האב.",
+        "ג. מתאר הקובץ `fd` נשאר פתוח בתהליך הבן ומצביע על אותו תיאור קובץ (file description) כמו זה של האב, כלומר חולק איתו את מצביע המיקום (file offset) ודגלי המצב.",
+        "ד. התנהגות מתאר הקובץ `fd` בתהליך הבן לאחר `execve()` אינה מוגדרת ועלולה להשתנות בין מערכות הפעלה שונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "התשובה הנכונה היא ג'.\nכאשר תהליך האב מבצע `fork()`, מתאר הקובץ `fd` משוכפל לתהליך הבן. שני התהליכים (האב והבן) מחזיקים כעת במתארי קובץ שונים (מספרים בטבלת מתארי הקבצים שלהם), אך שניהם מצביעים על אותו תיאור קובץ (file description) בטבלת הקבצים הפתוחים של המערכת. זה אומר שהם חולקים את מצביע המיקום הנוכחי (file offset) ואת דגלי המצב.\nקריאת המערכת `execve()` מחליפה את תמונת התהליך הנוכחית (קוד, נתונים, מחסנית, ערימה) בתמונה של תוכנית חדשה. עם זאת, באופן ברירת מחדל, `execve()` *אינה* סוגרת את מתארי הקבצים הפתוחים. מתארי הקבצים נשמרים כפי שהם היו לפני הקריאה ל-`execve()`, כולל ההצבעה שלהם לאותם תיאורי קובץ משותפים. לכן, התוכנית החדשה שרצה בתהליך הבן תירש את מתאר הקובץ `fd` והוא עדיין יצביע על אותו תיאור קובץ משותף עם האב, ויחלוק איתו את מצביע המיקום. יש לציין כי ניתן לשנות התנהגות זו באמצעות דגל `O_CLOEXEC` בעת פתיחת הקובץ, אך בהיעדרו, מתאר הקובץ נשמר."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

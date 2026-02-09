@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Condition Variables",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 07:32:29",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2619,
+      "output_tokens": 1571,
+      "total_tokens": 8655
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Condition Variables",
+      "Synchronization",
+      "Producer-Consumer"
+    ],
+    "content": {
+      "text": "נתון קטע קוד בשפת C המממש את בעיית היצרן-צרכן (Producer-Consumer) תוך שימוש במשתני תנאי (Condition Variables) ומנעול הדדי (Mutex). קראו את הקוד בעיון וענו על השאלות הבאות:\n\nא. זהו בעיה פוטנציאלית אחת שעלולה להתרחש במימוש זה, והסבירו מדוע היא מתרחשת.\nב. הציעו פתרון לבעיה שזיהיתם והסבירו מדוע הפתרון שלכם נכון.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <pthread.h>\n#include <unistd.h> // For usleep\n\n#define BUFFER_SIZE 10\n\nint buffer[BUFFER_SIZE];\nint count = 0;\nint in = 0;\nint out = 0;\n\npthread_mutex_t mutex;\npthread_cond_t cond_not_empty; // Signaled when buffer is not empty\npthread_cond_t cond_not_full;  // Signaled when buffer is not full\n\nvoid *producer(void *arg) {\n    int item;\n    for (int i = 0; i < 20; i++) {\n        item = i;\n        pthread_mutex_lock(&mutex);\n\n        // PROBLEM: Using IF instead of WHILE\n        if (count == BUFFER_SIZE) { // Buffer is full, wait\n            printf(\"Producer waiting: buffer full\\n\");\n            pthread_cond_wait(&cond_not_full, &mutex);\n        }\n\n        buffer[in] = item;\n        in = (in + 1) % BUFFER_SIZE;\n        count++;\n        printf(\"Produced: %d, count: %d\\n\", item, count);\n\n        pthread_cond_signal(&cond_not_empty); // Signal consumer\n        pthread_mutex_unlock(&mutex);\n        usleep(rand() % 100000); // Simulate work\n    }\n    return NULL;\n}\n\nvoid *consumer(void *arg) {\n    int item;\n    for (int i = 0; i < 20; i++) {\n        pthread_mutex_lock(&mutex);\n\n        // PROBLEM: Using IF instead of WHILE\n        if (count == 0) { // Buffer is empty, wait\n            printf(\"Consumer waiting: buffer empty\\n\");\n            pthread_cond_wait(&cond_not_empty, &mutex);\n        }\n\n        item = buffer[out];\n        out = (out + 1) % BUFFER_SIZE;\n        count--;\n        printf(\"Consumed: %d, count: %d\\n\", item, count);\n\n        pthread_cond_signal(&cond_not_full); // Signal producer\n        pthread_mutex_unlock(&mutex);\n        usleep(rand() % 200000); // Simulate work\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t prod_tid, cons_tid;\n\n    pthread_mutex_init(&mutex, NULL);\n    pthread_cond_init(&cond_not_empty, NULL);\n    pthread_cond_init(&cond_not_full, NULL);\n\n    pthread_create(&prod_tid, NULL, producer, NULL);\n    pthread_create(&cons_tid, NULL, consumer, NULL);\n\n    pthread_join(prod_tid, NULL);\n    pthread_join(cons_tid, NULL);\n\n    pthread_mutex_destroy(&mutex);\n    pthread_cond_destroy(&cond_not_empty);\n    pthread_cond_destroy(&cond_not_full);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "א. הבעיה הפוטנציאלית במימוש זה היא השימוש ב-`if` במקום `while` בבדיקת התנאי לפני הקריאה ל-`pthread_cond_wait` (בשני הפונקציות, היצרן והצרכן). ה-`pthread_cond_wait` יכול להתעורר מסיבות שונות, כולל התעוררות כוזבת (Spurious Wakeup) או בגלל שחוט אחר איתת, אך התנאי שהחוט הממתין חיכה לו כבר אינו מתקיים (לדוגמה, צרכן אחר לקח את הפריט, או יצרן אחר מילא את החוצץ). אם החוט מתעורר ובודק את התנאי באמצעות `if`, והתנאי אינו מתקיים, הוא ימשיך בביצוע הקוד כאילו התנאי כן התקיים. זה יוביל למצבי מירוץ (Race Conditions) ולשגיאות קריטיות, כמו צרכן המנסה לקרוא מחוצץ ריק, או יצרן המנסה לכתוב לחוצץ מלא.\n\nב. הפתרון הנכון הוא להחליף את ה-`if` ב-`while` בבדיקת התנאי לפני הקריאה ל-`pthread_cond_wait` בשתי הפונקציות. לדוגמה, עבור היצרן:\n`while (count == BUFFER_SIZE) { pthread_cond_wait(&cond_not_full, &mutex); }`\nועבור הצרכן:\n`while (count == 0) { pthread_cond_wait(&cond_not_empty, &mutex); }`\n\nהשימוש ב-`while` מבטיח שכאשר חוט מתעורר מ-`pthread_cond_wait`, הוא בודק מחדש את התנאי לפני שהוא ממשיך בביצוע. אם התנאי עדיין אינו מתקיים (לדוגמה, בגלל התעוררות כוזבת, או שחוט אחר כבר ביצע פעולה ששינתה את המצב), החוט יחזור למצב המתנה. זה מבטיח שהחוט ימשיך רק כאשר התנאי אכן מתקיים, ובכך מונע מצבי מירוץ ושומר על עקביות הנתונים."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "IPC and Signals",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 21:42:22",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1103,
+      "output_tokens": 969,
+      "total_tokens": 5731
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "IPC",
+      "Signals",
+      "Process Management",
+      "fork",
+      "kill"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא בשפת C:\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <signal.h>\n#include <sys/wait.h>\n\nvoid my_handler(int signum) {\n    printf(\"Process %d caught signal %d\\n\", getpid(), signum);\n}\n\nint main() {\n    pid_t pid;\n\n    signal(SIGUSR1, my_handler); // Parent sets handler\n    printf(\"Parent %d: Handler set.\\n\", getpid());\n\n    pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork\");\n        return 1;\n    } else if (pid == 0) { // Child process\n        printf(\"Child %d: Waiting for signal.\\n\", getpid());\n        sleep(2); // Child waits for a moment\n        printf(\"Child %d: Done waiting.\\n\", getpid());\n    } else { // Parent process\n        sleep(1); // Give child time to start\n        printf(\"Parent %d: Sending SIGUSR1 to child %d.\\n\", getpid(), pid);\n        kill(pid, SIGUSR1);\n        wait(NULL); // Parent waits for child\n    }\n\n    return 0;\n}\n```\nבהינתן קטע קוד זה, מהי הטענה הנכונה ביותר לגבי התנהגות התוכנית?",
+      "code_snippet": null,
+      "options": [
+        "א. תהליך האב (Parent) יקבל את הסיגנל וידפיס את ההודעה, בעוד תהליך הבן (Child) יסיים את ריצתו ללא קבלת הסיגנל.",
+        "ב. תהליך הבן (Child) יקבל את הסיגנל וידפיס את ההודעה \"Process [child_pid] caught signal 10\", בעוד תהליך האב ימתין לבן ויסיים.",
+        "ג. תהליך הבן (Child) יסיים באופן מיידי עם קבלת הסיגנל, מכיוון שמטפל הסיגנלים אינו עובר בירושה.",
+        "ד. גם תהליך האב וגם תהליך הבן יקבלו את הסיגנל וידפיסו את ההודעה, מכיוון שהסיגנל נשלח לכל קבוצת התהליכים.",
+        "ה. התוכנית תקרוס (segmentation fault) כאשר תהליך הבן ינסה לגשת למטפל הסיגנלים."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "הסבר: כאשר תהליך האב קורא ל-`fork()`, תהליך הבן מקבל עותק כמעט זהה של מרחב הכתובות של האב, כולל מצביעים למטפלי סיגנלים שהוגדרו. לכן, מטפל הסיגנלים `my_handler` שהוגדר על ידי האב עבור `SIGUSR1` עובר בירושה לבן. כאשר האב שולח `SIGUSR1` לבן באמצעות `kill(pid, SIGUSR1)`, הבן מקבל את הסיגנל, ומטפל הסיגנלים שלו (שהוא העתק של מטפל האב) מופעל. מטפל זה מדפיס את הודעת הקליטה יחד עם ה-PID של הבן (SIGUSR1 הוא בדרך כלל 10). תהליך האב ממתין לבן עם `wait(NULL)` לפני שהוא מסיים."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions and Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 11:26:05",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5488,
+      "output_tokens": 3173,
+      "total_tokens": 21028
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Race Conditions",
+      "Mutexes",
+      "Concurrency",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C/C++ המשתמשת במשתנה גלובלי משותף `g_counter` המאותחל ל-0. שני חוטים (threads), `thread_func_A` ו-`thread_func_B`, מריצים במקביל את הפונקציות הבאות. כל חוט מבצע את הלולאה `N` פעמים. עבור שאלה זו, נניח `N=1`.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\nint g_counter = 0; // משתנה גלובלי משותף\n\nvoid* thread_func_A(void* arg) {\n    int N = *(int*)arg; // N יהיה 1 עבור השאלה\n    for (int i = 0; i < N; ++i) {\n        int local_val = g_counter;\n        local_val = local_val * 2 + 1;\n        g_counter = local_val;\n    }\n    return NULL;\n}\n\nvoid* thread_func_B(void* arg) {\n    int N = *(int*)arg; // N יהיה 1 עבור השאלה\n    for (int i = 0; i < N; ++i) {\n        int local_val = g_counter;\n        local_val = local_val + 3;\n        g_counter = local_val;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t tid_A, tid_B;\n    int N_val = 1;\n\n    pthread_create(&tid_A, NULL, thread_func_A, &N_val);\n    pthread_create(&tid_B, NULL, thread_func_B, &N_val);\n\n    pthread_join(tid_A, NULL);\n    pthread_join(tid_B, NULL);\n\n    printf(\"Final g_counter: %d\\n\", g_counter);\n    return 0;\n}\n",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "8.1",
+        "text": "בהתחשב ב-`N=1` ובהיעדר כל מנגנון סנכרון, פרטו את כל הערכים האפשריים הסופיים של `g_counter` לאחר סיום ריצת שני החוטים. לכל ערך, הסבירו בקצרה את סדר הפעולות (interleaving) שמוביל אליו.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.2",
+        "text": "הסבירו מהי תופעת ה-Race Condition בקוד הנתון וכיצד היא גורמת למספר תוצאות אפשריות.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.3",
+        "text": "תקנו את הקוד הנתון באמצעות שימוש ב-`pthread_mutex_t` כך שימנע Race Condition. הציגו את הקוד המתוקן וציינו מה יהיו הערכים הסופיים האפשריים של `g_counter` לאחר התיקון, והסבירו מדוע.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "8.1: עם N=1, המשתנה g_counter מאותחל ל-0. כל חוט מבצע פעולת קריאה-שינוי-כתיבה. להלן כל הערכים האפשריים וה-interleaving המובילים אליהם:\n\n1.  **ערך סופי: 4**\n    *   `g_counter` = 0 (התחלה)\n    *   חוט A קורא: `local_val_A = 0`\n    *   חוט A מחשב: `local_val_A = 0 * 2 + 1 = 1`\n    *   חוט A כותב: `g_counter = 1`\n    *   חוט B קורא: `local_val_B = 1`\n    *   חוט B מחשב: `local_val_B = 1 + 3 = 4`\n    *   חוט B כותב: `g_counter = 4`\n    (חוט A מסיים את פעולתו לפני שחוט B מתחיל לקרוא את המשתנה המשותף)\n\n2.  **ערך סופי: 7**\n    *   `g_counter` = 0 (התחלה)\n    *   חוט B קורא: `local_val_B = 0`\n    *   חוט B מחשב: `local_val_B = 0 + 3 = 3`\n    *   חוט B כותב: `g_counter = 3`\n    *   חוט A קורא: `local_val_A = 3`\n    *   חוט A מחשב: `local_val_A = 3 * 2 + 1 = 7`\n    *   חוט A כותב: `g_counter = 7`\n    (חוט B מסיים את פעולתו לפני שחוט A מתחיל לקרוא את המשתנה המשותף)\n\n3.  **ערך סופי: 3**\n    *   `g_counter` = 0 (התחלה)\n    *   חוט A קורא: `local_val_A = 0`\n    *   חוט B קורא: `local_val_B = 0`\n    *   חוט A מחשב: `local_val_A = 1`\n    *   חוט A כותב: `g_counter = 1`\n    *   חוט B מחשב: `local_val_B = 3`\n    *   חוט B כותב: `g_counter = 3`\n    (שני החוטים קוראים את הערך הראשוני 0. חוט A כותב 1, אך מיד לאחר מכן חוט B כותב 3, ודורס את השינוי של חוט A. העדכון של חוט A אבד.)\n\n4.  **ערך סופי: 1**\n    *   `g_counter` = 0 (התחלה)\n    *   חוט B קורא: `local_val_B = 0`\n    *   חוט A קורא: `local_val_A = 0`\n    *   חוט B מחשב: `local_val_B = 3`\n    *   חוט B כותב: `g_counter = 3`\n    *   חוט A מחשב: `local_val_A = 1`\n    *   חוט A כותב: `g_counter = 1`\n    (שני החוטים קוראים את הערך הראשוני 0. חוט B כותב 3, אך מיד לאחר מכן חוט A כותב 1, ודורס את השינוי של חוט B. העדכון של חוט B אבד.)\n\n8.2: תופעת ה-Race Condition מתרחשת כאשר מספר חוטים ניגשים למשאב משותף (במקרה זה, המשתנה `g_counter`) בו-זמנית, ולפחות אחד מהם מבצע פעולת כתיבה, ללא מנגנון סנכרון מתאים. בקוד הנתון, כל חוט מבצע סדרת פעולות של קריאה (`local_val = g_counter`), שינוי (`local_val = ...`), וכתיבה (`g_counter = local_val`). סדר הפעולות אינו אטומי, כלומר, מערכת ההפעלה יכולה להחליף בין החוטים בכל נקודה. כאשר חוט אחד קורא את `g_counter` ולאחר מכן חוט אחר משנה וכותב ערך חדש ל-`g_counter` *לפני* שהחוט הראשון הספיק לכתוב את השינוי שלו, השינוי של אחד החוטים עלול להידרס ולהיאבד. הדבר מוביל לתוצאות בלתי צפויות ולא דטרמיניסטיות, כפי שמוצג בסעיף 8.1.\n\n8.3: כדי למנוע את ה-Race Condition, יש להגן על הקטע הקריטי (הכולל את פעולות הקריאה, השינוי והכתיבה של `g_counter`) באמצעות מנעול (mutex). רק חוט אחד יוכל לתפוס את המנעול ולהיכנס לקטע הקריטי בכל רגע נתון. הנה הקוד המתוקן:\n\n```c\n#include <stdio.h>\n#include <pthread.h>\n\nint g_counter = 0; // משתנה גלובלי משותף\npthread_mutex_t counter_mutex; // מנעול להגנה על g_counter\n\nvoid* thread_func_A_safe(void* arg) {\n    int N = *(int*)arg;\n    for (int i = 0; i < N; ++i) {\n        pthread_mutex_lock(&counter_mutex); // תפיסת מנעול\n        int local_val = g_counter;\n        local_val = local_val * 2 + 1;\n        g_counter = local_val;\n        pthread_mutex_unlock(&counter_mutex); // שחרור מנעול\n    }\n    return NULL;\n}\n\nvoid* thread_func_B_safe(void* arg) {\n    int N = *(int*)arg;\n    for (int i = 0; i < N; ++i) {\n        pthread_mutex_lock(&counter_mutex); // תפיסת מנעול\n        int local_val = g_counter;\n        local_val = local_val + 3;\n        g_counter = local_val;\n        pthread_mutex_unlock(&counter_mutex); // שחרור מנעול\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t tid_A, tid_B;\n    int N_val = 1;\n    \n    pthread_mutex_init(&counter_mutex, NULL); // אתחול המנעול\n\n    pthread_create(&tid_A, NULL, thread_func_A_safe, &N_val);\n    pthread_create(&tid_B, NULL, thread_func_B_safe, &N_val);\n\n    pthread_join(tid_A, NULL);\n    pthread_join(tid_B, NULL);\n\n    printf(\"Final g_counter: %d\\n\", g_counter);\n    \n    pthread_mutex_destroy(&counter_mutex); // השמדת המנעול\n    return 0;\n}\n```\n\nלאחר התיקון עם המנעולים, לא יהיו יותר Race Conditions. עם זאת, מכיוון שפעולות החוטים אינן קומוטטיביות (כלומר, הסדר משנה), הערך הסופי של `g_counter` עדיין יהיה תלוי בסדר שבו החוטים יצליחו לתפוס את המנעול לראשונה. לכן, קיימים שני ערכים סופיים אפשריים, אך שניהם נכונים (לא אבדו עדכונים): \n\n1.  **אם חוט A תופס את המנעול ראשון, ואז חוט B:**\n    *   `g_counter` מתחיל ב-0.\n    *   חוט A משנה את `g_counter` ל-`0 * 2 + 1 = 1`.\n    *   חוט B משנה את `g_counter` ל-`1 + 3 = 4`.\n    *   **הערך הסופי יהיה 4.**\n\n2.  **אם חוט B תופס את המנעול ראשון, ואז חוט A:**\n    *   `g_counter` מתחיל ב-0.\n    *   חוט B משנה את `g_counter` ל-`0 + 3 = 3`.\n    *   חוט A משנה את `g_counter` ל-`3 * 2 + 1 = 7`.\n    *   **הערך הסופי יהיה 7.**\n\nשני הערכים (4 ו-7) הם תוצאות לגיטימיות של ריצה טורית של הפעולות, והמנעול מבטיח שרק אחת מהריצות הטוריות הללו תתרחש בפועל (במובן של סדר הגישה למשתנה המשותף), ללא איבוד נתונים."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

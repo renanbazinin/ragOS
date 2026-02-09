@@ -1,0 +1,61 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Synchronization and Concurrency",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 21:16:35",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4132,
+      "output_tokens": 3386,
+      "total_tokens": 12631
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Concurrency",
+      "Threads",
+      "Producer-Consumer",
+      "Condition Variables",
+      "Race Conditions",
+      "Deadlock"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המממשת מנגנון יצרן-צרכן (Producer-Consumer) עם חוצץ חסום (Bounded Buffer). התוכנית משתמשת ב-pthreads, mutexes ובמשתני תנאי (condition variables) לסנכרון. יש לנתח את הקוד ולענות על השאלות הבאות, תוך התייחסות למקרה בו `BUFFER_SIZE=5`, `NUM_PRODUCERS=2`, `NUM_CONSUMERS=2`, וכל יצרן מייצר `ITEMS_PER_PRODUCER=5` פריטים. הניחו שכל קריאות המערכת הצליחו.",
+      "code_snippet": "1 #include <stdio.h>\n2 #include <stdlib.h>\n3 #include <pthread.h>\n4 #include <unistd.h> // For usleep\n5\n6 #define BUFFER_SIZE 5\n7 #define NUM_PRODUCERS 2\n8 #define NUM_CONSUMERS 2\n9 #define ITEMS_PER_PRODUCER 5\n10\n11 int buffer[BUFFER_SIZE];\n12 int count = 0; // Number of items in the buffer\n13 int head = 0;  // Index for consumer\n14 int tail = 0;  // Index for producer\n15\n16 pthread_mutex_t buffer_mutex = PTHREAD_MUTEX_INITIALIZER;\n17 pthread_cond_t not_empty = PTHREAD_COND_INITIALIZER;\n18 pthread_cond_t not_full = PTHREAD_COND_INITIALIZER;\n19\n20 void *producer(void *arg) {\n21    int producer_id = *(int*)arg;\n22    for (int i = 0; i < ITEMS_PER_PRODUCER; ++i) {\n23        pthread_mutex_lock(&buffer_mutex);\n24\n25        // BUG: should be while (count == BUFFER_SIZE)\n26        if (count == BUFFER_SIZE) {\n27            printf(\"Producer %d waiting because buffer is full. (count=%d)\\n\", producer_id, count);\n28            pthread_cond_wait(&not_full, &buffer_mutex);\n29        }\n30\n31        // Simulate producing an item\n32        buffer[tail] = producer_id * 100 + i;\n33        tail = (tail + 1) % BUFFER_SIZE;\n34        count++;\n35        printf(\"Producer %d produced item %d. Buffer count: %d\\n\", producer_id, buffer[(tail - 1 + BUFFER_SIZE) % BUFFER_SIZE], count);\n36\n37        pthread_cond_signal(&not_empty);\n38        pthread_mutex_unlock(&buffer_mutex);\n39        usleep(100000); // Simulate work\n40    }\n41    return NULL;\n42}\n43\n44 void *consumer(void *arg) {\n45    int consumer_id = *(int*)arg;\n46    // Each consumer tries to consume total_items / num_consumers items\n47    for (int i = 0; i < (NUM_PRODUCERS * ITEMS_PER_PRODUCER) / NUM_CONSUMERS; ++i) {\n48        pthread_mutex_lock(&buffer_mutex);\n49\n50        // BUG: should be while (count == 0)\n51        if (count == 0) {\n52            printf(\"Consumer %d waiting because buffer is empty. (count=%d)\\n\", consumer_id, count);\n53            pthread_cond_wait(&not_empty, &buffer_mutex);\n54        }\n55\n56        // Simulate consuming an item\n57        int item = buffer[head];\n58        head = (head + 1) % BUFFER_SIZE;\n59        count--;\n60        printf(\"Consumer %d consumed item %d. Buffer count: %d\\n\", consumer_id, item, count);\n61\n62        pthread_cond_signal(&not_full);\n63        pthread_mutex_unlock(&buffer_mutex);\n64        usleep(150000); // Simulate work\n65    }\n66    return NULL;\n67}\n68\n69 int main() {\n70    pthread_t prod_threads[NUM_PRODUCERS];\n71    pthread_t cons_threads[NUM_CONSUMERS];\n72    int prod_ids[NUM_PRODUCERS];\n73    int cons_ids[NUM_CONSUMERS];\n74\n75    printf(\"Starting Producer-Consumer simulation with BUFFER_SIZE=%d\\n\", BUFFER_SIZE);\n76\n77    for (int i = 0; i < NUM_PRODUCERS; ++i) {\n78        prod_ids[i] = i;\n79        pthread_create(&prod_threads[i], NULL, producer, &prod_ids[i]);\n80    }\n81\n82    for (int i = 0; i < NUM_CONSUMERS; ++i) {\n83        cons_ids[i] = i;\n84        pthread_create(&cons_threads[i], NULL, consumer, &cons_ids[i]);\n85    }\n86\n87    for (int i = 0; i < NUM_PRODUCERS; ++i) {\n88        pthread_join(prod_threads[i], NULL);\n89    }\n90\n91    for (int i = 0; i < NUM_CONSUMERS; ++i) {\n92        pthread_join(cons_threads[i], NULL);\n93    }\n94\n95    printf(\"Simulation finished. Final buffer count: %d\\n\", count);\n96    return 0;\n97}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "8.1",
+        "text": "תארו תרחיש תזמון ספציפי (sequence of events) שבו הקוד המוצג (עם `if` במקום `while` בקריאות `pthread_cond_wait`) יוביל להתנהגות שגויה. מהי ההתנהגות השגויה שתיצפה? (לדוגמה: צרכן מנסה לצרוך מחוצץ ריק, יצרן מנסה לייצר לחוצץ מלא, או ערך סופי לא נכון של `count`)",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.2",
+        "text": "האם ייתכן שהתוכנית תיכנס למצב של Deadlock? אם כן, תארו תרחיש כזה. אם לא, הסבירו מדוע.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.3",
+        "text": "מהו התיקון המינימלי הנדרש בקוד כדי להבטיח פעולה נכונה ויציבה של מנגנון היצרן-צרכן, ללא תלות בתזמון המערכת? יש להציג את קטע הקוד המתוקן.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "8.1: הבעיה נובעת משימוש ב-`if` במקום `while` בבדיקת התנאי לפני קריאה ל-`pthread_cond_wait`. תרחיש לדוגמה שיוביל להתנהגות שגויה:\n1.  החוצץ ריק (`count = 0`).\n2.  צרכן 1 נכנס לפונקציה `consumer`, נועל את `buffer_mutex`.\n3.  צרכן 1 בודק `if (count == 0)` ומוצא שהתנאי מתקיים. הוא מדפיס \"Consumer 1 waiting...\" ומתכונן להיכנס ל-`pthread_cond_wait(&not_empty, &buffer_mutex)`. רגע לפני הכניסה ל-`wait`, הוא משחרר את המנעול `buffer_mutex`.\n4.  מתזמן המערכת מעביר את הריצה ליצרן 1.\n5.  יצרן 1 נכנס לפונקציה `producer`, נועל את `buffer_mutex`.\n6.  יצרן 1 מוסיף פריט לחוצץ, `count` הופך ל-1. הוא מדפיס \"Producer 1 produced...\" ומאותת `pthread_cond_signal(&not_empty)`. \n7.  מתזמן המערכת מעביר את הריצה לצרכן 2 (אם היה קיים וחיכה, או נוצר והתחיל לרוץ).\n8.  צרכן 2 נכנס לפונקציה `consumer`, נועל את `buffer_mutex`. הוא בודק `if (count == 0)` ומוצא שהתנאי *אינו* מתקיים (`count` הוא 1). הוא ממשיך, צורך את הפריט שיצרן 1 יצר, `count` יורד ל-0. צרכן 2 משחרר את `buffer_mutex`.\n9.  מתזמן המערכת מעביר את הריצה לצרכן 1. צרכן 1 קם מ-`wait` ומקבל מחדש את `buffer_mutex`. \n10. **ההתנהגות השגויה**: צרכן 1 ממשיך מיד לאחר ה-`pthread_cond_wait` מבלי לבדוק שוב את התנאי `count == 0`. מכיוון שהתנאי נבדק רק פעם אחת עם `if`, הוא מניח שהחוצץ כעת אינו ריק, למרות שהוא שוב ריק (`count = 0`). הוא ינסה לצרוך מחוצץ ריק (`buffer[head]`), יקטין את `count` ל-1-, וידפיס ערך שגוי (garbage value). זוהי חריגה מגבולות החוצץ (buffer underflow) ופגיעה בתקינות הנתונים של `count`.\n\n8.2: לא, התוכנית כפי שהיא מוצגת לא תיכנס למצב של Deadlock.\nהסיבה לכך היא שבכל פעם שחוט קורא ל-`pthread_cond_wait`, הוא משחרר את המנעול `buffer_mutex` לפני שהוא נכנס למצב המתנה. כאשר הוא מתעורר, הוא רוכש מחדש את המנעול. אין כאן שרשרת המתנה מעגלית (circular wait) על מנעולים, ואין משאבים שנתפסים לצמיתות. המנעול היחיד הוא `buffer_mutex`, והוא משוחרר באופן אוטומטי על ידי `pthread_cond_wait` כאשר חוט נכנס למצב המתנה ומוחזר כאשר הוא מתעורר. הבעיה היא לא Deadlock אלא Race Condition המוביל לנתונים שגויים (Underflow/Overflow) או לוגיקה שגויה (Spurious Wakeups).\n\n8.3: התיקון המינימלי הנדרש הוא החלפת ה-`if` ב-`while` בבדיקות התנאי לפני קריאה ל-`pthread_cond_wait` בפונקציות `producer` ו-`consumer`. תיקון זה מבטיח שאפילו אם חוט מתעורר מ-`pthread_cond_wait` עקב \"התעוררות שווא\" (spurious wakeup) או בגלל שחוט אחר אותת אך התנאי הופר שוב על ידי חוט שלישי, הוא יבדוק שוב את התנאי לפני שהוא ממשיך. אם התנאי עדיין לא מתקיים, הוא ייכנס שוב למצב המתנה.\n\n**קטע הקוד המתוקן:**\n```c\nvoid *producer(void *arg) {\n    int producer_id = *(int*)arg;\n    for (int i = 0; i < ITEMS_PER_PRODUCER; ++i) {\n        pthread_mutex_lock(&buffer_mutex);\n\n        // תיקון: שינוי if ל-while\n        while (count == BUFFER_SIZE) {\n            pthread_cond_wait(&not_full, &buffer_mutex);\n        }\n\n        buffer[tail] = producer_id * 100 + i;\n        tail = (tail + 1) % BUFFER_SIZE;\n        count++;\n\n        pthread_cond_signal(&not_empty);\n        pthread_mutex_unlock(&buffer_mutex);\n        usleep(100000);\n    }\n    return NULL;\n}\n\nvoid *consumer(void *arg) {\n    int consumer_id = *(int*)arg;\n    for (int i = 0; i < (NUM_PRODUCERS * ITEMS_PER_PRODUCER) / NUM_CONSUMERS; ++i) {\n        pthread_mutex_lock(&buffer_mutex);\n\n        // תיקון: שינוי if ל-while\n        while (count == 0) {\n            pthread_cond_wait(&not_empty, &buffer_mutex);\n        }\n\n        int item = buffer[head];\n        head = (head + 1) % BUFFER_SIZE;\n        count--;\n\n        pthread_cond_signal(&not_full);\n        pthread_mutex_unlock(&buffer_mutex);\n        usleep(150000);\n    }\n    return NULL;\n}\n```",
+      "difficulty_estimation": "Hard"
+    }
+  }
+}

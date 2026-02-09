@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Memory Management and TLB",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 21:21:10",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1050,
+      "output_tokens": 484,
+      "total_tokens": 2516
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Memory Management",
+      "TLB",
+      "Paging"
+    ],
+    "content": {
+      "text": "תהליך מנסה לגשת לכתובת וירטואלית מסוימת. מתרחש TLB miss, אך נמצא כי הדף הרצוי נמצא בזיכרון הפיזי (RAM) (כלומר, Page Table Hit). לאחר עדכון ה-TLB, כמה גישות לזיכרון הפיזי (RAM) נדרשות בסך הכל כדי לגשת לנתון הרצוי?",
+      "code_snippet": null,
+      "options": [
+        "א. גישה אחת",
+        "ב. שתי גישות",
+        "ג. שלוש גישות",
+        "ד. ארבע גישות",
+        "ה. אף אחת מהתשובות האחרות אינה נכונה"
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב'. במקרה של TLB miss ו-Page Table hit, מתרחשים השלבים הבאים:\n1. ה-CPU ניגש לטבלת הדפים בזיכרון הפיזי (RAM) כדי למצוא את ה-PFN המתאים ל-VPN (זו הגישה הראשונה ל-RAM).\n2. טבלת הדפים מצביעה על כך שהדף נמצא ב-RAM. ה-PFN נשלף. ה-TLB מתעדכן עם המיפוי החדש (פעולה פנימית של ה-CPU שאינה דורשת גישה נוספת ל-RAM לצורך הנתון).\n3. ה-CPU משתמש ב-PFN וב-offset כדי לגשת לנתון עצמו בזיכרון הפיזי (RAM) (זו הגישה השנייה ל-RAM).\nלכן, נדרשות שתי גישות ל-RAM בסך הכל."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

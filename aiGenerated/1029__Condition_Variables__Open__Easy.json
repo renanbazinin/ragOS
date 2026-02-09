@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Condition Variables",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 07:31:16",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1573,
+      "output_tokens": 767,
+      "total_tokens": 3859
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Condition Variables",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "הסבירו מהם משתני תנאי (Condition Variables), מה מטרתם, וכיצד הם עובדים בשילוב עם מנעולים (mutexes) לסינכרון תהליכים/חוטים. תארו בקצרה את הפונקציות העיקריות שלהם (כגון wait, signal, broadcast) והדגישו את חשיבות השימוש בלולאת בדיקה סביב ה-wait.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "משתני תנאי (Condition Variables) הם כלי סינכרון המאפשר לחוטים להמתין עד שתנאי לוגי מסוים יתקיים, ולאחר מכן לקבל הודעה כאשר התנאי מתקיים. הם משמשים תמיד בשילוב עם מנעול (mutex) כדי להגן על המצב המשותף שעליו התנאי מבוסס, ועל משתנה התנאי עצמו. המנעול מבטיח שרק חוט אחד יכול לגשת ולשנות את המצב המשותף בכל רגע נתון, ובכך מונע תנאי מירוץ.\n\nהפונקציות העיקריות הן:\n*   **`wait(mutex)` / `pthread_cond_wait(&cond, &mutex)`**: חוט הקורא לפונקציה זו משחרר באופן אטומי את המנעול שניתן לו (ה-mutex), נכנס למצב המתנה (בלוק) על משתנה התנאי, וכאשר הוא מתעורר, הוא רוכש מחדש את המנעול לפני שהוא ממשיך בביצוע. חשוב מאוד להשתמש בלולאת `while` לבדיקת התנאי לאחר ה-`wait` (לדוגמה: `while (!condition_met) { pthread_cond_wait(&cond, &mutex); }`). הסיבה לכך היא תופעה הנקראת 'התעוררות שווא' (spurious wakeups), שבה חוט יכול להתעורר מ-`wait` למרות שלא נשלח אליו אות, או שתנאי אחר התקיים בינתיים.\n*   **`signal()` / `pthread_cond_signal(&cond)`**: מעירה חוט אחד (אם קיים כזה) מבין החוטים הממתינים על משתנה התנאי הספציפי.\n*   **`broadcast()` / `pthread_cond_broadcast(&cond)`**: מעירה את כל החוטים הממתינים על משתנה התנאי הספציפי. פונקציה זו שימושית כאשר שינוי בתנאי משפיע על מספר חוטים.\n\nהשימוש במשתני תנאי מאפשר לחוטים לחכות בצורה יעילה מבלי לבזבז זמן מעבד על 'המתנה פעילה' (busy-waiting)."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

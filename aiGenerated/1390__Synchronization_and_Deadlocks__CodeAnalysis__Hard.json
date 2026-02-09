@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Synchronization and Deadlocks",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 09:49:20",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5388,
+      "output_tokens": 1551,
+      "total_tokens": 17859
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Deadlocks",
+      "Atomic Operations",
+      "Concurrency",
+      "Lock-Free Algorithms"
+    ],
+    "content": {
+      "text": "מנעול K-פעמים הוא מנעול אשר ניתן לנעול בהצלחה K פעמים בלבד בסך הכל: ברגע ש-K חוטים תפסו את המנעול בהצלחה (לאו דווקא בו-זמנית), אף חוט אחר לא יכול לתפוס יותר את המנעול לכל אורך התוכנית. פונקציית הנעילה של מנעול K-פעמים מחזירה 0 לחוטים אשר נכשלו בתפיסת המנעול מבלי לחסום אותם (כלומר, ללא המתנה בדומה לקריאת trylock), ומחזירה 1 לחוט שהצליח. במנעול K-פעמים ל-N חוטים מובטח שפונקציית הנעילה של כל מנעול לא נקראת יותר מ-N פעמים בכל ריצת התוכנית.\n\nנניח שלרשותנו עומדת פקודת חומרה אטומית ששמה `compare_and_swap` (CAS), אשר משווה באופן אטומי את ערכו של תא זיכרון לערך צפוי, ואם הם שווים, היא מעדכנת את תא הזיכרון לערך חדש. הפקודה מחזירה 1 (אמת) אם ההשוואה הצליחה והעדכון בוצע, ו-0 (שקר) אחרת. את הפקודה ניתן לתאר כך:\n\nהבהרה: תיאור הפעולה הוא קוד C לצורך הסבר בלבד. פעולת המעבד מבצעת זאת באופן אטומי ולא בכמה פעולות. בכל שאלה זו אין להשתמש באובייקטי סנכרון או פעולות מעבד אטומיות מלבד `compare_and_swap`, ויש לדאוג למניעה הדדית וחופש מקיפאון.\n\nממשו מנעול K-פעמים (כאשר K פרמטר בפונקציית האתחול) באמצעות פקודת ה-`compare_and_swap`. יש להגדיר את מבנה המנעול (`struct KLock`) ולממש את הפונקציות הבאות:",
+      "code_snippet": "int compare_and_swap(int* val_ptr, int expected_val, int new_val) {\n    // This is a conceptual description. Actual hardware implementation is atomic.\n    if (*val_ptr == expected_val) {\n        *val_ptr = new_val;\n        return 1; // Success\n    }\n    return 0; // Failure\n}\n\ntypedef struct _klock {\n    // Define members here\n} KLock;\n\nvoid init_k_lock(KLock *lock, int K_limit) {\n}\n\nint lock_k(KLock *lock) {\n}\n\nvoid destroy_k_lock(KLock *lock) {\n    // Free any allocated resources\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון דורש שימוש בלולאת `compare_and_swap` (CAS) כדי לקדם באופן אטומי מונה. פונקציית `lock_k` מנסה שוב ושוב לקדם את המונה `acquired_count` רק אם ערכו הנוכחי קטן מ-`K_limit`. אם `acquired_count` כבר הגיע או עבר את `K_limit` (כלומר, הגיעו למספר התפיסות המרבי המותר), תפיסת המנעול נכשלת. הלולאה מבטיחה שאם מספר חוטים מנסים לתפוס את המנעול בו-זמנית, רק אחד מהם יצליח לעדכן את המונה באמצעות CAS עבור ערך נתון, בעוד שהאחרים יצטרכו לקרוא מחדש את המונה ולנסות שוב. פונקציית `destroy_k_lock` משחררת כל זיכרון שהוקצה דינמית. במקרה זה, `acquired_count` הוא חלק מהמבנה `KLock` ולא הוקצה דינמית, ולכן אין צורך בשחרור זיכרון.\n\n```c\n// This is a conceptual description. Actual hardware implementation is atomic.\nint compare_and_swap(int* val_ptr, int expected_val, int new_val) {\n    if (*val_ptr == expected_val) {\n        *val_ptr = new_val;\n        return 1; // Success\n    }\n    return 0; // Failure\n}\n\ntypedef struct _klock {\n    int acquired_count; // המונה עבור תפיסות מוצלחות\n    int K_limit;        // המספר המרבי של תפיסות מותרות\n} KLock;\n\nvoid init_k_lock(KLock *lock, int K_limit) {\n    lock->acquired_count = 0;\n    lock->K_limit = K_limit;\n}\n\nint lock_k(KLock *lock) {\n    int current_val;\n    do {\n        current_val = lock->acquired_count; // קריאת הערך הנוכחי (לא אטומי, אך משמש כערך צפוי ל-CAS)\n        if (current_val >= lock->K_limit) {\n            return 0; // המונה כבר הגיע ל-K_limit או עבר אותו, לא ניתן לתפוס את המנעול\n        }\n        // נסה לקדם את המונה באופן אטומי אם הערך הנוכחי לא השתנה\n    } while (!compare_and_swap(&lock->acquired_count, current_val, current_val + 1));\n    \n    return 1; // המנעול נתפס בהצלחה\n}\n\nvoid destroy_k_lock(KLock *lock) {\n    // אין חברים שהוקצו דינמית במבנה פשוט זה, ולכן אין מה לשחרר.\n    // אם acquired_count היה מצביע ל-int שהוקצה דינמית, היינו משחררים אותו כאן.\n}\n```"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

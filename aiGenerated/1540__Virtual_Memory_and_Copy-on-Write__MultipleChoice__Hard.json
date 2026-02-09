@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory and Copy-on-Write",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 11:16:17",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 975,
+      "output_tokens": 1559,
+      "total_tokens": 6089
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Virtual Memory",
+      "Copy-on-Write",
+      "Process Management",
+      "Paging"
+    ],
+    "content": {
+      "text": "נתונה תוכנית ה-C הבאה, המשתמשת במערכת הפעלה המיישמת זיכרון וירטואלי עם מנגנון Copy-on-Write (CoW) עבור תהליכים שנוצרו באמצעות `fork()`. גודל דף זיכרון הוא 4KB (4096 בתים).\n\nבהנחה שכל המשתנה `global_array` מאותחל ל-0 לפני קריאה ל-`fork()`, וכאשר תהליך כותב לראשונה לדף זיכרון משותף, מתרחשת תקלת CoW והדף מועתק עבורו. כמה תקלות CoW יתרחשו בסך הכל במהלך ביצוע הקוד על ידי שני התהליכים (האב והבן)?",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\n// Assume int is 4 bytes. 2048 * 4 bytes = 8192 bytes = 8KB.\n// This array spans two 4KB pages.\nint global_array[2048]; \n\nint main() {\n    // Initialize global_array to 0 (implicitly done for global vars, but explicit for clarity)\n    for (int i = 0; i < 2048; i++) {\n        global_array[i] = 0;\n    }\n\n    pid_t pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        return 1;\n    } else if (pid == 0) { // Child process\n        global_array[0] = 1;      // Modifies element on the first page\n        global_array[1024] = 2;   // Modifies element on the second page\n        printf(\"Child: global_array[0]=%d, global_array[1024]=%d\\n\", global_array[0], global_array[1024]);\n        exit(0);\n    } else { // Parent process\n        wait(NULL); \n        global_array[0] = 3;      // Modifies element on the first page\n        global_array[1024] = 4;   // Modifies element on the second page\n        printf(\"Parent: global_array[0]=%d, global_array[1024]=%d\\n\", global_array[0], global_array[1024]);\n    }\n\n    return 0;\n}",
+      "options": [
+        "א. 2",
+        "ב. 3",
+        "ג. 4",
+        "ד. 0",
+        "ה. 1"
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "התשובה הנכונה היא ג. 4.\n\nלאחר הקריאה ל-`fork()`, גם תהליך האב וגם תהליך הבן חולקים את אותם דפים פיזיים המכילים את המערך `global_array`. דפים אלו מסומנים כקריאה בלבד (read-only) בטבלאות הדפים של שני התהליכים. המערך `global_array` בגודל 8KB (2048 * 4 בתים) מתפרס על פני שני דפים בגודל 4KB (4096 בתים).\n\n1.  **תהליך הבן:**\n    *   כאשר הבן כותב ל-`global_array[0]`, הוא ניגש לכתובת הנמצאת בדף הראשון של המערך. מכיוון שהדף מסומן כקריאה בלבד, מתרחשת תקלת CoW. מערכת ההפעלה יוצרת עותק פרטי של הדף הראשון עבור תהליך הבן, משנה את הרשאת הדף בטבלת הדפים של הבן לקריאה-כתיבה, ומאפשרת לבן לכתוב. **זוהי תקלת CoW אחת.**\n    *   כאשר הבן כותב ל-`global_array[1024]`, הוא ניגש לכתובת הנמצאת בדף השני של המערך (מכיוון ש-1024 * 4 בתים = 4096 בתים, שהיא תחילת הדף השני). שוב, הדף מסומן כקריאה בלבד, ולכן מתרחשת תקלת CoW. מערכת ההפעלה יוצרת עותק פרטי של הדף השני עבור תהליך הבן. **זוהי תקלת CoW נוספת אחת.**\n    *   סה\"כ 2 תקלות CoW עבור תהליך הבן.\n\n2.  **תהליך האב:**\n    *   כאשר האב כותב ל-`global_array[0]`, הוא ניגש לכתובת הנמצאת בדף הראשון של המערך. הדף הפיזי המקורי (שעדיין מכיל את הערכים המקוריים, שכן כתיבת הבן הייתה לדף הפרטי שלו) עדיין מסומן כקריאה בלבד בטבלת הדפים של האב. מתרחשת תקלת CoW. מערכת ההפעלה יוצרת עותק פרטי של הדף הראשון עבור תהליך האב. **זוהי תקלת CoW אחת נוספת.**\n    *   כאשר האב כותב ל-`global_array[1024]`, הוא ניגש לכתובת הנמצאת בדף השני של המערך. הדף הפיזי המקורי עדיין מסומן כקריאה בלבד בטבלת הדפים של האב. מתרחשת תקלת CoW. מערכת ההפעלה יוצרת עותק פרטי של הדף השני עבור תהליך האב. **זוהי תקלת CoW נוספת אחת.**\n    *   סה\"כ 2 תקלות CoW עבור תהליך האב.\n\nבסך הכל, במהלך ביצוע הקוד, יתרחשו 4 תקלות CoW."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

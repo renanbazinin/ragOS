@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "TLB",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 08:09:05",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 810,
+      "total_tokens": 3323
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "TLB",
+      "Memory Management",
+      "Context Switching",
+      "Performance",
+      "Security"
+    ],
+    "content": {
+      "text": "נתונה מערכת הפעלה המשתמשת ב-TLB התומך ב-ASIDs (Address Space Identifiers). איזה מההיגדים הבאים הוא הנכון ביותר לגבי השפעתם של ASIDs על ביצועי המערכת וניהול ה-TLB?",
+      "code_snippet": null,
+      "options": [
+        "א. ASIDs מבטלים לחלוטין את הצורך בניקוי ה-TLB (TLB flush) במעבר הקשר (context switch), ובכך מונעים כל תקורה (overhead) הקשורה לניהול TLB.",
+        "ב. ASIDs מאפשרים ל-TLB להכיל בו זמנית ערכים עבור מספר מרחבי כתובות (address spaces) שונים, אך עדיין נדרש ניקוי חלקי של ה-TLB כאשר מתבצע מעבר לתהליך עם ASID שטרם נטען ל-TLB.",
+        "ג. ASIDs משפרים ביצועים על ידי צמצום הצורך בניקוי TLB במעבר הקשר, אך אינם מונעים אותו לחלוטין. הם אינם משפיעים על האבטחה מכיוון שהם רק מנגנון ביצועים.",
+        "ד. ASIDs מאפשרים ל-TLB להבחין בין ערכים השייכים למרחבי כתובות שונים, ובכך משפרים ביצועים במעבר הקשר על ידי הימנעות מניקוי TLB מלא. הם גם תורמים לאבטחה בכך שהם מבטיחים שתרגום כתובות יתייחס למרחב הכתובות הנכון של התהליך הנוכחי."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ד",
+      "explanation": "ASIDs (Address Space Identifiers) הם מזהים ייחודיים המצורפים לערכי TLB, המציינים לאיזה מרחב כתובות (תהליך) הערך שייך. כאשר מתבצע מעבר הקשר (context switch) בין תהליכים בעלי ASIDs שונים, ה-CPU יכול להשתמש ב-ASID הנוכחי כדי לסנן את הערכים ב-TLB, כך שרק ערכים התואמים את ה-ASID של התהליך הנוכחי יהיו תקפים. זה מונע את הצורך בריקון מלא של ה-TLB (TLB flush) ובכך משפר משמעותית את הביצועים לאחר מעבר הקשר, מכיוון שערכים של תהליכים אחרים יכולים להישאר ב-TLB ולהיות שימושיים כאשר התהליך יחזור לפעול. בנוסף, ASIDs תורמים לאבטחה בכך שהם מבטיחים שתרגום כתובות יתבצע תמיד בהקשר הנכון של מרחב הכתובות של התהליך הנוכחי, ומונעים שימוש שגוי בערכי TLB השייכים לתהליכים אחרים."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "File Systems and I/O",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 11:00:23",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1233,
+      "output_tokens": 521,
+      "total_tokens": 3041
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "File Systems",
+      "I/O",
+      "Caching"
+    ],
+    "content": {
+      "text": "כאשר תוכנית קוראת נתונים מקובץ באמצעות קריאת המערכת `read()`, ונתונים אלו כבר נמצאים בזיכרון המטמון של מערכת ההפעלה (OS page cache), מהי ההתנהגות הצפויה?",
+      "code_snippet": null,
+      "options": [
+        "א. הנתונים ייקראו ישירות מהדיסק הפיזי, ללא קשר למצב המטמון.",
+        "ב. הנתונים יועתקו ישירות ממטמון מערכת ההפעלה לחוצץ של התוכנית, ללא גישה לדיסק הפיזי.",
+        "ג. המערכת תבצע קריאה לדיסק כדי לוודא שהנתונים עדכניים, גם אם הם במטמון.",
+        "ד. ה-CPU יחכה לטעינת הנתונים מהדיסק בכל מקרה, מכיוון ש-`read()` היא קריאה חוסמת."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "כאשר קריאת המערכת `read()` מבוצעת עבור נתונים שכבר נמצאים במטמון העמודים (page cache) של מערכת ההפעלה, הנתונים מועתקים ישירות ממטמון זה לחוצץ (buffer) של התוכנית המבצעת את הקריאה. אין צורך בגישה לדיסק הפיזי, מה שמשפר משמעותית את ביצועי הקריאה ומפחית את זמן ההשהיה. קריאה חוסמת (blocking read) אכן גורמת ל-CPU להמתין, אך ההמתנה היא עד שהנתונים יהיו זמינים (מהמטמון או מהדיסק), לאו דווקא מהדיסק."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

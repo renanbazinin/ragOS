@@ -1,0 +1,57 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "IPC and Processes",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 19:38:36",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2411,
+      "output_tokens": 2617,
+      "total_tokens": 10496
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "IPC",
+      "Processes",
+      "Pipes"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המשתמשת במנגנון IPC מסוג Pipes כדי לתקשר בין תהליך אב לתהליך בן. תהליך האב שולח מחרוזת לתהליך הבן, ותהליך הבן מקבל את המחרוזת, ממיר אותה לאותיות גדולות (uppercase), ושולח אותה בחזרה לתהליך האב. תהליך האב מדפיס את המחרוזת שהתקבלה מהבן.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <string.h>\n#include <sys/wait.h>\n#include <ctype.h> // For toupper\n\n#define BUFFER_SIZE 256\n\nint main() {\n    int pipe_parent_to_child[2]; // Parent writes, Child reads\n    int pipe_child_to_parent[2]; // Child writes, Parent reads\n    pid_t pid;\n    char write_msg[BUFFER_SIZE] = \"Hello from parent!\";\n    char read_msg[BUFFER_SIZE];\n\n    if (pipe(pipe_parent_to_child) == -1 || pipe(pipe_child_to_parent) == -1) {\n        perror(\"pipe failed\");\n        exit(EXIT_FAILURE);\n    }\n\n    pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        exit(EXIT_FAILURE);\n    }\n\n    if (pid == 0) { // Child process\n        // Child reads from parent_to_child pipe\n        // Child writes to child_to_parent pipe\n\n        read(pipe_parent_to_child[0], read_msg, BUFFER_SIZE);\n        printf(\"Child received: %s\\n\", read_msg);\n\n        // Convert to uppercase\n        for (int i = 0; read_msg[i] != '\\0'; i++) {\n            read_msg[i] = toupper((unsigned char)read_msg[i]);\n        }\n\n        write(pipe_child_to_parent[1], read_msg, strlen(read_msg) + 1);\n        printf(\"Child sent: %s\\n\", read_msg);\n\n        exit(EXIT_SUCCESS);\n    } else { // Parent process\n        // Parent writes to parent_to_child pipe\n        // Parent reads from child_to_parent pipe\n\n        write(pipe_parent_to_child[1], write_msg, strlen(write_msg) + 1);\n        printf(\"Parent sent: %s\\n\", write_msg);\n\n        read(pipe_child_to_parent[0], read_msg, BUFFER_SIZE);\n        printf(\"Parent received: %s\\n\", read_msg);\n\n        wait(NULL); // Wait for child to terminate\n        exit(EXIT_SUCCESS);\n    }\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "מה יהיה הפלט של התוכנית כפי שהיא? הסבר.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "האם ישנן בעיות פוטנציאליות בקוד? אם כן, פרט אותן.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.3",
+        "text": "תקן את הקוד כך שיפעל כמצופה.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "10.1:\nהתוכנית תדפיס את ההודעות שהתהליכים שולחים, אך תהליך האב ייתקע (יתבצע חסימה) בקריאה מה-pipe השני. הסיבה לכך היא שתהליך האב מנסה לקרוא מ-`pipe_child_to_parent[0]` אך לא סגר את קצה הכתיבה שלו לאותו pipe, `pipe_child_to_parent[1]`. כל עוד קיים לפחות קצה כתיבה אחד פתוח ל-pipe, קריאה ממנו לא תחזיר EOF (סוף קובץ) גם אם אין נתונים זמינים. מכיוון שתהליך האב עצמו מחזיק את קצה הכתיבה, ה-`read()` שלו ייחסם לצמיתות, בציפייה שיום אחד האב אולי יכתוב לעצמו דרך ה-pipe הזה.\nפלט צפוי (לפני התקיעה):\n```\nParent sent: Hello from parent!\nChild received: Hello from parent!\nChild sent: HELLO FROM PARENT!\n```\n\n10.2:\nכן, ישנן מספר בעיות:\n1.  **חסימה (Deadlock/Blocking) של תהליך האב:** כפי שהוסבר לעיל, תהליך האב ייחסם בקריאה מ-`pipe_child_to_parent[0]` כי הוא לא סגר את קצה הכתיבה `pipe_child_to_parent[1]` של אותו pipe. ה-`read()` מצפה שכל קצוות הכתיבה ל-pipe ייסגרו כדי להחזיר EOF במקרה שאין נתונים נוספים, אך האב עצמו מחזיק קצה כתיבה פתוח.\n2.  **מנהלי קבצים מיותרים (Unnecessary open file descriptors):** גם תהליך האב וגם תהליך הבן מחזיקים מנהלי קבצים פתוחים שאינם בשימוש. זוהי בזבוז משאבים ועלולה להוביל לבעיות מורכבות יותר בתוכניות גדולות יותר.\n    *   האב לא משתמש ב-`pipe_parent_to_child[0]` (הוא רק כותב ל-pipe הזה).\n    *   האב לא משתמש ב-`pipe_child_to_parent[1]` (הוא רק קורא מה-pipe הזה).\n    *   הבן לא משתמש ב-`pipe_parent_to_child[1]` (הוא רק קורא מה-pipe הזה).\n    *   הבן לא משתמש ב-`pipe_child_to_parent[0]` (הוא רק כותב ל-pipe הזה).\n\n10.3:\nהתיקון העיקרי הוא סגירת קצוות ה-pipe שאינם בשימוש בכל אחד מהתהליכים מיד לאחר ה-`fork()`.\n\n**קוד מתוקן:**\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <string.h>\n#include <sys/wait.h>\n#include <ctype.h> // For toupper\n\n#define BUFFER_SIZE 256\n\nint main() {\n    int pipe_parent_to_child[2]; // Parent writes, Child reads\n    int pipe_child_to_parent[2]; // Child writes, Parent reads\n    pid_t pid;\n    char write_msg[BUFFER_SIZE] = \"Hello from parent!\";\n    char read_msg[BUFFER_SIZE];\n\n    if (pipe(pipe_parent_to_child) == -1 || pipe(pipe_child_to_parent) == -1) {\n        perror(\"pipe failed\");\n        exit(EXIT_FAILURE);\n    }\n\n    pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        exit(EXIT_FAILURE);\n    }\n\n    if (pid == 0) { // Child process\n        // Close unused pipe ends in child\n        close(pipe_parent_to_child[1]); // Child doesn't write to this pipe\n        close(pipe_child_to_parent[0]); // Child doesn't read from this pipe\n\n        // Child reads from parent_to_child pipe\n        read(pipe_parent_to_child[0], read_msg, BUFFER_SIZE);\n        printf(\"Child received: %s\\n\", read_msg);\n        close(pipe_parent_to_child[0]); // Close read end after reading\n\n        // Convert to uppercase\n        for (int i = 0; read_msg[i] != '\\0'; i++) {\n            read_msg[i] = toupper((unsigned char)read_msg[i]);\n        }\n\n        // Child writes to child_to_parent pipe\n        write(pipe_child_to_parent[1], read_msg, strlen(read_msg) + 1);\n        printf(\"Child sent: %s\\n\", read_msg);\n        close(pipe_child_to_parent[1]); // Close write end after writing\n\n        exit(EXIT_SUCCESS);\n    } else { // Parent process\n        // Close unused pipe ends in parent\n        close(pipe_parent_to_child[0]); // Parent doesn't read from this pipe\n        close(pipe_child_to_parent[1]); // Parent doesn't write to this pipe\n\n        // Parent writes to parent_to_child pipe\n        write(pipe_parent_to_child[1], write_msg, strlen(write_msg) + 1);\n        printf(\"Parent sent: %s\\n\", write_msg);\n        close(pipe_parent_to_child[1]); // Close write end after writing\n\n        // Parent reads from child_to_parent pipe\n        read(pipe_child_to_parent[0], read_msg, BUFFER_SIZE);\n        printf(\"Parent received: %s\\n\", read_msg);\n        close(pipe_child_to_parent[0]); // Close read end after reading\n\n        wait(NULL); // Wait for child to terminate\n        exit(EXIT_SUCCESS);\n    }\n\n    return 0;\n}\n```\n**פלט צפוי של הקוד המתוקן:**\n```\nParent sent: Hello from parent!\nChild received: Hello from parent!\nChild sent: HELLO FROM PARENT!\nParent received: HELLO FROM PARENT!\n```\n(הסדר של שורות \"Parent sent\" ו- \"Child received\" יכול להשתנות בהתאם ל-scheduler, אך שאר הסדר יהיה קבוע)."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

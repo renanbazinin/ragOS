@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Producer-Consumer",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 10:29:06",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1632,
+      "output_tokens": 1694,
+      "total_tokens": 8308
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Semaphores",
+      "Producer-Consumer",
+      "Concurrency",
+      "Deadlock"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא, המממש את בעיית יצרן-צרכן (Producer-Consumer) באמצעות סמפורים ומאגר חסום (bounded buffer). נניח ש-BUFFER_SIZE הוא 5, NUM_PRODUCERS הוא 1, NUM_CONSUMERS הוא 1, ו-ITEMS_TO_PRODUCE הוא 10.\n\nאם קריאות ה-sem_wait בפונקציית ה-producer היו מתחלפות בסדרן, כלומר sem_wait(&mutex) הייתה נקראת לפני sem_wait(&empty), מהי התוצאה הסבירה ביותר של הרצת התוכנית?",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <pthread.h>\n#include <semaphore.h>\n#include <unistd.h> // For sleep\n\n#define BUFFER_SIZE 5\n#define NUM_PRODUCERS 1\n#define NUM_CONSUMERS 1\n#define ITEMS_TO_PRODUCE 10\n\nint buffer[BUFFER_SIZE];\nint in = 0;\nint out = 0;\n\nsem_t mutex;    // For mutual exclusion\nsem_t empty;    // Counts empty slots\nsem_t full;     // Counts full slots\n\nvoid *producer(void *arg) {\n    int item;\n    for (int i = 0; i < ITEMS_TO_PRODUCE; i++) {\n        item = i; // Produce an item\n        \n        // The question refers to swapping these two lines:\n        // sem_wait(&empty); // Original correct order: Wait if buffer is full\n        // sem_wait(&mutex); // Original correct order: Acquire mutex\n        \n        // If swapped, it would be:\n        // sem_wait(&mutex); // Acquire mutex\n        // sem_wait(&empty); // Wait if buffer is full\n        \n        // For the purpose of running this code snippet as-is, we keep the correct order:\n        sem_wait(&empty); \n        sem_wait(&mutex); \n        \n        buffer[in] = item;\n        printf(\"Producer produced: %d at index %d\\n\", item, in);\n        in = (in + 1) % BUFFER_SIZE;\n        \n        sem_post(&mutex); // Release mutex\n        sem_post(&full);  // Signal that buffer has a new item\n        \n        usleep(100000); // Simulate work\n    }\n    return NULL;\n}\n\nvoid *consumer(void *arg) {\n    int item;\n    for (int i = 0; i < ITEMS_TO_PRODUCE; i++) {\n        sem_wait(&full);  // Wait if buffer is empty\n        sem_wait(&mutex); // Acquire mutex\n        \n        item = buffer[out];\n        printf(\"Consumer consumed: %d from index %d\\n\", item, out);\n        out = (out + 1) % BUFFER_SIZE;\n        \n        sem_post(&mutex); // Release mutex\n        sem_post(&empty); // Signal that buffer has an empty slot\n        \n        usleep(150000); // Simulate work\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t prod_tid[NUM_PRODUCERS], cons_tid[NUM_CONSUMERS];\n\n    // Initialize semaphores\n    sem_init(&mutex, 0, 1);             // Mutex for critical section (1 for binary semaphore)\n    sem_init(&empty, 0, BUFFER_SIZE);  // Initially BUFFER_SIZE empty slots\n    sem_init(&full, 0, 0);              // Initially 0 full slots\n\n    // Create producer threads\n    for (int i = 0; i < NUM_PRODUCERS; i++) {\n        pthread_create(&prod_tid[i], NULL, producer, NULL);\n    }\n\n    // Create consumer threads\n    for (int i = 0; i < NUM_CONSUMERS; i++) {\n        pthread_create(&cons_tid[i], NULL, consumer, NULL);\n    }\n\n    // Join threads\n    for (int i = 0; i < NUM_PRODUCERS; i++) {\n        pthread_join(prod_tid[i], NULL);\n    }\n    for (int i = 0; i < NUM_CONSUMERS; i++) {\n        pthread_join(cons_tid[i], NULL);\n    }\n\n    // Destroy semaphores\n    sem_destroy(&mutex);\n    sem_destroy(&empty);\n    sem_destroy(&full);\n\n    return 0;\n}",
+      "options": [
+        "א. התוכנית תרוץ כרגיל וללא שינוי בהתנהגות.",
+        "ב. ייתכן מצב של תנאי מירוץ (race condition) בגישה למאגר.",
+        "ג. התוכנית תיכנס למצב של קיפאון (deadlock).",
+        "ד. הצרכן יצרוך פריטים לא תקינים (garbage values).",
+        "ה. התוכנית תקרוס עקב שגיאת חלוקת זיכרון."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג'. במימוש הקלאסי של בעיית יצרן-צרכן עם סמפורים, היצרן צריך קודם כל להמתין למקום פנוי במאגר (באמצעות sem_wait(&empty)) ורק אז לנעול את המאגר לגישה בלעדית (באמצעות sem_wait(&mutex)). אם הסדר מתהפך, והיצרן לוקח קודם את ה-mutex ולאחר מכן ממתין למקום פנוי (sem_wait(&empty)), ייתכן מצב של קיפאון.\nלדוגמה, אם המאגר מתמלא לחלוטין (כלומר, empty מגיע ל-0), היצרן ינסה לייצר פריט נוסף. הוא יצליח לקחת את ה-mutex, אך אז ייתקע בניסיון לבצע sem_wait(&empty) מכיוון שאין מקום פנוי. במצב זה, היצרן מחזיק ב-mutex ואינו משחרר אותו. הצרכן, לעומת זאת, כדי לצרוך פריט ולפנות מקום (ובכך להגדיל את empty), צריך גם הוא לקחת את ה-mutex. מכיוון שהיצרן מחזיק ב-mutex, הצרכן לא יוכל להמשיך, וכתוצאה מכך היצרן לא יוכל לשחרר את ה-mutex והתוכנית תיכנס לקיפאון."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

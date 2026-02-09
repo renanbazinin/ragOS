@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "RAID and File Systems",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 20:02:34",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1011,
+      "output_tokens": 441,
+      "total_tokens": 4025
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "RAID",
+      "File Systems"
+    ],
+    "content": {
+      "text": "בהינתן מספר דיסקים קשיחים המשמשים לאחסון מערכת קבצים כללית, איזו תצורת RAID מבין הבאות תציע את השילוב האופטימלי של ביצועי קריאה וכתיבה גבוהים יחד עם עמידות בפני כשל של דיסק בודד?",
+      "code_snippet": null,
+      "options": [
+        "א. RAID-0",
+        "ב. RAID-1",
+        "ג. RAID-5",
+        "ד. RAID-10 (1+0)",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ד",
+      "explanation": "תצורת RAID-10 (או RAID 1+0) משלבת את היתרונות של RAID-1 (שכפול נתונים לעמידות בפני כשל וביצועי קריאה מצוינים) עם אלו של RAID-0 (פסיעה בין דיסקים לשיפור ביצועי קריאה וכתיבה). היא מספקת עמידות בפני כשל של דיסק אחד לפחות (ולרוב יותר, תלוי במיקום הדיסקים הכושלים) וביצועי קריאה וכתיבה גבוהים באופן משמעותי יותר מ-RAID-1 או RAID-5 עבור מערכות קבצים כלליות, במיוחד עם עומסי עבודה מעורבים של קריאה וכתיבה."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

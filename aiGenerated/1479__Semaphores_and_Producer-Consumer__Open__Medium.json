@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Producer-Consumer",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 10:41:42",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1649,
+      "output_tokens": 1612,
+      "total_tokens": 6613
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "Open",
+    "topic": [
+      "Semaphores",
+      "Producer-Consumer",
+      "Synchronization",
+      "Deadlocks"
+    ],
+    "content": {
+      "text": "נתונה בעיית ה-Producer-Consumer הקלאסית עם חוצץ מעגלי בעל קיבולת של N פריטים. יש לממש את קטעי הקוד הרלוונטיים עבור הפונקציות producer ו-consumer המשתמשות בסמפורים לצורך סנכרון, וכן לכתוב את קוד אתחול הסמפורים הנדרשים. הנח שקיימות פונקציות produce_item(), insert_item(item), remove_item() ו-consume_item(item) הזמינות לשימוש.\n\nלאחר מכן, נניח שהקוד מומש כראוי, אך בטעות אתחלנו את הסמפור mutex ל-0 במקום ל-1. הסבר מה יקרה במצב זה, תאר את ההשלכות על פעולת המערכת וציין האם תיתכן תופעת קיפאון (deadlock) או הרעבה (starvation).",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": 15,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "פתרון נכון לבעיית ה-Producer-Consumer:\n\nאתחול סמפורים (לדוגמה עבור N=10):\n```c\n#include <semaphore.h>\n#include <stdbool.h>\n\n#define N 10 // גודל החוצץ\n\nsem_t empty;   // מספר מקומות ריקים בחוצץ, מאותחל ל-N\nsem_t full;    // מספר מקומות מלאים בחוצץ, מאותחל ל-0\nsem_t mutex;   // סמפור בינארי להדדיות, מאותחל ל-1\n\nvoid init_semaphores() {\n    sem_init(&empty, 0, N);\n    sem_init(&full, 0, 0);\n    sem_init(&mutex, 0, 1);\n}\n\n// פונקציות עזר (הנחה שהן קיימות)\ntypedef int item_t;\nitem_t produce_item() { /* ... */ return 0; }\nvoid insert_item(item_t item) { /* ... */ }\nitem_t remove_item() { /* ... */ return 0; }\nvoid consume_item(item_t item) { /* ... */ }\n```\n\nקוד ה-Producer:\n```c\nvoid *producer(void *arg) {\n    item_t item;\n    while (true) {\n        item = produce_item();\n        sem_wait(&empty); // המתן למקום פנוי\n        sem_wait(&mutex); // קבל גישה בלעדית לחוצץ\n        insert_item(item); // קטע קריטי: הכנס פריט לחוצץ\n        sem_post(&mutex); // שחרר את הגישה לחוצץ\n        sem_post(&full);  // אותת שיש פריט מלא חדש\n    }\n    return NULL;\n}\n```\n\nקוד ה-Consumer:\n```c\nvoid *consumer(void *arg) {\n    item_t item;\n    while (true) {\n        sem_wait(&full);  // המתן לפריט מלא\n        sem_wait(&mutex); // קבל גישה בלעדית לחוצץ\n        item = remove_item(); // קטע קריטי: הוצא פריט מהחוצץ\n        sem_post(&mutex); // שחרר את הגישה לחוצץ\n        sem_post(&empty); // אותת שיש מקום פנוי חדש\n        consume_item(item);\n    }\n    return NULL;\n}\n```\n\nהסבר לגבי אתחול `mutex` ל-0 במקום ל-1:\nאם הסמפור `mutex` מאותחל בטעות ל-0, פירושו של דבר שערכו ההתחלתי הוא 0. מכיוון ש-`mutex` משמש להבטחת הדדיות (mutual exclusion) עבור הגישה לחוצץ, כל ניסיון של תהליך (Producer או Consumer) לבצע `sem_wait(&mutex)` יגרום לו להיחסם באופן מיידי, מכיוון שערך הסמפור אינו חיובי.\n\nההשלכות על פעולת המערכת הן כדלקמן:\n1.  **קיפאון (Deadlock):** המערכת תיכנס למצב של קיפאון מוחלט. אף תהליך לא יוכל להיכנס לקטע הקריטי כדי להכניס או להוציא פריטים מהחוצץ. ה-Producer ינסה להכניס פריט, יבצע `sem_wait(&empty)` (אם יש מקום פנוי, כלומר אם `empty` גדול מ-0), אך מיד לאחר מכן יתקע בניסיון לבצע `sem_wait(&mutex)` כי ערכו הוא 0. ה-Consumer, מצידו, יתקע מיד ב-`sem_wait(&full)` מכיוון שהחוצץ ריק בהתחלה (`full` מאותחל ל-0) ואין מי שיכניס פריטים. גם אם היה פריט כלשהו בחוצץ (תרחיש שלא ייתכן עם אתחול כזה), ה-Consumer היה נתקע ב-`sem_wait(&mutex)`. אף תהליך לא יוכל להתקדם, וכל התהליכים המעורבים ימתינו זה לזה ללא יכולת לשחרר את המשאבים שהם צריכים.\n2.  **הרעבה (Starvation):** במקרה זה, לא מדובר בתופעת הרעבה במובן הקלאסי (שבו תהליכים מסוימים זוכים למשאבים בעוד אחרים לאורך זמן אינם מקבלים אותם). כאן, כל התהליכים פשוט נחסמים באופן מיידי ומתמשך, כך שאין אף תהליך שמצליח להתקדם. לכן, התופעה העיקרית היא קיפאון מוחלט של המערכת, ולא הרעבה סלקטיבית.\n\nלסיכום, אתחול שגוי של `mutex` ל-0 יגרום לקיפאון מיידי של המערכת, כאשר אף תהליך לא יוכל לגשת לחוצץ."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

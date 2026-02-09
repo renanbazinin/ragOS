@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "System Calls",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 07:22:46",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3498,
+      "output_tokens": 2706,
+      "total_tokens": 10922
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "System Calls",
+      "Process Management",
+      "File I/O"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C בשם `main_prog.c` המבצעת פעולות פתיחה וכתיבה לקובץ, ולאחר מכן יוצרת תהליך בן באמצעות `fork`. תהליך הבן, בתורו, מנסה לכתוב לאותו קובץ ולאחר מכן מבצע `execv` לתוכנית אחרת בשם `writer_prog.c`. תוכנית `writer_prog.c` מקבלת את מספר מתאר הקובץ (file descriptor) כארגומנט ומנסה לכתוב באמצעותו. תהליך האב ממתין לסיום הבן ומבצע כתיבה נוספת לקובץ לפני סגירתו.\n\nנתחו את הקוד המצורף והסבירו בפירוט את רצף האירועים, כולל את מצב מתארי הקבצים בכל שלב, את השפעת דגל `O_CLOEXEC` ואת התוכן הסופי של הקובץ `output.txt` בסיום ריצת התוכנית כולה. ציינו במפורש מה יהיה הפלט לקונסול (stdout) של כל תהליך ומה יהיה התוכן הסופי של הקובץ `output.txt`.\n\n**קוד התוכניות:**",
+      "code_snippet": "/* main_prog.c */\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <fcntl.h>\n#include <sys/wait.h>\n#include <string.h>\n\nint main() {\n    int fd;\n    pid_t pid;\n    char *filename = \"output.txt\";\n    char fd_str[10];\n\n    // 1. Parent opens file with O_CLOEXEC\n    fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC, 0644);\n    if (fd == -1) {\n        perror(\"Parent: open failed\");\n        return 1;\n    }\n    printf(\"Parent: Opened %s with fd %d\\n\", filename, fd);\n\n    // 2. Parent initial write\n    write(fd, \"Parent initial write\\n\", strlen(\"Parent initial write\\n\"));\n\n    pid = fork();\n    if (pid == -1) {\n        perror(\"Parent: fork failed\");\n        close(fd);\n        return 1;\n    }\n\n    if (pid == 0) { // Child process\n        printf(\"Child: In child process, inherited fd %d\\n\", fd);\n        // 3. Child attempts to write to inherited FD\n        ssize_t bytes_written_child = write(fd, \"Child direct write\\n\", strlen(\"Child direct write\\n\"));\n        if (bytes_written_child == -1) {\n            perror(\"Child: write to inherited fd failed\");\n        } else {\n            printf(\"Child: Wrote %zd bytes to inherited fd %d\\n\", bytes_written_child, fd);\n        }\n\n        // Prepare arguments for execv\n        sprintf(fd_str, \"%d\", fd);\n        char *args[] = {\"./writer_prog\", fd_str, NULL};\n\n        // 4. Child execs writer_prog\n        printf(\"Child: Executing writer_prog with fd %s\\n\", fd_str);\n        execv(\"./writer_prog\", args);\n        perror(\"Child: execv failed\"); // Should only reach here if execv fails\n        _exit(1); // Use _exit in child after fork/exec failure\n    } else { // Parent process\n        // 5. Parent waits for child\n        printf(\"Parent: Waiting for child %d\\n\", pid);\n        wait(NULL);\n\n        // 6. Parent final write\n        write(fd, \"Parent final write\\n\", strlen(\"Parent final write\\n\"));\n\n        // 7. Parent closes FD\n        close(fd);\n        printf(\"Parent: Closed fd %d\\n\", fd);\n    }\n\n    return 0;\n}\n\n/* writer_prog.c */\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <string.h>\n#include <errno.h> // For errno\n\nint main(int argc, char *argv[]) {\n    if (argc != 2) {\n        fprintf(stderr, \"Usage: %s <file_descriptor_number>\\n\", argv[0]);\n        return 1;\n    }\n\n    int fd_from_parent = atoi(argv[1]);\n    printf(\"Writer_prog: Received fd %d\\n\", fd_from_parent);\n\n    // 8. writer_prog tries to write to the received FD\n    ssize_t bytes_written_writer = write(fd_from_parent, \"Writer prog write\\n\", strlen(\"Writer prog write\\n\"));\n    if (bytes_written_writer == -1) {\n        perror(\"Writer_prog: write to received fd failed\");\n        // Check if errno indicates Bad file descriptor\n        if (errno == EBADF) {\n            printf(\"Writer_prog: write failed because fd %d is a bad file descriptor.\\n\", fd_from_parent);\n        }\n    } else {\n        printf(\"Writer_prog: Wrote %zd bytes to fd %d\\n\", bytes_written_writer, fd_from_parent);\n    }\n\n    return 0;\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הסבר מפורט:\n1.  **פתיחת הקובץ על ידי האב (main_prog)**: תהליך האב פותח את הקובץ `output.txt` באמצעות `open` עם הדגלים `O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC, 0644`. הדגל `O_CLOEXEC` חשוב במיוחד כאן: הוא מציין שמתאר קובץ זה (fd) ייסגר אוטומטית אם התהליך יבצע קריאה מוצלחת ל-`exec` (או אחת ממשפחתה). בדוגמה זו, נניח ש-`fd` מקבל את הערך 3.\n2.  **כתיבה ראשונית של האב**: האב כותב את \"Parent initial write\\n\" לקובץ. הקובץ `output.txt` מכיל בשלב זה שורה זו, ומצביע הכתיבה מתקדם.\n3.  **קריאת `fork()`**: האב יוצר תהליך בן. חשוב לזכור ש-`fork()` משכפל את טבלת מתארי הקבצים של האב לתהליך הבן. המשמעות היא שהבן יורש עותק של מתאר הקובץ `fd` של האב, והוא מצביע לאותה תיאור קובץ פתוח (open file description) בקרנל. לכן, גם בבן, `fd` יהיה פתוח ויצביע לאותו קובץ, עם אותו מצביע כתיבה ואותם דגלים, כולל `O_CLOEXEC`.\n4.  **כתיבה ישירה של הבן**: תהליך הבן מנסה לכתוב \"Child direct write\\n\" באמצעות מתאר הקובץ `fd` שירש. כתיבה זו תצליח, מכיוון שמתאר הקובץ עדיין פתוח ותקף בבן. הקובץ `output.txt` יכיל כעת:\n    ```\n    Parent initial write\n    Child direct write\n    ```\n    ומצביע הכתיבה יתקדם שוב.\n5.  **קריאת `execv()` על ידי הבן**: תהליך הבן קורא ל-`execv()` כדי להריץ את `writer_prog`. כאן נכנס לתמונה דגל `O_CLOEXEC`. מכיוון שמתאר הקובץ `fd` נפתח עם דגל זה, הקרנל *סוגר אוטומטית* את מתאר הקובץ `fd` (במקרה שלנו, 3) בתהליך הבן *לפני* ש-`writer_prog` מתחילה לפעול. זה מבטיח שתוכניות חדשות לא יירשו בטעות מתארי קבצים שנועדו להיות פרטיים לתהליך הקודם.\n6.  **ניסיון כתיבה של `writer_prog`**: תוכנית `writer_prog` מתחילה ונקראת עם מספר מתאר הקובץ `fd` (שעבר כארגומנט) כ-3. כאשר היא מנסה לבצע `write(3, \"Writer prog write\\n\", ...)` היא תגלה שמתאר קובץ 3 אינו תקף יותר עבורה (הוא נסגר על ידי הקרנל בעקבות `O_CLOEXEC` ו-`execv`). לכן, קריאת `write` זו תיכשל, ותחזיר -1, עם `errno` השווה ל-`EBADF` (Bad file descriptor).\n7.  **האב ממתין וכותב כתיבה סופית**: תהליך האב ממתין לסיום הבן. לאחר מכן, הוא ממשיך וכותב \"Parent final write\\n\" למתאר הקובץ `fd` שלו. כתיבה זו תצליח, מכיוון שמתאר הקובץ של האב לא הושפע מקריאת `execv` של הבן והוא עדיין פתוח ותקף. הקובץ `output.txt` יכיל כעת:\n    ```\n    Parent initial write\n    Child direct write\n    Parent final write\n    ```\n    ומצביע הכתיבה יתקדם.\n8.  **סגירת הקובץ על ידי האב**: האב סוגר את מתאר הקובץ `fd` שלו.\n\n**פלט לקונסול (stdout):**\n(הערה: סדר הפלטים מה-stdout של האב והבן/writer_prog יכול להשתנות בהתאם ל-scheduler, אך ההודעות עצמן יופיעו.)\n```\nParent: Opened output.txt with fd 3\nParent: Waiting for child <child_pid>\nChild: In child process, inherited fd 3\nChild: Wrote 19 bytes to inherited fd 3\nChild: Executing writer_prog with fd 3\nWriter_prog: Received fd 3\nWriter_prog: write to received fd failed: Bad file descriptor\nWriter_prog: write failed because fd 3 is a bad file descriptor.\nParent: Closed fd 3\n```\n\n**תוכן סופי של הקובץ `output.txt`:**\n```\nParent initial write\nChild direct write\nParent final write\n```"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

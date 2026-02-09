@@ -1,0 +1,58 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Processes and Threads",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 10:19:27",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2789,
+      "output_tokens": 4658,
+      "total_tokens": 17777
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Processes",
+      "Threads",
+      "Concurrency",
+      "System Calls"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה, המשלבת תהליכים (processes) ותהליכונים (threads). יש להניח שכל קריאות המערכת והספרייה מצליחות, וכי מערכת ההפעלה אינה מבצעת החלפת הקשר (context switch) באופן שרירותי בתוך לולאת הגישה למשתנה המשותף (כלומר, קריאת ה-`global_counter++` מבוצעת אטומית מבחינת ה-CPU עבור כל הגדלה בודדת, אך אין שום מנגנון סנכרון ברמת התוכנית המבטיח את שלמות המונה הכולל). תזכורת: קריאה ל-`fork()` בתהליך מרובה תהליכונים משכפלת רק את התהליכון שביצע את הקריאה (במקרה זה, התהליכון הראשי של `main`).",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <pthread.h>\n#include <sys/wait.h>\n\n#define INITIAL_THREADS 3 // מספר התהליכונים שנוצרים לפני ה-fork\n#define POST_FORK_THREADS 2 // מספר התהליכונים שנוצרים אחרי ה-fork בכל תהליך\n#define INCREMENTS_PER_THREAD 100000 // מספר הפעמים שכל תהליכון מגדיל את המונה\n\nint global_counter = 0; // משתנה גלובלי משותף\n\n// פונקציית התהליכון\nvoid* thread_func(void* arg) {\n    int i;\n    int thread_logical_id = *(int*)arg; // מזהה לוגי לצורך הדפסה\n    printf(\"Thread %d (PID %d) starting work.\\n\", thread_logical_id, getpid());\n    for (i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n        global_counter++; // פעולה לא מסונכרנת על משתנה משותף\n    }\n    printf(\"Thread %d (PID %d) finished work. Counter: %d\\n\", thread_logical_id, getpid(), global_counter);\n    return NULL;\n}\n\nint main() {\n    pthread_t initial_pthreads[INITIAL_THREADS];\n    pthread_t post_fork_pthreads[POST_FORK_THREADS];\n    int thread_ids[INITIAL_THREADS + POST_FORK_THREADS]; // מזהים לוגיים עבור התהליכונים\n    int i;\n\n    printf(\"Main process (PID: %d) starting. Initial global_counter: %d\\n\", getpid(), global_counter);\n\n    // 1. יצירת תהליכונים ראשוניים בתהליך הראשי\n    for (i = 0; i < INITIAL_THREADS; ++i) {\n        thread_ids[i] = i + 1; // מזהים 1, 2, 3\n        if (pthread_create(&initial_pthreads[i], NULL, thread_func, &thread_ids[i]) != 0) {\n            perror(\"pthread_create initial failed\");\n            exit(1);\n        }\n    }\n\n    // נותנים זמן קצר לתהליכונים הראשוניים להתחיל לרוץ\n    usleep(10000); // 10ms\n\n    printf(\"Main process (PID: %d) forking. Current global_counter: %d\\n\", getpid(), global_counter);\n    pid_t pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        exit(1);\n    } else if (pid == 0) { // תהליך הבן\n        printf(\"Child process (PID: %d, PPID: %d) after fork. Its global_counter copy: %d\\n\", getpid(), getppid(), global_counter);\n        // בתהליך הבן, רק התהליכון שקרא ל-fork קיים.\n        // משתנה global_counter שוכפל. התהליכונים הראשוניים של האב אינם קיימים בבן.\n\n        // 2. יצירת תהליכונים נוספים בתהליך הבן\n        for (i = 0; i < POST_FORK_THREADS; ++i) {\n            thread_ids[INITIAL_THREADS + i] = 100 + i + 1; // מזהים 101, 102\n            if (pthread_create(&post_fork_pthreads[i], NULL, thread_func, &thread_ids[INITIAL_THREADS + i]) != 0) {\n                perror(\"pthread_create child failed\");\n                exit(1);\n            }\n        }\n\n        // הבן ממתין רק לתהליכונים שהוא יצר (אלה שאחרי ה-fork)\n        for (i = 0; i < POST_FORK_THREADS; ++i) {\n            pthread_join(post_fork_pthreads[i], NULL);\n        }\n        printf(\"Child process (PID: %d): Final global_counter = %d\\n\", getpid(), global_counter);\n\n    } else { // תהליך האב\n        printf(\"Parent process (PID: %d) after fork. Child PID: %d. Its global_counter copy: %d\\n\", getpid(), pid, global_counter);\n\n        // 2. יצירת תהליכונים נוספים בתהליך האב\n        for (i = 0; i < POST_FORK_THREADS; ++i) {\n            thread_ids[INITIAL_THREADS + i] = 200 + i + 1; // מזהים 201, 202\n            if (pthread_create(&post_fork_pthreads[i], NULL, thread_func, &thread_ids[INITIAL_FORK_THREADS + i]) != 0) {\n                perror(\"pthread_create parent failed\");\n                exit(1);\n            }\n        }\n\n        // האב ממתין לכל התהליכונים שלו (הראשוניים ואלה שאחרי ה-fork)\n        for (i = 0; i < INITIAL_THREADS; ++i) {\n            pthread_join(initial_pthreads[i], NULL);\n        }\n        for (i = 0; i < POST_FORK_THREADS; ++i) {\n            pthread_join(post_fork_pthreads[i], NULL);\n        }\n        \n        wait(NULL); // האב ממתין לתהליך הבן\n        printf(\"Parent process (PID: %d): Final global_counter = %d\\n\", getpid(), global_counter);\n    }\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "מהם הערכים האפשריים (טווח ערכים) של `global_counter` הסופי שיוצגו על ידי תהליך האב ועל ידי תהליך הבן? הסבירו באופן מפורט את החישובים ואת הגורמים לאי-הוודאות.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "ציירו את עץ התהליכים והתהליכונים שנוצרו. ציינו עבור כל תהליך את ה-PID שלו, ועבור כל תהליכון את ה-PID של התהליך שהוא שייך אליו ואת המזהה הלוגי שלו (thread_logical_id) כפי שמועבר לו. יש לציין במפורש אילו תהליכונים קיימים בכל תהליך לאחר קריאת ה-`fork()`.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.3",
+        "text": "אם היינו מעבירים את קריאת ה-`fork()` לשורה 12 (לפני יצירת התהליכונים הראשוניים), מה היו הערכים הסופיים הצפויים של `global_counter` בתהליך האב ובתהליך הבן? נמקו.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "### פתרון לשאלה 1.1: ערכים אפשריים של `global_counter`\n\nהערך `INCREMENTS_PER_THREAD` הוא 100,000.\n\n**תהליך האב:**\n*   **מספר התהליכונים הפעילים:** בתהליך האב, התהליכונים הראשוניים (`INITIAL_THREADS = 3`) שנוצרו לפני ה-`fork()` ממשיכים לרוץ. בנוסף, האב יוצר עוד `POST_FORK_THREADS = 2` תהליכונים חדשים. סך הכל 5 תהליכונים פעילים אצל האב, כל אחד מנסה להגדיל את המונה 100,000 פעמים.\n*   **ערך צפוי (ללא מרוץ):** `5 * 100,000 = 500,000`.\n*   **בפועל (עם מרוץ):** מכיוון שאין מנגנון סנכרון (mutex) על המשתנה `global_counter`, תתרחש תופעת מרוץ (race condition). מספר רב של הגדלות יאבדו כתוצאה מכך שתהליכונים שונים יקראו את אותו ערך, יגדילו אותו ויכתבו אותו בחזרה, ובכך ידרוסו הגדלות של תהליכונים אחרים. לדוגמה, אם שני תהליכונים קוראים את `global_counter` כשהוא 100, שניהם מגדילים אותו ל-101, ואז שניהם כותבים 101 בחזרה, נוצרה רק הגדלה אחת במקום שתיים.\n*   **טווח ערכים סופי באב:** הערך הסופי של `global_counter` בתהליך האב יהיה קטן מ-`500,000`. הטווח יהיה בין `5` (במקרה הקיצוני שבו כל תהליכון הצליח לבצע הגדלה אחת בלבד) לבין `499,999` (במקרה של אובדן מינימלי של הגדלות). בפועל, סביר שהערך יהיה קרוב ל-500,000 אך באופן עקבי נמוך ממנו.\n\n**תהליך הבן:**\n*   **ערך `global_counter` בעת ה-`fork()`:** כאשר `fork()` נקרא, תהליך הבן מקבל עותק משלו של מרחב הזיכרון של האב. העותק של `global_counter` שיקבל הבן (נקרא לו `C_initial_child`) יהיה הערך של `global_counter` באב *באותו רגע בדיוק*. מכיוון שהתהליכונים הראשוניים של האב כבר החלו לרוץ (וניתנה להם שהות של 10ms), הערך `C_initial_child` יהיה גדול מ-0, ויהיה תוצאה של מרוץ בין 3 התהליכונים הראשוניים של האב על `global_counter`. לכן, `0 < C_initial_child <= 3 * 100,000 = 300,000`. הערך המדויק אינו ניתן לחיזוי.\n*   **מספר התהליכונים הפעילים:** בתהליך הבן, רק התהליכון הראשי של `main` שוכפל. התהליכונים הראשוניים של האב (initial_pthreads) אינם קיימים בבן. תהליך הבן יוצר `POST_FORK_THREADS = 2` תהליכונים חדשים משלו, ורק אלה יפעלו על עותק ה-`global_counter` שלו.\n*   **הגדלות צפויות מהתהליכונים החדשים של הבן:** `2 * 100,000 = 200,000`.\n*   **בפועל (עם מרוץ):** גם כאן, תתרחש תופעת מרוץ בין 2 התהליכונים של הבן על ה-`global_counter` שלו, ולכן מספר ההגדלות בפועל יהיה קטן מ-200,000.\n*   **טווח ערכים סופי בבן:** הערך הסופי של `global_counter` בתהליך הבן יהיה `C_initial_child` בתוספת מספר ההגדלות בפועל מ-2 התהליכונים שלו. טווח ההגדלות בפועל הוא בין `2` ל-`199,999`. לכן, הטווח הכולל לבן יהיה בערך בין `C_initial_child + 2` לבין `C_initial_child + 199,999`. בהינתן ש-`C_initial_child` יכול להיות עד 300,000, הטווח המקסימלי לתוצאה הסופית של הבן יכול להגיע לכמעט `300,000 + 200,000 = 500,000` (פחות אובדן מרוץ).\n\n### פתרון לשאלה 1.2: עץ התהליכים והתהליכונים\n\nנניח ש-PID של התהליך הראשי הוא `P_MAIN_PID` ו-PID של הבן הוא `P_CHILD_PID`.\n\n**לפני קריאת ה-`fork()`:**\n*   **תהליך P_MAIN_PID (האב המקורי)**\n    *   T0 (התהליכון הראשי של `main`)\n    *   T1 (thread_logical_id 1)\n    *   T2 (thread_logical_id 2)\n    *   T3 (thread_logical_id 3)\n\n**לאחר קריאת ה-`fork()`:**\n*   **תהליך P_MAIN_PID (האב)**\n    *   T0 (התהליכון הראשי של `main`)\n    *   T1 (thread_logical_id 1) - קיים מהשלב הקודם\n    *   T2 (thread_logical_id 2) - קיים מהשלב הקודם\n    *   T3 (thread_logical_id 3) - קיים מהשלב הקודם\n    *   T4 (thread_logical_id 201) - תהליכון חדש שנוצר על ידי האב לאחר ה-`fork()`\n    *   T5 (thread_logical_id 202) - תהליכון חדש שנוצר על ידי האב לאחר ה-`fork()`\n\n*   **תהליך P_CHILD_PID (הבן)**\n    *   T0' (עותק של התהליכון הראשי של האב בזמן ה-`fork()`)\n    *   T6 (thread_logical_id 101) - תהליכון חדש שנוצר על ידי הבן לאחר ה-`fork()`\n    *   T7 (thread_logical_id 102) - תהליכון חדש שנוצר על ידי הבן לאחר ה-`fork()`\n\n**הערה חשובה:** התהליכונים T1, T2, T3 שנוצרו באב *לפני* ה-`fork()` אינם קיימים בתהליך הבן. רק התהליכון שביצע את קריאת ה-`fork()` (התהליכון הראשי T0) משוכפל לתהליך הבן (בתור T0').\n\n### פתרון לשאלה 1.3: העברת `fork()` לפני יצירת התהליכונים הראשוניים\n\nאם קריאת ה-`fork()` הייתה מועברת לשורה 12 (כלומר, לפני הלולאה הראשונה שיוצרת את `INITIAL_THREADS`):\n\n**שינוי התנהגות:**\n*   **ערך `global_counter` בעת ה-`fork()`:** מכיוון שקריאת ה-`fork()` תתבצע לפני יצירת תהליכונים כלשהם, הערך של `global_counter` יהיה 0 גם באב וגם בבן ברגע יצירתם. לא יהיו הגדלות מוקדמות שישוכפלו לבן.\n*   **יצירת תהליכונים בכל תהליך:**\n    *   **תהליך האב:** יצור סך הכל `INITIAL_THREADS + POST_FORK_THREADS = 5` תהליכונים (3 ראשוניים ואז 2 נוספים). כל התהליכונים הללו יתחרו על עותק ה-`global_counter` של האב.\n    *   **תהליך הבן:** יצור סך הכל `INITIAL_THREADS + POST_FORK_THREADS = 5` תהליכונים (3 ראשוניים ואז 2 נוספים). כל התהליכונים הללו יתחרו על עותק ה-`global_counter` של הבן.\n\n**הערכים הסופיים הצפויים של `global_counter`:**\n*   **תהליך האב:** יתחיל מ-`global_counter = 0`. 5 תהליכונים ינסו להגדיל אותו סך הכל `5 * 100,000 = 500,000` פעמים. עקב מרוץ, הערך הסופי יהיה קטן מ-`500,000` (בטווח של `5` עד `499,999`).\n*   **תהליך הבן:** יתחיל מ-`global_counter = 0`. 5 תהליכונים ינסו להגדיל אותו סך הכל `5 * 100,000 = 500,000` פעמים. עקב מרוץ, הערך הסופי יהיה קטן מ-`500,000` (בטווח של `5` עד `499,999`).\n\n**נימוק:** במצב זה, גם האב וגם הבן מתחילים עם `global_counter` מאופס, וכל אחד מהם יוצר את אותו מספר תהליכונים (5) שמתחרים על הגדלת המונה שלהם. לכן, שניהם יציגו התנהגות סטטיסטית דומה מאוד עבור הערך הסופי של `global_counter`, שיהיה נמוך מהסכום האידיאלי עקב מרוץ, אך שווה ערך פחות או יותר בין האב לבן."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

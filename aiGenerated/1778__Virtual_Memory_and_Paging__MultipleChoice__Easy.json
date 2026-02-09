@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory and Paging",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 20:47:00",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 949,
+      "output_tokens": 494,
+      "total_tokens": 2970
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Virtual Memory",
+      "Paging",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של מנגנון ה-paging בניהול זיכרון וירטואלי?",
+      "code_snippet": null,
+      "options": [
+        "א. להפחית את מספר ה-context switches הנדרשים.",
+        "ב. לאפשר לכל תהליך להשתמש במרחב כתובות וירטואלי רציף וגדול, ללא תלות בזיכרון הפיזי הזמין.",
+        "ג. למנוע פרגמנטציה חיצונית (external fragmentation) בזיכרון הפיזי.",
+        "ד. להאיץ את תרגום הכתובות מכתובת וירטואלית לכתובת פיזית.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב'. מנגנון ה-paging, כחלק מזיכרון וירטואלי, מאפשר לכל תהליך לראות מרחב כתובות וירטואלי משלו, רציף ולרוב גדול בהרבה מהזיכרון הפיזי הזמין. הוא מנתק את התלות בין מבנה הזיכרון הלוגי של התהליך לבין מיקומו הפיזי ב-RAM, ומאפשר לפזר דפים של תהליך בזיכרון הפיזי באופן לא רציף, או אף להחליף אותם לדיסק. מניעת פרגמנטציה חיצונית (ג') היא תועלת חשובה של paging, אך אינה המטרה העיקרית של מתן אבסטרקציה של זיכרון וירטואלי."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

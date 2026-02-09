@@ -1,0 +1,53 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Condition Variables",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 07:34:51",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3816,
+      "output_tokens": 2503,
+      "total_tokens": 10441
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Condition Variables",
+      "Synchronization",
+      "Concurrency",
+      "Readers-Writers Problem",
+      "Starvation"
+    ],
+    "content": {
+      "text": "נתונה המחלקה `ReadWriteLock` הממומשת ב-C++ ומשתמשת במנעול (mutex) ובמשתני תנאי (condition variables) כדי לסנכרן גישה למשאב משותף בין תהליכי קוראים (readers) ותהליכי כותבים (writers).\nכללים לגישה למשאב:\n1.  מספר קוראים יכולים לגשת למשאב בו-זמנית.\n2.  רק כותב יחיד יכול לגשת למשאב בכל רגע נתון.\n3.  כאשר כותב פעיל, אף קורא או כותב אחר אינו יכול לגשת.\n4.  כאשר קוראים פעילים, אף כותב אינו יכול לגשת.\n\nנתון מימוש המחלקה הבא:",
+      "code_snippet": "#include <mutex>\n#include <condition_variable>\n\nclass ReadWriteLock {\nprivate:\n    std::mutex mtx;\n    std::condition_variable reader_cv;\n    std::condition_variable writer_cv;\n    int active_readers = 0;\n    bool active_writer = false;\n\npublic:\n    void acquire_read_lock() {\n        std::unique_lock<std::mutex> lock(mtx);\n        reader_cv.wait(lock, [this] {\n            return !active_writer;\n        });\n        active_readers++;\n    }\n\n    void release_read_lock() {\n        std::unique_lock<std::mutex> lock(mtx);\n        active_readers--;\n        if (active_readers == 0) {\n            writer_cv.notify_one();\n        }\n    }\n\n    void acquire_write_lock() {\n        std::unique_lock<std::mutex> lock(mtx);\n        writer_cv.wait(lock, [this] {\n            return active_readers == 0 && !active_writer;\n        });\n        active_writer = true;\n    }\n\n    void release_write_lock() {\n        std::unique_lock<std::mutex> lock(mtx);\n        active_writer = false;\n        reader_cv.notify_all(); // מעיר את כל הקוראים הממתינים\n        writer_cv.notify_one(); // מעיר כותב אחד ממתין (אם יש)\n    }\n};",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "a",
+        "text": "זהו בעיית סנכרון פוטנציאלית אחת (לפחות) הקיימת במימוש הנתון של המחלקה `ReadWriteLock`. הסבירו מדוע היא מתרחשת.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "b",
+        "text": "הציעו תיקון לבעיה שזיהיתם בסעיף א'. הציגו את קטע הקוד המתוקן במלואו עבור המחלקה `ReadWriteLock` והסבירו את השינויים שביצעתם ואת האופן שבו הם פותרים את הבעיה.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "סעיף א': זיהוי והסבר הבעיה\nהבעיה העיקרית במימוש הנתון היא **הרעבת כותבים (Writer Starvation)**.\n**הסבר:**\n1.  **גישת קוראים בלתי מוגבלת:** בפונקציה `acquire_read_lock`, קורא ממתין רק אם `active_writer` הוא `true` (כלומר, כותב פעיל). אם אין כותב פעיל, קוראים חדשים יכולים להיכנס באופן מיידי וללא הגבלה, גם אם ישנם כותבים הממתינים לגישה למשאב.\n2.  **תנאי כניסת כותבים:** כותבים, לעומת זאת, ממתינים בפונקציה `acquire_write_lock` עד שיתקיימו שני תנאים: `active_readers == 0` וגם `!active_writer`. כל עוד ישנם קוראים פעילים, כותבים לא יוכלו להיכנס.\n3.  **הנעה חוזרת של קוראים:** גם כאשר כותב מסיים את עבודתו ומשחרר את המנעול (ב-`release_write_lock`), הוא קורא ל-`reader_cv.notify_all()` ול-`writer_cv.notify_one()`. קריאה ל-`notify_all()` עבור קוראים עלולה להעיר מספר רב של קוראים ממתינים. קוראים אלו יתחרו על המוטקס, וכאשר אחד מהם ישיג אותו ויבדוק את התנאי (`!active_writer`), הוא ימצא אותו נכון (כי הכותב הקודם סיים) וייכנס. אם יגיעו קוראים חדשים בזמן שכותב ממתין, הם עלולים להיכנס לפניו. כתוצאה מכך, המשתנה `active_readers` לא יגיע ל-0, והכותב הממתין לא יוכל לעולם להיכנס לקטע הקריטי, ויוביל להרעבה.\n\nסעיף ב': תיקון והסבר\nכדי למנוע הרעבת כותבים, נדרש ליישם מדיניות המעניקה עדיפות לכותבים. אם יש כותבים הממתינים, אסור לאפשר לקוראים חדשים להיכנס למשאב. נוסיף מונה למספר הכותבים הממתינים (`waiting_writers`).\n\n**הקוד המתוקן:**\n```c++\n#include <mutex>\n#include <condition_variable>\n\nclass ReadWriteLock {\nprivate:\n    std::mutex mtx;\n    std::condition_variable reader_cv;\n    std::condition_variable writer_cv;\n    int active_readers = 0;\n    bool active_writer = false;\n    int waiting_writers = 0; // חדש: מונה עבור כותבים ממתינים\n\npublic:\n    void acquire_read_lock() {\n        std::unique_lock<std::mutex> lock(mtx);\n        // קוראים ממתינים אם כותב פעיל, או אם יש כותבים שממתינים (למניעת הרעבה)\n        reader_cv.wait(lock, [this] {\n            return !active_writer && waiting_writers == 0;\n        });\n        active_readers++;\n    }\n\n    void release_read_lock() {\n        std::unique_lock<std::mutex> lock(mtx);\n        active_readers--;\n        if (active_readers == 0) {\n            // אם אין יותר קוראים, מאותתים לכותב ממתין (אם יש).\n            // זה יאפשר לכותב להמשיך, תוך כיבוד עדיפות כותבים.\n            writer_cv.notify_one();\n        }\n    }\n\n    void acquire_write_lock() {\n        std::unique_lock<std::mutex> lock(mtx);\n        waiting_writers++; // כותב מסמן את כוונתו להמתין\n        writer_cv.wait(lock, [this] {\n            return active_readers == 0 && !active_writer;\n        });\n        waiting_writers--; // כותב רכש את המנעול, אינו ממתין עוד\n        active_writer = true;\n    }\n\n    void release_write_lock() {\n        std::unique_lock<std::mutex> lock(mtx);\n        active_writer = false;\n        // עדיפות לכותבים: אם יש כותבים ממתינים, מעירים אחד מהם.\n        // אחרת (אם אין כותבים ממתינים), מעירים את כל הקוראים.\n        if (waiting_writers > 0) {\n            writer_cv.notify_one();\n        } else {\n            reader_cv.notify_all();\n        }\n    }\n};\n```\n\n**הסבר השינויים:**\n1.  **הוספת `waiting_writers`:** נוסף משתנה `int waiting_writers` המונה את מספר הכותבים שמבקשים לכתוב וכעת ממתינים בתור. משתנה זה מוגן על ידי המוטקס.\n2.  **שינוי `acquire_read_lock`:** תנאי ההמתנה לקוראים שונה ל-`return !active_writer && waiting_writers == 0;`. כלומר, קורא יכול להיכנס רק אם אין כותב פעיל *וגם* אין כותבים הממתינים. זה מבטיח שאם יש כותבים בתור, קוראים חדשים לא יוכלו לעקוף אותם ולגרום להרעבה.\n3.  **שינוי `acquire_write_lock`:** לפני שהכותב נכנס ללולאת ההמתנה, הוא מגדיל את `waiting_writers`. לאחר שהוא מצליח לרכוש את מנעול הכתיבה, הוא מקטין את `waiting_writers`. זה מאפשר למערכת לדעת כמה כותבים ממתינים.\n4.  **שינוי `release_write_lock`:** לאחר שכותב מסיים את עבודתו ומשחרר את המנעול, הוא בודק האם יש כותבים ממתינים (`waiting_writers > 0`).\n    *   אם יש כותבים ממתינים, הוא קורא ל-`writer_cv.notify_one()` כדי להעיר כותב אחד. זה נותן עדיפות לכותבים ומבטיח שהכותבים יתקדמו בתור ולא יורעבו על ידי קוראים חדשים.\n    *   אם אין כותבים ממתינים, הוא קורא ל-`reader_cv.notify_all()` כדי לאפשר לכל הקוראים הממתינים להיכנס. זה מאפשר יעילות כאשר אין צורך לתעדף כותבים."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

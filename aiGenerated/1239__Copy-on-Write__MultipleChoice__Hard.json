@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Copy-on-Write",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 08:53:41",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 972,
+      "output_tokens": 1498,
+      "total_tokens": 6294
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Copy-on-Write",
+      "Virtual Memory",
+      "Process Management"
+    ],
+    "content": {
+      "text": "נתון הקוד הבא:\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\n#define PAGE_SIZE 4096\n#define ARRAY_SIZE (PAGE_SIZE / sizeof(int)) // For a 4KB page, 1024 ints\n\nint main() {\n    int* arr = (int*) malloc(PAGE_SIZE); // Allocate 4KB for the array\n    if (arr == NULL) {\n        perror(\"malloc failed\");\n        return 1;\n    }\n\n    // Initialize the array (fills the 4KB page)\n    for (int i = 0; i < ARRAY_SIZE; i++) {\n        arr[i] = i;\n    }\n\n    pid_t pid = fork();\n\n    if (pid == -1) {\n        perror(\"fork failed\");\n        return 1;\n    } else if (pid == 0) { // Child process\n        // Child writes to a different index within the same page\n        arr[ARRAY_SIZE - 1] = 999; \n        exit(0);\n    } else { // Parent process\n        // Parent writes to an index within the same page\n        arr[0] = 111;\n        wait(NULL); // Wait for child to finish\n    }\n\n    free(arr);\n    return 0;\n}\n```\nבהנחה שמערכת ההפעלה משתמשת במנגנון Copy-on-Write (COW) עבור דפים שנוצרו על ידי `fork()`, וכי גודל דף זיכרון הוא 4KB:\nכמה דפים פיזיים *בשימוש פעיל* עבור המערך `arr` יהיו במערכת לאחר ששני התהליכים (האב והבן) יסיימו את כתיבתם?",
+      "code_snippet": null,
+      "options": [
+        "א. 1",
+        "ב. 2",
+        "ג. 3",
+        "ד. 4"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "הסבר:\n1.  **לפני ה-`fork()`:** התהליך האב מקצה ומאתחל מערך בגודל 4KB. פעולה זו גורמת להקצאת דף פיזי יחיד (נכנה אותו `P0`) עבור המערך. הדף ממופה בטבלת הדפים של האב במצב קריאה-כתיבה.\n2.  **לאחר ה-`fork()`:** נוצר תהליך הבן. בגלל מנגנון ה-Copy-on-Write, דף הזיכרון `P0` משותף כעת בין האב והבן. טבלאות הדפים של שניהם מפנות ל-`P0`, אך כעת שניהם מסומנים במצב קריאה בלבד (read-only). מונה ההפניות (reference count) של `P0` הוא 2.\n3.  **האב כותב ל-`arr[0]`:** כאשר התהליך האב מנסה לכתוב ל-`arr[0]` (שנמצא באותו דף `P0`), מתרחשת Page Fault מכיוון שהדף מסומן כ-read-only. מערכת ההפעלה מזהה שמדובר בדף COW:\n    *   היא מקצה דף פיזי חדש (נכנה אותו `P1`).\n    *   היא מעתיקה את התוכן המקורי של `P0` אל `P1`. (חשוב לציין ש-`P0` לא השתנה, הוא עדיין מכיל את הנתונים המקוריים).\n    *   טבלת הדפים של האב מעודכנת כך שהיא מפנה כעת ל-`P1` במצב קריאה-כתיבה.\n    *   מונה ההפניות של `P0` יורד ל-1 (הבן עדיין מפנה אליו).\n    *   הכתיבה של האב מתבצעת על `P1`.\n    בנקודה זו, ישנם שני דפים פיזיים פעילים: `P1` (עבור האב) ו-`P0` (עבור הבן).\n4.  **הבן כותב ל-`arr[ARRAY_SIZE - 1]`:** כאשר התהליך הבן מנסה לכתוב ל-`arr[ARRAY_SIZE - 1]` (שנמצא גם הוא באותו דף `P0`), מתרחשת Page Fault מכיוון שהדף `P0` מסומן כ-read-only. מערכת ההפעלה מזהה שמדובר בדף COW:\n    *   היא מקצה דף פיזי חדש (נכנה אותו `P2`).\n    *   היא מעתיקה את התוכן המקורי של `P0` אל `P2`.\n    *   טבלת הדפים של הבן מעודכנת כך שהיא מפנה כעת ל-`P2` במצב קריאה-כתיבה.\n    *   מונה ההפניות של `P0` יורד ל-0. בשלב זה, `P0` אינו ממופה יותר על ידי אף תהליך וניתן לשחררו למאגר הדפים הפנויים.\n    *   הכתיבה של הבן מתבצעת על `P2`.\nלאחר ששני התהליכים סיימו את כתיבתם, הדפים הפיזיים הפעילים היחידים עבור המערך הם `P1` (המכיל את השינוי של האב) ו-`P2` (המכיל את השינוי של הבן). הדף `P0` שוחרר או עומד לשחרור. לכן, ישנם 2 דפים פיזיים בשימוש פעיל עבור המערך."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

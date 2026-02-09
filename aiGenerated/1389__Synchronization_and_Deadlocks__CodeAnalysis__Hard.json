@@ -1,0 +1,51 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Synchronization and Deadlocks",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 09:48:26",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5388,
+      "output_tokens": 2751,
+      "total_tokens": 15751
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Deadlocks",
+      "Mutexes",
+      "Resource Allocation"
+    ],
+    "content": {
+      "text": "נתונה מערכת עם K משאבים משותפים, המיוצגים על ידי K מנעולים (pthread_mutex_t). קיימים N חוטים, כאשר כל חוט בעל מזהה `thread_id` (בין 0 ל-N-1) נדרש לגשת לשני משאבים סמוכים: `resources[thread_id]` ו-`resources[(thread_id + 1) % K]`. כלומר, חוט `i` ינסה לתפוס את מנעול `i` ואת מנעול `(i+1)%K`. הנחו שבכל רגע נתון, חוט יחיד בלבד יכול להחזיק במנעול מסוים. נתון הקוד הבא המנסה לתפוס ולשחרר את המשאבים:",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n\n#define K 5 // Number of resources/mutexes\n#define N 5 // Number of threads\n\npthread_mutex_t resources[K];\n\nvoid* thread_func(void* arg) {\n    long thread_id = (long)arg;\n    int first_res_idx = thread_id;\n    int second_res_idx = (thread_id + 1) % K;\n\n    printf(\"Thread %ld trying to acquire resource %d and %d\\n\", thread_id, first_res_idx, second_res_idx);\n\n    // Problematic acquisition order\n    pthread_mutex_lock(&resources[first_res_idx]);\n    printf(\"Thread %ld acquired resource %d\\n\", thread_id, first_res_idx);\n    usleep(100000); // Simulate work or delay\n\n    pthread_mutex_lock(&resources[second_res_idx]);\n    printf(\"Thread %ld acquired resource %d and %d\\n\", thread_id, first_res_idx, second_res_idx);\n\n    // Simulate work in critical section\n    printf(\"Thread %ld working with resources %d and %d\\n\", thread_id, first_res_idx, second_res_idx);\n    usleep(100000);\n\n    pthread_mutex_unlock(&resources[second_res_idx]);\n    printf(\"Thread %ld released resource %d\\n\", thread_id, second_res_idx);\n    pthread_mutex_unlock(&resources[first_res_idx]);\n    printf(\"Thread %ld released resource %d\\n\", thread_id, first_res_idx);\n\n    return NULL;\n}\n\nint main() {\n    for (int i = 0; i < K; ++i) {\n        pthread_mutex_init(&resources[i], NULL);\n    }\n\n    pthread_t threads[N];\n    for (long i = 0; i < N; ++i) {\n        pthread_create(&threads[i], NULL, thread_func, (void*)i);\n    }\n\n    for (int i = 0; i < N; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    for (int i = 0; i < K; ++i) {\n        pthread_mutex_destroy(&resources[i]);\n    }\n\n    printf(\"All threads finished.\\n\");\n    return 0;\n}"
+    },
+    "sub_questions": [
+      {
+        "id": "8.1",
+        "text": "האם הקוד הנתון עלול להוביל לקיפאון (deadlock)? אם כן, הסבירו מדוע וספקו תרחיש לדוגמה.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.2",
+        "text": "תקנו את הפונקציה `thread_func` כך שתמנע קיפאון, תוך שימוש במנעולים בלבד (אין להשתמש בסמפורים, משתני תנאי או פעולות אטומיות אחרות). יש להבטיח מניעה הדדית וחופש מקיפאון. הציגו את הקוד המתוקן והסבירו את הפתרון.",
+        "code_snippet": "void* thread_func_fixed(void* arg) {\n    long thread_id = (long)arg;\n    int res1_idx = thread_id;\n    int res2_idx = (thread_id + 1) % K;\n\n    // Determine the order of acquisition based on resource IDs\n    // Always acquire the smaller index first, then the larger index.\n    // Exception: If one resource is K-1 and the other is 0, acquire 0 first.\n    int first_to_acquire_idx = (res1_idx < res2_idx) ? res1_idx : res2_idx;\n    int second_to_acquire_idx = (res1_idx < res2_idx) ? res2_idx : res1_idx;\n\n    printf(\"Thread %ld trying to acquire resource %d and %d (in order %d, %d)\\n\",\n           thread_id, res1_idx, res2_idx, first_to_acquire_idx, second_to_acquire_idx);\n\n    pthread_mutex_lock(&resources[first_to_acquire_idx]);\n    printf(\"Thread %ld acquired resource %d\\n\", thread_id, first_to_acquire_idx);\n    usleep(100000); // Simulate work or delay\n\n    pthread_mutex_lock(&resources[second_to_acquire_idx]);\n    printf(\"Thread %ld acquired resource %d and %d\\n\",\n           thread_id, first_to_acquire_idx, second_to_acquire_idx);\n\n    // Simulate work in critical section\n    printf(\"Thread %ld working with resources %d and %d\\n\", thread_id, res1_idx, res2_idx);\n    usleep(100000);\n\n    pthread_mutex_unlock(&resources[second_to_acquire_idx]);\n    printf(\"Thread %ld released resource %d\\n\", thread_id, second_to_acquire_idx);\n    pthread_mutex_unlock(&resources[first_to_acquire_idx]);\n    printf(\"Thread %ld released resource %d\\n\", thread_id, first_to_acquire_idx);\n\n    return NULL;\n}",
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "8.1: כן, הקוד הנתון עלול להוביל לקיפאון (deadlock). זהו מקרה קלאסי של תלות מעגלית (circular wait), אחד מארבעת התנאים ההכרחיים לקיפאון (מניעה הדדית, החזק והמתן, אי-הפקעה ותלות מעגלית) מתקיימים. במקרה זה, כל חוט תופס משאב אחד ומחכה למשאב הבא בסדרה, מה שיוצר מעגל. \nתרחיש לדוגמה (בהנחה ש-K=N=5):\n1. חוט 0 תופס את `resources[0]`. \n2. חוט 1 תופס את `resources[1]`. \n3. חוט 2 תופס את `resources[2]`. \n4. חוט 3 תופס את `resources[3]`. \n5. חוט 4 תופס את `resources[4]`. \nכעת, כל חוט מחזיק במשאב אחד ומנסה לתפוס את המשאב הבא: \n- חוט 0 מנסה לתפוס את `resources[1]` (שמוחזק על ידי חוט 1). \n- חוט 1 מנסה לתפוס את `resources[2]` (שמוחזק על ידי חוט 2). \n- חוט 2 מנסה לתפוס את `resources[3]` (שמוחזק על ידי חוט 3). \n- חוט 3 מנסה לתפוס את `resources[4]` (שמוחזק על ידי חוט 4). \n- חוט 4 מנסה לתפוס את `resources[0]` (שמוחזק על ידי חוט 0). \nכל חוט ממתין למשאב שמוחזק על ידי חוט אחר במעגל, ונוצר מעגל המתנה אינסופי. אף חוט לא יכול להתקדם, וכל המערכת נכנסת לקיפאון.\n\n8.2: כדי למנוע קיפאון, יש לשבור את תנאי התלות המעגלית. הדרך הנפוצה לעשות זאת תוך שימוש במנעולים בלבד היא באמצעות סדר לקיחת משאבים גלובלי (resource ordering). נגדיר סדר לקיחת משאבים כך שחוטים תמיד ינסו לתפוס את המנעול בעל האינדקס הנמוך יותר תחילה, ולאחר מכן את המנעול בעל האינדקס הגבוה יותר. \nעבור חוט `thread_id` שצריך את `resources[thread_id]` ו-`resources[(thread_id + 1) % K]`: \n1. נזהה את שני המשאבים הנדרשים: `res1_idx = thread_id` ו-`res2_idx = (thread_id + 1) % K`. \n2. נגדיר את המשאב הראשון ללקיחה כ-`min(res1_idx, res2_idx)` ואת השני כ-`max(res1_idx, res2_idx)`. \n3. המקרה היחיד שבו `res1_idx > res2_idx` הוא כאשר `thread_id = K-1`, ואז `res1_idx = K-1` ו-`res2_idx = 0`. במקרה זה, `min` יהיה `0` ו-`max` יהיה `K-1`. \nלכן, חוט `K-1` יתפוס קודם את `resources[0]` ואז את `resources[K-1]`, בעוד שכל שאר החוטים `i` (כאשר `i < K-1`) יתפסו קודם את `resources[i]` ואז את `resources[i+1]`. \nפתרון זה מבטיח שאין תלות מעגלית, מכיוון שכל החוטים מנסים לתפוס משאבים לפי סדר עולה של האינדקסים שלהם. החוט היחיד ששובר את סדר זה לכאורה הוא חוט `K-1`, אך הוא למעשה מקפיד על הסדר הגלובלי בכך שהוא תופס את `resources[0]` (הנמוך ביותר) לפני `resources[K-1]` (הגבוה ביותר).  \n\nכדי להשתמש בקוד המתוקן, יש להחליף את הקריאה ל-`thread_func` בתוך פונקציית `main` בקריאה ל-`thread_func_fixed`."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

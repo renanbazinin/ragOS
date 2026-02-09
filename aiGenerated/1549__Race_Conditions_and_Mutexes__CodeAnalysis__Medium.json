@@ -1,0 +1,64 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions and Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 11:20:40",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3651,
+      "output_tokens": 1601,
+      "total_tokens": 8813
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Race Conditions",
+      "Mutexes",
+      "Threads",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה ב-C המשתמשת בספריות pthreads. התוכנית יוצרת מספר תהליכונים (threads) שכל אחד מהם מגדיל משתנה גלובלי משותף בשם `counter`. קראו את הקוד וענו על השאלות הבאות:",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\n#define NUM_THREADS 5\n#define ITERATIONS_PER_THREAD 100000\n\nint counter = 0; // Shared global variable\n\nvoid* increment_counter(void* arg) {\n    for (int i = 0; i < ITERATIONS_PER_THREAD; i++) {\n        counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    for (int i = 0; i < NUM_THREADS; i++) {\n        pthread_create(&threads[i], NULL, increment_counter, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; i++) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "7.1",
+        "text": "מהו הערך הסופי של המשתנה `counter` שיוצג בפלט התוכנית? האם ערך זה יהיה קבוע בכל הרצה של התוכנית? נמקו.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "7.2",
+        "text": "הסבירו מדוע התוכנית סובלת מבעיה, וציינו את סוג הבעיה ואת הסיבות לה.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "7.3",
+        "text": "כיצד ניתן לתקן את הבעיה באמצעות מנגנון `mutex` כך שהערך הסופי של `counter` יהיה תמיד נכון ודטרמיניסטי? הציגו את השינויים הנדרשים בקוד.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "7.4",
+        "text": "לאחר תיקון הבעיה כפי שתואר בסעיף הקודם, מה יהיה הערך הסופי של המשתנה `counter` שיוצג בפלט התוכנית?",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "7.1. הערך הסופי של המשתנה `counter` יהיה בדרך כלל קטן מהערך הצפוי של 500,000 (NUM_THREADS * ITERATIONS_PER_THREAD). הערך לא יהיה קבוע ויהיה שונה בין הרצות שונות של התוכנית. הסיבה לכך היא תנאי מרוץ (Race Condition).\n\n7.2. התוכנית סובלת מתנאי מרוץ (Race Condition). הבעיה נובעת מכך שמספר תהליכונים ניגשים ומשנים משתנה גלובלי משותף (`counter`) בו-זמנית ללא סנכרון מתאים. הפעולה `counter++` אינה אטומית; היא מורכבת משלוש פעולות ברמה נמוכה יותר: קריאת הערך של `counter` לתוך אוגר, הגדלת הערך באוגר, וכתיבת הערך המוגדל בחזרה לזיכרון. כאשר מספר תהליכונים מבצעים פעולות אלה במקביל, ייתכן שתהליכון אחד יקרא את הערך של `counter`, ותהליכון אחר יקרא את אותו ערך לפני שהתהליכון הראשון יספיק לכתוב את הערך המוגדל בחזרה. כתוצאה מכך, חלק מההגדלות \"נאבדות\" והערך הסופי נמוך מהצפוי.\n\n7.3. כדי לתקן את הבעיה באמצעות מנגנון `mutex`, יש להגן על הגישה למשתנה המשותף `counter`. הנה השינויים הנדרשים בקוד:\n\n```c\n#include <stdio.h>\n#include <pthread.h>\n\n#define NUM_THREADS 5\n#define ITERATIONS_PER_THREAD 100000\n\nint counter = 0; // Shared global variable\npthread_mutex_t lock; // Declare a mutex\n\nvoid* increment_counter(void* arg) {\n    for (int i = 0; i < ITERATIONS_PER_THREAD; i++) {\n        pthread_mutex_lock(&lock);   // Lock the mutex before accessing counter\n        counter++;\n        pthread_mutex_unlock(&lock); // Unlock the mutex after accessing counter\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n    pthread_mutex_init(&lock, NULL); // Initialize the mutex\n\n    for (int i = 0; i < NUM_THREADS; i++) {\n        pthread_create(&threads[i], NULL, increment_counter, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; i++) {\n        pthread_join(threads[i], NULL);\n    }\n\n    pthread_mutex_destroy(&lock); // Destroy the mutex\n    printf(\"Final counter value: %d\\n\", counter);\n\n    return 0;\n}\n```\n\n7.4. לאחר תיקון הבעיה באמצעות `mutex`, הערך הסופי של המשתנה `counter` שיוצג בפלט התוכנית יהיה תמיד 500,000. זאת מכיוון שה-`mutex` מבטיח שרק תהליכון אחד יוכל להיכנס לקטע הקריטי (הקוד שבו מתבצעת הפעולה `counter++`) בכל רגע נתון, ובכך מונע את תנאי המרוץ ומבטיח שכל ההגדלות נספרות כראוי."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

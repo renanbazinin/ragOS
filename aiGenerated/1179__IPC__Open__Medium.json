@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "IPC",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 08:28:33",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2071,
+      "output_tokens": 1830,
+      "total_tokens": 13060
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "IPC",
+      "Pipes",
+      "Process Communication"
+    ],
+    "content": {
+      "text": "כתוב תוכנית C המדגימה תקשורת בין-תהליכית (IPC) באמצעות צינורות (pipes). התוכנית צריכה ליצור תהליך בן (child process) באמצעות `fork`. התהליך האב ישלח מחרוזת קלט לתהליך הבן. התהליך הבן יקבל את המחרוזת, יהפוך את כל האותיות הקטנות לאותיות גדולות (לדוגמה, 'hello world' יהפוך ל-'HELLO WORLD'), וישלח את המחרוזת המעובדת בחזרה לתהליך האב. התהליך האב ידפיס את המחרוזת שהתקבלה מהבן. יש להשתמש בשני צינורות לתקשורת דו-כיוונית.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון מדגים תקשורת דו-כיוונית בין תהליך אב לתהליך בן באמצעות שני צינורות (pipes) נפרדים.\\n\\n1.  **יצירת צינורות**: תחילה, נוצרים שני צינורות באמצעות הפונקציה `pipe()`. כל קריאה ל-`pipe()` יוצרת שני קצוות: קצה קריאה (file descriptor 0) וקצה כתיבה (file descriptor 1). `pipe_p2c` משמש לתקשורת מהאב לבן, ו-`pipe_c2p` משמש לתקשורת מהבן לאב.\\n2.  **יצירת תהליך בן**: הפונקציה `fork()` משמשת ליצירת תהליך בן.\\n    *   **בתהליך האב (`pid > 0`)**: האב סוגר את הקצוות הלא-נחוצים: את קצה הקריאה של `pipe_p2c` ואת קצה הכתיבה של `pipe_c2p`. לאחר מכן, הוא כותב את המחרוזת המקורית ל-`pipe_p2c[WRITE_END]`, סוגר את קצה הכתיבה, קורא את המחרוזת המעובדת מ-`pipe_c2p[READ_END]`, מדפיס אותה וסוגר את קצה הקריאה. לבסוף, הוא ממתין לסיום ריצת התהליך הבן באמצעות `wait(NULL)`.\\n    *   **בתהליך הבן (`pid == 0`)**: הבן סוגר את הקצוות הלא-נחוצים: את קצה הכתיבה של `pipe_p2c` ואת קצה הקריאה של `pipe_c2p`. לאחר מכן, הוא קורא את המחרוזת מהאב מ-`pipe_p2c[READ_END]`, מעבד אותה (ממיר לאותיות גדולות באמצעות `to_uppercase` המשתמשת ב-`toupper`), כותב את המחרוזת המעובדת ל-`pipe_c2p[WRITE_END]`, סוגר את הקצוות ויוצא.\\n3.  **פונקציית `to_uppercase`**: פונקציה עזר זו עוברת על המחרוזת תו-תו וממירה כל תו לאות גדולה באמצעות `toupper()` מהספרייה `ctype.h`.\\n4.  **חשיבות סגירת הקצוות**: סגירת קצוות הצינורות שאינם בשימוש היא קריטית כדי למנוע מצב של deadlock (למשל, תהליך שמנסה לקרוא מצינור שקצה הכתיבה שלו עדיין פתוח אך אף תהליך לא יכתוב אליו יותר). כמו כן, זה משחרר משאבי מערכת.\\n\\nלהלן קוד לדוגמה:\\n#include <stdio.h>\\n#include <stdlib.h>\\n#include <unistd.h>\\n#include <string.h>\\n#include <sys/wait.h>\\n#include <ctype.h> // For toupper\\n\\n#define BUFFER_SIZE 256\\n#define READ_END 0\\n#define WRITE_END 1\\n\\nvoid to_uppercase(char *str) {\\n    for (int i = 0; str[i] != '\\\\0'; i++) {\\n        str[i] = toupper((unsigned char)str[i]);\\n    }\\n}\\n\\nint main() {\\n    int pipe_p2c[2]; // Parent to Child\\n    int pipe_c2p[2]; // Child to Parent\\n    pid_t pid;\\n    char buffer[BUFFER_SIZE];\\n    const char *initial_message = \"hello operating systems world\";\\n\\n    // Create pipes\\n    if (pipe(pipe_p2c) == -1) {\\n        perror(\"pipe_p2c failed\");\\n        return 1;\\n    }\\n    if (pipe(pipe_c2p) == -1) {\\n        perror(\"pipe_c2p failed\");\\n        return 1;\\n    }\\n\\n    pid = fork();\\n\\n    if (pid < 0) { // Error\\n        perror(\"fork failed\");\\n        return 1;\\n    } else if (pid == 0) { // Child process\\n        // Close unused ends\\n        close(pipe_p2c[WRITE_END]);\\n        close(pipe_c2p[READ_END]);\\n\\n        // Read from parent\\n        read(pipe_p2c[READ_END], buffer, BUFFER_SIZE);\\n        printf(\"Child received: \\\\\"%s\\\\\"\\\\n\", buffer);\\n\\n        // Process message\\n        to_uppercase(buffer);\\n\\n        // Write to parent\\n        write(pipe_c2p[WRITE_END], buffer, strlen(buffer) + 1);\\n        printf(\"Child sent: \\\\\"%s\\\\\"\\\\n\", buffer);\\n\\n        // Close remaining ends\\n        close(pipe_p2c[READ_END]);\\n        close(pipe_c2p[WRITE_END]);\\n        exit(0);\\n    } else { // Parent process\\n        // Close unused ends\\n        close(pipe_p2c[READ_END]);\\n        close(pipe_c2p[WRITE_END]);\\n\\n        // Write to child\\n        write(pipe_p2c[WRITE_END], initial_message, strlen(initial_message) + 1);\\n        printf(\"Parent sent: \\\\\"%s\\\\\"\\\\n\", initial_message);\\n\\n        // Close parent-to-child write end as it's done sending\\n        close(pipe_p2c[WRITE_END]);\\n\\n        // Read from child\\n        read(pipe_c2p[READ_END], buffer, BUFFER_SIZE);\\n        printf(\"Parent received: \\\\\"%s\\\\\"\\\\n\", buffer);\\n\\n        // Close child-to-parent read end\\n        close(pipe_c2p[READ_END]);\\n\\n        // Wait for child to terminate\\n        wait(NULL);\\n        printf(\"Parent finished.\\\\n\");\\n    }\\n\\n    return 0;\\n}"
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

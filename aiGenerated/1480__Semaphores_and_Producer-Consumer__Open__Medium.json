@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Producer-Consumer",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 10:42:09",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1649,
+      "output_tokens": 2695,
+      "total_tokens": 8191
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Synchronization",
+      "Semaphores",
+      "Producer-Consumer"
+    ],
+    "content": {
+      "text": "נתונה בעיית המפיק-צרכן הקלאסית (Producer-Consumer) עם חוצץ מעגלי בגודל סופי. לצורך סנכרון, אנו משתמשים בשלושה סמפורים: `mutex` (סמפור בינארי לאבטחת גישה לחוצץ), `full` (סמפור סופר המציין את מספר התאים המלאים בחוצץ), ו-`empty` (סמפור סופר המציין את מספר התאים הריקים בחוצץ).\n\nלהלן מימוש חלקי של פונקציית המפיק:\n\n```c\n#include <stdio.h>\n#include <semaphore.h>\n#include <unistd.h>\n\n#define BUFFER_SIZE 10\n\n// Global semaphores (assume initialized elsewhere)\nsem_t mutex;    // Initialized to 1\nsem_t full;     // Initialized to 0\nsem_t empty;    // Initialized to BUFFER_SIZE\n\n// Buffer and indices (assume initialized elsewhere)\nint buffer[BUFFER_SIZE];\nint in = 0;\n\n// Dummy function to simulate item production\nint produce_item() {\n    static int item_counter = 0;\n    return item_counter++;\n}\n\nvoid producer_function() {\n    int item;\n    while (1) {\n        item = produce_item(); // Simulate item production\n\n        sem_wait(&mutex);   // Acquire mutex\n        sem_wait(&empty);   // Wait for an empty slot\n\n        // Critical section: Add item to buffer\n        buffer[in] = item;\n        in = (in + 1) % BUFFER_SIZE;\n        printf(\"Producer added item %d\\n\", item);\n\n        sem_post(&mutex);   // Release mutex\n        sem_post(&full);    // Signal that an item has been added\n\n        // Simulate some work after critical section\n        usleep(10000); // Sleep for 10ms\n    }\n}\n\n// Assume consumer_function() and main() exist and semaphores are properly initialized.\n// Example main for context (not part of the question's snippet):\n/*\nint main() {\n    sem_init(&mutex, 0, 1);\n    sem_init(&full, 0, 0);\n    sem_init(&empty, 0, BUFFER_SIZE);\n\n    // Create producer and consumer threads\n    // pthread_create(&prod_thread, NULL, (void*)producer_function, NULL);\n    // pthread_create(&cons_thread, NULL, (void*)consumer_function, NULL);\n\n    // ... join threads ...\n\n    sem_destroy(&mutex);\n    sem_destroy(&full);\n    sem_destroy(&empty);\n    return 0;\n}\n*/\n```\n\nא. האם קטע הקוד של המפיק, כפי שהוא מוצג לעיל, עלול לגרום לקיפאון (deadlock) או לבעיית סנכרון אחרת?\nב. אם כן, הסבר בפירוט מדוע הבעיה מתרחשת, תאר תרחיש ספציפי שמוביל אליה, והצג את קטע הקוד המתוקן.\nג. אם לא, הסבר מדוע הקוד נכון ואינו גורם לבעיות סנכרון.",
+      "code_snippet": "#include <stdio.h>\n#include <semaphore.h>\n#include <unistd.h>\n\n#define BUFFER_SIZE 10\n\n// Global semaphores (assume initialized elsewhere)\nsem_t mutex;    // Initialized to 1\nsem_t full;     // Initialized to 0\nsem_t empty;    // Initialized to BUFFER_SIZE\n\n// Buffer and indices (assume initialized elsewhere)\nint buffer[BUFFER_SIZE];\nint in = 0;\n\n// Dummy function to simulate item production\nint produce_item() {\n    static int item_counter = 0;\n    return item_counter++;\n}\n\nvoid producer_function() {\n    int item;\n    while (1) {\n        item = produce_item(); // Simulate item production\n\n        sem_wait(&mutex);   // Acquire mutex\n        sem_wait(&empty);   // Wait for an empty slot\n\n        // Critical section: Add item to buffer\n        buffer[in] = item;\n        in = (in + 1) % BUFFER_SIZE;\n        printf(\"Producer added item %d\\n\", item);\n\n        sem_post(&mutex);   // Release mutex\n        sem_post(&full);    // Signal that an item has been added\n\n        // Simulate some work after critical section\n        usleep(10000); // Sleep for 10ms\n    }\n}\n\n// Assume consumer_function() and main() exist and semaphores are properly initialized.\n// Example main for context (not part of the question's snippet):\n/*\nint main() {\n    sem_init(&mutex, 0, 1);\n    sem_init(&full, 0, 0);\n    sem_init(&empty, 0, BUFFER_SIZE);\n\n    // Create producer and consumer threads\n    // pthread_create(&prod_thread, NULL, (void*)producer_function, NULL);\n    // pthread_create(&cons_thread, NULL, (void*)consumer_function, NULL);\n\n    // ... join threads ...\n\n    sem_destroy(&mutex);\n    sem_destroy(&full);\n    sem_destroy(&empty);\n    return 0;\n}\n*/",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "א. כן, קטע הקוד של המפיק עלול לגרום לקיפאון (deadlock).\n\nב. **הסבר הבעיה ותרחיש לקיפאון:**\nהבעיה נובעת מהסדר השגוי של קריאות ה-`sem_wait` בפונקציית המפיק. המפיק מבצע `sem_wait(&mutex)` לפני `sem_wait(&empty)`. הסדר הנכון הוא להמתין לתנאי המשאב (מקום פנוי בחוצץ) לפני רכישת ה-`mutex` המאבטח את הגישה לחוצץ.\n\n**תרחיש שיוביל לקיפאון:**\n1.  נניח שהחוצץ כמעט מלא, ונותר רק מקום אחד פנוי.\n2.  מפיק א' (Producer A) מגיע וקורא `sem_wait(&mutex)`. הוא מצליח לרכוש את ה-`mutex`.\n3.  מפיק א' ממשיך וקורא `sem_wait(&empty)`. כעת, יש מקום פנוי אחד, אז הוא מצליח לרכוש את `empty` (ערכו יורד ל-0).\n4.  מפיק א' מוסיף פריט לחוצץ. כעת החוצץ מלא לחלוטין.\n5.  מפיק א' מבצע `sem_post(&mutex)` ו-`sem_post(&full)`. ה-`mutex` משוחרר, ו-`full` גדל ל-`BUFFER_SIZE`.\n6.  מפיק ב' (Producer B) מגיע וקורא `sem_wait(&mutex)`. הוא מצליח לרכוש את ה-`mutex`.\n7.  מפיק ב' ממשיך וקורא `sem_wait(&empty)`. מכיוון שהחוצץ מלא לחלוטין, ערך `empty` הוא 0. לכן, מפיק ב' נחסם וממתין על `sem_wait(&empty)`. **חשוב לציין: מפיק ב' מחזיק כעת את ה-`mutex`**.\n8.  בשלב זה, כל צרכן (Consumer) שינסה לגשת לחוצץ כדי להוציא פריט יצטרך לרכוש את ה-`mutex` (באמצעות `sem_wait(&mutex)`). אך ה-`mutex` מוחזק כעת על ידי מפיק ב', שנחסם בעצמו.\n9.  לכן, הצרכנים אינם יכולים להוציא פריטים מהחוצץ, מה שאומר שהם אינם יכולים להגדיל את ערך `empty` (על ידי קריאה ל-`sem_post(&empty)`)..\n10. כתוצאה מכך, מפיק ב' (שמחזיק ב-`mutex` וממתין על `empty`) לעולם לא ישוחרר, והצרכנים לעולם לא יוכלו לגשת לחוצץ. זהו מצב של קיפאון.\n\n**הקוד המתוקן:**\nכדי למנוע קיפאון, יש להפוך את הסדר של קריאות ה-`sem_wait` כך שהמפיק ימתין למקום פנוי (`empty`) *לפני* שהוא רוכש את ה-`mutex`. זאת כדי לוודא שאין מצב שבו המפיק מחזיק את ה-`mutex` ובמקביל חוסם את הצרכנים מלפנות מקום בחוצץ (על ידי מניעת גישה ל-`mutex`).\n\n```c\n#include <stdio.h>\n#include <semaphore.h>\n#include <unistd.h>\n\n#define BUFFER_SIZE 10\n\n// Global semaphores (assume initialized elsewhere)\nsem_t mutex;\nsem_t full;\nsem_t empty;\n\n// Buffer and indices (assume initialized elsewhere)\nint buffer[BUFFER_SIZE];\nint in = 0;\n\n// Dummy function to simulate item production\nint produce_item() {\n    static int item_counter = 0;\n    return item_counter++;\n}\n\nvoid producer_function_fixed() {\n    int item;\n    while (1) {\n        item = produce_item(); // Simulate item production\n\n        sem_wait(&empty);   // Wait for an empty slot FIRST\n        sem_wait(&mutex);   // Then acquire mutex to protect critical section\n\n        // Critical section: Add item to buffer\n        buffer[in] = item;\n        in = (in + 1) % BUFFER_SIZE;\n        printf(\"Producer added item %d\\n\", item);\n\n        sem_post(&mutex);   // Release mutex\n        sem_post(&full);    // Signal that an item has been added\n\n        // Simulate some work after critical section\n        usleep(10000); // Sleep for 10ms\n    }\n}\n```\nג. (לא רלוונטי במקרה זה, כיוון שיש בעיה בקוד המקורי).\n"
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

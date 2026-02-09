@@ -1,0 +1,56 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Copy-on-Write",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 08:56:55",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3509,
+      "output_tokens": 2062,
+      "total_tokens": 8986
+    }
+  },
+  "question": {
+    "id": 9,
+    "type": "Open",
+    "topic": [
+      "Memory Management",
+      "Copy-on-Write",
+      "Process Management"
+    ],
+    "content": {
+      "text": "שאלה זו עוסקת במנגנון Copy-on-Write (CoW) בניהול זיכרון.\nמנגנון CoW הוא אופטימיזציה נפוצה במערכות הפעלה המאפשרת למספר תהליכים לחלוק דפי זיכרון פיזיים, תוך כדי יצירת עותק רק כאשר אחד התהליכים מנסה לכתוב לדף משותף זה.\n\nנתון קטע הקוד הבא:",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\n#define PAGE_SIZE_BYTES 4096 // A common page size in bytes\n\nint main() {\n    // Allocate memory for exactly one page\n    int* shared_array = (int*) malloc(PAGE_SIZE_BYTES); \n\n    if (shared_array == NULL) {\n        perror(\"malloc failed\");\n        return EXIT_FAILURE;\n    }\n\n    // Initialize the array elements that fit in one page\n    for (int i = 0; i < PAGE_SIZE_BYTES / sizeof(int); i++) {\n        shared_array[i] = i;\n    }\n\n    printf(\"Parent process (PID: %d) - Initial value shared_array[0] = %d\\n\", getpid(), shared_array[0]);\n\n    pid_t pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        free(shared_array);\n        exit(EXIT_FAILURE);\n    } else if (pid == 0) {\n        // Child process\n        printf(\"Child process (PID: %d) - Before modification, shared_array[0] = %d\\n\", getpid(), shared_array[0]);\n        shared_array[0] = 100; // Modify the first element, triggering CoW\n        printf(\"Child process (PID: %d) - After modification, shared_array[0] = %d\\n\", getpid(), shared_array[0]);\n        exit(EXIT_SUCCESS);\n    } else {\n        // Parent process\n        wait(NULL); // Wait for the child to finish\n        printf(\"Parent process (PID: %d) - After child modification, shared_array[0] = %d\\n\", getpid(), shared_array[0]);\n    }\n\n    free(shared_array);\n    return 0;\n}"
+    },
+    "sub_questions": [
+      {
+        "id": "9.1",
+        "text": "**לפני קריאת ה-`fork()`**: כמה דפי זיכרון פיזיים מוקצים לכתובות הווירטואליות של `shared_array` בתהליך האב? הסבירו.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "9.2",
+        "text": "**מיד לאחר קריאת ה-`fork()` (ולפני כל כתיבה)**:\nא. כמה דפי זיכרון פיזיים מוקצים בסך הכל עבור הנתונים של `shared_array` (כלומר, עבור התוכן ש-`shared_array` מצביע עליו) בתהליך האב ובתהליך הבן יחד?\nב. מהן הרשאות הגישה (קריאה/כתיבה) של דפים אלו עבור תהליך האב ועבור תהליך הבן?\nג. הסבירו מדוע מנגנון CoW מועיל במצב זה.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "9.3",
+        "text": "**לאחר שהתהליך הבן מבצע את השורה `shared_array[0] = 100;`**: \nא. כמה דפי זיכרון פיזיים מוקצים בסך הכל עבור הנתונים של `shared_array` (כלומר, עבור התוכן ש-`shared_array` מצביע עליו) בתהליך האב ובתהליך הבן יחד?\nב. תארו את מצב הרשאות הגישה לדפים אלו בתהליך האב ובתהליך הבן.\nג. מה יהיו הערכים המודפסים על ידי תהליך האב והתהליך הבן עבור `shared_array[0]` בכל שלב?\n    *   תהליך אב - לפני fork:\n    *   תהליך בן - לפני שינוי:\n    *   תהליך בן - אחרי שינוי:\n    *   תהליך אב - אחרי שינוי בן:",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "**פתרון:**\n\n**9.1. לפני קריאת ה-`fork()`:**\n*   **דפי זיכרון פיזיים מוקצים**: דף אחד.\n*   **הסבר**: הפונקציה `malloc(PAGE_SIZE_BYTES)` מקצה זיכרון בגודל של דף אחד (4096 בתים). לאחר האתחול בלולאה, תוכן הדף הזה נמצא בזיכרון הפיזי ומשויך לתהליך האב.\n\n**9.2. מיד לאחר קריאת ה-`fork()` (ולפני כל כתיבה):**\nא. **כמה דפי זיכרון פיזיים בסך הכל**: דף אחד.\nב. **רשאות גישה**: דף הזיכרון הפיזי היחיד המשותף לשני התהליכים יסומן כ\"קריאה בלבד\" (Read-Only) עבור שניהם.\n    *   **תהליך אב**: קריאה בלבד (Read-Only).\n    *   **תהליך בן**: קריאה בלבד (Read-Only).\nג. **הסבר מדוע CoW מועיל במצב זה**: לאחר ה-`fork()`, תהליך הבן מקבל עותק לוגי של מרחב הכתובות של האב. בזכות CoW, דפי הזיכרון הפיזיים אינם מועתקים מיד. במקום זאת, גם האב וגם הבן מצביעים על אותו דף פיזי, אך הוא מסומן כ\"קריאה בלבד\". זה חוסך הקצאת זיכרון מיותרת וזמן העתקה (overhead) אם התהליך הבן לא משנה את הנתונים, או משנה רק חלק קטן מהם. זהו יתרון משמעותי במקרים שבהם תהליכי בן מבצעים פעולות קריאה בלבד או משנים רק חלק קטן ממרחב הזיכרון של האב.\n\n**9.3. לאחר שהתהליך הבן מבצע את השורה `shared_array[0] = 100;`:**\nא. **כמה דפי זיכרון פיזיים בסך הכל**: שני דפים.\nב. **מצב הרשאות הגישה**: כאשר התהליך הבן מנסה לכתוב ל-`shared_array[0]`, מתרחשת הפרעת דף (page fault) מכיוון שהדף מסומן כקריאה בלבד. מערכת ההפעלה מזהה זאת כניסיון כתיבה לדף CoW.\n    *   מערכת ההפעלה יוצרת עותק פיזי חדש של הדף המשותף עבור התהליך הבן. רק הדף הספציפי שהתהליך הבן מנסה לשנות מועתק.\n    *   **תהליך אב**: מצביע על הדף הפיזי המקורי, עם הרשאות קריאה/כתיבה (הופך בחזרה ל-Read/Write).\n    *   **תהליך בן**: מצביע על הדף הפיזי החדש (העותק), עם הרשאות קריאה/כתיבה.\nג. **ערכים מודפסים**:\n    *   תהליך אב - לפני fork: `0`\n    *   תהליך בן - לפני שינוי: `0`\n    *   תהליך בן - אחרי שינוי: `100`\n    *   תהליך אב - אחרי שינוי בן: `0`"
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "TLB",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 08:06:41",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1201,
+      "output_tokens": 378,
+      "total_tokens": 2622
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "TLB",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "מהו התפקיד העיקרי של ה-TLB (Translation Lookaside Buffer) במערכות הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. לאחסן נתונים בשימוש תכוף מהדיסק הקשיח.",
+        "ב. לזרז את תרגום הכתובות הוירטואליות לכתובות פיזיות.",
+        "ג. לתזמן את ביצוע התהליכים במעבד.",
+        "ד. לטפל בקריאות מערכת (system calls) בין תהליכי משתמש למערכת ההפעלה.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב'. ה-TLB הוא זיכרון מטמון חומרתי מהיר המאחסן רשומות של תרגומי כתובות וירטואליות-פיזיות שבוצעו לאחרונה, ובכך מזרז משמעותית את תהליך תרגום הכתובות ומפחית את הצורך בגישה לטבלת הדפים בזיכרון הראשי."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Atomic Operations",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 09:23:56",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1094,
+      "output_tokens": 403,
+      "total_tokens": 2703
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Atomic Operations",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "מהי המשמעות העיקרית של פעולה אטומית (Atomic Operation) במערכות הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. היא תמיד מסתיימת במהירות רבה.",
+        "ב. היא יכולה להתבצע על ידי חוט (thread) אחד בלבד בכל רגע נתון.",
+        "ג. היא מבוצעת כיחידה בלתי ניתנת לחלוקה (indivisible), כך שכל חוט אחר יראה אותה כולה בוצעה או לא בוצעה כלל.",
+        "ד. היא דורשת קריאת מערכת (system call) לביצוע.",
+        "ה. היא תמיד מבוצעת במצב משתמש (user mode)."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "הסבר: פעולה אטומית היא פעולה שמובטחת שתתבצע כיחידה אחת ושלמה, ללא הפרעות ביניים שיהיו גלויות לחוטים אחרים. כלומר, חוט אחר שינסה לגשת לנתונים המשותפים בזמן שפעולה אטומית מתבצעת יראה או את המצב לפני הפעולה או את המצב אחרי שהסתיימה במלואה, אך לעולם לא מצב ביניים."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

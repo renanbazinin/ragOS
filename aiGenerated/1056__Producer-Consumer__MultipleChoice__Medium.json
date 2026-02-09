@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Producer-Consumer",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 07:40:11",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 887,
+      "output_tokens": 414,
+      "total_tokens": 2552
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Producer-Consumer",
+      "Synchronization",
+      "Semaphores",
+      "Mutex"
+    ],
+    "content": {
+      "text": "בהטמעה טיפוסית של בעיית המפיק-צרכן עם חוצץ משותף וסופי, שימוש בשני סמפורים מוֹנִים בלבד (עבור מקומות ריקים ומקומות מלאים בחוצץ) מספיק כדי להבטיח נכונות ולמנוע תנאי מירוץ בגישה לחוצץ עצמו.",
+      "code_snippet": null,
+      "options": [
+        "נכון",
+        "לא נכון"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "לא נכון",
+      "explanation": "לא נכון. בעוד שסמפורים מוֹנִים (empty ו-full) משמשים לסנכרון בין המפיק לצרכן לגבי מספר המקומות הפנויים והמלאים בחוצץ, הם אינם מספקים הדדיות (mutual exclusion) לגישה לחוצץ עצמו. אם יש מספר מפיקים או מספר צרכנים, או שניהם, הם עלולים לגשת לחוצץ בו-זמנית ולגרום לתנאי מירוץ (race conditions) בעת הוספה או הוצאה של פריטים. לכן, נדרש גם מנעול (mutex) או סמפור בינארי כדי להגן על הקטע הקריטי של הגישה לחוצץ."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Signals and System Calls",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 11:53:24",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 926,
+      "output_tokens": 511,
+      "total_tokens": 3049
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Signals",
+      "System Calls"
+    ],
+    "content": {
+      "text": "תהליך מבצע קריאה חוסמת באמצעות `read()`. בזמן הקריאה, התהליך מקבל סיגנל עבורו הוגדר מטפל (signal handler) מותאם אישית, ולאחר מכן המטפל חוזר. בהנחה שלא נעשה שימוש בדגל `SA_RESTART` בעת הגדרת מטפל הסיגנל, מה תהיה התנהגות קריאת ה-`read()`?",
+      "code_snippet": null,
+      "options": [
+        "א. קריאת ה-`read()` תמשיך לרוץ כרגיל לאחר חזרת מטפל הסיגנל.",
+        "ב. קריאת ה-`read()` תחזור עם הערך 0 (EOF), ותציין שלא נותרו נתונים לקריאה.",
+        "ג. קריאת ה-`read()` תחזור עם הערך 1-, ומשתנה ה-`errno` יוגדר ל-`EINTR`.",
+        "ד. התהליך יסיים את פעולתו (terminate) באופן מיידי."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "כאשר קריאת מערכת חוסמת (כגון `read()`, `waitpid()`, `sleep()`) מופרעת על ידי סיגנל עבורו הוגדר מטפל (signal handler), והדגל `SA_RESTART` לא הוגדר בעת התקנת המטפל, קריאת המערכת תחזור עם הערך 1- ומשתנה ה-`errno` יוגדר ל-`EINTR`. על התהליך הקורא לטפל במצב זה, בדרך כלל על ידי בדיקת `errno` והחלטה האם לנסות שוב את קריאת המערכת."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

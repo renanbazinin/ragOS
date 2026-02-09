@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Producer-Consumer",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 10:29:48",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1632,
+      "output_tokens": 1530,
+      "total_tokens": 6826
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Semaphores",
+      "Producer-Consumer",
+      "Concurrency",
+      "Deadlock"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא, המממש את בעיית היצרן-צרכן (Producer-Consumer Problem) באמצעות סמפורים.\nהבאפר המשותף הוא בגודל 3. היצרן מנסה לייצר 5 פריטים, והצרכן מנסה לצרוך 5 פריטים.\nבהנחה שקריאות המערכת לסמפורים ולניהול תהליכונים תמיד מצליחות, וכי התזמון יכול לגרום לכל סדר פעולות אפשרי.\nאיזו טענה מתארת בצורה הטובה ביותר את ההתנהגות הצפויה של התוכנית?",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <pthread.h>\n#include <semaphore.h>\n#include <unistd.h> \n\n#define BUFFER_SIZE 3\n\nint buffer[BUFFER_SIZE];\nint in = 0;\nint out = 0;\n\nsem_t mutex;\nsem_t empty;\nsem_t full;\n\nvoid *producer(void *arg) {\n    int item = 0;\n    for (int i = 0; i < 5; ++i) { \n        item = i + 1;\n        sem_wait(&mutex); \n        sem_wait(&empty); \n\n        buffer[in] = item;\n        printf(\"Producer produced: %d at index %d\\n\", item, in);\n        in = (in + 1) % BUFFER_SIZE;\n\n        sem_post(&full);  \n        sem_post(&mutex); \n        usleep(100000);\n    }\n    return NULL;\n}\n\nvoid *consumer(void *arg) {\n    int item;\n    for (int i = 0; i < 5; ++i) { \n        sem_wait(&mutex); \n        sem_wait(&full);  \n\n        item = buffer[out];\n        printf(\"Consumer consumed: %d from index %d\\n\", item, out);\n        out = (out + 1) % BUFFER_SIZE;\n\n        sem_post(&empty); \n        sem_post(&mutex); \n        usleep(200000);\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t prod_tid, cons_tid;\n\n    sem_init(&mutex, 0, 1);\n    sem_init(&empty, 0, BUFFER_SIZE);\n    sem_init(&full, 0, 0);\n\n    printf(\"Starting Producer-Consumer with buffer size %d\\n\", BUFFER_SIZE);\n\n    pthread_create(&prod_tid, NULL, producer, NULL);\n    pthread_create(&cons_tid, NULL, consumer, NULL);\n\n    pthread_join(prod_tid, NULL);\n    pthread_join(cons_tid, NULL);\n\n    sem_destroy(&mutex);\n    sem_destroy(&empty);\n    sem_destroy(&full);\n\n    printf(\"Finished Producer-Consumer\\n\");\n    return 0;\n}",
+      "options": [
+        "א. התוכנית תרוץ בהצלחה ותדפיס את כל 5 הפריטים המיוצרים והנצרכים ללא בעיות.",
+        "ב. התוכנית תרוץ בהצלחה, אך תהיה תפוקה נמוכה של יצרן או צרכן עקב תחרות על משאבים.",
+        "ג. התוכנית עלולה להיתקע במצב של קיפאון (Deadlock) אם הצרכן מנסה לצרוך מבאפר ריק, או אם היצרן מנסה לייצר לבאפר מלא.",
+        "ד. התוכנית תסבול מתנאי מרוץ (Race Condition) בגישה לבאפר המשותף, מה שיוביל לנתונים שגויים.",
+        "ה. התוכנית תיכשל עם שגיאת סגמנטציה (Segmentation Fault) עקב גישה לא חוקית לזיכרון."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג'. הבעיה בקוד טמונה בסדר הפעולות של הסמפורים. סמפור ה-`mutex` נועד להגן על הגישה לקטע הקריטי (הגישה לבאפר), בעוד שסמפורי ה-`empty` וה-`full` משמשים לסנכרון בין היצרן לצרכן ומונעים גישה לבאפר כשהוא מלא או ריק בהתאמה.\nבמימוש הנתון, גם היצרן וגם הצרכן מנסים לרכוש את `mutex` *לפני* שהם ממתינים לסמפור המשאב (empty או full).\nאם הבאפר מתמלא: היצרן ירכוש את `mutex`, ואז ינסה להמתין על `empty`. מכיוון שהבאפר מלא, `empty` יהיה 0, והיצרן ייתקע בהמתנה, *אך הוא עדיין מחזיק ב-`mutex`*. כעת, הצרכן אינו יכול להיכנס לקטע הקריטי כדי לצרוך פריט ולשחרר את `empty`, מכיוון שהיצרן מחזיק ב-`mutex`. נוצר קיפאון.\nבאופן דומה, אם הבאפר מתרוקן: הצרכן ירכוש את `mutex`, ואז ינסה להמתין על `full`. מכיוון שהבאפר ריק, `full` יהיה 0, והצרכן ייתקע בהמתנה, *אך הוא עדיין מחזיק ב-`mutex`*. כעת, היצרן אינו יכול להיכנס לקטע הקריטי כדי לייצר פריט ולשחרר את `full`, מכיוון שהצרכן מחזיק ב-`mutex`. נוצר קיפאון.\nלכן, התוכנית עלולה להיכנס למצב של קיפאון."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

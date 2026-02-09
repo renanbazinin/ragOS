@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Condition Variables",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 07:29:52",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 1190,
+      "total_tokens": 7749
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Condition Variables",
+      "Synchronization",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתון קטע קוד C++ המדמה מערכת לניהול משאבים, בה מספר תהליכונים ממתינים למשאבים ספציפיים על פי ה-ID שלהם. כאשר משאב משתחרר, פונקציית `release_resource` מוסיפה אותו בחזרה למאגר המשאבים הזמינים וקוראת ל-`cv.notify_one()` כדי להעיר תהליכון ממתין.\n\n```cpp\n#include <mutex>\n#include <condition_variable>\n#include <map>\n#include <thread>\n// ... (omitted includes for brevity)\n\nstruct Resource {\n    int id;\n    // ...\n};\n\nstd::mutex m;\nstd::condition_variable cv;\nstd::map<int, Resource> available_resources; // מפה של משאבים זמינים\n\n// פונקציה לתהליכון המבקש משאב ספציפי\nvoid request_specific_resource(int requested_resource_id) {\n    std::unique_lock<std::mutex> lock(m);\n    cv.wait(lock, [&]{ // תהליכון ממתין עד שהמשאב הספציפי יהיה זמין\n        return available_resources.count(requested_resource_id) > 0;\n    });\n    Resource r = available_resources[requested_resource_id];\n    available_resources.erase(requested_resource_id);\n    // ... השתמש במשאב ...\n}\n\n// פונקציה לשחרור משאב\nvoid release_resource(int resource_id) {\n    std::unique_lock<std::mutex> lock(m);\n    available_resources[resource_id] = Resource{resource_id}; // הוספת המשאב בחזרה\n    cv.notify_one(); // <--- השורה המרכזית לשאלה\n}\n```\n\nאיזו בעיה פוטנציאלית קיימת בשימוש ב-`cv.notify_one()` בשורת הקוד המודגשת, במקרה בו תהליכונים שונים ממתינים למשאבים שונים?",
+      "code_snippet": null,
+      "options": [
+        "א. קיפאון (Deadlock) בלתי נמנע.",
+        "ב. איבוד התעוררות (Lost wakeup) שיגרום לתהליכונים מסוימים להמתין לנצח.",
+        "ג. הרעבה (Starvation) או חוסר יעילות, שכן ייתכן שתהליכון רלוונטי לא יתעורר.",
+        "ד. התעוררויות שווא (Spurious wakeups) מרובות שיפגעו בביצועים אך לא בנכונות.",
+        "ה. אין כל בעיה, הקוד נכון ויעיל עבור תרחיש זה."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "הבעיה נובעת מכך שפונקציית `release_resource` משתמשת ב-`cv.notify_one()`. במערכת בה תהליכונים שונים ממתינים לתנאים שונים (במקרה זה, למשאבים ספציפיים שונים), קריאה ל-`notify_one()` מעירה תהליכון אחד בלבד מתוך אלה הממתינים על משתנה התנאי. ייתכן שהתהליכון שהתעורר אינו זה שהתנאי שלו הפך לנכון (כלומר, הוא ממתין למשאב אחר מזה ששוחרר). תהליכון זה יתפוס את המנעול, יבדוק את התנאי (באמצעות הפרדיקט ב-`cv.wait`), יגלה שהתנאי שלו עדיין שקרי, ויחזור לישון. בינתיים, התהליכון *הנכון* – זה שהתנאי שלו אכן הפך לנכון (כי המשאב הספציפי שלו שוחרר) – נשאר רדום ולא מתעורר. מצב זה מוביל לחוסר יעילות, שכן נדרשים סיגנלים נוספים (או המתנה ארוכה) כדי להעיר את התהליכון הרלוונטי, ועלול לגרום להרעבה אם התהליכון הרלוונטי לעולם לא יתעורר על ידי `notify_one()` במקרה הנכון. הפתרון הנכון במקרה זה הוא להשתמש ב-`cv.notify_all()` כדי להעיר את כל התהליכונים הממתינים, ולאפשר לכל אחד מהם לבדוק את התנאי שלו."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency and Condition Variables",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 11:43:13",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3819,
+      "output_tokens": 2382,
+      "total_tokens": 10564
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Concurrency",
+      "Condition Variables",
+      "Synchronization",
+      "Producer-Consumer"
+    ],
+    "content": {
+      "text": "נתבונן במימוש הבא של מאגר חסום (Bounded Buffer) המאפשר לתהליכי יצרן (Producer) להוסיף פריטים ולתהליכי צרכן (Consumer) להוציא פריטים. המאגר משתמש ב-mutex ובשני משתני תנאי (condition variables) - not_empty ו-not_full. הקוד מיועד לשימוש עם ספרית pthreads.\n\nהקוד לעיל מכיל שגיאה נפוצה בשימוש במשתני תנאי.\n\n1.  זהה את השגיאה (או השגיאות) בקוד. הסבר מדוע זו שגיאה וכיצד היא עלולה להוביל להתנהגות לא נכונה (כגון קריאה ממאגר ריק או כתיבה למאגר מלא) או לקיפאון (deadlock) במערכת.\n2.  הצע פתרון מתוקן לקוד. הצג את הפונקציות put ו-get המתוקנות והסבר מדוע הפתרון שלך נכון.\n3.  האם ישנם מקרים בהם עדיף להשתמש ב-pthread_cond_broadcast במקום ב-pthread_cond_signal במימוש הספציפי הזה של מאגר חסום? אם כן, פרט מתי ולמה. אם לא, הסבר מדוע.",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n\n#define MAX_BUFFER_SIZE 5\n\nint buffer[MAX_BUFFER_SIZE];\nint count = 0;\nint in = 0;\nint out = 0;\n\npthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;\npthread_cond_t not_empty = PTHREAD_COND_INITIALIZER;\npthread_cond_t not_full = PTHREAD_COND_INITIALIZER;\n\nvoid put(int item) {\n    pthread_mutex_lock(&mutex);\n    if (count == MAX_BUFFER_SIZE) { // Potential bug here\n        pthread_cond_wait(&not_full, &mutex);\n    }\n    buffer[in] = item;\n    in = (in + 1) % MAX_BUFFER_SIZE;\n    count++;\n    pthread_cond_signal(&not_empty);\n    pthread_mutex_unlock(&mutex);\n}\n\nint get() {\n    pthread_mutex_lock(&mutex);\n    if (count == 0) { // Potential bug here\n        pthread_cond_wait(&not_empty, &mutex);\n    }\n    int item = buffer[out];\n    out = (out + 1) % MAX_BUFFER_SIZE;\n    count--;\n    pthread_cond_signal(&not_full);\n    pthread_mutex_unlock(&mutex);\n    return item;\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "פתרון:\n\n1.  **זיהוי השגיאה והסבר**:\n    השגיאה הנפוצה בקוד היא השימוש בפקודת `if` במקום `while` לבדיקת התנאי לפני קריאה ל-`pthread_cond_wait`.\n    *   בפונקציה `put`, השורה `if (count == MAX_BUFFER_SIZE)` צריכה להיות `while (count == MAX_BUFFER_SIZE)`.\n    *   בפונקציה `get`, השורה `if (count == 0)` צריכה להיות `while (count == 0)`.\n\n    **הסבר מדוע זו שגיאה**:\n    `pthread_cond_wait` עלולה לחזור (להתעורר) גם אם לא נקראו `pthread_cond_signal` או `pthread_cond_broadcast` (תופעה המכונה \"התעוררות שווא\" - spurious wakeup). אם משתמשים ב-`if`, התהליך שהתעורר ימשיך בביצוע ללא בדיקה חוזרת של התנאי. זה עלול להוביל ל:\n    *   **גישה לא חוקית לזיכרון/שחיתות נתונים**: יצרן עלול לנסות לכתוב למאגר שכבר מלא (לאחר התעוררות שווא או אם צרכן אחר הוציא פריט והמאגר התמלא שוב לפני שהיצרן הספיק לבדוק מחדש), או צרכן עלול לנסות לקרוא ממאגר שכבר התרוקן. זה יוביל לשגיאות לוגיות, שחיתות נתונים או קריסות (לדוגמה, index out of bounds אם לא נבדק גודל).\n    *   **קיפאון (Deadlock) או רעב (Starvation)**: במקרים מסוימים, ובמיוחד אם יש מספר רב של יצרנים וצרכנים, התעוררויות שווא או התנהגות לא נכונה לאחר יציאה מ-`wait` יכולות לשבש את המנגנון כך שחוטים יתקעו בהמתנה לתנאי שלעולם לא יתקיים עבורם, או שחוטים אחרים יצרכו את המשאב שלא בצדק. לדוגמה, אם מספר צרכנים מתעוררים אך רק אחד מוציא פריט, והאחרים ממשיכים בגלל `if`, הם עלולים לחשוב שיש פריט כשלמעשה אין, מה שיכול להוביל לבלבול במצב המאגר ולכישלון של תהליכים עתידיים.\n\n2.  **פתרון מתוקן**:\n    הפתרון הוא להחליף את ה-`if` ב-`while` בשתי הפונקציות:\n\n    ```c\n    void put(int item) {\n        pthread_mutex_lock(&mutex);\n        while (count == MAX_BUFFER_SIZE) { // Corrected: Use while\n            pthread_cond_wait(&not_full, &mutex);\n        }\n        buffer[in] = item;\n        in = (in + 1) % MAX_BUFFER_SIZE;\n        count++;\n        pthread_cond_signal(&not_empty);\n        pthread_mutex_unlock(&mutex);\n    }\n\n    int get() {\n        pthread_mutex_lock(&mutex);\n        while (count == 0) { // Corrected: Use while\n            pthread_cond_wait(&not_empty, &mutex);\n        }\n        int item = buffer[out];\n        out = (out + 1) % MAX_BUFFER_SIZE;\n        count--;\n        pthread_cond_signal(&not_full);\n        pthread_mutex_unlock(&mutex);\n        return item;\n    }\n    ```\n    **הסבר מדוע הפתרון נכון**:\n    השימוש ב-`while` מבטיח שהתנאי (האם המאגר מלא או ריק) נבדק מחדש מיד לאחר שהתהליך מתעורר מ-`pthread_cond_wait` ולפני שהוא ממשיך בביצוע. זה מטפל באופן אמין בהתעוררויות שווא וכן במקרים שבהם התנאי השתנה שוב בין רגע ההתעוררות לרגע שבו התהליך הצליח לתפוס מחדש את המוטקס. בכך, אנו מבטיחים שהתהליך יבצע את הפעולה (הכנסה או הוצאה) רק כאשר מצב המאגר מאפשר זאת באופן ודאי.\n\n3.  **`pthread_cond_broadcast` לעומת `pthread_cond_signal`**:\n    במימוש הספציפי הזה של מאגר חסום, שבו כל פעולת `put` מוסיפה פריט אחד וכל פעולת `get` מוציאה פריט אחד, **אין עדיפות לשימוש ב-`pthread_cond_broadcast`**. למעשה, `pthread_cond_signal` עדיף ברוב המקרים מבחינת יעילות.\n    *   כאשר יצרן מוסיף פריט, מספיק להעיר צרכן אחד (אם ישנם כאלה שממתינים) כי רק צרכן אחד יכול לצרוך את הפריט שנוסף.\n    *   כאשר צרכן מוציא פריט, מספיק להעיר יצרן אחד (אם ישנם כאלה שממתינים) כי רק יצרן אחד יכול להוסיף פריט נוסף למאגר כתוצאה מהתרוקנות מקום אחד.\n    *   שימוש ב-`pthread_cond_broadcast` יגרום להתעוררות של *כל* החוטים הממתינים על משתנה התנאי. רובם יתחרו על המוטקס, יתפסו אותו, יבדקו את התנאי בתוך לולאת ה-`while`, יגלו שהתנאי עדיין לא מתקיים עבורם (כי חוט אחר כבר ביצע את הפעולה), וילכו לישון שוב. זהו בזבוז של משאבי מעבד ויוצר עומס מיותר.\n\n    לכן, במקרה זה, `pthread_cond_signal` הוא הבחירה הנכונה והיעילה יותר. `pthread_cond_broadcast` יהיה עדיף במצבים מורכבים יותר, למשל כאשר פעולה אחת משחררת מספר חוטים שכל אחד מהם יכול להמשיך באופן עצמאי (לדוגמה, מנגנון מחסום - barrier, או כאשר ישנם סוגים שונים של חוטים הממתינים לאותו אירוע אך כל אחד מהם בודק תנאי אחר)."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

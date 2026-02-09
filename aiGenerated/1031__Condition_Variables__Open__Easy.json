@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Condition Variables",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 07:31:51",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1573,
+      "output_tokens": 1410,
+      "total_tokens": 4900
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Condition Variables",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "הסבירו את מטרתן של משתני תנאי (Condition Variables) וכיצד הם משמשים בדרך כלל בשילוב עם מנעולים (mutexes) להשגת סנכרון בין תהליכונים. תנו דוגמת קוד פשוטה ב-C/C++ המדגימה את השימוש הבסיסי בהם (לדוגמה, תרחיש יצרן-צרכן עם פריט בודד).",
+      "code_snippet": "#include <iostream>\n#include <thread>\n#include <mutex>\n#include <condition_variable>\n\n// Shared resources and synchronization primitives\nstd::mutex mtx;\nstd::condition_variable cv;\nbool data_ready = false;\nint shared_data = 0;\n\n// Producer function\nvoid producer_thread_func() {\n    // Simulate some work before producing\n    std::this_thread::sleep_for(std::chrono::milliseconds(100)); \n\n    std::unique_lock<std::mutex> lock(mtx);\n    shared_data = 42; // Produce data\n    data_ready = true;\n    std::cout << \"Producer produced: \" << shared_data << std::endl;\n    cv.notify_one(); // Notify one waiting consumer\n    // Lock is automatically released when 'lock' goes out of scope\n}\n\n// Consumer function\nvoid consumer_thread_func() {\n    std::unique_lock<std::mutex> lock(mtx);\n    // Wait until data_ready is true. \n    // 'wait' atomically releases the lock and blocks. \n    // When woken up, it reacquires the lock and checks the predicate.\n    cv.wait(lock, []{ return data_ready; }); \n\n    std::cout << \"Consumer consumed: \" << shared_data << std::endl;\n    data_ready = false; // Reset the flag for potential future cycles\n    // Lock is automatically released when 'lock' goes out of scope\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "משתני תנאי (Condition Variables) מאפשרים לתהליכונים להמתין ביעילות עד שתנאי מסוים מתקיים, מבלי לבצע המתנה פעילה (busy-waiting) שצורכת משאבי CPU. הם משמשים כאשר תהליכון צריך להשהות את ביצועו עד שמצב משותף כלשהו משתנה על ידי תהליכון אחר.\n\nהם תמיד עובדים בשילוב עם מנעול (mutex). המנעול מגן על הנתונים המשותפים שמשתנה התנאי מנטר.\nתהליכון שרוצה להמתין:\n1.  רוכש את המנעול (לדוגמה, באמצעות `std::unique_lock`).\n2.  בודק את התנאי.\n3.  אם התנאי אינו מתקיים, הוא קורא לפונקציית `wait()` של משתנה התנאי, אשר משחררת באופן אטומי את המנעול ומכניסה את התהליכון למצב המתנה.\n\nתהליכון שמשנה את התנאי:\n1.  רוכש את המנעול.\n2.  משנה את הנתונים המשותפים כך שהתנאי עשוי להתקיים.\n3.  קורא ל-`notify_one()` (מעיר תהליכון אחד) או `notify_all()` (מעיר את כל התהליכונים) על משתנה התנאי.\n4.  משחרר את המנעול.\n\nכאשר תהליכון שקרא ל-`wait()` מתעורר (בעקבות קריאה ל-`notify_one`/`notify_all` או מסיבה אחרת כמו spurious wakeup), הוא רוכש מחדש את המנעול ובודק שוב את התנאי (לרוב באמצעות פרדיקט). הפרדיקט (הפונקציה הלמדא בקוד) מבטיח שהתהליכון לא ימשיך לפעול אם הוא התעורר אך התנאי עדיין אינו מתקיים.\n\n**הסבר קוד:**\n*   `mtx`: מנעול שמגן על הנתונים המשותפים `data_ready` ו-`shared_data` מפני תנאי מירוץ (race conditions).\n*   `cv`: משתנה התנאי המשמש לאותת/להמתין עבור שינוי ב-`data_ready`.\n*   פונקציית `producer_thread_func`: רוכשת את המנעול, משנה את הנתונים המשותפים (`shared_data` ו-`data_ready`), ואז קוראת ל-`cv.notify_one()` כדי להעיר תהליכון צרכן אחד שממתין. לאחר מכן, המנעול משתחרר אוטומטית.\n*   פונקציית `consumer_thread_func`: רוכשת את המנעול, ואז קוראת ל-`cv.wait(lock, []{ return data_ready; });`. קריאה זו משחררת את המנעול באופן אטומי ומכניסה את הצרכן למצב המתנה עד ש-`data_ready` הופך ל-`true` (והוא מתעורר ומרוכש מחדש את המנעול). לאחר שהתנאי מתקיים, הצרכן צורך את הנתונים (`shared_data`), מאפס את הדגל `data_ready` (אם נדרש למחזורים נוספים), ומשחרר את המנעול."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

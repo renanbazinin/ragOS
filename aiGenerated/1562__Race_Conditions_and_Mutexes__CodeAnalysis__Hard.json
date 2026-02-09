@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions and Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 11:28:05",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5488,
+      "output_tokens": 1925,
+      "total_tokens": 12104
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Race Conditions",
+      "Mutexes",
+      "Concurrency",
+      "Critical Section"
+    ],
+    "content": {
+      "text": "נתון קטע קוד בשפת C המשתמש במנגנוני תזמון של Pthreads. המערכת כוללת מערך גלובלי `g_arr` ומונה גלובלי `g_count`, המאותחלים כפי שמוצג. מספר חוטים מריצים במקביל את הפונקציה `update_data`.\n`g_arr` הוא מערך בגודל קבוע `MAX_SIZE` המאחסן ערכים שלמים, ו-`g_count` הוא אינדקס המשמש לכתיבה למערך בצורה מעגלית. הפונקציה `update_data` נועדה לעדכן את המערך עם ערך חדש.\n\n```c\n#define MAX_SIZE 10\nint g_arr[MAX_SIZE];\nint g_count = 0;\npthread_mutex_t g_mutex;\n\nvoid init_system() {\n    pthread_mutex_init(&g_mutex, NULL);\n    for (int i = 0; i < MAX_SIZE; ++i) {\n        g_arr[i] = -1; // Initialize with a distinct value\n    }\n}\n\nvoid update_data(int val) {\n    pthread_mutex_lock(&g_mutex);\n    g_count++; // Line A\n    pthread_mutex_unlock(&g_mutex); // Line B\n\n    g_arr[g_count % MAX_SIZE] = val; // Line C\n}\n```\n\nתארו מצב מרוץ (Race Condition) אפשרי בקוד הנתון. פרטו תרחיש ספציפי (רצף פעולות בין חוטים) שיוביל לתוצאה שגויה, הסבירו מדוע היא שגויה, והציעו תיקון מינימלי לקוד כדי למנוע את מצב המרוץ, בצירוף הסבר לתיקון.",
+      "code_snippet": "#define MAX_SIZE 10\nint g_arr[MAX_SIZE];\nint g_count = 0;\npthread_mutex_t g_mutex;\n\nvoid init_system() {\n    pthread_mutex_init(&g_mutex, NULL);\n    for (int i = 0; i < MAX_SIZE; ++i) {\n        g_arr[i] = -1; // Initialize with a distinct value\n    }\n}\n\nvoid update_data(int val) {\n    pthread_mutex_lock(&g_mutex);\n    g_count++; // Line A\n    pthread_mutex_unlock(&g_mutex); // Line B\n\n    g_arr[g_count % MAX_SIZE] = val; // Line C\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "**זיהוי מצב המרוץ:**\nכן, קיים מצב מרוץ בקוד הנתון. המוטקס `g_mutex` משחרר את הנעילה לאחר הגדלת `g_count` (שורה B), אך לפני השימוש בערך המעודכן של `g_count` כדי לגשת למערך `g_arr` (שורה C). פירוש הדבר הוא שחוטים אחרים יכולים לשנות את `g_count` בין שורה B לשורה C.\n\n**תרחיש שגוי לדוגמה:**\nנניח ש-`g_count` מאותחל ל-0.\n1.  **חוט 1 (T1)**: קורא ל-`update_data(10)`.\n2.  **T1**: מבצע `pthread_mutex_lock(&g_mutex);`.\n3.  **T1**: מבצע `g_count++;` (שורה A), כעת `g_count = 1`.\n4.  **T1**: מבצע `pthread_mutex_unlock(&g_mutex);` (שורה B).\n5.  **החלפת הקשר - חוט 2 (T2)**: קורא ל-`update_data(20)`.\n6.  **T2**: מבצע `pthread_mutex_lock(&g_mutex);`.\n7.  **T2**: מבצע `g_count++;` (שורה A), כעת `g_count = 2`.\n8.  **T2**: מבצע `pthread_mutex_unlock(&g_mutex);` (שורה B).\n9.  **T2**: מבצע `g_arr[g_count % MAX_SIZE] = 20;` (שורה C), כלומר `g_arr[2 % 10] = 20;` -> `g_arr[2] = 20`.\n10. **החלפת הקשר - T1**: חוזר לרוץ מהמקום בו הפסיק.\n11. **T1**: מבצע `g_arr[g_count % MAX_SIZE] = 10;` (שורה C). שימו לב ש-`g_count` הוא כעת 2 (השתנה על ידי T2). לכן, T1 מבצע `g_arr[2 % 10] = 10;` -> `g_arr[2] = 10`.\n\n**תוצאה שגויה:**\nהערך 20 שהוכנס על ידי T2 ל-`g_arr[2]` נדרס על ידי הערך 10 של T1. הערך 20 אבד, ולמעשה נוצר מצב בו שני ערכים (10 ו-20) \"צריכים\" להיות במערך במיקומים שונים (אינדקסים 1 ו-2 בהתאמה לערכי ה-`g_count` בזמן שכל חוט ביצע את ההגדלה), אך בפועל שניהם ניסו לכתוב לאינדקס 2 (בגלל שחרור המוטקס המוקדם), ובסופו של דבר רק אחד מהם נשמר. זה מפר את הציפייה שכל קריאה ל-`update_data` תמקם את הערך שלה באינדקס ייחודי (לפחות ביחס לקריאות אחרות שמבוצעות במקביל).\n\n**התיקון המוצע:**\nהקטע הקריטי, שדורש הגנה הדדית, כולל גם את הגדלת המונה וגם את השימוש בערך המונה לצורך גישה למערך. לכן, יש להרחיב את טווח הנעילה של המוטקס.\n\n```c\nvoid update_data(int val) {\n    pthread_mutex_lock(&g_mutex);\n    g_count++; // Line A\n    g_arr[g_count % MAX_SIZE] = val; // Line C (moved inside critical section)\n    pthread_mutex_unlock(&g_mutex); // Line B (moved to end of critical section)\n}\n```\n\n**הסבר לתיקון:**\nעל ידי העברת `pthread_mutex_unlock(&g_mutex);` לאחר שורת הגישה למערך (`g_arr[g_count % MAX_SIZE] = val;`), אנו מבטיחים שכל הפעולות הכרוכות בשינוי `g_count` ובשימוש בערכו לצורך כתיבה למערך יתבצעו באופן אטומי. כאשר חוט אחד מחזיק ב-`g_mutex`, אף חוט אחר לא יוכל לגשת ל-`g_count` או לשנות אותו עד שהחוט הראשון ישחרר את המוטקס. זה מבטיח שכל ערך `val` ייכתב לאינדקס המתאים לו ב-`g_arr` ללא דריסה או איבוד נתונים עקב פעילות מקבילה."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

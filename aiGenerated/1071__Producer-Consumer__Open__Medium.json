@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Producer-Consumer",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 07:45:57",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1877,
+      "output_tokens": 1569,
+      "total_tokens": 6115
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "Open",
+    "topic": [
+      "Producer-Consumer",
+      "Synchronization",
+      "Deadlocks",
+      "Semaphores"
+    ],
+    "content": {
+      "text": "בעיית המפיק-צרכן היא בעיה קלאסית בתחום מערכות ההפעלה הדנה בתיאום בין תהליכים (או תרדמים) המשתפים מאגר נתונים חסום. נתון קטע קוד C/C++ המממש את פונקציית הצרכן (consumer) תוך שימוש בסמפורים וב-mutex. קטע הקוד מכיל שגיאה לוגית שעלולה להוביל לקיפאון (deadlock).\n\n```c\n// Assume semaphores 'full', 'empty' and mutex 'mtx' are initialized\n// BUFFER_SIZE, buffer, in, out are global/shared\n// Item represents the data type\n\nvoid consumer() {\n    Item item;\n    while (true) {\n        pthread_mutex_lock(&mtx); // Acquire mutex first\n        sem_wait(&full);          // Wait for an item\n        \n        // Critical section: remove item from buffer\n        item = buffer[out];\n        out = (out + 1) % BUFFER_SIZE;\n        \n        pthread_mutex_unlock(&mtx); // Release mutex\n        sem_post(&empty);         // Signal an empty slot\n        \n        // Consume the item\n        consume_item(item);\n    }\n}\n```\n\nא. זהו את השגיאה בקטע הקוד והסבירו מדוע היא עלולה לגרום לקיפאון. פרטו את התרחיש שבו יתרחש הקיפאון.\nב. הציעו תיקון לשגיאה והציגו את קטע הקוד המתוקן.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "חלק א': זיהוי השגיאה והסבר לקיפאון\nהשגיאה בקטע הקוד של הצרכן היא בסדר הפעולות: הצרכן נועל את ה-mutex (`pthread_mutex_lock(&mtx)`) *לפני* שהוא ממתין לסמפור `full` (`sem_wait(&full)`).\n\nתרחיש לקיפאון:\n1.  נניח שהמאגר ריק לחלוטין (ערך הסמפור `full` הוא 0).\n2.  הצרכן מתחיל לרוץ. הוא נועל את ה-mutex `mtx` בהצלחה.\n3.  הצרכן מנסה לבצע `sem_wait(&full)`. מכיוון שהמאגר ריק, הסמפור `full` הוא 0, ולכן הצרכן נכנס למצב המתנה (בלוקינג) על הסמפור `full`.\n4.  בשלב זה, הצרכן מחזיק ב-mutex `mtx` אך ממתין לסמפור `full`.\n5.  כעת, נניח שהמפיק (producer) מנסה להוסיף פריט למאגר. תהליך המפיק ינסה קודם כל לבצע `sem_wait(&empty)` (נניח שיש מקום פנוי, כלומר `empty` > 0), ואז ינסה לנעול את ה-mutex `mtx` כדי לגשת למאגר המשותף.\n6.  המפיק יחסם בניסיון לנעול את ה-mutex `mtx`, מכיוון שהצרכן כבר מחזיק בו.\n7.  המצב שנוצר הוא קיפאון: הצרכן ממתין למפיק שיסמן את `full` (על ידי הוספת פריט), אך המפיק אינו יכול להוסיף פריט מכיוון שהוא ממתין ל-mutex `mtx` שמוחזק על ידי הצרכן. אף אחד מהם לא יכול להתקדם, ונוצר קיפאון.\n\nחלק ב': תיקון השגיאה\nהתיקון הוא לשנות את סדר הפעולות בצרכן, כך שההמתנה לסמפור `full` תתבצע *לפני* נעילת ה-mutex. באופן דומה, במפיק, ההמתנה לסמפור `empty` צריכה להתבצע לפני נעילת ה-mutex. ה-mutex צריך להגן רק על הגישה למאגר המשותף עצמו, ולא על פעולות ההמתנה/איתות של הסמפורים.\n\nקטע הקוד המתוקן:\n```c\n// Assume semaphores 'full', 'empty' and mutex 'mtx' are initialized\n// BUFFER_SIZE, buffer, in, out are global/shared\n// Item represents the data type\n\nvoid consumer() {\n    Item item;\n    while (true) {\n        sem_wait(&full);          // 1. Wait for an item (blocks if buffer empty)\n        pthread_mutex_lock(&mtx); // 2. Acquire mutex to access shared buffer\n        \n        // Critical section: remove item from buffer\n        item = buffer[out];\n        out = (out + 1) % BUFFER_SIZE;\n        \n        pthread_mutex_unlock(&mtx); // 3. Release mutex\n        sem_post(&empty);         // 4. Signal an empty slot\n        \n        // Consume the item\n        consume_item(item);\n    }\n}\n```\nהסבר לתיקון:\nבגרסה המתוקנת, הצרכן ממתין לפריט (`sem_wait(&full)`) לפני שהוא נועל את ה-mutex. אם המאגר ריק, הצרכן יחסם על `full` וישחרר את המעבד, אך ה-mutex `mtx` לא יהיה נעול. זה מאפשר למפיק להמשיך, להוסיף פריט למאגר (לאחר שיבצע `sem_wait(&empty)` וינעל את `mtx` בעצמו, יוסיף את הפריט וישחרר את `mtx`), ולבסוף לאותת ל`full` (`sem_post(&full)`). איתות זה ישחרר את הצרכן מההמתנה, והוא יוכל אז לנעול את ה-mutex ולגשת בבטחה למאגר. כך נמנע הקיפאון."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

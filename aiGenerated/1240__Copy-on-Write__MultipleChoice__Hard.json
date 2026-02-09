@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Copy-on-Write",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 08:54:10",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 972,
+      "output_tokens": 1810,
+      "total_tokens": 7948
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Virtual Memory",
+      "Copy-on-Write",
+      "Process Management"
+    ],
+    "content": {
+      "text": "נתון קטע קוד C המשתמש בזיכרון וירטואלי ובמנגנון Copy-on-Write (CoW). בהנחה שגודל דף זיכרון הוא `PAGE_SIZE` (4096 בתים), וכמו כן, מערכת ההפעלה מבצעת שחרור של דפים פיזיים מיד כשה-reference count שלהם מגיע ל-0. כמה דפים פיזיים ייחודיים (unique physical pages) בסך הכל נוצרו/הוקצו על ידי מערכת ההפעלה במהלך כל ריצת התוכנית (מרגע ה-malloc ועד סוף התוכנית, לפני ה-free האחרון ב-parent)?",
+      "code_snippet": "#include <unistd.h>\n#include <sys/wait.h>\n#include <stdio.h>\n#include <stdlib.h>\n\n#define PAGE_SIZE 4096 // Assume a typical page size\n\nint main() {\n    char *data = (char *)malloc(2 * PAGE_SIZE); // Allocate 2 pages\n    if (data == NULL) {\n        perror(\"malloc failed\");\n        return 1;\n    }\n\n    // Initialize the first page\n    for (int i = 0; i < PAGE_SIZE; ++i) {\n        data[i] = 'A';\n    }\n    // Initialize the second page\n    for (int i = PAGE_SIZE; i < 2 * PAGE_SIZE; ++i) {\n        data[i] = 'B';\n    }\n\n    pid_t pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        return 1;\n    } else if (pid == 0) { // Child process\n        data[0] = 'X'; // Modify first byte of first page\n        data[PAGE_SIZE + 100] = 'Y'; // Modify byte in second page\n        exit(0);\n    } else { // Parent process\n        wait(NULL); // Wait for child to finish\n        data[50] = 'P'; // Modify byte in first page\n        data[PAGE_SIZE + 200] = 'Q'; // Modify byte in second page\n    }\n\n    free(data);\n    return 0;\n}",
+      "options": [
+        "א. 2",
+        "ב. 3",
+        "ג. 4",
+        "ד. 6",
+        "ה. 8"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ד",
+      "explanation": "הסבר מפורט:\n1.  **לפני `fork()`:** הפונקציה `malloc(2 * PAGE_SIZE)` מקצה זיכרון לשני דפים וירטואליים וממפה אותם לשני דפים פיזיים ייחודיים (נקרא להם P1_orig ו-P2_orig). סה\"כ 2 דפים פיזיים נוצרו.\n2.  **לאחר `fork()`:** תהליך הבן נוצר. עקב מנגנון CoW, שני התהליכים (האב והבן) חולקים את אותם שני דפים פיזיים (P1_orig, P2_orig). כעת, טבלאות הדפים של שניהם מצביעות על P1_orig ו-P2_orig, והדפים מסומנים כקריאה בלבד (Read-Only) עם reference count של 2 לכל אחד. לא נוצרו דפים פיזיים חדשים בשלב זה.\n3.  **בתהליך הבן:**\n    *   `data[0] = 'X';`: זוהי פעולת כתיבה לדף הווירטואלי הראשון. כיוון שהדף מסומן כ-Read-Only, נוצרת תקלת דף (page fault). מערכת ההפעלה מקצה דף פיזי חדש (נקרא לו P1_child), מעתיקה אליו את תוכן P1_orig, וטבלת הדפים של הבן מתעדכנת כך שהיא מצביעה על P1_child (ומסומן כ-Read-Write). ה-reference count של P1_orig יורד ל-1. בשלב זה, נוצר דף פיזי ייחודי שלישי.\n    *   `data[PAGE_SIZE + 100] = 'Y';`: זוהי פעולת כתיבה לדף הווירטואלי השני. בדומה, נוצרת תקלת דף, מערכת ההפעלה מקצה דף פיזי חדש (נקרא לו P2_child), מעתיקה אליו את תוכן P2_orig, וטבלת הדפים של הבן מתעדכנת כך שהיא מצביעה על P2_child. ה-reference count של P2_orig יורד ל-1. בשלב זה, נוצר דף פיזי ייחודי רביעי.\n4.  **יציאת תהליך הבן (`exit(0)`):** כאשר תהליך הבן מסיים את ריצתו, המשאבים שלו משוחררים. הדפים P1_child ו-P2_child (שנוצרו עבורו) משוחררים בחזרה לבריכת הדפים הפיזיים של מערכת ההפעלה, מכיוון שה-reference count שלהם יורד ל-0.\n5.  **בתהליך האב (לאחר שהבן סיים):**\n    *   `data[50] = 'P';`: זוהי פעולת כתיבה לדף הווירטואלי הראשון. טבלת הדפים של האב עדיין מצביעה על P1_orig (שכעת ה-reference count שלו הוא 1 ומסומן כ-Read-Only). נוצרת תקלת דף. מערכת ההפעלה מקצה דף פיזי חדש (נקרא לו P1_parent), מעתיקה אליו את תוכן P1_orig, וטבלת הדפים של האב מתעדכנת כך שהיא מצביעה על P1_parent. ה-reference count של P1_orig יורד ל-0, ולכן P1_orig משוחרר. בשלב זה, נוצר דף פיזי ייחודי חמישי.\n    *   `data[PAGE_SIZE + 200] = 'Q';`: זוהי פעולת כתיבה לדף הווירטואלי השני. בדומה, נוצרת תקלת דף. מערכת ההפעלה מקצה דף פיזי חדש (נקרא לו P2_parent), מעתיקה אליו את תוכן P2_orig, וטבלת הדפים של האב מתעדכנת כך שהיא מצביעה על P2_parent. ה-reference count של P2_orig יורד ל-0, ולכן P2_orig משוחרר. בשלב זה, נוצר דף פיזי ייחודי שישי.\n\nלסיכום, סך הדפים הפיזיים הייחודיים שנוצרו/הוקצו במהלך כל ריצת התוכנית הם: P1_orig, P2_orig, P1_child, P2_child, P1_parent, P2_parent. בסך הכל 6 דפים פיזיים ייחודיים."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

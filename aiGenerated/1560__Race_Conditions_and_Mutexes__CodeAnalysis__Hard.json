@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions and Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 11:26:49",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5488,
+      "output_tokens": 2519,
+      "total_tokens": 15780
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Race Conditions",
+      "Mutexes",
+      "Concurrency",
+      "Shared Resources",
+      "Data Inconsistency"
+    ],
+    "content": {
+      "text": "נתונה מערכת המנהלת מאגר משאבים בגודל קבוע. המערכת כוללת פונקציות לרכישה ושחרור משאבים, וכן חוט ניטור הבודק את תקינות המאגר.\nהקוד הבא מציג מימוש חלקי של המערכת. משתנים גלובליים:\n`resource_pool`: מערך בוליאני המייצג את מצב המשאבים (true = פנוי, false = בשימוש).\n`available_resources`: מונה את מספר המשאבים הפנויים.\n`pool_mutex`: מנעול להגנה על משאבי המאגר.\n\nחוטי עבודה (`worker_thread`) רוכשים משאב, משתמשים בו ומשחררים אותו.\nחוט ניטור (`monitor_thread`) בודק מעת לעת את מספר המשאבים הפנויים ומנסה לוודא שהמונה `available_resources` תואם למצב האמיתי של המשאבים במערך `resource_pool`.\n\nקוד המימוש נתון להלן. נתחו את הקוד וענו על השאלה:\n\nהאם ייתכן מצב בו חוט הניטור (`monitor_thread`) מזהה חוסר התאמה בין המונה `available_resources` לבין הספירה בפועל של משאבים פנויים במערך `resource_pool` (כלומר, `available_resources != actual_available`)?\nאם כן, הסבירו כיצד מצב זה יכול להתרחש ומהי הסיבה לכך. אם לא, הוכיחו מדוע.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <stdbool.h>\n#include <unistd.h> // for usleep\n\n#define POOL_SIZE 3\n\nbool resource_pool[POOL_SIZE]; // true if available, false if in use\npthread_mutex_t pool_mutex;\nint available_resources = POOL_SIZE;\n\n// Function to acquire a resource\nint acquire_resource() {\n    pthread_mutex_lock(&pool_mutex);\n    for (int i = 0; i < POOL_SIZE; ++i) {\n        if (resource_pool[i]) {\n            resource_pool[i] = false;\n            available_resources--;\n            printf(\"Acquired resource %d. Available: %d\\n\", i, available_resources);\n            pthread_mutex_unlock(&pool_mutex);\n            return i;\n        }\n    }\n    pthread_mutex_unlock(&pool_mutex);\n    return -1; // No resource available\n}\n\n// Function to release a resource\nvoid release_resource(int r_id) {\n    if (r_id >= 0 && r_id < POOL_SIZE) {\n        pthread_mutex_lock(&pool_mutex);\n        if (!resource_pool[r_id]) { // Ensure it was actually in use\n            resource_pool[r_id] = true;\n            available_resources++;\n            printf(\"Released resource %d. Available: %d\\n\", r_id, available_resources);\n        } else {\n            printf(\"Error: Attempted to release an unacquired resource %d.\\n\", r_id);\n        }\n        pthread_mutex_unlock(&pool_mutex);\n    }\n}\n\n// Worker thread\nvoid* worker_thread(void* arg) {\n    for (int i = 0; i < 5; ++i) {\n        int r = acquire_resource();\n        if (r != -1) {\n            printf(\"Worker %ld: Using resource %d...\\n\", (long)arg, r);\n            usleep(20000 + (long)arg * 1000); // Simulate work with resource\n            release_resource(r);\n        } else {\n            printf(\"Worker %ld: No resource available, waiting...\\n\", (long)arg);\n            usleep(50000); // Wait and try again\n        }\n    }\n    return NULL;\n}\n\n// Monitor thread - checks if `available_resources` matches the actual count\nvoid* monitor_thread(void* arg) {\n    for (int i = 0; i < 10; ++i) {\n        usleep(30000); // Monitor periodically\n        // Problematic check\n        if (available_resources < POOL_SIZE) { // Check outside mutex\n            int actual_in_use = 0;\n            for (int j = 0; j < POOL_SIZE; ++j) {\n                if (!resource_pool[j]) { // Accessing resource_pool without mutex\n                    actual_in_use++;\n                }\n            }\n            int actual_available = POOL_SIZE - actual_in_use;\n            \n            pthread_mutex_lock(&pool_mutex);\n            printf(\"Monitor %ld: available_resources=%d, actual_available=%d. Mismatch? %s\\n\", \n                   (long)arg, available_resources, actual_available, \n                   (available_resources != actual_available) ? \"YES!\" : \"No.\");\n            pthread_mutex_unlock(&pool_mutex);\n        } else {\n             pthread_mutex_lock(&pool_mutex);\n             printf(\"Monitor %ld: All resources available (%d).\\n\", (long)arg, available_resources);\n             pthread_mutex_unlock(&pool_mutex);\n        }\n    }\n    return NULL;\n}\n\nint main() {\n    for (int i = 0; i < POOL_SIZE; ++i) {\n        resource_pool[i] = true; // All resources initially available\n    }\n    pthread_mutex_init(&pool_mutex, NULL);\n\n    pthread_t worker_tids[4];\n    pthread_t mon_tid;\n\n    for (long i = 0; i < 4; ++i) {\n        pthread_create(&worker_tids[i], NULL, worker_thread, (void*)(i + 1));\n    }\n    pthread_create(&mon_tid, NULL, monitor_thread, (void*)99L);\n\n    for (int i = 0; i < 4; ++i) {\n        pthread_join(worker_tids[i], NULL);\n    }\n    pthread_join(mon_tid, NULL);\n\n    printf(\"Final available resources: %d\\n\", available_resources);\n    pthread_mutex_destroy(&pool_mutex);\n    return 0;\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "כן, מצב כזה של חוסר התאמה אפשרי.\n\n**הסבר:**\nחוט הניטור (`monitor_thread`) מבצע את הבדיקה `if (available_resources < POOL_SIZE)` מחוץ למנעול. קריאה זו של `available_resources` כשלעצמה אינה בעייתית, מכיוון שזהו משתנה יחיד ואטומי (בהנחה שקריאתו היא אטומית במערכת). אולם, הלולאה שלאחר מכן, `for (int j = 0; j < POOL_SIZE; ++j)`, ניגשת למערך `resource_pool[j]` **מבלי להחזיק את `pool_mutex`**.\n\nזה יוצר תנאי מירוץ:\n1.  **חוט ניטור (M)**: קורא את `available_resources` (לדוגמה, ערכו 2).\n2.  **חוט ניטור (M)**: נכנס ללולאה כדי לחשב את `actual_in_use`. הוא מתחיל לעבור על `resource_pool`.\n3.  **חוט עבודה (W)**: קורא לפונקציה `acquire_resource()`. הוא נועל את `pool_mutex`, מוצא משאב פנוי (לדוגמה, משאב 0), משנה את `resource_pool[0] = false`, מפחית את `available_resources` ל-1, ומשחרר את `pool_mutex`.\n4.  **חוט ניטור (M)**: ממשיך את הלולאה שלו. כאשר הוא קורא את `resource_pool[0]`, הוא רואה כעת `false`.\n5.  **חוט עבודה (W)**: קורא לפונקציה `release_resource()`. הוא נועל את `pool_mutex`, משנה את `resource_pool[0] = true`, מגדיל את `available_resources` ל-2, ומשחרר את `pool_mutex`.\n6.  **חוט ניטור (M)**: מסיים את הלולאה שלו. `actual_in_use` חושב על בסיס צילום מצב של `resource_pool` שהיה לא עקבי לאורך זמן. ערכו של `available_resources` עשוי היה להשתנות מספר פעמים במהלך הלולאה של M. כאשר M סוף סוף נועל את `pool_mutex` כדי להדפיס את ממצאיו, `available_resources` יכול להיות 2, אך `actual_available` (שחושב מקריאות לא עקביות של `resource_pool`) יכול להיות שונה, מה שיוביל לחוסר התאמה.\n\nהבעיה המרכזית היא ש-`resource_pool` הוא מבנה נתונים משותף, וחוט הניטור קורא את האלמנטים שלו מבלי להחזיק את המנעול המגן עליו. למרות ש-`available_resources` עצמו מעודכן תחת מנעול, מערך `resource_pool`, שאותו `available_resources` אמור לשקף, אינו מוגן באופן עקבי במהלך הסריקה המלאה של חוט הניטור. כדי לחשב נכון את `actual_available`, חוט הניטור חייב לרכוש את `pool_mutex` **לפני** תחילת הלולאה שעוברת על `resource_pool` ולהחזיק אותו עד לסיום החישוב."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

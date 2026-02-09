@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Threads and Mutexes",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 20:27:58",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4527,
+      "output_tokens": 2040,
+      "total_tokens": 11439
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Threads",
+      "Mutexes",
+      "Deadlock",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתון קטע קוד בשפת C++ המשתמש בספרית `pthread` לניהול תהליכונים (threads) ומנעולים (mutexes). המערכת כוללת משאבים משותפים: מונה (`shared_counter`) ווקטור (`shared_data`). קיימים שני סוגי תהליכונים: מפיקים (producers) וצרכנים (consumers). תהליכוני המפיקים מגדילים את המונה ומוסיפים איברים לווקטור, ותהליכוני הצרכנים מקטינים את המונה ומוציאים איברים מהווקטור. שני המשאבים מוגנים באמצעות מנעולים נפרדים. \n\nעיין בקוד וזהה בעיה קריטית אחת או יותר שעלולה להתרחש בעת הרצת התוכנית. הסבר מדוע הבעיה מתרחשת וכיצד היא יכולה להשפיע על תקינות המערכת. לאחר מכן, הצע פתרון לקוד הנתון, הצג את הקוד המתוקן והסבר בקצרה מדוע הפתרון שלך פותר את הבעיה.",
+      "code_snippet": "#include <iostream>\n#include <vector>\n#include <pthread.h>\n#include <unistd.h> // For usleep\n\n// Shared resources\nint shared_counter = 0;\nstd::vector<int> shared_data;\n\n// Mutexes\npthread_mutex_t counter_mutex;\npthread_mutex_t data_mutex;\n\nvoid* producer_thread(void* arg) {\n    for (int i = 0; i < 5; ++i) {\n        // Producer acquires counter_mutex then data_mutex\n        pthread_mutex_lock(&counter_mutex);\n        pthread_mutex_lock(&data_mutex);\n\n        shared_counter++;\n        shared_data.push_back(shared_counter);\n        std::cout << \"Producer: Added \" << shared_counter << \". Current size: \" << shared_data.size() << std::endl;\n\n        pthread_mutex_unlock(&data_mutex);\n        pthread_mutex_unlock(&counter_mutex);\n        usleep(100000); // Simulate work\n    }\n    return NULL;\n}\n\nvoid* consumer_thread(void* arg) {\n    for (int i = 0; i < 5; ++i) {\n        // Consumer acquires data_mutex then counter_mutex\n        pthread_mutex_lock(&data_mutex);\n        pthread_mutex_lock(&counter_mutex);\n\n        if (!shared_data.empty()) {\n            int value = shared_data.back();\n            shared_data.pop_back();\n            shared_counter--;\n            std::cout << \"Consumer: Removed \" << value << \". Current size: \" << shared_data.size() << std::endl;\n        } else {\n            std::cout << \"Consumer: Data is empty.\" << std::endl;\n        }\n\n        pthread_mutex_unlock(&counter_mutex);\n        pthread_mutex_unlock(&data_mutex);\n        usleep(150000); // Simulate work\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_mutex_init(&counter_mutex, NULL);\n    pthread_mutex_init(&data_mutex, NULL);\n\n    pthread_t p_threads[2];\n    pthread_t c_threads[2];\n\n    for (int i = 0; i < 2; ++i) {\n        pthread_create(&p_threads[i], NULL, producer_thread, NULL);\n        pthread_create(&c_threads[i], NULL, consumer_thread, NULL);\n    }\n\n    for (int i = 0; i < 2; ++i) {\n        pthread_join(p_threads[i], NULL);\n        pthread_join(c_threads[i], NULL);\n    }\n\n    pthread_mutex_destroy(&counter_mutex);\n    pthread_mutex_destroy(&data_mutex);\n\n    std::cout << \"Final counter: \" << shared_counter << std::endl;\n    std::cout << \"Final data size: \" << shared_data.size() << std::endl;\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הבעיה הקריטית בקוד היא מצב קיפאון (Deadlock). \n\n**הסבר הבעיה:**\nתהליכוני המפיק (producer_thread) מנסים לרכוש את המנעולים בסדר הבא: `counter_mutex` ולאחר מכן `data_mutex`. \nתהליכוני הצרכן (consumer_thread) מנסים לרכוש את המנעולים בסדר הפוך: `data_mutex` ולאחר מכן `counter_mutex`. \nאם תהליכון מפיק אחד רוכש את `counter_mutex` ובמקביל תהליכון צרכן אחד רוכש את `data_mutex`, שניהם ימתינו זה לזה באופן אינסופי כדי לרכוש את המנעול השני. המפיק ממתין ל-`data_mutex` שהצרכן מחזיק, והצרכן ממתין ל-`counter_mutex` שהמפיק מחזיק. מצב זה מוביל לקיפאון, שבו כל התהליכונים המעורבים מפסיקים להתקדם והתוכנית נתקעת.\n\n**השפעה על המערכת:**\nקיפאון גורם לכך שהתוכנית מפסיקה להגיב, לא מבצעת פעולות נוספות ומשאבים נשארים נעולים, מה שעלול להוביל לחוסר זמינות של שירותים או איבוד נתונים במערכות מורכבות יותר.\n\n**פתרון מוצע:**\nכדי למנוע קיפאון כתוצאה מסדר רכישת מנעולים שונה, יש להקפיד על סדר רכישה עקבי של המנעולים בכל התהליכונים. נבחר שכל התהליכונים ירכשו תמיד קודם את `counter_mutex` ולאחר מכן את `data_mutex`.\n\n**קוד מתוקן (רק פונקציית `consumer_thread` משתנה):**\n```c\nvoid* consumer_thread(void* arg) {\n    for (int i = 0; i < 5; ++i) {\n        // Consumer now acquires counter_mutex then data_mutex (consistent order)\n        pthread_mutex_lock(&counter_mutex);\n        pthread_mutex_lock(&data_mutex);\n\n        if (!shared_data.empty()) {\n            int value = shared_data.back();\n            shared_data.pop_back();\n            shared_counter--;\n            std::cout << \"Consumer: Removed \" << value << \". Current size: \" << shared_data.size() << std::endl;\n        } else {\n            std::cout << \"Consumer: Data is empty.\" << std::endl;\n        }\n\n        pthread_mutex_unlock(&data_mutex);\n        pthread_mutex_unlock(&counter_mutex);\n        usleep(150000); // Simulate work\n    }\n    return NULL;\n}\n```\n\n**הסבר הפתרון:**\nעל ידי אכיפת סדר רכישת מנעולים אחיד (לדוגמה, תמיד `counter_mutex` ואז `data_mutex`), אנו מונעים את התנאי ההכרחי לקיפאון של \"החזקה והמתנה מעגלית\" (Circular Wait). כעת, אם תהליכון כלשהו מחזיק ב-`counter_mutex`, אף תהליכון אחר לא יוכל לרכוש אותו לפני שהתהליכון הראשון ישחרר אותו. רק לאחר רכישת `counter_mutex`, התהליכון ינסה לרכוש את `data_mutex`. כך, אין אפשרות למצב שבו תהליכון אחד מחזיק ב-A וממתין ל-B, בעוד תהליכון אחר מחזיק ב-B וממתין ל-A."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Deadlocks and Synchronization",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 11:52:03",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1163,
+      "output_tokens": 687,
+      "total_tokens": 2996
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "Deadlocks",
+      "Synchronization",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "בהינתן קטע הקוד הבא המשתמש בשני מנעולים (mutexes) ובשני חוטים (threads), איזו טענה נכונה לגבי פוטנציאל לקיפאון (deadlock)?",
+      "code_snippet": "pthread_mutex_t mutex1 = PTHREAD_MUTEX_INITIALIZER;\npthread_mutex_t mutex2 = PTHREAD_MUTEX_INITIALIZER;\n\nvoid* thread_func1(void* arg) {\n    pthread_mutex_lock(&mutex1);\n    // do something\n    pthread_mutex_lock(&mutex2);\n    // do something else\n    pthread_mutex_unlock(&mutex2);\n    pthread_mutex_unlock(&mutex1);\n    return NULL;\n}\n\nvoid* thread_func2(void* arg) {\n    pthread_mutex_lock(&mutex2);\n    // do something\n    pthread_mutex_lock(&mutex1);\n    // do something else\n    pthread_mutex_unlock(&mutex1);\n    pthread_mutex_unlock(&mutex2);\n    return NULL;\n}",
+      "options": [
+        "א. קיימת סבירות לקיפאון (deadlock) מכיוון שהחוטים מנסים לרכוש את המנעולים בסדר הפוך.",
+        "ב. לא ייתכן קיפאון (deadlock) מכיוון שכל חוט משחרר את המנעולים שהוא רוכש.",
+        "ג. לא ייתכן קיפאון (deadlock) מכיוון שהמנעולים מוגדרים כ-PTHREAD_MUTEX_INITIALIZER.",
+        "ד. קיימת סבירות לקיפאון (deadlock) רק אם יש יותר משני חוטים במערכת."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "נכון. קיפאון (deadlock) אכן אפשרי במקרה זה. התנאי ההכרחי לקיפאון של 'המתנה מחזורית' (Circular Wait) יכול להתקיים כאן מכיוון ש-thread_func1 מנסה לרכוש את mutex1 ולאחר מכן את mutex2, בעוד ש-thread_func2 מנסה לרכוש את mutex2 ולאחר מכן את mutex1. אם thread_func1 ירכוש את mutex1 ו-thread_func2 ירכוש את mutex2 בו זמנית, שניהם ימתינו ללא סוף למנעול שהשני מחזיק, ובכך ייווצר קיפאון."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

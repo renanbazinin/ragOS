@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Page Replacement",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 07:52:13",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 952,
+      "output_tokens": 361,
+      "total_tokens": 2478
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Page Replacement"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של אלגוריתמי החלפת עמודים (Page Replacement Algorithms)?",
+      "code_snippet": null,
+      "options": [
+        "א. להקטין את מספר ה-page faults.",
+        "ב. להגדיל את נפח הזיכרון הפיזי הזמין.",
+        "ג. לתרגם כתובות וירטואליות לכתובות פיזיות.",
+        "ד. להבטיח שכל העמודים של תהליך נמצאים בזיכרון הפיזי.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "המטרה העיקרית של אלגוריתמי החלפת עמודים היא לבחור איזה עמוד להוציא מהזיכרון הפיזי (ה-RAM) כאשר יש צורך להכניס עמוד חדש ואין מקום פנוי. הבחירה נעשית במטרה למזער את מספר ה-page faults העתידיים, ובכך לשפר את ביצועי המערכת."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

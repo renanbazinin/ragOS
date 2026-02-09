@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Deadlocks and Synchronization",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 11:52:17",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1163,
+      "output_tokens": 977,
+      "total_tokens": 4493
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "Deadlocks",
+      "Synchronization",
+      "Concurrency",
+      "Mutexes"
+    ],
+    "content": {
+      "text": "בהינתן קטע הקוד הבא המשתמש ב-pthreads ו-mutexes, האם עלול להיווצר קיפאון (deadlock)? בחר את התשובה הנכונה ביותר.",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h> // For usleep\n\npthread_mutex_t mutex1 = PTHREAD_MUTEX_INITIALIZER;\npthread_mutex_t mutex2 = PTHREAD_MUTEX_INITIALIZER;\n\nvoid* thread_func1(void* arg) {\n    pthread_mutex_lock(&mutex1);\n    printf(\"Thread 1 acquired mutex 1\\n\");\n    // Simulate some work or delay\n    usleep(100000); // 100ms\n    pthread_mutex_lock(&mutex2);\n    printf(\"Thread 1 acquired mutex 2\\n\");\n    // Critical section\n    pthread_mutex_unlock(&mutex2);\n    pthread_mutex_unlock(&mutex1);\n    printf(\"Thread 1 released both mutexes\\n\");\n    return NULL;\n}\n\nvoid* thread_func2(void* arg) {\n    pthread_mutex_lock(&mutex2);\n    printf(\"Thread 2 acquired mutex 2\\n\");\n    // Simulate some work or delay\n    usleep(100000); // 100ms\n    pthread_mutex_lock(&mutex1);\n    printf(\"Thread 2 acquired mutex 1\\n\");\n    // Critical section\n    pthread_mutex_unlock(&mutex1);\n    pthread_mutex_unlock(&mutex2);\n    printf(\"Thread 2 released both mutexes\\n\");\n    return NULL;\n}\n\nint main() {\n    pthread_t t1, t2;\n\n    pthread_create(&t1, NULL, thread_func1, NULL);\n    pthread_create(&t2, NULL, thread_func2, NULL);\n\n    pthread_join(t1, NULL);\n    pthread_join(t2, NULL);\n\n    printf(\"Main finished\\n\");\n    return 0;\n}",
+      "options": [
+        "א. לא, קיפאון לא ייתכן מכיוון שכל חוט משחרר את המנעולים לאחר השימוש בהם.",
+        "ב. כן, קיפאון עלול להתרחש מכיוון ששני החוטים מנסים לרכוש את המנעולים בסדר הפוך.",
+        "ג. לא, קיפאון לא ייתכן מכיוון שכל חוט רוכש רק שני מנעולים.",
+        "ד. כן, קיפאון עלול להתרחש רק אם קיימים יותר משני חוטים."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "כן. קטע הקוד מדגים תרחיש קיפאון קלאסי. חוט 1 מנסה לרכוש תחילה את mutex1 ולאחר מכן את mutex2. חוט 2 מנסה לרכוש תחילה את mutex2 ולאחר מכן את mutex1. אם חוט 1 ירכוש את mutex1 וחוט 2 ירכוש את mutex2 בערך באותו זמן, שני החוטים ינסו לרכוש את המנעול המוחזק על ידי החוט השני. מצב זה מוביל למצב של המתנה מעגלית (circular wait) ולכן לקיפאון. שחרור המנעולים לאחר השימוש בהם הוא הכרחי, אך אינו מונע קיפאונות אם סדר רכישת המנעולים בעייתי."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

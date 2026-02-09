@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Memory Management and TLB",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 21:21:18",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1050,
+      "output_tokens": 521,
+      "total_tokens": 2621
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Memory Management",
+      "TLB"
+    ],
+    "content": {
+      "text": "מהו סדר הפעולות הנכון ביותר כאשר מתרחשת TLB Miss, והדף המבוקש נמצא בזיכרון הפיזי (RAM)?",
+      "code_snippet": null,
+      "options": [
+        "א. ה-CPU מיד גורם ל-Page Fault, ומערכת ההפעלה טוענת את הדף מהדיסק.",
+        "ב. ה-CPU ניגש לטבלת הדפים בזיכרון הראשי כדי למצוא את הכתובת הפיזית, ולאחר מכן מעדכן את ה-TLB.",
+        "ג. ה-CPU מעדכן את ה-TLB עם הכתובת הווירטואלית והפיזית, ולאחר מכן ניגש לזיכרון הפיזי.",
+        "ד. ה-CPU מבצע חיפוש חוזר ב-TLB, הפעם עם הרשאות מנהל מערכת.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב'. כאשר מתרחשת TLB Miss, הדבר הראשון שהחומרה עושה הוא לנסות לפתור את הכתובת הווירטואלית לכתובת פיזית באמצעות טבלת הדפים (Page Table) הנמצאת בזיכרון הראשי (RAM). אם הדף נמצא בזיכרון הפיזי (כלומר, ה-Present bit ברשומת טבלת הדפים דולק), הכתובת הפיזית נשלפת, ה-TLB מתעדכן עם הרשומה החדשה (כדי למנוע Miss עתידי לאותה כתובת), והפעולה ממשיכה. Page Fault מתרחש רק אם הדף אינו נמצא בזיכרון הפיזי."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

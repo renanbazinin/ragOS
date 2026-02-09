@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Producer-Consumer",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 07:45:18",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1877,
+      "output_tokens": 2205,
+      "total_tokens": 10157
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "Open",
+    "topic": [
+      "Producer-Consumer",
+      "Synchronization",
+      "Mutexes",
+      "Condition Variables"
+    ],
+    "content": {
+      "text": "בתרחיש של בעיית יצרן-צרכן עם חוצץ חסום (bounded buffer) ושימוש ב-pthreads mutexes ו-condition variables, נניח שהיצרן (Producer) שוכח לנעול את המוטקס לפני בדיקת תנאי המלאות של החוצץ (לדוגמה, count == BUFFER_SIZE) או לפני קריאה ל-`pthread_cond_wait`. אילו בעיות עלולות להתעורר? יש להדגים קטע קוד C/C++ הממחיש בעיה כזו, ולהסביר כיצד לתקן אותה.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <pthread.h>\n#include <unistd.h>\n\n#define BUFFER_SIZE 5\n\nint buffer[BUFFER_SIZE];\nint count = 0;\nint in = 0;\nint out = 0;\n\npthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;\npthread_cond_t not_full = PTHREAD_COND_INITIALIZER;\npthread_cond_t not_empty = PTHREAD_COND_INITIALIZER;\n\nvoid *producer(void *arg) {\n    int item;\n    for (int i = 0; i < 10; i++) {\n        item = i;\n\n        // PROBLEM 1: Checking count without mutex lock - Race condition on 'count'\n        // PROBLEM 2: Calling pthread_cond_wait without mutex locked by the caller\n        while (count == BUFFER_SIZE) { \n            // pthread_cond_wait expects the mutex to be locked when called.\n            // If not locked, it leads to undefined behavior or an error (e.g., EINVAL).\n            pthread_cond_wait(&not_full, &mutex); \n        }\n        \n        // This mutex lock is too late for the condition check and the wait operation.\n        pthread_mutex_lock(&mutex); \n        \n        buffer[in] = item;\n        in = (in + 1) % BUFFER_SIZE;\n        count++;\n        printf(\"Producer produced: %d, count: %d\\n\", item, count);\n\n        pthread_cond_signal(&not_empty);\n        pthread_mutex_unlock(&mutex);\n        usleep(rand() % 100000);\n    }\n    return NULL;\n}\n\n// Consumer is assumed to be correct for this problem focus\nvoid *consumer(void *arg) {\n    int item;\n    for (int i = 0; i < 10; i++) {\n        pthread_mutex_lock(&mutex);\n        while (count == 0) {\n            pthread_cond_wait(&not_empty, &mutex);\n        }\n        item = buffer[out];\n        out = (out + 1) % BUFFER_SIZE;\n        count--;\n        printf(\"Consumer consumed: %d, count: %d\\n\", item, count);\n        pthread_cond_signal(&not_full);\n        pthread_mutex_unlock(&mutex);\n        usleep(rand() % 100000);\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t prod_thread, cons_thread;\n\n    pthread_create(&prod_thread, NULL, producer, NULL);\n    pthread_create(&cons_thread, NULL, consumer, NULL);\n\n    pthread_join(prod_thread, NULL);\n    pthread_join(cons_thread, NULL);\n\n    pthread_mutex_destroy(&mutex);\n    pthread_cond_destroy(&not_full);\n    pthread_cond_destroy(&not_empty);\n\n    return 0;\n}\n",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הבעיות שעלולות להתעורר:\n\n1.  **Race Condition (תנאי מירוץ):** אם היצרן בודק את התנאי `count == BUFFER_SIZE` ללא נעילת המוטקס, ערך המונה `count` יכול להשתנות על ידי צרכן (שמפנה מקום בחוצץ) בדיוק בין הבדיקה לבין ניסיון הנעילה (אם הייתה). כתוצאה מכך, היצרן עלול לקבל החלטה שגויה - לדוגמה, להמשיך לייצר פריט למרות שהחוצץ מלא, או לחילופין להיכנס למצב המתנה (wait) למרות שיש מקום פנוי, ובכך להחמיץ איתות (signal) שהגיע לפני שהספיק להיכנס למצב המתנה (Lost Wakeup).\n\n2.  **Undefined Behavior / Error (התנהגות בלתי מוגדרת / שגיאה):** הפונקציה `pthread_cond_wait` דורשת שהמוטקס (הארגומנט השני שלה) יהיה נעול על ידי החוט הקורא בעת הקריאה אליה. היא נועדה לשחרר את המוטקס באופן אטומי, להמתין לאיתות, ולאחר מכן לנעול מחדש את המוטקס לפני החזרה. אם המוטקס אינו נעול בעת הקריאה ל-`pthread_cond_wait`, הפונקציה עלולה להיכשל (לדוגמה, להחזיר קוד שגיאה כמו `EINVAL`), או לגרום להתנהגות בלתי מוגדרת, מה שיוביל לקריסת התוכנית או לבעיות סנכרון חמורות.\n\n**תיקון קטע הקוד:**\nהתיקון הנכון דורש שהיצרן ינעל את המוטקס *לפני* שהוא בודק את תנאי המלאות של החוצץ ולפני קריאה ל-`pthread_cond_wait`. הלולאה `while` מבטיחה שהתנאי נבדק שוב לאחר שהחוט התעורר מ-`pthread_cond_wait`, מכיוון שהחוט עשוי להתעורר מסיבות אחרות (Spurious Wakeup) או שהתנאי כבר לא תקף.\n\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <pthread.h>\n#include <unistd.h>\n\n#define BUFFER_SIZE 5\n\nint buffer[BUFFER_SIZE];\nint count = 0;\nint in = 0;\nint out = 0;\n\npthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;\npthread_cond_t not_full = PTHREAD_COND_INITIALIZER;\npthread_cond_t not_empty = PTHREAD_COND_INITIALIZER;\n\nvoid *producer(void *arg) {\n    int item;\n    for (int i = 0; i < 10; i++) {\n        item = i;\n\n        pthread_mutex_lock(&mutex); // Correct: Lock mutex before checking condition and waiting\n\n        while (count == BUFFER_SIZE) { \n            pthread_cond_wait(&not_full, &mutex); // Correct: Mutex is locked here\n        }\n        \n        buffer[in] = item;\n        in = (in + 1) % BUFFER_SIZE;\n        count++;\n        printf(\"Producer produced: %d, count: %d\\n\", item, count);\n\n        pthread_cond_signal(&not_empty);\n        pthread_mutex_unlock(&mutex); // Unlock mutex after critical section\n        usleep(rand() % 100000);\n    }\n    return NULL;\n}\n\nvoid *consumer(void *arg) {\n    int item;\n    for (int i = 0; i < 10; i++) {\n        pthread_mutex_lock(&mutex);\n        while (count == 0) {\n            pthread_cond_wait(&not_empty, &mutex);\n        }\n        item = buffer[out];\n        out = (out + 1) % BUFFER_SIZE;\n        count--;\n        printf(\"Consumer consumed: %d, count: %d\\n\", item, count);\n        pthread_cond_signal(&not_full);\n        pthread_mutex_unlock(&mutex);\n        usleep(rand() % 100000);\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t prod_thread, cons_thread;\n\n    pthread_create(&prod_thread, NULL, producer, NULL);\n    pthread_create(&cons_thread, NULL, consumer, NULL);\n\n    pthread_join(prod_thread, NULL);\n    pthread_join(cons_thread, NULL);\n\n    pthread_mutex_destroy(&mutex);\n    pthread_cond_destroy(&not_full);\n    pthread_cond_destroy(&not_empty);\n\n    return 0;\n}\n```"
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

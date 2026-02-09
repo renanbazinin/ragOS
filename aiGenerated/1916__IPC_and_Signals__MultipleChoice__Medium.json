@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "IPC and Signals",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 21:44:35",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1103,
+      "output_tokens": 1277,
+      "total_tokens": 7597
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "IPC",
+      "Signals",
+      "Process Management",
+      "System Calls"
+    ],
+    "content": {
+      "text": "נתון קטע קוד ב-C המשתמש במנגנוני IPC וטיפול באותות (Signals). מהו הפלט הסביר ביותר של התוכנית כאשר היא מורצת?",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <signal.h>\n#include <sys/wait.h>\n\nvolatile sig_atomic_t signal_handled = 0;\n\nvoid user_signal_handler(int signum) {\n    if (signum == SIGUSR1) {\n        printf(\"Parent: SIGUSR1 handler invoked.\\n\");\n        signal_handled = 1;\n    }\n}\n\nint main() {\n    pid_t pid;\n\n    struct sigaction sa;\n    sa.sa_handler = user_signal_handler;\n    sigemptyset(&sa.sa_mask);\n    sa.sa_flags = 0; // No SA_RESTART for sleep() interruption\n\n    if (sigaction(SIGUSR1, &sa, NULL) == -1) {\n        perror(\"sigaction\");\n        exit(EXIT_FAILURE);\n    }\n\n    printf(\"Parent: PID is %d\\n\", getpid());\n\n    pid = fork();\n\n    if (pid == -1) {\n        perror(\"fork\");\n        exit(EXIT_FAILURE);\n    }\n\n    if (pid == 0) { // Child process\n        printf(\"Child: PID is %d. Sending SIGUSR1 to parent in 1 second.\\n\", getpid());\n        sleep(1); \n        kill(getppid(), SIGUSR1);\n        printf(\"Child: SIGUSR1 sent. Exiting.\\n\");\n        exit(EXIT_SUCCESS);\n    } else { // Parent process\n        printf(\"Parent: Forked child %d. Going to sleep for 5 seconds.\\n\", pid);\n        unsigned int remaining_sleep = sleep(5); // sleep() can be interrupted by signals\n        \n        if (remaining_sleep > 0) {\n            printf(\"Parent: sleep() was interrupted after %u seconds.\\n\", 5 - remaining_sleep);\n        } else {\n            printf(\"Parent: sleep() completed its full duration.\\n\");\n        }\n\n        if (signal_handled) {\n            printf(\"Parent: SIGUSR1 was handled.\\n\");\n        } else {\n            printf(\"Parent: SIGUSR1 was NOT handled.\\n\");\n        }\n\n        int status;\n        waitpid(pid, &status, 0); // Clean up child process\n        printf(\"Parent: Child %d reaped. Parent exiting.\\n\", pid);\n    }\n\n    return 0;\n}",
+      "options": [
+        "א. הפלט יכלול את ההודעות: \"Parent: SIGUSR1 handler invoked.\" ו-\"Parent: sleep() was interrupted after 1 seconds.\", והתהליך האב יסיים את ריצתו לאחר מכן.",
+        "ב. הפלט יכלול את ההודעה: \"Parent: SIGUSR1 handler invoked.\", אך התוכנית תמשיך לישון 5 שניות מלאות לפני שתסיים את ריצתה.",
+        "ג. התוכנית תיתקע ב-`sleep()` ולא תטפל באות, מכיוון ש-`sleep()` אינה ניתנת להפרעה.",
+        "ד. התהליך הבן ישלח את האות, אך האב לא יקבל אותו כיוון ש-`sleep()` חוסמת את קבלת האותות.",
+        "ה. האות `SIGUSR1` יגרום לסיום מיידי של התהליך האב."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "התהליך האב מגדיר מטפל לאות SIGUSR1 באמצעות `sigaction`. לאחר מכן הוא יוצר תהליך בן. התהליך הבן ממתין שנייה אחת, שולח את האות SIGUSR1 לתהליך האב, ויוצא. כשהאות SIGUSR1 מגיע לתהליך האב, קריאת המערכת `sleep(5)` מופסקת (מכיוון ש-`sa.sa_flags` הוגדר ל-0, כלומר ללא `SA_RESTART`), והמטפל באות (`user_signal_handler`) מופעל. המטפל מדפיס הודעה ומשנה את ערכו של `signal_handled` ל-1. לאחר שהמטפל מסיים, `sleep()` חוזרת עם מספר השניות שנותרו (במקרה זה, כ-4 שניות), ומשתנה `remaining_sleep` יהיה גדול מ-0. לכן, התהליך האב ידפיס שהשינה הופסקה לאחר שנייה אחת, ושהאות טופל בהצלחה, ולאחר מכן ימשיך לנקות את התהליך הבן ויצא."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

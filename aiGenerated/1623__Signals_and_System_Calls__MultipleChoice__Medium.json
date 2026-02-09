@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Signals and System Calls",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 11:54:01",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 926,
+      "output_tokens": 1300,
+      "total_tokens": 6319
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Signals",
+      "System Calls",
+      "Process Management"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא:\n\nתהליך הילד (child process) מריץ את קריאת המערכת `read()` הממתינה לקלט מ-`stdin`. תהליך האב (parent process) שולח סיגנל `SIGUSR1` לילד בזמן שהילד ממתין ב-`read()`. לאחר טיפול הסיגנל על ידי הפונקציה `sigusr1_handler`, מה תהיה תוצאת קריאת המערכת `read()` בתהליך הילד?",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <signal.h>\n#include <sys/wait.h>\n#include <errno.h>\n\nvoid sigusr1_handler(int signum) {\n    printf(\"Child: SIGUSR1 received! Handling signal %d.\\n\", signum);\n}\n\nint main() {\n    struct sigaction sa;\n    pid_t pid;\n    char buffer[256];\n    ssize_t bytes_read;\n\n    sa.sa_handler = sigusr1_handler;\n    sigemptyset(&sa.sa_mask);\n    sa.sa_flags = 0; // חשוב: SA_RESTART אינו מוגדר.\n\n    if (sigaction(SIGUSR1, &sa, NULL) == -1) {\n        perror(\"sigaction\");\n        exit(EXIT_FAILURE);\n    }\n\n    pid = fork();\n\n    if (pid == -1) {\n        perror(\"fork\");\n        exit(EXIT_FAILURE);\n    }\n\n    if (pid == 0) { // Child process\n        printf(\"Child %d: Waiting for input or signal...\\n\", getpid());\n        bytes_read = read(STDIN_FILENO, buffer, sizeof(buffer) - 1);\n\n        if (bytes_read == -1) {\n            if (errno == EINTR) {\n                printf(\"Child %d: read() was interrupted by a signal (errno=EINTR).\\n\", getpid());\n            } else {\n                perror(\"Child: read error\");\n            }\n        } else if (bytes_read == 0) {\n            printf(\"Child %d: read() returned 0 (EOF).\\n\", getpid());\n        } else {\n            buffer[bytes_read] = '\\0';\n            printf(\"Child %d: read() returned %zd bytes: '%s'\\n\", getpid(), bytes_read, buffer);\n        }\n        printf(\"Child %d: Exiting.\\n\", getpid());\n\n    } else { // Parent process\n        printf(\"Parent %d: Child PID is %d.\\n\", getpid(), pid);\n        sleep(2);\n        printf(\"Parent %d: Sending SIGUSR1 to child %d...\\n\", getpid(), pid);\n        if (kill(pid, SIGUSR1) == -1) {\n            perror(\"kill\");\n            exit(EXIT_FAILURE);\n        }\n        wait(NULL);\n        printf(\"Parent %d: Child exited.\\n\", getpid());\n    }\n\n    return 0;\n}",
+      "options": [
+        "א. קריאת המערכת `read()` תמשיך להמתין לקלט מ-`stdin` כאילו דבר לא קרה.",
+        "ב. קריאת המערכת `read()` תחזור מיד עם ערך של `0`.",
+        "ג. קריאת המערכת `read()` תחזור מיד עם ערך של `-1` ו-`errno` יוגדר ל-`EINTR`.",
+        "ד. תהליך הילד יסיים את ריצתו באופן מיידי עקב קבלת הסיגנל.",
+        "ה. קריאת המערכת `read()` תחזור מיד עם ערך של `-1` ו-`errno` יוגדר ל-`EAGAIN`."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "כאשר קריאת מערכת חוסמת (כמו `read()`, `write()`, `sleep()`, `wait()`) מופרעת על ידי סיגנל, ולאחר שפונקציית הטיפול בסיגנל (handler) מסיימת את ריצתה, קריאת המערכת בדרך כלל מסתיימת מוקדם מהצפוי ומחזירה `-1`, כאשר `errno` מוגדר ל-`EINTR`. התנהגות זו מתרחשת אלא אם כן הדגל `SA_RESTART` מוגדר במבנה `sigaction` (במקרה כזה קריאת המערכת הייתה מופעלת מחדש באופן אוטומטי על ידי הקרנל). בקטע הקוד הנתון, `sa.sa_flags = 0`, מה שאומר ש-`SA_RESTART` אינו מוגדר, ולכן `read()` תוחזר עם `EINTR`."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

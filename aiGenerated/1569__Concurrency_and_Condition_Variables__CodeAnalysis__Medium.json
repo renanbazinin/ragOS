@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency and Condition Variables",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 11:33:15",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2951,
+      "output_tokens": 2373,
+      "total_tokens": 9304
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Concurrency",
+      "Condition Variables",
+      "Mutex",
+      "pthreads"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה המשתמשת ב-pthreads, mutex וב-condition variables כדי לתאם בין תהליך ראשי למספר תהליכי עבודה. התהליך הראשי מפיץ משימות בקבוצות (batches), ותהליכי העבודה מבצעים אותן. התהליך הראשי ממתין לסיום כל המשימות בקבוצה הנוכחית לפני שהוא מפיץ קבוצה חדשה.\n\nמה יהיה הפלט הסופי של התוכנית? האם ישנם מרוצים (race conditions) או קיפאונות (deadlocks) פוטנציאליים? (אין צורך לציין את סדר ההדפסות של ה-printf אלא רק את סדר האירועים הכללי והתוצאה הסופית).",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <pthread.h>\n#include <unistd.h> // For usleep\n#include <stdbool.h> // For bool type\n\n#define NUM_WORKERS 3\n#define BATCH_SIZE 5\n#define TOTAL_BATCHES 2\n\npthread_mutex_t mutex;\npthread_cond_t worker_cond; // Workers wait for tasks\npthread_cond_t main_cond;   // Main waits for batch completion\n\nint tasks_in_queue = 0;\nint tasks_processed_in_batch = 0;\nbool stop_threads = false;\n\nvoid *worker_function(void *arg) {\n    long id = (long)arg;\n    printf(\"Worker %ld started.\\n\", id);\n\n    pthread_mutex_lock(&mutex);\n    while (!stop_threads) {\n        // Wait for tasks\n        while (tasks_in_queue == 0 && !stop_threads) {\n            printf(\"Worker %ld waiting for tasks.\\n\", id);\n            pthread_cond_wait(&worker_cond, &mutex);\n        }\n\n        if (stop_threads) {\n            break; // Exit loop if signaled to stop\n        }\n\n        tasks_in_queue--;\n        printf(\"Worker %ld processing task. Tasks remaining in queue: %d\\n\", id, tasks_in_queue);\n        \n        pthread_mutex_unlock(&mutex); // Unlock while doing \"work\"\n        usleep(100 * 1000); // Simulate work\n        pthread_mutex_lock(&mutex); // Lock again to update shared state\n\n        tasks_processed_in_batch++;\n        printf(\"Worker %ld completed task. Tasks processed in batch: %d\\n\", id, tasks_processed_in_batch);\n\n        if (tasks_processed_in_batch == BATCH_SIZE) {\n            printf(\"Worker %ld signaling main for batch completion.\\n\", id);\n            pthread_cond_signal(&main_cond); // Signal main thread\n        }\n    }\n    pthread_mutex_unlock(&mutex);\n    printf(\"Worker %ld exiting.\\n\", id);\n    return NULL;\n}\n\nint main() {\n    pthread_t workers[NUM_WORKERS];\n    long i;\n\n    pthread_mutex_init(&mutex, NULL);\n    pthread_cond_init(&worker_cond, NULL);\n    pthread_cond_init(&main_cond, NULL);\n\n    for (i = 0; i < NUM_WORKERS; ++i) {\n        pthread_create(&workers[i], NULL, worker_function, (void *)(i + 1));\n    }\n\n    for (int batch = 1; batch <= TOTAL_BATCHES; ++batch) {\n        pthread_mutex_lock(&mutex);\n        tasks_processed_in_batch = 0; // Reset for new batch\n        tasks_in_queue = BATCH_SIZE;  // Add tasks for workers\n        printf(\"\\nMain: Dispatching Batch %d with %d tasks.\\n\", batch, BATCH_SIZE);\n        pthread_cond_broadcast(&worker_cond); // Wake up all workers\n        \n        // Main waits for all tasks in the current batch to be processed\n        while (tasks_processed_in_batch < BATCH_SIZE) {\n            printf(\"Main: Waiting for Batch %d completion. Processed: %d/%d\\n\", batch, tasks_processed_in_batch, BATCH_SIZE);\n            pthread_cond_wait(&main_cond, &mutex);\n        }\n        printf(\"Main: Batch %d completed. All %d tasks processed.\\n\", batch, BATCH_SIZE);\n        pthread_mutex_unlock(&mutex);\n    }\n\n    // Signal workers to stop and join them\n    pthread_mutex_lock(&mutex);\n    stop_threads = true;\n    printf(\"\\nMain: Signaling workers to stop.\\n\");\n    pthread_cond_broadcast(&worker_cond); // Wake up all workers to check stop_threads flag\n    pthread_mutex_unlock(&mutex);\n\n    for (i = 0; i < NUM_WORKERS; ++i) {\n        pthread_join(workers[i], NULL);\n    }\n\n    pthread_mutex_destroy(&mutex);\n    pthread_cond_destroy(&worker_cond);\n    pthread_cond_destroy(&main_cond);\n\n    printf(\"Main: All workers joined. Exiting.\\n\");\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.  **פלט סופי**: התוכנית תדפיס אינדיקציה על התחלת וסיום כל Worker, ולאחר מכן אינדיקציה על התחלת וסיום כל Batch על ידי ה-Main thread. הפלט הסופי יכלול את ההודעות הבאות (בסדר כללי, סדר ה-printf הפנימי של ה-workers יכול להשתנות):\n    *   \"Worker X started.\" (עבור כל X=1,2,3)\n    *   \"Main: Dispatching Batch 1 with 5 tasks.\"\n    *   הודעות של Workers הממתינים, מעבדים משימות ומסיימים משימות עבור Batch 1.\n    *   \"Worker X signaling main for batch completion.\" (אחד מה-workers ידפיס זאת כשהוא מסיים את המשימה החמישית ב-batch).\n    *   \"Main: Batch 1 completed. All 5 tasks processed.\"\n    *   \"Main: Dispatching Batch 2 with 5 tasks.\"\n    *   הודעות של Workers הממתינים, מעבדים משימות ומסיימים משימות עבור Batch 2.\n    *   \"Worker X signaling main for batch completion.\" (אחד מה-workers ידפיס זאת כשהוא מסיים את המשימה החמישית ב-batch).\n    *   \"Main: Batch 2 completed. All 5 tasks processed.\"\n    *   \"Main: Signaling workers to stop.\"\n    *   \"Worker X exiting.\" (עבור כל X=1,2,3)\n    *   \"Main: All workers joined. Exiting.\"\n\n2.  **מרוצים (Race Conditions)**: אין מרוצי נתונים (data races) בתוכנית. כל הגישה למשתנים המשותפים (`tasks_in_queue`, `tasks_processed_in_batch`, `stop_threads`) מוגנת על ידי המוטקס (`mutex`).\n    *   השימוש ב-`pthread_cond_wait` בתוך לולאת `while` מטפל כראוי בהתעוררויות שווא (spurious wakeups), ומבטיח שהתהליכים בודקים את התנאי שוב לאחר ההתעוררות.\n    *   השימוש ב-`pthread_cond_broadcast` על `worker_cond` מבטיח שכל ה-workers יתעוררו כאשר משימות חדשות מגיעות או כאשר נדרש מהם לצאת.\n    *   השימוש ב-`pthread_cond_signal` על `main_cond` על ידי ה-worker שמסיים את המשימה האחרונה ב-batch הוא נכון, מכיוון שרק תהליך אחד (ה-main) ממתין על תנאי זה, ורק אירוע אחד (סיום ה-batch) צריך לעורר אותו.\n\n3.  **קיפאונות (Deadlocks)**: אין קיפאונות בתוכנית.\n    *   המוטקס ננעל ומשוחרר באופן עקבי.\n    *   ה-main thread משחרר את המוטקס לפני שהוא מסיים batch וממתין ל-join של ה-workers.\n    *   ה-workers משחררים את המוטקס בזמן שהם מבצעים את ה\"עבודה\" (usleep) כדי לאפשר ל-main thread או ל-workers אחרים לגשת למשתנים המשותפים במידת הצורך, ונועלים אותו שוב לפני עדכון המצב המשותף. זהו דפוס נכון שמונע קיפאון פוטנציאלי כאשר עבודה ארוכה מתבצעת בתוך קטע קריטי.\n    *   תהליך הכיבוי (shutdown) מתוכנן היטב: ה-main thread מגדיר את `stop_threads` ל-true ומשדר broadcast ל-`worker_cond` כדי להבטיח שכל ה-workers יתעוררו, יבדקו את הדגל ויצאו מהלולאה שלהם.\n\nהתוכנית מדגימה שימוש נכון ב-mutex וב-condition variables לתיאום מורכב יחסית בין תהליכים."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

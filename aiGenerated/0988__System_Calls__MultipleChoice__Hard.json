@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "System Calls",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 07:16:14",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 1054,
+      "total_tokens": 5903
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "System Calls",
+      "Process Management",
+      "File Descriptors"
+    ],
+    "content": {
+      "text": "תהליך אב פותח קובץ בשם \"log.txt\" באמצעות קריאת המערכת `open` ומוסיף את הדגל `O_CLOEXEC`. לאחר מכן, תהליך האב יוצר תהליך בן באמצעות קריאת המערכת `fork`. מיד לאחר `fork`, תהליך הבן מנסה לכתוב לקובץ זה באמצעות קריאת המערכת `write` תוך שימוש במתאר הקובץ שירש מהאב.\n\nמה תהיה התוצאה הסבירה ביותר של קריאת ה-`write` בתהליך הבן?",
+      "code_snippet": "#include <unistd.h>\n#include <fcntl.h>\n#include <stdio.h> // for perror\n#include <string.h>\n\nint main() {\n    int fd;\n    pid_t pid;\n    const char *filename = \"log.txt\";\n    const char *child_msg = \"Hello from child!\\n\";\n\n    // Parent opens file with O_CLOEXEC\n    fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC, 0644);\n    if (fd == -1) {\n        perror(\"open\");\n        return 1;\n    }\n\n    pid = fork();\n\n    if (pid == 0) { // Child process\n        // Child attempts to write to the inherited fd\n        ssize_t bytes_written = write(fd, child_msg, strlen(child_msg));\n        if (bytes_written == -1) {\n            perror(\"child write\");\n            _exit(1);\n        }\n        _exit(0);\n    }\n    // Parent logic (not directly relevant to the child's write outcome, but good practice)\n    close(fd);\n    return 0;\n}",
+      "options": [
+        "א. קריאת ה-`write` תצליח לכתוב את הנתונים לקובץ כרגיל, מכיוון ש-`O_CLOEXEC` משפיע רק על `execve`.",
+        "ב. קריאת ה-`write` תיכשל ותחזיר שגיאה (לדוגמה, `EBADF`), מכיוון שמתאר הקובץ `fd` נסגר אוטומטית בתהליך הבן עקב הדגל `O_CLOEXEC`.",
+        "ג. קריאת ה-`write` תיכשל ותחזיר שגיאה (לדוגמה, `EACCES`), מכיוון שלתהליך הבן אין הרשאות כתיבה לקובץ שהאב פתח עם `O_CLOEXEC`.",
+        "ד. קריאת ה-`write` תצליח, אך הנתונים ייכתבו לקובץ זמני בזיכרון ולא לקובץ המקורי \"log.txt\"."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "הדגל `O_CLOEXEC` (או `FD_CLOEXEC` המוגדר באמצעות `fcntl`) גורם למתאר הקובץ להיסגר אוטומטית כאשר התהליך מבצע קריאת מערכת `execve`. הוא אינו משפיע על קריאת המערכת `fork`. כאשר תהליך אב מבצע `fork`, תהליך הבן מקבל עותק של טבלת מתארי הקבצים של האב. המשמעות היא שמתאר הקובץ `fd` (כולל הדגל `O_CLOEXEC` שלו) מועתק לתהליך הבן. מכיוון שתהליך הבן אינו מבצע `execve` לפני קריאת ה-`write`, הדגל `O_CLOEXEC` אינו נכנס לפעולה, ומתאר הקובץ נשאר פתוח ותקף. לכן, קריאת ה-`write` בתהליך הבן תצליח כרגיל."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

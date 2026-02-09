@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Threads and Synchronization",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 19:44:15",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1971,
+      "output_tokens": 804,
+      "total_tokens": 5547
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Threads",
+      "Synchronization",
+      "Mutexes",
+      "Race Conditions"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המשתמשת בחוטים (threads) ובמנגנוני סנכרון. התוכנית יוצרת שני חוטים, כאשר כל חוט מבצע לולאה של 100,000 איטרציות ומגדיל משתנה גלובלי משותף בשם `counter`. המשתנה מוגן באמצעות mutex.\nנתח את קטע הקוד הבא וקבע מהו הערך הסופי שיוצג עבור `counter` בסיום ריצת התוכנית, בהנחה שהמערכת מבצעת את החוטים כהלכה וללא כשלים.",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n\n#define NUM_THREADS 2\n#define ITERATIONS 100000\n\nint counter = 0;\npthread_mutex_t mutex;\n\nvoid *increment(void *arg) {\n    for (int i = 0; i < ITERATIONS; i++) {\n        pthread_mutex_lock(&mutex);\n        counter++;\n        pthread_mutex_unlock(&mutex);\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n    pthread_mutex_init(&mutex, NULL);\n\n    for (int i = 0; i < NUM_THREADS; i++) {\n        pthread_create(&threads[i], NULL, increment, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; i++) {\n        pthread_join(&threads[i], NULL);\n    }\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    pthread_mutex_destroy(&mutex);\n    return 0;\n}",
+      "options": [
+        "א. 100000",
+        "ב. 200000",
+        "ג. ערך בין 100000 ל-200000 (כולל)",
+        "ד. ערך קטן מ-100000",
+        "ה. התנהגות בלתי צפויה"
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "התשובה הנכונה היא ב'. התוכנית יוצרת שני חוטים, וכל חוט מבצע 100,000 הגדלות למשתנה הגלובלי `counter`. סך ההגדלות הכולל הוא 2 * 100,000 = 200,000. השימוש ב-`pthread_mutex_lock` ו-`pthread_mutex_unlock` מבטיח שכל פעולת הגדלה של `counter++` תהיה אטומית, כלומר, לא יתרחשו תנאי מרוץ (race conditions) שיובילו לאובדן הגדלות. לכן, הערך הסופי של `counter` יהיה בדיוק 200,000."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

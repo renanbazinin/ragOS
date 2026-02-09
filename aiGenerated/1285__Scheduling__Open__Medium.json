@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Scheduling",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 09:11:12",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1598,
+      "output_tokens": 1696,
+      "total_tokens": 7795
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Scheduling",
+      "CPU Scheduling",
+      "SRTF",
+      "FCFS"
+    ],
+    "content": {
+      "text": "נתונים שלושה תהליכים P1, P2, P3 עם זמני הגעה (Arrival Time) וזמני ריצה (Burst Time) כדלקמן:\nP1: Arrival Time = 0ms, Burst Time = 8ms\nP2: Arrival Time = 2ms, Burst Time = 4ms\nP3: Arrival Time = 4ms, Burst Time = 2ms\n\nא. ציירו את תרשים גאנט (Gantt Chart) וחשבו את זמן ההמתנה הממוצע (Average Waiting Time) וזמן המחזור הממוצע (Average Turnaround Time) עבור תזמון Shortest Remaining Time First (SRTF).\nב. כיצד ישתנו זמני ההמתנה והמחזור הממוצעים אם נשתמש באלגוריתם First Come First Served (FCFS) במקום SRTF? הסבירו מדוע קיים הבדל (אם קיים).\nג. בהתבסס על התוצאות מסעיפים א' וב', מתי עדיף להשתמש ב-SRTF ומתי ב-FCFS, בהתחשב במטרות תזמון שונות (למשל, זמן תגובה מהיר לעומת תפוקה גבוהה)? נמקו.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": 15,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "פתרון:\n\n**א. תזמון Shortest Remaining Time First (SRTF):**\nתהליכים:\nP1: זמן הגעה = 0ms, זמן ריצה = 8ms\nP2: זמן הגעה = 2ms, זמן ריצה = 4ms\nP3: זמן הגעה = 4ms, זמן ריצה = 2ms\n\nתרשים גאנט:\n| P1 (0-2) | P2 (2-4) | P3 (4-6) | P2 (6-8) | P1 (8-14) |\n\nזמני השלמה (Completion Time - CT):\nP3: 6ms\nP2: 8ms\nP1: 14ms\n\nזמן מחזור (Turnaround Time - TAT = CT - AT):\nP1: 14 - 0 = 14ms\nP2: 8 - 2 = 6ms\nP3: 6 - 4 = 2ms\nזמן מחזור ממוצע = (14 + 6 + 2) / 3 = 22 / 3 = 7.33ms\n\nזמן המתנה (Waiting Time - WT = TAT - BT):\nP1: 14 - 8 = 6ms\nP2: 6 - 4 = 2ms\nP3: 2 - 2 = 0ms\nזמן המתנה ממוצע = (6 + 2 + 0) / 3 = 8 / 3 = 2.67ms\n\n**ב. תזמון First Come First Served (FCFS):**\nתרשים גאנט:\n| P1 (0-8) | P2 (8-12) | P3 (12-14) |\n\nזמני השלמה (CT):\nP1: 8ms\nP2: 12ms\nP3: 14ms\n\nזמן מחזור (TAT = CT - AT):\nP1: 8 - 0 = 8ms\nP2: 12 - 2 = 10ms\nP3: 14 - 4 = 10ms\nזמן מחזור ממוצע = (8 + 10 + 10) / 3 = 28 / 3 = 9.33ms\n\nזמן המתנה (WT = TAT - BT):\nP1: 8 - 8 = 0ms\nP2: 10 - 4 = 6ms\nP3: 10 - 2 = 8ms\nזמן המתנה ממוצע = (0 + 6 + 8) / 3 = 14 / 3 = 4.67ms\n\n**הסבר להבדל:**\nבאלגוריתם SRTF, שהוא אלגוריתם קדימה (preemptive), התהליך בעל זמן הריצה הנותר הקצר ביותר מקבל עדיפות. כאשר תהליך קצר יותר מגיע בזמן שתהליך ארוך יותר רץ, התהליך הארוך מופסק (preempted) והתהליך הקצר מתחיל לרוץ. במקרה זה, P2 ו-P3, שהם קצרים יותר מ-P1, זוכים לזמן מעבד מוקדם יותר, מה שמפחית משמעותית את זמני ההמתנה והמחזור הממוצעים. לעומת זאת, FCFS הוא אלגוריתם שאינו קדימה (non-preemptive), ותהליך שהחל לרוץ ממשיך עד לסיומו. לכן, P1 רץ לכל אורכו (8ms) לפני ש-P2 ו-P3 יכולים להתחיל, מה שגורם לזמני המתנה ומחזור גבוהים יותר עבורם.\n\n**ג. מתי עדיף להשתמש ב-SRTF ומתי ב-FCFS:**\n**SRTF:** עדיף במערכות שבהן קריטי למזער את זמן ההמתנה הממוצע וזמן המחזור הממוצע, ובמיוחד להבטיח זמני תגובה מהירים למשימות קצרות. זה מתאים למערכות אינטראקטיביות (כמו מערכות הפעלה לשולחן עבודה) שבהן המשתמש מצפה לתגובה מהירה לפעולות קצרות. החיסרון הוא תקורה גבוהה יותר עקב ריבוי החלפות הקשר (context switches) והצורך לדעת או להעריך את זמני הריצה הנותרים. קיים גם סיכון לרעב (starvation) של תהליכים ארוכים אם יש זרם קבוע של תהליכים קצרים.\n\n**FCFS:** עדיף במערכות שבהן פשטות יישום ותקורה נמוכה חשובות יותר מזמני תגובה מהירים. הוא מבטיח הוגנות במובן של סדר הגעה. מתאים למערכות אצווה (batch systems) שבהן התפוקה הכוללת חשובה והצפוי הוא שתהליכים ירוצו עד לסיום ללא הפרעה. החיסרון העיקרי הוא אפקט 'שיירה' (convoy effect), שבו תהליך ארוך אחד יכול לחסום תהליכים קצרים רבים אחריו, ולהעלות משמעותית את זמני ההמתנה שלהם."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

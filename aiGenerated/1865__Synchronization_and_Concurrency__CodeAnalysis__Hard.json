@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Synchronization and Concurrency",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 21:19:44",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4132,
+      "output_tokens": 2119,
+      "total_tokens": 14447
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Concurrency",
+      "Threads",
+      "Condition Variables",
+      "Deadlock",
+      "Starvation"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המשתמשת בחוטים (pthreads) ובמנגנוני סנכרון (mutexes ו-condition variables) כדי לתאם בין חוטים עובדים (worker threads) לחוט מנהל (manager thread). מטרת התוכנית היא שכל ה-`NUM_WORKERS` חוטים העובדים יבצעו סדרה של משימות ב'קבוצות' (`batches`). חוט המנהל צריך לוודא שכל העובדים סיימו קבוצה לפני שהוא מאותת להם להתחיל קבוצה חדשה. יש לנתח את הקוד ולזהות בעיה קריטית שעלולה להוביל לקיפאון (deadlock) או הרעבה (starvation) בתנאי ריצה מסוימים. לאחר מכן, יש להציע פתרון מינימלי לבעיה ולציין את השינוי בקוד.",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h> // For usleep\n#include <time.h>   // For srand\n\n#define NUM_WORKERS 3\n#define NUM_BATCHES 2\n\nint tasks_completed_in_batch = 0;\npthread_mutex_t mutex;\npthread_cond_t all_workers_done_cond; // Manager waits on this\npthread_cond_t new_batch_ready_cond;  // Workers wait on this\n\nvoid* worker_thread(void* arg) {\n    long worker_id = (long)arg;\n\n    for (int batch = 0; batch < NUM_BATCHES; ++batch) {\n        printf(\"Worker %ld: Starting batch %d\\n\", worker_id, batch);\n        // Simulate work\n        usleep(rand() % 10000); // 0-10ms\n\n        pthread_mutex_lock(&mutex);\n        tasks_completed_in_batch++;\n        printf(\"Worker %ld: Finished task in batch %d. Total completed: %d\\n\", worker_id, batch, tasks_completed_in_batch);\n\n        if (tasks_completed_in_batch == NUM_WORKERS) {\n            printf(\"Worker %ld: All workers done for batch %d. Signaling manager.\\n\", worker_id, batch);\n            pthread_cond_signal(&all_workers_done_cond);\n        }\n        pthread_mutex_unlock(&mutex);\n\n        // Wait for manager to signal start of next batch\n        pthread_mutex_lock(&mutex);\n        while (tasks_completed_in_batch > 0) { // Condition: wait until manager resets tasks_completed_in_batch to 0\n            printf(\"Worker %ld: Waiting for new batch signal (batch %d). Current completed: %d\\n\", worker_id, batch, tasks_completed_in_batch);\n            pthread_cond_wait(&new_batch_ready_cond, &mutex);\n        }\n        pthread_mutex_unlock(&mutex);\n    }\n    return NULL;\n}\n\nvoid* manager_thread(void* arg) {\n    for (int batch = 0; batch < NUM_BATCHES; ++batch) {\n        pthread_mutex_lock(&mutex);\n        printf(\"Manager: Waiting for all workers to finish batch %d...\\n\", batch);\n        while (tasks_completed_in_batch < NUM_WORKERS) {\n            pthread_cond_wait(&all_workers_done_cond, &mutex);\n        }\n        printf(\"Manager: All workers finished batch %d. Resetting for next batch.\\n\", batch);\n        tasks_completed_in_batch = 0; // Reset for next batch\n        pthread_cond_signal(&new_batch_ready_cond); // BUG: Should be broadcast\n        pthread_mutex_unlock(&mutex);\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t workers[NUM_WORKERS];\n    pthread_t manager;\n\n    pthread_mutex_init(&mutex, NULL);\n    pthread_cond_init(&all_workers_done_cond, NULL);\n    pthread_cond_init(&new_batch_ready_cond, NULL);\n\n    srand(time(NULL));\n\n    for (long i = 0; i < NUM_WORKERS; ++i) {\n        pthread_create(&workers[i], NULL, worker_thread, (void*)i);\n    }\n    pthread_create(&manager, NULL, manager_thread, NULL);\n\n    for (int i = 0; i < NUM_WORKERS; ++i) {\n        pthread_join(workers[i], NULL);\n    }\n    pthread_join(manager, NULL);\n\n    printf(\"All batches completed. Final tasks_completed_in_batch: %d\\n\", tasks_completed_in_batch);\n\n    pthread_mutex_destroy(&mutex);\n    pthread_cond_destroy(&all_workers_done_cond);\n    pthread_cond_destroy(&new_batch_ready_cond);\n\n    return 0;\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הבעיה העיקרית בקוד היא שימוש ב-`pthread_cond_signal` במקום `pthread_cond_broadcast` בחוט המנהל (manager thread) כאשר הוא מאותת לחוטים העובדים (worker threads) להתחיל קבוצת משימות חדשה. \n\n**ניתוח הבעיה:**\n1.  **מנגנון התיאום:** התוכנית מתוכננת כך שכל `NUM_WORKERS` החוטים העובדים צריכים לסיים משימות בקבוצה מסוימת לפני שחוט המנהל מאפס את המונה `tasks_completed_in_batch` ומאותת להם להתחיל קבוצה חדשה. החוטים העובדים ממתינים לאות זה בתוך לולאת `while (tasks_completed_in_batch > 0)` באמצעות `pthread_cond_wait(&new_batch_ready_cond, &mutex);`.\n2.  **נקודת הכשל:** בחוט המנהל, לאחר שכל העובדים סיימו קבוצה והמונה `tasks_completed_in_batch` מאופס, חוט המנהל קורא ל-`pthread_cond_signal(&new_batch_ready_cond);`. קריאה זו מעירה רק חוט אחד מבין כל החוטים הממתינים על משתנה התנאי `new_batch_ready_cond`. \n3.  **השלכות:** אם `NUM_WORKERS` גדול מ-1 (כמו במקרה זה, 3), רק חוט עובד אחד יתעורר, יראה שהתנאי `tasks_completed_in_batch > 0` כבר לא מתקיים (כי הוא 0), ויצא מהלולאה כדי להתחיל את הקבוצה הבאה (או לסיים אם אין קבוצות נוספות). שאר החוטים העובדים יישארו חסומים באופן תמידי על `pthread_cond_wait`, מכיוון שאף אחד לא יאותת להם יותר. זהו מצב של **הרעבה (starvation)** עבור החוטים החסומים, ויוביל ל**קיפאון (deadlock)** של התוכנית כולה אם ישנן קבוצות נוספות לביצוע, שכן חוט המנהל ימתין ללא סוף לסיום עבודתם של החוטים החסומים.\n\n**הפתרון:**\nכדי לתקן את הבעיה, יש להחליף את הקריאה ל-`pthread_cond_signal(&new_batch_ready_cond);` בקריאה ל-`pthread_cond_broadcast(&new_batch_ready_cond);` בחוט המנהל. קריאה זו תבטיח שכל החוטים הממתינים על `new_batch_ready_cond` יתעוררו, יבדקו מחדש את התנאי `tasks_completed_in_batch > 0` (שיהיה כעת שקר, כלומר 0), וימשיכו כולם יחד לקבוצה הבאה של המשימות.\n\n**שינוי קוד מינימלי:**\nבפונקציה `manager_thread`, שורה 69:\n`- pthread_cond_signal(&new_batch_ready_cond); // BUG: Should be broadcast`\n`+ pthread_cond_broadcast(&new_batch_ready_cond); // FIX`"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

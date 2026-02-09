@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Synchronization and Concurrency",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 21:19:01",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4132,
+      "output_tokens": 2169,
+      "total_tokens": 16037
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Concurrency",
+      "Deadlock",
+      "Condition Variables",
+      "Mutexes"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה, המשתמשת בחוטים (threads) ובמשתנה משותף `shared_counter`. התוכנית נועדה לאפשר לחוטים לקדם את המונה, אך רק בתנאי שערכו הנוכחי של המונה זוגי. אם המונה אי-זוגי, החוט המנסה לקדם חייב להמתין עד שהמונה יהפוך לזוגי. כל חוט מבצע מספר קבוע של קידומים. ניתן להניח שכל קריאות המערכת הצליחו.\n\nיש לנתח את קוד המקור, לתאר את התנהגות התוכנית, לזהות כל בעיה (כגון תנאי מרוץ, קיפאון, או חוסר סיום), ולהסביר מדוע היא מתרחשת. לאחר מכן, יש להציע תיקון מינימלי לקוד המאפשר לתוכנית לסיים בהצלחה, תוך שמירה על רוח הדרישה המקורית (שהמונה יהיה זוגי לפני קידום).",
+      "code_snippet": "1 #include <pthread.h>\n2 #include <stdio.h>\n3 #include <stdlib.h>\n4 #include <unistd.h>\n5 #include <time.h>\n6\n7 #define NUM_THREADS 5\n8 #define INCREMENTS_PER_THREAD 10\n9\n10 int shared_counter = 0;\n11 pthread_mutex_t counter_mutex;\n12 pthread_cond_t counter_cond;\n13\n14 void* increment_thread(void* arg) {\n15    for (int i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n16        pthread_mutex_lock(&counter_mutex);\n17\n18        while (shared_counter % 2 != 0) {\n19            printf(\"Thread %ld: Counter is odd (%d), waiting...\\n\", (long)arg, shared_counter);\n20            pthread_cond_wait(&counter_cond, &counter_mutex);\n21        }\n22\n23        shared_counter++;\n24        printf(\"Thread %ld: Incremented counter to %d\\n\", (long)arg, shared_counter);\n25\n26        pthread_cond_broadcast(&counter_cond);\n27        pthread_mutex_unlock(&counter_mutex);\n28        usleep(rand() % 10000);\n29    }\n30    return NULL;\n31 }\n32\n33 int main() {\n34    pthread_t threads[NUM_THREADS];\n35    pthread_mutex_init(&counter_mutex, NULL);\n36    pthread_cond_init(&counter_cond, NULL);\n37    srand(time(NULL));\n38\n39    for (long i = 0; i < NUM_THREADS; ++i) {\n40        pthread_create(&threads[i], NULL, increment_thread, (void*)i);\n41    }\n42\n43    for (int i = 0; i < NUM_THREADS; ++i) {\n44        pthread_join(threads[i], NULL);\n45    }\n46\n47    printf(\"Final counter value: %d\\n\", shared_counter);\n48\n49    pthread_mutex_destroy(&counter_mutex);\n50    pthread_cond_destroy(&counter_cond);\n51    return 0;\n52 }",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "ניתוח התוכנית והבעיה:\nהתוכנית נועדה לקדם מונה משותף `shared_counter` על ידי מספר חוטים. הדרישה היא שחוט יכול לקדם את המונה רק אם ערכו הנוכחי זוגי. אם המונה אי-זוגי, החוט חייב להמתין.\n\nהבעיה העיקרית בתוכנית כפי שהיא כתובה היא **קיפאון (Deadlock) או רעב תמידי (Permanent Starvation)**. הנה ההסבר:\n1.  **מצב התחלה:** המונה `shared_counter` מאותחל ל-0, שהוא מספר זוגי.\n2.  **קידום ראשון:** חוט כלשהו (נניח חוט 0) רוכש את המנעול (`counter_mutex`). הוא בודק את התנאי `shared_counter % 2 != 0`. מכיוון ש-`0 % 2 == 0`, התנאי שקרי והחוט אינו ממתין. הוא ממשיך לשורה 23 ומקדם את המונה: `shared_counter++`. המונה הופך ל-1.\n3.  **הודעה ושחרור:** החוט קורא ל-`pthread_cond_broadcast` ומשחרר את המנעול.\n4.  **חסימה עתידית:** כעת, ערך המונה `shared_counter` הוא 1 (מספר אי-זוגי). כל חוט אחר (או אותו חוט בניסיון הקידום הבא שלו) שינסה לרכוש את המנעול ולבדוק את התנאי `shared_counter % 2 != 0` ימצא שהתנאי אמיתי (כי `1 % 2 != 0`). לכן, הוא יקרא ל-`pthread_cond_wait` וימתין שערך המונה יהפוך לזוגי.\n5.  **חוסר יכולת להתקדם:** הבעיה היא שאין בתוכנית שום מנגנון אחר שמשנה את ערך `shared_counter` מלבד הפעולה `shared_counter++`. פעולה זו תמיד הופכת מספר זוגי לאי-זוגי (0->1, 2->3 וכו'). מכיוון שהמונה כבר הפך ל-1 (אי-זוגי), הוא לעולם לא יוכל לחזור להיות זוגי באמצעות הפעולה היחידה שמשנה אותו. כתוצאה מכך, כל החוטים ימתינו ללא סוף, והתוכנית לא תסיים. ערך המונה הסופי שיוצג יהיה 1.\n\nתיקון מינימלי לקוד:\nהבעיה נובעת מהסתירה הלוגית בין הדרישה שהמונה יהיה זוגי לפני קידום, לבין העובדה שקידום ב-1 תמיד הופך מספר זוגי לאי-זוגי, ובכך חוסם קידומים עתידיים. כדי לאפשר לתוכנית לסיים בהצלחה תוך שמירה על רוח הדרישה (שהמונה יהיה זוגי לפני תחילת פעולת הקידום), עלינו לשנות את אופן הקידום כך שיבטיח שהמונה יוכל לחזור למצב זוגי, או יישאר זוגי.\n\nהתיקון המינימלי ביותר שמאפשר זאת, תוך שמירה על פעולת `pthread_cond_wait` רלוונטית, הוא לשנות את פעולת הקידום כך שהמונה תמיד יישאר זוגי, למשל על ידי קידום ב-2 בכל פעם. זה משנה את משמעות ה\"קידום ב-1\" המקורי, אך פותר את הקיפאון ומאפשר לתוכנית לסיים:\n\n**שינוי בשורה 23:**\n```c\n// Original: shared_counter++;\nshared_counter += 2; // Modified to ensure counter remains even after increment\n```\n\n**הסבר לתיקון:**\nעל ידי שינוי `shared_counter++` ל-`shared_counter += 2;`, אנו מבטיחים שאם המונה היה זוגי לפני הקידום, הוא יישאר זוגי גם אחריו. לדוגמה, אם `shared_counter` הוא 0, הוא יהפוך ל-2. אם הוא 2, הוא יהפוך ל-4, וכן הלאה. בדרך זו, התנאי `shared_counter % 2 != 0` לעולם לא יהיה אמיתי (לאחר האתחול ל-0), והחוטים לעולם לא יצטרכו להמתין. הם יבצעו את הקידומים שלהם בטור (בזכות המוטקס) ויסיימו את ריצתם. ערך המונה הסופי יהיה `2 * NUM_THREADS * INCREMENTS_PER_THREAD`. תיקון זה שומר על רוח הדרישה בכך שהמונה *תמיד* זוגי כאשר חוט מגיע לבצע את הקידום, ובכך הוא עומד בתנאי שהוגדר.",
+      "difficulty_estimation": "Hard"
+    }
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions and Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 11:21:25",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3651,
+      "output_tokens": 1641,
+      "total_tokens": 7811
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Race Conditions",
+      "Mutexes",
+      "Concurrency",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה המשתמשת ב-pthreads. מטרת התוכנית היא להגדיל מונה משותף על ידי מספר תהליכונים.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <unistd.h> \n\n#define NUM_THREADS 2\n#define ITERATIONS 100000\n\nint counter = 0;\npthread_mutex_t mutex; // Initially commented out for race condition demonstration\n\nvoid* increment_counter(void* arg) {\n    for (int i = 0; i < ITERATIONS; ++i) {\n        // pthread_mutex_lock(&mutex); // Initially commented out\n        counter++;\n        // pthread_mutex_unlock(&mutex); // Initially commented out\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    // pthread_mutex_init(&mutex, NULL); // Initially commented out\n\n    printf(\"Initial counter value: %d\\n\", counter);\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        if (pthread_create(&threads[i], NULL, increment_counter, NULL) != 0) {\n            perror(\"Failed to create thread\");\n            return 1;\n        }\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        if (pthread_join(threads[i], NULL) != 0) {\n            perror(\"Failed to join thread\");\n            return 1;\n        }\n    }\n\n    // pthread_mutex_destroy(&mutex); // Initially commented out\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "7.1",
+        "text": "בהתחשב בקוד הנתון (ללא שורות ה-mutex המוערות), מהם הערכים האפשריים הסופיים של המונה `counter` לאחר שכל התהליכונים סיימו את פעולתם? הסבר מדוע מתקבלים ערכים אלו.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "7.2",
+        "text": "כיצד ניתן לתקן את התוכנית באמצעות mutex כדי להבטיח שהמונה `counter` יגיע לערך הסופי הצפוי? ציין אילו שורות קוד יש להסיר מההערה (או להוסיף), ומה יהיה הערך הסופי של `counter` במקרה זה.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1. הקוד הנתון מכיל תנאי מרוץ (race condition). מספר תהליכונים מנסים לגשת ולשנות את המשתנה המשותף `counter` בו זמנית ללא מנגנון סנכרון. הפעולה `counter++` אינה אטומית; היא מורכבת מקריאה של הערך הנוכחי של `counter`, הגדלתו באחד, וכתיבת הערך החדש בחזרה לזיכרון. אם שני תהליכונים קוראים את אותו ערך של `counter` לפני שאחד מהם מספיק לכתוב את הערך המוגדל בחזרה, שניהם יגדילו את אותו ערך ישן, ואחת ההגדלות תאבד.\nלדוגמה, אם `counter` הוא 0, תהליכון A קורא 0, תהליכון B קורא 0. תהליכון A מגדיל ל-1 וכותב 1. תהליכון B מגדיל ל-1 וכותב 1. התוצאה הסופית היא 1 במקום 2.\nמכיוון שכל תהליכון מבצע 100,000 איטרציות, וקיימים 2 תהליכונים, הערך הסופי הצפוי הוא 200,000. אולם, בגלל תנאי המרוץ, הערך הסופי יהיה בין 1 (המקרה הגרוע ביותר שבו כמעט כל ההגדלות נאבדות) לבין 200,000 (המקרה שבו במקרה אין התנגשויות). בדרך כלל, הערך יהיה קרוב ל-200,000 אך נמוך ממנו, תלוי בתזמון הספציפי של ריצת התהליכונים.\n\n2. כדי לתקן את תנאי המרוץ ולהבטיח שהמונה יגיע לערך הסופי הצפוי, יש להשתמש ב-mutex. ה-mutex מבטיח שרק תהליכון אחד יוכל לגשת לקטע הקריטי (הקוד שמשנה את המונה) בכל רגע נתון.\nיש להסיר את ההערות מהשורות הבאות:\n   *   שורה 8: `pthread_mutex_t mutex;` - הגדרת אובייקט ה-mutex.\n   *   שורה 13: `pthread_mutex_init(&mutex, NULL);` - אתחול ה-mutex לפני יצירת התהליכונים.\n   *   שורה 11: `pthread_mutex_lock(&mutex);` - נעילת ה-mutex לפני הגישה ל-`counter++` בתוך הלולאה בפונקציה `increment_counter`.\n   *   שורה 13: `pthread_mutex_unlock(&mutex);` - שחרור ה-mutex מיד לאחר שינוי המונה.\n   *   שורה 30: `pthread_mutex_destroy(&mutex);` - שחרור משאבי ה-mutex לאחר שכל התהליכונים סיימו.\n\nלאחר התיקון עם ה-mutex, הפעולה `counter++` תהפוך לאטומית מבחינה לוגית (כלומר, היא תתבצע במלואה על ידי תהליכון אחד לפני שתהליכון אחר יוכל להתחיל אותה). לכן, כל 100,000 ההגדלות מכל אחד משני התהליכונים יתבצעו בהצלחה.\nהערך הסופי של `counter` יהיה 2 * 100,000 = 200,000."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

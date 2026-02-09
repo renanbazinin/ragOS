@@ -1,0 +1,83 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory and Copy-on-Write",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 11:12:58",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2412,
+      "output_tokens": 1654,
+      "total_tokens": 8344
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Virtual Memory",
+      "Copy-on-Write",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "נתונה מערכת הפעלה התומכת בזיכרון וירטואלי ובמנגנון Copy-on-Write (CoW) עבור תהליכים הנוצרים באמצעות `fork()`. גודל הזיכרון הפיזי במערכת הוא 256KB, וגודל דף הוא 4KB.\n\nנתון קוד C הבא:",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\n#define PAGE_SIZE 4096\n#define NUM_PAGES 10\n#define ARRAY_SIZE (NUM_PAGES * PAGE_SIZE) // 40KB\n\nint main() {\n    int *data = (int *)malloc(ARRAY_SIZE);\n    if (data == NULL) {\n        perror(\"malloc failed\");\n        return 1;\n    }\n\n    // Initialize data (makes pages dirty and resident)\n    for (int i = 0; i < ARRAY_SIZE / sizeof(int); ++i) {\n        data[i] = i;\n    }\n\n    pid_t pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        return 1;\n    } else if (pid == 0) { // Child process\n        printf(\"Child process: Modifying data...\\n\");\n        data[0] = 100; // Modify the first element\n        data[PAGE_SIZE / sizeof(int)] = 200; // Modify an element in a *different* page\n        sleep(1); // Give parent time to potentially observe\n        exit(0);\n    } else { // Parent process\n        printf(\"Parent process: Waiting for child...\\n\");\n        wait(NULL);\n        printf(\"Parent process: Child finished.\\n\");\n    }\n\n    free(data);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "כמה דפים פיזיים תופס המערך `data` בזיכרון *לפני* קריאת ה-`fork()`?",
+        "code_snippet": null,
+        "options": null,
+        "solution": {
+          "is_present_in_file": true,
+          "correct_option": null,
+          "explanation": "המערך `data` מוקצה בגודל `NUM_PAGES * PAGE_SIZE = 10 * 4KB = 40KB`. מכיוון שגודל דף הוא 4KB, המערך תופס 10 דפים פיזיים. האתחול בלולאה מבטיח שכל הדפים הללו נטענים לזיכרון הפיזי."
+        }
+      },
+      {
+        "id": "10.2",
+        "text": "כמה דפים פיזיים תופס המערך `data` בזיכרון (עבור שני התהליכים יחד – האב והבן) *מיד לאחר* קריאת ה-`fork()` (בהנחה ש-CoW פעיל)?",
+        "code_snippet": null,
+        "options": null,
+        "solution": {
+          "is_present_in_file": true,
+          "correct_option": null,
+          "explanation": "מיד לאחר קריאת ה-`fork()`, ובזכות מנגנון Copy-on-Write, התהליך הבן מקבל העתק לוגי של מרחב הכתובות של האב, אך הדפים הפיזיים עצמם אינם משוכפלים. במקום זאת, הם מסומנים כ-read-only ומשותפים בין האב לבן. לכן, עדיין נתפסים רק 10 דפים פיזיים עבור המערך `data`."
+        }
+      },
+      {
+        "id": "10.3",
+        "text": "כמה דפים פיזיים תופס המערך `data` בזיכרון (עבור שני התהליכים יחד) *לאחר* שהתהליך הבן מבצע את השינויים בשני האינדקסים `data[0]` ו-`data[PAGE_SIZE / sizeof(int)]`?",
+        "code_snippet": null,
+        "options": null,
+        "solution": {
+          "is_present_in_file": true,
+          "correct_option": null,
+          "explanation": "התהליך הבן משנה את `data[0]` ואת `data[PAGE_SIZE / sizeof(int)]`. אינדקסים אלו נמצאים בדפים שונים: `data[0]` בדף הראשון, ו-`data[PAGE_SIZE / sizeof(int)]` בדף השני. כאשר התהליך הבן מנסה לכתוב לדפים אלו, מתרחש Page Fault, ומערכת ההפעלה יוצרת עותק פרטי של כל אחד מהדפים הללו עבור התהליך הבן. לכן, נוספים 2 דפים פיזיים חדשים. סך הכל יהיו 10 דפים משותפים (שלא שונו על ידי הבן) + 2 דפים שהועתקו עבור הבן = 12 דפים פיזיים."
+        }
+      },
+      {
+        "id": "10.4",
+        "text": "כמה דפים פיזיים היו נתפסים על ידי המערך `data` (עבור שני התהליכים יחד) *לאחר* קריאת ה-`fork()` אם המערכת *לא* הייתה תומכת במנגנון Copy-on-Write (כלומר, כל הדפים היו משוכפלים מיד)?",
+        "code_snippet": null,
+        "options": null,
+        "solution": {
+          "is_present_in_file": true,
+          "correct_option": null,
+          "explanation": "ללא מנגנון Copy-on-Write, כאשר מתבצע `fork()`, מערכת ההפעלה משכפלת באופן מיידי את כל מרחב הכתובות של האב עבור התהליך הבן. לכן, אם האב תפס 10 דפים עבור `data`, הבן היה מקבל גם הוא 10 דפים משלו. סך הכל היו נתפסים 10 (אב) + 10 (בן) = 20 דפים פיזיים."
+        }
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": null
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

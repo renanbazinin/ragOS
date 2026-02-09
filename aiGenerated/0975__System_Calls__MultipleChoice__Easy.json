@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "System Calls",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 07:13:34",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1034,
+      "output_tokens": 578,
+      "total_tokens": 2827
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "System Calls"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של קריאת מערכת (System Call)?",
+      "code_snippet": null,
+      "options": [
+        "א. לאפשר לתהליכים במצב משתמש (user mode) לבצע פעולות ישירות על רכיבי חומרה.",
+        "ב. לספק ממשק מוגדר ובטוח לתהליכי משתמש לבקש שירותים מליבת מערכת ההפעלה (kernel).",
+        "ג. לשמש כדרך יחידה לתקשורת בין תהליכים שונים (Inter-Process Communication).",
+        "ד. להפעיל תוכניות עזר (utility programs) המהוות חלק ממערכת ההפעלה."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "קריאת מערכת (System Call) היא המנגנון שבאמצעותו תוכנית הפועלת במצב משתמש (user mode) יכולה לבקש שירותים מליבת מערכת ההפעלה (kernel). שירותים אלו כוללים, בין היתר, גישה לחומרה (כמו קבצים, התקני I/O), יצירת תהליכים חדשים, ניהול זיכרון ותקשורת בין תהליכים. קריאות מערכת מבטיחות גישה מבוקרת ובטוחה למשאבי המערכת, ומונעות מתוכניות משתמש לבצע פעולות שעלולות לפגוע ביציבות המערכת. אפשרות א' שגויה מכיוון שקריאות מערכת דווקא מונעות גישה ישירה לחומרה ומתווכות אותה. אפשרות ג' שגויה מכיוון שאף על פי ש-IPC לעיתים קרובות משתמש בקריאות מערכת, זו אינה המטרה העיקרית והיחידה שלהן. אפשרות ד' שגויה מכיוון שקריאות מערכת נועדו לבקש שירותים מהליבה, לא להפעיל תוכניות עזר ברמת המשתמש."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

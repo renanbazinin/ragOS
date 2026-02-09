@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Condition Variables",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 07:25:12",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 873,
+      "output_tokens": 303,
+      "total_tokens": 2027
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Condition Variables",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "מהי הפעולה העיקרית של `pthread_cond_wait`?",
+      "code_snippet": null,
+      "options": [
+        "א. משחררת את המנעול, ממתינה, ואז נועלת מחדש את המנעול.",
+        "ב. רק ממתינה.",
+        "ג. נועלת את המנעול, ממתינה, ואז משחררת את המנעול.",
+        "ד. מאותתת לחוט אחר."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "א. הפעולה `pthread_cond_wait` משחררת באופן אטומי את המנעול המשויך למשתנה התנאי, ממתינה לאות (signal/broadcast), וכאשר היא מתעוררת (או מזויפת), היא נועלת מחדש את המנעול לפני שהיא חוזרת."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

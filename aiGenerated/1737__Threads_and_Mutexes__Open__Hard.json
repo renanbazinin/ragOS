@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Threads and Mutexes",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 20:25:10",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4527,
+      "output_tokens": 2487,
+      "total_tokens": 13134
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Threads",
+      "Mutexes",
+      "Deadlock",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתונה פיסת קוד ב-C/C++ המדמה מערכת עם מספר תהליכונים (threads) הניגשים למשאבים משותפים. המערכת כוללת רשימה מקושרת גלובלית ומונה גלובלי למזהי צמתים ייחודיים. שני משאבים אלו מוגנים באמצעות שני mutex-ים נפרדים: `list_mutex` ו-`id_mutex`. תהליכונים שונים עשויים לבצע פעולות שונות הדורשות גישה לשני המשאבים. עיין בקוד המצורף, המציג שתי פונקציות שונות (`add_node_to_list_path1` ו-`process_id_and_list_path2`) שכל אחת מהן מופעלת על ידי תהליכון נפרד ב-`main`.\n\nא. מהי הבעיה העיקרית בקוד המצורף? הסבר מדוע הבעיה מתרחשת, ותאר תרחיש ספציפי שיוביל לכך.\nב. כתוב את השינויים הנדרשים בקוד כדי לפתור את הבעיה.\nג. הסבר כיצד השינויים שהצעת פותרים את הבעיה.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <pthread.h>\n#include <unistd.h> // For usleep\n\n// Node structure for the linked list\ntypedef struct Node {\n    int id;\n    struct Node* next;\n} Node;\n\n// Global linked list head and its mutex\nNode* head = NULL;\npthread_mutex_t list_mutex;\n\n// Global counter for unique IDs and its mutex\nint next_node_id = 0;\npthread_mutex_t id_mutex;\n\n// Function 1: Adds a new node to the list\nvoid add_node_to_list_path1() {\n    Node* new_node = (Node*)malloc(sizeof(Node));\n    if (new_node == NULL) {\n        perror(\"Failed to allocate new node\");\n        return;\n    }\n\n    pthread_mutex_lock(&list_mutex); // Lock list first\n    usleep(10); // Simulate some work\n    pthread_mutex_lock(&id_mutex);   // Then lock ID\n\n    new_node->id = next_node_id++;\n    new_node->next = head;\n    head = new_node;\n\n    pthread_mutex_unlock(&id_mutex);\n    pthread_mutex_unlock(&list_mutex);\n}\n\n// Function 2: A different operation that needs both resources, but locks in reverse order\nvoid process_id_and_list_path2() {\n    pthread_mutex_lock(&id_mutex);   // Lock ID first\n    usleep(10); // Simulate some work\n    pthread_mutex_lock(&list_mutex); // Then lock list\n\n    // This function might perform some operation that requires both resources\n    // For this example, we just increment next_node_id (protected by id_mutex)\n    // and then release both mutexes.\n    next_node_id++;\n\n    pthread_mutex_unlock(&list_mutex);\n    pthread_mutex_unlock(&id_mutex);\n}\n\nvoid* thread_func_1(void* arg) {\n    int num_iterations = *((int*)arg);\n    for (int i = 0; i < num_iterations; ++i) {\n        add_node_to_list_path1();\n        usleep(50); // Simulate some work\n    }\n    return NULL;\n}\n\nvoid* thread_func_2(void* arg) {\n    int num_iterations = *((int*)arg);\n    for (int i = 0; i < num_iterations; ++i) {\n        process_id_and_list_path2();\n        usleep(50); // Simulate some work\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[2];\n    int num_iterations = 5;\n\n    pthread_mutex_init(&list_mutex, NULL);\n    pthread_mutex_init(&id_mutex, NULL);\n\n    pthread_create(&threads[0], NULL, thread_func_1, &num_iterations);\n    pthread_create(&threads[1], NULL, thread_func_2, &num_iterations);\n\n    for (int i = 0; i < 2; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final List (IDs are not necessarily consecutive due to Path2 increments):\\n\");\n    Node* current = head;\n    while (current != NULL) {\n        printf(\"Node ID: %d\\n\", current->id);\n        Node* temp = current;\n        current = current->next;\n        free(temp);\n    }\n\n    pthread_mutex_destroy(&list_mutex);\n    pthread_mutex_destroy(&id_mutex);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "א. הבעיה העיקרית בקוד היא Deadlock (מבוי סתום). ה-deadlock מתרחש כאשר שני תהליכונים או יותר מחזיקים במשאבים (mutex-ים במקרה זה) ומחכים למשאבים המוחזקים על ידי תהליכונים אחרים, וכתוצאה מכך אף אחד מהם אינו יכול להמשיך. במקרה זה, ישנם שני mutex-ים: `list_mutex` ו-`id_mutex`.\n\nתרחיש ספציפי ל-deadlock:\n1. תהליכון 1 (המריץ את `add_node_to_list_path1`) מבצע `pthread_mutex_lock(&list_mutex)` ומצליח לרכוש את `list_mutex`.\n2. תהליכון 2 (המריץ את `process_id_and_list_path2`) מבצע `pthread_mutex_lock(&id_mutex)` ומצליח לרכוש את `id_mutex`.\n3. תהליכון 1 מנסה כעת לבצע `pthread_mutex_lock(&id_mutex)` אך נחסם מכיוון ש-`id_mutex` מוחזק על ידי תהליכון 2.\n4. תהליכון 2 מנסה כעת לבצע `pthread_mutex_lock(&list_mutex)` אך נחסם מכיוון ש-`list_mutex` מוחזק על ידי תהליכון 1.\n\nכתוצאה מכך, שני התהליכונים חסומים זה לזה, אף אחד מהם לא יכול לשחרר את ה-mutex שהוא מחזיק, והמערכת נכנסת למצב של deadlock.\n\nב. כדי לפתור את בעיית ה-deadlock, יש להקפיד על סדר אחיד של רכישת mutex-ים בכל הפונקציות שבהן נדרשים מספר mutex-ים. נבחר, לדוגמה, לרכוש תמיד את `list_mutex` לפני `id_mutex`.\n\nהשינויים הנדרשים בקוד (שינוי `process_id_and_list_path2`): \n```c\n// Function 1 (no change needed, already locks list_mutex then id_mutex)\nvoid add_node_to_list_path1() {\n    Node* new_node = (Node*)malloc(sizeof(Node));\n    if (new_node == NULL) {\n        perror(\"Failed to allocate new node\");\n        return;\n    }\n\n    pthread_mutex_lock(&list_mutex);\n    usleep(10);\n    pthread_mutex_lock(&id_mutex);\n\n    new_node->id = next_node_id++;\n    new_node->next = head;\n    head = new_node;\n\n    pthread_mutex_unlock(&id_mutex);\n    pthread_mutex_unlock(&list_mutex);\n}\n\n// Function 2: Modified to lock list_mutex first, then id_mutex\nvoid process_id_and_list_path2() {\n    pthread_mutex_lock(&list_mutex); // Lock list first (consistent order)\n    usleep(10);\n    pthread_mutex_lock(&id_mutex);   // Then lock ID\n\n    next_node_id++;\n\n    pthread_mutex_unlock(&id_mutex);\n    pthread_mutex_unlock(&list_mutex);\n}\n```\n\nג. השינויים שהוצעו פותרים את בעיית ה-deadlock על ידי אכיפת סדר רכישת mutex-ים עקבי (consistent locking order) בכל התהליכונים. כאשר כל התהליכונים מנסים לרכוש את ה-mutex-ים באותו סדר (לדוגמה, תמיד `list_mutex` ואז `id_mutex`), מוסרת אחת מארבעת התנאים ההכרחיים ל-deadlock: תנאי ה'המתנה מעגלית' (Circular Wait). אם תהליכון 1 מחזיק ב-`list_mutex` ומחכה ל-`id_mutex`, ותהליכון 2 ינסה לרכוש את `list_mutex` קודם, הוא ייחסם עד שתהליכון 1 ישחרר אותו (לאחר שירכוש וישחרר גם את `id_mutex`). לא ייווצר מצב שבו תהליכון 1 מחכה למשאב שתהליכון 2 מחזיק בו, בעוד שתהליכון 2 מחכה למשאב שתהליכון 1 מחזיק בו. בכך, מובטח שכל תהליכון שרוכש את ה-mutex הראשון יוכל בסופו של דבר לרכוש גם את ה-mutex השני ולהשלים את פעולתו, ובכך למנוע את המבוי הסתום."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

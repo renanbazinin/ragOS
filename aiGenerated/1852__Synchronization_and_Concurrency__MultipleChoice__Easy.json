@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Synchronization and Concurrency",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 21:12:30",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 998,
+      "output_tokens": 351,
+      "total_tokens": 2419
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Synchronization",
+      "Concurrency",
+      "Mutex"
+    ],
+    "content": {
+      "text": "מנעול (mutex) משמש בעיקר ל:",
+      "code_snippet": null,
+      "options": [
+        "א. למנוע מצב של Deadlock.",
+        "ב. להבטיח גישה בלעדית למשאב משותף (critical section).",
+        "ג. לסנכרן את הסדר שבו חוטים רצים.",
+        "ד. לייעל את ביצועי התוכנית על ידי הפעלת חוטים רבים יותר במקביל."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "מנעול (mutex) נועד להבטיח שרק חוט ביצוע (thread) אחד יוכל להיכנס לקטע קריטי (critical section) ולגשת למשאב משותף בזמן נתון, ובכך למנוע תנאי מרוץ (race conditions) ולהבטיח עקביות נתונים. בעוד שהוא יכול להיות חלק ממנגנוני מניעת Deadlock או סנכרון סדר, מטרתו העיקרית היא הגנה על קטעים קריטיים."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "IPC",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 08:23:24",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 968,
+      "output_tokens": 2004,
+      "total_tokens": 12351
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "IPC",
+      "Pipes",
+      "Process Communication",
+      "File Descriptors"
+    ],
+    "content": {
+      "text": "נתונה פיסת קוד C הבאה, המנסה לבצע תקשורת דו-כיוונית בין תהליך אב לתהליך בן באמצעות צינורות (pipes).\n\nאילוץ: תהליך הבן, לאחר קריאה מהאב, מסיבה כלשהי אינו כותב בחזרה לצינור `c_to_p` (לדוגמה, תנאי מסוים לא התקיים, או באג).\n\nמה תהיה התוצאה הסבירה ביותר של הרצת קוד זה?",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <string.h>\n#include <sys/wait.h>\n\n#define MSG_SIZE 256\n\nint main() {\n    int p_to_c[2]; // Parent writes, Child reads\n    int c_to_p[2]; // Child writes, Parent reads\n    pid_t pid;\n    char buffer[MSG_SIZE];\n\n    if (pipe(p_to_c) == -1 || pipe(c_to_p) == -1) {\n        perror(\"pipe\");\n        exit(EXIT_FAILURE);\n    }\n\n    pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork\");\n        exit(EXIT_FAILURE);\n    }\n\n    if (pid == 0) { // Child process\n        // Child closes unused ends\n        close(p_to_c[1]); // Child won't write to p_to_c\n        close(c_to_p[0]); // Child won't read from c_to_p\n\n        ssize_t bytes_read = read(p_to_c[0], buffer, MSG_SIZE);\n        if (bytes_read > 0) {\n            // Child processes, but due to a condition/bug, DOES NOT write back\n            // write(c_to_p[1], buffer, strlen(buffer) + 1); // This line is intentionally commented out\n        }\n\n        close(p_to_c[0]); // Child closes its used read end\n        // Child DOES NOT explicitly close c_to_p[1]. It will be closed on exit.\n        exit(EXIT_SUCCESS);\n    } else { // Parent process\n        // Parent closes unused ends\n        close(p_to_c[0]); // Parent won't read from p_to_c\n        // Parent FORGETS to close c_to_p[1] (its own write end for the child-to-parent pipe)\n\n        strcpy(buffer, \"Initial message\");\n        write(p_to_c[1], buffer, strlen(buffer) + 1);\n\n        ssize_t bytes_read = read(c_to_p[0], buffer, MSG_SIZE); // Parent tries to read from child\n        if (bytes_read > 0) {\n            printf(\"Parent received: %s\\n\", buffer);\n        } else if (bytes_read == 0) {\n            printf(\"Parent received EOF from child pipe.\\n\");\n        } else {\n            perror(\"Parent read error\");\n        }\n\n        close(p_to_c[1]); // Parent closes its used write end\n        close(c_to_p[0]); // Parent closes its used read end\n        wait(NULL); // Wait for child to terminate\n    }\n\n    return 0;\n}",
+      "options": [
+        "א. התוכנית תרוץ בהצלחה, ותהליך האב יקבל EOF מהצינור וידפיס הודעה מתאימה.",
+        "ב. התוכנית תרוץ בהצלחה, ותהליך האב יקבל את ההודעה המעובדת מהבן וידפיס אותה.",
+        "ג. תהליך האב ייתקע (deadlock/indefinite block) בניסיון לקרוא מהצינור המיועד לתשובת הבן.",
+        "ד. תהליך הבן ייתקע בניסיון לכתוב לצינור, ויגרום לתהליך האב להיתקע ב-wait.",
+        "ה. התוכנית תקרוס עם שגיאת segmentation fault."
+      ]
+    },
+    "sub_questions": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "תהליך האב יוצר שני צינורות ותהליך בן. הצינור `p_to_c` מיועד לכתיבה מהאב לבן, והצינור `c_to_p` מיועד לכתיבה מהבן לאב.\n\nבתהליך הבן:\n1. ה-file descriptor `p_to_c[1]` (קצה הכתיבה של הצינור לאב) ו-`c_to_p[0]` (קצה הקריאה של הצינור מהבן) נסגרים כראוי.\n2. הבן קורא בהצלחה את ההודעה מהאב דרך `p_to_c[0]`.\n3. בהתאם לאילוץ בשאלה, הבן *אינו כותב* בחזרה לצינור `c_to_p[1]`.\n4. ה-file descriptor `p_to_c[0]` נסגר. הבן מסיים את ריצתו ויוצא, ובכך סוגר אוטומטית את כל ה-file descriptors הפתוחים שנותרו לו, כולל `c_to_p[1]`.\n\nבתהליך האב:\n1. ה-file descriptor `p_to_c[0]` (קצה הקריאה של הצינור לבן) נסגר כראוי.\n2. **השגיאה הקריטית:** תהליך האב *אינו סוגר* את ה-file descriptor `c_to_p[1]` (קצה הכתיבה של הצינור מהבן) שלו. כך, עותק של `c_to_p[1]` נשאר פתוח בתהליך האב.\n3. האב כותב בהצלחה את ההודעה לצינור `p_to_c` דרך `p_to_c[1]`.\n4. כאשר תהליך האב מנסה לקרוא מ-`c_to_p[0]`, הוא יחכה לנתונים. מכיוון שהבן לא כתב נתונים ל-`c_to_p[1]`, אין נתונים זמינים.\n\nהתוצאה היא שתהליך האב ייתקע ב-`read(c_to_p[0], ...)`.\n*   אם כל קצוות הכתיבה של צינור נסגרים (על ידי כל התהליכים שמחזיקים אותם), קריאה מקצה הקריאה של הצינור תחזיר EOF (0 בתים).\n*   במקרה זה, למרות שהבן יצא וסגר את העותק שלו של `c_to_p[1]`, תהליך האב עצמו עדיין מחזיק עותק פתוח של `c_to_p[1]`. כל עוד קיים לפחות קצה כתיבה אחד פתוח לצינור בתוך התהליך המנסה לקרוא (או בכל תהליך אחר), קריאה מקצה הקריאה של הצינור תחסם ללא הגבלת זמן אם אין נתונים בצינור, ולא תחזיר EOF. היא תמתין לנתונים שלעולם לא יגיעו, מכיוון שהאב אינו כותב לצינור זה, והבן כבר יצא ולא כתב.\n\nלכן, תהליך האב ייתקע ב-`read(c_to_p[0], ...)` ויחכה לנתונים שלעולם לא יגיעו, מכיוון שהוא עצמו מונע את ה-EOF על ידי החזקת קצה הכתיבה `c_to_p[1]` פתוח."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

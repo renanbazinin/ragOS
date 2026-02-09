@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Memory Management and TLB",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 21:21:02",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1050,
+      "output_tokens": 609,
+      "total_tokens": 4155
+    }
+  },
+  "question": {
+    "id": 3,
+    "type": "MultipleChoice",
+    "topic": [
+      "Memory Management",
+      "TLB",
+      "Paging"
+    ],
+    "content": {
+      "text": "במערכת המשתמשת בזיכרון וירטואלי מבוסס דפדוף (paging) וכוללת TLB (Translation Lookaside Buffer), כמה גישות לזיכרון הראשי (RAM) נדרשות במקרה של TLB Miss, כאשר רשומת טבלת הדפים (PTE) נמצאת בזיכרון הראשי ומצביעה על דף קיים ותקין (page hit)?",
+      "code_snippet": null,
+      "options": [
+        "א. גישה אחת בלבד (לנתונים).",
+        "ב. שתי גישות (אחת ל-PTE ואחת לנתונים).",
+        "ג. שלוש גישות (שתי גישות ל-PTE במקרה של טבלת דפים רב-שכבתית, ואחת לנתונים).",
+        "ד. ארבע גישות (שתיים ל-PTE, אחת לעדכון TLB ואחת לנתונים).",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "במקרה של TLB Miss, המערכת נדרשת לגשת לטבלת הדפים בזיכרון הראשי (RAM) על מנת למצוא את רשומת הדף (PTE). זוהי הגישה הראשונה ל-RAM. לאחר מכן, ה-TLB מתעדכן עם הרשומה שנמצאה (זוהי פעולת חומרה ואינה נחשבת כגישה נוספת ל-RAM לצורך ספירה זו), ורק אז מתבצעת גישה לנתונים עצמם בכתובת הפיזית המתורגמת. זוהי הגישה השנייה ל-RAM. לכן, בסך הכל נדרשות שתי גישות לזיכרון הראשי. אפשרות ג' מתארת מצב של טבלת דפים רב-שכבתית, אך בהיעדר ציון לכך, התשובה הסטנדרטית היא עבור טבלת דפים חד-שכבתית. עדכון ה-TLB אינו גישה ל-RAM."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "System Calls",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 07:13:24",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1034,
+      "output_tokens": 378,
+      "total_tokens": 2606
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "System Calls"
+    ],
+    "content": {
+      "text": "מהי מטרתה העיקרית של קריאת מערכת (System Call)?",
+      "code_snippet": null,
+      "options": [
+        "א. לגרום למעבד לעבור למצב משתמש (User Mode).",
+        "ב. לאפשר לתהליכי משתמש לגשת למשאבי חומרה או שירותי ליבה מוגנים.",
+        "ג. לשפר את ביצועי התוכנית על ידי הפעלה מקבילית של קוד.",
+        "ד. לספק דרך לתקשורת בין תהליכים (Inter-Process Communication).",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב. קריאת מערכת היא ממשק שמאפשר לתהליכי משתמש לבקש שירותים ממערכת ההפעלה, כגון גישה לקבצים, ניהול זיכרון, יצירת תהליכים חדשים, וגישה למשאבי חומרה, כל זאת בצורה בטוחה ומבוקרת. היא מעבירה את השליטה מ-User Mode ל-Kernel Mode כדי לבצע פעולות מוגנות."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

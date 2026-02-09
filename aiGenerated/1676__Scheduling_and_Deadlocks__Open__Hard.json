@@ -1,0 +1,58 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Scheduling and Deadlocks",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 20:01:45",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3383,
+      "output_tokens": 3750,
+      "total_tokens": 12861
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Scheduling",
+      "Deadlocks",
+      "Synchronization",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתונה מערכת הפעלה המריצה תהליכונים (threads) המתחרים על גישה לשני משאבים גלובליים, `mutex_A` ו-`mutex_B`, המוגנים באמצעות מנעולי `pthread_mutex_t`. \nהמערכת משתמשת במתזמן מונע (preemptive) מבוסס עדיפויות (priority-based), כאשר לכל תהליכון מוקצית עדיפות קבועה.\n\nקיימים שני סוגי תהליכונים במערכת, הממומשים כדלקמן:",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n// Assume mutex_A and mutex_B are globally initialized pthread_mutex_t variables.\n\nvoid* thread_type1(void* arg) {\n    // Thread of type 1: acquires mutex_A then mutex_B\n    printf(\"Thread 1 (ID: %ld) trying to acquire A...\\n\", (long)pthread_self());\n    pthread_mutex_lock(&mutex_A);\n    printf(\"Thread 1 (ID: %ld) acquired A, trying to acquire B...\\n\", (long)pthread_self());\n    // Simulate some work or delay\n    // sleep(1);\n    pthread_mutex_lock(&mutex_B);\n    printf(\"Thread 1 (ID: %ld) acquired B, doing work...\\n\", (long)pthread_self());\n    // Do critical work\n    printf(\"Thread 1 (ID: %ld) releasing B...\\n\", (long)pthread_self());\n    pthread_mutex_unlock(&mutex_B);\n    printf(\"Thread 1 (ID: %ld) releasing A...\\n\", (long)pthread_self());\n    pthread_mutex_unlock(&mutex_A);\n    printf(\"Thread 1 (ID: %ld) finished.\\n\", (long)pthread_self());\n    return NULL;\n}\n\nvoid* thread_type2(void* arg) {\n    // Thread of type 2: acquires mutex_B then mutex_A\n    printf(\"Thread 2 (ID: %ld) trying to acquire B...\\n\", (long)pthread_self());\n    pthread_mutex_lock(&mutex_B);\n    printf(\"Thread 2 (ID: %ld) acquired B, trying to acquire A...\\n\", (long)pthread_self());\n    // Simulate some work or delay\n    // sleep(1);\n    pthread_mutex_lock(&mutex_A);\n    printf(\"Thread 2 (ID: %ld) acquired A, doing work...\\n\", (long)pthread_self());\n    // Do critical work\n    printf(\"Thread 2 (ID: %ld) releasing A...\\n\", (long)pthread_self());\n    pthread_mutex_unlock(&mutex_A);\n    printf(\"Thread 2 (ID: %ld) releasing B...\\n\", (long)pthread_self());\n    pthread_mutex_unlock(&mutex_B);\n    printf(\"Thread 2 (ID: %ld) finished.\\n\", (long)pthread_self());\n    return NULL;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "a",
+        "text": "הסבירו תחת אילו תנאים תיתכן קיפאון (deadlock) במערכת זו. פרטו את ארבעת התנאים ההכרחיים לקיפאון והסבירו כיצד הם מתקיימים במקרה זה.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "b",
+        "text": "כיצד המתזמן מבוסס העדיפויות משפיע על הסיכוי להיווצרות קיפאון במערכת? האם תהליכון בעל עדיפות גבוהה יכול להיתקע בגלל תהליכון בעל עדיפות נמוכה? הסבירו והדגימו.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "c",
+        "text": "הציעו פתרון למניעת קיפאון במערכת זו. נמקו את הפתרון והסבירו כיצד הוא מונע את הקיפאון, תוך התייחסות למתזמן העדיפויות. הציגו קטע קוד מתוקן (עבור שני סוגי התהליכונים) המדגים את הפתרון.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "סעיף א': תנאי קיפאון\nקיפאון (deadlock) יכול להתרחש במערכת זו כאשר שני תהליכונים (או יותר) נכנסים למצב של המתנה מעגלית למשאבים שהם צריכים. התנאים ההכרחיים לקיפאון הם:\n1.  מניעה הדדית (Mutual Exclusion): מתקיים. המנעולים `mutex_A` ו-`mutex_B` מבטיחים שרק תהליכון אחד יכול להחזיק כל משאב בכל רגע נתון.\n2.  החזק והמתן (Hold and Wait): מתקיים. תהליכון מסוג `thread_type1` יכול להחזיק ב-`mutex_A` ולהמתין ל-`mutex_B`. באופן דומה, תהליכון מסוג `thread_type2` יכול להחזיק ב-`mutex_B` ולהמתין ל-`mutex_A`.\n3.  אי-נשללות (No Preemption): מתקיים. המנעולים אינם נשללים בכוח מתהליכון שמחזיק בהם. תהליכון חייב לשחרר את המנעול באופן יזום.\n4.  המתנה מעגלית (Circular Wait): מתקיים. ניתן לדמיין תרחיש בו:\n    *   תהליכון `T1` (מסוג `thread_type1`) תופס את `mutex_A`.\n    *   מיד לאחר מכן, תהליכון `T2` (מסוג `thread_type2`) תופס את `mutex_B`.\n    *   כעת, `T1` ממתין ל-`mutex_B` (שמוחזק על ידי `T2`), ו-`T2` ממתין ל-`mutex_A` (שמוחזק על ידי `T1`). נוצרה המתנה מעגלית והמערכת בקיפאון.\n\nסעיף ב': השפעת המתזמן מבוסס העדיפויות\nהמתזמן מבוסס העדיפויות המונע יכול להשפיע על הסיכוי להיווצרות קיפאון, אך אינו מונע אותו לחלוטין.\n*   הפחתת סיכוי (אך לא מניעה): במערכת עם עדיפויות, אם תהליכון בעל עדיפות גבוהה מצליח לרכוש את כל המשאבים הדרושים לו במהירות לפני שתהליכונים בעלי עדיפות נמוכה יותר יוכלו ליצור מצב של המתנה מעגלית, אזי הסיכוי לקיפאון יורד. המתזמן יקצה זמן מעבד קודם כל לתהליכון בעל העדיפות הגבוהה ביותר.\n*   הגברת סיכוי לקיפאון (במצבים מסוימים) ובעיית היפוך עדיפויות (Priority Inversion): המתזמן מבוסס העדיפויות עלול להחמיר מצבים מסוימים או להוביל לבעיית היפוך עדיפויות, שבה תהליכון בעל עדיפות גבוהה נחסם על ידי תהליכון בעל עדיפות נמוכה.\n    *   תרחיש לדוגמה של היפוך עדיפויות וקיפאון:\n        1.  תהליכון `TL` (בעל עדיפות נמוכה, מסוג `thread_type1`) תופס את `mutex_A`.\n        2.  תהליכון `TM` (בעל עדיפות בינונית) מתחיל לרוץ ועושה עבודה שאינה קשורה למנעולים אלו.\n        3.  תהליכון `TH` (בעל עדיפות גבוהה, מסוג `thread_type2`) מתחיל לרוץ. הוא מנסה לתפוס את `mutex_B` ומצליח.\n        4.  כעת `TH` מנסה לתפוס את `mutex_A`. אך `mutex_A` מוחזק על ידי `TL`.\n        5.  `TH` נחסם וממתין ל-`mutex_A`. למרות שהוא בעל עדיפות גבוהה, הוא לא יכול להמשיך.\n        6.  `TL` (בעל עדיפות נמוכה) צריך להמשיך לרוץ כדי לשחרר את `mutex_A`, אך המתזמן יעדיף להריץ את `TM` (בעל עדיפות בינונית) לפני `TL` כל עוד `TM` מוכן לרוץ.\n        7.  במצב זה, `TH` (גבוהה) חסום על ידי `TL` (נמוכה) שאינו יכול לרוץ בגלל `TM` (בינונית). זהו היפוך עדיפויות.\n        8.  אם `TL` יצליח בסופו של דבר לרוץ, הוא ינסה לתפוס את `mutex_B`. אם `mutex_B` עדיין מוחזק על ידי `TH` (או שוחרר ואז נתפס שוב על ידי `TH` לפני ש-`TL` הגיע), ייווצר קיפאון קלאסי (`TL` מחזיק A ומחכה ל-B, `TH` מחזיק B ומחכה ל-A), כאשר היפוך העדיפויות רק החמיר את המצב והקשה על זיהוי או פתרון הבעיה בזמן אמת.\n    *   פתרונות לבעיית היפוך עדיפויות, כמו Priority Inheritance, יכולים להקל על המצב, אך אינם מונעים קיפאון הנובע מסדר רכישת משאבים שגוי.\n\nסעיף ג': פתרון למניעת קיפאון\nהדרך הנפוצה והיעילה ביותר למנוע קיפאון במקרה זה היא למנוע את תנאי \"המתנה מעגלית\" על ידי אכיפת סדר רכישת משאבים (resource ordering).\nיש לקבוע סדר גלובלי עבור המשאבים ולדרוש מכל התהליכונים לרכוש את המשאבים באותו סדר. לדוגמה, כל התהליכונים חייבים לרכוש קודם את `mutex_A` ולאחר מכן את `mutex_B`.\n\nהסבר:\nעל ידי אכיפת סדר רכישה עקבי (לדוגמה: תמיד A ואז B), אנו מבטיחים שלא תיווצר שרשרת המתנה מעגלית. אם תהליכון `T1` מחזיק את `mutex_A` וממתין ל-`mutex_B`, הוא לעולם לא יוכל להחזיק את `mutex_B` ולהמתין ל-`mutex_A` בו-זמנית. לכן, לא ייתכן מצב שבו `T1` מחכה ל-`T2` עבור `mutex_B` ו-`T2` מחכה ל-`T1` עבור `mutex_A`, כי `T2` (אם הוא עוקב אחר הכלל) לא ינסה לתפוס את `mutex_A` אם הוא כבר מחזיק את `mutex_B` וממתין ל-`mutex_A`. למעשה, אם `T2` צריך את `mutex_A` לפני `mutex_B` (לפי הכלל החדש), הוא יצטרך לשנות את סדר הפעולות שלו.\nהפתרון הזה עובד ללא קשר למתזמן העדיפויות, שכן הוא מבטל את אחד מתנאי הקיפאון הבסיסיים. היפוך עדיפויות עדיין יכול להתרחש אם תהליכון בעל עדיפות נמוכה מחזיק משאב שתהליכון בעל עדיפות גבוהה צריך, אך זהו מצב שונה מקיפאון קלאסי וניתן לטפל בו באמצעות פרוטוקולי ירושת עדיפויות (Priority Inheritance Protocol) במימוש המנעולים.\n\nקטע קוד מתוקן (עבור `thread_type1` ו-`thread_type2`):\nנניח שהסדר הגלובלי הוא: קודם `mutex_A`, אחר כך `mutex_B`.\n\n```c\n#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n\n// Assume mutex_A and mutex_B are globally initialized pthread_mutex_t variables.\n\nvoid* thread_type1_fixed(void* arg) {\n    // Thread of type 1: acquires mutex_A then mutex_B (already in order)\n    printf(\"Thread 1 (ID: %ld) trying to acquire A...\\n\", (long)pthread_self());\n    pthread_mutex_lock(&mutex_A);\n    printf(\"Thread 1 (ID: %ld) acquired A, trying to acquire B...\\n\", (long)pthread_self());\n    pthread_mutex_lock(&mutex_B);\n    printf(\"Thread 1 (ID: %ld) acquired B, doing work...\\n\", (long)pthread_self());\n    // Do critical work\n    printf(\"Thread 1 (ID: %ld) releasing B...\\n\", (long)pthread_self());\n    pthread_mutex_unlock(&mutex_B);\n    printf(\"Thread 1 (ID: %ld) releasing A...\\n\", (long)pthread_self());\n    pthread_mutex_unlock(&mutex_A);\n    printf(\"Thread 1 (ID: %ld) finished.\\n\", (long)pthread_self());\n    return NULL;\n}\n\nvoid* thread_type2_fixed(void* arg) {\n    // Thread of type 2: MUST now also acquire mutex_A then mutex_B\n    printf(\"Thread 2 (ID: %ld) trying to acquire A...\\n\", (long)pthread_self());\n    pthread_mutex_lock(&mutex_A); // Changed order\n    printf(\"Thread 2 (ID: %ld) acquired A, trying to acquire B...\\n\", (long)pthread_self());\n    pthread_mutex_lock(&mutex_B);\n    printf(\"Thread 2 (ID: %ld) acquired B, doing work...\\n\", (long)pthread_self());\n    // Do critical work\n    printf(\"Thread 2 (ID: %ld) releasing B...\\n\", (long)pthread_self());\n    pthread_mutex_unlock(&mutex_B);\n    printf(\"Thread 2 (ID: %ld) releasing A...\\n\", (long)pthread_self());\n    pthread_mutex_unlock(&mutex_A);\n    printf(\"Thread 2 (ID: %ld) finished.\\n\", (long)pthread_self());\n    return NULL;\n}\n```"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

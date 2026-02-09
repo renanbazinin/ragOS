@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "IPC",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 08:20:47",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1139,
+      "output_tokens": 427,
+      "total_tokens": 2964
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "IPC",
+      "Pipes"
+    ],
+    "content": {
+      "text": "איזו מהטענות הבאות נכונה לגבי צינורות (pipes) אנונימיים במערכות הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. הם מאפשרים תקשורת דו-כיוונית בין תהליכים שונים.",
+        "ב. הם מאפשרים תקשורת חד-כיוונית בין תהליכים שונים.",
+        "ג. הם מיועדים בעיקר לתקשורת בין חוטים (threads) באותו תהליך.",
+        "ד. הם מאפשרים גישה ישירה לזיכרון משותף בין תהליכים.",
+        "ה. הם דורשים שם ייחודי במערכת הקבצים כדי להתקיים."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב'. צינורות אנונימיים (unnamed pipes) הם מנגנון IPC המאפשר תקשורת חד-כיוונית (unidirectional) בין תהליכים שיש להם קשר הורה-ילד. הם אינם דו-כיווניים, אינם מיועדים לתקשורת בין חוטים (אלא בין תהליכים), ואינם מבוססים על זיכרון משותף ישיר. כמו כן, הם אינם דורשים שם במערכת הקבצים (בניגוד ל-named pipes/FIFOs)."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

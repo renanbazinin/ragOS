@@ -1,0 +1,47 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "TLB",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 08:09:43",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 951,
+      "total_tokens": 5495
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "TLB",
+      "Virtual Memory",
+      "Paging",
+      "Context Switch",
+      "Cache"
+    ],
+    "content": {
+      "text": "במערכת הפעלה המשתמשת בזיכרון וירטואלי עם מנגנון דפדוף (paging), קיימים TLB, מטמון נתונים L1 (L1 data cache) וזיכרון ראשי.\nזמני גישה ממוצעים הם כדלקמן:\n*   זמן גישה ל-TLB (הן לחיפוש והן למקרה של פגיעה): 1 ns\n*   זמן הליכה בטבלת דפים (Page Table Walk) במקרה של TLB miss: 100 ns (לא כולל זמן הגישה ל-TLB עצמו)\n*   זמן גישה למטמון L1 במקרה של פגיעה (hit): 2 ns\n*   זמן גישה לזיכרון ראשי במקרה של L1 miss: 100 ns (לא כולל זמן הגישה ל-L1 עצמו)\n\nהמערכת מוגדרת כך ש-TLB מתרוקן (flushed) באופן מלא בכל מעבר קשר (context switch) בין תהליכים.\nתהליך P1 רץ לזמן מה, ולאחר מכן מתבצע מעבר קשר לתהליך P2. מיד לאחר המעבר, תהליך P2 ניגש לכתובת וירטואלית X.\nבהנחה שכתובת X הייתה ב-TLB וב-L1 cache כאשר P2 רץ בפעם האחרונה, ושהיא עדיין נמצאת ב-L1 cache אך *אינה* ב-TLB (בגלל הריקון), מהו זמן הגישה הכולל לכתובת X עבור הגישה הראשונה של P2 לאחר מעבר הקשר?",
+      "code_snippet": null,
+      "options": [
+        "א. 1 ns",
+        "ב. 2 ns",
+        "ג. 101 ns",
+        "ד. 102 ns",
+        "ה. 103 ns",
+        "ו. 203 ns"
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ה",
+      "explanation": "הסבר:\n1.  **TLB Miss**: מכיוון שה-TLB מתרוקן במעבר קשר (context switch), הגישה הראשונה של תהליך P2 לכתובת X תגרום ל-TLB miss. זמן החיפוש ב-TLB הוא 1 ns.\n2.  **הליכה בטבלת דפים (Page Table Walk)**: עקב ה-TLB miss, המערכת תבצע הליכה בטבלת הדפים כדי למצוא את הכתובת הפיזית המתאימה. פעולה זו אורכת 100 ns (כפי שצוין, לא כולל את זמן הגישה ל-TLB עצמו).\n3.  **L1 Cache Hit**: לאחר שהכתובת הפיזית נמצאה, המערכת ניגשת למטמון הנתונים L1. השאלה מציינת שהנתונים עדיין נמצאים ב-L1 cache, ולכן זוהי פגיעה (hit) במטמון L1. פעולה זו אורכת 2 ns.\n4.  **זמן גישה כולל**: זמן הגישה הכולל הוא סכום זמני הפעולות הללו, שכן הן מתרחשות ברצף: 1 ns (חיפוש ב-TLB) + 100 ns (הליכה בטבלת דפים) + 2 ns (גישה למטמון L1) = 103 ns."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

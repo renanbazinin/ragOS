@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Signals",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 08:38:06",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 923,
+      "output_tokens": 2203,
+      "total_tokens": 8013
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Signals",
+      "Process Management",
+      "System Calls"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא:\n\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <signal.h>\n#include <sys/types.h>\n#include <sys/wait.h>\n\nvoid handler(int signum) {\n    printf(\"Received signal %d\\n\", signum);\n}\n\nint main() {\n    struct sigaction sa;\n    sa.sa_handler = handler;\n    sigemptyset(&sa.sa_mask);\n    sa.sa_flags = 0;\n\n    if (sigaction(SIGUSR1, &sa, NULL) == -1) {\n        perror(\"sigaction\");\n        return 1;\n    }\n    printf(\"Parent: SIGUSR1 handler installed.\\n\");\n\n    sigset_t block_mask, old_mask;\n    sigemptyset(&block_mask);\n    sigaddset(&block_mask, SIGUSR1);\n\n    if (sigprocmask(SIG_BLOCK, &block_mask, &old_mask) == -1) {\n        perror(\"sigprocmask block\");\n        return 1;\n    }\n    printf(\"Parent: SIGUSR1 blocked.\\n\");\n\n    pid_t pid = fork();\n\n    if (pid == -1) {\n        perror(\"fork\");\n        return 1;\n    } else if (pid == 0) { // Child process\n        sleep(1); // Ensure parent has blocked the signal\n        printf(\"Child: Sending SIGUSR1 to parent (%d).\\n\", getppid());\n        if (kill(getppid(), SIGUSR1) == -1) {\n            perror(\"kill\");\n            return 1;\n        }\n        printf(\"Child: Signal sent, exiting.\\n\");\n        exit(EXIT_SUCCESS);\n    } else { // Parent process\n        printf(\"Parent: Forked child with PID %d.\\n\", pid);\n        sleep(2); // Give child time to send the signal\n        printf(\"Parent: Unblocking SIGUSR1.\\n\");\n        if (sigprocmask(SIG_SETMASK, &old_mask, NULL) == -1) {\n            perror(\"sigprocmask unblock\");\n            return 1;\n        }\n        printf(\"Parent: SIGUSR1 unblocked.\\n\");\n        wait(NULL);\n        printf(\"Parent: Child finished, parent exiting.\\n\");\n    }\n    return 0;\n}\n```\n\nאיזו מהאפשרויות הבאות מתארת נכונה את התנהגות תהליך האב כאשר הוא מריץ את הקוד לעיל?",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <signal.h>\n#include <sys/types.h>\n#include <sys/wait.h>\n\nvoid handler(int signum) {\n    printf(\"Received signal %d\\n\", signum);\n}\n\nint main() {\n    struct sigaction sa;\n    sa.sa_handler = handler;\n    sigemptyset(&sa.sa_mask);\n    sa.sa_flags = 0;\n\n    if (sigaction(SIGUSR1, &sa, NULL) == -1) {\n        perror(\"sigaction\");\n        return 1;\n    }\n    printf(\"Parent: SIGUSR1 handler installed.\\n\");\n\n    sigset_t block_mask, old_mask;\n    sigemptyset(&block_mask);\n    sigaddset(&block_mask, SIGUSR1);\n\n    if (sigprocmask(SIG_BLOCK, &block_mask, &old_mask) == -1) {\n        perror(\"sigprocmask block\");\n        return 1;\n    }\n    printf(\"Parent: SIGUSR1 blocked.\\n\");\n\n    pid_t pid = fork();\n\n    if (pid == -1) {\n        perror(\"fork\");\n        return 1;\n    } else if (pid == 0) { // Child process\n        sleep(1); // Ensure parent has blocked the signal\n        printf(\"Child: Sending SIGUSR1 to parent (%d).\\n\", getppid());\n        if (kill(getppid(), SIGUSR1) == -1) {\n            perror(\"kill\");\n            return 1;\n        }\n        printf(\"Child: Signal sent, exiting.\\n\");\n        exit(EXIT_SUCCESS);\n    } else { // Parent process\n        printf(\"Parent: Forked child with PID %d.\\n\", pid);\n        sleep(2); // Give child time to send the signal\n        printf(\"Parent: Unblocking SIGUSR1.\\n\");\n        if (sigprocmask(SIG_SETMASK, &old_mask, NULL) == -1) {\n            perror(\"sigprocmask unblock\");\n            return 1;\n        }\n        printf(\"Parent: SIGUSR1 unblocked.\\n\");\n        wait(NULL);\n        printf(\"Parent: Child finished, parent exiting.\\n\");\n    }\n    return 0;\n}\n",
+      "options": [
+        "א. תהליך האב יקבל את הסיגנל מיד לאחר קריאת ה-`kill` של תהליך הבן, תוך כדי שהוא חוסם את הסיגנל, וה-handler יופעל.",
+        "ב. תהליך האב יקבל את הסיגנל מיד לאחר קריאת ה-`kill` של תהליך הבן, אך ה-handler לא יופעל מאחר שהסיגנל חסום.",
+        "ג. תהליך האב יקבל את הסיגנל רק לאחר קריאת ה-`sigprocmask` שמשחררת את חסימת ה-`SIGUSR1`, וה-handler יופעל.",
+        "ד. תהליך האב לעולם לא יקבל את הסיגנל `SIGUSR1` מאחר והוא נשלח בזמן שהסיגנל היה חסום.",
+        "ה. תהליך האב יסיים את ריצתו מבלי להדפיס \"Received signal...\" מכיוון שהסיגנל נשלח לפני התקנת ה-handler."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "הסבר: \n1. תהליך האב מתקין handler עבור `SIGUSR1` ולאחר מכן חוסם את `SIGUSR1` באמצעות `sigprocmask`. המסכה הישנה (שאינה חוסמת את `SIGUSR1`) נשמרת ב-`old_mask`.\n2. תהליך האב יוצר תהליך בן באמצעות `fork()`. תהליך הבן יורש את מסכת הסיגנלים החסומים (שכוללת את `SIGUSR1`) ואת הגדרת ה-handler עבור `SIGUSR1`.\n3. תהליך הבן שולח את `SIGUSR1` לתהליך האב באמצעות `kill(getppid(), SIGUSR1)`.\n4. מכיוון ש-`SIGUSR1` חסום בתהליך האב, הסיגנל לא נמסר מיד אלא נשאר במצב 'ממתין' (pending) עבור תהליך האב. הוא לא יפעיל את ה-handler כל עוד הוא חסום.\n5. תהליך האב ממשיך בריצתו, ממתין מספר שניות, ולאחר מכן קורא ל-`sigprocmask` עם `SIG_SETMASK` ו-`old_mask`. קריאה זו משחזרת את מסכת הסיגנלים המקורית של האב, ובכך משחררת את חסימת `SIGUSR1`.\n6. ברגע ש-`SIGUSR1` משוחרר מחסימה, הסיגנל הממתין נמסר מיד, וה-handler שהותקן מופעל. לכן, תהליך האב ידפיס 'Received signal...' לאחר שחרור החסימה.\n\nלסיכום:\n- א. שגוי: סיגנל חסום אינו מופעל מיד.\n- ב. שגוי: סיגנל חסום אינו נמסר כלל, אלא נהפך לממתין.\n- ג. נכון: הסיגנל הופך לממתין ומטופל רק לאחר שחרור החסימה.\n- ד. שגוי: סיגנל שנשלח בזמן חסימה אינו 'נעלם' אלא ממתין למסירה.\n- ה. שגוי: ה-handler הותקן בהצלחה לפני שליחת הסיגנל."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

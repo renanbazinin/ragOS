@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Signals",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 08:36:32",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1021,
+      "output_tokens": 310,
+      "total_tokens": 2768
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Signals"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של אותות (signals) במערכת הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. לסיים תהליכים בכוח.",
+        "ב. לתזמן תהליכים לביצוע.",
+        "ג. לאפשר לתהליכים לתקשר על אירועים אסינכרוניים.",
+        "ד. לנהל גישה למשאבים משותפים."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג'. אותות (signals) הם מנגנון לתקשורת אסינכרונית בין תהליכים או בין הקרנל לתהליך. הם משמשים להודיע לתהליך על אירועים שונים כגון שגיאות, בקשות סיום, או אירועים חיצוניים אחרים, ובכך מאפשרים לו להגיב לאירועים אלו."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

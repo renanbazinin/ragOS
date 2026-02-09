@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Copy-on-Write",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 08:53:18",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 972,
+      "output_tokens": 1814,
+      "total_tokens": 5698
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Virtual Memory",
+      "Copy-on-Write",
+      "Process Management"
+    ],
+    "content": {
+      "text": "תהליך אב (P) יוצר תהליך בן (C) באמצעות קריאת המערכת `fork()`. לפני הקריאה ל-`fork()`, תהליך P משתמש בדף זיכרון מסוים (נניח דף X) עם הרשאות כתיבה. לאחר ה-`fork()` ולפני שכל אחד מהתהליכים מבצע כתיבה כלשהי לדף X, שני התהליכים (P ו-C) קוראים מדף X. לאחר מכן, תהליך P מנסה לכתוב לדף X. \n\nבהתבסס על מנגנון Copy-on-Write (CoW), מהו המצב הנכון של דגל הכתיבה (Writable flag) בטבלאות הדפים של P ו-C, ומונה ההתייחסויות (Reference Count) לדפים הפיזיים המעורבים, מיד לאחר שתהליך P מסיים בהצלחה את פעולת הכתיבה לדף X?",
+      "code_snippet": "```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\nint global_array[1024]; // This will be on a page, let's call it page X\n\nint main() {\n    // Initialize page X\n    for (int i = 0; i < 1024; i++) {\n        global_array[i] = i;\n    }\n\n    pid_t pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        exit(1);\n    } else if (pid == 0) {\n        // Child process C\n        printf(\"Child: Reading global_array[0] = %d\\n\", global_array[0]);\n        // Child does not write, so it still refers to the original page X\n        sleep(1); // Give parent time to write\n        printf(\"Child: Reading global_array[0] again = %d\\n\", global_array[0]);\n        exit(0);\n    } else {\n        // Parent process P\n        printf(\"Parent: Reading global_array[0] = %d\\n\", global_array[0]);\n        // Parent writes to page X, triggering CoW\n        global_array[0] = 999; // This is the write operation\n        printf(\"Parent: Wrote 999 to global_array[0]\\n\");\n        printf(\"Parent: Reading global_array[0] after write = %d\\n\", global_array[0]);\n        wait(NULL); // Wait for child\n    }\n\n    return 0;\n}\n```",
+      "options": [
+        "א. דגל כתיבה ב-PTE של P עבור דף X: True, דגל כתיבה ב-PTE של C עבור דף X: True, מונה התייחסויות לדף הפיזי המקורי X: 1, מונה התייחסויות לדף הפיזי החדש X' (של P): 1",
+        "ב. דגל כתיבה ב-PTE של P עבור דף X: True, דגל כתיבה ב-PTE של C עבור דף X: False, מונה התייחסויות לדף הפיזי המקורי X: 1, מונה התייחסויות לדף הפיזי החדש X' (של P): 1",
+        "ג. דגל כתיבה ב-PTE של P עבור דף X: False, דגל כתיבה ב-PTE של C עבור דף X: False, מונה התייחסויות לדף הפיזי המקורי X: 2, מונה התייחסויות לדף הפיזי החדש X' (של P): 0",
+        "ד. דגל כתיבה ב-PTE של P עבור דף X: True, דגל כתיבה ב-PTE של C עבור דף X: False, מונה התייחסויות לדף הפיזי המקורי X: 2, מונה התייחסויות לדף הפיזי החדש X' (של P): 1",
+        "ה. דגל כתיבה ב-PTE של P עבור דף X: False, דגל כתיבה ב-PTE של C עבור דף X: True, מונה התייחסויות לדף הפיזי המקורי X: 1, מונה התייחסויות לדף הפיזי החדש X' (של P): 1"
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "הסבר מפורט:\n1.  **לפני `fork()`:** דף X בבעלות P, ה-PTE שלו מסומן כניתן לכתיבה (Writable), ומונה ההתייחסויות לדף הפיזי של X הוא 1.\n2.  **לאחר `fork()` ולפני כתיבה:**\n    *   הקרנל משכפל את ה-PTE של דף X עבור תהליך C.\n    *   שני ה-PTEs (של P ושל C) מצביעים לאותו דף פיזי X.\n    *   שני ה-PTEs מסומנים כקריאה בלבד (Read-Only) כחלק ממנגנון CoW.\n    *   מונה ההתייחסויות לדף הפיזי X מוגדל ל-2 (P ו-C מצביעים אליו).\n3.  **כאשר P מנסה לכתוב לדף X:**\n    *   מתרחשת פסיקת דף (page fault) מכיוון שה-PTE של P עבור דף X מסומן כקריאה בלבד.\n    *   הקרנל מטפל בפסיקה:\n        *   מקצה דף פיזי חדש (נניח X').\n        *   מעתיק את התוכן של הדף הפיזי המקורי X לדף הפיזי החדש X'.\n        *   מעדכן את ה-PTE של P כך שיצביע לדף הפיזי החדש X' ומסמן אותו כניתן לכתיבה (Writable).\n        *   מקטין את מונה ההתייחסויות לדף הפיזי המקורי X מ-2 ל-1 (רק C עדיין מצביע אליו).\n        *   מונה ההתייחסויות לדף הפיזי החדש X' מוגדר ל-1 (רק P מצביע אליו).\n    *   הכתיבה של P מתבצעת כעת לדף הפיזי החדש X'.\n4.  **המצב הסופי מיד לאחר ש-P מסיים את הכתיבה בהצלחה:**\n    *   ה-PTE של P עבור דף X' (החדש): Writable (True).\n    *   ה-PTE של C עבור דף X (המקורי): Read-Only (False).\n    *   מונה ההתייחסויות לדף הפיזי המקורי X: 1 (כי רק C מצביע אליו).\n    *   מונה ההתייחסויות לדף הפיזי החדש X': 1 (כי רק P מצביע אליו).\n\nלכן, האפשרות הנכונה היא ב'."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

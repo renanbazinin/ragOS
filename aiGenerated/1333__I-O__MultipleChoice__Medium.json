@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Disks",
+    "topic_hint": "I/O",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 09:33:51",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1141,
+      "output_tokens": 546,
+      "total_tokens": 3626
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "I/O",
+      "Interrupts",
+      "Polling",
+      "CPU Utilization"
+    ],
+    "content": {
+      "text": "נתונה מערכת הפעלה המנהלת התקן קלט/פלט איטי במיוחד, כמו מקלדת. איזה מבין מנגנוני ה-I/O הבאים עדיף בדרך כלל עבור התקן כזה מבחינת ניצול מעבד (CPU utilization), ומדוע?",
+      "code_snippet": null,
+      "options": [
+        "א. Polling, מכיוון שהוא פשוט למימוש ודורש פחות זיכרון.",
+        "ב. Interrupt-driven I/O, מכיוון שהוא מאפשר למעבד לבצע עבודה אחרת בזמן ההמתנה ל-I/O.",
+        "ג. DMA (Direct Memory Access), מכיוון שהוא מאפשר העברת נתונים ישירה לזיכרון ללא מעורבות מעבד.",
+        "ד. Polling, מכיוון שהוא מבטיח תגובה מיידית לנתונים ברגע שהם זמינים."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב'. עבור התקנים איטיים כמו מקלדת, ה-CPU מבלה זמן רב בהמתנה לאירוע I/O. שימוש ב-Polling יגרום לבזבוז משאבי מעבד רבים, מכיוון שהמעבד יצטרך לבדוק שוב ושוב את מצב ההתקן. לעומת זאת, מנגנון Interrupt-driven I/O מאפשר למעבד לבצע משימות אחרות בזמן ההמתנה, ורק כאשר ההתקן מוכן, הוא שולח פסיקה למעבד. זה משפר משמעותית את ניצולת המעבד. DMA אינו יעיל עבור התקנים איטיים מכיוון שהתקורה של הגדרת ה-DMA עשויה להיות גבוהה יותר מהתועלת בהעברת נתונים בקצב איטי ולרוב משמש להתקנים מהירים."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

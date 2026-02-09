@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Memory Management and Page Replacement",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 10:45:55",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 941,
+      "output_tokens": 347,
+      "total_tokens": 2617
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Memory Management",
+      "Page Replacement Algorithms",
+      "Belady's Anomaly"
+    ],
+    "content": {
+      "text": "איזה מאלגוריתמי החלפת הדפים הבאים סובל מאנומליה של בלדי (Belady's Anomaly)?",
+      "code_snippet": null,
+      "options": [
+        "א. LRU (Least Recently Used)",
+        "ב. FIFO (First-In, First-Out)",
+        "ג. Optimal (OPT)",
+        "ד. LFU (Least Frequently Used)",
+        "ה. אף אחת מהתשובות האחרות אינה נכונה."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "אנומליה של בלדי היא מצב שבו הגדלת מספר מסגרות הזיכרון הזמינות גורמת לעלייה במספר כשלי הדף (page faults). אלגוריתם FIFO (First-In, First-Out) ידוע כסובל מאנומליה זו. אלגוריתמים כמו LRU, Optimal ו-LFU אינם סובלים ממנה, שכן הם עומדים בעיקרון של 'Stack Algorithms'."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

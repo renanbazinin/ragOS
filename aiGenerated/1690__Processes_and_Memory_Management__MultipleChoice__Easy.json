@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Processes and Memory Management",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 20:05:12",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1034,
+      "output_tokens": 408,
+      "total_tokens": 2662
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Processes",
+      "Memory Management",
+      "Virtual Memory"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של זיכרון וירטואלי (Virtual Memory) במערכת הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. להגדיל את כמות הזיכרון הפיזי הזמין למערכת.",
+        "ב. לאפשר לכל תהליך לראות מרחב כתובות זיכרון רציף ועצמאי.",
+        "ג. לשפר את מהירות הגישה לזיכרון הפיזי.",
+        "ד. לאפשר למעבד לבצע מספר פעולות במקביל.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב'. המטרה העיקרית של זיכרון וירטואלי היא לספק לכל תהליך תפיסה של מרחב זיכרון גדול, רציף ועצמאי, המנותק מהזיכרון הפיזי בפועל. זה מאפשר הגנה בין תהליכים, שימוש יעיל בזיכרון הפיזי על ידי העברת דפים לדיסק (swapping) וטעינה לפי דרישה (demand paging), ומפשט את תכנות היישומים."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

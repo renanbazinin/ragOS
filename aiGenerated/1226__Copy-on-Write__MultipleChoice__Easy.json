@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Copy-on-Write",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 08:50:32",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 967,
+      "output_tokens": 417,
+      "total_tokens": 2392
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Virtual Memory",
+      "Memory Management",
+      "Copy-on-Write"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של מנגנון Copy-on-Write (CoW)?",
+      "code_snippet": null,
+      "options": [
+        "א. להבטיח שכל תהליך יקבל עותק פרטי של נתונים באופן מיידי בעת יצירתו.",
+        "ב. לדחות את העתקת עמודי זיכרון משותפים בין תהליכים עד שאחד מהם מנסה לכתוב אליהם.",
+        "ג. לשפר את מהירות טעינת תוכניות לזיכרון הפיזי.",
+        "ד. למנוע גישה לא חוקית לזיכרון על ידי תהליכים זדוניים."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב'. מנגנון Copy-on-Write (CoW) נועד לדחות את העתקת עמודי זיכרון המשותפים בין תהליכים (לרוב לאחר קריאת מערכת כמו fork()) עד שאחד מהתהליכים מנסה לכתוב לאותו עמוד. רק אז נוצר עותק פרטי של העמוד עבור התהליך הכותב. זה חוסך זמן וזיכרון, במיוחד במקרים שבהם עמודים רבים לעולם אינם נכתבים או נכתבים רק על ידי תהליך אחד."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

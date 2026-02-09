@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "IPC and Processes",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 19:39:02",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2411,
+      "output_tokens": 2779,
+      "total_tokens": 8530
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "IPC",
+      "Processes",
+      "Pipes"
+    ],
+    "content": {
+      "text": "תהליך אב יוצר תהליך בן. תהליך האב מייצר סדרה של 10 מספרים שלמים אקראיים (בין 1 ל-100) ושולח אותם לתהליך הבן. תהליך הבן מקבל את המספרים, מחשב את סכומם, ושולח את הסכום בחזרה לתהליך האב. תהליך האב מדפיס את הסכום שהתקבל מהבן.\n\nכתבו תוכנית ב-C המממשת תרחיש זה תוך שימוש ב-anonymous pipes (צינורות אנונימיים) לתקשורת דו-כיוונית בין האב לבן.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n#include <time.h>\n\n#define NUM_COUNT 10\n\nint main() {\n    int pipe_pc[2]; // Parent to Child\n    int pipe_cp[2]; // Child to Parent\n    pid_t pid;\n\n    // Create pipes\n    if (pipe(pipe_pc) == -1) {\n        perror(\"pipe_pc\");\n        exit(EXIT_FAILURE);\n    }\n    if (pipe(pipe_cp) == -1) {\n        perror(\"pipe_cp\");\n        exit(EXIT_FAILURE);\n    }\n\n    pid = fork();\n\n    if (pid == -1) {\n        perror(\"fork\");\n        exit(EXIT_FAILURE);\n    }\n\n    if (pid == 0) { // Child process\n        // Close unused write end of pipe_pc and read end of pipe_cp\n        close(pipe_pc[1]);\n        close(pipe_cp[0]);\n\n        int numbers[NUM_COUNT];\n        int sum = 0;\n\n        // Read numbers from parent\n        if (read(pipe_pc[0], numbers, sizeof(int) * NUM_COUNT) == -1) {\n            perror(\"child: read from parent\");\n            exit(EXIT_FAILURE);\n        }\n        close(pipe_pc[0]); // Close read end of pipe_pc\n\n        printf(\"Child received numbers: \");\n        for (int i = 0; i < NUM_COUNT; i++) {\n            printf(\"%d \", numbers[i]);\n            sum += numbers[i];\n        }\n        printf(\"\\n\");\n\n        printf(\"Child calculated sum: %d\\n\", sum);\n\n        // Send sum to parent\n        if (write(pipe_cp[1], &sum, sizeof(int)) == -1) {\n            perror(\"child: write to parent\");\n            exit(EXIT_FAILURE);\n        }\n        close(pipe_cp[1]); // Close write end of pipe_cp\n\n        exit(EXIT_SUCCESS);\n\n    } else { // Parent process\n        // Close unused read end of pipe_pc and write end of pipe_cp\n        close(pipe_pc[0]);\n        close(pipe_cp[1]);\n\n        srand(time(NULL)); // Seed random number generator\n        int numbers[NUM_COUNT];\n        printf(\"Parent generating numbers: \");\n        for (int i = 0; i < NUM_COUNT; i++) {\n            numbers[i] = rand() % 100 + 1; // Random numbers between 1 and 100\n            printf(\"%d \", numbers[i]);\n        }\n        printf(\"\\n\");\n\n        // Write numbers to child\n        if (write(pipe_pc[1], numbers, sizeof(int) * NUM_COUNT) == -1) {\n            perror(\"parent: write to child\");\n            exit(EXIT_FAILURE);\n        }\n        close(pipe_pc[1]); // Close write end of pipe_pc\n\n        int received_sum;\n        // Read sum from child\n        if (read(pipe_cp[0], &received_sum, sizeof(int)) == -1) {\n            perror(\"parent: read from child\n\");\n            exit(EXIT_FAILURE);\n        }\n        close(pipe_cp[0]); // Close read end of pipe_cp\n\n        printf(\"Parent received sum from child: %d\\n\", received_sum);\n\n        // Wait for child to terminate\n        wait(NULL);\n\n        exit(EXIT_SUCCESS);\n    }\n\n    return 0; // Should not be reached\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "הסבירו בקצרה מדוע Pipes מתאימים לתרחיש זה. הציעו מנגנון IPC חלופי שיכול לשמש למטרה דומה, וציינו יתרון וחיסרון אחד של המנגנון החלופי לעומת Pipes בתרחיש הנתון.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "פתרון קוד:\nהקוד מממש תקשורת בין תהליך אב לבן באמצעות שני צינורות אנונימיים (pipes).\n1.  **יצירת צינורות**: לפני ה-`fork`, נוצרים שני צינורות: `pipe_pc` לתקשורת מהאב לבן, ו-`pipe_cp` לתקשורת מהבן לאב. כל צינור הוא מערך של שני אינטגרים, כאשר אינדקס 0 הוא לקריאה ואינדקס 1 הוא לכתיבה.\n2.  **פיצול תהליכים (`fork`)**: התהליך מתפצל לאב ולבן. בדיקת שגיאות מתבצעת עבור `pipe()` ו-`fork()`.\n3.  **תהליך הבן (pid == 0)**:\n    *   סוגר את קצוות הצינור שאינם בשימוש: קצה הכתיבה של `pipe_pc` (כי הוא רק קורא מהאב) וקצה הקריאה של `pipe_cp` (כי הוא רק כותב לאב).\n    *   קורא את מערך המספרים מהאב באמצעות `read()` מ-`pipe_pc[0]`.\n    *   מחשב את סכום המספרים.\n    *   כותב את הסכום בחזרה לאב באמצעות `write()` ל-`pipe_cp[1]`.\n    *   סוגר את קצוות הצינור שבהם השתמש לאחר סיום הקריאה/כתיבה.\n    *   יוצא בהצלחה.\n4.  **תהליך האב (pid > 0)**:\n    *   סוגר את קצוות הצינור שאינם בשימוש: קצה הקריאה של `pipe_pc` (כי הוא רק כותב לבן) וקצה הכתיבה של `pipe_cp` (כי הוא רק קורא מהבן).\n    *   מאתחל את מחולל המספרים האקראיים (`srand`) באמצעות זמן המערכת.\n    *   מייצר 10 מספרים אקראיים בין 1 ל-100.\n    *   כותב את מערך המספרים לבן באמצעות `write()` ל-`pipe_pc[1]`.\n    *   קורא את הסכום מהבן באמצעות `read()` מ-`pipe_cp[0]`.\n    *   מדפיס את הסכום שהתקבל.\n    *   סוגר את קצוות הצינור שבהם השתמש לאחר סיום הכתיבה/קריאה.\n    *   ממתין לסיום תהליך הבן באמצעות `wait()` כדי למנוע תהליכי זומבי.\n    *   יוצא בהצלחה.\n\nפתרון לשאלה 10.1:\n\n**מדוע Pipes מתאימים לתרחיש זה:**\nPipes (צינורות אנונימיים) מתאימים מאוד לתרחיש זה מכמה סיבות:\n*   **תקשורת בין תהליכים קרובים**: Pipes מיועדים בעיקר לתקשורת בין תהליכים בעלי קשר אב-בן (או אחים שנוצרו מאותו אב), שכן הם יורשים את מזהי הקבצים הפתוחים.\n*   **פשטות שימוש**: הם פשוטים יחסית ליישום עבור זרם נתונים חד כיווני, מה שמחייב שני pipes עבור תקשורת דו-כיוונית כפי שנדרש בתרגיל.\n*   **זרם בתים**: הם מספקים זרם בתים (byte stream) מה שמתאים לשליחת מערך מספרים או יחידת מידע אחת (הסכום) בצורה רציפה.\n*   **סנכרון מובנה**: הליבה מבצעת סנכרון בסיסי – תהליך קורא נחסם אם הצינור ריק, ותהליך כותב נחסם אם הצינור מלא, מה שמפשט את הטיפול בזרימת הנתונים.\n\n**מנגנון IPC חלופי, יתרון וחיסרון:**\n\n**אפשרות 1: זיכרון משותף (Shared Memory)**\n*   **יתרון**: ביצועים מהירים מאוד. ברגע שהזיכרון המשותף ממופה למרחבי הכתובות של שני התהליכים, התקשורת מתבצעת ישירות דרך הזיכרון, ללא צורך בהעתקת נתונים על ידי הליבה (kernel copies), מה שמפחית את התקורה באופן משמעותי.\n*   **חיסרון**: דורש מנגנוני סנכרון מפורשים (כגון סמפורים או מנעולים) כדי למנוע תנאי מרוץ (race conditions) כאשר שני התהליכים ניגשים לאותו אזור זיכרון בו-זמנית. זה מוסיף מורכבות משמעותית ליישום נכון ובטוח.\n\n**אפשרות 2: תורי הודעות (Message Queues)**\n*   **יתרון**: מספקים מבנה הודעות (message-based) במקום זרם בתים, מה שיכול להיות נוח יותר לשליחת יחידות מידע מוגדרות (לדוגמה, כל מספר בנפרד או את הסכום). הם גם מספקים סנכרון מובנה (הודעות נשלחות ומתקבלות בצורה אטומית) ויכולים לשמש לתקשורת בין תהליכים שאינם קשורים ישירות.\n*   **חיסרון**: בדרך כלל איטיים יותר מ-Pipes או מזיכרון משותף בשל הצורך בהעתקת נתונים בין מרחב המשתמש למרחב הליבה עבור כל הודעה. יש להם גם מגבלות על גודל ההודעות ועל מספר ההודעות בתור, ויכולים להיות בעלי תקורה גבוהה יותר עבור העברת זרם גדול של נתונים."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

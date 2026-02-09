@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Signals and System Calls",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 11:53:13",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 926,
+      "output_tokens": 560,
+      "total_tokens": 2825
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Signals",
+      "System Calls"
+    ],
+    "content": {
+      "text": "מהי התנהגות אופיינית של קריאת מערכת חוסמת (blocking system call), כגון `read()` או `sleep()`, כאשר היא מופרעת על ידי קבלת סיגנל (signal) לפני שהיא מסיימת את פעולתה?",
+      "code_snippet": null,
+      "options": [
+        "א. קריאת המערכת ממשיכה לפעול כרגיל עד לסיומה, והסיגנל מטופל רק לאחר מכן.",
+        "ב. קריאת המערכת מסתיימת באופן מיידי ומחזירה ערך שגיאה (`-1`), כאשר `errno` מוגדר בדרך כלל ל-`EINTR`.",
+        "ג. קריאת המערכת מופסקת ומאותחלת מחדש באופן אוטומטי, כאילו לא הופרעה כלל.",
+        "ד. התהליך מקבל את הסיגנל ומסיים את פעולתו (terminates) באופן מיידי.",
+        "ה. אף אחת מהתשובות אינה נכונה."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב. כאשר קריאת מערכת חוסמת מופרעת על ידי סיגנל, היא בדרך כלל מסתיימת מוקדם ומחזירה את הערך `-1` (המציין שגיאה), כאשר המשתנה הגלובלי `errno` מוגדר ל-`EINTR` (interrupted system call). זה מאפשר לתהליך לטפל בסיגנל ואז להחליט אם לנסות שוב את קריאת המערכת. במקרים מסוימים, ניתן להגדיר את קריאת המערכת לאתחל מחדש באופן אוטומטי (למשל, באמצעות הדגל `SA_RESTART` ב-`sigaction`), אך זו אינה התנהגות ברירת המחדל האופיינית לכל קריאות המערכת או כל הסיגנלים."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

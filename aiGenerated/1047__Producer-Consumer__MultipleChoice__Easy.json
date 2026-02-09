@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Producer-Consumer",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 07:38:32",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1101,
+      "output_tokens": 458,
+      "total_tokens": 2900
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Producer-Consumer",
+      "Concurrency",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "בבעיית יצרן-צרכן (Producer-Consumer), מהו התפקיד העיקרי של מנגנוני סנכרון כמו סמפורים (semaphores)?",
+      "code_snippet": null,
+      "options": [
+        "א. להבטיח שהיצרנים תמיד ירוצו מהר יותר מהצרכנים.",
+        "ב. למנוע מצב בו הצרכן מנסה לצרוך פריט ממאגר ריק, או היצרן מנסה להוסיף פריט למאגר מלא.",
+        "ג. לאפשר רק ליצרן אחד וצרכן אחד לפעול בכל זמן נתון.",
+        "ד. לקבוע את גודל המאגר המשותף."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב'. בבעיית יצרן-צרכן, מנגנוני סנכרון כמו סמפורים (לדוגמה, סמפורים 'empty' ו-'full') חיוניים למניעת מצבי מירוץ וטעויות. תפקידם העיקרי הוא לוודא שהיצרן לא ינסה להוסיף נתון למאגר שכבר מלא (מצב 'overflow'), ושהצרכן לא ינסה לצרוך נתון ממאגר שהוא ריק (מצב 'underflow'). בנוסף, לרוב משתמשים ב-mutex כדי להגן על הגישה הבלעדית למאגר עצמו בזמן פעולת הוספה או הוצאה."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

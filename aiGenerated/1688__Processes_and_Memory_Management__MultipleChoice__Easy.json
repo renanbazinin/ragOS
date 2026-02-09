@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Processes and Memory Management",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 20:04:55",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1034,
+      "output_tokens": 422,
+      "total_tokens": 3073
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Processes",
+      "Memory Management",
+      "Virtual Memory"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של שימוש בזיכרון וירטואלי (Virtual Memory) במערכת הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. לאפשר למעבד לגשת לזיכרון פיזי מהר יותר.",
+        "ב. לספק לכל תהליך מרחב כתובות פרטי ונפרד משלו, ללא תלות בזיכרון הפיזי הזמין.",
+        "ג. לשמור עותקים של נתונים חשובים בדיסק הקשיח.",
+        "ד. לנהל את קבצי המערכת באופן יעיל יותר."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב. זיכרון וירטואלי (Virtual Memory) מספק לכל תהליך אשליה של מרחב כתובות רציף ופרטי משלו, המנותק מהזיכרון הפיזי. זה מאפשר הגנה בין תהליכים (איזולציה), וכן מאפשר לתהליכים להשתמש בזיכרון גדול יותר מהזיכרון הפיזי הזמין על ידי שימוש בדיסק כמקום אחסון משני (swap space). שאר האפשרויות מתארות תפקידים של רכיבים אחרים (כגון מטמון CPU או מערכת קבצים) או היבטים משניים."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

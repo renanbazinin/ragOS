@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "Security",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 09:44:11",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1204,
+      "output_tokens": 746,
+      "total_tokens": 3245
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "Security",
+      "Buffer Overflow",
+      "Memory Protection",
+      "Vulnerabilities"
+    ],
+    "content": {
+      "text": "נתונה פונקציה בשפת C:\n\n```c\n#include <stdio.h>\n#include <string.h>\n\nvoid process_input(char* input) {\n    char buffer[64];\n    strcpy(buffer, input);\n    printf(\"Processed: %s\\n\", buffer);\n}\n\nint main() {\n    char small_input[] = \"Hello\";\n    char large_input[] = \"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"; // 100 'A's\n\n    process_input(small_input);\n    // Calling with large_input would lead to a vulnerability\n    // process_input(large_input);\n\n    return 0;\n}\n```\n\nמהי פגיעות האבטחה העיקרית בדוגמת קוד זו?\n",
+      "code_snippet": "void process_input(char* input) {\n    char buffer[64];\n    strcpy(buffer, input);\n    printf(\"Processed: %s\\n\", buffer);\n}",
+      "options": [
+        "א. הפונקציה אינה מבצעת אימות קלט (input validation), מה שעלול להוביל להתקפות הזרקת SQL.",
+        "ב. הפונקציה רגישה להתקפת גלישת חוצץ (Buffer Overflow), שעלולה לאפשר למתקיף להריץ קוד זדוני.",
+        "ג. הפונקציה אינה משתמשת בפרוטוקול תקשורת מאובטח, מה שחושף את המידע להאזנה.",
+        "ד. הפונקציה יוצרת תנאי מירוץ (Race Condition) בגישה למשאב משותף.",
+        "ה. הקוד בטוח ואין בו פגיעות אבטחה."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב. הקוד מדגים פגיעות קלאסית של גלישת חוצץ (Buffer Overflow). הפונקציה `strcpy` מעתיקה את תוכן המשתנה `input` לתוך המערך `buffer` מבלי לבדוק את גודל `input`. אם `input` ארוך יותר מ-63 תווים (בתוספת תו ה-NULL הסוגר), `strcpy` תכתוב מעבר לגבולות `buffer`, ותדרוס נתונים אחרים במחסנית, מה שעלול להוביל לקריסת התוכנית או, במקרים חמורים יותר, לאפשר למתקיף להריץ קוד זדוני. הפתרון הנכון הוא להשתמש בפונקציות בטוחות יותר כמו `strncpy` עם הגבלת גודל, או `snprintf`."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

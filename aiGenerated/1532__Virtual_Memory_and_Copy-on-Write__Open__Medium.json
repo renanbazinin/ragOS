@@ -1,0 +1,72 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory and Copy-on-Write",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 11:11:52",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2412,
+      "output_tokens": 1802,
+      "total_tokens": 7558
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Virtual Memory",
+      "Copy-on-Write",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "נתונה מערכת הפעלה התומכת במנגנון Copy-on-Write (CoW) לניהול זיכרון וירטואלי. זיכרון פיזי במערכת בגודל 128MB וגודל דף הוא 4KB.\nלפניכם קטע קוד C:",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\n#define ARRAY_SIZE (1024 * 1024) // 1MB\n\nint main() {\n    int *arr = (int *)malloc(ARRAY_SIZE);\n    if (arr == NULL) {\n        perror(\"malloc failed\");\n        return 1;\n    }\n\n    // Initialize array - this will cause pages to be allocated and marked dirty\n    for (int i = 0; i < ARRAY_SIZE / sizeof(int); i++) {\n        arr[i] = 0;\n    }\n\n    pid_t pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        return 1;\n    } else if (pid == 0) { // Child process\n        // Child modifies a specific page\n        arr[0] = 100; // Modifies the first page\n        printf(\"Child modified arr[0]\\n\");\n        exit(0);\n    } else { // Parent process\n        wait(NULL); // Wait for child to finish\n        // Parent modifies a different specific page\n        arr[ARRAY_SIZE / sizeof(int) - 1] = 200; // Modifies the last page\n        printf(\"Parent modified arr[last_element]\\n\");\n    }\n\n    free(arr);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "כמה דפים פיזיים מוקצים עבור המערך arr מיד לאחר הקצאתו ואיפוסו (לפני הקריאה ל-fork)?",
+        "code_snippet": null,
+        "options": null,
+        "solution": {
+          "is_present_in_file": true,
+          "correct_option": null,
+          "explanation": "1. **חישוב מספר הדפים הראשוני:**\n   גודל המערך arr הוא 1MB = 1024 * 1024 בתים.\n   גודל דף הוא 4KB = 4 * 1024 בתים.\n   מספר הדפים הנדרש למערך: (1024 * 1024) / (4 * 1024) = 1024 / 4 = 256 דפים.\n   הלולאה מאתחלת את כל המערך, מה שמבטיח שכל 256 הדפים יוקצו פיזית ויסומנו כ-dirty.\n   **תשובה:** 256 דפים פיזיים."
+        }
+      },
+      {
+        "id": "10.2",
+        "text": "כמה דפים פיזיים *נוספים* מוקצים עבור המערך arr לאחר ש-fork() חוזר, אך לפני שמי מהתהליכים (האב או הבן) מבצע שינוי כלשהו במערך?",
+        "code_snippet": null,
+        "options": null,
+        "solution": {
+          "is_present_in_file": true,
+          "correct_option": null,
+          "explanation": "2. **לאחר fork() ולפני שינוי:**\n   מנגנון ה-Copy-on-Write (CoW) מונע העתקה מיותרת של דפים בעת יצירת תהליך חדש באמצעות fork(). במקום להעתיק את כל מרחב הכתובות של האב לבן, הקרנל מסמן את הדפים המשותפים (כמו אלו של המערך arr) כקריאה בלבד (read-only) בשתי טבלאות הדפים (של האב ושל הבן). בפועל, האב והבן חולקים את אותם דפים פיזיים. לכן, לא מוקצים דפים פיזיים *נוספים* בשלב זה.\n   **תשובה:** 0 דפים פיזיים נוספים."
+        }
+      },
+      {
+        "id": "10.3",
+        "text": "כמה דפים פיזיים בסך הכל מוקצים עבור המערך arr (כולל הדפים המשותפים והדפים שהוכפלו) לאחר ששני התהליכים (האב והבן) ביצעו את השינויים שלהם במערך? הסבר את פעולת מנגנון ה-Copy-on-Write בהקשר זה.",
+        "code_snippet": null,
+        "options": null,
+        "solution": {
+          "is_present_in_file": true,
+          "correct_option": null,
+          "explanation": "3. **לאחר השינויים על ידי האב והבן:**\n   כאשר תהליך (האב או הבן) מנסה לכתוב לדף המסומן כ-read-only (בגלל CoW), נוצר Page Fault. הקרנל מזהה שמדובר בדף CoW, מעתיק את הדף הפיזי לדף פיזי חדש, מעדכן את טבלת הדפים של התהליך המבצע את הכתיבה כך שתצביע על הדף החדש שהועתק, ומאפשר לתהליך לכתוב לדף החדש. הדף המקורי נשאר ללא שינוי עבור התהליך השני (או נשאר משותף עד שינוי נוסף).\n   -   הבן משנה את arr[0]. אלמנט זה נמצא בדף הראשון של המערך. שינוי זה יגרום להעתקה של הדף הראשון. יוקצה דף פיזי חדש אחד עבור הדף הראשון של הבן.\n   -   האב משנה את arr[ARRAY_SIZE / sizeof(int) - 1]. אלמנט זה נמצא בדף האחרון של המערך. שינוי זה יגרום להעתקה של הדף האחרון. יוקצה דף פיזי חדש אחד עבור הדף האחרון של האב.\n   -   שאר הדפים (256 - 2 = 254 דפים) נשארים משותפים בין האב והבן מכיוון שלא בוצעו בהם שינויים.\n   **סה\"כ דפים פיזיים:**\n   256 (דפים מקוריים שנותרו משותפים או שהיוו בסיס להעתקה)\n   + 1 (דף חדש עבור הדף הראשון של הבן)\n   + 1 (דף חדש עבור הדף האחרון של האב)\n   = 258 דפים פיזיים בסך הכל.\n   **תשובה:** 258 דפים פיזיים."
+        }
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": null
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

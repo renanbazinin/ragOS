@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency and Condition Variables",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 11:34:31",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2951,
+      "output_tokens": 1545,
+      "total_tokens": 12170
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Concurrency",
+      "Condition Variables"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה המשתמשת במשתני תנאי (condition variables) ו-mutexים כדי לתאם בין תהליכונים (threads):\nכמה פעמים תודפס השורה `Coordinator: threshold met (...)` לפלט הסטנדרטי כאשר התוכנית תסתיים? יש להניח שכל קריאות המערכת מצליחות, ושהתזמון מאפשר לכל התהליכונים להשלים את פעולתם.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\n#define NUM_WORKERS 5\n#define THRESHOLD 3\n#define CYCLES 2\n\nint shared_counter = 0;\npthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;\npthread_cond_t workers_wait_cond = PTHREAD_COND_INITIALIZER;\npthread_cond_t coordinator_signal_cond = PTHREAD_COND_INITIALIZER;\n\nvoid *worker_thread(void *arg) {\n    int id = *(int*)arg; // id is not used in the final logic but kept from original structure\n    for (int i = 0; i < CYCLES; ++i) {\n        pthread_mutex_lock(&mutex);\n        shared_counter++;\n        if (shared_counter == THRESHOLD) {\n            pthread_cond_signal(&coordinator_signal_cond);\n        }\n        while (shared_counter != 0) {\n            pthread_cond_wait(&workers_wait_cond, &mutex);\n        }\n        pthread_mutex_unlock(&mutex);\n    }\n    return NULL;\n}\n\nvoid *coordinator_thread(void *arg) {\n    for (int i = 0; i < CYCLES; ++i) {\n        pthread_mutex_lock(&mutex);\n        while (shared_counter < THRESHOLD) {\n            pthread_cond_wait(&coordinator_signal_cond, &mutex);\n        }\n        printf(\"Coordinator: threshold met (%d), resetting counter and broadcasting to workers.\\n\", shared_counter);\n        shared_counter = 0;\n        pthread_cond_broadcast(&workers_wait_cond);\n        pthread_mutex_unlock(&mutex);\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t workers[NUM_WORKERS];\n    pthread_t coordinator;\n    int worker_ids[NUM_WORKERS];\n\n    pthread_create(&coordinator, NULL, coordinator_thread, NULL);\n\n    for (int i = 0; i < NUM_WORKERS; ++i) {\n        worker_ids[i] = i + 1;\n        pthread_create(&workers[i], NULL, worker_thread, &worker_ids[i]);\n    }\n\n    for (int i = 0; i < NUM_WORKERS; ++i) {\n        pthread_join(workers[i], NULL);\n    }\n    pthread_join(coordinator, NULL);\n\n    return 0;\n}",
+      "options": [
+        "א. 1",
+        "ב. 2",
+        "ג. 3",
+        "ד. 5",
+        "ה. 10"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "התוכנית כוללת תהליכון מתאם (coordinator) ו-5 תהליכוני עבודה (workers). כל תהליכון עבודה מבצע לולאה `CYCLES` פעמים (כלומר, פעמיים).\nבכל איטרציה של לולאת ה-`worker_thread`:\n1. התהליכון נועל את ה-mutex ומגדיל את `shared_counter` באחד.\n2. אם `shared_counter` מגיע לערך `THRESHOLD` (שהוא 3), התהליכון שגרם לו להגיע לערך זה מאותת ל-coordinator באמצעות `pthread_cond_signal(&coordinator_signal_cond)`.\n3. לאחר מכן, כל תהליכוני העבודה, כולל זה שאותת, נכנסים ללולאת `while (shared_counter != 0)` וממתינים באמצעות `pthread_cond_wait(&workers_wait_cond, &mutex)` עד שהמונה יתאפס על ידי ה-coordinator.\n\nתהליכון ה-coordinator:\n1. נועל את ה-mutex ונכנס ללולאת `while (shared_counter < THRESHOLD)` שממתינה באמצעות `pthread_cond_wait(&coordinator_signal_cond, &mutex)` עד שאחד מה-workers יאותת לו שהמונה הגיע ל-THRESHOLD (או עבר אותו).\n2. בגלל ש-`NUM_WORKERS` (5) גדול מ-`THRESHOLD` (3), המונה `shared_counter` יגיע ל-3 על ידי אחד ה-workers (נניח Worker 3), ויאותת ל-coordinator. אך לאחר מכן, Workers 4 ו-5 ימשיכו להגדיל את המונה ל-4 ו-5 בהתאמה, לפני שכל ה-workers ייכנסו למצב המתנה על `workers_wait_cond`.\n3. כאשר ה-coordinator מתעורר, הוא מוצא את `shared_counter` בערך שהוא לפחות `THRESHOLD` (במקרה זה, 5). הוא מדפיס את השורה `Coordinator: threshold met (...)`, מאפס את `shared_counter` ל-0, ומשדר `pthread_cond_broadcast(&workers_wait_cond)` כדי להעיר את כל ה-workers הממתינים.\n\nתהליך זה חוזר על עצמו `CYCLES` פעמים. עבור `CYCLES = 2`:\n- בסבב הראשון של ה-workers, המונה יגיע ל-5. ה-coordinator יתעורר וידפיס את השורה פעם אחת.\n- בסבב השני של ה-workers, המונה יגיע שוב ל-5. ה-coordinator יתעורר שוב וידפיס את השורה פעם נוספת.\n\nלכן, השורה `Coordinator: threshold met (...)` תודפס פעמיים בסך הכל.\nהתשובה הנכונה היא ב'."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

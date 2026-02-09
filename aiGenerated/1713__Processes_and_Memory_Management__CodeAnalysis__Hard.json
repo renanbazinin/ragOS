@@ -1,0 +1,52 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Processes and Memory Management",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 20:16:08",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3064,
+      "output_tokens": 3903,
+      "total_tokens": 15918
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Processes",
+      "Memory Management",
+      "Virtual Memory",
+      "Copy-on-Write",
+      "System Calls"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה (prog1.c) ושלוש תוכניות נוספות (prog_A.c, prog_B.c, prog_C.c):\nיש להניח כי כל קריאות המערכת (fork, execvp) הצליחו, לא נוצרים תהליכים בקטעי קוד אחרים במערכת, וכל תהליך מקבל מזהה הגדול ב-1 מהתהליך שנוצר לפניו. התהליך הראשי (P0) קיבל את מזהה התהליך 100. כל הדפסה לפלט הסטנדרטי מתבצעת מיד, ללא חוצץ. גודל דף זיכרון הוא 4KB.\nהתוכניות prog1.c, prog_A.c, prog_B.c, prog_C.c קטנות מספיק כך שכל הקוד וכל הנתונים לקריאה בלבד (read-only data) של כל אחת מהן נכנסים יחד בדף זיכרון אחד (4KB). כל תהליך דורש בנוסף לפחות דף זיכרון אחד עבור המחסנית והערימה שלו (stack/heap).\nהמערכת משתמשת במנגנון Copy-on-Write (COW) עבור דפי זיכרון הניתנים לכתיבה (writable data segments) לאחר קריאת fork().\n\nלהלן קוד המקור של prog1.c:\n",
+      "code_snippet": "/* prog1.c */\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\nint global_var = 10; // Global variable in data segment\n\nint main() {\n    pid_t p0_pid = getpid();\n    printf(\"P0 (PID: %d) - global_var: %d\\n\", p0_pid, global_var);\n\n    pid_t pid1 = fork(); // P0 forks P1\n    if (pid1 == 0) { // Child P1\n        printf(\"P1 (PID: %d, PPID: %d) - original global_var: %d\\n\", getpid(), getppid(), global_var);\n        global_var = 20; // P1 modifies global_var, triggers COW for data segment\n        printf(\"P1 (PID: %d) modified global_var to: %d\\n\", getpid(), global_var);\n        char* args[] = { \"./prog_A\", NULL };\n        execvp(args[0], args);\n        perror(\"P1 execvp prog_A failed\"); // Should not reach here\n        exit(1);\n    }\n\n    pid_t pid2 = fork(); // P0 forks P2\n    if (pid2 == 0) { // Child P2\n        printf(\"P2 (PID: %d, PPID: %d) - global_var: %d\\n\", getpid(), getppid(), global_var); // Should see 10 due to COW\n        char* args[] = { \"./prog_B\", NULL };\n        execvp(args[0], args);\n        perror(\"P2 execvp prog_B failed\"); // Should not reach here\n        exit(1);\n    }\n\n    // Parent P0 continues here (after forking P1 and P2)\n    printf(\"P0 (PID: %d) - global_var: %d (before exec)\\n\", getpid(), global_var);\n    // P0 will exec prog_C\n    char* args[] = { \"./prog_C\", NULL };\n    execvp(args[0], args);\n    perror(\"P0 execvp prog_C failed\"); // Should not reach here\n    exit(1); // In case execvp fails\n}\n\n/* \n   prog_A.c, prog_B.c, prog_C.c (קוד המקור של תוכניות אלה זהה, הן מדפיסות את שמן, ה-PID שלהן ואת ה-PPID שלהן).\n   לדוגמה, קוד המקור של prog_A.c:\n*/\n/*\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n\nint main() {\n    printf(\"Hello from prog_A (PID: %d, PPID: %d)\\n\", getpid(), getppid());\n    sleep(1);\n    return 0;\n}\n*/"
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "ציירו את עץ התהליכים שנוצר והסבירו את כל הפלטים האפשריים של התוכנית. ציינו את ה-PID של כל תהליך בעץ (בהנחה ש-P0 קיבל PID 100, והבאים אחריו מקבלים +1).",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "כמה מסגרות זיכרון (memory frames) של מרחב המשתמש (user space) יהיו תפוסות במערכת בכל אחד משני מצבי הזמן הבאים? נמקו את תשובתכם בפירוט.\n\nא. מיד לאחר שכל קריאות ה-fork() הושלמו בהצלחה, אך *לפני* שבוצעה קריאת execvp כלשהי.\nב. מיד לאחר שכל קריאות ה-execvp() הושלמו בהצלחה (כלומר, התוכניות החדשות נטענו ומוכנות לריצה), אך *לפני* שכל תהליך יצא (exit).",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "### סעיף 1.1: עץ תהליכים ופלטים\n\n**עץ תהליכים:**\n\n```\n       P0 (PID 100)  -> exec prog_C\n       /  \\\n      /    \\\n     P1 (PID 101)   P2 (PID 102)\n     -> exec prog_A  -> exec prog_B\n```\n\n**הסבר הפלטים האפשריים:**\n\nהסדר המדויק של הפלטים עשוי להשתנות עקב תזמון לא דטרמיניסטי, אך הערכים וההודעות יהיו קבועים:\n\n1.  **P0 (התהליך הראשי, PID 100):**\n    *   `P0 (PID: 100) - global_var: 10` (מדפיס את הערך ההתחלתי של `global_var`).\n    *   לאחר יצירת שני הבנים (P1, P2):\n        *   `P0 (PID: 100) - global_var: 10 (before exec)` (ערך `global_var` ב-P0 נשאר 10, מכיוון ש-P1 שינה את העותק שלו בלבד). P0 מבצע `execvp` ל-`prog_C`.\n        *   `Hello from prog_C (PID: 100, PPID: <ה-PID של תהליך האב המקורי של P0>)` (הודעה מ-`prog_C` לאחר שנטען). ה-PPID יהיה ה-PID של תהליך המעטפת (shell) שממנו הופעל `prog1`.\n\n2.  **P1 (הבן הראשון של P0, PID 101, PPID 100):**\n    *   `P1 (PID: 101, PPID: 100) - original global_var: 10` (מקבל את העותק של `global_var` עם הערך 10 דרך COW, אך הדף עדיין משותף).\n    *   `P1 (PID: 101) modified global_var to: 20` (משנה את `global_var` ל-20. שינוי זה מפעיל את מנגנון ה-COW, ו-P1 מקבל דף זיכרון משלו עבור ה-data segment המכיל את `global_var`).\n    *   P1 מבצע `execvp` ל-`prog_A`.\n    *   `Hello from prog_A (PID: 101, PPID: 100)` (הודעה מ-`prog_A` לאחר שנטען).\n\n3.  **P2 (הבן השני של P0, PID 102, PPID 100):**\n    *   `P2 (PID: 102, PPID: 100) - global_var: 10` (מקבל את העותק של `global_var` עם הערך 10. מכיוון ש-P2 לא משנה את `global_var`, דף הזיכרון של ה-data segment נשאר משותף עם P0).\n    *   P2 מבצע `execvp` ל-`prog_B`.\n    *   `Hello from prog_B (PID: 102, PPID: 100)` (הודעה מ-`prog_B` לאחר שנטען).\n\n**דוגמת פלט אפשרית (הסדר יכול להשתנות):**\n```\nP0 (PID: 100) - global_var: 10\nP1 (PID: 101, PPID: 100) - original global_var: 10\nP2 (PID: 102, PPID: 100) - global_var: 10\nP1 (PID: 101) modified global_var to: 20\nP0 (PID: 100) - global_var: 10 (before exec)\nHello from prog_C (PID: 100, PPID: <shell_pid>)\nHello from prog_A (PID: 101, PPID: 100)\nHello from prog_B (PID: 102, PPID: 100)\n```\n\n### סעיף 1.2: חישוב מסגרות זיכרון\n\n**הנחות:**\n*   גודל דף: 4KB.\n*   כל תוכנית (prog1, prog_A, prog_B, prog_C) דורשת דף אחד עבור הקוד ונתונים לקריאה בלבד (RO data).\n*   כל תהליך דורש דף אחד עבור המחסנית והערימה שלו (stack/heap).\n*   המשתנה `global_var` נמצא בדף נתונים נפרד הניתן לכתיבה (writable data segment).\n*   מנגנון Copy-on-Write (COW) פעיל עבור דפי נתונים הניתנים לכתיבה.\n\n**מצב א: מיד לאחר שכל קריאות ה-fork() הושלמו בהצלחה, אך *לפני* שבוצעה קריאת execvp כלשהי.**\nבנקודה זו, קיימים שלושה תהליכים: P0, P1, P2. כולם מריצים את הקוד של `prog1`.\n\n*   **P0 (תהליך האב):**\n    *   דף קוד/RO data של `prog1`: 1 מסגרת.\n    *   דף נתונים הניתן לכתיבה (עבור `global_var = 10`): 1 מסגרת.\n    *   דף מחסנית/ערימה: 1 מסגרת.\n    *   סה\"כ עבור P0: 3 מסגרות.\n\n*   **P1 (הבן הראשון):**\n    *   דף קוד/RO data של `prog1`: משותף עם P0 (COW עבור קוד הוא בעצם Read-Only Sharing). לא נוצרת מסגרת חדשה.\n    *   דף נתונים הניתן לכתיבה: P1 שינה את `global_var` (ל-20). שינוי זה הפעיל COW, ולכן נוצרה מסגרת חדשה עבור דף הנתונים של P1. 1 מסגרת.\n    *   דף מחסנית/ערימה: P1 מקבל דף מחסנית/ערימה משלו. 1 מסגרת.\n    *   סה\"כ מסגרות *נוספות* ש-P1 דורש: 2 מסגרות.\n\n*   **P2 (הבן השני):**\n    *   דף קוד/RO data של `prog1`: משותף עם P0. לא נוצרת מסגרת חדשה.\n    *   דף נתונים הניתן לכתיבה: P2 קרא את `global_var` (שערכו היה 10) אך לא שינה אותו. לכן, הדף נשאר משותף עם P0 (עדיין COW, אך לא נכתב ולכן לא הועתק). לא נוצרת מסגרת חדשה.\n    *   דף מחסנית/ערימה: P2 מקבל דף מחסנית/ערימה משלו. 1 מסגרת.\n    *   סה\"כ מסגרות *נוספות* ש-P2 דורש: 1 מסגרת.\n\n**סה\"כ מסגרות במצב א': 3 (P0) + 2 (P1) + 1 (P2) = 6 מסגרות.**\n\n**מצב ב: מיד לאחר שכל קריאות ה-execvp() הושלמו בהצלחה, אך *לפני* שכל תהליך יצא (exit).**\nבנקודה זו, P0 מריץ את `prog_C`, P1 מריץ את `prog_A`, ו-P2 מריץ את `prog_B`. קריאת `execvp` מחליפה את כל מרחב הכתובות של התהליך בזה של התוכנית החדשה.\n\n*   **P0 (מריץ את prog_C):**\n    *   דף קוד/RO data של `prog_C`: 1 מסגרת.\n    *   דף מחסנית/ערימה של `prog_C`: 1 מסגרת.\n    *   סה\"כ עבור P0: 2 מסגרות.\n\n*   **P1 (מריץ את prog_A):**\n    *   דף קוד/RO data של `prog_A`: 1 מסגרת.\n    *   דף מחסנית/ערימה של `prog_A`: 1 מסגרת.\n    *   סה\"כ עבור P1: 2 מסגרות.\n\n*   **P2 (מריץ את prog_B):**\n    *   דף קוד/RO data של `prog_B`: 1 מסגרת.\n    *   דף מחסנית/ערימה של `prog_B`: 1 מסגרת.\n    *   סה\"כ עבור P2: 2 מסגרות.\n\n**סה\"כ מסגרות במצב ב': 2 (P0) + 2 (P1) + 2 (P2) = 6 מסגרות.**\n\n*(הערה: יש לשים לב שאף על פי שתוכניות prog_A, prog_B, prog_C זהות בקוד המקור שלהן, הן נטענות כתוכניות נפרדות לזיכרון, אלא אם צוין אחרת במפורש שמערכת ההפעלה מבצעת שיתוף חכם של קטעי קוד זהים לרוחב תוכניות שונות. בהיעדר מידע כזה, נניח שהן נטענות באופן עצמאי.)"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

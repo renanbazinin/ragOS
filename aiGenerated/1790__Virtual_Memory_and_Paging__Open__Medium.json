@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory and Paging",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 20:49:10",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2075,
+      "output_tokens": 928,
+      "total_tokens": 4952
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Virtual Memory",
+      "Paging",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "נתונה מערכת עם זיכרון וירטואלי של 2GB, גודל דף של 4KB, וזיכרון פיזי של 1GB. כל כניסה בטבלת הדפים (PTE) מכילה מספר מסגרת פיזית (PFN), ביט valid, ביט dirty וביט accessed. הנח שכל PTE מעוגל לגודל המינימלי בחזקת 2 בתים.\n\nחשב את הפרטים הבאים:\n1. גודל ה-VPN (בביטים): ________\n2. גודל ה-PFN (בביטים): ________\n3. גודל כניסה בטבלת הדפים (PTE) (בבתים): ________\n4. הגודל הכולל של טבלת הדפים הלינארית (ב-MB): ________",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.  **גודל ה-VPN:**\n    *   זיכרון וירטואלי: 2GB = 2^31 בתים. לכן, כתובת וירטואלית היא באורך 31 ביטים.\n    *   גודל דף: 4KB = 2^12 בתים. לכן, ההיסט (offset) הוא באורך 12 ביטים.\n    *   VPN = אורך כתובת וירטואלית - אורך היסט = 31 - 12 = 19 ביטים.\n    *   **VPN = 19 ביטים**\n\n2.  **גודל ה-PFN:**\n    *   זיכרון פיזי: 1GB = 2^30 בתים. לכן, כתובת פיזית היא באורך 30 ביטים.\n    *   היסט (offset) זהה לגודל הדף: 12 ביטים.\n    *   PFN = אורך כתובת פיזית - אורך היסט = 30 - 12 = 18 ביטים.\n    *   **PFN = 18 ביטים**\n\n3.  **גודל כניסה בטבלת הדפים (PTE):**\n    *   PFN: 18 ביטים.\n    *   ביטים נוספים (valid, dirty, accessed): 3 ביטים.\n    *   סה\"כ ביטים ל-PTE: 18 + 3 = 21 ביטים.\n    *   כדי לעגל לגודל המינימלי בחזקת 2 בתים: 21 ביטים הם 2.625 בתים. חזקת 2 הקרובה והגדולה ביותר היא 4 בתים (32 ביטים).\n    *   **PTE = 4 בתים**\n\n4.  **הגודל הכולל של טבלת הדפים הלינארית:**\n    *   מספר דפים וירטואליים: 2^VPN = 2^19 דפים.\n    *   גודל טבלה = מספר דפים וירטואליים * גודל PTE = 2^19 דפים * 4 בתים/לדף = 2^19 * 2^2 בתים = 2^21 בתים.\n    *   2^21 בתים = 2MB.\n    *   **גודל טבלה = 2MB**"
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

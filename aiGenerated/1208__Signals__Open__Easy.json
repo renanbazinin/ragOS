@@ -1,0 +1,52 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Signals",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 08:41:58",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4591,
+      "output_tokens": 886,
+      "total_tokens": 8645
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "Open",
+    "topic": [
+      "Signals",
+      "IPC",
+      "Process Management"
+    ],
+    "content": {
+      "text": "אותות (Signals) הם מנגנון בסיסי במערכות הפעלה מבוססות יוניקס לתקשורת אסינכרונית בין תהליכים או בין הקרנל לתהליכים. ענה על השאלות הבאות:",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "8.1",
+        "text": "כתוב תוכנית C קצרה שתטפל באות SIGINT (המופעל בדרך כלל בלחיצה על Ctrl+C) כך שבמקום שהתהליך יסיים את ריצתו, הוא ידפיס את ההודעה 'Caught SIGINT!' ולאחר מכן ימשיך בריצתו הרגילה. התוכנית צריכה להמתין לקלט מהמשתמש בלולאה אינסופית כדי להדגים את הטיפול באות.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.2",
+        "text": "ציין שני אותות לפחות שלא ניתן ללכוד (catch) או להתעלם מהם (ignore) על ידי תהליך.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "8.1: כדי לטפל באות SIGINT, נשתמש בפונקציה `signal()` (או `sigaction()` לטיפול מתקדם יותר) כדי לרשום פונקציית טיפול (handler) שתופעל כאשר האות מתקבל. בתוך פונקציית הטיפול, נדפיס את ההודעה הרצויה. לולאה אינסופית עם `sleep()` או `pause()` תאפשר לתהליך להמתין לאות מבלי לסיים.\n\n```c\n#include <stdio.h>\n#include <signal.h>\n#include <unistd.h> // For sleep\n\nvoid sigint_handler(int signum) {\n    printf(\"Caught SIGINT!\\n\");\n}\n\nint main() {\n    // Register the signal handler for SIGINT\n    signal(SIGINT, sigint_handler);\n\n    printf(\"Press Ctrl+C to send SIGINT. The process will catch it.\\n\");\n    printf(\"Press Ctrl+\\\\ to send SIGQUIT and terminate the process.\\n\");\n\n    // Loop indefinitely to keep the process running and waiting for signals\n    while (1) {\n        sleep(1); // Wait for 1 second\n    }\n\n    return 0;\n}\n```\n\n8.2: שני אותות שלא ניתן ללכוד או להתעלם מהם הם:\n1. SIGKILL (אות מספר 9): משמש לסיום תהליך באופן מיידי ולא ניתן לחסום או לטפל בו.\n2. SIGSTOP (אות מספר 19 בדרך כלל): משמש להשהיית תהליך ולא ניתן לחסום או לטפל בו. (SIGCONT משחרר אותו מהשהייה).\nמטרתם של אותות אלו היא לספק דרך אמינה לקרנל או לתהליכים מורשים לשלוט בתהליכים אחרים, גם אם הם מנסים לחסום או להתעלם מאותות אחרים.",
+      "code_snippet": null
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

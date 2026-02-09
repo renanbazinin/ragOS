@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory and Copy-on-Write",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 11:13:36",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2412,
+      "output_tokens": 2375,
+      "total_tokens": 11705
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Virtual Memory",
+      "Copy-on-Write",
+      "Process Management"
+    ],
+    "content": {
+      "text": "נתונה מערכת הפעלה התומכת בזיכרון וירטואלי ובמנגנון Copy-on-Write (CoW). גודל דף במערכת הוא 4KB. נניח שכל תהליך (האב והבן) דורש 2 דפים פיזיים נוספים עבור קוד, מחסנית, והיפ (לצרכי המערכת עצמה, ללא המערך שיוגדר).",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\n#define ARRAY_SIZE_BYTES (1024 * 1024) // 1MB\nint global_array[ARRAY_SIZE_BYTES / sizeof(int)]; // Array of ints, total 1MB\n\nint main() {\n    // Stage 1: Parent initializes array\n    for (int i = 0; i < ARRAY_SIZE_BYTES / sizeof(int); i++) {\n        global_array[i] = i;\n    }\n    printf(\"Parent: Array initialized. PID: %d\\n\", getpid());\n\n    pid_t pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        exit(1);\n    } else if (pid == 0) { // Child process\n        // Stage 2: Child reads and then modifies an element\n        printf(\"Child: Before modify, global_array[0] = %d. PID: %d\\n\", global_array[0], getpid());\n        global_array[0] = 100; // Modify first element\n        printf(\"Child: After modify, global_array[0] = %d. PID: %d\\n\", global_array[0], getpid());\n        exit(0);\n    } else { // Parent process\n        // Stage 3: Parent waits for child, then modifies another element\n        wait(NULL); // Wait for child to complete Stage 2 and exit\n        printf(\"Parent: After child exited. global_array[ARRAY_SIZE_BYTES/sizeof(int) - 1] = %d. PID: %d\\n\", global_array[ARRAY_SIZE_BYTES/sizeof(int) - 1], getpid());\n        global_array[ARRAY_SIZE_BYTES/sizeof(int) - 1] = 200; // Modify last element\n        printf(\"Parent: After modify, global_array[ARRAY_SIZE_BYTES/sizeof(int) - 1] = %d. PID: %d\\n\", global_array[ARRAY_SIZE_BYTES/sizeof(int) - 1], getpid());\n    }\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הסבר מפורט:\n*   גודל המערך `global_array` בבתים: 1MB.\n*   גודל דף: 4KB.\n*   מספר דפים הדרושים למערך `global_array`: 1MB / 4KB = 1024KB / 4KB = 256 דפים.\n*   דפים נוספים לכל תהליך (עבור קוד, מחסנית, היפ וכו'): 2 דפים.\n\n1.  **לאחר השלמת Stage 1 (התהליך האב סיים לאתחל את המערך, לפני קריאת ה-`fork`):**\n    *   התהליך האב הוא התהליך היחיד הפעיל במערכת.\n    *   לאחר האתחול, המערך `global_array` נמצא כולו בזיכרון הפיזי, ותופס 256 דפים פיזיים.\n    *   התהליך האב דורש בנוסף 2 דפים פיזיים עבור מרחב הקוד, המחסנית וההיפ שלו.\n    *   **סה\"כ דפים פיזיים במערכת:** 256 (עבור המערך) + 2 (עבור התהליך האב) = 258 דפים.\n\n2.  **לאחר קריאת ה-`fork` (בתחילת Stage 2), כאשר גם התהליך האב וגם התהליך הבן רצים, אך אף אחד מהם עדיין לא ביצע כתיבה למערך `global_array`:**\n    *   קריאת ה-`fork` יוצרת תהליך בן, ומשכפלת את מרחב הכתובות הוירטואלי של האב.\n    *   בזכות מנגנון ה-Copy-on-Write, הדפים הפיזיים של המערך `global_array` (256 דפים) אינם משוכפלים מיידית. במקום זאת, טבלאות הדפים של האב ושל הבן מצביעות על אותם 256 דפים פיזיים, והם מסומנים כדפים לקריאה בלבד (read-only).\n    *   כל תהליך דורש גם את 2 הדפים הפיזיים הנוספים עבור קוד, מחסנית והיפ. דפים אלו, שאינם משותפים בין האב לבן, משוכפלים עבור הבן.\n    *   **דפים פיזיים עבור `global_array`**: 256 דפים פיזיים משותפים.\n    *   **דפים פיזיים עבור צרכים אחרים**: 2 דפים (עבור האב) + 2 דפים (עבור הבן) = 4 דפים.\n    *   **סה\"כ דפים פיזיים במערכת:** 256 + 4 = 260 דפים.\n\n3.  **לאחר שהתהליך הבן סיים את Stage 2 ויצא (כלומר, ביצע את הכתיבה ל-`global_array[0]`), והתהליך האב ממתין לפני ביצוע הכתיבה שלו (בתחילת Stage 3):**\n    *   כאשר התהליך הבן כתב ל-`global_array[0]`, אלמנט זה נמצא בדף הפיזי הראשון של המערך. מכיוון שהדף היה מסומן כ-read-only (בשל CoW), התרחשה תקלת דף (page fault). מערכת ההפעלה זיהתה את תקלת ה-CoW: היא הקצתה דף פיזי חדש, העתיקה אליו את תוכן הדף המקורי, ועדכנה את טבלת הדפים של הבן כך שתצביע על הדף הפיזי החדש עבור הדף הוירטואלי הרלוונטי. טבלת הדפים של האב המשיכה להצביע על הדף הפיזי המקורי.\n    *   לאחר מכן, התהליך הבן יצא. כל הדפים הפיזיים שהיו בבעלותו הבלעדית (כולל הדף החדש שנוצר כתוצאה מה-CoW ושני הדפים הנוספים שלו) שוחררו.\n    *   כעת, רק התהליך האב פעיל במערכת.\n    *   **דפים פיזיים עבור `global_array` (של האב):** 256 דפים פיזיים (הדפים המקוריים, שמעולם לא שונו על ידי האב עצמו או שוחררו). כלומר, מצב הדפים הפיזיים של המערך עבור האב חזר להיות כפי שהיה לפני ה-fork.\n    *   **דפים פיזיים עבור צרכים אחרים של האב**: 2 דפים.\n    *   **סה\"כ דפים פיזיים במערכת:** 256 + 2 = 258 דפים.\n\n4.  **לאחר שהתהליך האב סיים את Stage 3 (כלומר, ביצע את הכתיבה ל-`global_array[ARRAY_SIZE_BYTES/sizeof(int) - 1]`)**: \n    *   התהליך האב כתב ל-`global_array[ARRAY_SIZE_BYTES/sizeof(int) - 1]`. אלמנט זה נמצא בדף הפיזי האחרון של המערך.\n    *   בדומה למקרה של הבן, מכיוון שהדף היה מסומן כ-read-only (בשל CoW), התרחשה תקלת דף CoW. מערכת ההפעלה הקצתה דף פיזי חדש, העתיקה אליו את תוכן הדף המקורי, ועדכנה את טבלת הדפים של האב כך שתצביע על הדף הפיזי החדש עבור הדף הוירטואלי הרלוונטי.\n    *   כעת, מתוך 256 הדפים הוירטואליים של המערך אצל האב, 255 מצביעים לדפים הפיזיים המקוריים (אשר לא שונו על ידי האב), והדף האחרון מצביע לדף הפיזי החדש שנוצר עבור האב. כלומר, האב מחזיק כעת ב-256 דפים פיזיים ייחודיים עבור המערך.\n    *   **דפים פיזיים עבור `global_array` (של האב):** 256 דפים פיזיים (כאשר אחד מהם הוא עותק חדש שנוצר עבור האב).\n    *   **דפים פיזיים עבור צרכים אחרים של האב**: 2 דפים.\n    *   **סה\"כ דפים פיזיים במערכת:** 256 + 2 = 258 דפים."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

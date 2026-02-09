@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Paging and TLB",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 10:00:38",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1143,
+      "output_tokens": 514,
+      "total_tokens": 2893
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Paging",
+      "TLB",
+      "Virtual Memory",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "מהו רצף הפעולות הנדרש עבור גישת זיכרון לכתובת וירטואלית, במערכת המשתמשת ב-Paging ו-TLB, כאשר מתרחש TLB Miss אך ה-Page Table Entry (PTE) נמצא בזיכרון הפיזי?",
+      "code_snippet": null,
+      "options": [
+        "א. גישה ל-TLB, ולאחר מכן גישה לזיכרון הפיזי עבור הנתונים.",
+        "ב. גישה ל-TLB, לאחר מכן גישה לטבלת הדפים בזיכרון הפיזי, עדכון ה-TLB, ולבסוף גישה לזיכרון הפיזי עבור הנתונים.",
+        "ג. גישה ל-TLB, ולאחר מכן גישה לדיסק כדי לטעון את הדף, ולבסוף גישה לזיכרון הפיזי עבור הנתונים.",
+        "ד. גישה ישירה לטבלת הדפים בזיכרון הפיזי, ולאחר מכן גישה לזיכרון הפיזי עבור הנתונים."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב. כאשר מתרחש TLB Miss, המערכת מנסה למצוא את ה-PTE בטבלת הדפים שנמצאת בזיכרון הפיזי (זוהי גישת זיכרון). לאחר מציאת ה-PTE, ה-TLB מעודכן עם ה-mapping החדש כדי למנוע Miss עתידי לאותה כתובת, ורק אז מתבצעת גישה לזיכרון הפיזי כדי לקרוא או לכתוב את הנתונים המבוקשים (זוהי גישת זיכרון שנייה)."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

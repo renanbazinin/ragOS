@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Deadlocks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 20:31:07",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1047,
+      "output_tokens": 728,
+      "total_tokens": 3251
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Semaphores",
+      "Deadlocks",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתונים שני תהליכים, P1 ו-P2, ושני סמפורים בינאריים, S1 ו-S2, שמאותחלים ל-1.\nהקוד של P1 הוא:\n",
+      "code_snippet": "sem_wait(S1);\nsem_wait(S2);\n// critical section\nsem_post(S2);\nsem_post(S1);\n\nהקוד של P2 הוא:\n\nsem_wait(S2);\nsem_wait(S1);\n// critical section\nsem_post(S1);\nsem_post(S2);\n\nאיזו טענה נכונה לגבי המערכת הזו?",
+      "options": [
+        "א. המערכת לעולם לא תיכנס למצב קיפאון.",
+        "ב. המערכת תמיד תיכנס למצב קיפאון.",
+        "ג. המערכת עלולה להיכנס למצב קיפאון, אך לא בהכרח.",
+        "ד. המערכת תיכנס למצב קיפאון רק אם S1 ו-S2 יאותחלו ל-0."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "תשובה ג' נכונה.\nהמערכת עלולה להיכנס למצב קיפאון. מצב קיפאון יתרחש אם תהליך P1 יבצע `sem_wait(S1)` ויצליח, ותהליך P2 יבצע `sem_wait(S2)` ויצליח. בשלב זה, P1 מחזיק ב-S1 וממתין ל-S2, ו-P2 מחזיק ב-S2 וממתין ל-S1. שני התהליכים ממתינים למשאב שמוחזק על ידי השני, ונוצר מעגל המתנה (circular wait), כאשר כל שאר תנאי הקיפאון (הדרה הדדית, החזקה והמתנה, אי-נתיקה) מתקיימים גם כן.\nעם זאת, קיפאון אינו ודאי. לדוגמה, אם P1 יבצע את כל הפעולות שלו (`sem_wait(S1)`, `sem_wait(S2)`, `sem_post(S2)`, `sem_post(S1)`) לפני ש-P2 יבצע את `sem_wait(S2)`, אז P1 ישחרר את שני הסמפורים, ו-P2 יוכל להמשיך ללא הפרעה. המצב ההפוך, שבו P2 מסיים לפני P1, גם הוא מונע קיפאון. לכן, קיפאון תלוי בסדר הספציפי של ביצוע הפעולות."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

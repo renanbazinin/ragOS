@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Producer-Consumer",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 10:35:57",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4898,
+      "output_tokens": 2162,
+      "total_tokens": 17392
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Semaphores",
+      "Producer-Consumer",
+      "Deadlock",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "להלן מימוש חלקי של בעיית יצרן-צרכן עבור מחסן חסום יחיד המכיל שני סוגי פריטים: Type A ו-Type B. ישנם יצרנים וצרכנים עבור כל אחד מהסוגים. המחסן בעל קיבולת כוללת של MAX_BUFFER_SIZE. לצורך סנכרון נעשה שימוש ב-4 סמפורים: `mutex` (להגנה על גישה למחסן), `empty` (לספירת מקומות פנויים במחסן), `full_A` (לספירת פריטים מסוג A במחסן) ו-`full_B` (לספירת פריטים מסוג B במחסן). הסמפורים מאותחלים כדלקמן: `mutex=1`, `empty=MAX_BUFFER_SIZE`, `full_A=0`, `full_B=0`. פונקציות `add_item_X` ו-`remove_item_X` (שאינן מוצגות בקוד אך מעדכנות את המונים `count_A` או `count_B` בהתאמה) מבוצעות בתוך הקטע הקריטי המוגן על ידי `mutex`.\n\nהקוד הבא מציג את פונקציות היצרן עבור Type A (`producer_A_thread`) ואת פונקציות הצרכן עבור Type A ו-Type B (`consumer_A_thread`, `consumer_B_thread`), וכן את פונקציית היצרן עבור Type B (`producer_B_thread`).\n\nהאם המימוש הנתון יכול להוביל לקיפאון (Deadlock)? אם כן, תארו תרחיש ספציפי המוביל לקיפאון והסבירו מדוע הוא מתרחש. אם לא, הסבירו מדוע הפתרון חסין מקיפאון.",
+      "code_snippet": "sem_t mutex;    // Mutual exclusion for buffer modification\nsem_t empty;    // Number of empty slots in the buffer (initialized to MAX_BUFFER_SIZE)\nsem_t full_A;   // Number of Type A items in the buffer (initialized to 0)\nsem_t full_B;   // Number of Type B items in the buffer (initialized to 0)\n\nint count_A = 0; // Current count of Type A items\nint count_B = 0; // Current count of Type B items\n\n// Conceptual functions, assume they update count_A/count_B and are protected by mutex\nvoid add_item_A() { count_A++; /* ... */ }\nvoid remove_item_A() { count_A--; /* ... */ }\nvoid add_item_B() { count_B++; /* ... */ }\nvoid remove_item_B() { count_B--; /* ... */ }\n\n// Producer for Type A\nvoid* producer_A_thread(void* arg) {\n    while (1) {\n        // Produce an item\n        sem_wait(&mutex); // Acquire mutex first (INCORRECT ORDER!)\n        sem_wait(&empty); // Then wait for an empty slot\n        \n        add_item_A(); // Critical section\n        \n        sem_post(&mutex); // Release mutex\n        sem_post(&full_A); // Signal A item available\n    }\n    return NULL;\n}\n\n// Producer for Type B\nvoid* producer_B_thread(void* arg) {\n    while (1) {\n        // Produce an item\n        sem_wait(&empty); // Correct order\n        sem_wait(&mutex); // Correct order\n        \n        add_item_B(); // Critical section\n        \n        sem_post(&mutex);\n        sem_post(&full_B);\n    }\n    return NULL;\n}\n\n// Consumer for Type A\nvoid* consumer_A_thread(void* arg) {\n    while (1) {\n        sem_wait(&full_A); // Correct order\n        sem_wait(&mutex);  // Correct order\n        \n        remove_item_A(); // Critical section\n        \n        sem_post(&mutex);\n        sem_post(&empty);\n        // Consume item\n    }\n    return NULL;\n}\n\n// Consumer for Type B\nvoid* consumer_B_thread(void* arg) {\n    while (1) {\n        sem_wait(&full_B); // Correct order\n        sem_wait(&mutex);  // Correct order\n        \n        remove_item_B(); // Critical section\n        \n        sem_post(&mutex);\n        sem_post(&empty);\n        // Consume item\n    }\n    return NULL;\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "כן, המימוש הנתון יכול להוביל לקיפאון (Deadlock). הקיפאון מתרחש עקב סדר שגוי של קריאות `sem_wait` בחוט היצרן של Type A (`producer_A_thread`). חוט זה תופס את ה-`mutex` *לפני* שהוא ממתין למקום פנוי במחסן באמצעות `empty`.\n\n**תרחיש המוביל לקיפאון:**\n1.  **מצב התחלתי**: נניח שהמחסן מלא לחלוטין בפריטים מסוג A. לדוגמה, `MAX_BUFFER_SIZE` מוגדר ל-5, וכל 5 המקומות תפוסים בפריטי A. (כלומר, `count_A = 5`, `count_B = 0`).\n    *   ערכי הסמפורים: `empty = 0`, `full_A = 5`, `full_B = 0`, `mutex = 1`.\n\n2.  **חוט P_A (יצרן Type A)** מתחיל לרוץ:\n    *   P_A קורא ל-`sem_wait(&mutex);`. הפעולה מצליחה, `mutex` הופך ל-0. חוט P_A מחזיק כעת את ה-`mutex`.\n    *   P_A קורא ל-`sem_wait(&empty);`. הפעולה נכשלת כי `empty` שווה ל-0 (המחסן מלא). חוט P_A נחסם, *אך הוא עדיין מחזיק את ה-`mutex`*.\n\n3.  **חוט C_A (צרכן Type A)** מתחיל לרוץ (או כל צרכן אחר שדורש גישה למחסן):\n    *   C_A קורא ל-`sem_wait(&full_A);`. הפעולה מצליחה, `full_A` הופך ל-4.\n    *   C_A קורא ל-`sem_wait(&mutex);`. הפעולה נכשלת כי `mutex` שווה ל-0 (מוחזק על ידי P_A). חוט C_A נחסם.\n\n**הסבר לקיפאון:**\n*   חוט P_A חסום בהמתנה ל-`empty` (שערכו 0). כדי ש-`empty` יוכל לעלות ל-1, צרכן כלשהו (כמו C_A) צריך להסיר פריט מהמחסן ולבצע `sem_post(&empty)`.\n*   חוט C_A חסום בהמתנה ל-`mutex` (המוחזק על ידי P_A). כדי ש-C_A יוכל להמשיך, להסיר פריט ולשחרר מקום, הוא זקוק ל-`mutex`.\n*   אבל ה-`mutex` מוחזק על ידי P_A, שחסום בעצמו ואינו יכול לשחרר את ה-`mutex`.\n*   נוצר מעגל המתנה: P_A מחכה ל-C_A (בעקיפין, דרך הצורך ב-`empty`), ו-C_A מחכה ל-P_A (ישירות, דרך ה-`mutex`). זהו מצב של קיפאון.\n\n**תיקון (לא נדרש בשאלה, אך להבנה):**\nהפתרון הנכון דורש להפוך את סדר הקריאות ל-`sem_wait` ב-`producer_A_thread` כך ש-`sem_wait(&empty)` יקדים את `sem_wait(&mutex)`. סדר זה מבטיח שחוט יצרן לא יחזיק את ה-`mutex` בזמן שהוא ממתין למקום פנוי, ובכך מונע את הקיפאון המתואר. הדבר נכון גם עבור יצרן Type B אם הוא היה בעל סדר שגוי."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

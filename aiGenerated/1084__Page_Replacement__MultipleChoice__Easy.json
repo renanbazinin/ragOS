@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Page Replacement",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 07:51:55",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 952,
+      "output_tokens": 363,
+      "total_tokens": 2171
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Memory Management",
+      "Virtual Memory",
+      "Page Replacement"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של אלגוריתמי החלפת עמודים (Page Replacement Algorithms) במערכת הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. להפחית את מספר החלפות ההקשר (Context Switches) במערכת.",
+        "ב. למזער את מספר כשלים העמודים (Page Faults).",
+        "ג. להבטיח שכל העמודים בזיכרון הפיזי יהיו בשימוש קבוע.",
+        "ד. להגדיל את נפח הזיכרון הפיזי הזמין למערכת.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "אלגוריתמי החלפת עמודים נועדו לבחור איזה עמוד להוציא מהזיכרון הפיזי כאשר מתרחש כשל עמוד ואין מקום פנוי, במטרה למזער את כשלים העמודים העתידיים ולשפר את ביצועי המערכת."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

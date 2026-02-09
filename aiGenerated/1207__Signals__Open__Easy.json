@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Signals",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 08:41:40",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4591,
+      "output_tokens": 679,
+      "total_tokens": 7302
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Signals"
+    ],
+    "content": {
+      "text": "כתבו תוכנית C המטפלת באות SIGINT. התוכנית צריכה להדפיס 'Waiting for SIGINT...' בתחילתה, להיכנס ללולאה אינסופית, וכאשר היא מקבלת את האות SIGINT, עליה להדפיס 'SIGINT received!' ולסיים את פעולתה בצורה מסודרת.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון כולל פונקציית מטפל אותות (signal handler) עבור SIGINT. פונקציה זו, `sigint_handler`, תדפיס הודעה ותקרא ל-`exit(0)` כדי לסיים את התוכנית בצורה מסודרת.\nבתוך הפונקציה הראשית `main`, נשתמש ב-`signal(SIGINT, sigint_handler)` כדי לרשום את המטפל עבור האות SIGINT. לאחר מכן, התוכנית תיכנס ללולאה אינסופית (תוך שימוש ב-`sleep` כדי למנוע צריכת מעבד גבוהה) ותמתין לקבלת האות. כאשר המשתמש ילחץ Ctrl+C (או ישלח את האות בדרך אחרת), המטפל יופעל והתוכנית תסיים את ריצתה.\n\n```c\n#include <stdio.h>\n#include <signal.h>\n#include <stdlib.h> // For exit()\n#include <unistd.h> // For sleep()\n\n// Signal handler for SIGINT\nvoid sigint_handler(int signo) {\n    if (signo == SIGINT) {\n        printf(\"\\nSIGINT received!\\n\");\n        exit(0); // Terminate the program gracefully\n    }\n}\n\nint main() {\n    // Register the signal handler for SIGINT\n    // signal() returns SIG_ERR on failure\n    if (signal(SIGINT, sigint_handler) == SIG_ERR) {\n        perror(\"Cannot catch SIGINT\");\n        return 1;\n    }\n\n    printf(\"Waiting for SIGINT... (Press Ctrl+C to send SIGINT)\\n\");\n\n    // Infinite loop to keep the program running and waiting for the signal\n    while (1) {\n        sleep(1); // Sleep for a second to reduce CPU usage\n    }\n\n    return 0; // This line will not be reached due to exit(0) in handler\n}\n```"
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

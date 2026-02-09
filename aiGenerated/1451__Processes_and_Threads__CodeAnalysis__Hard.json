@@ -1,0 +1,66 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Processes and Threads",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 10:22:45",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2789,
+      "output_tokens": 3938,
+      "total_tokens": 14590
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Processes",
+      "Threads",
+      "Shared Memory",
+      "Concurrency",
+      "Race Conditions",
+      "System Calls"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה המשתמשת בזיכרון משותף (shared memory) ובתהליכונים (threads).\nקוד זה מנסה לספור סך הכל פעולות הגדלה על מונה משותף.\n\nיש להניח שכל קריאות המערכת (system calls) והפונקציות של Pthreads מצליחות, ולא מתרחשות שגיאות.\n\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/mman.h>\n#include <sys/wait.h>\n#include <fcntl.h>\n#include <pthread.h>\n\n#define NUM_THREADS 2\n#define INCREMENTS_PER_THREAD 100000\n\n// Global variable that will be mapped to shared memory\nint *shared_counter = NULL;\nconst char *SHM_NAME = \"/my_shared_counter\";\n\nvoid *thread_func(void *arg) {\n    for (int i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n        (*shared_counter)++;\n    }\n    return NULL;\n}\n\nint main() {\n    // 1. Create and open shared memory object\n    int fd = shm_open(SHM_NAME, O_CREAT | O_RDWR, 0666);\n    if (fd == -1) {\n        perror(\"shm_open\");\n        exit(EXIT_FAILURE);\n    }\n\n    // 2. Set the size of the shared memory object\n    if (ftruncate(fd, sizeof(int)) == -1) {\n        perror(\"ftruncate\");\n        exit(EXIT_FAILURE);\n    }\n\n    // 3. Map the shared memory object into the process's address space\n    shared_counter = (int *)mmap(NULL, sizeof(int), PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);\n    if (shared_counter == MAP_FAILED) {\n        perror(\"mmap\");\n        exit(EXIT_FAILURE);\n    }\n\n    // 4. Initialize the shared counter\n    *shared_counter = 0;\n\n    pid_t pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork\");\n        exit(EXIT_FAILURE);\n    } else if (pid == 0) { // Child process\n        printf(\"Child process (PID %d) starting threads...\\n\", getpid());\n        pthread_t threads[NUM_THREADS];\n        for (int i = 0; i < NUM_THREADS; ++i) {\n            pthread_create(&threads[i], NULL, thread_func, NULL);\n        }\n\n        for (int i = 0; i < NUM_THREADS; ++i) {\n            pthread_join(threads[i], NULL);\n        }\n        printf(\"Child process (PID %d) finished. Counter value: %d\\n\", getpid(), *shared_counter);\n        munmap(shared_counter, sizeof(int));\n        close(fd);\n        exit(EXIT_SUCCESS);\n    } else { // Parent process\n        printf(\"Parent process (PID %d) starting threads...\\n\", getpid());\n        pthread_t threads[NUM_THREADS];\n        for (int i = 0; i < NUM_THREADS; ++i) {\n            pthread_create(&threads[i], NULL, thread_func, NULL);\n        }\n\n        for (int i = 0; i < NUM_THREADS; ++i) {\n            pthread_join(threads[i], NULL);\n        }\n        printf(\"Parent process (PID %d) finished. Counter value: %d\\n\", getpid(), *shared_counter);\n\n        // Wait for the child process to finish\n        wait(NULL);\n\n        printf(\"Final shared counter value: %d\\n\", *shared_counter);\n\n        // Clean up shared memory\n        munmap(shared_counter, sizeof(int));\n        close(fd);\n        shm_unlink(SHM_NAME);\n        exit(EXIT_SUCCESS);\n    }\n\n    return 0;\n}\n```",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "8.1",
+        "text": "מהו הערך המקסימלי האפשרי של `shared_counter` שיוצג בפלט הסופי של התוכנית? נמקו.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.2",
+        "text": "מהו הערך המינימלי האפשרי של `shared_counter` שיוצג בפלט הסופי של התוכנית? נמקו.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.3",
+        "text": "האם קיימת אפשרות שהפלט של \"Child process finished. Counter value:\" והפלט של \"Parent process finished. Counter value:\" יהיו זהים? אם כן, תארו תרחיש כזה. אם לא, הסבירו מדוע.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.4",
+        "text": "הציעו פתרון לתיקון בעיית המרוץ (race condition) כך שהמונה תמיד יציג את הערך הנכון. יש להציע פתרון אחד בלבד, ולהסביר את השינויים הנדרשים בקוד.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "ניתוח כללי:\nהתוכנית יוצרת אובייקט זיכרון משותף בשם `/my_shared_counter` וממפה אותו לתוך מרחב הכתובות של התהליך הראשי. המונה `shared_counter` מאותחל ל-0. לאחר מכן, התהליך הראשי מבצע `fork()`. גם תהליך האב וגם תהליך הבן ממשיכים לנקודת ההתחלה של הקוד שלהם, אך כעת שניהם ממופים לאותו אזור זיכרון משותף (ולכן `shared_counter` מצביע על אותו מיקום פיזי בשניהם). כל אחד מהתהליכים (האב והבן) יוצר `NUM_THREADS` (שהוגדר כ-2) תהליכונים (threads). כל תהליכון מבצע `INCREMENTS_PER_THREAD` (שהוגדר כ-100,000) פעולות הגדלה על `*shared_counter`. סך הכל ישנם 4 תהליכונים (2 באב, 2 בבן) המבצעים כל אחד 100,000 הגדלות, כך שהערך הנכון הסופי אמור להיות 4 * 100,000 = 400,000.\nעם זאת, אין כל מנגנון סנכרון (כמו mutex) סביב פעולת ההגדלה `(*shared_counter)++`. פעולה זו אינה אטומית; היא מורכבת מקריאה של הערך, הגדלתו, וכתיבת הערך החדש. כאשר מספר תהליכונים (ואף תהליכים) ניגשים למונה משותף ללא סנכרון, נוצר מצב מרוץ (race condition).\n\n8.1. מהו הערך המקסימלי האפשרי?\nהערך המקסימלי האפשרי הוא 400,000.\nהערך המקסימלי יתקבל אם, במקרה, כל פעולות ההגדלה יבוצעו באופן סדרתי או שהמרוץ יתנהל כך שכל הגדלה תבוצע במלואה לפני שהגדלה אחרת תתחיל או תסיים. זהו המקרה האידיאלי שבו אין אובדן של פעולות הגדלה. למרות שזה לא סביר שיקרה באופן טבעי ללא סנכרון, זהו עדיין פלט אפשרי תיאורטית, המייצג את סך כל ההגדלות שתוכננו.\n\n8.2. מהו הערך המינימלי האפשרי?\nהערך המינימלי האפשרי הוא 1.\nכדי להבין זאת, נתבונן בפעולת ההגדלה `(*shared_counter)++`. היא מתורגמת בדרך כלל לשלוש פעולות מכונה:\n1.  קרא את הערך של `*shared_counter` לתוך רגיסטר.\n2.  הגדל את הערך ברגיסטר ב-1.\n3.  כתוב את הערך מהרגיסטר בחזרה ל-`*shared_counter`.\n\nתרחיש קיצוני לערך מינימלי:\nנניח שכל ארבעת התהליכונים מתחילים כמעט בו-זמנית, כאשר `*shared_counter` הוא 0. כל 400,000 פעולות ההגדלה יכולות להתבצע באופן הבא: כל ארבעת התהליכונים קוראים את הערך הנוכחי (0), מגדילים אותו ל-1 ברגיסטר שלהם, ואז בזה אחר זה כותבים 1 לזיכרון המשותף. האחרון שכותב הוא זה שקובע את הערך הסופי. אם סדר הפעולות הוא כזה שכל 4 התהליכונים קוראים `0`, מגדילים ל`1` (ברגיסטר שלהם), ואז כותבים `1` חזרה לזיכרון, זה אומר ש-4 פעולות הגדלה תרמו רק לשינוי של 1 במונה. תרחיש זה יכול לחזור על עצמו באופן תיאורטי לכל 400,000 ההגדלות, כך שהערך הסופי של המונה יהיה 1.\n\n8.3. האם קיימת אפשרות שהפלט של \"Child process finished. Counter value:\" והפלט של \"Parent process finished. Counter value:\" יהיו זהים?\nכן, בהחלט קיימת אפשרות כזו.\nמכיוון שהמונה `shared_counter` הוא זיכרון משותף בין האב והבן (באמצעות `mmap` עם `MAP_SHARED`), שניהם רואים ומשנים את אותו מופע של המונה.\nהפלט \"Child process finished. Counter value: %d\" והפלט \"Parent process finished. Counter value: %d\" מציגים את הערך של `*shared_counter` ברגע שהתהליך הספציפי מסיים את כל התהליכונים שלו ומגיע לשורת ההדפסה.\nהסדר שבו התהליכים והתהליכונים רצים נקבע על ידי המתזמן של מערכת ההפעלה, והוא אינו מובטח. ייתכן מצב שבו תהליך הבן מסיים את כל עבודתו, מדפיס את הערך הסופי של המונה. לאחר מכן, תהליך האב מסיים גם הוא את כל עבודתו, ומדפיס את אותו ערך סופי. לדוגמה, אם תהליך הבן מסיים את כל 200,000 ההגדלות שלו ושל התהליכונים שלו, ואז תהליך האב מסיים את כל 200,000 ההגדלות שלו ושל התהליכונים שלו. בסופו של דבר, שניהם ידפיסו את הערך הסופי של המונה המשותף, לאחר שכל 400,000 ההגדלות (בתוספת האובדן עקב מרוץ) בוצעו.\n\n8.4. הצעת פתרון לתיקון בעיית המרוץ:\nכדי לפתור את בעיית המרוץ על `shared_counter` בין תהליכונים ותהליכים, יש להשתמש במנגנון סנכרון כמו mutex. מכיוון שה-mutex צריך להיות משותף בין תהליכים, יש להשתמש ב-mutex שיכול לפעול בין תהליכים (process-shared mutex).\n\nשינויים נדרשים בקוד:\n1.  **הגדרת מבנה נתונים משותף:**\n    נשנה את הזיכרון המשותף כך שיכיל גם את המונה וגם את ה-mutex.\n    ```c\n    // Global structure for shared memory\n    typedef struct {\n        int counter;\n        pthread_mutex_t mutex; // Mutex for inter-process and inter-thread synchronization\n    } shared_data_t;\n\n    shared_data_t *shared_data = NULL; // Pointer to the mapped shared memory\n    const char *SHM_NAME = \"/my_shared_counter\";\n    // ...\n    // ב-main, נשנה את ה-ftruncate ואת ה-mmap:\n    if (ftruncate(fd, sizeof(shared_data_t)) == -1) { /* ... */ }\n    shared_data = (shared_data_t *)mmap(NULL, sizeof(shared_data_t), PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);\n    if (shared_data == MAP_FAILED) { /* ... */ }\n    ```\n\n2.  **אתחול ה-mutex:**\n    ה-mutex צריך להיות מאותחל עם התכונה `PTHREAD_PROCESS_SHARED`. רק תהליך אחד (לרוב האב) צריך לאתחל אותו.\n    ```c\n    // ב-main, לפני ה-fork, נאתחל את תכונות ה-mutex:\n    pthread_mutexattr_t attr;\n    pthread_mutexattr_init(&attr);\n    pthread_mutexattr_setpshared(&attr, PTHREAD_PROCESS_SHARED);\n\n    pid_t pid = fork();\n    // ...\n    else if (pid == 0) { // Child process\n        // הבן לא מאתחל את המונה או ה-mutex.\n    } else { // Parent process\n        // האב מאתחל את המונה וה-mutex\n        shared_data->counter = 0;\n        pthread_mutex_init(&(shared_data->mutex), &attr);\n    }\n    // ...\n    // חשוב להרוס את תכונות ה-mutex לאחר השימוש בהן\n    pthread_mutexattr_destroy(&attr);\n    ```\n\n3.  **שימוש ב-mutex בפונקציית התהליכון:**\n    יש לנעול את ה-mutex לפני גישה למונה ולשחרר אותו לאחר מכן.\n    ```c\n    void *thread_func(void *arg) {\n        for (int i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n            pthread_mutex_lock(&(shared_data->mutex)); // נעל את ה-mutex\n            (shared_data->counter)++;\n            pthread_mutex_unlock(&(shared_data->mutex)); // שחרר את ה-mutex\n        }\n        return NULL;\n    }\n    ```\n\n4.  **שחרור ה-mutex:**\n    יש להרוס את ה-mutex (רק פעם אחת, לרוב על ידי התהליך האחרון).\n    ```c\n    // ב-main, בתהליך האב, לפני munmap ו-shm_unlink:\n    pthread_mutex_destroy(&(shared_data->mutex)); // הרס את ה-mutex\n    ```\nעם שינויים אלה, כל גישה למונה תהיה מוגנת על ידי ה-mutex, מה שיבטיח שההגדלות יהיו אטומיות והערך הסופי של המונה יהיה תמיד 400,000."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

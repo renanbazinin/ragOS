@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Producer-Consumer",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 07:44:22",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3452,
+      "output_tokens": 1486,
+      "total_tokens": 9915
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "Open",
+    "topic": [
+      "Synchronization",
+      "Producer-Consumer",
+      "Semaphores",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתונה מערכת מרובת חוטים המממשת את בעיית היצרן-צרכן הקלאסית. במערכת זו, חוט יצרן מייצר מספרים שלמים ומוסיף אותם למאגר משותף בגודל קבוע N. חוט צרכן מוציא מספרים שלמים מהמאגר ומדפיס אותם. יש לממש את הפתרון תוך שימוש בסמפורים בלבד כדי להבטיח סנכרון נכון ולמנוע תנאי מרוץ, כמו גם למנוע מצב שהיצרן מנסה להוסיף פריט למאגר מלא, או שהצרכן מנסה להוציא פריט ממאגר ריק. יש להניח שהמאגר מתנהג כתור FIFO.\n\nיש לממש את הפונקציות `producer` ו-`consumer` המייצגות את לולאת הפעולה של חוט היצרן וחוט הצרכן בהתאמה. בנוסף, יש להגדיר את המשתנים הגלובליים הנדרשים (כולל סמפורים) ולציין את ערכי האתחול שלהם. יש להניח כי הקבוע N מוגדר מראש.",
+      "code_snippet": "void* producer(void* arg) {\n}\n\nvoid* consumer(void* arg) {\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון משתמש בשלושה סמפורים ובמנעול הדדי אחד (mutex) כדי להבטיח סנכרון נכון וגישה בטוחה למאגר המשותף:\n1. `mutex`: סמפור בינארי המאותחל ל-1, המשמש להגנה על הגישה למאגר המשותף (`buffer`, `in`, `out`) כדי למנוע תנאי מרוץ כאשר מספר חוטים ניגשים אליו בו-זמנית.\n2. `empty`: סמפור סופר המאותחל ל-N, המייצג את מספר המקומות הריקים במאגר. היצרן מבצע `sem_wait` על סמפור זה לפני הוספת פריט, והצרכן מבצע `sem_post` עליו לאחר הוצאת פריט.\n3. `full`: סמפור סופר המאותחל ל-0, המייצג את מספר הפריטים המלאים במאגר. הצרכן מבצע `sem_wait` על סמפור זה לפני הוצאת פריט, והיצרן מבצע `sem_post` עליו לאחר הוספת פריט.\n\nלהלן הגדרת המשתנים הגלובליים והמימוש של פונקציות היצרן והצרכן:\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <pthread.h>\n#include <semaphore.h>\n\n#define N 10 // גודל המאגר\n\n// משתנים גלובליים\nsem_t mutex; // מנעול הדדי לגישה למאגר, אתחול: 1\nsem_t empty; // סמפור סופר למקומות ריקים, אתחול: N\nsem_t full;  // סמפור סופר לפריטים מלאים, אתחול: 0\n\nint buffer[N]; // המאגר המשותף\nint in = 0;    // אינדקס כתיבה ליצרן\nint out = 0;   // אינדקס קריאה לצרכן\n\nvoid* producer(void* arg) {\n    int item_to_produce;\n    while (1) {\n        // לדוגמה, יצרן מייצר פריטים אקראיים\n        item_to_produce = rand() % 100; \n\n        sem_wait(&empty);   // ממתין למקום פנוי במאגר (אם המאגר מלא, חוסם)\n        sem_wait(&mutex);   // נועל את הגישה למאגר כדי למנוע תנאי מרוץ\n        \n        buffer[in] = item_to_produce;\n        in = (in + 1) % N;\n        printf(\"Producer produced: %d (at index %d)\\n\", item_to_produce, (in - 1 + N) % N);\n        \n        sem_post(&mutex);   // משחרר את המנעול\n        sem_post(&full);    // מאותת שיש פריט חדש במאגר (מגדיל את ספירת הפריטים המלאים)\n\n        // sleep(1); // מדמה פעולת ייצור שלוקחת זמן\n    }\n    return NULL;\n}\n\nvoid* consumer(void* arg) {\n    int item_consumed;\n    while (1) {\n        sem_wait(&full);    // ממתין לפריט במאגר (אם המאגר ריק, חוסם)\n        sem_wait(&mutex);   // נועל את הגישה למאגר כדי למנוע תנאי מרוץ\n        \n        item_consumed = buffer[out];\n        out = (out + 1) % N;\n        printf(\"Consumer consumed: %d (from index %d)\\n\", item_consumed, (out - 1 + N) % N);\n        \n        sem_post(&mutex);   // משחרר את המנעול\n        sem_post(&empty);   // מאותת שיש מקום פנוי במאגר (מגדיל את ספירת המקומות הריקים)\n        \n        // sleep(2); // מדמה פעולת צריכה שלוקחת זמן\n    }\n    return NULL;\n}\n```"
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

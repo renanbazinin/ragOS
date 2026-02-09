@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Producer-Consumer",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 10:44:28",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1649,
+      "output_tokens": 1587,
+      "total_tokens": 6895
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Synchronization",
+      "Semaphores",
+      "Producer-Consumer"
+    ],
+    "content": {
+      "text": "נתונה בעיית המפיק-צרכן (Producer-Consumer Problem) עם חיץ חסום (bounded buffer) הממומשת באמצעות סמפורים (semaphores) ומנעול הדדי (mutex). הקוד הבא מציג מימוש של המפיק והצרכן:\n\nא. זהה תקלה (bug) אחת בקוד המצורף שעלולה להוביל לקיפאון (deadlock) או התנהגות שגויה.\nב. הסבר בפירוט מדוע זו תקלה וכיצד היא מובילה לקיפאון / התנהגות שגויה.\nג. הצג את הקוד המתוקן עבור הפונקציות המושפעות מהתקלה.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <pthread.h>\n#include <semaphore.h>\n\n#define BUFFER_SIZE 5\n\nint buffer[BUFFER_SIZE];\nint in = 0;\nint out = 0;\n\nsem_t mutex;    // Controls access to buffer\nsem_t empty;    // Counts empty slots in buffer\nsem_t full;     // Counts full slots in buffer\n\nvoid *producer(void *param) {\n    int item;\n    for (int i = 0; i < 10; i++) {\n        item = rand() % 100; // Produce a random item\n\n        // BUG: Acquiring mutex before waiting for empty slot\n        sem_wait(&mutex); // Acquire lock for buffer access\n        sem_wait(&empty); // Wait for an empty slot\n\n        buffer[in] = item;\n        in = (in + 1) % BUFFER_SIZE;\n        printf(\"Producer produced: %d\\n\", item);\n\n        sem_post(&full);  // Signal that a slot is full\n        sem_post(&mutex); // Release lock\n    }\n    pthread_exit(0);\n}\n\nvoid *consumer(void *param) {\n    int item;\n    for (int i = 0; i < 10; i++) {\n        sem_wait(&full);  // Wait for a full slot\n        sem_wait(&mutex); // Acquire lock for buffer access\n\n        item = buffer[out];\n        out = (out + 1) % BUFFER_SIZE;\n        printf(\"Consumer consumed: %d\\n\", item);\n\n        sem_post(&mutex); // Release lock\n        sem_post(&empty); // Signal that a slot is empty\n    }\n    pthread_exit(0);\n}\n\nint main() {\n    pthread_t prod_tid, cons_tid;\n\n    sem_init(&mutex, 0, 1);\n    sem_init(&empty, 0, BUFFER_SIZE);\n    sem_init(&full, 0, 0);\n\n    pthread_create(&prod_tid, NULL, producer, NULL);\n    pthread_create(&cons_tid, NULL, consumer, NULL);\n\n    pthread_join(prod_tid, NULL);\n    pthread_join(cons_tid, NULL);\n\n    sem_destroy(&mutex);\n    sem_destroy(&empty);\n    sem_destroy(&full);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": 15,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "א. התקלה נמצאת בפונקציית המפיק (producer). הסדר של קריאות ה-`sem_wait` שגוי: המפיק קורא ל-`sem_wait(&mutex)` לפני קריאה ל-`sem_wait(&empty)`.\n\nב. הסבר התקלה:\nבמצב שבו החיץ מלא (כלומר, סמפור `empty` שווה ל-0), המפיק יבצע את הפעולות הבאות:\n1.  יבצע `sem_wait(&mutex)` ויקבל את המנעול ההדדי.\n2.  לאחר מכן יבצע `sem_wait(&empty)`. מכיוון שהחיץ מלא, הסמפור `empty` הוא 0, והמפיק יחסם וימתין שיתפנה מקום בחיץ.\nהבעיה היא שהמפיק מחזיק במנעול ההדדי (`mutex`) בזמן שהוא חסום וממתין למקום פנוי. הצרכן, כדי לפנות מקום בחיץ, צריך לגשת לחיץ ולצרוך פריט. אך כדי לגשת לחיץ, הצרכן צריך לרכוש את המנעול ההדדי (`mutex`), אשר מוחזק כרגע על ידי המפיק החסום.\nמצב זה יוצר קיפאון (deadlock): המפיק ממתין לצרכן שיפנה מקום, והצרכן ממתין למפיק שישחרר את המנעול. אף אחד מהם לא יכול להתקדם.\n\nג. קוד מתוקן עבור פונקציית המפיק (producer):\n```c\nvoid *producer(void *param) {\n    int item;\n    for (int i = 0; i < 10; i++) {\n        item = rand() % 100; // Produce a random item\n\n        // סדר מתוקן: ממתינים למקום פנוי לפני רכישת המנעול ההדדי\n        sem_wait(&empty); // Wait for an empty slot\n        sem_wait(&mutex); // Acquire lock for buffer access\n\n        buffer[in] = item;\n        in = (in + 1) % BUFFER_SIZE;\n        printf(\"Producer produced: %d\\n\", item);\n\n        sem_post(&mutex); // Release lock\n        sem_post(&full);  // Signal that a slot is full\n    }\n    pthread_exit(0);\n}\n```\nהערה: הסדר של `sem_post(&mutex)` ואחריו `sem_post(&full)` נחשב לפרקטיקה מומלצת, שכן הוא משחרר את המנעול ההדדי מיד לאחר סיום הפעולה הקריטית, ובכך מאפשר לחוטים אחרים לגשת למשאב מוקדם יותר."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

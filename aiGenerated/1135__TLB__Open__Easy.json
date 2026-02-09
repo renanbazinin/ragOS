@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "TLB",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 08:10:30",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3093,
+      "output_tokens": 367,
+      "total_tokens": 4536
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "TLB",
+      "Memory Management",
+      "Virtual Memory"
+    ],
+    "content": {
+      "text": "מהי מטרת ה-TLB? כיצד הוא מסייע בשיפור ביצועי המערכת?",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "ה-TLB (Translation Lookaside Buffer) הוא זיכרון מטמון קטן ומהיר המאחסן תרגומי כתובות וירטואליות לכתובות פיזיות שנעשה בהן שימוש לאחרונה. מטרתו העיקרית היא להאיץ את תהליך תרגום הכתובות. כאשר המעבד צריך לגשת לזיכרון באמצעות כתובת וירטואלית, הוא בודק תחילה אם התרגום קיים ב-TLB. אם התרגום נמצא (TLB hit), הכתובת הפיזית מתקבלת במהירות רבה, מה שחוסך את הצורך בגישה איטית יותר לטבלת הדפים בזיכרון הראשי. בכך, ה-TLB מפחית את זמן הגישה לזיכרון ומשפר משמעותית את ביצועי המערכת הכוללים."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Threads and Mutexes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 20:19:31",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1131,
+      "output_tokens": 419,
+      "total_tokens": 2435
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Threads",
+      "Mutexes",
+      "Synchronization",
+      "Race Conditions"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של שימוש ב-mutex במערכת מרובת חוטים (multithreaded system) הניגשת למשאב משותף?",
+      "code_snippet": null,
+      "options": [
+        "א. להגביר את מהירות הגישה למשאב המשותף.",
+        "ב. למנוע מצב מירוץ (race condition) על ידי הבטחת גישה בלעדית לקטע קריטי.",
+        "ג. לאפשר לחוטים שונים לגשת למשאב בו זמנית ללא הגבלה.",
+        "ד. להקצות זיכרון דינמי עבור המשאב המשותף.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "התשובה הנכונה היא ב'. mutex משמש כמנגנון סנכרון המבטיח שרק חוט אחד יוכל לגשת לקטע קריטי (critical section) שבו מתבצעת גישה למשאב משותף, ובכך למנוע מצבי מירוץ (race conditions) ולשמור על עקביות הנתונים. mutex אינו מיועד להגביר מהירות אלא להבטיח נכונות, ואינו קשור להקצאת זיכרון."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "IPC and Signals",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 21:43:51",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1103,
+      "output_tokens": 1123,
+      "total_tokens": 4116
+    }
+  },
+  "question": {
+    "id": 6,
+    "type": "MultipleChoice",
+    "topic": [
+      "IPC",
+      "Signals",
+      "Process Management",
+      "System Calls"
+    ],
+    "content": {
+      "text": "נתון קוד C הבא. מה תהיה התוצאה הסבירה ביותר של הרצת התוכנית?",
+      "code_snippet": "#include <stdio.k>\n#include <stdlib.h>\n#include <unistd.h>\n#include <signal.h>\n#include <sys/wait.h>\n\nvoid sigusr1_handler(int signum) {\n    printf(\"Parent: Received SIGUSR1\\n\");\n}\n\nint main() {\n    pid_t pid;\n    sigset_t newmask, oldmask;\n\n    // Set up SIGUSR1 handler for the parent\n    struct sigaction sa;\n    sa.sa_handler = sigusr1_handler;\n    sigemptyset(&sa.sa_mask);\n    sa.sa_flags = 0;\n    if (sigaction(SIGUSR1, &sa, NULL) == -1) {\n        perror(\"sigaction\");\n        exit(EXIT_FAILURE);\n    }\n\n    // Block SIGUSR1 in the parent\n    sigemptyset(&newmask);\n    sigaddset(&newmask, SIGUSR1);\n    if (sigprocmask(SIG_BLOCK, &newmask, &oldmask) == -1) {\n        perror(\"sigprocmask BLOCK\");\n        exit(EXIT_FAILURE);\n    }\n    printf(\"Parent: SIGUSR1 blocked.\\n\");\n\n    pid = fork();\n\n    if (pid == -1) {\n        perror(\"fork\");\n        exit(EXIT_FAILURE);\n    } else if (pid == 0) { // Child process\n        printf(\"Child: Sending SIGUSR1 to parent.\\n\");\n        if (kill(getppid(), SIGUSR1) == -1) {\n            perror(\"kill\");\n            exit(EXIT_FAILURE);\n        }\n        sleep(1); // Give parent time to potentially handle\n        printf(\"Child: Exiting.\\n\");\n        exit(EXIT_SUCCESS);\n    } else { // Parent process\n        printf(\"Parent: Waiting for child...\\n\");\n        sleep(2); // Wait a bit, allowing child to send signal\n        printf(\"Parent: Unblocking SIGUSR1.\\n\");\n        if (sigprocmask(SIG_UNBLOCK, &newmask, NULL) == -1) { // Unblock SIGUSR1\n            perror(\"sigprocmask UNBLOCK\");\n            exit(EXIT_FAILURE);\n        }\n        printf(\"Parent: SIGUSR1 unblocked. Waiting for handler...\\n\");\n        wait(NULL); // Wait for child to finish\n        printf(\"Parent: Child finished, exiting.\\n\");\n    }\n\n    return 0;\n}",
+      "options": [
+        "א. תהליך האב יסיים את פעולתו מיד לאחר שהבן שולח את האות, מבלי לטפל בו.",
+        "ב. תהליך האב יקבל ויטפל באות SIGUSR1 מיד לאחר שהבן שולח אותו.",
+        "ג. תהליך האב לעולם לא יקבל את האות SIGUSR1.",
+        "ד. תהליך האב יקבל ויטפל באות SIGUSR1 רק לאחר שיבטל את חסימת האות.",
+        "ה. התוכנית תיכנס למצב של קיפאון (deadlock) או תקרוס."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ד",
+      "explanation": "הסבר: בתחילת התוכנית, תהליך האב חוסם את האות SIGUSR1 באמצעות `sigprocmask(SIG_BLOCK, ...)`. כאשר תהליך הבן שולח את האות SIGUSR1 לתהליך האב באמצעות `kill(getppid(), SIGUSR1)`, האות נרשם כאות ממתין (pending signal) עבור תהליך האב, אך אינו נמסר מיד מכיוון שהוא חסום. רק כאשר תהליך האב מבטל את חסימת האות באמצעות `sigprocmask(SIG_UNBLOCK, ...)`, האות הממתין נמסר לתהליך האב, וה-handler שהוגדר (`sigusr1_handler`) מופעל. לכן, הפלט 'Parent: Received SIGUSR1' יופיע לאחר ביטול החסימה."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

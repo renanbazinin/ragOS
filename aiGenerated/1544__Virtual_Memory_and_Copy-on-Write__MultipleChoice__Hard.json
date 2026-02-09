@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory and Copy-on-Write",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 11:18:38",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 975,
+      "output_tokens": 2432,
+      "total_tokens": 9056
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Virtual Memory",
+      "Copy-on-Write",
+      "fork()"
+    ],
+    "content": {
+      "text": "נתונה תוכנית ה-C הבאה המשתמשת במנגנון Copy-on-Write (CoW) של מערכת ההפעלה. המערכת מוגדרת עם גודל דף זיכרון של 4096 בתים (PAGE_SIZE). איזו טענה מתארת נכונה את מספר אירועי CoW (page faults מסוג כתיבה לדף משותף) שיתרחשו, ואת סך הדפים הפיזיים שיהיו בשימוש על ידי המערך `shared_array` (הן על ידי האב והן על ידי הבן) לאחר סיום פעולת שני התהליכים?",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\n#define PAGE_SIZE 4096\n#define NUM_PAGES 5 // Total 5 pages for the array\n\nint main() {\n    int* shared_array = (int*)malloc(NUM_PAGES * PAGE_SIZE);\n    if (shared_array == NULL) {\n        perror(\"malloc failed\");\n        return 1;\n    }\n\n    // Initialize all pages. This ensures all pages are backed by physical memory.\n    for (int i = 0; i < (NUM_PAGES * PAGE_SIZE) / sizeof(int); ++i) {\n        shared_array[i] = i;\n    }\n\n    pid_t pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        return 1;\n    } else if (pid == 0) { // Child process\n        // Child reads from page 0\n        printf(\"Child reads: %d\\n\", shared_array[0]);\n\n        // Child writes to page 1\n        shared_array[PAGE_SIZE / sizeof(int)] = 1000;\n        printf(\"Child wrote to page 1\\n\");\n\n        // Child writes to page 2\n        shared_array[2 * PAGE_SIZE / sizeof(int)] = 2000;\n        printf(\"Child wrote to page 2\\n\");\n\n        exit(0);\n    } else { // Parent process\n        // Parent waits for child to finish\n        wait(NULL);\n\n        // Parent reads from page 0\n        printf(\"Parent reads: %d\\n\", shared_array[0]);\n\n        // Parent writes to page 3\n        shared_array[3 * PAGE_SIZE / sizeof(int)] = 3000;\n        printf(\"Parent wrote to page 3\\n\");\n\n        // Parent writes to page 4\n        shared_array[4 * PAGE_SIZE / sizeof(int)] = 4000;\n        printf(\"Parent wrote to page 4\\n\");\n\n        // Parent reads from page 1\n        printf(\"Parent reads: %d\\n\", shared_array[PAGE_SIZE / sizeof(int)]);\n    }\n\n    free(shared_array);\n    return 0;\n}",
+      "options": [
+        "א. 4 אירועי CoW, סה\"כ 7 דפים פיזיים.",
+        "ב. 4 אירועי CoW, סה\"כ 9 דפים פיזיים.",
+        "ג. 2 אירועי CoW, סה\"כ 7 דפים פיזיים.",
+        "ד. 2 אירועי CoW, סה\"כ 9 דפים פיזיים.",
+        "ה. אף אחת מהתשובות אינה נכונה."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "הבה ננתח את פעולת התוכנית שלב אחר שלב:\n\n1.  **לפני ה-fork:**\n    *   `malloc` מקצה זיכרון וירטואלי עבור 5 דפים (NUM_PAGES * PAGE_SIZE). \n    *   לולאת האתחול `for` כותבת לכל תא במערך, מה שגורם להקצאה פיזית של 5 דפים (נסמן אותם כ-P0, P1, P2, P3, P4) בזיכרון הפיזי ומפויים לכתובות הוירטואליות של התהליך האב. סה\"כ: 5 דפים פיזיים.\n\n2.  **לאחר ה-fork:**\n    *   התהליך הבן נוצר. כתוצאה ממנגנון CoW, גם האב וגם הבן חולקים את אותם 5 דפים פיזיים. טבלאות הדפים שלהם מצביעות על אותם דפים, והם מסומנים כקריאה בלבד (read-only). כל ניסיון כתיבה לדף משותף יגרום ל-CoW (page fault מסוג write-on-read-only-page), יקצה דף פיזי חדש, יעתיק אליו את התוכן, וישנה את טבלת הדפים של התהליך הכותב כך שתצביע על הדף החדש.\n\n3.  **פעולות התהליך הבן:**\n    *   `printf(\"Child reads: %d\\n\", shared_array[0]);` – קריאה מדף 0. הדף משותף וקריאה בלבד. לא מתרחש CoW. (סה\"כ דפים פיזיים כרגע: 5)\n    *   `shared_array[PAGE_SIZE / sizeof(int)] = 1000;` – כתיבה לדף 1. דף 1 משותף. מתרחש **אירוע CoW אחד**. מוקצה דף פיזי חדש (נסמן אותו כ-P1_child), תוכן P1 המקורי מועתק אליו, וטבלת הדפים של הבן עבור דף 1 מצביעה כעת על P1_child. סה\"כ דפים פיזיים: 5 (מקוריים) + 1 (חדש) = 6. (CoW: 1)\n    *   `shared_array[2 * PAGE_SIZE / sizeof(int)] = 2000;` – כתיבה לדף 2. דף 2 משותף. מתרחש **אירוע CoW אחד**. מוקצה דף פיזי חדש (נסמן אותו כ-P2_child), תוכן P2 המקורי מועתק אליו, וטבלת הדפים של הבן עבור דף 2 מצביעה כעת על P2_child. סה\"כ דפים פיזיים: 6 + 1 (חדש) = 7. (CoW: 2)\n    *   התהליך הבן מסתיים (`exit(0)`). הדפים P1_child ו-P2_child עדיין קיימים בזיכרון הפיזי עד שמערכת ההפעלה תשחרר אותם. הדפים המקוריים (P0, P1, P2, P3, P4) נשארים נגישים לאב.\n\n4.  **פעולות התהליך האב (לאחר שהבן סיים):**\n    *   `wait(NULL);` – האב ממתין לסיום הבן.\n    *   `printf(\"Parent reads: %d\\n\", shared_array[0]);` – קריאה מדף 0. הדף עדיין מצביע על P0 המקורי. לא מתרחש CoW. (סה\"כ דפים פיזיים כרגע: 7)\n    *   `shared_array[3 * PAGE_SIZE / sizeof(int)] = 3000;` – כתיבה לדף 3. דף 3 משותף. מתרחש **אירוע CoW אחד**. מוקצה דף פיזי חדש (נסמן אותו כ-P3_parent), תוכן P3 המקורי מועתק אליו, וטבלת הדפים של האב עבור דף 3 מצביעה כעת על P3_parent. סה\"כ דפים פיזיים: 7 + 1 (חדש) = 8. (CoW: 3)\n    *   `shared_array[4 * PAGE_SIZE / sizeof(int)] = 4000;` – כתיבה לדף 4. דף 4 משותף. מתרחש **אירוע CoW אחד**. מוקצה דף פיזי חדש (נסמן אותו כ-P4_parent), תוכן P4 המקורי מועתק אליו, וטבלת הדפים של האב עבור דף 4 מצביעה כעת על P4_parent. סה\"כ דפים פיזיים: 8 + 1 (חדש) = 9. (CoW: 4)\n    *   `printf(\"Parent reads: %d\\n\", shared_array[PAGE_SIZE / sizeof(int)]);` – קריאה מדף 1. דף 1 עדיין מצביע על P1 המקורי עבור האב. לא מתרחש CoW.\n\n**סיכום:**\n*   **סה\"כ אירועי CoW:** 2 (מהבן עבור דפים 1 ו-2) + 2 (מהאב עבור דפים 3 ו-4) = **4 אירועים**. \n*   **סה\"כ דפים פיזיים שהוקצו למערך:** 5 (דפים מקוריים P0-P4) + 2 (דפים שהוקצו לבן P1_child, P2_child) + 2 (דפים שהוקצו לאב P3_parent, P4_parent) = **9 דפים פיזיים**. \n\nלכן, התשובה הנכונה היא ב'."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

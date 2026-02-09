@@ -1,0 +1,71 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Synchronization and Concurrency",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 21:17:30",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4132,
+      "output_tokens": 3924,
+      "total_tokens": 17600
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Concurrency",
+      "Mutexes",
+      "Condition Variables",
+      "Race Conditions",
+      "Linked Lists"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C/C++ המשתמשת בחוטים (threads) ובמנעולים (mutexes) כדי לבנות רשימה מקושרת (linked list) משותפת. כל חוט מוסיף מספר קבוע של צמתים לרשימה. כל צומת מקבל מזהה ייחודי באמצעות מונה גלובלי. יש להניח שכל קריאות המערכת הצליחו. עיין בקוד המצורף וענה על השאלות הבאות:",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <pthread.h>\n#include <unistd.h> // For usleep\n#include <time.h>   // For srand\n\n#define NUM_THREADS 4\n#define NODES_PER_THREAD 5\n\ntypedef struct Node {\n    int data;\n    struct Node *next;\n} Node;\n\nNode *head = NULL;\nint global_counter = 0; // Shared counter for node data\n\npthread_mutex_t list_lock;    // Mutex for list modifications\npthread_mutex_t counter_lock; // Mutex for global_counter\npthread_cond_t add_cond;      // Condition variable for ordered addition (used in Q1.5 solution)\n\nint expected_id_to_add; // Used in Q1.5 solution\n\n// Function to add a node to the beginning of the list\nvoid add_node_to_list(int data) {\n    Node *new_node = (Node *)malloc(sizeof(Node));\n    if (new_node == NULL) {\n        perror(\"malloc failed\");\n        exit(EXIT_FAILURE);\n    }\n    new_node->data = data;\n    new_node->next = NULL;\n\n    new_node->next = head;\n    head = new_node;\n}\n\nvoid* worker_thread(void* arg) {\n    for (int i = 0; i < NODES_PER_THREAD; ++i) {\n        int my_id;\n        \n        // Step 1: Get a unique ID\n        pthread_mutex_lock(&counter_lock);\n        my_id = global_counter++;\n        pthread_mutex_unlock(&counter_lock);\n\n        // Simulate some processing time before adding to list\n        usleep(100 + (rand() % 100)); // Random delay between 100-199 microseconds\n\n        // Step 2: Add node to the list\n        pthread_mutex_lock(&list_lock);\n        add_node_to_list(my_id);\n        pthread_mutex_unlock(&list_lock);\n    }\n    return NULL;\n}\n\nvoid print_list() {\n    Node *current = head;\n    printf(\"List (from head to tail): \");\n    while (current != NULL) {\n        printf(\"%d -> \", current->data);\n        current = current->next;\n    }\n    printf(\"NULL\\n\");\n}\n\nvoid free_list() {\n    Node *current = head;\n    while (current != NULL) {\n        Node *temp = current;\n        current = current->next;\n        free(temp);\n    }\n    head = NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    pthread_mutex_init(&list_lock, NULL);\n    pthread_mutex_init(&counter_lock, NULL);\n    // pthread_cond_init(&add_cond, NULL); // Initialized for Q1.5 solution\n\n    srand(time(NULL)); // Seed random for usleep variation\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, worker_thread, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"All threads finished. Total nodes: %d\\n\", NUM_THREADS * NODES_PER_THREAD);\n    print_list();\n\n    free_list();\n    pthread_mutex_destroy(&list_lock);\n    pthread_mutex_destroy(&counter_lock);\n    // pthread_cond_destroy(&add_cond); // Destroyed for Q1.5 solution\n\n    return 0;\n}"
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "מהו המספר הכולל של הצמתים ברשימה כאשר התוכנית מסיימת את ריצתה?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "האם כל ערכי ה-`data` בצמתים ברשימה מובטחים להיות ייחודיים (unique)? הסבר מדוע.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.3",
+        "text": "האם הרשימה מובטחת להיות נקייה משחיתות (corruption), כגון מצביעים תלויים (dangling pointers), מעגלים (cycles), או מצביעי `next` שגויים? הסבר מדוע.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.4",
+        "text": "האם הרשימה מובטחת להיות ממוינת לפי ערכי ה-`data` (בסדר עולה או יורד) מהראש לסוף? אם לא, תאר תרחיש אחד המוביל לרשימה לא ממוינת. אם כן, הסבר מדוע.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.5",
+        "text": "בהנחה שאנו רוצים שהרשימה תהיה ממוינת בסדר עולה לפי ערכי ה-`data` (כלומר, `head` מצביע לצומת עם ה-ID הקטן ביותר, אחריו הצומת עם ה-ID הבא בגודלו, וכן הלאה, עד `NULL`). אילו שינויים מינימליים נדרשים בקוד הקיים (בפונקציה `worker_thread` ו/או במשתנים גלובליים/מנעולים) כדי להבטיח סדר עולה זה? עליך להמשיך להשתמש בפונקציה `add_node_to_list` כפי שהיא מסופקת, המוסיפה תמיד צמתים חדשים לראש הרשימה. אתה רשאי להשתמש בכל פרימיטיבי סנכרון סטנדרטי (mutexes, semaphores, condition variables).",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.1: המספר הכולל של הצמתים ברשימה יהיה תוצר המכפלה של NUM_THREADS * NODES_PER_THREAD. במקרה זה, 4 * 5 = 20 צמתים. כל חוט מריץ את הלולאה NODES_PER_THREAD פעמים, ובכל פעם הוא מוסיף צומת אחד לרשימה. מכיוון שאין מחיקות או כשלים ביצירת צמתים (הנחת השאלה), כל הצמתים שנוצרו יתווספו לרשימה.\n\n1.2: כן, כל ערכי ה-`data` בצמתים ברשימה מובטחים להיות ייחודיים. הסיבה לכך היא שהמשתנה הגלובלי `global_counter` מוגן על ידי `counter_lock` (מנעול). בכל פעם שחוט רוצה לקבל ID, הוא נועל את המנעול, קורא את הערך הנוכחי של `global_counter`, מקדם אותו, ורק אז משחרר את המנעול. זה מבטיח שכל חוט יקבל ערך ייחודי מהמונה, ושהמונה יתקדם בצורה אטומית, ללא איבוד עדכונים או קריאת ערכים שגויים.\n\n1.3: כן, הרשימה מובטחת להיות נקייה משחיתות. המנעול `list_lock` מגן על כל הגישה והשינויים למבנה הרשימה המקושרת (הצבעה ל-`head` ועדכון מצביעי `next` בתוך `add_node_to_list`). כאשר חוט נועל את `list_lock`, הוא מבטיח ששום חוט אחר לא יוכל לשנות את הרשימה במקביל. זה מונע מצבי מרוץ (race conditions) שעלולים להוביל למצביעים שגויים, איבוד צמתים, או מבנה רשימה לקוי.\n\n1.4: לא, הרשימה אינה מובטחת להיות ממוינת לפי ערכי ה-`data`. למרות שכל מזהה (`my_id`) מובטח להיות ייחודי ומתקבל בסדר עולה (0, 1, 2, ...), ישנו השהיה אקראית (`usleep`) בין השלב שבו חוט מקבל את ה-ID שלו לבין השלב שבו הוא מוסיף את הצומת לרשימה. מכיוון ש-`add_node_to_list` מוסיפה צמתים לראש הרשימה, הסדר הסופי של הצמתים ברשימה תלוי בסדר שבו החוטים השונים מצליחים לנעול את `list_lock` ולהוסיף את הצומת שלהם לאחר ההשהיה. \n\nתרחיש לדוגמה המוביל לרשימה לא ממוינת (בסדר עולה או יורד):\nנניח NUM_THREADS=2, NODES_PER_THREAD=1.\n1. חוט A מקבל `my_id = 0`. הוא נכנס ל-`usleep`.\n2. חוט B מקבל `my_id = 1`. הוא נכנס ל-`usleep`.\n3. חוט B מסיים את ה-`usleep` שלו לפני חוט A. הוא נועל את `list_lock`, קורא ל-`add_node_to_list(1)`.\n   הרשימה כעת: `1 -> NULL`.\n4. חוט B משחרר את `list_lock` ומסיים.\n5. חוט A מסיים את ה-`usleep` שלו. הוא נועל את `list_lock`, קורא ל-`add_node_to_list(0)`.\n   הרשימה כעת: `0 -> 1 -> NULL`.\nבדוגמה זו, הרשימה ממוינת בסדר עולה. אך תרחיש הפוך אפשרי באותה מידה:\n1. חוט A מקבל `my_id = 0`. נכנס ל-`usleep`.\n2. חוט B מקבל `my_id = 1`. נכנס ל-`usleep`.\n3. חוט A מסיים את ה-`usleep` שלו לפני חוט B. הוא נועל את `list_lock`, קורא ל-`add_node_to_list(0)`.\n   הרשימה כעת: `0 -> NULL`.\n4. חוט A משחרר את `list_lock` ומסיים.\n5. חוט B מסיים את ה-`usleep` שלו. הוא נועל את `list_lock`, קורא ל-`add_node_to_list(1)`.\n   הרשימה כעת: `1 -> 0 -> NULL`.\nבדוגמה זו, הרשימה אינה ממוינת בסדר עולה וגם לא בסדר יורד לחלוטין. זה מדגים את חוסר הדטרמיניזם בסדר.\n\n1.5: כדי להבטיח שהרשימה תהיה ממוינת בסדר עולה (0 -> 1 -> ... -> N-1 -> NULL) כאשר `add_node_to_list` מוסיפה לראש הרשימה, יש להבטיח שהצומת עם ה-ID הגבוה ביותר יתווסף ראשון לרשימה, אחריו הצומת עם ה-ID השני בגודלו, וכן הלאה, עד שהצומת עם ה-ID הנמוך ביותר (0) יתווסף אחרון. לשם כך נשתמש במשתנה תנאי (condition variable) ובמונה עזר גלובלי שיציין איזה ID צפוי להתווסף לרשימה כעת (בסדר יורד של ה-ID-ים).\n\n**שינויים נדרשים:**\n1.  **הוספת משתנים גלובליים:**\n    `pthread_cond_t add_cond;`\n    `int expected_id_to_add; // יש לאתחל ב-main ל-(NUM_THREADS * NODES_PER_THREAD) - 1`\n\n2.  **אתחול וניקוי ב-`main`:**\n    יש להוסיף אתחול ל-`expected_id_to_add` לפני יצירת החוטים:\n    `expected_id_to_add = (NUM_THREADS * NODES_PER_THREAD) - 1;`\n    יש לאתחל ולנקות את משתנה התנאי:\n    `pthread_cond_init(&add_cond, NULL);`\n    `pthread_cond_destroy(&add_cond);`\n\n3.  **שינוי הפונקציה `worker_thread`:**\n    ```c\n    void* worker_thread(void* arg) {\n        for (int i = 0; i < NODES_PER_THREAD; ++i) {\n            int my_id;\n            \n            // Step 1: Get a unique ID (unchanged)\n            pthread_mutex_lock(&counter_lock);\n            my_id = global_counter++;\n            pthread_mutex_unlock(&counter_lock);\n\n            // Simulate some processing time (unchanged)\n            usleep(100 + (rand() % 100)); \n\n            // Step 2: Add node to the list, but only when it's this ID's turn\n            pthread_mutex_lock(&list_lock); // Use list_lock to protect expected_id_to_add and add_cond\n            while (my_id != expected_id_to_add) {\n                // Wait until it's this thread's turn to add its node\n                pthread_cond_wait(&add_cond, &list_lock);\n            }\n            // Now my_id == expected_id_to_add, so it's this thread's turn\n            add_node_to_list(my_id);\n            expected_id_to_add--; // Decrement to signal the next expected ID (smaller one)\n            pthread_cond_broadcast(&add_cond); // Wake up all waiting threads to recheck their IDs\n            pthread_mutex_unlock(&list_lock);\n        }\n        return NULL;\n    }\n    ```\n\n**הסבר:**\nהשינוי מבטיח שהצמתים יתווספו לרשימה בסדר יורד של ה-ID-ים שלהם (ה-ID הגדול ביותר ראשון, הקטן ביותר אחרון). מכיוון שפונקציית `add_node_to_list` מוסיפה לראש הרשימה, הוספה של 19, ואז 18, ואז 17, וכו', תוביל לרשימה סופית מהצורה `0 -> 1 -> 2 -> ... -> 19 -> NULL`, שהיא ממוינת בסדר עולה. `expected_id_to_add` ו-`add_cond` משמשים כמנגנון תזמון קפדני בין החוטים, כך שכל חוט ימתין בסבלנות עד שה-ID שלו יהיה הבא בתור להתווסף לרשימה."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

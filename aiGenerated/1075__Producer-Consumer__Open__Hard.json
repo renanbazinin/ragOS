@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Producer-Consumer",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 07:47:44",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3433,
+      "output_tokens": 2407,
+      "total_tokens": 14640
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Producer-Consumer",
+      "Synchronization",
+      "Semaphores",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "במערכת הדפסה מבוזרת, משתמשים (Producers) שולחים עבודות הדפסה לתור עבודות משותף (Shared Buffer). מדפסות (Consumers) מוציאות עבודות מהתור ומדפיסות אותן.\nלמערכת יש מגבלה ייחודית: כדי למנוע עומס יתר, קיים מספר מרבי של עבודות שניתן לטפל בהן במקביל במערכת כולה. מספר זה, `MAX_ACTIVE_JOBS`, כולל גם עבודות שנמצאות כרגע בתור ההדפסה וגם עבודות שכבר נלקחו מהתור על ידי מדפסת ונמצאות בתהליך הדפסה (כלומר, טרם הסתיימו). גודל התור עצמו מוגבל ל-`BUFFER_SIZE` עבודות.\nכאשר מדפסת מסיימת להדפיס עבודה, היא משחררת את המשאבים עבורה.\n\nיש לממש את לוגיקת ה-Producer וה-Consumer עבור מערכת זו באמצעות סמפורים בלבד (כמו בדוגמאות). יש להניח שהסמפורים הוגנים.\nיש לתאר בקצרה ובבירור את הפתרון ולכתוב קוד C/C++ ברור לפונקציות הראשיות של חוטי ה-Producer וה-Consumer.\n\nתיאור הפתרון:\nמשתנים גלובליים (יש לכתוב ערכי אתחול בהערה):",
+      "code_snippet": "void* producer(void* arg) {\n    // Implement producer logic here\n}\n\nvoid* consumer(void* arg) {\n    // Implement consumer logic here\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון משתמש בארבעה סמפורים וב-mutex אחד (שמיושם כסמפור בינארי), בתוספת מבנה נתונים עבור התור:\n\n**הגדרות ומשתנים גלובליים:**\n```c\n#include <pthread.h>\n#include <semaphore.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h> // For usleep\n\n#define BUFFER_SIZE 5       // גודל תור ההדפסה המשותף\n#define MAX_ACTIVE_JOBS 8   // מגבלת עבודות פעילות במערכת כולה (בתור או בהדפסה)\n\ntypedef struct {\n    int id;\n} Job;\n\n// משתנים גלובליים (אתחול בסוגריים):\nsem_t mutex;                     // מגן על הגישה לתור ההדפסה (אתחול ל-1)\nsem_t queue_slots_available;     // סופר מקומות פנויים בתור (אתחול ל-BUFFER_SIZE)\nsem_t jobs_available_in_queue;   // סופר עבודות שממתינות בתור (אתחול ל-0)\nsem_t total_system_capacity;     // עוקב אחר מגבלת MAX_ACTIVE_JOBS (אתחול ל-MAX_ACTIVE_JOBS)\n\nJob print_queue[BUFFER_SIZE];    // התור המשותף לעבודות הדפסה\nint head = 0;                    // אינדקס להוצאת עבודות מהתור\nint tail = 0;                    // אינדקס להכנסת עבודות לתור\n\n// פונקציות עזר לדוגמה (לצורך הדמיית פעולה)\nvoid produce_job(Job* job) {\n    static int next_job_id = 0;\n    job->id = __sync_fetch_and_add(&next_job_id, 1); // Increment job ID atomically\n    printf(\"Producer produced job %d\\n\", job->id);\n    usleep(rand() % 100000); // Simulate work\n}\n\nvoid process_job(Job job) {\n    printf(\"Consumer processing job %d\\n\", job.id);\n    usleep(rand() % 500000); // Simulate processing time\n    printf(\"Consumer finished job %d\\n\", job.id);\n}\n```\n\n**תיאור הפתרון:**\nהפתרון משתמש בארבעה סמפורים וב-mutex אחד (שמיושם כסמפור בינארי).\n1.  `mutex`: סמפור בינארי (מאותחל ל-1) המגן על הגישה לתור ההדפסה המשותף (`print_queue`) ולמשתני האינדקסים (`head`, `tail`). הוא מבטיח שרק חוט אחד יוכל לשנות את מצב התור בכל רגע נתון.\n2.  `queue_slots_available`: סמפור ספירה (מאותחל ל-`BUFFER_SIZE`) המייצג את מספר המקומות הפנויים בתור ההדפסה. Producers ימתינו עליו לפני הוספת עבודה (באמצעות `sem_wait`), ו-Consumers יבצעו `sem_post` לאחר הוצאת עבודה, ובכך ישחררו מקום בתור.\n3.  `jobs_available_in_queue`: סמפור ספירה (מאותחל ל-0) המייצג את מספר העבודות הממתינות בתור ההדפסה. Consumers ימתינו עליו לפני הוצאת עבודה (באמצעות `sem_wait`), ו-Producers יבצעו `sem_post` לאחר הוספת עבודה, ובכך יסמנו שיש עבודה חדשה בתור.\n4.  `total_system_capacity`: סמפור ספירה (מאותחל ל-`MAX_ACTIVE_JOBS`) המייצג את המגבלה הכוללת על מספר העבודות הפעילות במערכת (בתור או בהדפסה). Producers יבצעו `sem_wait` עליו *לפני* שהם מוסיפים עבודה לתור, ובכך יוודאו שיש מקום במערכת כולה. Consumers יבצעו `sem_post` עליו *רק לאחר סיום הדפסת העבודה*, ובכך ישחררו את המגבלה עבור עבודה זו.\n\n**קוד C/C++ עבור Producer:**\n```c\nvoid* producer(void* arg) {\n    while (1) {\n        Job new_job;\n        produce_job(&new_job); // יצירת עבודה חדשה\n\n        // 1. המתן למקום פנוי במערכת כולה (מגבלת MAX_ACTIVE_JOBS)\n        sem_wait(&total_system_capacity);\n        // 2. המתן למקום פנוי בתור ההדפסה עצמו\n        sem_wait(&queue_slots_available);\n\n        // 3. נועל את ה-mutex לגישה לתור\n        sem_wait(&mutex);\n        // 4. הוסף את העבודה לתור\n        print_queue[tail] = new_job;\n        tail = (tail + 1) % BUFFER_SIZE;\n        printf(\"Producer added job %d to queue. Current queue state (tail: %d)\\n\", new_job.id, tail);\n        // 5. שחרר את ה-mutex\n        sem_post(&mutex);\n\n        // 6. סמן שיש עבודה זמינה בתור\n        sem_post(&jobs_available_in_queue);\n\n        usleep(rand() % 200000); // הדמיית זמן לפני יצירת העבודה הבאה\n    }\n    return NULL;\n}\n```\n\n**קוד C/C++ עבור Consumer:**\n```c\nvoid* consumer(void* arg) {\n    while (1) {\n        // 1. המתן לעבודה זמינה בתור\n        sem_wait(&jobs_available_in_queue);\n\n        // 2. נועל את ה-mutex לגישה לתור\n        sem_wait(&mutex);\n        // 3. הוצא את העבודה מהתור\n        Job job_to_process = print_queue[head];\n        head = (head + 1) % BUFFER_SIZE;\n        printf(\"Consumer took job %d from queue. Current queue state (head: %d)\\n\", job_to_process.id, head);\n        // 4. סמן שמקום בתור התפנה\n        sem_post(&queue_slots_available);\n        // 5. שחרר את ה-mutex\n        sem_post(&mutex);\n\n        // 6. בצע את פעולת הדפסת העבודה (מחוץ לאזור הקריטי)\n        process_job(job_to_process);\n\n        // 7. סמן שמקום במגבלת MAX_ACTIVE_JOBS התפנה (העבודה הושלמה)\n        sem_post(&total_system_capacity);\n\n        usleep(rand() % 100000); // הדמיית זמן לפני צריכת העבודה הבאה\n    }\n    return NULL;\n}\n```\n\nסדר זה מבטיח שהמגבלה `MAX_ACTIVE_JOBS` נאכפת כראוי, ושהמערכת לא תיכנס למצב של עומס יתר, תוך שמירה על סנכרון נכון בין Producers ו-Consumers. הסמפורים הוגנים (כנדרש) ולכן לא תהיה רעב (starvation) של חוטים הממתינים."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

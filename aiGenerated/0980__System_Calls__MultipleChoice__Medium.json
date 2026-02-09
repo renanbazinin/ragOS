@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "System Calls",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 07:14:21",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1165,
+      "output_tokens": 606,
+      "total_tokens": 3487
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "System Calls",
+      "Kernel Mode",
+      "Operating System Fundamentals"
+    ],
+    "content": {
+      "text": "מה מתרחש ברמת מערכת ההפעלה כאשר תהליך משתמש קורא לפונקציית ספרייה כמו `read()` או `write()`, אשר מבצעת קריאת מערכת (System Call)?",
+      "code_snippet": null,
+      "options": [
+        "א. הפונקציה בספרייה מעבירה את השליטה ישירות לקרנל באמצעות קריאה לפונקציה מיוחדת בכתובת קבועה בזיכרון המשתמש.",
+        "ב. התהליך מבצע פסיקת תוכנה (software interrupt/trap) המעבירה את השליטה למצב ליבה (kernel mode), שם מטופלת קריאת המערכת.",
+        "ג. המעבד מזהה את הקריאה כפקודה מיוחדת ומחליף אוטומטית למצב ליבה, מבלי צורך בפסיקה או במנגנון מיוחד אחר.",
+        "ד. הפונקציה בספרייה מבצעת קפיצה (jump) לכתובת של פונקציית הליבה המקבילה בזיכרון הליבה.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "כאשר תהליך משתמש מבצע קריאת מערכת (System Call), הוא אינו יכול לגשת ישירות לזיכרון הליבה או לבצע פעולות עם הרשאות מיוחדות. במקום זאת, הוא משתמש בפקודת `trap` (או פסיקת תוכנה). פקודה זו גורמת למעבד לעבור ממצב משתמש (user mode) למצב ליבה (kernel mode), לשמור את הקונטקסט של התהליך הנוכחי, ולקפוץ לכתובת קבועה בטבלת הפסיקות של הקרנל. שם נמצא הקוד שמטפל בקריאת המערכת הספציפית, מבצע את הפעולה המבוקשת (כמו קריאה מקובץ), ולאחר מכן מחזיר את השליטה לתהליך המשתמש במצב משתמש."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

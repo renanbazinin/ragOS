@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Synchronization and Concurrency",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 21:12:22",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 998,
+      "output_tokens": 363,
+      "total_tokens": 2475
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Synchronization",
+      "Concurrency",
+      "Mutex"
+    ],
+    "content": {
+      "text": "מהו התפקיד העיקרי של מנעול הדדי (mutex) במערכת הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. למנוע קיפאון (deadlock) בין תהליכים.",
+        "ב. להבטיח שרק תהליך/חוט אחד ייגש לקטע קריטי בכל רגע נתון.",
+        "ג. לשפר את ביצועי המעבד על ידי חלוקת עבודה.",
+        "ד. לאפשר תקשורת בין תהליכים (IPC)."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "התפקיד העיקרי של מנעול הדדי (mutex) הוא להגן על קטעים קריטיים בקוד, ובכך להבטיח שרק חוט ביצוע (thread) או תהליך אחד יוכל לגשת למשאב משותף (כגון משתנה גלובלי או מבנה נתונים) בכל רגע נתון. זה מונע מצבי מרוץ (race conditions) ומוודא עקביות נתונים."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

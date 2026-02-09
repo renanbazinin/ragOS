@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Atomic Operations",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 09:23:47",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1094,
+      "output_tokens": 507,
+      "total_tokens": 2980
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Atomic Operations",
+      "Concurrency",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של פעולה אטומית (Atomic Operation) בסביבת ריבוי תהליכים או חוטים?",
+      "code_snippet": null,
+      "options": [
+        "א. להאיץ את ביצוע התוכנית על ידי הקטנת תקורה.",
+        "ב. למנוע מצבי תחרות (Race Conditions) ולהבטיח עקביות נתונים משותפים.",
+        "ג. לאפשר לחוטים לגשת לזיכרון פרטי של תהליכים אחרים.",
+        "ד. להבטיח שכל חוט יקבל זמן מעבד שווה באופן הוגן.",
+        "ה. לפצל פעולה מורכבת למספר פעולות קטנות יותר."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב'. פעולה אטומית היא פעולה שמובטחת שתתבצע במלואה או לא תתבצע כלל, ללא הפרעה מחוטים או תהליכים אחרים. מטרתה העיקרית היא למנוע מצבי תחרות (Race Conditions) כאשר מספר ישויות ניגשות למשאב משותף, ובכך להבטיח את עקביות הנתונים המשותפים. אפשרות א' אינה נכונה מכיוון שפעולות אטומיות לרוב מגיעות עם תקורה מסוימת. אפשרויות ג' ו-ד' מתארות מושגים שונים לחלוטין (בידוד תהליכים ותזמון מעבד, בהתאמה). אפשרות ה' אינה נכונה מכיוון שפעולה אטומית היא יחידה בלתי ניתנת לחלוקה."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

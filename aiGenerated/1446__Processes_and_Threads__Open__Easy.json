@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Processes and Threads",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 10:18:25",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2768,
+      "output_tokens": 858,
+      "total_tokens": 5063
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "Open",
+    "topic": [
+      "Processes and Threads"
+    ],
+    "content": {
+      "text": "הסבירו מהם ההבדלים העיקריים בין תהליכים (processes) לבין תהליכונים (threads) בהקשר של שיתוף משאבים. פרטו אילו משאבים משותפים בין תהליכונים בתוך אותו תהליך, ואילו משאבים נשארים פרטיים לכל תהליכון.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הבדלים עיקריים בין תהליכים לתהליכונים בהקשר של שיתוף משאבים:\n\n*   **תהליכים (Processes)**: כל תהליך הוא יחידה עצמאית לחלוטין עם מרחב זיכרון משלו (address space), קבצי קלט/פלט פתוחים משלו, אוגרים משלו, וכו'. תהליכים בדרך כלל אינם חולקים משאבים אלא אם כן מבוצע שיתוף מפורש באמצעות מנגנוני תקשורת בין-תהליכית (IPC) כמו pipes, shared memory, message queues וכו'. יצירת תהליך חדש היא יקרה יחסית מבחינת משאבי מערכת.\n\n*   **תהליכונים (Threads)**: תהליכונים הם יחידות ביצוע קלות-משקל (lightweight) בתוך תהליך בודד. כל התהליכונים בתוך אותו תהליך חולקים את מרחב הזיכרון של התהליך, קבצים פתוחים ורוב משאבי מערכת ההפעלה. יצירת תהליכון חדש היא זולה יותר מיצירת תהליך חדש.\n\n**משאבים משותפים בין תהליכונים באותו תהליך:**\n*   **מרחב כתובות (Address Space)**: כולל קוד התוכנית (text segment), נתונים גלובליים (data segment), ערימה (heap).\n*   **קבצים פתוחים (Open Files)**: כל קובצי ה-I/O שהתהליך פתח.\n*   **אותות (Signals)**: סוגי אותות ומטפלי אותות (signal handlers).\n*   **משאבי מערכת הפעלה נוספים**: למשל, מזהה תהליך (Process ID), מידע על משתמש וקבוצה (user and group IDs).\n\n**משאבים פרטיים לכל תהליכון:**\n*   **אוגרים (Registers)**: כולל מונה תוכנית (Program Counter - PC) ומצביע מחסנית (Stack Pointer).\n*   **מחסנית (Stack)**: לכל תהליכון יש מחסנית משלו, המשמשת לאחסון משתנים לוקאליים ומידע על קריאות לפונקציות.\n*   **מצב תהליכון (Thread State)**: כולל את המצב הנוכחי של התהליכון (למשל, ריצה, מוכן, חסום).\n*   **נתונים לוקאליים לתהליכון (Thread-Local Storage - TLS)**: אם משתמשים במנגנון כזה, אלו משתנים שכל תהליכון מקבל עותק משלו."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

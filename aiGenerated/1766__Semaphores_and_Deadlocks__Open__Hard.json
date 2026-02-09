@@ -1,0 +1,52 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Deadlocks",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 20:41:19",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4395,
+      "output_tokens": 3135,
+      "total_tokens": 14273
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Semaphores",
+      "Deadlocks",
+      "Concurrency",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתונה מסילת רכבת מעגלית המחולקת ל-N מקטעים (sections), הממוספרים מ-0 עד N-1. N רכבות (threads), הממוספרות מ-0 עד N-1, נעות על המסילה בכיוון אחד (ממקטע i למקטע (i+1)%N). כל מקטע יכול להכיל לכל היותר רכבת אחת בכל רגע נתון. רכבת חייבת לתפוס את המקטע הבא לפני שהיא משחררת את המקטע הנוכחי, וזאת על מנת למנוע התנגשות. יש לממש פונקציה `move_train(train_id, current_section, next_section)` שתאפשר לרכבת להתקדם בבטחה ממקטע למקטע, תוך שימוש בסמפורים בלבד.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "ממשו את הפונקציה `move_train` באופן שעלול ליצור קיפאון (deadlock). הציגו את מבנה הנתונים הנדרש (semaphores) והסבירו בקצרה מדוע המימוש עלול לגרום לקיפאון, וספקו תרחיש ספציפי שבו קיפאון אכן יתרחש.",
+        "code_snippet": "```c\n#include <semaphore.h>\n#include <stdio.h>\n#include <stdlib.h>\n\n#define N_SECTIONS 5 // דוגמה ל-N\n\n// סמפורים גלובליים עבור כל מקטע\nsem_t section_semaphores_deadlock[N_SECTIONS];\n\nvoid init_train_system_deadlock() {\n    for (int i = 0; i < N_SECTIONS; i++) {\n        sem_init(&section_semaphores_deadlock[i], 0, 1); // כל מקטע פנוי בהתחלה\n    }\n}\n\nvoid destroy_train_system_deadlock() {\n    for (int i = 0; i < N_SECTIONS; i++) {\n        sem_destroy(&section_semaphores_deadlock[i]);\n    }\n}\n\nvoid move_train_deadlock(int train_id, int current_section, int next_section) {\n    // השלימו את הקוד כאן\n}\n```",
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "שנו את המימוש של הפונקציה `move_train` כך שימנע קיפאון, תוך שמירה על בטיחות (מניעת התנגשויות). הציגו את השינויים במבנה הנתונים (אם ישנם) ובקוד, והסבירו בקצרה את אסטרטגיית מניעת הקיפאון וכיצד היא עובדת. הוכיחו בקצרה שהפתרון אכן מונע קיפאון.",
+        "code_snippet": "```c\n#include <semaphore.h>\n#include <stdio.h>\n#include <stdlib.h>\n\n#define N_SECTIONS 5 // דוגמה ל-N\n\n// סמפורים גלובליים עבור כל מקטע\nsem_t section_semaphores_safe[N_SECTIONS];\n// סמפורים נוספים הנדרשים למניעת קיפאון\nsem_t control_semaphore;\n\nvoid init_train_system_safe() {\n    for (int i = 0; i < N_SECTIONS; i++) {\n        sem_init(&section_semaphores_safe[i], 0, 1); // כל מקטע פנוי בהתחלה\n    }\n    // אתחול סמפורים נוספים\n    sem_init(&control_semaphore, 0, N_SECTIONS - 1); // הגבלת N-1 רכבות פעילות\n}\n\nvoid destroy_train_system_safe() {\n    for (int i = 0; i < N_SECTIONS; i++) {\n        sem_destroy(&section_semaphores_safe[i]);\n    }\n    // השמדת סמפורים נוספים\n    sem_destroy(&control_semaphore);\n}\n\nvoid move_train_safe(int train_id, int current_section, int next_section) {\n    // השלימו את הקוד כאן\n}\n```",
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "### 1.1 מימוש שעלול לגרום לקיפאון\n\n**קוד:**\n```c\nvoid move_train_deadlock(int train_id, int current_section, int next_section) {\n    printf(\"Train %d trying to acquire section %d\\n\", train_id, current_section);\n    sem_wait(&section_semaphores_deadlock[current_section]); // תפוס את המקטע הנוכחי\n    printf(\"Train %d acquired section %d, trying to acquire %d\\n\", train_id, current_section, next_section);\n    sem_wait(&section_semaphores_deadlock[next_section]);    // נסה לתפוס את המקטע הבא\n    printf(\"Train %d acquired section %d, releasing %d\\n\", train_id, next_section, current_section);\n    sem_post(&section_semaphores_deadlock[current_section]); // שחרר את המקטע הנוכחי\n    printf(\"Train %d moved from %d to %d\\n\", train_id, current_section, next_section);\n}\n```\n\n**הסבר לקיפאון ותרחיש:**\nהמימוש הנ\"ל עלול לגרום לקיפאון (deadlock) מכיוון שהוא מקיים את ארבעת התנאים של קיפאון:\n1.  **מניעה הדדית (Mutual Exclusion):** כל מקטע מוגן על ידי סמפור בינארי, כך שרק רכבת אחת יכולה לתפוס מקטע מסוים בכל רגע נתון.\n2.  **החזקה והמתנה (Hold and Wait):** כל רכבת תופסת את המקטע הנוכחי שלה (`current_section`) ולאחר מכן ממתינה לתפוס את המקטע הבא (`next_section`) מבלי לשחרר את המקטע שהיא מחזיקה.\n3.  **אי-הפקעה (No Preemption):** לא ניתן להפקיע מקטע מרכבת אלא אם היא משחררת אותו מרצונה.\n4.  **המתנה מעגלית (Circular Wait):** תרחיש קיפאון יכול להתרחש כאשר כל N הרכבות מנסות להתקדם בו-זמנית:\n    *   רכבת 0 תופסת את מקטע 0 וממתינה למקטע 1.\n    *   רכבת 1 תופסת את מקטע 1 וממתינה למקטע 2.\n    *   ...\n    *   רכבת N-1 תופסת את מקטע N-1 וממתינה למקטע 0.\n    במצב זה, כל רכבת ממתינה למקטע שמוחזק על ידי הרכבת הבאה בתור, מה שיוצר מעגל המתנה אינסופי. אף רכבת לא יכולה להתקדם ושחרר את המקטע שלה, ולכן נוצר קיפאון.\n\n### 1.2 מימוש מונע קיפאון\n\n**שינויים במבנה הנתונים:**\nנוסיף סמפור בינארי גלובלי נוסף בשם `control_semaphore`, שיאותחל ל- `N_SECTIONS - 1`. סמפור זה ישמש להגבלת מספר הרכבות שיכולות להיות 'פעילות' (כלומר, מחזיקות מקטע אחד ומנסות לרכוש מקטע נוסף) בו-זמנית.\n\n**קוד:**\n```c\nvoid move_train_safe(int train_id, int current_section, int next_section) {\n    printf(\"Train %d trying to acquire control_semaphore\\n\", train_id);\n    sem_wait(&control_semaphore); // הגבל את מספר הרכבות הפעילות ל-N-1\n    printf(\"Train %d acquired control_semaphore, trying to acquire section %d\\n\", train_id, current_section);\n    sem_wait(&section_semaphores_safe[current_section]); // תפוס את המקטע הנוכחי\n    printf(\"Train %d acquired section %d, trying to acquire %d\\n\", train_id, current_section, next_section);\n    sem_wait(&section_semaphores_safe[next_section]);    // תפוס את המקטע הבא\n    printf(\"Train %d acquired section %d, releasing %d and control_semaphore\\n\", train_id, next_section, current_section);\n    sem_post(&section_semaphores_safe[current_section]); // שחרר את המקטע הנוכחי\n    sem_post(&control_semaphore); // אפשר לרכבת נוספת להיות פעילה\n    printf(\"Train %d moved from %d to %d safely\\n\", train_id, current_section, next_section);\n}\n```\n\n**הסבר לאסטרטגיית מניעת הקיפאון:**\nאסטרטגיה זו מונעת קיפאון על ידי שבירת תנאי ה'המתנה המעגלית' (Circular Wait). ה-`control_semaphore` מבטיח שבכל רגע נתון, לכל היותר `N-1` רכבות יכולות להיות במצב שבו הן מחזיקות מקטע אחד ומנסות לתפוס מקטע נוסף. כאשר יש `N` מקטעים ו-`N` רכבות, אם רק `N-1` רכבות מורשות להיכנס למצב זה, תמיד יישאר מקטע אחד לפחות שאינו מוחזק על ידי רכבת הממתינה למקטע אחר. \n\n**כיצד זה עובד:**\nנניח ש-`N-1` רכבות הצליחו לרכוש את `control_semaphore` ואת המקטעים הנוכחיים שלהן, וכעת כולן ממתינות למקטעים הבאים שלהן. עדיין ישנו מקום אחד פנוי ב-`control_semaphore` (המונה שלו הוא 0). אם רכבת נוספת (הרכבת ה-N-ית) תנסה להיכנס, היא תחסם על ידי `control_semaphore` עד שאחת הרכבות הפעילות תסיים את תנועתה. מבין ה-`N-1` הרכבות הפעילות, לא ייתכן שכולן יהיו חסומות במעגל המתנה, מכיוון שתמיד יהיה מקטע אחד לפחות שאינו מוחזק על ידי אף אחת מהן, או שמוחזק על ידי רכבת שכבר סיימה את רכישת שני המקטעים שלה והיא בדרך לשחרר את ה-`control_semaphore`. לכן, תמיד תהיה רכבת אחת לפחות שתוכל לרכוש את המקטע הבא שלה, לשחרר את המקטע הנוכחי, ולשחרר את ה-`control_semaphore`, ובכך לאפשר לרכבת חסומה אחרת להתקדם.\n\n**הוכחה קצרה למניעת קיפאון:**\nהפתרון מונע קיפאון על ידי שבירת תנאי ההמתנה המעגלית. ה-`control_semaphore` מבטיח שלכל היותר `N-1` רכבות יוכלו לתפוס את המקטעים שלהן בו-זמנית. אם `N-1` רכבות תופסות מקטעים, נשאר מקטע אחד פנוי. במצב של המתנה מעגלית, כל רכבת מחזיקה מקטע וממתינה למקטע הבא, וכולם יוצרים מעגל. אך אם יש רק `N-1` רכבות במצב זה, לא ניתן ליצור מעגל סגור של `N` מקטעים, שכן חסרה רכבת אחת שתשלים את המעגל. לכן, תמיד תהיה לפחות רכבת אחת שתוכל לרכוש את המקטע הבא שלה (שכן הוא חייב להיות פנוי, או שרכבת אחרת כבר מחזיקה אותו וסיימה את רכישת שניהם), להשלים את תנועתה ולשחרר משאבים, ובכך למנוע קיפאון."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

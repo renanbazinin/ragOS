@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Threads and Synchronization",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 19:43:59",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1971,
+      "output_tokens": 1120,
+      "total_tokens": 6686
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Threads",
+      "Synchronization",
+      "Race Conditions"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה המשתמשת במספר חוטים. מהו הערך *הצפוי* של המשתנה הגלובלי shared_counter בסיום ריצת כל החוטים, והאם ערך זה *מובטח*?",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\n#define NUM_THREADS 5\n#define INCREMENTS_PER_THREAD 100000\n\nint shared_counter = 0;\n\nvoid *increment_counter(void *arg) {\n    for (int i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n        shared_counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, increment_counter, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final counter value: %d\\n\", shared_counter);\n\n    return 0;\n}",
+      "options": [
+        "א. 500000, וערך זה מובטח תמיד.",
+        "ב. 500000, אך ערך זה אינו מובטח ויהיה לרוב נמוך יותר.",
+        "ג. 500000, אך ערך זה אינו מובטח ויכול להיות גבוה יותר או נמוך יותר.",
+        "ד. ערך כלשהו בין 0 ל-500000, וערך זה אינו מובטח."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "הערך הצפוי (האידיאלי) של המשתנה shared_counter הוא סך כל ההגדלות שבוצעו על ידי כל החוטים: NUM_THREADS * INCREMENTS_PER_THREAD = 5 * 100000 = 500000.\n\nאולם, הקוד סובל מתנאי מירוץ (race condition) על המשתנה הגלובלי shared_counter. הפעולה shared_counter++ אינה אטומית. היא מורכבת למעשה משלוש פעולות בסיסיות ברמת המעבד:\n1. קריאת הערך הנוכחי של shared_counter מהזיכרון לרגיסטר של המעבד.\n2. הגדלת הערך ברגיסטר באחד.\n3. כתיבת הערך המעודכן מהרגיסטר בחזרה לזיכרון של shared_counter.\n\nכאשר מספר חוטים מנסים לבצע פעולה זו במקביל ללא מנגנון סנכרון (כמו mutex), ייתכן שחוט אחד יקרא את הערך, חוט שני יקרא *את אותו ערך* לפני שהחוט הראשון הספיק לכתוב את הערך המעודכן. שניהם יגדילו את הערך ברגיסטרים הפרטיים שלהם, ושניהם יכתבו אותו בחזרה לזיכרון. במקרה כזה, אחת מההגדלות תאבד, והערך הסופי יהיה נמוך מהצפוי. לדוגמה:\n- shared_counter = 0.\n- חוט A קורא 0 (לרגיסטר שלו).\n- חוט B קורא 0 (לרגיסטר שלו).\n- חוט A מגדיל את הרגיסטר שלו ל-1.\n- חוט A כותב 1 ל-shared_counter.\n- חוט B מגדיל את הרגיסטר שלו ל-1.\n- חוט B כותב 1 ל-shared_counter.\nבסוף שני ההגדלות, הערך של shared_counter הוא 1 במקום 2.\n\nמכיוון שהפעולה היא רק הגדלה, הערך הסופי יכול להיות רק שווה או נמוך מהערך הצפוי (500000), אך לעולם לא גבוה ממנו. לכן, הערך 500000 אינו מובטח, והוא יהיה לרוב נמוך יותר עקב אובדן עדכונים."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

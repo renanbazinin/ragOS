@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Condition Variables",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 07:29:21",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 1431,
+      "total_tokens": 9577
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Synchronization",
+      "Condition Variables",
+      "Producer-Consumer"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא המממש תור משותף (shared queue) בין מספר תהליכי יצרן (producer) ותהליכי צרכן (consumer) באמצעות מנעול בודד ומשתנה תנאי בודד. מהי הבעיה המשמעותית ביותר במנגנון הסנכרון המוצג בקוד?",
+      "code_snippet": "#include <iostream>\n#include <queue>\n#include <mutex>\n#include <condition_variable>\n#include <thread>\n#include <vector>\n\nconst int MAX_ITEMS = 5;\nstd::queue<int> shared_queue;\nstd::mutex mtx;\nstd::condition_variable cv; // Single condition variable for both producers and consumers\n\nvoid producer(int id) {\n    for (int i = 0; i < 3; ++i) { // Each producer adds 3 items\n        std::this_thread::sleep_for(std::chrono::milliseconds(10));\n        std::unique_lock<std::mutex> lock(mtx);\n        cv.wait(lock, [] { return shared_queue.size() < MAX_ITEMS; }); // Wait if full\n\n        int item = id * 100 + i;\n        shared_queue.push(item);\n        std::cout << \"Producer \" << id << \" produced \" << item << \". Queue size: \" << shared_queue.size() << std::endl;\n        cv.notify_one(); // Notify *one* waiting thread (could be producer or consumer)\n    }\n}\n\nvoid consumer(int id) {\n    for (int i = 0; i < 2; ++i) { // Each consumer consumes 2 items\n        std::this_thread::sleep_for(std::chrono::milliseconds(15));\n        std::unique_lock<std::mutex> lock(mtx);\n        cv.wait(lock, [] { return !shared_queue.empty(); }); // Wait if empty\n\n        int item = shared_queue.front();\n        shared_queue.pop();\n        std::cout << \"Consumer \" << id << \" consumed \" << item << \". Queue size: \" << shared_queue.size() << std::endl;\n        cv.notify_one(); // Notify *one* waiting thread (could be producer or consumer)\n    }\n}\n\nint main() {\n    std::vector<std::thread> threads;\n    for (int i = 0; i < 2; ++i) { // 2 producers\n        threads.emplace_back(producer, i + 1);\n    }\n    for (int i = 0; i < 3; ++i) { // 3 consumers\n        threads.emplace_back(consumer, i + 1);\n    }\n\n    for (auto& t : threads) {\n        t.join();\n    }\n    std::cout << \"Final queue size: \" << shared_queue.size() << std::endl;\n    return 0;\n}",
+      "options": [
+        "א. סכנת Deadlock עקב שימוש שגוי במנעול.",
+        "ב. תחרות (Race Condition) העלולה לגרום לשחיתות נתונים בתור.",
+        "ג. חוסר יעילות משמעותי בשל התעוררויות שגויות והחלפות הקשר מיותרות.",
+        "ד. סכנת הרעבה (Starvation) עבור חלק מהתהליכים.",
+        "ה. אין בעיה מהותית, הקוד נכון ויעיל מספיק."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ד. סכנת הרעבה (Starvation) עבור חלק מהתהליכים.",
+      "explanation": "הקוד משתמש במשתנה תנאי יחיד (cv) הן עבור תהליכי היצרן (המתנה שהתור לא יהיה מלא) והן עבור תהליכי הצרכן (המתנה שהתור לא יהיה ריק). בנוסף, משתמשים ב-`notify_one()` במקום ב-`notify_all()` או בשני משתני תנאי נפרדים (אחד ליצרנים ואחד לצרכנים). במצב כזה, כאשר תהליך כלשהו משחרר פריט או מוסיף פריט וקורא ל-`notify_one()`, הוא עשוי להעיר תהליך מהסוג ה'לא נכון' (לדוגמה, להעיר צרכן כאשר יש יצרנים שממתינים למקום פנוי בתור, או להעיר יצרן כאשר יש צרכנים שממתינים לפריט בתור). התהליך שהתעורר יבדוק את התנאי שלו באמצעות הלולאה `while` (או הלמבדה במקרה זה), ואם התנאי לא מתקיים עבורו, הוא יחזור להמתין. אם התנאי מתקיים עבורו, הוא יבצע את פעולתו, אך ייתכן שתהליך אחר (מסוג אחר) שכן יכול היה להתקדם, נשאר רדום. תרחיש זה מוביל אמנם לחוסר יעילות רב עקב החלפות הקשר מיותרות (תשובה ג'), אך חמור מכך, עלול לגרום למצב של הרעבה (Starvation) שבו תהליכים מסוימים לעולם או לעיתים רחוקות מאוד יזכו להתעורר ולבצע את עבודתם, בעוד תהליכים אחרים ממשיכים להתקדם, גם אם בצורה לא אופטימלית. לכן, סכנת הרעבה היא הבעיה המשמעותית ביותר."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

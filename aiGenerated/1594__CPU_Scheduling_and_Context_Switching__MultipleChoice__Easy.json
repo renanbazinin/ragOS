@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "CPU Scheduling and Context Switching",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 11:45:25",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1035,
+      "output_tokens": 470,
+      "total_tokens": 2918
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "CPU Scheduling",
+      "Context Switching"
+    ],
+    "content": {
+      "text": "מהי אחת ההשלכות של החלפת הקשר (context switch) על ביצועי המערכת?",
+      "code_snippet": null,
+      "options": [
+        "א. היא מאפשרת למערכת להריץ מספר תהליכים בו זמנית על מעבד יחיד.",
+        "ב. היא מצריכה שמירת מצב (state) התהליך המופסק וטעינת מצב התהליך החדש, פעולה הצורכת זמן מעבד.",
+        "ג. היא מונעת מתהליכים בעלי עדיפות גבוהה לקבל זמן מעבד.",
+        "ד. היא גורמת תמיד לאיבוד נתונים של התהליך המופסק."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "החלפת הקשר (context switch) היא תהליך הכרחי המאפשר למערכת ההפעלה להחליף בין תהליכים שונים הרצים על המעבד. עם זאת, תהליך זה כרוך בשמירת מצב (state) התהליך הנוכחי וטעינת מצב התהליך הבא (למשל, תוכן האוגרים, מונה התוכנית, מצביע המחסנית). פעולות אלו צורכות זמן מעבד ומשאבי מערכת, והזמן המושקע בהן נחשב ל-overhead (תקורה) ואינו מועיל ישירות לביצוע עבודת התוכנה. לכן, הוא משפיע על ביצועי המערכת על ידי הפחתת הזמן הזמין לביצוע עבודה פרודוקטיבית."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

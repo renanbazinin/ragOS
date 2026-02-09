@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Context Switching",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 07:03:33",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 956,
+      "output_tokens": 389,
+      "total_tokens": 2391
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Context Switching",
+      "Processes",
+      "CPU Scheduling"
+    ],
+    "content": {
+      "text": "מהי אחת ההשלכות העיקריות של ביצוע החלפת הקשר (context switch) תכופה?",
+      "code_snippet": null,
+      "options": [
+        "א. שיפור ביצועי המערכת הכוללים.",
+        "ב. הגדלת יעילות השימוש בזיכרון מטמון (cache).",
+        "ג. הגדלת העומס על המעבד עקב שמירה ושחזור של מצב התהליך.",
+        "ד. הפחתת הצורך במצב ליבה (kernel mode)."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג'. החלפת הקשר היא פעולה יקרה הכרוכה בשמירה של מצב התהליך הנוכחי (כמו אוגרי המעבד ומונה התוכנית) ובשחזור מצב התהליך הבא. פעולות אלו גורמות לעומס על המעבד ולזמן ביצוע מבוזבז, במיוחד אם הן מתרחשות בתדירות גבוהה. בנוסף, החלפות קשר תכופות עלולות לפגוע ביעילות זיכרון המטמון (cache) עקב החלפת הנתונים וההוראות הפעילים."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

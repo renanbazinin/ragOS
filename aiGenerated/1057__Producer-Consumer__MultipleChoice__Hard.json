@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Producer-Consumer",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 07:40:35",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 970,
+      "output_tokens": 1232,
+      "total_tokens": 6896
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Producer-Consumer",
+      "Synchronization",
+      "Condition Variables",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתונה מערכת מפיק-צרכן המשתמשת בחוצץ מעגלי חסום (bounded circular buffer), מנעול (mutex) ושני משתני תנאי (condition variables): `not_full` ו-`not_empty`. קטע הקוד הבא מיישם את פונקציית הצרכן. ההנחה היא שיש מספר מפיקים ומספר צרכנים הפועלים במקביל. מהי התוצאה הסבירה ביותר של השגיאה בקטע הקוד המסומן?",
+      "code_snippet": "#include <pthread.h>\n#define BUFFER_SIZE 5\n\nint buffer[BUFFER_SIZE];\nint count = 0; // Number of items in buffer\nint in = 0;    // Next write position\nint out = 0;   // Next read position\n\npthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;\npthread_cond_t not_full = PTHREAD_COND_INITIALIZER;\npthread_cond_t not_empty = PTHREAD_COND_INITIALIZER;\n\nvoid *consumer(void *arg) {\n    int item;\n    while (1) {\n        pthread_mutex_lock(&mutex);\n        // START OF FLAWED CODE\n        if (count == 0) { // POTENTIAL BUG: Should be 'while (count == 0)'\n            pthread_cond_wait(&not_empty, &mutex);\n        }\n        // END OF FLAWED CODE\n        \n        item = buffer[out];\n        out = (out + 1) % BUFFER_SIZE;\n        count--;\n        \n        pthread_cond_signal(&not_full);\n        pthread_mutex_unlock(&mutex);\n        // process item...\n    }\n    return NULL;\n}",
+      "options": [
+        "א. המערכת תהיה נתונה למצב של קיפאון (deadlock) מכיוון שצרכן יכול להיתקע בהמתנה למצב שאינו יגיע לעולם.",
+        "ב. צרכנים עלולים לנסות לקרוא נתונים מחוץ לגבולות החוצץ (buffer underflow) או לקרוא נתונים שאינם תקפים, במיוחד כאשר יש מספר צרכנים.",
+        "ג. מפיקים עלולים לנסות לכתוב נתונים לחוצץ מלא (buffer overflow), מה שיוביל לשחיתות נתונים.",
+        "ד. המערכת תפעל בצורה תקינה אך עם ביצועים נמוכים יותר עקב יקיצות סרק מרובות (spurious wakeups).",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "התשובה הנכונה היא ב'. השימוש ב-`if (count == 0)` במקום `while (count == 0)` הוא טעות נפוצה בעבודה עם משתני תנאי (condition variables).\nכאשר קריאה ל-`pthread_cond_wait` מסתיימת, היא יכולה להתרחש כתוצאה מסיגנל (signal/broadcast), יקיצה ספונטנית (spurious wakeup), או הפרעה. בכל המקרים הללו, התנאי שהחוט המתין לו (למשל, `count > 0`) ייתכן שכבר לא יהיה נכון כאשר החוט מתעורר ומקבל מחדש את המנעול (mutex).\nבמיוחד בתרחיש של מספר צרכנים:\n1.  אם מפיק מוסיף פריט אחד וקורא ל-`pthread_cond_signal(&not_empty)`, ייתכן שיתעוררו מספר צרכנים (עקב יקיצות ספונטניות או תזמון, גם אם `signal` אמור להעיר אחד בלבד). \n2.  הצרכן הראשון שיקבל את המנעול יצרוך את הפריט, ו-`count` יהפוך ל-0.\n3.  צרכנים נוספים שהתעוררו יקבלו את המנעול בזה אחר זה. מכיוון שהם השתמשו ב-`if (count == 0)`, הם ימשיכו הלאה מבלי לבדוק מחדש את התנאי, וינסו לקרוא מחוצץ ריק (`count == 0`).\nזה יוביל ל-buffer underflow (קריאה מחוץ לגבולות החוצץ או קריאת נתונים שאינם תקפים), שזו שגיאת תקינות קריטית ולא רק בעיית ביצועים. השימוש ב-`while` מבטיח שהתנאי ייבדק מחדש לאחר כל יקיצה, ובכך מונע מצבים אלו."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

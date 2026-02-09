@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Condition Variables",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 07:32:53",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2619,
+      "output_tokens": 1955,
+      "total_tokens": 8106
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Condition Variables",
+      "Synchronization",
+      "Multithreading"
+    ],
+    "content": {
+      "text": "במערכת הפעלה מרובת תהליכים, נניח שיש לנו N חוטי עבודה (worker threads) שכל אחד מהם מבצע סדרת משימות. לאחר שכל חוט עבודה מסיים משימה יחידה, עליו להמתין עד שכל שאר חוטי העבודה (כל N החוטים) יסיימו גם הם את המשימה הנוכחית שלהם. רק לאחר שכל N החוטים הגיעו לנקודת סנכרון זו (מחסום - barrier), כולם יכולים להמשיך למשימה הבאה. \n\nיישם/י מנגנון סנכרון מסוג מחסום באמצעות מנעול הדדי (mutex) ומשתני תנאי (condition variables) של POSIX pthreads. \n\nקטע הקוד צריך לכלול:\n1. הצהרה ואתחול של המשתנים הגלובליים הנדרשים.\n2. פונקציה `worker_thread_func` המדמה ביצוע משימה וכוללת את לוגיקת המחסום.\n3. פונקציה `main` שתצור N חוטי עבודה ותמתין לסיומם (לצורך הדגמה, ניתן להגדיר מספר קבוע של איטרציות).\n\nהסבר/י בקצרה את פעולת המנגנון שהצעת, תוך התייחסות לחשיבות השימוש בלולאת `while` עם `pthread_cond_wait` ולבחירה בין `pthread_cond_signal` ל-`pthread_cond_broadcast`.",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h> // For sleep\n\n#define NUM_THREADS 5\n#define NUM_ITERATIONS 3\n\npthread_mutex_t barrier_mutex;\npthread_cond_t barrier_cond;\nint threads_at_barrier = 0;\nint total_threads = NUM_THREADS;\n\nvoid *worker_thread_func(void *arg) {\n    long tid = (long)arg;\n    int i;\n\n    for (i = 0; i < NUM_ITERATIONS; ++i) {\n        // Simulate doing some work\n        printf(\"Thread %ld: Starting iteration %d, doing work...\\n\", tid, i);\n        sleep(rand() % 3 + 1); // Simulate variable work time\n        printf(\"Thread %ld: Finished work for iteration %d.\\n\", tid, i);\n\n        pthread_mutex_lock(&barrier_mutex);\n\n        threads_at_barrier++;\n        printf(\"Thread %ld: Reached barrier. %d/%d threads here.\\n\", tid, threads_at_barrier, total_threads);\n\n        if (threads_at_barrier == total_threads) {\n            // Last thread to arrive, signal all others\n            printf(\"Thread %ld: Last thread arrived. Broadcasting to all waiting threads.\\n\", tid);\n            threads_at_barrier = 0; // Reset for next iteration\n            pthread_cond_broadcast(&barrier_cond);\n        } else {\n            // Not the last thread, wait for others\n            // Use a while loop for spurious wakeups and to re-check condition\n            while (threads_at_barrier != 0) { // Condition: wait until barrier is reset by the last thread\n                pthread_cond_wait(&barrier_cond, &barrier_mutex);\n            }\n        }\n        \n        pthread_mutex_unlock(&barrier_mutex);\n        printf(\"Thread %ld: Passed barrier, starting next task/iteration %d.\\n\", tid, i + 1);\n    }\n\n    printf(\"Thread %ld: All iterations completed. Exiting.\\n\", tid);\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n    long i;\n\n    // Initialize mutex and condition variable\n    pthread_mutex_init(&barrier_mutex, NULL);\n    pthread_cond_init(&barrier_cond, NULL);\n\n    srand(time(NULL)); // Seed for random sleep\n\n    // Create worker threads\n    for (i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, worker_thread_func, (void *)i);\n    }\n\n    // Wait for all threads to complete\n    for (i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"All threads finished. Main exiting.\\n\");\n\n    // Destroy mutex and condition variable\n    pthread_mutex_destroy(&barrier_mutex);\n    pthread_cond_destroy(&barrier_cond);\n\n    return 0;\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "מנגנון המחסום מיושם באמצעות מנעול הדדי (mutex) ומשתנה תנאי (condition variable). המשתנה הגלובלי `threads_at_barrier` עוקב אחר מספר החוטים שהגיעו למחסום באותו סבב. `total_threads` מגדיר את המספר הכולל של החוטים.\n\n**פעולת המנגנון:**\n1.  **הגעה למחסום:** כל חוט עבודה, לאחר שסיים את משימתו הנוכחית, נועל את ה-mutex ומגדיל את המונה `threads_at_barrier`.\n2.  **החוט האחרון:**\n    *   אם החוט הנוכחי הוא האחרון שמגיע למחסום (`threads_at_barrier == total_threads`), הוא אחראי לאפס את המונה (`threads_at_barrier = 0`) כדי להכין את המחסום לסבב הבא, ולאחר מכן לשדר (broadcast) באמצעות `pthread_cond_broadcast`. פעולה זו מעירה את כל החוטים האחרים שממתינים על משתנה התנאי.\n3.  **חוטים ממתינים:**\n    *   אם החוט הנוכחי אינו האחרון שמגיע למחסום, עליו להמתין. הוא קורא ל-`pthread_cond_wait`, שמשחררת אוטומטית את ה-mutex ומכניסה את החוט למצב שינה עד שיעורר.\n\n**חשיבות לולאת `while` עם `pthread_cond_wait`:**\nהשימוש בלולאת `while (threads_at_barrier != 0)` סביב `pthread_cond_wait` הוא קריטי. הוא מטפל במצבים של \"התעוררות שווא\" (spurious wakeups), שבהם חוט מתעורר ממשתנה התנאי למרות שהתנאי שעליו הוא ממתין עדיין אינו מתקיים. הלולאה מבטיחה שהחוט יבדוק מחדש את התנאי (`threads_at_barrier == 0` כלומר, המחסום שוחרר על ידי החוט האחרון) לאחר שהתעורר, ורק אם התנאי אכן מתקיים, ימשיך בדרכו. אם לא, הוא יחזור למצב המתנה.\n\n**בחירה בין `pthread_cond_signal` ל-`pthread_cond_broadcast`:**\nבמקרה של מחסום, יש להשתמש ב-`pthread_cond_broadcast`. הסיבה היא שברגע שהחוט האחרון מגיע, כל החוטים הממתינים צריכים להשתחרר ולהמשיך במקביל. שימוש ב-`pthread_cond_signal` יעיר רק חוט אחד, מה שיגרום לקיפאון (deadlock) או לפעולה שגויה של המחסום, מכיוון ששאר החוטים יישארו במצב המתנה ולא יתקדמו."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

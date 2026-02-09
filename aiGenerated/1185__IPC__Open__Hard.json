@@ -1,0 +1,66 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "IPC",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 08:32:49",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4148,
+      "output_tokens": 3433,
+      "total_tokens": 15452
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "IPC",
+      "Shared Memory",
+      "Semaphores",
+      "Message Queues",
+      "Synchronization",
+      "Producer-Consumer"
+    ],
+    "content": {
+      "text": "תכננו ויישמו (או תארו את היישום עבור) מערכת תקשורת בין תהליכים (IPC) המאפשרת לתהליך אב (master) לחלק משימות לתהליכי צאצא (worker) מרובים, ולאסוף מהם את התוצאות. המשימות הן מספרים שלמים, וכל תהליך worker מקבל מספר, מבצע עליו חישוב מסוים (לדוגמה, העלאה בריבוע), ומחזיר את התוצאה. תהליך ה-master צריך לוודא שכל המשימות מבוצעות ולקבל את כל התוצאות בחזרה.\nהמערכת תשתמש בזיכרון משותף (Shared Memory) כחוצץ מעגלי (circular buffer) להעברת משימות, ובסמפורים (Semaphores) לצורך סנכרון נכון. בנוסף, תהליכי ה-worker ישתמשו בתור הודעות (Message Queue) יחיד כדי להחזיר את התוצאות לתהליך ה-master.\nיש להתייחס למקרה בו יש N תהליכי worker. יש לכלול קוד C/C++ במידת הצורך ולהסביר את הלוגיקה.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "פרטו את עיצוב המערכת: אילו מנגנוני IPC ספציפיים (Shared Memory, Semaphores, Message Queue) ישמשו, מה יהיה מבנה הנתונים בזיכרון המשותף, ומה תפקידו של כל סמפור. ציינו כיצד תבטיחו זיהוי של משימות ותוצאות מתאימות.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "כתבו קטע קוד ב-C/C++ המדגים כיצד תהליך ה-master מכניס משימה חדשה לחוצץ המשותף. התייחסו לסנכרון הנדרש.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.3",
+        "text": "כתבו קטע קוד ב-C/C++ המדגים כיצד תהליך worker לוקח משימה מהחוצץ המשותף, מבצע אותה, ומחזיר את התוצאה דרך תור ההודעות. התייחסו לסנכרון הנדרש.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.4",
+        "text": "תארו כיצד המערכת תבצע סיום עבודה מסודר (graceful shutdown) וניקוי של כל משאבי ה-IPC (זיכרון משותף, סמפורים, תור הודעות) לאחר שכל המשימות בוצעו והתוצאות נאספו. מהן ההשלכות אם תהליך worker קורס באופן בלתי צפוי במהלך העבודה?",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "פתרון מלא:\n\n**1.1 עיצוב המערכת:**\n*   **זיכרון משותף (Shared Memory):** ישמש לאחסון חוצץ מעגלי של משימות. מבנה הנתונים בזיכרון המשותף יכלול: \n    ```c\n    #define BUFFER_SIZE 10 // גודל החוצץ\n    struct Task {\n        int id;           // מזהה ייחודי למשימה\n        int input_value;  // ערך הקלט למשימה\n    };\n\n    struct SharedData {\n        struct Task tasks[BUFFER_SIZE]; // מערך המשימות (החוצץ המעגלי)\n        int head;                       // אינדקס לכתיבת משימה חדשה ע\"י ה-master\n        int tail;                       // אינדקס לקריאת משימה ע\"י ה-workers\n    };\n    ```\n*   **סמפורים (Semaphores):** ישמשו לסנכרון הגישה לזיכרון המשותף ולניהול מצב המלאי בחוצץ:\n    *   `mutex`: סמפור בינארי, מאותחל ל-1. מגן על הגישה הקריטית למבנה `SharedData` (קריאה/כתיבה ל-`tasks`, עדכון `head` ו-`tail`).\n    *   `empty`: סמפור מונה, מאותחל ל-`BUFFER_SIZE`. סופר את מספר המקומות הפנויים בחוצץ המשימות. ה-master מבצע `sem_wait` עליו לפני הכנסת משימה, וה-worker מבצע `sem_post` עליו לאחר לקיחת משימה.\n    *   `full`: סמפור מונה, מאותחל ל-0. סופר את מספר המקומות התפוסים (משימות זמינות) בחוצץ המשימות. ה-worker מבצע `sem_wait` עליו לפני לקיחת משימה, וה-master מבצע `sem_post` עליו לאחר הכנסת משימה.\n*   **תור הודעות (Message Queue):** ישמש להחזרת התוצאות מה-workers ל-master. כל worker ישלח הודעה לתור המכילה את מזהה המשימה ואת התוצאה. מבנה ההודעה:\n    ```c\n    struct Result {\n        int task_id;      // מזהה המשימה אליה מתייחסת התוצאה\n        int output_value; // תוצאת החישוב\n    };\n\n    struct MsgBuf {         // מבנה ההודעה לתור\n        long mtype;         // סוג ההודעה (לדוגמה, 1)\n        struct Result result; // מבנה התוצאה\n    };\n    ```\n*   **זיהוי משימות ותוצאות:** ה-master יקצה `id` ייחודי לכל משימה. ה-worker יכלול את ה-`task_id` במבנה ה-`Result` שהוא שולח בתור ההודעות, ובכך ה-master יוכל לשייך כל תוצאה למשימה המקורית שלה.\n\n**1.2 קוד תהליך ה-Master (הכנסת משימות):**\n```c\n// הגדרות ואיניציאליזציה (לדוגמה, shm_ptr, semaphores, msgid)\n// ...\n\nfor (int i = 0; i < total_tasks; ++i) {\n    struct Task newTask = { .id = i, .input_value = rand() % 100 };\n\n    sem_wait(empty); // המתן למקום פנוי בחוצץ\n    sem_wait(mutex); // כניסה לאזור קריטי - גישה לזיכרון המשותף\n\n    shm_ptr->tasks[shm_ptr->head] = newTask;\n    shm_ptr->head = (shm_ptr->head + 1) % BUFFER_SIZE;\n\n    sem_post(mutex); // יציאה מהאזור הקריטי\n    sem_post(full);  // סמן כי יש משימה חדשה בחוצץ\n\n    printf(\"Master: Added task %d with input %d\\n\", newTask.id, newTask.input_value);\n}\n\n// לאחר שליחת כל המשימות, ה-master ימשיך לאסוף תוצאות מתור ההודעות\n```\n\n**1.3 קוד תהליך ה-Worker (לקיחת משימה והחזרת תוצאה):**\n```c\n// הגדרות ואיניציאליזציה (לדוגמה, shm_ptr, semaphores, msgid)\n// ...\n\nwhile (1) { // לולאת עבודה אינסופית עד לקבלת אות סיום\n    sem_wait(full);  // המתן למשימה זמינה בחוצץ\n    sem_wait(mutex); // כניסה לאזור קריטי - גישה לזיכרון המשותף\n\n    struct Task taskToProcess = shm_ptr->tasks[shm_ptr->tail];\n    shm_ptr->tail = (shm_ptr->tail + 1) % BUFFER_SIZE;\n\n    sem_post(mutex); // יציאה מהאזור הקריטי\n    sem_post(empty); // סמן כי מקום התפנה בחוצץ\n\n    // אם קיימת משימת סיום מיוחדת (לדוגמה, taskToProcess.id == -1), יש לצאת מהלולאה\n    // if (taskToProcess.id == TERMINATION_TASK_ID) break;\n\n    printf(\"Worker %d: Processing task %d (input %d)\\n\", getpid(), taskToProcess.id, taskToProcess.input_value);\n\n    // ביצוע העבודה בפועל (לדוגמה, העלאה בריבוע)\n    sleep(1); // הדמיית עבודה\n    int output = taskToProcess.input_value * taskToProcess.input_value;\n\n    // הכנת התוצאה ושליחתה בתור ההודעות\n    struct Result result = { .task_id = taskToProcess.id, .output_value = output };\n    struct MsgBuf msg = { .mtype = 1, .result = result }; \n\n    if (msgsnd(msgid, &msg, sizeof(struct Result), 0) == -1) {\n        perror(\"msgsnd\");\n        // טיפול בשגיאה: ייתכן שיש לנסות לשלוח שוב או לדווח ל-master\n    }\n    printf(\"Worker %d: Sent result for task %d (output %d)\\n\", getpid(), result.task_id, result.output_value);\n}\n\nexit(0); // יציאה מסודרת של ה-worker\n```\n\n**1.4 סיום וניקוי:**\n*   **סיום עבודה מסודר (Graceful Shutdown):**\n    1.  **סיום המשימות:** ה-master מייצר ושולח את כל `total_tasks` המשימות לחוצץ המשותף.\n    2.  **איסוף תוצאות:** ה-master ממתין ומקבל `total_tasks` תוצאות מתור ההודעות. הוא יכול לשמור מונה של תוצאות שהתקבלו. \n    3.  **איתות סיום ל-workers:** לאחר שה-master אסף את כל התוצאות, הוא צריך לאותת ל-workers לסיים את עבודתם. דרך נפוצה היא לשלוח מספר משימות \"מיוחדות\" (לדוגמה, עם `task_id = -1`) לחוצץ המשותף, כמספר ה-workers הפעילים. כל worker, כאשר הוא מקבל משימת סיום זו, יוצא מלולאת העבודה שלו ומסיים את התהליך.\n    4.  **המתנה ל-workers:** ה-master מבצע `waitpid()` עבור כל תהליכי ה-worker כדי לוודא שכולם סיימו ונאספו משאביהם.\n*   **ניקוי משאבי IPC:** ה-master הוא האחראי לניקוי כל המשאבים:\n    *   **זיכרון משותף:** `shm_unlink()` עבור הזיכרון המשותף (אם משתמשים ב-POSIX shared memory) או `shmctl(shmid, IPC_RMID, NULL)` (אם System V shared memory). פעולה זו מנתקת את הזיכרון ומסמנת אותו למחיקה לאחר שכל התהליכים ניתקו ממנו.\n    *   **סמפורים:** `sem_unlink()` עבור כל סמפור (אם משתמשים ב-POSIX named semaphores) או `semctl(semid, 0, IPC_RMID)` (אם System V semaphores). פעולה זו משחררת את הסמפורים מהמערכת.\n    *   **תור הודעות:** `msgctl(msgid, IPC_RMID, NULL)` עבור תור ההודעות. פעולה זו מסירה את התור מהמערכת.\n*   **השלכות קריסת Worker:**\n    *   **אובדן משימה:** אם worker קורס לאחר שלקח משימה מהחוצץ אך לפני ששלח תוצאה, המשימה עלולה ללכת לאיבוד (ה-master לא יקבל תוצאה עבורה) וה-`empty` סמפור לא יעודכן. \n    *   **נעילת סמפורים:** אם ה-worker קורס כשהוא מחזיק ב-`mutex` סמפור, המערכת תיכנס למצב של Deadlock, מכיוון שאף תהליך אחר לא יוכל להיכנס לאזור הקריטי. סמפורי POSIX named semaphores פחות רגישים לבעיה זו מאשר סמפורים לא-שמיים או System V ללא דגל `SEM_UNDO`.\n    *   **זיהוי כשל:** ה-master יבחין בכשל בכך שלא יקבל את כל `total_tasks` התוצאות המצופות, או אם `waitpid()` ידווח על יציאה בלתי צפויה של worker. מערכות חזקות יותר כוללות מנגנוני Heartbeat או Timeout כדי לזהות workers שאינם מגיבים ולטפל במשימות שאבדו (לדוגמה, ע\"י הקצאתן מחדש ל-worker אחר).\n"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

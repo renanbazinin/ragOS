@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "IPC",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 08:25:29",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 968,
+      "output_tokens": 1209,
+      "total_tokens": 7959
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "IPC",
+      "Synchronization",
+      "Semaphores",
+      "Deadlock"
+    ],
+    "content": {
+      "text": "נתונות שתי תוכניות, P1 (מפיק) ו-P2 (צרכן), המשתפות ביניהן זיכרון משותף. הזיכרון המשותף מכיל משתנה שלם `data` ושני סמפורים: `mutex` ו-`sync_sem`. הסמפור `mutex` מאותחל ל-1. הסמפור `sync_sem` מאותחל ל-0.\n\nלהלן קטעי הקוד של P1 ו-P2:\n\n```c\n// קוד P1 (מפיק)\nvoid producer() {\n    // ... (הכנות לזיכרון משותף וסמפורים)\n    sem_wait(&mutex);           // 1. תפוס mutex\n    data = 123;                 // 2. כתוב נתון\n    sem_post(&sync_sem);        // 3. סמן שנתון זמין\n    sem_post(&mutex);           // 4. שחרר mutex\n    // ...\n}\n\n// קוד P2 (צרכן)\nvoid consumer() {\n    // ... (הכנות לזיכרון משותף וסמפורים)\n    sem_wait(&mutex);           // 1. תפוס mutex\n    sem_wait(&sync_sem);        // 2. המתן לנתון זמין\n    int read_value = data;      // 3. קרא נתון\n    sem_post(&mutex);           // 4. שחרר mutex\n    // ...\n}\n```\n\nבהנחה ששני התהליכים מופעלים במקביל וייתכן ש-P2 יתחיל לרוץ לפני ש-P1 יסיים את מחזור הכתיבה שלו. איזו טענה נכונה לגבי התנהגות המערכת?",
+      "code_snippet": null,
+      "options": [
+        "א. המערכת תפעל כשורה; P1 יכתוב את הנתון, ו-P2 יקרא אותו בהצלחה.",
+        "ב. המערכת תיכנס למצב של מרוץ תחרותי (race condition) בגישה ל-`data`.",
+        "ג. המערכת תיכנס למבוי סתום (deadlock).",
+        "ד. P2 יקרא ערך שגוי מ-`data` לפני ש-P1 יספיק לכתוב.",
+        "ה. P1 יבצע כתיבה חוזרת של נתונים מבלי ש-P2 יספיק לקרוא אותם."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "הסבר:\nהמערכת תיכנס למבוי סתום (deadlock). ננתח את סדר הפעולות בתרחיש שמוביל למבוי סתום:\n1.  **תהליך P2 מתחיל לפעול ראשון:**\n    *   P2 מבצע `sem_wait(&mutex)` ומצליח לתפוס את המנעול `mutex` (ערכו הופך ל-0). כעת P2 מחזיק במנעול `mutex`.\n    *   P2 ממשיך לשורה הבאה: `sem_wait(&sync_sem)`. מכיוון ש-`sync_sem` מאותחל ל-0 ו-P1 עדיין לא ביצע עליו `sem_post`, P2 נחסם וממתין ש-`sync_sem` יהיה גדול מ-0.\n    *   **חשוב:** P2 נחסם כשהוא עדיין מחזיק במנעול `mutex`.\n2.  **תהליך P1 מתחיל לפעול (או מקבל את המעבד לאחר ש-P2 נחסם):**\n    *   P1 מנסה לבצע `sem_wait(&mutex)`.\n    *   מכיוון ש-P2 עדיין מחזיק במנעול `mutex`, P1 נחסם וממתין ש-P2 ישחרר את `mutex`.\n\n**התוצאה:**\n*   P2 ממתין ל-`sync_sem` (ש-P1 אמור להעלות). P2 מחזיק במנעול `mutex`.\n*   P1 ממתין ל-`mutex` (ש-P2 מחזיק בו) כדי שיוכל לכתוב את הנתון ולבצע `sem_post(&sync_sem)`.\nנוצר מצב של המתנה מעגלית (circular wait) – P2 מחזיק במשאב ש-P1 צריך, ו-P1 צריך לבצע פעולה כדי לשחרר את P2. זהו מבוי סתום קלאסי."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

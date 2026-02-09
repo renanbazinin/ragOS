@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Memory Management and Page Replacement",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 10:46:13",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 941,
+      "output_tokens": 740,
+      "total_tokens": 3133
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Memory Management",
+      "Page Replacement",
+      "Paging",
+      "FIFO"
+    ],
+    "content": {
+      "text": "בהינתן רצף הפניות לדפים הבא: 1, 2, 3, 4, 1, 2, 5, 1, 2, 3, 4, 5\nוכאשר קיימות 3 מסגרות זיכרון פיזיות בלבד, כמה כשלים בדף (page faults) יתרחשו בשימוש באלגוריתם החלפת הדפים FIFO (First-In, First-Out)?",
+      "code_snippet": null,
+      "options": [
+        "א. 7",
+        "ב. 8",
+        "ג. 9",
+        "ד. 10",
+        "ה. 12"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "נבצע מעקב אחר אלגוריתם FIFO עם 3 מסגרות זיכרון עבור רצף הפניות לדפים: 1, 2, 3, 4, 1, 2, 5, 1, 2, 3, 4, 5\n\nמצב המסגרות (F) וספירת כשלים (PF):\n1.  דף 1: F=[1, _, _] - PF (1)\n2.  דף 2: F=[1, 2, _] - PF (2)\n3.  דף 3: F=[1, 2, 3] - PF (3)\n4.  דף 4: F=[4, 2, 3] - PF (4), דף 1 יוצא (הישן ביותר)\n5.  דף 1: F=[4, 1, 3] - PF (5), דף 2 יוצא\n6.  דף 2: F=[4, 1, 2] - PF (6), דף 3 יוצא\n7.  דף 5: F=[5, 1, 2] - PF (7), דף 4 יוצא\n8.  דף 1: F=[5, 1, 2] - פגיעה (Hit)\n9.  דף 2: F=[5, 1, 2] - פגיעה (Hit)\n10. דף 3: F=[5, 3, 2] - PF (8), דף 1 יוצא\n11. דף 4: F=[5, 3, 4] - PF (9), דף 2 יוצא\n12. דף 5: F=[5, 3, 4] - פגיעה (Hit)\n\nסה\"כ כשלים בדף: 9."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

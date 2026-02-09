@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "RAID and File Systems",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 20:03:07",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1011,
+      "output_tokens": 716,
+      "total_tokens": 4653
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "RAID",
+      "File Systems"
+    ],
+    "content": {
+      "text": "נתונה מערכת שרתים עם 6 דיסקים קשיחים, כל אחד בגודל 4TB. מערכת קבצים נבנית על גבי מערך RAID המורכב מדיסקים אלו.\nאיזה ממנגנוני ה-RAID הבאים יספק את שטח האחסון המקסימלי עבור מערכת הקבצים, תוך שמירה על יכולת להתמודד עם קלקול של דיסק אחד?",
+      "code_snippet": null,
+      "options": [
+        "א. RAID-1",
+        "ב. RAID-5",
+        "ג. RAID-6",
+        "ד. RAID-10 (או RAID 0+1)",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "נחשב את שטח האחסון השמיש עבור כל רמת RAID, בהתחשב ביכולת להתמודד עם כשל של דיסק אחד:\n-   **RAID-1 (מערך של 6 דיסקים)**: בדרך כלל מורכב מ-3 זוגות מראה. נפח שמיש = (6/2) * 4TB = 12TB. יכול להתמודד עם כשל של דיסק אחד בכל זוג (עד 3 כשלים אם הם בזוגות שונים).\n-   **RAID-5 (מערך של 6 דיסקים)**: נפח שמיש = (N-1) * S = (6-1) * 4TB = 5 * 4TB = 20TB. יכול להתמודד עם כשל של דיסק אחד.\n-   **RAID-6 (מערך של 6 דיסקים)**: נפח שמיש = (N-2) * S = (6-2) * 4TB = 4 * 4TB = 16TB. יכול להתמודד עם כשל של 2 דיסקים (ולכן גם עם כשל של דיסק אחד).\n-   **RAID-10 (או RAID 0+1, מערך של 6 דיסקים)**: מורכב מ-3 זוגות מראה (RAID-1) שעוברים Striping (RAID-0). נפח שמיש = (6/2) * 4TB = 12TB. יכול להתמודד עם כשל של דיסק אחד בכל זוג (עד 3 כשלים אם הם בזוגות שונים).\n\nמבין האפשרויות המספקות עמידות לכשל של דיסק אחד, RAID-5 מספק את שטח האחסון המקסימלי של 20TB."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

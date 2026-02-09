@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Paging and TLB",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 10:00:14",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1143,
+      "output_tokens": 526,
+      "total_tokens": 3078
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Paging",
+      "TLB",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "מערכת הפעלה משתמשת בזיכרון וירטואלי עם מנגנון דפדוף (Paging). קיים TLB (Translation Lookaside Buffer) לזירוז תרגום כתובות. בהינתן ש-hit ratio של ה-TLB הוא 90%. כמה גישות לזיכרון הראשי (Main Memory) נדרשות בממוצע עבור כל גישה לכתובת לוגית?\n(הניחו שגישת TLB מהירה מאוד וזניחה יחסית לגישת זיכרון ראשי).",
+      "code_snippet": null,
+      "options": [
+        "א. 1.1",
+        "ב. 1.2",
+        "ג. 1.5",
+        "ד. 1.9",
+        "ה. 2.0"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "במקרה של TLB hit (90% מהמקרים), הכתובת הפיזית נמצאת ב-TLB, ונדרשת גישה אחת לזיכרון הראשי כדי להביא את הנתונים בפועל.\nבמקרה של TLB miss (10% מהמקרים), הכתובת הפיזית אינה נמצאת ב-TLB. לכן, נדרשות שתי גישות לזיכרון הראשי: גישה אחת כדי למצוא את ה-PTE (Page Table Entry) בטבלת הדפים, וגישה נוספת כדי להביא את הנתונים בפועל.\nלכן, מספר הגישות הממוצע לזיכרון הראשי הוא:\n(0.9 * 1 גישה) + (0.1 * 2 גישות) = 0.9 + 0.2 = 1.1 גישות."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Processes and Threads",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 10:15:11",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1710,
+      "output_tokens": 605,
+      "total_tokens": 3966
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "Processes",
+      "Threads",
+      "System Calls"
+    ],
+    "content": {
+      "text": "נתון תהליך במערכת הפעלה מודרנית (כמו Linux) שיוצר מספר נימים (threads) באמצעות `pthread_create`. אחד הנימים הללו מבצע קריאה למערכת `fork()`.\nמהי התוצאה הסבירה ביותר של קריאה זו?",
+      "code_snippet": null,
+      "options": [
+        "א. רק הנים הקורא משוכפל לתהליך חדש, וכל שאר הנימים בתהליך המקורי נשארים ללא שינוי.",
+        "ב. כל התהליך משוכפל, אך בתהליך הבן שנוצר, רק הנים שביצע את הקריאה ל-`fork()` ממשיך לרוץ.",
+        "ג. כל התהליך משוכפל, וכל הנימים שהיו קיימים בתהליך האב ממשיכים לרוץ גם בתהליך הבן.",
+        "ד. הקריאה ל-`fork()` תיכשל כי לא ניתן לבצע `fork()` מתהליך מרובה נימים.",
+        "ה. ההתנהגות אינה מוגדרת ועלולה לגרום לקריסה של התוכנית."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב'. כאשר קריאה ל-`fork()` מתבצעת מתהליך מרובה נימים, תקן POSIX קובע כי התהליך הבן שנוצר הוא העתק של התהליך האב, אך רק הנים שביצע את קריאת ה-`fork()` הוא זה שממשיך לרוץ בתהליך הבן. כל שאר הנימים שהיו קיימים בתהליך האב אינם משוכפלים לתהליך הבן. התנהגות זו נועדה למנוע בעיות עם מנעולים (mutexes), משתני תנאי (condition variables) ומשאבים אחרים שנמצאים בשימוש על ידי נימים אחרים בתהליך האב ועלולים להיות במצב לא עקבי בתהליך הבן. התהליך הבן מתחיל עם נים בודד, שהוא העותק של הנים שקרא ל-`fork()`."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

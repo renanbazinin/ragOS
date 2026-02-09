@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "IPC",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 08:26:32",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1654,
+      "output_tokens": 1068,
+      "total_tokens": 6834
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "IPC",
+      "Pipes"
+    ],
+    "content": {
+      "text": "הסבר בקצרה כיצד צינורות (pipes) משמשים לתקשורת בין תהליכים (IPC) במערכות הפעלה מבוססות יוניקס. כלול בתשובתך דוגמת קוד פשוטה בשפת C המדגימה תקשורת חד-כיוונית בין תהליך אב לתהליך בן באמצעות pipe.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "צינורות (pipes) הם מנגנון IPC פשוט המשמש לתקשורת חד-כיוונית בין תהליכים קשורים (בדרך כלל אב ובן). כאשר תהליך יוצר pipe באמצעות קריאת המערכת `pipe()`, נוצרים שני קצוות לקובץ: קצה אחד לכתיבה וקצה אחד לקריאה (לרוב `pipe_fd[1]` לכתיבה ו-`pipe_fd[0]` לקריאה). לאחר מכן, כאשר תהליך האב מבצע `fork()`, תהליך הבן יורש את כל ה-file descriptors הפתוחים, כולל אלה של ה-pipe. כדי לאפשר תקשורת חד-כיוונית, אחד התהליכים סוגר את קצה הכתיבה וקורא מקצה הקריאה, והתהליך השני סוגר את קצה הקריאה וכותב לקצה הכתיבה. הנתונים נכתבים לקצה הכתיבה ונקראים מקצה הקריאה בסדר FIFO (First-In, First-Out).\n\nלהלן דוגמת קוד פשוטה:\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/types.h>\n#include <string.h>\n#include <sys/wait.h> // For wait()\n\n#define MSG_SIZE 256\n\nint main() {\n    int pipe_fd[2]; // pipe_fd[0] for reading, pipe_fd[1] for writing\n    pid_t pid;\n    char write_msg[MSG_SIZE] = \"שלום מהאב לבן!\";\n    char read_msg[MSG_SIZE];\n\n    // Create a pipe\n    if (pipe(pipe_fd) == -1) {\n        perror(\"pipe failed\");\n        exit(EXIT_FAILURE);\n    }\n\n    // Fork a child process\n    pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        exit(EXIT_FAILURE);\n    }\n\n    if (pid > 0) { // Parent process\n        close(pipe_fd[0]); // Close unused read end in parent\n        printf(\"אב: שולח הודעה: \\\"%s\\\"\\n\", write_msg);\n        // Write to the pipe\n        write(pipe_fd[1], write_msg, strlen(write_msg) + 1);\n        close(pipe_fd[1]); // Close write end in parent\n        wait(NULL); // Wait for child to finish\n        printf(\"אב: סיים.\\n\");\n    } else { // Child process\n        close(pipe_fd[1]); // Close unused write end in child\n        // Read from the pipe\n        read(pipe_fd[0], read_msg, MSG_SIZE);\n        printf(\"בן: קיבל הודעה: \\\"%s\\\"\\n\", read_msg);\n        close(pipe_fd[0]); // Close read end in child\n        printf(\"בן: סיים.\\n\");\n    }\n\n    return 0;\n}\n```\nשימו לב שבקוד ההדגמה, תהליך האב סוגר את קצה הקריאה (pipe_fd[0]) וכותב לקצה הכתיבה (pipe_fd[1]), בעוד שתהליך הבן סוגר את קצה הכתיבה (pipe_fd[1]) וקורא מקצה הקריאה (pipe_fd[0])."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

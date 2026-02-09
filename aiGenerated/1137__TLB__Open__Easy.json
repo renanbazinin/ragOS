@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "TLB",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 08:10:46",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3093,
+      "output_tokens": 393,
+      "total_tokens": 4522
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "TLB",
+      "Virtual Memory",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "מהי מטרת ה-TLB (Translation Lookaside Buffer), ומדוע הוא חשוב במערכות זיכרון וירטואלי?",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "ה-TLB הוא זיכרון מטמון קטן ומהיר המכיל מיפויים אחרונים מכתובות וירטואליות לכתובות פיזיות. מטרתו העיקרית היא להאיץ את תהליך תרגום הכתובות הוירטואליות לכתובות פיזיות. במערכות זיכרון וירטואלי, כל גישה לזיכרון דורשת בדרך כלל שתי גישות לזיכרון הפיזי: אחת לטבלת הדפים כדי למצוא את המסגרת הפיזית, ואחת לנתונים עצמם. ה-TLB מפחית את הצורך בגישה לטבלת הדפים הראשונה על ידי שמירת המיפויים הנפוצים ביותר. כאשר מתרחש TLB hit (כלומר, המיפוי נמצא ב-TLB), תרגום הכתובת מהיר מאוד, ובכך משפר משמעותית את ביצועי המערכת."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

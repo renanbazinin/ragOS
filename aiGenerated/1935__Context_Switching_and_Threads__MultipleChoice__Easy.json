@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Context Switching and Threads",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 21:55:58",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 985,
+      "output_tokens": 520,
+      "total_tokens": 3548
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Context Switching",
+      "Threads"
+    ],
+    "content": {
+      "text": "מה ההבדל העיקרי בין החלפת הקשר (context switch) בין שני תהליכים (processes) לבין החלפת הקשר בין שני חוטים (threads) באותו תהליך?",
+      "code_snippet": null,
+      "options": [
+        "א. בהחלפת קשר בין תהליכים, מערכת ההפעלה צריכה לטעון מפת זיכרון (memory map) חדשה, בעוד שבהחלפת קשר בין חוטים באותו תהליך, מפת הזיכרון נשארת זהה.",
+        "ב. החלפת קשר בין חוטים תמיד דורשת מעבר למצב ליבה (kernel mode), בעוד שהחלפת קשר בין תהליכים יכולה להתבצע במצב משתמש (user mode).",
+        "ג. החלפת קשר בין חוטים כוללת שמירה ושחזור של כל הנתונים בזיכרון הראשי (RAM) של התהליך.",
+        "ד. בין חוטים אין צורך לבצע החלפת קשר כלל, מכיוון שהם חולקים את אותה סביבת ביצוע."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "א. ההבדל העיקרי הוא שחוטים באותו תהליך חולקים את אותו מרחב כתובות (address space), ולכן בזמן החלפת קשר בין חוטים אין צורך לשנות את מפת הזיכרון (page tables) של המעבד. לעומת זאת, תהליכים שונים מחזיקים במרחבי כתובות נפרדים, ולכן החלפת קשר ביניהם דורשת טעינה של מפת זיכרון חדשה, מה שהופך את החלפת הקשר בין תהליכים ליקרה יותר."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

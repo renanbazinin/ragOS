@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Synchronization and Concurrency",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 21:12:39",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 998,
+      "output_tokens": 372,
+      "total_tokens": 2542
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Synchronization",
+      "Concurrency",
+      "Mutexes"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של שימוש ב-mutex (מנעול הדדי) במערכות הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. למנוע מצב של Deadlock.",
+        "ב. להבטיח גישה בלעדית למשאב משותף בקטע קריטי.",
+        "ג. לשפר את ביצועי המערכת על ידי הפעלת תהליכים במקביל.",
+        "ד. לאפשר תקשורת בין תהליכים שונים."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "המטרה העיקרית של mutex היא להבטיח שבכל רגע נתון, רק תהליך או חוט אחד יוכל לגשת לקטע קריטי (critical section) ולשנות משאבים משותפים. זה מונע תנאי מירוץ (race conditions) ומבטיח עקביות נתונים. בעוד ש-mutexes יכולים להיות חלק מפתרונות למניעת Deadlock או לאפשר תקשורת עקיפה, תפקידם היסודי הוא אכיפת הדדיות (mutual exclusion)."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "IPC and Signals",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 21:43:07",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1103,
+      "output_tokens": 746,
+      "total_tokens": 3758
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "IPC",
+      "Signals",
+      "System Calls"
+    ],
+    "content": {
+      "text": "תהליך אב (parent process) יוצר תהליך בן (child process) באמצעות `fork()`. לאחר מכן, תהליך האב קורא לפונקציה `waitpid()` על מנת להמתין לסיום תהליך הבן. בזמן שתהליך האב ממתין ב-`waitpid()`, הוא מקבל סיגנל `SIGUSR1` (שנשלח לו על ידי תהליך אחר, למשל). סיגנל זה מטופל על ידי handler שהותקן באמצעות `sigaction()`, וה-handler מוגדר פשוט להדפיס הודעה למסך (ללא דגלי `SA_RESTART`). איזו מהטענות הבאות מתארת נכונה את ההתנהגות הצפויה של תהליך האב?",
+      "code_snippet": null,
+      "options": [
+        "א. תהליך האב ימשיך להמתין ב-`waitpid()` גם לאחר ביצוע ה-handler של הסיגנל. ה-handler יבוצע, אך הקריאה ל-`waitpid()` לא תופרע.",
+        "ב. ה-handler של הסיגנל לא יבוצע כלל עד שתהליך הבן יסיים ותהליך האב יחזור מ-`waitpid()`.",
+        "ג. ה-handler של הסיגנל יבוצע, ולאחר מכן הקריאה ל-`waitpid()` תופרע והיא תחזיר את הערך -1, עם `errno` שיהיה `EINTR`.",
+        "ד. תהליך האב יסיים את פעולתו באופן מיידי (terminate) עקב קבלת הסיגנל `SIGUSR1`.",
+        "ה. הקריאה ל-`waitpid()` תחזור מיד עם ה-PID של תהליך הבן, וה-handler של הסיגנל יבוצע לאחר מכן."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "כאשר תהליך חוסם בקריאת מערכת (כמו `waitpid()`) ומקבל סיגנל שהוגדר לו handler (ללא דגל `SA_RESTART` ב-`sigaction`), מערכת ההפעלה מבצעת את ה-handler של הסיגנל. לאחר שה-handler מסיים את פעולתו, קריאת המערכת שבה התהליך חסם מופרעת (interrupted). במקרה של `waitpid()`, היא תחזיר -1 ו-`errno` יוגדר ל-`EINTR`, המציין שהקריאה הופרעה על ידי סיגנל. התהליך יכול אז לבדוק את `errno` ולנסות שוב את `waitpid()` או לבצע פעולה אחרת בהתאם ללוגיקה שלו."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

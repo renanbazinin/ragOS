@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "TLB",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 08:10:55",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3093,
+      "output_tokens": 496,
+      "total_tokens": 4833
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "TLB",
+      "Virtual Memory",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "תאר בקצרה את תהליך תרגום כתובת וירטואלית לכתובת פיזית במערכת המשתמשת ב-TLB. הסבר מה ההבדל בין TLB Hit לבין TLB Miss.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "כאשר המעבד מייצר כתובת וירטואלית, חומרת הזיכרון (MMU) בודקת תחילה אם המיפוי מדף וירטואלי (VPN) למסגרת פיזית (PFN) קיים ב-TLB. \n\n**TLB Hit:** אם המיפוי נמצא ב-TLB, המערכת מפיקה באופן מיידי את ה-PFN מה-TLB, ומשלבת אותו עם ההיסט (offset) של הדף כדי ליצור את הכתובת הפיזית. תהליך זה מהיר מאוד מכיוון שה-TLB הוא זיכרון מטמון קטן ומהיר.\n\n**TLB Miss:** אם המיפוי אינו נמצא ב-TLB, המערכת נאלצת לגשת לטבלת הדפים המאוחסנת בזיכרון הראשי (RAM) כדי למצוא את ה-PFN המתאים. לאחר מציאת ה-PFN בטבלת הדפים, המיפוי נטען ל-TLB (כדי שישמש בגישות עתידיות), ואז משולב עם ההיסט ליצירת הכתובת הפיזית. תהליך זה איטי יותר מ-TLB Hit מכיוון שהוא דורש גישה לזיכרון הראשי."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

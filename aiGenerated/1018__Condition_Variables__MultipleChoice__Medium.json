@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Condition Variables",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 07:26:27",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 983,
+      "output_tokens": 914,
+      "total_tokens": 4551
+    }
+  },
+  "question": {
+    "id": 6,
+    "type": "MultipleChoice",
+    "topic": [
+      "Condition Variables",
+      "Synchronization",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתון קטע הקוד הבא המשתמש במשתנה תנאי (condition variable) ובמנעול (mutex) לסנכרון בין producer ל-consumer. איזה מהבאים מתאר בצורה הטובה ביותר בעיה פוטנציאלית בקוד, או פרקטיקה מומלצת שאינה מיושמת?",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h>\n\npthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;\npthread_cond_t cond = PTHREAD_COND_INITIALIZER;\nint shared_data_ready = 0;\n\nvoid* producer(void* arg) {\n    // Simulate some work\n    sleep(1); \n    pthread_mutex_lock(&mutex);\n    shared_data_ready = 1;\n    printf(\"Producer: Data is ready.\\n\");\n    pthread_cond_signal(&cond); // Signal one waiting consumer\n    pthread_mutex_unlock(&mutex);\n    return NULL;\n}\n\nvoid* consumer(void* arg) {\n    pthread_mutex_lock(&mutex);\n    if (!shared_data_ready) { // Check condition - POTENTIAL ISSUE HERE\n        printf(\"Consumer: Waiting for data.\\n\");\n        pthread_cond_wait(&cond, &mutex); // Wait for signal\n    }\n    printf(\"Consumer: Data received.\\n\");\n    // Process shared_data\n    pthread_mutex_unlock(&mutex);\n    return NULL;\n}",
+      "options": [
+        "א. הקוד עלול לסבול מבעיית \"אות אבוד\" (lost signal) אם ה-producer מסמן לפני שה-consumer נכנס למצב המתנה, מה שיגרום ל-consumer להמתין לנצח.",
+        "ב. הקוד עלול לסבול מ\"התעוררות שווא\" (spurious wakeup), מה שיגרום ל-consumer לעבד נתונים לפני שהם באמת מוכנים.",
+        "ג. יש להשתמש ב-`pthread_cond_broadcast` במקום `pthread_cond_signal` כדי להבטיח שכל ה-consumers יתעוררו.",
+        "ד. המנעול אינו משוחרר כראוי לפני הקריאה ל-`pthread_cond_wait`, מה שיוביל ל-deadlock.",
+        "ה. אין שום בעיה בקוד, והוא ממומש בצורה נכונה."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב'. השימוש ב-`if` במקום `while` לבדיקת התנאי לפני הקריאה ל-`pthread_cond_wait` הוא טעות נפוצה. `pthread_cond_wait` עלול להתעורר באופן שווא (spurious wakeup) גם ללא קריאה ל-`pthread_cond_signal` או `pthread_cond_broadcast`. אם ה-consumer מתעורר באופן שווא והתנאי (`shared_data_ready`) עדיין לא מתקיים, ה-`if` לא יגרום לו לבדוק שוב את התנאי ולחזור למצב המתנה, אלא יאפשר לו להמשיך בעיבוד נתונים לא מוכנים. שימוש ב-`while (!shared_data_ready)` מבטיח שה-consumer יבדוק תמיד את התנאי וימתין שוב אם הוא עדיין לא מתקיים, גם לאחר התעוררות שווא."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

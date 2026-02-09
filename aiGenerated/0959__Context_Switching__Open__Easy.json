@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Context Switching",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 07:07:44",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2777,
+      "output_tokens": 353,
+      "total_tokens": 3825
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "Open",
+    "topic": [
+      "Context Switching"
+    ],
+    "content": {
+      "text": "הסבר בקצרה מהו 'החלפת הקשר' (Context Switch) ומדוע הוא נחוץ במערכת הפעלה מודרנית.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "החלפת הקשר (Context Switch) היא תהליך שבו מערכת ההפעלה שומרת את מצבו (הקשרו) של תהליך או תהליכון אחד (לרוב, ה-CPU registers, program counter, ו-stack pointer) וטוענת את מצבו של תהליך או תהליכון אחר כדי לאפשר לו להמשיך לרוץ. תהליך זה נחוץ במערכות הפעלה מודרניות כדי לאפשר ריבוי משימות (multitasking) וריבוי משתמשים (multi-user). הוא מאפשר למערכת ההפעלה לשתף את המעבד בין מספר תהליכים או תהליכונים, ובכך ליצור אשליה של הרצה מקבילה ולשפר את ניצול המשאבים ואת היענות המערכת."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

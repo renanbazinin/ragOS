@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "CPU Scheduling and Context Switching",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 11:45:42",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1035,
+      "output_tokens": 460,
+      "total_tokens": 2841
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "CPU Scheduling",
+      "Context Switching"
+    ],
+    "content": {
+      "text": "איזו אינפורמציה חיונית נשמרת על ידי מערכת ההפעלה עבור תהליך שמוחלף (swapped out) במהלך החלפת הקשר (context switch)?",
+      "code_snippet": null,
+      "options": [
+        "א. רק תוכן הרגיסטרים של המעבד.",
+        "ב. רק הקוד הבינארי של התהליך.",
+        "ג. תוכן הרגיסטרים של המעבד, מונה התוכנית (Program Counter), ומצב התהליך בבלוק בקרת התהליך (PCB).",
+        "ד. רק כתובות הזיכרון הפיזיות בהן נמצא התהליך.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג'. במהלך החלפת הקשר, מערכת ההפעלה שומרת את כל המידע הדרוש כדי לשחזר את ריצת התהליך מאוחר יותר. זה כולל את מצב המעבד (כמו תוכן הרגיסטרים ומונה התוכנית - PC) ואת המידע הניהולי של התהליך (הנשמר ב-PCB), הכולל בין היתר את מצב התהליך, מידע על ניהול זיכרון וקבצים פתוחים. אופציות א', ב' ו-ד' מציגות רק חלק מהמידע או מידע שאינו נשמר ישירות כחלק ממצב התהליך המיידי להחלפה."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Synchronization and Deadlocks",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 09:50:27",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5388,
+      "output_tokens": 2374,
+      "total_tokens": 13333
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Deadlocks",
+      "Mutexes",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתונה מערכת מרובת חוטים בה שני משאבים משותפים, `משאב A` ו-`משאב B`. כל משאב מוגן על ידי מנעול (mutex) ייעודי: `mutex_A` עבור `משאב A` ו-`mutex_B` עבור `משאב B`. חוטים במערכת מבצעים פעולה הדורשת גישה לשני המשאבים בו-זמנית. הפונקציה `perform_task` הבאה ממחישה את אופן השימוש במשאבים. שימו לב כי מזהה החוט `thread_id` משמש לקביעת סדר רכישת המנעולים.",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h> // For printing messages in a real execution\n\npthread_mutex_t mutex_A = PTHREAD_MUTEX_INITIALIZER;\npthread_mutex_t mutex_B = PTHREAD_MUTEX_INITIALIZER;\n\nvoid* perform_task(void* arg) {\n    int thread_id = *(int*)arg;\n\n    if (thread_id % 2 == 0) { // Even threads acquire A then B\n        pthread_mutex_lock(&mutex_A);\n        printf(\"Thread %d acquired mutex_A\\n\", thread_id);\n        // Simulate some work or delay\n        // usleep(1000); // For demonstrating deadlock in real time\n        pthread_mutex_lock(&mutex_B);\n        printf(\"Thread %d acquired mutex_B\\n\", thread_id);\n    } else { // Odd threads acquire B then A\n        pthread_mutex_lock(&mutex_B);\n        printf(\"Thread %d acquired mutex_B\\n\", thread_id);\n        // Simulate some work or delay\n        // usleep(1000); // For demonstrating deadlock in real time\n        pthread_mutex_lock(&mutex_A);\n        printf(\"Thread %d acquired mutex_A\\n\", thread_id);\n    }\n\n    printf(\"Thread %d acquired both resources. Performing task...\\n\", thread_id);\n    // Critical section: Use Resource A and Resource B\n    // ...\n    printf(\"Thread %d finished task. Releasing resources.\\n\", thread_id);\n\n    // Release in reverse order of acquisition for safety\n    if (thread_id % 2 == 0) {\n        pthread_mutex_unlock(&mutex_B);\n        pthread_mutex_unlock(&mutex_A);\n    } else {\n        pthread_mutex_unlock(&mutex_A);\n        pthread_mutex_unlock(&mutex_B);\n    }\n    return NULL;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "8.1",
+        "text": "א. נתחו את הקוד הנתון. האם קיימת סכנה לקיפאון (deadlock) במערכת? אם כן, הסבירו בפירוט מדוע ומדוע. תארו תרחיש תזמון ספציפי שיוביל לקיפאון זה.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.2",
+        "text": "ב. הציעו פתרון מתוקן לפונקציה `perform_task` שימנע קיפאון, תוך שימוש במנעולים (mutexes) בלבד. הסבירו את התיקון שביצעתם ומדוע הוא מונע קיפאון.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "א. כן, קיימת סכנה מובהקת לקיפאון (deadlock) במערכת. הקיפאון נובע מכך שחוטים רוכשים את המנעולים `mutex_A` ו-`mutex_B` בסדר לא עקבי. תנאי הקיפאון של Coffman (או Holt) מתקיימים:\n1.  **מניעה הדדית (Mutual Exclusion):** כל מנעול מגן על משאב ורק חוט אחד יכול להחזיק בו בו-זמנית.\n2.  **החזק והמתן (Hold and Wait):** חוט יכול להחזיק במנעול אחד (למשל `mutex_A`) ולהמתין למנעול אחר (למשל `mutex_B`).\n3.  **אי-הפקעה (No Preemption):** מנעול שנרכש על ידי חוט לא יכול להילקח ממנו בכוח.\n4.  **המתנה מעגלית (Circular Wait):** זהו התנאי המרכזי שמוביל לקיפאון במקרה זה.\n\n**תרחיש תזמון ספציפי לקיפאון:**\nנניח שיש לנו שני חוטים: `Thread 0` (מזהה זוגי) ו-`Thread 1` (מזהה אי-זוגי).\n1.  `Thread 0` מתחיל לרוץ ורוכש את `mutex_A`.\n    *   `printf(\"Thread 0 acquired mutex_A\\n\", 0);`\n2.  בשלב זה, מתבצע מיתוג הקשר (context switch) ל-`Thread 1`.\n3.  `Thread 1` מתחיל לרוץ ורוכש את `mutex_B`.\n    *   `printf(\"Thread 1 acquired mutex_B\\n\", 1);`\n4.  `Thread 1` מנסה כעת לרכוש את `mutex_A`. אך `mutex_A` מוחזק על ידי `Thread 0`. לכן, `Thread 1` נחסם וממתין לשחרור `mutex_A`.\n5.  מתבצע מיתוג הקשר בחזרה ל-`Thread 0`.\n6.  `Thread 0` מנסה כעת לרכוש את `mutex_B`. אך `mutex_B` מוחזק על ידי `Thread 1`. לכן, `Thread 0` נחסם וממתין לשחרור `mutex_B`.\n\nבנקודה זו, `Thread 0` מחזיק ב-`mutex_A` וממתין ל-`mutex_B` (המוחזק על ידי `Thread 1`), בעוד ש-`Thread 1` מחזיק ב-`mutex_B` וממתין ל-`mutex_A` (המוחזק על ידי `Thread 0`). נוצרה שרשרת המתנה מעגלית, ושני החוטים חסומים לצמיתות – המערכת נמצאת בקיפאון.\n\nב. כדי למנוע קיפאון, יש לשבור את תנאי ההמתנה המעגלית. הדרך הנפוצה והפשוטה ביותר לעשות זאת היא לאכוף סדר רכישה עקבי של המנעולים על ידי כל החוטים. כלומר, כל החוטים ירכשו תמיד את `mutex_A` ואז את `mutex_B`, או לחלופין, את `mutex_B` ואז את `mutex_A`. כל עוד כולם מצייתים לאותו סדר, לא תיווצר המתנה מעגלית.\n\n**פתרון מתוקן (אכיפת סדר רכישה: תמיד A ואז B):**\n```c\n#include <pthread.h>\n#include <stdio.h>\n\npthread_mutex_t mutex_A = PTHREAD_MUTEX_INITIALIZER;\npthread_mutex_t mutex_B = PTHREAD_MUTEX_INITIALIZER;\n\nvoid* perform_task_fixed(void* arg) {\n    int thread_id = *(int*)arg;\n\n    // All threads now acquire mutex_A first, then mutex_B\n    pthread_mutex_lock(&mutex_A);\n    printf(\"Thread %d acquired mutex_A\\n\", thread_id);\n    pthread_mutex_lock(&mutex_B);\n    printf(\"Thread %d acquired mutex_B\\n\", thread_id);\n\n    printf(\"Thread %d acquired both resources. Performing task...\\n\", thread_id);\n    // Critical section: Use Resource A and Resource B\n    // ...\n    printf(\"Thread %d finished task. Releasing resources.\\n\", thread_id);\n\n    // Release in reverse order of acquisition\n    pthread_mutex_unlock(&mutex_B);\n    pthread_mutex_unlock(&mutex_A);\n    return NULL;\n}\n```\n\n**הסבר לתיקון:**\nהתיקון מבטל את התלות ב-`thread_id` לקביעת סדר רכישת המנעולים. כעת, כל חוט, ללא קשר למזהה שלו, ינסה לרכוש קודם את `mutex_A` ולאחר מכן את `mutex_B`. \nאם `Thread X` מחזיק ב-`mutex_A` וממתין ל-`mutex_B`, אף חוט אחר (`Thread Y`) לא יכול להחזיק ב-`mutex_B` ולהמתין ל-`mutex_A`, מכיוון ש-`Thread Y` ינסה קודם לרכוש את `mutex_A` (שמוחזק על ידי `Thread X`) וייחסם. לכן, לא יכולה להיווצר שרשרת המתנה מעגלית, והקיפאון נמנע.\nפתרון זה פשוט ויעיל, ומבטיח שהמערכת תישאר חופשית מקיפאון."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

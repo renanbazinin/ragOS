@@ -1,0 +1,58 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Synchronization and Concurrency",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 21:20:09",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4132,
+      "output_tokens": 2049,
+      "total_tokens": 10536
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Synchronization",
+      "Concurrency",
+      "Deadlock",
+      "Mutex"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה, המשתמשת בשני חוטים (threads) ובשני מנעולים (mutexes) כדי לעדכן משתנה גלובלי משותף. יש להניח שכל קריאות המערכת מצליחות ושהמערכת מפגרת בהפעלת חוטים (כלומר, קיים סיכוי גבוה למעבר הקשר בין חוטים בזמן שהם מחזיקים מנעולים).",
+      "code_snippet": "1 #include <pthread.h>\n2 #include <stdio.h>\n3 #include <stdlib.h>\n4 #include <unistd.h> // For usleep\n5\n6 // Global shared resources\n7 int shared_data = 0;\n8 pthread_mutex_t mutex1;\n9 pthread_mutex_t mutex2;\n10\n11 // Thread function 1\n12 void* thread_func_A(void* arg) {\n13   for (int i = 0; i < 5; ++i) {\n14     pthread_mutex_lock(&mutex1);\n15     usleep(100); // Simulate work that takes time\n16     pthread_mutex_lock(&mutex2);\n17\n18     shared_data++;\n19     printf(\"Thread A: shared_data = %d\\n\", shared_data);\n20\n21     pthread_mutex_unlock(&mutex2);\n22     pthread_mutex_unlock(&mutex1);\n23     usleep(10); // Simulate other work\n24   }\n25   return NULL;\n26 }\n27\n28 // Thread function 2\n29 void* thread_func_B(void* arg) {\n30   for (int i = 0; i < 5; ++i) {\n31     pthread_mutex_lock(&mutex2);\n32     usleep(100); // Simulate work that takes time\n33     pthread_mutex_lock(&mutex1);\n34\n35     shared_data++;\n36     printf(\"Thread B: shared_data = %d\\n\", shared_data);\n37\n38     pthread_mutex_unlock(&mutex1);\n39     pthread_mutex_unlock(&mutex2);\n40     usleep(10); // Simulate other work\n41   }\n42   return NULL;\n43 }\n44\n45 int main() {\n46   pthread_t tid_A, tid_B;\n47\n48   pthread_mutex_init(&mutex1, NULL);\n49   pthread_mutex_init(&mutex2, NULL);\n50\n51   pthread_create(&tid_A, NULL, thread_func_A, NULL);\n52   pthread_create(&tid_B, NULL, thread_func_B, NULL);\n53\n54   pthread_join(tid_A, NULL);\n55   pthread_join(tid_B, NULL);\n56\n57   printf(\"Final shared_data = %d\\n\", shared_data);\n58\n59   pthread_mutex_destroy(&mutex1);\n60   pthread_mutex_destroy(&mutex2);\n61\n62   return 0;\n63 }",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "8.1",
+        "text": "מהו התרחיש הסביר ביותר שיתרחש בזמן ריצת התוכנית? נמק את תשובתך בפירוט, תוך התייחסות למצבם של המנעולים והחוטים ברגע התרחשותו.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.2",
+        "text": "מה יהיה הערך הסופי של המשתנה `shared_data` אם התוכנית הייתה מסיימת את ריצתה בהצלחה (כלומר, אם התרחיש שתיארת בסעיף הקודם לא היה מתרחש)? נמק.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.3",
+        "text": "תקן את התוכנית כדי למנוע את התרחיש שתיארת בסעיף 1, תוך שמירה על נכונות עדכון המשתנה המשותף. הצג רק את השינויים הנדרשים בקוד (אין צורך להציג את כל הקוד מחדש). נמק בקצרה מדוע התיקון שלך פותר את הבעיה.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "8.1: התרחיש הסביר ביותר הוא קיפאון (Deadlock). קיפאון יתרחש כאשר חוט A ירכוש את mutex1 וחוט B ירכוש את mutex2 (או להפך, אך זה התרחיש הקלאסי עם הסדר הנוכחי). לאחר מכן, חוט A ינסה לרכוש את mutex2 (שנמצא אצל חוט B), וחוט B ינסה לרכוש את mutex1 (שנמצא אצל חוט A). שני החוטים יחסמו זה את זה לצמיתות, וימתינו למנעול שהשני מחזיק, מבלי שיוכלו לשחרר את המנעול שבידיהם. ה-usleep(100) מגביר את הסיכוי למעבר הקשר בין חוטים בזמן שהם מחזיקים מנעול אחד, וטרם ניסו לרכוש את השני.\n\n8.2: אם התוכנית הייתה מסיימת את ריצתה בהצלחה, הערך הסופי של `shared_data` היה 10. כל אחד משני החוטים (A ו-B) מבצע לולאה 5 פעמים, ובכל איטרציה הוא מגדיל את `shared_data` באחד. מכיוון שפעולת הגידול מוגנת על ידי מנעולים (אמנם בצורה שגורמת לקיפאון, אך עדיין מונעת מרוץ על המונה עצמו), כל 10 הפעולות יתבצעו כראוי, כל אחת בתורה. לכן, 5 + 5 = 10.\n\n8.3: כדי למנוע קיפאון, יש לוודא שכל החוטים רוכשים את המנעולים באותו סדר קבוע. לדוגמה, שניהם ירכשו תמיד את mutex1 ואז את mutex2. התיקון הנדרש: לשנות את פונקציית thread_func_B כך שתאמץ את אותו סדר רכישת מנעולים כמו thread_func_A.\n\nשינויים בקוד (בפונקציה thread_func_B בלבד):\n```c\nvoid* thread_func_B(void* arg) {\n  for (int i = 0; i < 5; ++i) {\n    pthread_mutex_lock(&mutex1); // Changed from mutex2\n    usleep(100); // Simulate work\n    pthread_mutex_lock(&mutex2);\n\n    shared_data++;\n    printf(\"Thread B: shared_data = %d\\n\", shared_data);\n\n    pthread_mutex_unlock(&mutex2);\n    pthread_mutex_unlock(&mutex1); // Changed from mutex2\n    usleep(10); // Simulate other work\n  }\n  return NULL;\n}\n```\n\nהנימוק: על ידי קביעת סדר אחיד לרכישת המנעולים (לדוגמה, תמיד קודם mutex1 ואז mutex2), אנו מונעים את תנאי ה\"המתנה מעגלית\" (Circular Wait) הנדרש לקיומו של קיפאון. חוט שלוקח את mutex1 תמיד ינסה לקחת את mutex2. אם חוט אחר כבר מחזיק את mutex1, הוא פשוט ימתין. הוא לא יוכל להחזיק ב-mutex2 ולנסות לקחת את mutex1 בו זמנית, מה שמונע את המעגל שהוביל לקיפאון."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

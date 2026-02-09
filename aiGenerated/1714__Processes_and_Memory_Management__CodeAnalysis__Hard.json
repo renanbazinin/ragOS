@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Processes and Memory Management",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 20:16:57",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3064,
+      "output_tokens": 3193,
+      "total_tokens": 14988
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Processes",
+      "Memory Management",
+      "Virtual Memory",
+      "Copy-on-Write",
+      "System Calls"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה בשפת C. התוכנית יוצרת שלושה תהליכי בן. יש להניח שגודל דף זיכרון (page size) הוא 4KB. התוכנית המקורית (main) עצמה (קוד, נתונים סטטיים ומחסנית) תופסת 2 דפי זיכרון פיזיים. התוכנית `prog2` (שמבוצעת על ידי תהליך בן 3) היא תוכנית קטנה שקוד הריצה, נתוניה ומחסניתה תופסים ביחד דף זיכרון פיזי אחד בלבד. כל קריאות המערכת מצליחות, ואין תהליכים או פעולות זיכרון אחרות במערכת המשפיעות על מצב הזיכרון. מערכת ההפעלה משתמשת במנגנון Copy-on-Write (CoW) עבור דפי זיכרון משותפים בין תהליכים שנוצרו באמצעות `fork`.\n\nבדקו את מצב המערכת בנקודת זמן בה:\n1. כל התהליכים הבנים (PID1, PID2, PID3) נוצרו בהצלחה מהתהליך האב.\n2. תהליך בן 1 סיים לשנות את `arr[0]`.\n3. תהליך בן 2 סיים לשנות את `arr[ARRAY_SIZE/2]`.\n4. תהליך בן 3 סיים בהצלחה את קריאת `execvp` והוא מריץ כעת את התוכנית `prog2`.\n5. אף תהליך (אב או בנים) עוד לא סיים את ריצתו.\n\nכמה מסגרות זיכרון פיזי (physical frames) תפוסות במערכת עבור מרחב המשתמש (user space) בנקודה זו? נמקו את תשובתכם בפירוט.",
+      "code_snippet": " 1 #include <stdio.h>\n 2 #include <stdlib.h>\n 3 #include <unistd.h>\n 4 #include <sys/wait.h>\n 5 \n 6 #define PAGE_SIZE_BYTES 4096 // גודל דף זיכרון: 4KB\n 7 #define INT_PER_PAGE (PAGE_SIZE_BYTES / sizeof(int)) // מספר אינטג'רים בדף אחד\n 8 #define NUM_PAGES 4 // המערך יתפרס על פני 4 דפים\n 9 #define ARRAY_SIZE (NUM_PAGES * INT_PER_PAGE) // גודל המערך הכולל\n10 \n11 // קוד התוכנית prog2 (מניחים שקוד זה ונתוניו תופסים דף אחד בלבד)\n12 // int main() {\n13 //     printf(\"Hello from prog2, PID: %d\\n\", getpid());\n14 //     sleep(1);\n15 //     return 0;\n16 // }\n17 \n18 int main() {\n19     // הקצאת מערך בזיכרון ה-heap\n20     int* arr = (int*)malloc(ARRAY_SIZE * sizeof(int));\n21     if (arr == NULL) {\n22         perror(\"malloc failed\");\n23         return 1;\n24     }\n25 \n26     // אתחול המערך על מנת לוודא שכל הדפים מוקצים ונגישים\n27     for (int i = 0; i < ARRAY_SIZE; ++i) {\n28         arr[i] = i;\n29     }\n30 \n31     printf(\"Parent PID: %d, Array initialized. (Expected %d pages for array)\\n\", getpid(), NUM_PAGES);\n32 \n33     pid_t pid1, pid2, pid3;\n34 \n35     // בן 1: משנה את arr[0] (הדף הראשון של המערך)\n36     pid1 = fork();\n37     if (pid1 == 0) { // קוד הבן הראשון\n38         printf(\"Child 1 PID: %d, PPID: %d. Modifying arr[0].\\n\", getpid(), getppid());\n39         arr[0] = getpid(); // יפעיל CoW עבור הדף הראשון\n40         sleep(1); // ממתין כדי לאפשר תצפית\n41         exit(0);\n42     } else if (pid1 < 0) {\n43         perror(\"fork 1 failed\");\n44         free(arr);\n45         return 1;\n46     }\n47 \n48     // בן 2: משנה את arr[ARRAY_SIZE/2] (הדף השלישי של המערך)\n49     pid2 = fork();\n50     if (pid2 == 0) { // קוד הבן השני\n51         printf(\"Child 2 PID: %d, PPID: %d. Modifying arr[ARRAY_SIZE/2].\\n\", getpid(), getppid());\n52         arr[ARRAY_SIZE / 2] = getpid(); // יפעיל CoW עבור הדף השלישי\n53         sleep(1); // ממתין כדי לאפשר תצפית\n54         exit(0);\n55     } else if (pid2 < 0) {\n56         perror(\"fork 2 failed\");\n57         free(arr);\n58         return 1;\n59     }\n60 \n61     // בן 3: מריץ את prog2\n62     pid3 = fork();\n63     if (pid3 == 0) { // קוד הבן השלישי\n64         printf(\"Child 3 PID: %d, PPID: %d. Executing prog2.\\n\", getpid(), getppid());\n65         char *args[] = {\"./prog2\", NULL};\n66         execvp(args[0], args);\n67         perror(\"execvp failed\"); // לא אמור להגיע לכאן אם execvp הצליח\n68         exit(1);\n69     } else if (pid3 < 0) {\n70         perror(\"fork 3 failed\");\n71         free(arr);\n72         return 1;\n73     }\n74 \n75     // האב ממתין לכל הבנים (לא רלוונטי לנקודת הבדיקה)\n76     waitpid(pid1, NULL, 0);\n77     waitpid(pid2, NULL, 0);\n78     waitpid(pid3, NULL, 0);\n79 \n80     printf(\"Parent PID: %d. All children finished.\\n\", getpid());\n81     free(arr);\n82     return 0;\n83 }",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "ננתח את מצב הזיכרון צעד אחר צעד, בהתחשב בכך שדף זיכרון הוא בגודל 4KB. התוכנית המקורית (main) עצמה (קוד, נתונים סטטיים ומחסנית) תופסת 2 דפי זיכרון פיזיים. המערך `arr` תופס 4 דפים.\n\n1.  **מצב התהליך האב לפני יצירת בנים:**\n    *   קוד התוכנית `main` ונתונים סטטיים: 1 דף (נכנה אותו P_code).\n    *   מחסנית התהליך האב: 1 דף (P_stack).\n    *   זיכרון Heap עבור המערך `arr` (בגודל `ARRAY_SIZE` אינטג'רים): 4 דפים (נכנה אותם P_heap0, P_heap1, P_heap2, P_heap3).\n    *   **סה\"כ דפים פיזיים ייחודיים במערכת:** 1 (P_code) + 1 (P_stack) + 4 (P_heap) = 6 דפים.\n\n2.  **לאחר יצירת תהליך בן 1 (לפני שינוי `arr[0]`):**\n    *   תהליך בן 1 נוצר באמצעות `fork` ומשתף את כל 6 הדפים של האב במנגנון CoW.\n    *   **סה\"כ דפים פיזיים ייחודיים במערכת:** עדיין 6 דפים.\n\n3.  **לאחר שבן 1 משנה את `arr[0]`:**\n    *   האיבר `arr[0]` נמצא בדף P_heap0. השינוי מפעיל את מנגנון CoW, אשר יוצר עותק פרטי של דף P_heap0 עבור בן 1. נכנה אותו C1_heap0.\n    *   **סה\"כ דפים פיזיים ייחודיים במערכת:** 6 (הדפים המקוריים של האב) + 1 (C1_heap0) = 7 דפים.\n\n4.  **לאחר יצירת תהליך בן 2 (לפני שינוי `arr[ARRAY_SIZE/2]`):**\n    *   תהליך בן 2 נוצר מהאב ומשתף את כל הדפים של האב (P_code, P_stack, P_heap0, P_heap1, P_heap2, P_heap3) במנגנון CoW.\n    *   **סה\"כ דפים פיזיים ייחודיים במערכת:** עדיין 7 דפים.\n\n5.  **לאחר שבן 2 משנה את `arr[ARRAY_SIZE/2]`:**\n    *   האיבר `arr[ARRAY_SIZE/2]` נמצא בדף P_heap2 (בהנחה ש-`ARRAY_SIZE/2` נופל בדף השלישי של המערך, כלומר אינדקס `2*INT_PER_PAGE`). השינוי מפעיל את מנגנון CoW, אשר יוצר עותק פרטי של דף P_heap2 עבור בן 2. נכנה אותו C2_heap2.\n    *   **סה\"כ דפים פיזיים ייחודיים במערכת:** 7 (מהשלב הקודם) + 1 (C2_heap2) = 8 דפים.\n\n6.  **לאחר יצירת תהליך בן 3 (לפני `execvp`):**\n    *   תהליך בן 3 נוצר מהאב ומשתף את כל הדפים של האב (P_code, P_stack, P_heap0, P_heap1, P_heap2, P_heap3) במנגנון CoW.\n    *   **סה\"כ דפים פיזיים ייחודיים במערכת:** עדיין 8 דפים.\n\n7.  **לאחר שבן 3 מריץ את `execvp` עבור `prog2`:**\n    *   קריאת `execvp` מחליפה את כל מרחב הכתובות של תהליך בן 3. ההפניות שלו לדפים שהיו משותפים או שהועתקו מהאב (P_code, P_stack, P_heap0, P_heap1, P_heap2, P_heap3) מוסרות. מכיוון שהדפים הפיזיים P_code, P_stack, P_heap0, P_heap1, P_heap2, P_heap3 עדיין מופנים על ידי האב, בן 1 (למעט C1_heap0) ובן 2 (למעט C2_heap2), הם אינם משוחררים מהזיכרון הפיזי.\n    *   תוכנית `prog2` נטענת לזיכרון. נתון שקוד התוכנית `prog2`, נתוניה והמחסנית שלה תופסים יחד דף זיכרון פיזי אחד בלבד (נכנה אותו C3_prog2_pages).\n    *   **סה\"כ דפים פיזיים ייחודיים במערכת בנקודה זו:**\n        *   דפים של האב: P_code, P_stack, P_heap0, P_heap1, P_heap2, P_heap3 (6 דפים).\n        *   דף פרטי של בן 1: C1_heap0 (1 דף).\n        *   דף פרטי של בן 2: C2_heap2 (1 דף).\n        *   דף של בן 3 (לאחר `execvp`): C3_prog2_pages (1 דף).\n        *   **סה\"כ:** 6 + 1 + 1 + 1 = 9 דפים.\n\n**תשובה סופית:** 9 מסגרות זיכרון פיזי."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

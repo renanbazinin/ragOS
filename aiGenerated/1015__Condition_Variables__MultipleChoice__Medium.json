@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Condition Variables",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 07:25:33",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 983,
+      "output_tokens": 866,
+      "total_tokens": 4103
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Condition Variables",
+      "Synchronization",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "בעת שימוש במשתנה תנאי (condition variable) מסוג `pthread_cond_t` יחד עם מנעול (mutex) מסוג `pthread_mutex_t`, תהליך ממתין לתנאי מסוים שיתקיים. איזה מהבאים מתאר את הדרך הנכונה ביותר לבדוק את התנאי לפני קריאה ל-`pthread_cond_wait` ולאחר חזרה ממנה, על מנת להבטיח נכונות וחוזק (robustness) של הקוד?",
+      "code_snippet": null,
+      "options": [
+        "א. יש לבדוק את התנאי באמצעות `if` לפני הקריאה ל-`pthread_cond_wait`.",
+        "ב. יש לבדוק את התנאי באמצעות `while` לפני הקריאה ל-`pthread_cond_wait`, כשהבדיקה מתבצעת בתוך הלולאה.",
+        "ג. אין צורך לבדוק את התנאי כלל, מכיוון ש-`pthread_cond_wait` מבטיחה שהתהליך יתעורר רק כאשר התנאי מתקיים.",
+        "ד. יש לבדוק את התנאי באמצעות `if` לפני הקריאה ל-`pthread_cond_wait`, וגם `if` נוסף לאחר החזרה ממנה."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב'. השימוש בלולאת `while` לבדיקת התנאי לפני הקריאה ל-`pthread_cond_wait` ולאחר חזרה ממנה הוא קריטי ממספר סיבות:\n1.  **התעוררות שווא (Spurious Wakeups)**: מערכות הפעלה או מימושי `pthread` עשויים להעיר תהליכים שממתינים על משתנה תנאי גם כאשר לא נשלח אות (`signal` או `broadcast`). לולאת `while` מבטיחה שהתהליך יבדוק מחדש את התנאי ויחזור למצב המתנה אם התנאי עדיין לא מתקיים.\n2.  **מצבי מירוץ (Race Conditions)**: גם אם תהליך התעורר כתוצאה מ-`signal`, ייתכן שתהליך אחר הספיק לרוץ, לרכוש את המנעול ולשנות את התנאי בחזרה למצב שאינו מתאים, וזאת לפני שהתהליך שהתעורר הספיק לרכוש מחדש את המנעול. לולאת `while` מטפלת במצב זה בכך שהיא מאלצת בדיקה חוזרת של התנאי.\n3.  **מספר מאותתים (Multiple Signalers)**: אם מספר תהליכים ממתינים על אותו משתנה תנאי, ורק אחד מהם יכול להמשיך ברגע שהתנאי מתקיים (לדוגמה, במאגר מוגבל), `pthread_cond_signal` יעיר רק אחד מהם. אם אחר כך תהליך נוסף יתעורר (אפילו באופן שווא), הוא חייב לבדוק את התנאי שוב כדי לוודא אם יש לו עדיין עבודה לבצע. לולאת `while` מבטיחה שהתהליך ימשיך להמתין כל עוד התנאי לא מתקיים באופן ודאי עבורו."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Copy-on-Write",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 08:50:24",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 967,
+      "output_tokens": 438,
+      "total_tokens": 2488
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Copy-on-Write",
+      "Memory Management",
+      "Processes"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של מנגנון Copy-on-Write (CoW) במערכות הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. לאפשר לתהליכים שונים לכתוב לאותו אזור זיכרון במקביל ללא צורך בנעילות.",
+        "ב. להפחית את צריכת הזיכרון ואת זמן היצירה של תהליכים חדשים על ידי שיתוף דפי זיכרון.",
+        "ג. למנוע גישה לא חוקית לזיכרון על ידי תהליכים זדוניים.",
+        "ד. להבטיח שכל הנתונים בזיכרון יישמרו באופן קבוע על הדיסק.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב'. מנגנון Copy-on-Write מאפשר לתהליכים שונים (לדוגמה, תהליך אב ובן לאחר קריאת fork()) לשתף דפי זיכרון לקריאה בלבד. רק כאשר אחד התהליכים מנסה לכתוב לדף משותף, נוצר עותק פרטי של הדף עבורו, ובכך נמנע בזבוז זיכרון ומשאבים מיותרים ומואץ תהליך היצירה של תהליכים חדשים."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

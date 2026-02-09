@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Threads and Mutexes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 20:18:54",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1131,
+      "output_tokens": 334,
+      "total_tokens": 2663
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Threads",
+      "Mutexes",
+      "Synchronization",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "מהי הבעיה העיקרית שמנגנון mutex נועד לפתור בעת גישה למשאב משותף על ידי מספר חוטים (threads) במקביל?",
+      "code_snippet": null,
+      "options": [
+        "א. מניעת Deadlock",
+        "ב. מניעת Race Condition",
+        "ג. שיפור ביצועי המערכת על ידי הקטנת Context Switch",
+        "ד. הבטחת סדר הרצת החוטים"
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "מנגנון mutex נועד להגן על קטעים קריטיים של קוד שבהם מספר חוטים ניגשים למשאב משותף. הוא מבטיח שרק חוט אחד יוכל לגשת למשאב זה בכל רגע נתון, ובכך מונע מצב של Race Condition שבו התוצאה הסופית תלויה בסדר הלא צפוי של פעולות החוטים."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Processes and Memory Management",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 20:11:04",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3064,
+      "output_tokens": 3109,
+      "total_tokens": 16005
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Processes",
+      "Memory Management",
+      "System Calls",
+      "Copy-on-Write",
+      "Virtual Memory"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה, `prog_A.c`, והתוכנית `prog_B.c` (שאינה מופיעה בקוד אך ידוע כי אינה מבצעת `fork` או `exec` נוספים וקוד ה-`main` שלה ריק למעט `return 0`).\nהניחו את ההנחות הבאות:\n*   גודל דף זיכרון (PAGE_SIZE) הוא 4096 בתים.\n*   קוד ונתונים סטטיים של `prog_A` תופסים דף אחד (1 PAGE_SIZE).\n*   קוד ונתונים סטטיים של `prog_B` תופסים דף אחד (1 PAGE_SIZE).\n*   כל קריאות המערכת `fork()`, `execvp()`, `malloc()` מצליחות.\n*   מערכת ההפעלה משתמשת במנגנון Copy-on-Write (CoW) עבור דפים בעת יצירת תהליך חדש.\n*   קריאת `malloc()` תמיד מקצה זיכרון בגודל כפולה של `PAGE_SIZE`, ונגיעה בבייט הראשון של כל דף שהוקצה (`mem_block[i * PAGE_SIZE] = 'X'`) מבטיחה את העברתו לזיכרון פיזי (כלומר, הקצאת מסגרת פיזית עבורו).\n*   `execvp()` מחליף את כל מרחב הכתובות הווירטואלי של התהליך המבצע אותו בזה של התוכנית החדשה.\n*   טבלאות דפים ונתוני מערכת הפעלה אחרים אינם נספרים כזיכרון מרחב משתמש (user space).\n*   אין שימוש ב-swapping.\n*   בתחילת ריצת התוכנית `prog_A` (לפני שורה 1), תפוסים 30 מסגרות זיכרון פיזי במערכת עבור זיכרון מרחב משתמש.\n\nכמה מסגרות זיכרון פיזי (frames) יהיו תפוסות במערכת עבור מרחב המשתמש (user space) בנקודת הזמן הבאה: כל קריאות ה-`execvp` הסתיימו בהצלחה. תהליך `prog_B` (שהופעל על ידי C1) טרם ביצע כל הקצאת זיכרון משלו (מעבר לקוד/נתונים סטטיים). תהליך `prog_A` שהופעל מחדש (על ידי C2) נמצא בתחילת ריצת ה-`main` שלו (לפני שורה 6).\nיש לפרט את חישוב המסגרות עבור כל תהליך.\n\n```c\n// File: prog_A.c\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n#include <string.h>\n\n#define PAGE_SIZE 4096\n\nvoid allocate_and_touch(int num_pages) {\n    char *mem_block = (char*)malloc(num_pages * PAGE_SIZE);\n    if (!mem_block) { perror(\"malloc failed\"); exit(1); }\n    for (int i = 0; i < num_pages; ++i) {\n        mem_block[i * PAGE_SIZE] = 'X'; // Touch a byte in each page\n    }\n}\n\nint main(int argc, char *argv[]) {\n    // Original process P\n    if (argc == 1) { // This is the initial run of prog_A\n        allocate_and_touch(4); // P allocates 4 pages\n\n        pid_t child1_pid = fork();\n        if (child1_pid == 0) { // Child C1\n            allocate_and_touch(2); // C1 allocates 2 pages\n            char *args_b[] = {\"./prog_B\", NULL};\n            execvp(args_b[0], args_b);\n            perror(\"execvp prog_B failed\"); exit(1);\n        } else { // Parent P continues\n            pid_t child2_pid = fork();\n            if (child2_pid == 0) { // Child C2\n                allocate_and_touch(3); // C2 allocates 3 pages\n                char *args_a[] = {\"./prog_A\", \"re_exec\", NULL}; // Differentiate re-exec\n                execvp(args_a[0], args_a);\n                perror(\"execvp prog_A failed\"); exit(1);\n            } else { // Parent P waits\n                waitpid(child1_pid, NULL, 0);\n                waitpid(child2_pid, NULL, 0);\n            }\n        }\n    }\n    return 0;\n}\n```",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הבה ננתח את השימוש במסגרות זיכרון פיזיות (frames) על ידי התהליכים השונים, תוך התחשבות במנגנון Copy-on-Write (CoW) ובפעולת `execvp`.\n\n**חישוב מסגרות הזיכרון הפיזי במערכת:**\n\n1.  **מצב התחלתי:**\n    *   30 מסגרות זיכרון תפוסות במערכת עבור מרחב המשתמש.\n\n2.  **תהליך P (התוכנית המקורית `prog_A`) מתחיל:**\n    *   קוד ונתונים סטטיים של `prog_A` נטענים לזיכרון: 1 מסגרת.\n    *   סה\"כ מסגרות: 30 + 1 = 31.\n\n3.  **תהליך P מבצע `allocate_and_touch(4)`:**\n    *   P מקצה 4 דפים ונוגע בהם, מה שגורם להקצאת 4 מסגרות פיזיות חדשות עבור ה-heap שלו.\n    *   סה\"כ מסגרות: 31 + 4 = 35.\n    *   בשלב זה, P משתמש ב-1 מסגרת לקוד של `prog_A` וב-4 מסגרות ל-heap שלו (סה\"כ 5 מסגרות).\n\n4.  **תהליך P מבצע `fork()` ליצירת C1:**\n    *   C1 נוצר כבן של P. בתחילה, C1 משתף את כל דפי הזיכרון של P (קוד ו-heap) במנגנון CoW. לא מוקצות מסגרות פיזיות חדשות בשלב זה.\n    *   סה\"כ מסגרות: 35.\n\n5.  **תהליך C1 מבצע `allocate_and_touch(2)`:**\n    *   C1 מקצה 2 דפים חדשים ונוגע בהם, מה שגורם להקצאת 2 מסגרות פיזיות חדשות עבור ה-heap שלו.\n    *   סה\"כ מסגרות: 35 + 2 = 37.\n    *   בשלב זה, C1 משתמש ב-2 מסגרות ל-heap שלו (בנוסף לדפים המשותפים עם P).\n\n6.  **תהליך P מבצע `fork()` ליצירת C2:**\n    *   C2 נוצר כבן של P. C2 משתף את כל דפי הזיכרון של P (קוד ו-heap) במנגנון CoW. לא מוקצות מסגרות פיזיות חדשות בשלב זה.\n    *   סה\"כ מסגרות: 37.\n\n7.  **תהליך C2 מבצע `allocate_and_touch(3)`:**\n    *   C2 מקצה 3 דפים חדשים ונוגע בהם, מה שגורם להקצאת 3 מסגרות פיזיות חדשות עבור ה-heap שלו.\n    *   סה\"כ מסגרות: 37 + 3 = 40.\n    *   בשלב זה, C2 משתמש ב-3 מסגרות ל-heap שלו (בנוסף לדפים המשותפים עם P).\n\n8.  **תהליך C1 מבצע `execvp(\"./prog_B\", ...)`:**\n    *   `execvp` מחליף את כל מרחב הכתובות הווירטואלי של C1 במרחב הכתובות של `prog_B`.\n    *   2 מסגרות ה-heap שהוקצו על ידי C1 (בשלב 5) משוחררות.\n    *   כל המיפויים לדפים משותפים עם P מוסרים.\n    *   קוד ונתונים סטטיים של `prog_B` נטענים. מכיוון ש-`prog_B` לא היה טעון קודם במערכת, מוקצית 1 מסגרת פיזית חדשה עבור הקוד שלו.\n    *   סה\"כ מסגרות: 40 - 2 (heap של C1) + 1 (קוד של `prog_B`) = 39.\n    *   בשלב זה, C1 (שכעת מריץ את `prog_B`) משתמש ב-1 מסגרת לקוד של `prog_B`.\n\n9.  **תהליך C2 מבצע `execvp(\"./prog_A\", \"re_exec\", ...)`:**\n    *   `execvp` מחליף את כל מרחב הכתובות הווירטואלי של C2 במרחב הכתובות של `prog_A`.\n    *   3 מסגרות ה-heap שהוקצו על ידי C2 (בשלב 7) משוחררות.\n    *   כל המיפויים לדפים משותפים עם P מוסרים.\n    *   קוד ונתונים סטטיים של `prog_A` נטענים. מכיוון שקוד `prog_A` כבר טעון בזיכרון הפיזי (על ידי P), C2 ישתף את אותה מסגרת קוד קיימת. לא מוקצית מסגרת פיזית חדשה עבור קוד `prog_A`.\n    *   סה\"כ מסגרות: 39 - 3 (heap של C2) = 36.\n\n**סיכום מסגרות בנקודת הזמן הסופית הנדרשת:**\n\nבנקודת הזמן שבה כל קריאות ה-`execvp` הסתיימו בהצלחה, אך `prog_B` טרם ביצע הקצאות משלו, ו-`prog_A` שהופעל מחדש נמצא בתחילת ריצת `main` (לפני שורה 6):\n\n*   **P (מריץ `prog_A`):**\n    *   קוד `prog_A`: 1 מסגרת (המסגרת המקורית של קוד `prog_A`, משותפת כעת עם C2).\n    *   Heap של P: 4 מסגרות (שהוקצו ב-`allocate_and_touch(4)`).\n    *   סה\"כ עבור P: 5 מסגרות.\n\n*   **C1 (מריץ `prog_B`):**\n    *   קוד `prog_B`: 1 מסגרת.\n    *   סה\"כ עבור C1: 1 מסגרת.\n\n*   **C2 (מריץ `prog_A` מחדש):**\n    *   קוד `prog_A`: 1 מסגרת (משתף את המסגרת הקיימת של קוד `prog_A` עם P).\n    *   סה\"כ עבור C2: 1 מסגרת.\n\n**מסגרות פיזיות ייחודיות בשימוש על ידי התהליכים:**\n*   1 מסגרת עבור קוד `prog_A` (משותפת בין P ל-C2).\n*   4 מסגרות עבור ה-heap של P.\n*   1 מסגרת עבור קוד `prog_B` (משמשת את C1).\n*   **סה\"כ מסגרות ייחודיות בשימוש על ידי התהליכים = 1 + 4 + 1 = 6 מסגרות.**\n\n**סה\"כ מסגרות זיכרון פיזי במערכת:**\n*   30 (מסגרות התחלתיות) + 6 (מסגרות חדשות שנוצרו על ידי התהליכים) = **36 מסגרות**.\n",
+      "difficulty_estimation": "Hard"
+    }
+  }
+}

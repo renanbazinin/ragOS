@@ -1,0 +1,47 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Processes and Threads",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 10:25:31",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2789,
+      "output_tokens": 3033,
+      "total_tokens": 11972
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Processes",
+      "Threads",
+      "Concurrency",
+      "Memory Management",
+      "System Calls"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה בשפת C. התוכנית משתמשת בתהליכים (processes) ובתהליכונים (threads).\nיש להניח שכל קריאות המערכת (לדוגמה: fork, pthread_create) מצליחות. כמו כן, יש להניח שכל הדפסה לפלט הסטנדרטי מתבצעת מיד, ללא חוצץ (buffer) הדפסה או המתנה לירידת שורה. התעלמו מבעיות של טיפול בשגיאות (error handling) למטרות השאלה.\n",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <pthread.h>\n#include <sys/wait.h>\n\n#define NUM_THREADS 3\n#define ITERATIONS  2\n\nint g_counter = 0; // Global variable\npthread_mutex_t mutex;\n\nvoid *thread_func(void *arg) {\n    long thread_id = (long)arg;\n    for (int i = 0; i < ITERATIONS; ++i) {\n        pthread_mutex_lock(&mutex);\n        g_counter++;\n        printf(\"PID: %d, TID: %ld, Counter: %d\\n\", getpid(), thread_id, g_counter);\n        pthread_mutex_unlock(&mutex);\n        usleep(100); // Simulate some work and increase interleaving opportunities\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n    pid_t pid;\n    long i;\n\n    pthread_mutex_init(&mutex, NULL);\n\n    printf(\"Main process (PID: %d) starting with g_counter = %d\\n\", getpid(), g_counter);\n\n    pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        exit(1);\n    } else if (pid == 0) { // Child process\n        printf(\"Child process (PID: %d) created, g_counter = %d\\n\", getpid(), g_counter);\n        for (i = 0; i < NUM_THREADS; ++i) {\n            pthread_create(&threads[i], NULL, thread_func, (void *)(i + 100)); // Child thread IDs start from 100\n        }\n        for (i = 0; i < NUM_THREADS; ++i) {\n            pthread_join(threads[i], NULL);\n        }\n        printf(\"Child process (PID: %d) finished, final g_counter = %d\\n\", getpid(), g_counter);\n        exit(0); // Child exits\n    } else { // Parent process\n        printf(\"Parent process (PID: %d) continuing, g_counter = %d\\n\", getpid(), g_counter);\n        for (i = 0; i < NUM_THREADS; ++i) {\n            pthread_create(&threads[i], NULL, thread_func, (void *)(i + 1)); // Parent thread IDs start from 1\n        }\n        for (i = 0; i < NUM_THREADS; ++i) {\n            pthread_join(threads[i], NULL);\n        }\n        wait(NULL); // Wait for the child process to finish\n        printf(\"Parent process (PID: %d) finished, final g_counter = %d\\n\", getpid(), g_counter);\n    }\n\n    pthread_mutex_destroy(&mutex);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "מהם כל הפלטים האפשריים של התוכנית? ציין גם את הערך הסופי של המשתנה `g_counter` בתהליך האב ובתהליך הבן. הסבר את תשובתך בפירוט, כולל התייחסות למצב מרוץ (race condition) אם קיים, והאם המוטקס מונע אותו.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הסבר מפורט:\n\n1.  **יצירת תהליכים ותהליכונים**: התוכנית מתחילה בתהליך ראשי (Parent). תהליך זה יוצר תהליך בן (Child) באמצעות `fork()`. לאחר מכן, הן תהליך האב והן תהליך הבן יוצרים כל אחד `NUM_THREADS` (שהוגדר כ-3) תהליכונים. כל תהליכון מבצע `ITERATIONS` (שהוגדר כ-2) איטרציות.\n\n2.  **הפרדת זיכרון בין תהליכים (Processes)**:\n    *   כאשר `fork()` נקרא, נוצר עותק של מרחב הכתובות של תהליך האב עבור תהליך הבן. זה כולל את המשתנה הגלובלי `g_counter` ואת המוטקס `mutex`. לכן, לתהליך האב ולתהליך הבן יש עותקים *נפרדים ועצמאיים* של `g_counter` ושל `mutex`.\n    *   הערך ההתחלתי של `g_counter` הוא 0 בשני התהליכים מיד לאחר ה-`fork()`.\n\n3.  **שיתוף זיכרון בין תהליכונים (Threads) באותו תהליך**:\n    *   תהליכונים שנוצרו בתוך אותו תהליך (בין אם האב ובין אם הבן) חולקים את אותו מרחב כתובות. לכן, כל התהליכונים בתהליך האב חולקים את אותו `g_counter` של האב ואת אותו `mutex` של האב. באופן דומה, כל התהליכונים בתהליך הבן חולקים את אותו `g_counter` של הבן ואת אותו `mutex` של הבן.\n\n4.  **מצב מרוץ (Race Condition) והמוטקס (Mutex)**:\n    *   בתוך כל תהליך (אב או בן), מספר תהליכונים מנסים לגשת ולשנות את אותו `g_counter` משותף. ללא הגנה, זה היה יוצר מצב מרוץ. עם זאת, התוכנית משתמשת במוטקס (`pthread_mutex_t mutex`) כדי להגן על הגישה ל-`g_counter`. כל גישה (הגדלה והדפסה) מוגנת על ידי `pthread_mutex_lock` ו-`pthread_mutex_unlock`.\n    *   **המסקנה**: לא קיים מצב מרוץ על המשתנה `g_counter` *בתוך אף אחד מהתהליכים*. המוטקס מונע זאת ביעילות. חשוב להבין שהמוטקסים של האב והבן הם נפרדים, ולכן כל אחד מהם מגן על ה-`g_counter` שלו באופן עצמאי.\n\n5.  **חישוב ערכים סופיים של `g_counter`**:\n    *   כל תהליך (אב ובן) יוצר 3 תהליכונים. כל תהליכון מבצע 2 איטרציות, ובכל איטרציה מגדיל את `g_counter` באחד. \n    *   לכן, בכל תהליך, `g_counter` יוגדל בסך הכל `NUM_THREADS * ITERATIONS = 3 * 2 = 6` פעמים.\n    *   הערך ההתחלתי של `g_counter` הוא 0 בשני התהליכים לאחר ה-`fork()`.\n    *   **ערך סופי של `g_counter` בתהליך האב**: 0 + 6 = 6.\n    *   **ערך סופי של `g_counter` בתהליך הבן**: 0 + 6 = 6.\n\n6.  **פלטים אפשריים**: \n    *   **שורות התחלה וסיום**: הפלטים הראשונים יהיו של התהליך הראשי והתהליך הבן: \"Main process ... starting\", \"Child process ... created\" או \"Parent process ... continuing\". הפלטים הסופיים יהיו \"Child process ... finished\" ו-\"Parent process ... finished\". סדר הפלטים של \"Child process ... created\" ו-\"Parent process ... continuing\" אינו מובטח, אך \"Main process ... starting\" יופיע תמיד ראשון. \"Parent process ... finished\" יופיע אחרון, לאחר שהאב המתין לבן.\n    *   **פלטי התהליכונים**: כל תהליכון ידפיס שורה בכל איטרציה. ישנם 3 תהליכונים באב ו-3 תהליכונים בבן, וכל אחד מבצע 2 איטרציות. בסך הכל 12 הדפסות של \"PID: ..., TID: ..., Counter: ...\".\n    *   **ערכי Counter בהדפסה**: בתוך כל תהליך, ערך ה-`Counter` המודפס יעלה מ-1 עד 6 ברצף (בגלל המוטקס). עם זאת, מכיוון שהתהליכים (אב ובן) רצים במקביל, הפלטים שלהם יכולים להתערבב. למשל, תהליכון של האב יכול להדפיס \"Counter: 1\", ואז תהליכון של הבן יכול להדפיס \"Counter: 1\" (עבור ה-`g_counter` *שלו*), וכן הלאה. ה-PID יעזור להבחין מי הדפיס מה.\n    *   **דוגמת פלט אפשרית (לא יחידה)**:\n        ```\n        Main process (PID: <main_pid>) starting with g_counter = 0\n        Parent process (PID: <main_pid>) continuing, g_counter = 0\n        Child process (PID: <child_pid>) created, g_counter = 0\n        PID: <main_pid>, TID: 1, Counter: 1\n        PID: <child_pid>, TID: 100, Counter: 1\n        PID: <main_pid>, TID: 2, Counter: 2\n        PID: <child_pid>, TID: 101, Counter: 2\n        PID: <main_pid>, TID: 3, Counter: 3\n        PID: <child_pid>, TID: 102, Counter: 3\n        PID: <main_pid>, TID: 1, Counter: 4\n        PID: <child_pid>, TID: 100, Counter: 4\n        PID: <main_pid>, TID: 2, Counter: 5\n        PID: <child_pid>, TID: 101, Counter: 5\n        PID: <main_pid>, TID: 3, Counter: 6\n        PID: <child_pid>, TID: 102, Counter: 6\n        Child process (PID: <child_pid>) finished, final g_counter = 6\n        Parent process (PID: <main_pid>) finished, final g_counter = 6\n        ```\n        הסדר המדויק של שורות ה-`PID: ..., TID: ..., Counter: ...` בין האב לבן יכול להשתנות באופן דרמטי, וגם הסדר בתוך כל קבוצת תהליכונים. עם זאת, בתוך כל קבוצת תהליכונים, ערך ה-`Counter` יעלה ברצף מ-1 עד 6. מספר הפלטים האפשריים הוא גדול מאוד בגלל ריבוי ההתערבבויות האפשריות בין התהליכונים של האב והבן.\n\n**סיכום:**\n*   **ערך סופי של `g_counter` בתהליך האב**: 6\n*   **ערך סופי של `g_counter` בתהליך הבן**: 6\n*   **מצב מרוץ**: לא קיים מצב מרוץ על `g_counter` *בתוך אף תהליך*, בזכות השימוש במוטקסים (שכל תהליך מקבל עותק משלו). קיימת אי-דטרמיניסטיות בסדר ההדפסה בין התהליכים השונים והתהליכונים השונים.\n"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

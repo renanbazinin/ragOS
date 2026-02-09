@@ -1,0 +1,59 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Threads and Synchronization",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 19:47:58",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3826,
+      "output_tokens": 3176,
+      "total_tokens": 14783
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Threads",
+      "Synchronization",
+      "Deadlock",
+      "Condition Variables",
+      "Mutexes"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה, המשתמשת בחוטים (threads) ובמנגנוני סנכרון (מנעולים ומשתני תנאי) כדי לעדכן מונה גלובלי משותף `shared_counter`. מטרת התוכנית היא לאפשר לחוטים לעדכן את המונה בהתאם לכלל הבא: חוט בעל מזהה זוגי (0, 2, ...) יכול להגדיל את המונה רק כאשר ערכו הנוכחי זוגי. חוט בעל מזהה אי-זוגי (1, 3, ...) יכול להגדיל את המונה רק כאשר ערכו הנוכחי אי-זוגי. כל חוט מבצע `INCREMENTS_PER_THREAD` הגדלות. ניתן להניח שכל קריאות המערכת הצליחו.",
+      "code_snippet": "```c\n#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n\n#define NUM_THREADS 4 // ערך לדוגמה. בפתרון יש להתייחס למספר החוטים כמשתנה.\n#define INCREMENTS_PER_THREAD 5 \n\nint shared_counter = 0;\npthread_mutex_t mutex;\npthread_cond_t cond_even, cond_odd;\n\nvoid do_work() {\n    // מדמה עבודה כלשהי\n    // usleep(100);\n}\n\nvoid* thread_func(void* arg) {\n    long thread_id = (long)arg;\n\n    for (int i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n        pthread_mutex_lock(&mutex);\n\n        if (thread_id % 2 == 0) { // חוט זוגי\n            while (shared_counter % 2 != 0) {\n                pthread_cond_wait(&cond_even, &mutex);\n            }\n        } else { // חוט אי-זוגי\n            while (shared_counter % 2 == 0) {\n                pthread_cond_wait(&cond_odd, &mutex);\n            }\n        }\n\n        // קטע קריטי\n        do_work(); \n        shared_counter++;\n        printf(\"Thread %ld incremented counter to %d\\n\", thread_id, shared_counter);\n\n        if (shared_counter % 2 != 0) { // המונה כעת אי-זוגי\n            pthread_cond_broadcast(&cond_odd);\n        } else { // המונה כעת זוגי\n            pthread_cond_broadcast(&cond_even);\n        }\n\n        pthread_mutex_unlock(&mutex);\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n    pthread_mutex_init(&mutex, NULL);\n    pthread_cond_init(&cond_even, NULL);\n    pthread_cond_init(&cond_odd, NULL);\n\n    // יצירת חוטים רגילה עם מזהים עוקבים\n    // עבור סעיפים 1 ו-2, יש להתייחס לתנאי יצירת החוטים המפורטים בשאלה.\n    for (long i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, thread_func, (void*)i);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final counter value: %d\\n\", shared_counter);\n\n    pthread_mutex_destroy(&mutex);\n    pthread_cond_destroy(&cond_even);\n    pthread_cond_destroy(&cond_odd);\n\n    return 0;\n}\n```",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "Q1.1",
+        "text": "הרץ את התוכנית בהנחה שנוצרים רק חוטים בעלי מזהים זוגיים (לדוגמה: שני חוטים בעלי מזהים 0 ו-2), וכל חוט מנסה לבצע `INCREMENTS_PER_THREAD = 5` הגדלות. מהו הערך הסופי של `shared_counter` שיודפס? הסבר בפירוט מדוע. (הערה: ייתכן שהתוכנית לא תגיע לסיומה באופן תקין).",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "Q1.2",
+        "text": "תאר באופן כללי, באילו תנאים (ביחס למספר החוטים `NUM_THREADS` ולמזהי החוטים שנוצרים) התוכנית הנתונה תמיד תינעל (deadlock)? הסבר מדוע.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "Q1.3",
+        "text": "תקן את הקוד כך שימנע קיפאון (deadlock) ויפעל באופן תקין על-פי הכללים המקוריים, ללא קשר למזהי החוטים שנוצרים. עליך להשתמש רק במנגנוני הסנכרון הקיימים (מנעולים ומשתני תנאי). הוסף הערות לקוד המסבירות את השינויים.",
+        "code_snippet": "```c\n// Global variables (יש לציין ערכי אתחול בהערה):\n// int shared_counter = 0;\n// pthread_mutex_t mutex; // אתחול: PTHREAD_MUTEX_INITIALIZER\n// pthread_cond_t cond;   // אתחול: PTHREAD_COND_INITIALIZER\n\nvoid* thread_func(void* arg) {\n    long thread_id = (long)arg;\n\n    for (int i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n        pthread_mutex_lock(&mutex);\n\n        // TODO: הוסף לוגיקת המתנה כאן\n\n        // קטע קריטי\n        do_work(); \n        shared_counter++;\n        printf(\"Thread %ld incremented counter to %d\\n\", thread_id, shared_counter);\n\n        // TODO: הוסף לוגיקת איתות כאן\n\n        pthread_mutex_unlock(&mutex);\n    }\n    return NULL;\n}\n```",
+        "options": null
+      }
+    ],
+    "points": 25,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "Q1.1: במקרה זה, התוכנית תינעל (deadlock). ה-`shared_counter` מתחיל ב-0 (זוגי). אחד החוטים הזוגיים (לדוגמה, חוט 0) יקבל את המנעול, יבדוק שהמונה זוגי (`0%2==0`), ימשיך, יבצע את ההגדלה וישנה את `shared_counter` ל-1. כעת המונה אי-זוגי (`1%2!=0`). חוט 0 יבצע `pthread_cond_broadcast(&cond_odd)`. מכיוון שאין חוטים אי-זוגיים שקיימים וממתינים ל-`cond_odd`, האות הזה לא יתקבל על ידי אף חוט. לאחר שחרור המנעול, כל שאר החוטים הזוגיים (לדוגמה, חוט 2) ינסו גם הם לגשת למונה. הם יקבלו את המנעול, יבדקו את התנאי `shared_counter % 2 != 0` (שכן `1%2!=0`), ימצאו אותו נכון, וייכנסו למצב המתנה על `cond_even`. אף חוט לא יצליח לשנות את המונה בחזרה לערך זוגי, ולכן `cond_even` לעולם לא ישודר. התוכנית תינעל עם `shared_counter = 1`.\n\nQ1.2: התוכנית תינעל באופן כללי כאשר כל החוטים שנוצרו הם בעלי אותה זוגיות (כלומר, כולם זוגיים או כולם אי-זוגיים). \n*   **אם כל החוטים זוגיים:** המונה יוגדל מ-0 ל-1 על ידי אחד מהם. אז ישודר `cond_odd`, אך לא יהיו חוטים אי-זוגיים שיוכלו לקבל את האות ולהמשיך. המונה יישאר 1, וכל החוטים הזוגיים ימתינו ל-`cond_even` שלעולם לא ישודר, מה שמוביל לקיפאון. \n*   **אם כל החוטים אי-זוגיים:** אף חוט לא יוכל להתקדם מהתחלה, שכן `shared_counter` הוא 0 (זוגי) וחוטים אי-זוגיים ממתינים למונה אי-זוגי. במצב זה, `cond_odd` לעולם לא ישודר, והתוכנית תינעל מיד.\n\nQ1.3:\nהפתרון לבעיית הקיפאון הוא להשתמש במשתנה תנאי יחיד (`cond`) ולשדר אליו `broadcast` בכל פעם שהמונה מתעדכן. כך, כל החוטים הממתינים יתעוררו ויבדקו מחדש את התנאי שלהם. חוטים שאינם עומדים בתנאי יחזרו להמתין. זה מבטיח שאף אות לא יחמיץ, גם אם לא קיימים חוטים מהזוגיות הנדרשת, שכן כל מי שיכול להתקדם יתעורר ויקבל הזדמנות לבדוק את התנאי.\n\n```c\n#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n\n#define NUM_THREADS 4 \n#define INCREMENTS_PER_THREAD 5 \n\nint shared_counter = 0;\npthread_mutex_t mutex; // אתחול: PTHREAD_MUTEX_INITIALIZER\n// שונה: שימוש במשתנה תנאי יחיד במקום שניים.\npthread_cond_t cond;   // אתחול: PTHREAD_COND_INITIALIZER\n\nvoid do_work() {\n    // מדמה עבודה כלשהי\n    // usleep(100);\n}\n\nvoid* thread_func(void* arg) {\n    long thread_id = (long)arg;\n\n    for (int i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n        pthread_mutex_lock(&mutex);\n\n        // שונה: כל החוטים ממתינים על משתנה התנאי היחיד,\n        // אך תנאי ההמתנה שלהם נשאר ספציפי לזוגיות שלהם.\n        if (thread_id % 2 == 0) { // חוט זוגי\n            while (shared_counter % 2 != 0) {\n                pthread_cond_wait(&cond, &mutex);\n            }\n        } else { // חוט אי-זוגי\n            while (shared_counter % 2 == 0) {\n                pthread_cond_wait(&cond, &mutex);\n            }\n        }\n\n        // קטע קריטי\n        do_work(); \n        shared_counter++;\n        printf(\"Thread %ld incremented counter to %d\\n\", thread_id, shared_counter);\n\n        // שונה: תמיד משדרים לכל הממתינים על משתנה התנאי היחיד.\n        // כל החוטים הממתינים יתעוררו ויבדקו מחדש את התנאי שלהם.\n        pthread_cond_broadcast(&cond);\n\n        pthread_mutex_unlock(&mutex);\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n    pthread_mutex_init(&mutex, NULL);\n    // שונה: אתחול של משתנה התנאי היחיד בלבד.\n    pthread_cond_init(&cond, NULL);\n\n    for (long i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, thread_func, (void*)i);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final counter value: %d\\n\", shared_counter);\n\n    pthread_mutex_destroy(&mutex);\n    // שונה: השמדת משתנה התנאי היחיד בלבד.\n    pthread_cond_destroy(&cond);\n\n    return 0;\n}\n```"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Memory Management and TLB",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 21:21:30",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1050,
+      "output_tokens": 797,
+      "total_tokens": 3394
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Memory Management",
+      "TLB",
+      "Paging",
+      "Virtual Memory"
+    ],
+    "content": {
+      "text": "מהו הרצף הנכון של פעולות במערכת הפעלה המשתמשת ב-TLB ובדפדוף (Paging), כאשר מתרחש TLB Miss אך Page Table Hit (כלומר, הדף נמצא בזיכרון הפיזי)?",
+      "code_snippet": null,
+      "options": [
+        "א. המעבד ניגש לטבלת הדפים בזיכרון הראשי, מוצא את ה-PTE המתאים, טוען אותו ל-TLB, ואז מבצע תרגום כתובת חוזר מה-TLB.",
+        "ב. המעבד ניגש לשטח ההחלפה (swap space) כדי למצוא את הדף, טוען אותו לזיכרון הראשי, מעדכן את טבלת הדפים, טוען את ה-PTE ל-TLB, ואז מבצע תרגום כתובת.",
+        "ג. המעבד מחולל Page Fault, מערכת ההפעלה מטפלת בפסיקה, טוענת את הדף לזיכרון הראשי, מעדכנת את טבלת הדפים, טוענת את ה-PTE ל-TLB, ואז מבצעת תרגום כתובת.",
+        "ד. המעבד ניגש לטבלת הדפים בזיכרון הראשי, מוצא את ה-PTE המתאים, מבצע תרגום כתובת ישירות מטבלת הדפים מבלי לטעון ל-TLB.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "א'. במקרה של TLB Miss ו-Page Table Hit, המשמעות היא שהכתובת הווירטואלית לא נמצאה ב-TLB, אך רשומת טבלת הדפים (PTE) עבורה קיימת בזיכרון הראשי ומצביעה על כך שהדף נמצא בזיכרון הפיזי. לכן, המעבד (או יחידת ניהול הזיכרון - MMU) ניגש לזיכרון הראשי כדי לאחזר את ה-PTE מטבלת הדפים. לאחר מכן, ה-PTE נטען ל-TLB כדי לזרז גישות עתידיות לאותו דף. לבסוף, תרגום הכתובת מבוצע שוב, הפעם בהצלחה מה-TLB.\nאפשרויות ב' ו-ג' מתארות מצב של Page Fault (הדף לא נמצא בזיכרון הראשי), שאינו המקרה כאן (Page Table Hit).\nאפשרות ד' שגויה מכיוון שהמטרה של ה-TLB היא למנוע גישות חוזרות ונשנות לטבלת הדפים בזיכרון הראשי; לכן, לאחר מציאת ה-PTE, יש לטעון אותו ל-TLB לשימוש עתידי."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

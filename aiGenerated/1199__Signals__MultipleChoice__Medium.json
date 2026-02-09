@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Signals",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 08:38:38",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 923,
+      "output_tokens": 852,
+      "total_tokens": 4446
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Signals",
+      "Process Management",
+      "System Calls"
+    ],
+    "content": {
+      "text": "בהינתן קטע הקוד הבא, מהי התוצאה הסבירה ביותר של הרצת הקוד ביחס לתהליך הבן (child process)?",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <signal.h>\n#include <sys/wait.h>\n\nint main() {\n    sigset_t newmask;\n    sigemptyset(&newmask);\n    sigaddset(&newmask, SIGUSR1);\n    sigprocmask(SIG_BLOCK, &newmask, NULL); // Block SIGUSR1\n\n    pid_t pid = fork();\n\n    if (pid == 0) { // Child process\n        // SIGUSR1 is inherited as blocked\n        printf(\"Child: Waiting...\\n\");\n        sleep(5); // Wait for parent to send signal, or just exit\n        printf(\"Child: Exiting normally.\\n\");\n    } else if (pid > 0) { // Parent process\n        sleep(1); // Give child time to start\n        kill(pid, SIGUSR1); // Send SIGUSR1 to child\n        wait(NULL); // Wait for child\n        printf(\"Parent: Child finished.\\n\");\n    }\n    return 0;\n}",
+      "options": [
+        "א. תהליך הבן יקבל את הסיגנל SIGUSR1 ויתרסק מיד עם קבלתו.",
+        "ב. תהליך הבן יקבל את הסיגנל SIGUSR1, אך כיוון שהוא חסום, הוא ימתין עד לסיום ה-sleep ורק אז יתרסק.",
+        "ג. תהליך הבן לא יקבל את הסיגנל SIGUSR1, אלא ימשיך בריצה ויצא באופן רגיל לאחר ה-sleep.",
+        "ד. תהליך הבן יכנס למצב של קיפאון (deadlock) ולא יסיים את ריצתו לעולם.",
+        "ה. תהליך הבן יקבל את הסיגנל SIGUSR1, אך כיוון שלא הוגדר לו מטפל ספציפי, הוא יתעלם ממנו וימשיך בריצה."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "כאשר תהליך אב מבצע fork, תהליך הבן יורש את מסכת הסיגנלים (signal mask) של האב. מכיוון שהאב חסם את SIGUSR1 לפני ה-fork, גם הבן יתחיל את ריצתו כאשר SIGUSR1 חסום. כאשר האב שולח את SIGUSR1 לבן, הסיגנל הופך להיות 'ממתין' (pending) עבור הבן, אך הוא לא יסופק (delivered) עד שהבן יבטל את חסימתו. בקטע הקוד הזה, הבן אף פעם לא מבטל את חסימת SIGUSR1. לכן, הסיגנל יישאר ממתין, והבן ימשיך את ריצתו באופן רגיל, יסיים את ה-sleep ויצא באופן תקין מבלי שהסיגנל יסופק לו."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency and Condition Variables",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 11:39:56",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3819,
+      "output_tokens": 2490,
+      "total_tokens": 12799
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Concurrency",
+      "Condition Variables",
+      "Synchronization",
+      "Mutexes"
+    ],
+    "content": {
+      "text": "במערכת מרובת תהליכים (threads), קיים מונה משותף `count` שמתחיל ב-0. ישנם `N` תהליכי 'מגדיל' (incrementer) ותהליך אחד 'מאפס' (resetter).\n\nתהליכי המגדיל מגדילים את `count` באופן רציף.\n\nכאשר `count` מגיע לערך סף קבוע `THRESHOLD` (לדוגמה, 10), תהליך המאפס *חייב* לאפס את `count` בחזרה ל-0.\n\n**דרישות חשובות:**\n1. אף תהליך מגדיל לא יכול להגדיל את `count` *מעבר* ל-`THRESHOLD` לאחר שהגיע לערך זה, וזאת *לפני* שתהליך המאפס איפס אותו.\n2. תהליך המאפס יאפס את `count` *רק* כאשר הוא מגיע ל-`THRESHOLD`.\n\nכתבו את קוד המקור (ב-C/C++) למימוש תהליכי המגדיל והמאפס תוך שימוש במנעולים (mutexes) ומשתני תנאי (condition variables) באופן שיבטיח את הדרישות הנ\"ל. יש לכלול את כל המשתנים הגלובליים הנדרשים ואת פונקציות התהליכים. אין צורך בפונקציית `main` מלאה או טיפול בשגיאות.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון דורש שימוש במנעול (mutex) כדי להבטיח גישה הדדית בלעדית למונה `count` ולמשתני מצב נוספים, ובשני משתני תנאי (condition variables) לתיאום בין התהליכים.\n\n**משתנים גלובליים נדרשים:**\n- `count`: המונה המשותף.\n- `mutex`: מנעול להגנה על `count` ועל משתני המצב.\n- `cond_threshold_reached`: משתנה תנאי שעליו ימתין תהליך המאפס עד ש-`count` יגיע ל-`THRESHOLD`.\n- `cond_reset_done`: משתנה תנאי שעליו ימתינו תהליכי המגדיל עד שתהליך המאפס יבצע את האיפוס.\n- `threshold_reached_flag`: דגל בוליאני המציין האם `count` הגיע ל-`THRESHOLD`. דגל זה קריטי למניעת הגדלה מעבר ל-`THRESHOLD` ולטיפול ב-\"lost wakeup\" עבור תהליך המאפס.\n\n**הסבר למימוש:**\n\n**פונקציית תהליך המגדיל (`incrementer_thread`):**\n1.  **נעילת המוטקס:** כל גישה ל-`count` או ל-`threshold_reached_flag` מוגנת על ידי `pthread_mutex_lock(&mutex)`.\n2.  **המתנה לאיפוס:** תהליך המגדיל בודק את `threshold_reached_flag` בלולאת `while`. אם הדגל `true` (כלומר, `count` הגיע ל-`THRESHOLD` ותהליך איפוס צפוי), התהליך ממתין על `cond_reset_done`. השימוש ב-`while` במקום `if` חיוני כדי לטפל ב-\"spurious wakeups\" ולוודא שהתנאי עדיין מתקיים לאחר ההתעוררות.\n3.  **הגדלת המונה:** לאחר שווידא שהדגל `false` (כלומר, המונה לא הגיע ל-`THRESHOLD` או שכבר אופס), התהליך מגדיל את `count`.\n4.  **הגעה ל-THRESHOLD:** אם `count` מגיע בדיוק ל-`THRESHOLD` לאחר ההגדלה, תהליך המגדיל מעדכן את `threshold_reached_flag` ל-`true` ומאותת (signal) ל-`cond_threshold_reached` כדי להעיר את תהליך המאפס. השימוש ב-`pthread_cond_signal` מספיק מכיוון שרק תהליך מאפס אחד ממתין לתנאי זה.\n5.  **שחרור המוטקס:** המוטקס משוחרר לאחר ביצוע הפעולות.\n\n**פונקציית תהליך המאפס (`resetter_thread`):**\n1.  **נעילת המוטקס:** גם כאן, גישה למשתנים המשותפים מוגנת על ידי `pthread_mutex_lock(&mutex)`.\n2.  **המתנה ל-THRESHOLD:** תהליך המאפס ממתין על `cond_threshold_reached` בלולאת `while` כל עוד `threshold_reached_flag` הוא `false`. זה מבטיח שהתהליך יתעורר רק כאשר `count` אכן הגיע ל-`THRESHOLD` (או כתוצאה מ-spurious wakeup, ואז יחזור להמתין). זה גם פותר בעיית \"lost wakeup\" - אם הדגל כבר `true` כשהמאפס מגיע ללולאה, הוא לא ימתין כלל.\n3.  **איפוס המונה:** לאחר שהתעורר ו-`threshold_reached_flag` הוא `true`, תהליך המאפס מאפס את `count` ל-0 ומעדכן את `threshold_reached_flag` בחזרה ל-`false` כדי לאפשר לתהליכי המגדיל להמשיך.\n4.  **הודעה למגדילים:** תהליך המאפס מאותת באמצעות `pthread_cond_broadcast(&cond_reset_done)` לכל תהליכי המגדיל שממתינים, כדי ליידע אותם שהמונה אופס והם יכולים להמשיך.\n5.  **שחרור המוטקס:** המוטקס משוחרר.\n\n**מניעת הגדלה מעבר ל-THRESHOLD:**\nהדגל `threshold_reached_flag` הוא המפתח לכך. ברגע ש-`count` מגיע ל-`THRESHOLD` (על ידי אחד המגדילים), הדגל מוגדר ל-`true`. כל תהליך מגדיל אחר שינסה להגדיל את המונה יראה שהדגל `true` וייכנס למצב המתנה על `cond_reset_done` עד שהמונה יאופס. זה מבטיח ש-`count` לא יעלה על `THRESHOLD`.\n\n**קוד המקור המוצע:**\n```c\n#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h> // For usleep\n\n#define THRESHOLD 10\n// #define NUM_INCREMENTERS 3 // ניתן להגדיר כפרמטר חיצוני או גלובלי\n\n// משתנים גלובליים\nint count = 0;\npthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;\npthread_cond_t cond_threshold_reached = PTHREAD_COND_INITIALIZER; // למאפס שימתין\npthread_cond_t cond_reset_done = PTHREAD_COND_INITIALIZER;        // למגדילים שימתינו\nint threshold_reached_flag = 0; // דגל המציין אם המונה הגיע ל-THRESHOLD\n\n// פונקציית תהליך המגדיל\nvoid *incrementer_thread(void *arg) {\n    // long id = (long)arg; // אם רוצים לזהות תהליכים ספציפיים\n    while (1) {\n        pthread_mutex_lock(&mutex);\n\n        // המתן אם המונה הגיע לסף ועדיין לא אופס\n        while (threshold_reached_flag) {\n            // printf(\"Incrementer %ld: Waiting for reset. Current count: %d\\n\", id, count);\n            pthread_cond_wait(&cond_reset_done, &mutex);\n        }\n\n        // בשלב זה, count < THRESHOLD\n        count++;\n        // printf(\"Incrementer %ld: Incremented count to %d\\n\", id, count);\n\n        if (count == THRESHOLD) {\n            threshold_reached_flag = 1; // סמן שהסף הושג\n            // printf(\"Incrementer %ld: Threshold reached! Signaling resetter.\\n\", id);\n            pthread_cond_signal(&cond_threshold_reached); // הער את תהליך המאפס\n        }\n\n        pthread_mutex_unlock(&mutex);\n        usleep(100000); // הדמיית עבודה כלשהי\n    }\n    return NULL;\n}\n\n// פונקציית תהליך המאפס\nvoid *resetter_thread(void *arg) {\n    while (1) {\n        pthread_mutex_lock(&mutex);\n\n        // המתן עד שהמונה יגיע לסף\n        while (!threshold_reached_flag) {\n            // printf(\"Reseter: Waiting for threshold to be reached. Current count: %d\\n\", count);\n            pthread_cond_wait(&cond_threshold_reached, &mutex);\n        }\n\n        // בשלב זה, threshold_reached_flag הוא true ו-count הוא THRESHOLD\n        // printf(\"Reseter: Threshold reached, resetting count from %d to 0.\\n\", count);\n        count = 0;\n        threshold_reached_flag = 0; // איין את הדגל כדי לאפשר למגדילים להמשיך\n\n        pthread_cond_broadcast(&cond_reset_done); // הער את כל תהליכי המגדיל הממתינים\n        // printf(\"Reseter: Count reset. Signaling incrementers.\\n\");\n\n        pthread_mutex_unlock(&mutex);\n        usleep(500000); // הדמיית עבודה כלשהי לאחר האיפוס\n    }\n    return NULL;\n}\n```"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

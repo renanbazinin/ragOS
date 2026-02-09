@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "Security",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 09:45:35",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 968,
+      "output_tokens": 1111,
+      "total_tokens": 7186
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "Security",
+      "Privilege Management",
+      "setuid"
+    ],
+    "content": {
+      "text": "נתונה פיסת קוד C המהווה חלק מתוכנית setuid root (כלומר, ה-Effective UID ההתחלתי שלה הוא 0, וה-Real UID שלה הוא של משתמש לא מורשה). התוכנית מיועדת לבצע פעולה מורשית, ולאחר מכן להוריד הרשאות באופן 'קבוע'.\n\nאיזו טענה נכונה לגבי מצב האבטחה של התוכנית לאחר הקריאה בשורה המסומנת /* POINT OF INTEREST */?",
+      "code_snippet": "#include <unistd.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <sys/types.h>\n\nint main() {\n    uid_t ruid = getuid(); // Real UID (e.g., 1000)\n    uid_t euid = geteuid(); // Effective UID (e.g., 0)\n\n    if (euid != 0) {\n        printf(\"This program must be setuid root.\\n\");\n        return 1;\n    }\n\n    // 1. Temporarily drop privileges\n    if (seteuid(ruid) == -1) {\n        perror(\"seteuid(ruid) failed\");\n        return 1;\n    }\n\n    // 2. Perform some unprivileged operations...\n    // ...\n\n    // 3. Re-elevate privileges for a critical task\n    if (seteuid(0) == -1) {\n        perror(\"seteuid(0) failed to re-elevate\");\n        return 1;\n    }\n\n    // 4. Perform a privileged operation\n    // ...\n\n    // 5. Attempt to permanently drop privileges /* POINT OF INTEREST */\n    if (seteuid(ruid) == -1) { // This is the flaw\n        perror(\"seteuid(ruid) failed for final drop\");\n        return 1;\n    }\n\n    // 6. Program continues with unprivileged operations...\n    // ...\n\n    return 0;\n}",
+      "options": [
+        "א. לאחר הקריאה בשורה המסומנת, התוכנית מאבדת לצמיתות את היכולת לחזור להרשאות root.",
+        "ב. לאחר הקריאה בשורה המסומנת, התוכנית יכולה לחזור להרשאות root על ידי קריאה נוספת ל-seteuid(0).",
+        "ג. לאחר הקריאה בשורה המסומנת, ה-Real UID של התוכנית משתנה ל-0.",
+        "ד. הקוד יגרום לשגיאת הרצה (runtime error) מכיוון ש-seteuid לא יכולה לשנות את ה-Effective UID ל-ruid לאחר שהייתה root.",
+        "ה. אף אחת מהטענות אינה נכונה."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "הטעות בקוד היא השימוש ב-`seteuid(ruid)` בשלב שבו הכוונה היא להוריד הרשאות לצמיתות. כאשר תוכנית setuid root מתחילה לפעול, ה-Real UID שלה הוא של המשתמש שהריץ אותה (לדוגמה, 1000), ה-Effective UID שלה הוא 0, וה-Saved Set-User-ID שלה הוא גם 0. הקריאה ל-`seteuid(ruid)` משנה רק את ה-Effective UID לערך של ה-Real UID (לדוגמה, 1000), אך היא אינה משנה את ה-Saved Set-User-ID. כיוון שה-Saved Set-User-ID נשאר 0, התוכנית עדיין יכולה לקרוא שוב ל-`seteuid(0)` כדי להחזיר את ה-Effective UID ל-0 ולחזור להרשאות root. כדי להוריד הרשאות לצמיתות, יש להשתמש ב-`setuid(ruid)` (או בצירוף של `setresuid` או `setreuid`), אשר משנה את כל שלושת מזהי המשתמש (Real, Effective, ו-Saved Set-User-ID) ל-`ruid`, ובכך מונעת את האפשרות לחזור להרשאות root."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

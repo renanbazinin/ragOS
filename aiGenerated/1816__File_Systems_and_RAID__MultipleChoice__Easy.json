@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "File Systems and RAID",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 21:01:32",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1064,
+      "output_tokens": 460,
+      "total_tokens": 2741
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "File Systems",
+      "RAID",
+      "Data Redundancy"
+    ],
+    "content": {
+      "text": "איזו מהטענות הבאות מתארת נכונה את המטרה העיקרית של RAID 1 (Mirroring)?",
+      "code_snippet": null,
+      "options": [
+        "א. הגדלת קיבולת האחסון הכוללת על ידי שילוב מספר דיסקים לדיסק לוגי אחד.",
+        "ב. שיפור ביצועי קריאה וכתיבה על ידי פיצול נתונים על פני מספר דיסקים (striping).",
+        "ג. יתירות נתונים והגנה מפני כשל דיסק על ידי שיקוף (mirroring) נתונים בין שני דיסקים או יותר.",
+        "ד. תיקון שגיאות באמצעות נתוני זוגיות (parity) המפוזרים על פני דיסקים מרובים."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג'. RAID 1, הידוע גם כ-mirroring, יוצר עותק זהה (שיקוף) של הנתונים על שני דיסקים או יותר. מטרתו העיקרית היא לספק יתירות נתונים והגנה מפני כשל של אחד הדיסקים, שכן במקרה של כשל, הנתונים עדיין זמינים על הדיסק המשוקף. אפשרויות א' וב' מתארות מאפיינים של RAID 0 (stripping) או שילוב דיסקים פשוט, ואפשרות ד' מתארת מאפיינים של RAID 5 או RAID 6."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Synchronization and Concurrency",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 21:12:58",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 998,
+      "output_tokens": 287,
+      "total_tokens": 1996
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Synchronization",
+      "Concurrency",
+      "Race Conditions"
+    ],
+    "content": {
+      "text": "כאשר מספר חוטים (threads) ניגשים בו-זמנית למשתנה משותף ומשנים אותו, תמיד נדרש מנגנון סנכרון כדי למנוע מצב מירוץ (race condition).",
+      "code_snippet": null,
+      "options": [
+        "נכון",
+        "לא נכון"
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "נכון",
+      "explanation": "נכון. גישה בו-זמנית למשתנה משותף על ידי מספר חוטים, כאשר לפחות אחד מהם מבצע כתיבה, עלולה להוביל למצב מירוץ (race condition). מנגנוני סנכרון כגון Mutexes או Semaphores נחוצים כדי להבטיח גישה אטומית ולשמור על עקביות הנתונים."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "IPC",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 08:23:54",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 968,
+      "output_tokens": 1923,
+      "total_tokens": 8148
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "IPC",
+      "Synchronization",
+      "Semaphores",
+      "Deadlock"
+    ],
+    "content": {
+      "text": "נתון קוד C המממש מנגנון יצרן-צרכן (Producer-Consumer) באמצעות זיכרון משותף ומערכת סמפורים (System V semaphores). לזיכרון המשותף מצורף מבנה `SharedData` המכיל חוצץ בגודל 10 איברים, ואינדקסים `in` ו-`out`. מערך הסמפורים `sem_id` מכיל שלושה סמפורים: `sem_id[0]` משמש כ-mutex (ערך התחלתי 1), `sem_id[1]` מייצג את מספר המקומות הריקים בחוצץ (empty, ערך התחלתי 10), ו-`sem_id[2]` מייצג את מספר המקומות המלאים בחוצץ (full, ערך התחלתי 0). הקוד הבא מציג את פונקציות ה-`producer_func` וה-`consumer_func`. איזו בעיה עלולה להתרחש במערכת זו?",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <sys/types.h>\n#include <sys/ipc.h>\n#include <sys/shm.h>\n#include <sys/sem.h>\n#include <unistd.h>\n\ntypedef struct {\n    int buffer[10];\n    int in;\n    int out;\n} SharedData;\n\n// Producer function\nvoid producer_func(SharedData *shm_ptr, int sem_id) {\n    struct sembuf p_op, v_op;\n\n    // Acquire mutex FIRST\n    p_op.sem_num = 0; p_op.sem_op = -1; p_op.sem_flg = 0; // mutex--\n    if (semop(sem_id, &p_op, 1) == -1) { perror(\"Producer semop mutex P\"); exit(1); }\n\n    // Wait for empty slot\n    p_op.sem_num = 1; p_op.sem_op = -1; p_op.sem_flg = 0; // empty--\n    if (semop(sem_id, &p_op, 1) == -1) { perror(\"Producer semop empty P\"); exit(1); }\n\n    // Critical section: produce item\n    shm_ptr->buffer[shm_ptr->in] = rand();\n    shm_ptr->in = (shm_ptr->in + 1) % 10;\n\n    // Release mutex\n    v_op.sem_num = 0; v_op.sem_op = 1; v_op.sem_flg = 0; // mutex++\n    if (semop(sem_id, &v_op, 1) == -1) { perror(\"Producer semop mutex V\"); exit(1); }\n\n    // Signal full slot\n    v_op.sem_num = 2; v_op.sem_op = 1; v_op.sem_flg = 0; // full++\n    if (semop(sem_id, &v_op, 1) == -1) { perror(\"Producer semop full V\"); exit(1); }\n}\n\n// Consumer function\nvoid consumer_func(SharedData *shm_ptr, int sem_id) {\n    struct sembuf p_op, v_op;\n\n    // Acquire mutex FIRST\n    p_op.sem_num = 0; p_op.sem_op = -1; p_op.sem_flg = 0; // mutex--\n    if (semop(sem_id, &p_op, 1) == -1) { perror(\"Consumer semop mutex P\"); exit(1); }\n\n    // Wait for full slot\n    p_op.sem_num = 2; p_op.sem_op = -1; p_op.sem_flg = 0; // full--\n    if (semop(sem_id, &p_op, 1) == -1) { perror(\"Consumer semop full P\"); exit(1); }\n\n    // Critical section: consume item\n    int item = shm_ptr->buffer[shm_ptr->out];\n    shm_ptr->out = (shm_ptr->out + 1) % 10;\n\n    // Release mutex\n    v_op.sem_num = 0; v_op.sem_op = 1; v_op.sem_flg = 0; // mutex++\n    if (semop(sem_id, &v_op, 1) == -1) { perror(\"Consumer semop mutex V\"); exit(1); }\n\n    // Signal empty slot\n    v_op.sem_num = 1; v_op.sem_op = 1; v_op.sem_flg = 0; // empty++\n    if (semop(sem_id, &v_op, 1) == -1) { perror(\"Consumer semop empty V\"); exit(1); }\n}",
+      "options": [
+        "א. ייתכן מצב של קיפאון (deadlock) אם הצרכן מנסה לצרוך מחוצץ ריק בזמן שהיצרן ממתין ל-mutex.",
+        "ב. ייתכן מצב של תנאי מרוץ (race condition) בגישה לחוצץ המשותף, מה שיוביל לנתונים שגויים.",
+        "ג. ייתכן מצב של רעב (starvation) עבור הצרכן אם היצרן ממלא את החוצץ מהר מדי.",
+        "ד. ייתכן מצב של רעב (starvation) עבור היצרן אם הצרכן מרוקן את החוצץ מהר מדי.",
+        "ה. אף אחת מהטענות האחרות אינה נכונה."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "התשובה הנכונה היא א'. הבעיה בקוד המוצג היא שהסמפור `mutex` נתפס לפני הסמפורים `empty` או `full`. נבחן תרחיש שבו החוצץ ריק לחלוטין:\n1. תהליך הצרכן (consumer) מתחיל לרוץ.\n2. הצרכן תופס את ה-`mutex` (ערכו הופך ל-0).\n3. הצרכן מנסה להמתין על הסמפור `full` (שערכו 0, כיוון שהחוצץ ריק). הצרכן נחסם וממתין ש-`full` יהיה גדול מ-0.\n4. כעת, תהליך היצרן (producer) מנסה לרוץ.\n5. היצרן מנסה לתפוס את ה-`mutex`. מכיוון שה-`mutex` כבר נתפס על ידי הצרכן, היצרן נחסם וממתין לשחרורו.\nנוצר קיפאון (deadlock): הצרכן מחזיק ב-`mutex` וממתין ליצרן שיסמן את `full`, בעוד שהיצרן ממתין ל-`mutex` שהצרכן מחזיק בו. הפתרון הנכון הוא לתפוס את סמפורי `empty` ו-`full` (השולטים בזרימת התהליכים) לפני תפיסת ה-`mutex` (השולט בגישה לקטע הקריטי)."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

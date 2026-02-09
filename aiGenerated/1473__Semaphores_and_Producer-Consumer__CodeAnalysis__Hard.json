@@ -1,0 +1,52 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Producer-Consumer",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 10:37:49",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4898,
+      "output_tokens": 2783,
+      "total_tokens": 32132
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Semaphores",
+      "Producer-Consumer",
+      "Deadlock",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "להלן מימוש חלקי של בעיית יצרן-צרכן עם חיץ חסום (Bounded Buffer), הכולל תמיכה במספר סוגי פריטים ודרישה להגביל את כמות הפריטים מכל סוג בחיץ.\nהמערכת מורכבת מחיץ בגודל `BUFFER_SIZE`, משתני מעקב `in`, `out`, ושלושה סמפורים כלליים: `mutex` (להגנה על הגישה לחיץ), `empty` (לספירת מקומות פנויים), ו-`full` (לספירת מקומות מלאים).\nבנוסף, קיים מערך של סמפורים `type_capacity[NUM_TYPES]` המגביל את המספר המקסימלי של פריטים מכל סוג `k` בחיץ ל-`MAX_PER_TYPE`.\nפונקציות האתחול מאתחלות את `mutex` ל-1, `empty` ל-`BUFFER_SIZE`, `full` ל-0, ואת כל `type_capacity[k]` ל-`MAX_PER_TYPE`.",
+      "code_snippet": "```c\n#define BUFFER_SIZE 2\n#define NUM_TYPES 2\n#define MAX_PER_TYPE 1 // Must be <= BUFFER_SIZE\n\ntypedef struct {\n    int type;\n    // other item data\n} Item;\n\nItem buffer[BUFFER_SIZE];\nint in = 0;\nint out = 0;\n\nsem_t mutex; // Protects buffer, in, out\nsem_t empty; // Counts empty slots in buffer\nsem_t full;  // Counts full slots in buffer\n\nsem_t type_capacity[NUM_TYPES]; // Limits items of each type to MAX_PER_TYPE\n\n// Initialization code (sem_init, etc.) is omitted for brevity.\n// Assume it initializes mutex=1, empty=BUFFER_SIZE, full=0, type_capacity[k]=MAX_PER_TYPE for all k.\n\nvoid produce(Item item) {\n    sem_wait(&empty); // Line P1\n    sem_wait(&mutex); // Line P2\n    sem_wait(&type_capacity[item.type]); // Line P3\n\n    buffer[in] = item; // Line P4\n    in = (in + 1) % BUFFER_SIZE; // Line P5\n\n    sem_post(&type_capacity[item.type]); // Line P6 (!!! ERROR: This post should not be here)\n    sem_post(&mutex); // Line P7\n    sem_post(&full);  // Line P8\n}\n\nItem consume() {\n    sem_wait(&full);  // Line C1\n    sem_wait(&mutex); // Line C2\n\n    Item item = buffer[out];\n    out = (out + 1) % BUFFER_SIZE;\n\n    sem_post(&mutex); // Line C3\n    sem_post(&empty); // Line C4\n    sem_post(&type_capacity[item.type]); // Line C5\n\n    return item;\n}\n```",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "האם המימוש הנתון נכון? אם לא, תארו תרחיש ספציפי המוביל לקיפאון (Deadlock) והסבירו אותו בפירוט.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "תקנו את הקוד על מנת למנוע קיפאון, תוך שמירה על כללי הסנכרון והמגבלות הנתונות. אין לשנות את פונקציית `consume`. יש לשנות את שורות P1-P6 בלבד בפונקציית `produce`.",
+        "code_snippet": "```c\nvoid produce(Item item) {\n    // יש לשנות רק את השורות הבאות (P1-P6)\n    // P1:\n    // P2:\n    // P3:\n\n    buffer[in] = item; // P4\n    in = (in + 1) % BUFFER_SIZE; // P5\n\n    // P6:\n\n    sem_post(&mutex); // P7\n    sem_post(&full);  // P8\n}\n```",
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.1: המימוש הנתון אינו נכון והוא מוביל למצב של קיפאון (Deadlock).\n\n**תרחיש הקיפאון:**\nנניח `BUFFER_SIZE = 1`, `NUM_TYPES = 1`, `MAX_PER_TYPE = 1`.\nאתחול: `mutex=1, empty=1, full=0, type_capacity[0]=1`.\n\n1.  **חוט יצרן `P` (מסוג 0) מתחיל את הפונקציה `produce(item0_type0)`:**\n    *   `P`: מבצע `sem_wait(&empty)` -> `empty` הופך ל-0. (שורה P1)\n    *   `P`: מבצע `sem_wait(&mutex)` -> `mutex` הופך ל-0. (שורה P2)\n    *   בשלב זה, `P` מחזיק בסמפורים `empty` ו-`mutex`.\n    *   `P`: מנסה לבצע `sem_wait(&type_capacity[item.type])` (כלומר `sem_wait(&type_capacity[0])`).\n        *   **כאן מתרחשת הפסקה (Preemption) או ש-`type_capacity[0]` כבר 0.** נניח ש-`P` נחסם כאן, וממתין ל-`type_capacity[0]` (שהוא כרגע 0, כי פריט אחד מסוג 0 כבר בחיץ או שהיה שם בעבר). `P` מחזיק ב-`empty` וב-`mutex`.\n\n2.  **חוט צרכן `C` מתחיל את הפונקציה `consume()`:**\n    *   `C`: מבצע `sem_wait(&full)`. `full` הוא 0 (כי `P` עדיין לא סיים לייצר וטרם ביצע `sem_post(&full)`). `C` נחסם וממתין ל-`full`.\n\n**ניתוח הקיפאון:**\n*   `P` מחזיק בסמפורים `empty` ו-`mutex`. `P` ממתין לסמפור `type_capacity[0]`.\n*   `C` ממתין לסמפור `full`.\n\nכדי ש-`full` יעלה, `P` צריך לסיים את הייצור (כלומר, להשיג את `type_capacity[0]` ולבצע `sem_post(&full)`).\nכדי ש-`type_capacity[0]` ישתחרר (כלומר, ערכו יעלה מ-0 ל-1), `C` צריך לצרוך פריט מסוג 0 ולבצע `sem_post(&type_capacity[0])` (שורה C5).\nכדי ש-`C` יוכל לצרוך פריט, הוא צריך את `full` (ש-`P` צריך להעלות) ואת `mutex` (ש-`P` מחזיק).\n\nלכן, נוצר מעגל המתנה: `P` מחזיק `mutex` וממתין ל-`type_capacity[0]` (ש-`C` משחרר), ו-`C` ממתין ל-`mutex` (ש-`P` מחזיק) ול-`full` (ש-`P` משחרר). זהו קיפאון קלאסי.\n\nהבעיה העיקרית היא ש-`P` תופס את ה-`mutex` הכללי *לפני* שהוא תופס את `type_capacity` הספציפי. אם `type_capacity` אינו זמין, `P` ממתין כשהוא מחזיק ב-`mutex`, ובכך מונע מחוטים אחרים (כמו `C`) לגשת לחיץ ולשחרר את `type_capacity` הנדרש.\n\n2.  **תיקון הקוד:**\nכדי למנוע קיפאון, יש לשנות את סדר תפיסת הסמפורים בפונקציית `produce` כך שה-`mutex` הכללי ייתפס אחרון, לאחר תפיסת הסמפורים הספציפיים (כמו `type_capacity`) וסמפורי המשאבים הכלליים (כמו `empty`). בנוסף, שחרור ה-`type_capacity` ב-`produce` (שורה P6 המקורית) שגוי, שכן מגבלת `MAX_PER_TYPE` מתייחסת לפריטים *בחיץ*, ולכן סמפור זה צריך להשתחרר רק כאשר פריט מסוג זה נצרך מהחיץ (כפי שקורה נכון בפונקציית `consume`).\n\n```c\nvoid produce(Item item) {\n    sem_wait(&type_capacity[item.type]); // Line P1 (תיקון: תופס קודם את הסמפור הספציפי לסוג הפריט)\n    sem_wait(&empty); // Line P2 (תיקון: תופס את סמפור המקומות הפנויים)\n    sem_wait(&mutex); // Line P3 (תיקון: תופס את מנעול הגישה לחיץ אחרון)\n\n    buffer[in] = item; // Line P4 (ללא שינוי)\n    in = (in + 1) % BUFFER_SIZE; // Line P5 (ללא שינוי)\n\n    // sem_post(&type_capacity[item.type]); // Line P6 (תיקון: שורה זו הוסרה מכיוון ש-type_capacity משוחרר רק על ידי הצרכן)\n    sem_post(&mutex); // Line P7 (ללא שינוי)\n    sem_post(&full);  // Line P8 (ללא שינוי)\n}\n```\n\n**הסבר לתיקון:**\nהתיקון מבטיח שחוט יצרן לא יחזיק ב-`mutex` (משאב כללי קריטי) בזמן שהוא ממתין למשאב ספציפי (`type_capacity`). כעת, היצרן תופס קודם את המשאב הספציפי (מקום מותר לסוג הפריט), אחר כך משאב כללי (מקום פנוי בחיץ), ורק לבסוף את המשאב הכללי ביותר (`mutex`) המגן על הגישה לחיץ. סדר זה מונע את מעגל ההמתנה שתואר לעיל. כמו כן, שחרור ה-`type_capacity` בפונקציית `produce` הוסר, שכן הוא אינו נחוץ ועלול להוביל לחוסר עקביות; סמפור זה משוחרר כראוי על ידי הצרכן."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory and Paging",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 20:47:54",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 949,
+      "output_tokens": 425,
+      "total_tokens": 2912
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Virtual Memory",
+      "Paging"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של מנגנון הדפדוף (Paging) במערכות זיכרון וירטואלי?",
+      "code_snippet": null,
+      "options": [
+        "א. לאפשר למעבד לבצע חישובים מהירים יותר.",
+        "ב. להבטיח שכל תהליך יקבל גישה ישירה לכל הזיכרון הפיזי.",
+        "ג. לספק לכל תהליך מרחב כתובות וירטואלי משלו ולאפשר שימוש בזיכרון וירטואלי גדול מהזיכרון הפיזי.",
+        "ד. למנוע לחלוטין כל סוג של פרגמנטציה בזיכרון המערכת.",
+        "ה. להאיץ את קריאת הנתונים מהדיסק."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג'. המטרה העיקרית של מנגנון הדפדוף (Paging) בזיכרון וירטואלי היא לספק לכל תהליך מרחב כתובות וירטואלי משלו, מבודד מתהליכים אחרים, ולאפשר למערכת ההפעלה לנהל זיכרון וירטואלי גדול בהרבה מהזיכרון הפיזי הזמין, באמצעות העברת דפים בין הזיכרון הפיזי לדיסק (swapping)."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

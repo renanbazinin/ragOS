@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency and Condition Variables",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 11:37:53",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3819,
+      "output_tokens": 1604,
+      "total_tokens": 11325
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Concurrency",
+      "Condition Variables",
+      "Synchronization",
+      "Deadlock",
+      "Starvation"
+    ],
+    "content": {
+      "text": "נתונה מערכת לניהול משאבים משותפים הממומשת באמצעות קוד C/C++. המערכת כוללת מספר קבוע של משאבים (`TOTAL_RESOURCES`) וחוטים יכולים לבקש ולשחרר משאבים. בכל רגע נתון, מספר המשאבים הפנויים מנוהל על ידי המשתנה `available_resources`.\nהקוד הבא מציג את הפונקציות `acquire_resources` ו-`release_resources`:\n\n```c\n#include <pthread.h>\n\n#define TOTAL_RESOURCES 10\n\nint available_resources = TOTAL_RESOURCES;\npthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;\npthread_cond_t cond = PTHREAD_COND_INITIALIZER;\n\nvoid acquire_resources(int count) {\n    pthread_mutex_lock(&mutex);\n    while (available_resources < count) {\n        pthread_cond_wait(&cond, &mutex);\n    }\n    available_resources -= count;\n    pthread_mutex_unlock(&mutex);\n}\n\nvoid release_resources(int count) {\n    pthread_mutex_lock(&mutex);\n    available_resources += count;\n    pthread_cond_signal(&cond); // POTENTIAL ISSUE HERE\n    pthread_mutex_unlock(&mutex);\n}\n```\n\n1. האם הקוד הנ\"ל יכול להוביל למצב של קיפאון (deadlock) או הרעבה (starvation) במערכת מרובת חוטים? נמק היטב.\n2. במידה וכן, כיצד היית משנה את הקוד כדי למנוע את הבעיה? הצג את השינוי בקוד והסבר מדוע הוא פותר את הבעיה.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1. **כן, הקוד יכול להוביל למצב של הרעבה (starvation) של חוטים.**\n   הבעיה טמונה בשימוש ב-`pthread_cond_signal` בפונקציה `release_resources`. כאשר חוט משחרר משאבים ומפעיל `signal`, רק אחד מהחוטים הממתינים על משתנה התנאי `cond` יתעורר. ייתכנו מספר תרחישים שיובילו להרעבה:\n   *   **תרחיש 1: התעוררות חוט שאינו יכול להמשיך:** נניח ש-`TOTAL_RESOURCES = 10`. חוט A משחרר 5 משאבים, מה שהופך את `available_resources` ל-5. חוט B ממתין ל-8 משאבים, וחוט C ממתין ל-3 משאבים. אם `signal` מעיר את חוט B, הוא יבדוק את התנאי `available_resources < 8` (כלומר `5 < 8`) וימצא שהוא עדיין לא יכול להמשיך, ולכן יחזור לישון. חוט C, שיכול היה להמשיך (כי 3 משאבים זמינים), נשאר רדום ולא מקבל הזדמנות לקבל את המשאבים. במצב זה, חוט C יכול להישאר רדום ללא הגבלת זמן אם לא יהיו שחרורים נוספים שיעירו אותו או אם חוטים אחרים יתעוררו ויחזרו לישון.\n   *   **תרחיש 2: התעוררות חוט שלוקח חלק מהמשאבים אך משאיר אחרים רדומים:** נניח ש-`TOTAL_RESOURCES = 10`. חוט A משחרר 10 משאבים, מה שהופך את `available_resources` ל-10. חוט B ממתין ל-8 משאבים, וחוט C ממתין ל-3 משאבים. אם `signal` מעיר את חוט B, הוא יקבל 8 משאבים, ו-`available_resources` יהפוך ל-2. חוט C נשאר רדום, וכעת אין מספיק משאבים עבורו (הוא צריך 3, ויש רק 2). חוט C ימשיך להיות מורעב עד שחרור משאבים נוסף (אם בכלל יקרה) שיעיר אותו. במקרה זה, חוט B אמנם התקדם, אך חוט C נשאר מורעב למרות שבאופן זמני היו מספיק משאבים במערכת כדי לספק אותו.\n   הקוד אינו מוביל בהכרח לקיפאון מוחלט (deadlock) כי בסופו של דבר חוטים משחררים משאבים, אך הוא כן גורם להרעבה וחוסר הוגנות מכיוון שחוטים מסוימים עשויים לחכות זמן רב באופן בלתי סביר, בעוד שחוטים אחרים ממשיכים להתקדם.\n\n2. **כדי למנוע את בעיית ההרעבה, יש להחליף את `pthread_cond_signal` ב-`pthread_cond_broadcast` בפונקציה `release_resources`.**\n   השינוי בקוד ייראה כך:\n   ```c\nvoid release_resources(int count) {\n    pthread_mutex_lock(&mutex);\n    available_resources += count;\n    pthread_cond_broadcast(&cond); // CHANGED from signal to broadcast\n    pthread_mutex_unlock(&mutex);\n}\n   ```\n   **הסבר:**\n   הפונקציה `pthread_cond_broadcast(&cond)` מעירה את **כל** החוטים הממתינים על משתנה התנאי `cond`. כל חוט שמתעורר ינסה מחדש לרכוש את המנעול, ולאחר מכן יבדוק את התנאי שלו (`while (available_resources < count)`). בדרך זו, כל החוטים שיכולים כעת להמשיך (כלומר, יש מספיק משאבים עבורם) יקבלו הזדמנות לעשות זאת. חוטים שעדיין לא יכולים להמשיך יחזרו לישון. זה מבטיח הוגנות טובה יותר ומונע מצבי הרעבה, מכיוון שכל שחרור משאבים נותן הזדמנות לכל החוטים הממתינים לבדוק אם הם יכולים להתקדם."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

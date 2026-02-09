@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Context Switching and Threads",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 21:55:28",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 985,
+      "output_tokens": 406,
+      "total_tokens": 2554
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Context Switching",
+      "Threads"
+    ],
+    "content": {
+      "text": "מהו היתרון העיקרי של החלפת הקשר (context switch) בין חוטים (threads) באותו תהליך (process) לעומת החלפת הקשר בין תהליכים שונים?",
+      "code_snippet": null,
+      "options": [
+        "א. נשמרים פחות אוגרי מעבד (CPU registers).",
+        "ב. אין צורך להחליף מרחב כתובות זיכרון (memory address space).",
+        "ג. חוטים רצים תמיד על מעבדים שונים.",
+        "ד. לחוטים יש קבצים פתוחים נפרדים.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב'. כאשר מתבצעת החלפת הקשר בין חוטים השייכים לאותו תהליך, הם חולקים את אותו מרחב כתובות זיכרון. לכן, אין צורך לטעון טבלאות דפים חדשות או לנקות את ה-TLB (Translation Lookaside Buffer), מה שהופך את החלפת ההקשר למהירה ויעילה יותר מאשר החלפת הקשר בין תהליכים שונים, הדורשת שינוי מלא של מרחב הכתובות."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

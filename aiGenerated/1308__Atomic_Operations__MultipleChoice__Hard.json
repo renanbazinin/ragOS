@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Atomic Operations",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 09:26:55",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 969,
+      "output_tokens": 1427,
+      "total_tokens": 5153
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "Atomic Operations",
+      "Concurrency",
+      "Memory Model"
+    ],
+    "content": {
+      "text": "נתון קוד C++ המשתמש במשתנים אטומיים ובמשתנים רגילים לתיאום בין תהליכים (threads). תהליך אחד (Producer) כותב נתונים למשתנה גלובלי לא-אטומי ולאחר מכן מעדכן דגל אטומי. תהליך שני (Consumer) ממתין שהדגל האטומי יוגדר, ולאחר מכן ניגש לנתונים הגלובליים הלא-אטומיים.\n\n```cpp\n#include <atomic>\n#include <thread>\n#include <vector>\n#include <iostream>\n#include <string>\n\nstd::string shared_data; // Non-atomic shared data\nstd::atomic<bool> data_ready_flag(false);\n\nvoid producer_thread() {\n    // 1. Write data to shared_data\n    shared_data = \"Hello, Atomic World!\";\n    // 2. Set the flag to indicate data is ready\n    data_ready_flag.store(true, /* memory_order_X */);\n}\n\nvoid consumer_thread() {\n    // 1. Wait for the flag to be set\n    while (!data_ready_flag.load(/* memory_order_Y */)) {\n        std::this_thread::yield();\n    }\n    // 2. Read data from shared_data\n    std::cout << \"Received: \" << shared_data << std::endl;\n}\n```\n\nכדי להבטיח שהנתונים שנכתבו ל-`shared_data` על ידי ה-`producer_thread` (לפני הגדרת הדגל) יהיו גלויים באופן עקבי ל-`consumer_thread` (לאחר שזיהה שהדגל הוגדר), איזה שילוב של סדרי זיכרון (memory_order) עבור פעולות `store` ו-`load` על `data_ready_flag` הוא ה-**מינימלי** הנדרש?",
+      "code_snippet": null,
+      "options": [
+        "א. `std::memory_order_relaxed` עבור `store` וגם עבור `load`.",
+        "ב. `std::memory_order_acquire` עבור `store` ו-`std::memory_order_release` עבור `load`.",
+        "ג. `std::memory_order_release` עבור `store` ו-`std::memory_order_acquire` עבור `load`.",
+        "ד. `std::memory_order_seq_cst` עבור `store` וגם עבור `load`."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "התשובה הנכונה היא ג'. כדי להבטיח שכל הכתיבות שבוצעו לפני פעולת `store` אטומית יהיו גלויות לכל הקריאות שבוצעו לאחר פעולת `load` אטומית על אותו משתנה אטומי, נדרש להשתמש בשילוב של `memory_order_release` עבור פעולת ה-`store` ב-`producer_thread` וב-`memory_order_acquire` עבור פעולת ה-`load` ב-`consumer_thread`.\n\n*   `std::memory_order_release`: פעולת `store` עם `release` מבטיחה שכל הכתיבות שבוצעו לפני פעולה זו בתהליך המבצע אותה יהיו גלויות לפני פעולה זו. היא יוצרת 'happens-before' קשר עם פעולת `acquire` על אותו משתנה.\n*   `std::memory_order_acquire`: פעולת `load` עם `acquire` מבטיחה שכל הכתיבות שקשורות לפעולת `release` שקדמה לה (באמצעות ה-'happens-before' קשר) יהיו גלויות לאחר פעולה זו בתהליך המבצע אותה.\n\nשילוב זה יוצר מחסום זיכרון (memory barrier) יעיל: ה-`store(true, std::memory_order_release)` ב-producer מבטיח ששמירת הנתונים ב-`shared_data` 'פורסמה' (published) לפני שהדגל הוגדר. ה-`load(std::memory_order_acquire)` ב-consumer מבטיח שברגע שהדגל נצפה כ-`true`, כל הנתונים שפורסמו על ידי ה-producer יהיו גלויים גם ל-consumer.\n\nא. `std::memory_order_relaxed` אינו מספק שום הבטחה לגבי סדר פעולות זיכרון שאינן אטומיות בין תהליכים, ולכן אינו מבטיח את נראות הנתונים הלא-אטומיים.\nב. השילוב `acquire` ל-`store` ו-`release` ל-`load` אינו תואם את המודל של C++ ליצירת קשרי סנכרון. `acquire` משמש בעיקר ל-`load` ו-`release` ל-`store`.\nד. `std::memory_order_seq_cst` היה פועל גם כן, מכיוון שהוא מספק את ההבטחות החזקות ביותר (sequentially consistent) וכולל את ההבטחות של `acquire` ו-`release`. אך השאלה מבקשת את ה-**מינימום** הנדרש, ו-`acquire`/`release` מספקות בדיוק את ההבטחות הנדרשות במקרה זה עם פחות תקורה פוטנציאלית (אם כי בפועל ההבדל עשוי להיות זניח בארכיטקטורות מסוימות)."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

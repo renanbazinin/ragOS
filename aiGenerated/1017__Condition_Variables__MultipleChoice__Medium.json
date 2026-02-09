@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Condition Variables",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 07:26:10",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 983,
+      "output_tokens": 961,
+      "total_tokens": 4025
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Condition Variables",
+      "Synchronization",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתבונן בקטע הקוד הבא המדגים שימוש במשתנה תנאי (condition variable) ובמנעול (mutex) לסנכרון בין חוט יצרן לחוט צרכן. מהי הבעיה הפוטנציאלית העיקרית בדרך שבה חוט הצרכן ממתין לתנאי?",
+      "code_snippet": "pthread_mutex_t m;\npthread_cond_t cond;\nint shared_data_ready = 0;\n\nvoid consumer_thread() {\n    pthread_mutex_lock(&m);\n    if (shared_data_ready == 0) { // שימו לב לשורת הקוד הזו\n        pthread_cond_wait(&cond, &m);\n    }\n    // Assume shared_data is processed here\n    printf(\"Data processed.\\n\");\n    shared_data_ready = 0; // Reset for next use\n    pthread_mutex_unlock(&m);\n}\n\nvoid producer_thread() {\n    pthread_mutex_lock(&m);\n    // Assume shared_data is prepared here\n    shared_data_ready = 1;\n    pthread_cond_signal(&cond);\n    pthread_mutex_unlock(&m);\n}",
+      "options": [
+        "א. הקוד עלול להיכנס למצב של Deadlock מכיוון ש-`pthread_cond_wait` לא משחרר את המנעול באופן אטומי לפני ההמתנה.",
+        "ב. חוט הצרכן עלול להמשיך בעיבוד הנתונים למרות שהתנאי (`shared_data_ready == 1`) אינו מתקיים, עקב התעוררות שווא (spurious wakeup) או לאחר שחוט אחר כבר עיבד את הנתונים.",
+        "ג. חוט הצרכן עלול לפספס אות (lost signal) מחוט היצרן אם התנאי מתקיים לפני שהצרכן מגיע ל-`pthread_cond_wait` ואין חוט שממתין.",
+        "ד. הבעיה העיקרית היא ש-`pthread_cond_signal` צריך להיות מוחלף ב-`pthread_cond_broadcast` כדי להבטיח שכל הצרכנים יקבלו את האות.",
+        "ה. אין בעיה בקוד, והוא יפעל בצורה תקינה וסנכרונית במקרה של יצרן יחיד וצרכן יחיד."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב'. שימוש ב-`if` במקום ב-`while` עלול לגרום לחוט הצרכן להמשיך בביצוע גם כאשר התנאי אינו מתקיים, וזאת מכמה סיבות: א. התעוררות שווא (spurious wakeup) – `pthread_cond_wait` יכולה לחזור ללא `pthread_cond_signal` מקביל. ב. במקרה של מספר צרכנים (או אפילו עם צרכן יחיד והתעוררות שווא), חוט הצרכן מתעורר, בודק את התנאי בפעם הראשונה, ואם הוא נכון ממשיך הלאה. אך אם התנאי משתנה שוב (לדוגמה, חוט אחר מעבד את הנתונים, או שהייתה התעוררות שווא) לפני שהחוט הספציפי הספיק לעבד את הנתונים, הוא ימשיך בביצוע כאילו התנאי עדיין מתקיים. לכן, תמיד יש לבדוק את התנאי בלולאת `while` לאחר חזרה מ-`pthread_cond_wait` כדי לוודא שהתנאי עדיין תקף."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

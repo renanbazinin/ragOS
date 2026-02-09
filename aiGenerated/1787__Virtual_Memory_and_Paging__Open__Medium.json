@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory and Paging",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 20:48:27",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2075,
+      "output_tokens": 828,
+      "total_tokens": 5502
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Virtual Memory",
+      "Paging",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "נתונה מערכת עם זיכרון וירטואלי של 256MB, גודל דף של 4KB, וזיכרון פיזי של 128MB.\nכל כניסה בטבלת הדפים (PTE) מכילה את מספר המסגרת הפיזית (PFN), וכן 6 ביטים נוספים לניהול: ביט Valid, ביט Dirty, ביט Accessed, ושלושה ביטי הגנה (Read/Write/Execute).\nבהנחה שכל כניסה בטבלת הדפים מעוגלת לגודל שלם של חזקת 2 של בתים (למשל, אם נדרשים 17 ביטים, הכניסה תתפוס 4 בתים), כמה זיכרון פיזי תתפוס טבלת דפים (לינארית) של תהליך?\nגודל VPN: ____ גודל PFN: ____ גודל PTE: ____ גודל טבלה: ____",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.  **חישוב גודל VPN:**\n    *   זיכרון וירטואלי: 256MB = 2^28 בתים. לכן כתובת וירטואלית היא 28 ביטים.\n    *   גודל דף: 4KB = 2^12 בתים. לכן ההיסט (Offset) הוא 12 ביטים.\n    *   VPN = 28 - 12 = 16 ביטים.\n\n2.  **חישוב גודל PFN:**\n    *   זיכרון פיזי: 128MB = 2^27 בתים. לכן כתובת פיזית היא 27 ביטים.\n    *   ההיסט זהה: 12 ביטים.\n    *   PFN = 27 - 12 = 15 ביטים.\n\n3.  **חישוב גודל PTE:**\n    *   PFN: 15 ביטים.\n    *   ביטים נוספים: Valid (1) + Dirty (1) + Accessed (1) + הגנה (3) = 6 ביטים.\n    *   סה\"כ ביטים ל-PTE = 15 + 6 = 21 ביטים.\n    *   מעוגל לחזקת 2 של בתים: 21 ביטים גדול מ-16 ביטים (2 בתים) וקטן מ-32 ביטים (4 בתים). לכן כל PTE יתפוס 4 בתים.\n\n4.  **חישוב גודל טבלת הדפים:**\n    *   מספר דפים וירטואליים: 2^VPN = 2^16 = 65,536 דפים.\n    *   גודל טבלת דפים = מספר דפים וירטואליים * גודל PTE = 65,536 * 4 בתים = 262,144 בתים = 256KB."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

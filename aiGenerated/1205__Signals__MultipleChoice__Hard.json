@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Signals",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 08:41:02",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 968,
+      "output_tokens": 1561,
+      "total_tokens": 6422
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Signals",
+      "Process Communication",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתון קוד C הבא המשתמש באותות (signals). תהליך האב יוצר תהליך בן, ששניהם מדפיסים הודעות לקונסול. תהליך הבן מגדיר מטפל לאות SIGUSR1, חוסם אותו, ממתין מעט, ואז קורא ל-`sigsuspend` עם המסכה המקורית (לפני החסימה). תהליך האב שולח את האות SIGUSR1 לבן לאחר שהבן חסם את האות. מה תהיה התוצאה הסופית של ההדפסות והתנהגות תהליך הבן?",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <signal.h>\n#include <sys/wait.h>\n\nvolatile int sigusr1_received = 0;\n\nvoid handler(int signum) {\n    if (signum == SIGUSR1) {\n        sigusr1_received = 1;\n        printf(\"Child: SIGUSR1 handler executed.\\n\");\n    }\n}\n\nint main() {\n    pid_t pid;\n    sigset_t newmask, oldmask;\n\n    sigemptyset(&newmask);\n    sigaddset(&newmask, SIGUSR1);\n\n    struct sigaction sa;\n    sa.sa_handler = handler;\n    sigemptyset(&sa.sa_mask);\n    sa.sa_flags = 0;\n    if (sigaction(SIGUSR1, &sa, NULL) == -1) {\n        perror(\"sigaction\");\n        return EXIT_FAILURE;\n    }\n\n    pid = fork();\n\n    if (pid == -1) {\n        perror(\"fork\");\n        return EXIT_FAILURE;\n    }\n\n    if (pid == 0) { // Child process\n        printf(\"Child: PID %d\\n\", getpid());\n\n        if (sigprocmask(SIG_BLOCK, &newmask, &oldmask) == -1) {\n            perror(\"sigprocmask BLOCK\");\n            return EXIT_FAILURE;\n        }\n        printf(\"Child: SIGUSR1 blocked.\\n\");\n\n        sleep(1); // Give parent time to send signal\n\n        printf(\"Child: Calling sigsuspend...\\n\");\n        sigsuspend(&oldmask); // Temporarily unblocks SIGUSR1 and waits.\n\n        printf(\"Child: sigsuspend returned. sigusr1_received = %d\\n\", sigusr1_received);\n\n        if (sigusr1_received) {\n            printf(\"Child: SIGUSR1 was handled.\\n\");\n        }\n        return EXIT_SUCCESS;\n\n    } else { // Parent process\n        printf(\"Parent: PID %d, Child PID %d\\n\", getpid(), pid);\n        sleep(0.5); // Give child time to block signal\n        printf(\"Parent: Sending SIGUSR1 to child %d\\n\", pid);\n        if (kill(pid, SIGUSR1) == -1) {\n            perror(\"kill\");\n            return EXIT_FAILURE;\n        }\n        printf(\"Parent: SIGUSR1 sent.\\n\");\n\n        wait(NULL);\n        printf(\"Parent: Child exited.\\n\");\n        return EXIT_SUCCESS;\n    }\n}",
+      "options": [
+        "א. תהליך הבן לא יטפל באות SIGUSR1, והקריאה ל-`sigsuspend` תיתקע ולא תחזור לעולם (אלא אם כן יגיע אות אחר).",
+        "ב. תהליך הבן יטפל באות SIGUSR1, והקריאה ל-`sigsuspend` תחזור מיד לאחר שהמטפל סיים לרוץ.",
+        "ג. תהליך הבן יטפל באות SIGUSR1, אך הקריאה ל-`sigsuspend` תחזור רק אם יגיע אות נוסף (שאינו SIGUSR1) לאחר מכן.",
+        "ד. תהליך הבן לא יטפל באות SIGUSR1, אך הקריאה ל-`sigsuspend` תחזור מיד מכיוון שהאות נשלח בזמן שהוא חסום."
+      ]
+    },
+    "sub_questions": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "התשובה הנכונה היא ב'.\n1.  תהליך הבן חוסם את האות SIGUSR1 באמצעות `sigprocmask(SIG_BLOCK, &newmask, &oldmask)`. בשלב זה, המסכה `oldmask` מכילה את מצב חסימת האותות לפני שהאות SIGUSR1 נחסם (כלומר, SIGUSR1 אינו חסום ב-`oldmask`).\n2.  תהליך האב שולח את האות SIGUSR1. מכיוון שהאות חסום בבן, הוא אינו מטופל מיד אלא הופך לאות ממתין (pending signal).\n3.  תהליך הבן קורא ל-`sigsuspend(&oldmask)`. הפונקציה `sigsuspend` מבצעת שתי פעולות באופן אטומי:\n    *   היא מחליפה את מסכת האותות הנוכחית במסכה `oldmask`.\n    *   היא ממתינה (suspends) עד שיתקבל אות שאינו חסום במסכה החדשה.\n4.  ברגע ש-`sigsuspend` מחליפה את המסכה ל-`oldmask`, האות SIGUSR1, שהיה ממתין, הופך להיות לא חסום. כתוצאה מכך, המטפל לאות SIGUSR1 (הפונקציה `handler`) מופעל מיד.\n5.  לאחר שהמטפל `handler` מסיים את ריצתו, `sigsuspend` מחזירה את מסכת האותות למצבה המקורי (המסכה שבה SIGUSR1 חסום) וחוזרת.\nלכן, המטפל ירוץ, המשתנה `sigusr1_received` יקבל את הערך 1, והקריאה ל-`sigsuspend` תחזור מיד לאחר מכן."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

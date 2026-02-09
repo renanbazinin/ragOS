@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Scheduling and Processes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 21:05:33",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1031,
+      "output_tokens": 321,
+      "total_tokens": 2271
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Scheduling",
+      "Processes"
+    ],
+    "content": {
+      "text": "מהי מטרתו העיקרית של מתזמן המעבד (CPU Scheduler)?",
+      "code_snippet": null,
+      "options": [
+        "א. להקצות זיכרון לתהליכים.",
+        "ב. לנהל את קבצי המערכת.",
+        "ג. לבחור איזה תהליך ירוץ על המעבד הבא.",
+        "ד. לטפל בפסיקות חומרה.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג. מתזמן המעבד (CPU Scheduler) הוא רכיב במערכת ההפעלה שאחראי לבחור מבין התהליכים הנמצאים במצב 'מוכן' (Ready) איזה מהם יקבל את המעבד ויעבור למצב 'רץ' (Running), בהתאם למדיניות תזמון מסוימת."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

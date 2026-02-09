@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Disks",
+    "topic_hint": "RAID",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 09:36:29",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1066,
+      "output_tokens": 343,
+      "total_tokens": 2321
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "RAID",
+      "Storage"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של RAID (Redundant Array of Independent Disks)?",
+      "code_snippet": null,
+      "options": [
+        "א. להגדיל את מהירות המעבד (CPU).",
+        "ב. לשפר את זמן השהיה (latency) של הרשת.",
+        "ג. לשלב מספר כונני דיסק פיזיים ליחידה לוגית אחת, למטרות יתירות נתונים, שיפור ביצועים או שניהם.",
+        "ד. לנהל זיכרון וירטואלי.",
+        "ה. להצפין נתונים על דיסקים."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג. כפי שנלמד, RAID נועד לשלב מספר כונני דיסק פיזיים ליחידה לוגית אחת, במטרה לשפר ביצועים, לספק יתירות נתונים (עמידות בפני כשלים), או שניהם, בהתאם לרמת ה-RAID הספציפית."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

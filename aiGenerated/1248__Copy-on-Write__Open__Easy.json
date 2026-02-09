@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Copy-on-Write",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 08:56:33",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4669,
+      "output_tokens": 478,
+      "total_tokens": 6182
+    }
+  },
+  "question": {
+    "id": 9,
+    "type": "Open",
+    "topic": [
+      "Copy-on-Write",
+      "Memory Management",
+      "Process Management"
+    ],
+    "content": {
+      "text": "הסבר בקצרה מהו מנגנון Copy-on-Write (CoW) וכיצד הוא תורם ליעילות מערכת ההפעלה בפעולות כמו יצירת תהליך חדש (fork).",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "מנגנון Copy-on-Write (CoW) הוא אסטרטגיה לניהול זיכרון שבה נתונים משותפים בין מספר ישויות (לרוב תהליכים), אך בפועל שכפול הנתונים מתבצע רק כאשר אחת הישויות מנסה לשנות את הנתונים המשותפים.\n\nבפעולת יצירת תהליך חדש (fork), במקום לשכפל באופן מיידי את כל מרחב הכתובות של תהליך האב לתהליך הבן, מערכת ההפעלה מסמנת את דפי הזיכרון כמשותפים ולקריאה בלבד. בפעם הראשונה שתהליך האב או הבן מנסה לכתוב לדף זיכרון משותף זה, מתבצע שכפול של הדף הספציפי הזה בלבד, ורק אז מאפשרת הכתיבה. זה חוסך זמן ומשאבי זיכרון משמעותיים, במיוחד במקרים בהם תהליך הבן מבצע מיד exec() (ומחליף את מרחב הכתובות שלו) או רק קורא מרוב הדפים, מכיוון שאין צורך לבצע העתקה מיותרת של נתונים שלעולם לא ישונו או ישמשו."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Paging and TLB",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 10:04:04",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4769,
+      "output_tokens": 3651,
+      "total_tokens": 15805
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Paging",
+      "TLB",
+      "Memory Management",
+      "Virtual Memory",
+      "Performance"
+    ],
+    "content": {
+      "text": "נתונה מערכת זיכרון וירטואלי עם טבלת דפים היררכית בעלת שתי רמות. גודל דף הוא 4KB (2^12 בתים), וגודל כל כניסה בטבלת הדפים (PTE או PDE) הוא 4 בתים. כל טבלה (גם ברמה הראשונה וגם בשנייה) מאוחסנת בדף זיכרון פיזי בודד. במערכת קיים TLB (Translation Lookaside Buffer) בגודל 16 כניסות, הפועל בשיטת אסוציאטיביות מלאה (Fully Associative) ומדיניות החלפה LRU (Least Recently Used). זמן הגישה ל-TLB הוא 10ns. זמן הגישה לזיכרון פיזי (RAM) הוא 100ns. זמן הגישה לדיסק (במקרה של כשל דף – Page Fault) הוא 10ms (10,000,000ns). יש לפרט ולנמק את כל החישובים וההסברים.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "מהו זמן הגישה האפקטיבי הממוצע לזיכרון (Effective Access Time – EAT) אם ידוע ששיעור הפגיעות ב-TLB (TLB Hit Ratio) הוא 95%, ושיעור כשלונות הדף (Page Fault Rate) הוא 0.1% מכלל הגישות לזיכרון (לאחר בדיקת TLB)?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "נתון שה-TLB ריק בתחילת ריצת התהליך. נתון שדפים וירטואליים P0 עד P15 נמצאים בזיכרון פיזי, ודפים P16 ו-P17 אינם נמצאים בזיכרון פיזי. התהליך מבצע את סדרת הגישות הבאה לדפים וירטואליים: P0, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P0, P16, P17, P1. עבור כל גישה בסדרה, ציין אם זו פגיעה ב-TLB (TLB Hit), החטאה ב-TLB (TLB Miss) שמובילה לגישה לטבלת הדפים (Page Table Walk) או כשל דף (Page Fault). חשב את זמן הגישה לזיכרון עבור כל אחת מהגישות.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.3",
+        "text": "לאחר סדרת הגישות בסעיף 1.2, מתרחשת החלפת הקשר (Context Switch) לתהליך אחר. מיד לאחר מכן, מתבצעת גישה לכתובת וירטואלית בדף P0 עבור התהליך המקורי. מה יהיה זמן הגישה לזיכרון במקרה זה? נמק את תשובתך.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "נתוני המערכת:\n- גודל דף: 4KB = 2^12 בתים. לכן, אופסט (offset) הוא 12 ביטים.\n- גודל PTE/PDE: 4 בתים.\n- מספר כניסות בטבלת דפים אחת: 4KB / 4 בתים = 1024 כניסות = 2^10 כניסות.\n- טבלת דפים 2 רמות: כל רמה משתמשת ב-10 ביטים מכתובת ה-VPN. סה\"כ VPN הוא 20 ביטים.\n- כתובת וירטואלית: 20 (VPN) + 12 (Offset) = 32 ביטים.\n- זמני גישה:\n  - TLB: 10ns\n  - RAM: 100ns\n  - Disk: 10,000,000ns (10ms)\n\nחישוב זמני גישה בסיסיים:\n- זמן גישה במקרה של TLB Hit: גישה ל-TLB + גישה ל-RAM = 10ns + 100ns = 110ns.\n- זמן גישה במקרה של TLB Miss ו-Page Table Hit (אין כשל דף):\n  - גישה ל-TLB (החטאה) + 2 גישות ל-RAM (עבור מעבר על טבלת הדפים ברמה 1 ורמה 2) + גישה ל-RAM (עבור הנתונים) = 10ns + 2 * 100ns + 100ns = 410ns. (לאחר מכן ה-PTE נוסף ל-TLB).\n- זמן גישה במקרה של TLB Miss ו-Page Fault:\n  - גישה ל-TLB (החטאה) + 2 גישות ל-RAM (עבור מעבר על טבלת הדפים עד שמוצאים שה-P-bit הוא 0) + גישה לדיסק (לטעינת הדף) + גישה ל-RAM (עבור הנתונים) = 10ns + 2 * 100ns + 10,000,000ns + 100ns = 10,000,310ns. (לאחר מכן ה-PTE מתעדכן ונוסף ל-TLB).\n\n**1.1 חישוב זמן הגישה האפקטיבי הממוצע (EAT):**\n- נתון: שיעור פגיעות ב-TLB (P_TLB_Hit) = 0.95\n- נתון: שיעור כשלונות דף (P_Page_Fault) = 0.001 מכלל הגישות לזיכרון.\n\nמכאן נובע:\n- P_TLB_Miss = 1 - P_TLB_Hit = 1 - 0.95 = 0.05\n- ההסתברות לכשל דף מתוך כלל הגישות היא 0.001. כלומר, P_TLB_Miss_and_Page_Fault = 0.001.\n- ההסתברות להחטאה ב-TLB ללא כשל דף (כלומר, TLB Miss ו-Page Table Hit) היא:\n  P_TLB_Miss_and_Page_Table_Hit = P_TLB_Miss - P_TLB_Miss_and_Page_Fault = 0.05 - 0.001 = 0.049\n\nEAT = (P_TLB_Hit * זמן גישה ב-TLB Hit) + (P_TLB_Miss_and_Page_Table_Hit * זמן גישה ב-TLB Miss ללא Page Fault) + (P_TLB_Miss_and_Page_Fault * זמן גישה ב-TLB Miss עם Page Fault)\n\nEAT = (0.95 * 110ns) + (0.049 * 410ns) + (0.001 * 10,000,310ns)\nEAT = 104.5ns + 20.09ns + 10.00031ns\nEAT = 134.59031ns\n\n**1.2 ניתוח סדרת הגישות:**\nTLB ריק בתחילה. מדיניות החלפה LRU: הכניסה ששימשה הכי פחות לאחרונה תפונה.\n\n1.  **P0**: TLB Miss. Page Table Walk. Page Hit (P0 בזיכרון). זמן: 410ns. TLB: [P0]\n2.  **P1**: TLB Miss. Page Table Walk. Page Hit (P1 בזיכרון). זמן: 410ns. TLB: [P0, P1]\n3.  **P2**: TLB Miss. Page Table Walk. Page Hit (P2 בזיכרון). זמן: 410ns. TLB: [P0, P1, P2]\n4.  **P3**: TLB Miss. Page Table Walk. Page Hit (P3 בזיכרון). זמן: 410ns. TLB: [..., P3]\n5.  **P4**: TLB Miss. Page Table Walk. Page Hit (P4 בזיכרון). זמן: 410ns. TLB: [..., P4]\n6.  **P5**: TLB Miss. Page Table Walk. Page Hit (P5 בזיכרון). זמן: 410ns. TLB: [..., P5]\n7.  **P6**: TLB Miss. Page Table Walk. Page Hit (P6 בזיכרון). זמן: 410ns. TLB: [..., P6]\n8.  **P7**: TLB Miss. Page Table Walk. Page Hit (P7 בזיכרון). זמן: 410ns. TLB: [..., P7]\n9.  **P8**: TLB Miss. Page Table Walk. Page Hit (P8 בזיכרון). זמן: 410ns. TLB: [..., P8]\n10. **P9**: TLB Miss. Page Table Walk. Page Hit (P9 בזיכרון). זמן: 410ns. TLB: [..., P9]\n11. **P10**: TLB Miss. Page Table Walk. Page Hit (P10 בזיכרון). זמן: 410ns. TLB: [..., P10]\n12. **P11**: TLB Miss. Page Table Walk. Page Hit (P11 בזיכרון). זמן: 410ns. TLB: [..., P11]\n13. **P12**: TLB Miss. Page Table Walk. Page Hit (P12 בזיכרון). זמן: 410ns. TLB: [..., P12]\n14. **P13**: TLB Miss. Page Table Walk. Page Hit (P13 בזיכרון). זמן: 410ns. TLB: [..., P13]\n15. **P14**: TLB Miss. Page Table Walk. Page Hit (P14 בזיכרון). זמן: 410ns. TLB: [..., P14]\n16. **P15**: TLB Miss. Page Table Walk. Page Hit (P15 בזיכרון). זמן: 410ns. ה-TLB מלא כעת עם P0-P15. P0 הוא ה-LRU (Least Recently Used).\n    TLB: [P0, P1, ..., P15] (P0 הוא ה-LRU)\n17. **P0**: TLB Hit. זמן: 110ns. P0 הופך ל-MRU (Most Recently Used). P1 הוא ה-LRU הבא.\n    TLB: [P1, P2, ..., P15, P0] (P1 הוא ה-LRU)\n18. **P16**: TLB Miss. Page Table Walk. Page Fault (P16 אינו בזיכרון פיזי). המערכת טוענת את P16 לזיכרון פיזי (נניח למסגרת F16). מפנה את P1 (ה-LRU הנוכחי) מה-TLB. P16 מתווסף ל-TLB. זמן: 10,000,310ns.\n    TLB: [P2, P3, ..., P15, P0, P16] (P2 הוא ה-LRU)\n19. **P17**: TLB Miss. Page Table Walk. Page Fault (P17 אינו בזיכרון פיזי). המערכת טוענת את P17 לזיכרון פיזי (נניח למסגרת F17). מפנה את P2 (ה-LRU הנוכחי) מה-TLB. P17 מתווסף ל-TLB. זמן: 10,000,310ns.\n    TLB: [P3, P4, ..., P15, P0, P16, P17] (P3 הוא ה-LRU)\n20. **P1**: TLB Miss. Page Table Walk. Page Hit (P1 היה בזיכרון פיזי אך פונה מה-TLB בגישה 18). מפנה את P3 (ה-LRU הנוכחי) מה-TLB. P1 מתווסף ל-TLB. זמן: 410ns.\n    TLB: [P4, P5, ..., P15, P0, P16, P17, P1] (P4 הוא ה-LRU)\n\n**1.3 השפעת החלפת הקשר (Context Switch):**\nברוב מערכות ההפעלה, ה-TLB נחשב ספציפי לתהליך (process-specific) או שהוא מרוקן (flushed) בעת החלפת הקשר (Context Switch). הסיבה לכך היא שתהליכים שונים משתמשים במרחבי כתובות וירטואליים שונים, ומיפויים ב-TLB של תהליך אחד אינם תקפים עבור תהליך אחר. אם לא מרוקנים את ה-TLB, יש צורך ב-ASID (Address Space ID) כדי להבחין בין כניסות של תהליכים שונים, אך השאלה לא מציינת TLB מתויג (tagged TLB). לכן, ההנחה הסטנדרטית היא שה-TLB מרוקן.\n\nכאשר התהליך המקורי חוזר וניגש לדף P0:\n1.  ה-TLB יהיה ריק לחלוטין (עקב ריקון בהחלפת הקשר).\n2.  תתרחש TLB Miss.\n3.  המערכת תבצע Page Table Walk (שתי גישות ל-RAM) כדי למצוא את ה-PTE של P0.\n4.  דף P0 נמצא בזיכרון פיזי (כפי שצוין בתחילת סעיף 1.2), ולכן זו תהיה Page Table Hit (אין כשל דף).\n5.  ה-PTE של P0 יוכנס ל-TLB.\n6.  לאחר מכן תתבצע גישה לזיכרון הפיזי עבור הנתונים.\n\nלכן, זמן הגישה לזיכרון במקרה זה יהיה כמו TLB Miss ו-Page Table Hit: 410ns."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

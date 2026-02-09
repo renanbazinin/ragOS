@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Producer-Consumer",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 07:46:15",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1877,
+      "output_tokens": 1371,
+      "total_tokens": 5871
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Producer-Consumer",
+      "Synchronization",
+      "Semaphores",
+      "Deadlocks"
+    ],
+    "content": {
+      "text": "נתונה בעיית המפיק-צרכן (Producer-Consumer) עם חיץ חסום (bounded buffer). החיץ בעל קיבולת של N פריטים. לצורך סנכרון, אנו משתמשים בשלושה סמפורים: `empty` (מאותחל ל-N), `full` (מאותחל ל-0) ו-`mutex` (סמפור בינארי, מאותחל ל-1).\nלהלן מימוש שגוי של פונקציית המפיק (Producer):\n\nא. הסבירו מדוע רצף הפעולות בסמפורים במימוש המפיק הנתון עלול להוביל למצב של קיפאון (deadlock). תארו תרחיש ספציפי שבו קיפאון אכן יתרחש.\nב. הציעו תיקון למימוש המפיק והסבירו מדוע התיקון שלכם פותר את בעיית הקיפאון.",
+      "code_snippet": "void producer() {\n    item_type item;\n    while (true) {\n        // produce an item\n        item = produce_item();\n\n        wait(mutex); // (1)\n        wait(empty); // (2)\n        \n        insert_item(item); // Add item to buffer\n        \n        signal(full);  // (3)\n        signal(mutex); // (4)\n    }\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "חלק א': הסבר לקיפאון ותרחיש\nהבעיה במימוש הנתון היא בסדר הפעולות `wait(mutex)` ואחריו `wait(empty)`. סדר זה עלול להוביל לקיפאון.\n\nתרחיש לקיפאון:\n1.  נניח שהחיץ מלא (כלומר, הסמפור `empty` מאותחל ל-0). \n2.  המפיק מנסה לייצר פריט. הוא מבצע `wait(mutex)` ומצליח לרכוש את המנעול. כעת `mutex` = 0.\n3.  המפיק ממשיך ל-`wait(empty)`. מכיוון שהחיץ מלא, `empty` = 0, והמפיק נחסם בהמתנה ל-`empty` להפוך לחיובי.\n4.  בשלב זה, המפיק מחזיק את המנעול `mutex` וחסום בהמתנה ל-`empty`.\n5.  כדי ש-`empty` יהפוך לחיובי, הצרכן צריך לצרוך פריט מהחיץ ולבצע `signal(empty)`.\n6.  אבל הצרכן, כדי לצרוך פריט, צריך לרכוש את המנעול `mutex` (כלומר, לבצע `wait(mutex)`).\n7.  מכיוון שהמפיק מחזיק כעת את `mutex` וחסום, הצרכן לא יוכל לרכוש את `mutex` ולכן לא יוכל לצרוך פריט ולשחרר את `empty`.\n8.  התוצאה היא קיפאון (deadlock): המפיק ממתין לצרכן שישחרר `empty`, והצרכן ממתין למפיק שישחרר `mutex`. אף אחד מהם לא יכול להתקדם.\n\nחלק ב': תיקון והסבר\nהתיקון הוא להחליף את הסדר של `wait(mutex)` ו-`wait(empty)`. המפיק צריך לבדוק אם יש מקום פנוי בחיץ *לפני* שהוא רוכש את המנעול לגישה לחיץ.\n\nהמימוש המתוקן של פונקציית המפיק:\n```c\nvoid producer() {\n    item_type item;\n    while (true) {\n        // produce an item\n        item = produce_item();\n\n        wait(empty); // (1) - Check for empty slot first\n        wait(mutex); // (2) - Then acquire mutex for buffer access\n        \n        insert_item(item); // Add item to buffer\n        \n        signal(mutex); // (3) - Release mutex\n        signal(full);  // (4) - Signal that a slot is full\n    }\n}\n```\n\nהסבר מדוע התיקון פותר את הבעיה:\nבמימוש המתוקן, המפיק קודם מבצע `wait(empty)`. אם החיץ מלא, המפיק נחסם כאן וממתין למקום פנוי. חשוב לציין שבשלב זה, המפיק *אינו* מחזיק את המנעול `mutex`. לכן, הצרכן יכול לרכוש את `mutex`, לצרוך פריט, לבצע `signal(mutex)` ולבסוף `signal(empty)`. פעולת `signal(empty)` זו תשחרר את המפיק החסום (אם היה כזה), והוא יוכל להמשיך לרכוש את `mutex` ולהכניס את הפריט. החלפת הסדר מבטיחה שתמיד נשחרר את `mutex` לפני שנחסם על סמפור אחר שדורש את `mutex` כדי להשתחרר. זה מונע את התנאי ההדדי של המתנה מעגלית שמוביל לקיפאון."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

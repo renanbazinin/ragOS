@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Processes and Threads",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 10:24:54",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2789,
+      "output_tokens": 1972,
+      "total_tokens": 9665
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Processes",
+      "Threads",
+      "Concurrency",
+      "Synchronization",
+      "System Calls"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה:\nיש להניח שכל קריאות המערכת וה-pthreads שיכולות להצליח אכן מצליחות. אין שגיאות מערכת או שגיאות ב-pthreads. אין תהליכים או ת'רדים נוספים במערכת שמשפיעים על קטע הקוד הזה.\n\nמהו הפלט האפשרי של התוכנית? האם התוכנית מסיימת את ריצתה באופן תקין? אם לא, הסבירו מדוע ומהי התופעה שמתרחשת.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <pthread.h>\n#include <sys/wait.h>\n\n// Global mutex\npthread_mutex_t my_mutex;\n\n// Thread function: locks the mutex and holds it\nvoid* thread_func_locker(void* arg) {\n    printf(\"Thread %ld: Trying to acquire mutex...\\n\", (long)pthread_self());\n    pthread_mutex_lock(&my_mutex);\n    printf(\"Thread %ld: Mutex acquired. Holding it for 2 seconds.\\n\", (long)pthread_self());\n    sleep(2); // Hold the mutex\n    printf(\"Thread %ld: Releasing mutex.\\n\", (long)pthread_self());\n    pthread_mutex_unlock(&my_mutex);\n    return NULL;\n}\n\nint main() {\n    pthread_t tid;\n    pid_t pid;\n\n    pthread_mutex_init(&my_mutex, NULL);\n\n    // Create a thread that locks the mutex\n    pthread_create(&tid, NULL, thread_func_locker, NULL);\n\n    // Give the thread a moment to acquire the mutex\n    usleep(100000); // 100ms, likely enough for the thread to lock the mutex\n\n    printf(\"Main process (PID %d): About to fork.\\n\", getpid());\n    pid = fork();\n\n    if (pid == -1) {\n        perror(\"fork failed\");\n        exit(EXIT_FAILURE);\n    } else if (pid == 0) { // Child process\n        printf(\"Child process (PID %d): Trying to acquire mutex...\\n\", getpid());\n        // The child process tries to lock the mutex.\n        // The mutex was locked by 'tid' in the parent.\n        // In the child, 'tid' does not exist, and the mutex is in a locked state, but no thread in the child owns it.\n        // This will likely lead to a deadlock in the child.\n        pthread_mutex_lock(&my_mutex); // Child deadlocks here!\n        printf(\"Child process (PID %d): Mutex acquired (this should not happen normally).\\n\", getpid());\n        pthread_mutex_unlock(&my_mutex);\n        exit(0);\n    } else { // Parent process\n        printf(\"Parent process (PID %d): Child created. Waiting for child to finish.\\n\", getpid());\n        wait(NULL); // Wait for the child to finish (if it ever does)\n        printf(\"Parent process (PID %d): Child finished. Joining thread.\\n\", getpid());\n        pthread_join(tid, NULL); // Join the thread in the parent\n        printf(\"Parent process (PID %d): Thread joined.\\n\", getpid());\n    }\n\n    pthread_mutex_destroy(&my_mutex);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפלט האפשרי של התוכנית:\n\nהפלט יתחיל בהדפסות מהתהליך הראשי ומהת'רד שנוצר:\n```\nThread <tid_value>: Trying to acquire mutex...\nThread <tid_value>: Mutex acquired. Holding it for 2 seconds.\nMain process (PID <main_pid>): About to fork.\n```\n\nלאחר מכן, התהליך הראשי יבצע `fork()`. התהליך הבן ייווצר וימשיך לרוץ מקריאת ה-`fork()`.\n\nבנקודה זו, `my_mutex` נמצא במצב נעול בתהליך האב (על ידי ה-`tid` שנוצר). כאשר הבן נוצר, הוא מקבל עותק של מרחב הזיכרון של האב, כולל המשתנה הגלובלי `my_mutex`. מצב הנעילה של ה-mutex משוכפל לבן, אך הת'רד `tid` שרכש את הנעילה באב *אינו* משוכפל לבן. כלומר, בבן, ה-mutex נראה נעול, אך אין ת'רד בתוך תהליך הבן שהוא הבעלים של הנעילה הזו.\n\nכאשר תהליך הבן מגיע לשורה `pthread_mutex_lock(&my_mutex);`, הוא מנסה לרכוש נעילה על mutex שכבר נחשב נעול (בעותק שלו). מכיוון שאף ת'רד בבן לא החזיק בנעילה לפני כן, ולא ניתן לשחרר mutex שנעול על ידי ת'רד שאינו קיים, תהליך הבן ייכנס למצב של קיפאון (deadlock) בניסיון לרכוש את ה-mutex. הוא לעולם לא יצליח לרכוש אותו ולא ימשיך לבצע את שאר הקוד שלו, כולל ה-`exit(0)`.\n\nהתהליך הראשי (האב) יגיע לשורה `wait(NULL)` וימתין שהבן יסיים. מכיוון שהבן נמצא בקיפאון, הוא לעולם לא יסיים, ולכן גם האב ייתקע בהמתנה לבן. האב לא יגיע לשורות ההדפסה וה-`pthread_join` שאחרי ה-`wait`.\n\nהת'רד שנוצר באב (זה שרץ את `thread_func_locker`) ימשיך להחזיק את ה-mutex למשך 2 שניות, ישחרר אותו ויסיים את ריצתו. אך מכיוון שהאב ממתין לבן ב-`wait(NULL)`, הוא לא יגיע ל-`pthread_join` של הת'רד הזה.\n\n**פלט סופי משוער:**\n```\nThread <tid_value>: Trying to acquire mutex...\nThread <tid_value>: Mutex acquired. Holding it for 2 seconds.\nMain process (PID <main_pid>): About to fork.\nChild process (PID <child_pid>): Trying to acquire mutex...\n```\nלאחר מכן, תהליך הבן ייתקע ב-`pthread_mutex_lock`. תהליך האב ייתקע ב-`wait(NULL)`. התוכנית לא תסיים את ריצתה באופן תקין, והן האב והן הבן יישארו במצב קיפאון. ה-`sleep(2)` בת'רד של האב יסתיים, הת'רד ישחרר את ה-mutex ויסיים, אך האב לא יוכל לצרף אותו כי הוא תקוע ב-`wait`.\n\n**התופעה שמתרחשת:** קיפאון (Deadlock) בתהליך הבן (ובעקבותיו, גם בתהליך האב). הסיבה היא ש-`fork()` משכפל את מרחב הזיכרון של התהליך הקורא, כולל מצב של mutexים גלובליים, אך אינו משכפל את הת'רדים האחרים. כאשר mutex נעול על ידי ת'רד באב, העותק שלו בבן נשאר נעול, אך אין ת'רד בבן שיכול לשחרר אותו, מה שמוביל לקיפאון כאשר הבן מנסה לרכוש אותו."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

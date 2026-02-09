@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Memory Management and Page Replacement",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 10:44:47",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 941,
+      "output_tokens": 740,
+      "total_tokens": 5239
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Memory Management",
+      "Page Replacement",
+      "Virtual Memory"
+    ],
+    "content": {
+      "text": "איזה מההיגדים הבאים מתאר בצורה הטובה ביותר אתגר או מאפיין מרכזי באלגוריתמי החלפת דפים בזיכרון וירטואלי?",
+      "code_snippet": null,
+      "options": [
+        "א. אלגוריתם FIFO (First-In, First-Out) אינו דורש מידע על דפוסי גישה עתידיים, ולכן הוא קל ליישום אך לעיתים קרובות אינו יעיל.",
+        "ב. אלגוריתם LRU (Least Recently Used) הוא האלגוריתם האופטימלי ביותר מבחינת מזעור כמות ה-page faults, אך הוא אינו ניתן ליישום בפועל.",
+        "ג. אלגוריתם Optimal הוא אלגוריתם תיאורטי בלבד, מכיוון שהוא דורש ידע מראש על כל הפניות הזיכרון העתידיות.",
+        "ד. Belady's Anomaly מתרחשת כאשר הגדלת מספר מסגרות הזיכרון הפיזי מובילה לירידה במספר ה-page faults עבור כל אלגוריתם החלפת דפים."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "אלגוריתם Optimal (OPT) הוא האלגוריתם שמייצר את המספר הנמוך ביותר של page faults, ולכן הוא משמש כנקודת ייחוס (benchmark) להשוואת אלגוריתמים אחרים. עם זאת, הוא דורש לדעת מראש אילו דפים יצטרכו בעתיד הרחוק ביותר, ומידע זה אינו זמין למערכת ההפעלה בזמן אמת. לכן, הוא נחשב לאלגוריתם תיאורטי בלבד ואינו ניתן ליישום בפועל.\nלגבי האפשרויות האחרות:\nא. FIFO אכן קל ליישום ואינו דורש מידע עתידי, אך הוא לא 'התיאור הטוב ביותר' לאתגר מרכזי, אלא מאפיין של אלגוריתם ספציפי. הוא גם יכול לסבול מ-Belady's Anomaly.\nב. LRU אינו האלגוריתם האופטימלי (Optimal הוא האופטימלי), והוא בהחלט ניתן ליישום בפועל (אף כי לעיתים דורש תמיכת חומרה).\nד. Belady's Anomaly מתרחשת כאשר הגדלת מספר מסגרות הזיכרון הפיזי *מובילה לעלייה* במספר ה-page faults, והיא אינה מתרחשת עבור כל האלגוריתמים (לדוגמה, לא עבור LRU או Optimal)."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "CPU Scheduling and Context Switching",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 11:44:32",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1035,
+      "output_tokens": 462,
+      "total_tokens": 2926
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "CPU Scheduling",
+      "Context Switching"
+    ],
+    "content": {
+      "text": "מהו המידע העיקרי הנשמר במהלך החלפת הקשר (context switch) על ידי מערכת ההפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. רק מצב המעבד (CPU registers) וכתובת ההוראה הבאה (Program Counter).",
+        "ב. רק תוכן זיכרון ה-RAM של התהליך.",
+        "ג. מצב המעבד (CPU registers, Program Counter) ומידע ניהול זיכרון (כמו Page Table Base Register).",
+        "ד. קבצי הקלט/פלט הפתוחים של התהליך.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג'. במהלך החלפת הקשר, מערכת ההפעלה שומרת את מצב התהליך הנוכחי, הכולל את תוכן הרגיסטרים של המעבד (כמו רגיסטרים כלליים, מונה התוכנית - Program Counter, ורגיסטרי מצב). בנוסף, היא שומרת את המידע הקשור לניהול הזיכרון של התהליך, כגון הערך של רגיסטר בסיס טבלת הדפים (Page Table Base Register), המגדיר את מרחב הכתובות של התהליך. מידע זה נשמר בבלוק בקרת התהליך (PCB) שלו, כך שניתן יהיה לטעון אותו מחדש כאשר התהליך יחזור לרוץ."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

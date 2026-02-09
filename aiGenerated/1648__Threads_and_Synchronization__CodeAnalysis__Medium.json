@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Threads and Synchronization",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 19:42:53",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1971,
+      "output_tokens": 1011,
+      "total_tokens": 4772
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Threads",
+      "Synchronization",
+      "Race Conditions"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המשתמשת בחוטים (threads) לביצוע פעולת ספירה משותפת ללא מנגנוני סנכרון. קראו את הקוד וקבעו מהו הפלט האפשרי של התוכנית, והסבירו מדוע הוא עשוי להיות שונה מהערך הצפוי.\n\n```c\n#include <stdio.h>\n#include <pthread.h>\n\n#define NUM_THREADS 5\n#define INCREMENTS_PER_THREAD 100000\n\nint counter = 0;\n\nvoid *thread_function(void *arg) {\n    for (int i = 0; i < INCREMENTS_PER_THREAD; ++i) {\n        counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, thread_function, NULL);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    return 0;\n}\n```",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הערך הצפוי של המונה (`counter`) בסיום התוכנית הוא 500,000 (5 חוטים * 100,000 הגדלות לחוט). עם זאת, הפלט בפועל יהיה כמעט תמיד נמוך מהערך הצפוי, ויכול להשתנות בין הרצות שונות.\n\nהסיבה לכך היא תנאי מרוץ (race condition) על המשתנה המשותף `counter`. פעולת ההגדלה `counter++` אינה אטומית. היא מורכבת בדרך כלל משלושה שלבים עיקריים ברמת המעבד:\n1.  קריאת הערך הנוכחי של `counter` לתוך אוגר (register).\n2.  הגדלת הערך באוגר.\n3.  כתיבת הערך החדש מהאוגר בחזרה לזיכרון של `counter`.\n\nכאשר מספר חוטים מבצעים פעולה זו במקביל ללא סנכרון מתאים, ייתכן שחוט אחד יקרא את הערך של `counter`, וחומר אחר יקרא את אותו ערך לפני שהחוט הראשון הספיק לכתוב את ערכו המוגדל. במצב כזה, שני החוטים יבצעו הגדלה ויכתבו את אותו ערך חדש, מה שיוביל לאיבוד אחת ההגדלות. לדוגמה, אם `counter` הוא 10:\n*   חוט A קורא 10.\n*   חוט B קורא 10 (לפני שחוט A הספיק לכתוב).\n*   חוט A מגדיל את הערך באוגר שלו ל-11 וכותב 11 בחזרה ל-`counter`.\n*   חוט B מגדיל את הערך באוגר שלו (שעדיין מכיל 10) ל-11 וכותב 11 בחזרה ל-`counter`.\n\nבמקום שהמונה יהיה 12 (לאחר שתי הגדלות), הוא נשאר 11. עקב כך, הערך הסופי של `counter` יהיה נמוך מ-500,000 ואינו ניתן לחיזוי מדויק מראש, אלא רק טווח אפשרי של ערכים הנמוכים מהצפוי."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

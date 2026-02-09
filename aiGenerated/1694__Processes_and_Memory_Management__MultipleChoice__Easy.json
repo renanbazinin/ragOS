@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Processes and Memory Management",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 20:05:50",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1034,
+      "output_tokens": 412,
+      "total_tokens": 3106
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Processes",
+      "Memory Management",
+      "Virtual Memory"
+    ],
+    "content": {
+      "text": "מהו היתרון העיקרי בשימוש בזיכרון וירטואלי במערכת הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. לאפשר לתוכניות להשתמש בזיכרון רב יותר ממה שזמין פיזית.",
+        "ב. להאיץ את הגישה לזיכרון הפיזי.",
+        "ג. למנוע מתהליכים לגשת אחד לזיכרון של השני.",
+        "ד. לפשט את תרגום הכתובות מהמעבד לזיכרון הפיזי.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "היתרון העיקרי של זיכרון וירטואלי הוא לאפשר לתוכניות לגשת למרחב כתובות גדול יותר ממה שזמין בזיכרון הפיזי, על ידי שימוש באחסון משני (כמו דיסק) כהרחבה ל-RAM. בנוסף, הוא מספק בידוד והגנה בין תהליכים ומפשט את ניהול הזיכרון עבור המתכנת, אך היכולת לחרוג מגבולות הזיכרון הפיזי נחשבת לרוב ליתרון המרכזי."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

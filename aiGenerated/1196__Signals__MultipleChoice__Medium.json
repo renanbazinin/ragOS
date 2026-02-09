@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Signals",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 08:37:38",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 923,
+      "output_tokens": 562,
+      "total_tokens": 4168
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Signals",
+      "Process Management"
+    ],
+    "content": {
+      "text": "תהליך P מגדיר handler לסיגנל SIGUSR1 באמצעות `sigaction`. מיד לאחר מכן, הוא חוסם את SIGUSR1 באמצעות `sigprocmask`. בזמן ש-SIGUSR1 חסום, תהליך אחר שולח ל-P סיגנל SIGUSR1. מהי התוצאה הסבירה ביותר כאשר תהליך P יסיר את החסימה מ-SIGUSR1?",
+      "code_snippet": null,
+      "options": [
+        "א. ה-handler של SIGUSR1 יופעל באופן מיידי פעם אחת.",
+        "ב. ה-handler של SIGUSR1 יופעל פעם אחת, אך רק לאחר שהתהליך יסיים את פעולתו הנוכחית (למשל, יחזור מקריאת מערכת חוסמת).",
+        "ג. ה-handler של SIGUSR1 יופעל מספר פעמים, כמספר הפעמים שהסיגנל נשלח בזמן שהיה חסום.",
+        "ד. הסיגנל יאבד ולא יטופל כלל, מכיוון שהוא נשלח בזמן שהיה חסום.",
+        "ה. התהליך יקרוס (crash) עקב קבלת סיגנל חסום."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "כאשר סיגנל נשלח לתהליך בזמן שהוא חסום (blocked), הסיגנל נרשם כ-pending. ברגע שהתהליך מסיר את החסימה מאותו סיגנל, מערכת ההפעלה תספק את הסיגנל. עבור סיגנלים סטנדרטיים (כמו SIGUSR1), אם אותו סיגנל נשלח מספר פעמים בזמן שהוא חסום, הוא יסופק פעם אחת בלבד ברגע הסרת החסימה (הם אינם נשמרים בתור - non-queued). לכן, ה-handler יופעל פעם אחת מיד עם הסרת החסימה."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

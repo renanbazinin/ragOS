@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Signals",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 08:41:28",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 968,
+      "output_tokens": 1738,
+      "total_tokens": 6904
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Signals",
+      "Signal Handling",
+      "Atomic Operations",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתון קוד C הבא. התהליך מתחיל עם חסימה של האות SIGINT. לאחר מכן, הוא מגדיר מטפל לאות זה ונכנס ל-sleep קצר. *במהלך ה-sleep, משתמש שולח את האות SIGINT פעם אחת*. מיד לאחר ה-sleep, התהליך קורא ל-sigsuspend עם מסכת אותות המאפשרת את קבלת SIGINT (כלומר, SIGINT אינו חסום במסכה זו). מה יהיה הפלט הסופי של התוכנית ומה יהיה הערך הסופי של sig_count?",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <signal.h>\n#include <unistd.h>\n\nvolatile int sig_count = 0;\n\nvoid sigint_handler(int signum) {\n    sig_count++;\n    printf(\"Handler called. sig_count = %d\\n\", sig_count);\n}\n\nint main() {\n    struct sigaction sa;\n    sigset_t block_mask, old_mask, suspend_mask;\n\n    // 1. Set up the signal handler\n    sa.sa_handler = sigint_handler;\n    sigemptyset(&sa.sa_mask);\n    sa.sa_flags = 0; \n    if (sigaction(SIGINT, &sa, NULL) == -1) {\n        perror(\"sigaction\");\n        exit(EXIT_FAILURE);\n    }\n\n    // 2. Block SIGINT initially\n    sigemptyset(&block_mask);\n    sigaddset(&block_mask, SIGINT);\n    if (sigprocmask(SIG_BLOCK, &block_mask, &old_mask) == -1) {\n        perror(\"sigprocmask BLOCK\");\n        exit(EXIT_FAILURE);\n    }\n    printf(\"SIGINT blocked. Try sending SIGINT now.\\n\");\n    sleep(2); // User sends SIGINT once during this sleep\n\n    // 3. Prepare suspend_mask: unblock SIGINT\n    suspend_mask = old_mask; // Copy the mask *before* SIGINT was blocked\n    sigdelset(&suspend_mask, SIGINT); // Ensure SIGINT is NOT blocked in suspend_mask\n\n    printf(\"About to call sigsuspend. sig_count = %d\\n\", sig_count);\n\n    // 4. Call sigsuspend\n    sigsuspend(&suspend_mask); \n\n    printf(\"sigsuspend returned. sig_count = %d\\n\", sig_count);\n\n    // 5. Restore original mask (sigsuspend already did this, but good practice)\n    if (sigprocmask(SIG_SETMASK, &old_mask, NULL) == -1) {\n        perror(\"sigprocmask SETMASK\");\n        exit(EXIT_FAILURE);\n    }\n\n    printf(\"Main exiting. Final sig_count = %d\\n\", sig_count);\n\n    return 0;\n}",
+      "options": [
+        "א. הפלט הסופי יהיה:\n   SIGINT blocked. Try sending SIGINT now.\n   About to call sigsuspend. sig_count = 0\n   sigsuspend returned. sig_count = 0\n   Main exiting. Final sig_count = 0\n   (sig_count סופי = 0)",
+        "ב. הפלט הסופי יהיה:\n   SIGINT blocked. Try sending SIGINT now.\n   About to call sigsuspend. sig_count = 0\n   Handler called. sig_count = 1\n   sigsuspend returned. sig_count = 1\n   Main exiting. Final sig_count = 1\n   (sig_count סופי = 1)",
+        "ג. הפלט הסופי יהיה:\n   SIGINT blocked. Try sending SIGINT now.\n   About to call sigsuspend. sig_count = 0\n   sigsuspend returned. sig_count = 0\n   Handler called. sig_count = 1\n   Main exiting. Final sig_count = 1\n   (sig_count סופי = 1)",
+        "ד. הפלט הסופי יהיה:\n   SIGINT blocked. Try sending SIGINT now.\n   About to call sigsuspend. sig_count = 0\n   Handler called. sig_count = 1\n   sigsuspend returned. sig_count = 1\n   Handler called. sig_count = 2\n   Main exiting. Final sig_count = 2\n   (sig_count סופי = 2)"
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "התשובה הנכונה היא ב'.\nהסבר:\n1.  בתחילה, SIGINT חסום. כאשר האות SIGINT נשלח במהלך ה-sleep, הוא אינו מועבר לתהליך אלא הופך לאות ממתין (pending signal).\n2.  הפלט הראשוני \"SIGINT blocked. Try sending SIGINT now.\" ולאחריו ה-sleep מתרחשים. ערכו של sig_count נשאר 0.\n3.  הפלט \"About to call sigsuspend. sig_count = 0\" מודפס.\n4.  כאשר `sigsuspend(&suspend_mask)` נקרא, מתרחשים שני דברים באופן אטומי:\n    א.  מסכת האותות של התהליך משתנה ל-`suspend_mask`, אשר מוגדרת כך ש-SIGINT אינו חסום בה.\n    ב.  המערכת בודקת האם יש אותות ממתינים (pending) שכעת אינם חסומים. מכיוון ש-SIGINT היה ממתין וכעת אינו חסום, המטפל (handler) עבור SIGINT נקרא באופן מיידי.\n5.  המטפל `sigint_handler` מופעל, מדפיס \"Handler called. sig_count = 1\" ומגדיל את `sig_count` ל-1.\n6.  לאחר שהמטפל מסיים, `sigsuspend` משחזר את מסכת האותות הקודמת (שבה SIGINT היה חסום) וחוזר, בדרך כלל עם שגיאת EINTR (שלא מטופלת במפורש בקוד, אך גורמת לחזרה מהפונקציה).\n7.  התוכנית ממשיכה להדפיס את השורות הבאות עם הערך המעודכן של `sig_count` שהוא 1: \"sigsuspend returned. sig_count = 1\" ו-\"Main exiting. Final sig_count = 1\".\nלכן, המטפל נקרא פעם אחת, בין ההדפסה של \"About to call sigsuspend\" לבין ההדפסה של \"sigsuspend returned\", והערך הסופי של `sig_count` הוא 1."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

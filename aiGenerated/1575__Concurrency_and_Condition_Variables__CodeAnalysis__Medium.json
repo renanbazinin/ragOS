@@ -1,0 +1,57 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency and Condition Variables",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 11:36:24",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2951,
+      "output_tokens": 2583,
+      "total_tokens": 11141
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Concurrency",
+      "Condition Variables",
+      "Pthreads",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המשתמשת במנגנוני סנכרון של pthreads (mutexes ו-condition variables) כדי לתאם בין תהליכון ראשי למספר תהליכוני עבודה. קראו את הקוד בעיון וענו על השאלות הבאות:",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <pthread.h>\n#include <unistd.h> // For sleep\n\n#define NUM_THREADS 5\n\n// משאבים משותפים\npthread_mutex_t mutex;\npthread_cond_t start_cond; // התהליכון הראשי מאותת לתהליכוני העבודה להתחיל\npthread_cond_t done_cond;  // תהליכוני העבודה מאותתים לתהליכון הראשי שסיימו\nint ready_count = 0;       // כמה תהליכוני עבודה מוכנים להתחיל\nint finished_count = 0;    // כמה תהליכוני עבודה סיימו\nint start_work_flag = 0;   // דגל המציין שתהליכוני העבודה יכולים להתחיל\n\nvoid *worker_thread(void *arg) {\n    long id = (long)arg;\n\n    pthread_mutex_lock(&mutex);\n    ready_count++;\n    printf(\"Worker %ld: Ready to start. (ready_count = %d)\\n\", id, ready_count);\n\n    // המתן לאות מהתהליכון הראשי להתחיל\n    while (!start_work_flag) {\n        pthread_cond_wait(&start_cond, &mutex);\n    }\n    pthread_mutex_unlock(&mutex); // שחרור המנעול לפני ביצוע העבודה\n\n    // הדמיית עבודה\n    printf(\"Worker %ld: Starting work...\\n\", id);\n    sleep(1 + (id % 2)); // הדמיית זמן עבודה משתנה\n    printf(\"Worker %ld: Finished work.\\n\", id);\n\n    pthread_mutex_lock(&mutex);\n    finished_count++;\n    printf(\"Worker %ld: Signaled done. (finished_count = %d)\\n\", id, finished_count);\n    if (finished_count == NUM_THREADS) {\n        pthread_cond_signal(&done_cond); // אות לתהליכון הראשי שכל העבודה הסתיימה\n    }\n    pthread_mutex_unlock(&mutex);\n\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n    long i;\n\n    pthread_mutex_init(&mutex, NULL);\n    pthread_cond_init(&start_cond, NULL);\n    pthread_cond_init(&done_cond, NULL);\n\n    // יצירת תהליכוני עבודה\n    for (i = 0; i < NUM_THREADS; i++) {\n        pthread_create(&threads[i], NULL, worker_thread, (void *)i);\n    }\n\n    // התהליכון הראשי ממתין שכל תהליכוני העבודה יהיו מוכנים\n    pthread_mutex_lock(&mutex);\n    while (ready_count < NUM_THREADS) {\n        pthread_mutex_unlock(&mutex); // שחרור המנעול כדי לאפשר לתהליכונים אחרים להתקדם\n        usleep(10000); // המתנה קצרה\n        pthread_mutex_lock(&mutex);\n    }\n    printf(\"Main: All workers are ready. Setting flag and signaling them to start.\\n\");\n    start_work_flag = 1; // הגדרת הדגל\n    pthread_cond_broadcast(&start_cond); // אות לכל תהליכוני העבודה להתחיל\n    pthread_mutex_unlock(&mutex);\n\n    // התהליכון הראשי ממתין שכל תהליכוני העבודה יסיימו\n    pthread_mutex_lock(&mutex);\n    while (finished_count < NUM_THREADS) {\n        pthread_cond_wait(&done_cond, &mutex); // המתן עד שכל תהליכוני העבודה יסיימו\n    }\n    printf(\"Main: All workers have finished. Exiting.\\n\");\n    pthread_mutex_unlock(&mutex);\n\n    // צירוף תהליכונים\n    for (i = 0; i < NUM_THREADS; i++) {\n        pthread_join(threads[i], NULL);\n    }\n\n    pthread_mutex_destroy(&mutex);\n    pthread_cond_destroy(&start_cond);\n    pthread_cond_destroy(&done_cond);\n\n    return 0;\n}"
+    },
+    "sub_questions": [
+      {
+        "id": "7.1",
+        "text": "תארו את תפקידם של המשתנים `ready_count`, `finished_count`, ו-`start_work_flag` בתהליך הסנכרון בין התהליכונים.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "7.2",
+        "text": "הסבירו מדוע נעשה שימוש ב-`pthread_cond_broadcast(&start_cond)` בתהליכון הראשי, לעומת `pthread_cond_signal(&done_cond)` בתהליכון העבודה?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "7.3",
+        "text": "האם ייתכן מצב שבו תהליכון עבודה יתחיל לבצע את עבודתו (ידפיס 'Starting work...') לפני שהתהליכון הראשי יסיים את הלולאה `while (ready_count < NUM_THREADS)` ויבצע `pthread_cond_broadcast(&start_cond)`? נמקו.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "### פתרון לשאלה 7.1:\n*   `ready_count`: משתנה זה משמש לתיאום נקודת ההתחלה של תהליכוני העבודה. הוא סופר כמה תהליכוני עבודה סיימו את שלב ההכנה הראשוני שלהם והגיעו לנקודת ההמתנה לתחילת העבודה. התהליכון הראשי משתמש בו כדי לדעת מתי כל התהליכונים מוכנים לקבל את האות להתחיל.\n*   `finished_count`: משתנה זה משמש לתיאום נקודת הסיום. הוא סופר כמה תהליכוני עבודה סיימו את משימתם. התהליכון הראשי ממתין שמונה זה יגיע ל-`NUM_THREADS` כדי לוודא שכל העבודה הסתיימה לפני סיום התוכנית.\n*   `start_work_flag`: דגל בוליאני המשמש כפרדיקט עבור משתנה התנאי `start_cond`. הוא מציין אם התהליכונים יכולים להתחיל את עבודתם. התהליכון הראשי מגדיר אותו ל-1 לאחר שכל התהליכונים מוכנים, ותהליכוני העבודה ממתינים שהוא יהיה 1 בתוך לולאת ה-`while` שלהם לפני שהם ממשיכים.\n\n### פתרון לשאלה 7.2:\n*   **`pthread_cond_broadcast(&start_cond)`**: בתהליכון הראשי, נעשה שימוש ב-`broadcast` מכיוון שכל `NUM_THREADS` תהליכוני העבודה ממתינים על `start_cond` וכולם צריכים להתחיל את עבודתם בו-זמנית (או לפחות ברגע שהאות ניתן). `broadcast` מעיר את כל התהליכונים שממתינים על משתנה התנאי, ובכך מבטיח שכל תהליכוני העבודה יצאו מההמתנה ויבדקו את `start_work_flag`.\n*   **`pthread_cond_signal(&done_cond)`**: בתהליכון העבודה, נעשה שימוש ב-`signal` (ולא ב-`broadcast`) מכיוון שהתהליכון הראשי הוא היחיד שממתין על `done_cond`. רק התהליכון האחרון שמסיים את עבודתו צריך לאותת לתהליכון הראשי, ו-`signal` מספיק כדי להעיר תהליכון אחד (במקרה זה, התהליכון הראשי). אין צורך להעיר את כל התהליכונים (שכבר סיימו את עבודתם או שבכלל לא ממתינים על משתנה תנאי זה).\n\n### פתרון לשאלה 7.3:\n*   **לא, לא ייתכן מצב כזה.**\n    *   תהליכון עבודה יכול להדפיס \"Starting work...\" רק לאחר שהוא יצא מהלולאה `while (!start_work_flag)` בתוך הפונקציה `worker_thread`.\n    *   כדי לצאת מלולאה זו, הדגל `start_work_flag` חייב להיות 1.\n    *   הדגל `start_work_flag` מוגדר ל-1 רק על ידי התהליכון הראשי, וזאת *אחרי* שהתהליכון הראשי וידא ש-`ready_count` שווה ל-`NUM_THREADS` (כלומר, כל תהליכוני העבודה מוכנים).\n    *   התהליכון הראשי מבצע את הגדרת הדגל `start_work_flag = 1` ואת `pthread_cond_broadcast(&start_cond)` כשהוא מחזיק את המוטקס (`mutex`).\n    *   כל תהליכוני העבודה מחזיקים את המוטקס כשהם נמצאים בלולאת ה-`while (!start_work_flag)` או כשהם קוראים ל-`pthread_cond_wait`. קריאה ל-`pthread_cond_wait` משחררת את המוטקס באופן אטומי ומכניסה את התהליכון למצב המתנה, ורוכשת אותו בחזרה כשהוא מתעורר. לכן, אף תהליכון עבודה לא יכול להמשיך מעבר ללולאת ההמתנה לפני שהתהליכון הראשי הגדיר את `start_work_flag` וביצע `broadcast`."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

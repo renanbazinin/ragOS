@@ -1,0 +1,59 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Processes and Threads",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 10:24:24",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2789,
+      "output_tokens": 4068,
+      "total_tokens": 15567
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Processes",
+      "Threads",
+      "Concurrency",
+      "Synchronization",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה המשתמשת בתהליכים ובתהליכונים (threads) למניית משתנה גלובלי:\nיש להניח שכל קריאות המערכת מצליחות, ושהפלט לסטנדרט אאוט מתבצע באופן מיידי וללא עיכובים משמעותיים. אין להניח סדר הרצה ספציפי בין תהליכים או תהליכונים אלא אם הדבר נאכף במפורש על ידי קריאת מערכת.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <pthread.h>\n#include <sys/wait.h> // For wait()\n\nint global_counter = 0; // Global variable shared by threads within a process\n\nvoid* thread_func(void* arg) {\n    int thread_local_id = *(int*)arg;\n    for (int i = 0; i < 5; ++i) {\n        global_counter++;\n    }\n    printf(\"Thread %d (PID %d) finished. global_counter = %d\\n\", thread_local_id, getpid(), global_counter);\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[2];\n    int thread_ids[2];\n\n    printf(\"Main process (PID %d) starts. global_counter = %d\\n\", getpid(), global_counter);\n\n    pid_t pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        exit(1);\n    } else if (pid == 0) { // Child process\n        printf(\"Child process (PID %d, PPID %d) created.\\n\", getpid(), getppid());\n        global_counter = 100; // Child has its own copy, modifies it\n        for (int i = 0; i < 2; ++i) {\n            thread_ids[i] = i + 10;\n            pthread_create(&threads[i], NULL, thread_func, &thread_ids[i]);\n        }\n        for (int i = 0; i < 2; ++i) {\n            pthread_join(threads[i], NULL);\n        }\n        printf(\"Child process (PID %d) finished its threads. Final global_counter = %d\\n\", getpid(), global_counter); // (1) Output for child\n    } else { // Parent process\n        printf(\"Parent process (PID %d) after fork.\\n\", getpid());\n        // Parent's global_counter remains 0\n        for (int i = 0; i < 2; ++i) {\n            thread_ids[i] = i + 1;\n            pthread_create(&threads[i], NULL, thread_func, &thread_ids[i]);\n        }\n        for (int i = 0; i < 2; ++i) {\n            pthread_join(threads[i], NULL);\n        }\n        printf(\"Parent process (PID %d) finished its threads. Final global_counter = %d\\n\", getpid(), global_counter); // (2) Output for parent before wait\n        wait(NULL);\n        printf(\"Parent process (PID %d) after waiting for child. Final global_counter = %d\\n\", getpid(), global_counter); // (3) Output for parent after wait\n    }\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "מהם כל ערכי הפלט האפשריים עבור `global_counter` בשלוש שורות ההדפסה המסומנות (1), (2) ו-(3) בקוד? הסבירו בפירוט מדוע, תוך התייחסות למודל הזיכרון.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "האם קיים מצב מרוץ (race condition) בתוכנית? אם כן, זהו אותו והסבירו כיצד הוא בא לידי ביטוי ומהן השלכותיו על הפלט. אם לא, הסבירו מדוע.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.3",
+        "text": "כיצד הייתם משנים את הקוד כדי להבטיח שערכו הסופי של `global_counter` בכל תהליך יהיה דטרמיניסטי (כלומר, 10 בתהליך האב ו-110 בתהליך הבן)? ספקו את קטע הקוד המתוקן.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "פתרון:\n\n**סעיף 10.1: ערכי הפלט האפשריים של `global_counter`**\n\nמודל הזיכרון:\n*   כאשר תהליך האב מבצע `fork()`, נוצר תהליך בן. לכל אחד מהתהליכים הללו יש מרחב כתובות זיכרון משלו, הכולל עותק נפרד של המשתנים הגלובליים (כמו `global_counter`). לכן, השינויים של הבן ב-`global_counter` אינם משפיעים על `global_counter` של האב, ולהיפך.\n*   בתוך תהליך בודד (האב או הבן), כל התהליכונים (threads) חולקים את אותו מרחב כתובות זיכרון, ולכן הם חולקים את אותו עותק של המשתנה הגלובלי `global_counter`.\n\nניתוח ערכים אפשריים:\n*   **עבור תהליך הבן (שורת הדפסה (1)):**\n    *   הבן מתחיל עם `global_counter = 100` (לאחר אתחול המשתנה הגלובלי המקורי ל-0 ואז שינוי העותק שלו). \n    *   שני תהליכונים נוצרים בבן. כל אחד מהם מבצע 5 פעולות `global_counter++`. בסך הכל 10 פעולות הגדלה.\n    *   בגלל מצב המרוץ (race condition) שיתואר בסעיף הבא, הפעולה `global_counter++` אינה אטומית. כל פעולה כזו מורכבת מקריאה, הגדלה וכתיבה. ייתכן שפעולות הגדלה מסוימות יאבדו אם שני תהליכונים יקראו את אותו ערך, יגדילו אותו ויכתבו אותו בחזרה, ובכך ידרוס אחד את עבודתו של השני.\n    *   הערך המקסימלי האפשרי הוא 100 + 10 = 110 (אם אין אובדן של הגדלות).\n    *   הערך המינימלי האפשרי הוא 100 + 2 = 102. זה קורה אם כל אחד משני התהליכונים מצליח לבצע בהצלחה לפחות הגדלה אחת, אך כל שאר ההגדלות (8 סך הכל) אובדות עקב מרוץ בין התהליכונים. כלומר, במקרה הגרוע ביותר, כל זוג פעולות `++` מתרחש באופן חופף כך שרק אחת מהן נרשמת בפועל (לדוגמה, תהליכון A קורא X, תהליכון B קורא X, תהליכון A כותב X+1, תהליכון B כותב X+1. אבדה הגדלה אחת).\n    *   **טווח אפשרי ל-`global_counter` בבן (1): [102, 110]**.\n\n*   **עבור תהליך האב (שורת הדפסה (2) ושורת הדפסה (3)):**\n    *   האב מתחיל עם `global_counter = 0`. \n    *   שני תהליכונים נוצרים באב. כל אחד מהם מבצע 5 פעולות `global_counter++`. בסך הכל 10 פעולות הגדלה.\n    *   בדומה לבן, גם כאן קיים מצב מרוץ.\n    *   הערך המקסימלי האפשרי הוא 0 + 10 = 10.\n    *   הערך המינימלי האפשרי הוא 0 + 2 = 2 (מאותה סיבה כמו בבן).\n    *   שורת הדפסה (3) מתרחשת לאחר שהאב המתין לבן שיסיים (`wait(NULL)`). פעולת ההמתנה אינה משנה את ערך `global_counter` של האב, שכן הוא נמצא במרחב זיכרון נפרד מהבן.\n    *   **טווח אפשרי ל-`global_counter` באב (2) ו-(3): [2, 10]**.\n\n**סעיף 10.2: מצב מרוץ (Race Condition)**\n\n*   **כן, קיים מצב מרוץ בתוכנית.**\n*   **זיהוי:** מצב המרוץ מתרחש על המשתנה הגלובלי `global_counter` בתוך כל אחד מהתהליכים (האב והבן) באופן בלתי תלוי. כלומר, יש מצב מרוץ בין התהליכונים של האב על עותק ה-`global_counter` שלו, ויש מצב מרוץ בין התהליכונים של הבן על עותק ה-`global_counter` שלו.\n*   **כיצד בא לידי ביטוי:** הפעולה `global_counter++` אינה אטומית. היא מתורגמת לסדרת פעולות ברמת המעבד: 1. קרא את הערך הנוכחי של `global_counter` לתוך אוגר. 2. הגדל את הערך באוגר ב-1. 3. כתוב את הערך מהאוגר בחזרה ל-`global_counter` בזיכרון. כאשר שני תהליכונים (או יותר) מנסים לבצע את הפעולה הזו במקביל, סדר הפעולות יכול להשתלב באופן שגוי. לדוגמה:\n    1.  תהליכון A קורא את `global_counter` (נניח 0).\n    2.  תהליכון B קורא את `global_counter` (גם הוא קורא 0, לפני שתהליכון A הספיק לכתוב).\n    3.  תהליכון A מגדיל את ערכו ל-1.\n    4.  תהליכון B מגדיל את ערכו ל-1.\n    5.  תהליכון A כותב 1 ל-`global_counter`.\n    6.  תהליכון B כותב 1 ל-`global_counter`.\n    במקרה זה, למרות שבוצעו שתי פעולות הגדלה, הערך הסופי של `global_counter` הוא 1 במקום 2, כלומר הגדלה אחת אבדה.\n*   **השלכות על הפלט:** מצב המרוץ גורם לכך שהערך הסופי של `global_counter` בכל אחד מהתהליכים אינו דטרמיניסטי. הוא יכול להיות כל ערך בתוך הטווחים שפורטו בסעיף 10.1, בהתאם לסדר ההרצה הספציפי של התהליכונים ומידת החפיפה ביניהם.\n\n**סעיף 10.3: שינוי הקוד להבטחת ערך דטרמיניסטי**\n\nכדי להבטיח שערכו הסופי של `global_counter` יהיה דטרמיניסטי (10 באב ו-110 בבן), יש להגן על הגישה למשתנה `global_counter` באמצעות מנעול (mutex), אשר יבטיח שהפעולה `global_counter++` תתבצע באופן אטומי. כלומר, רק תהליכון אחד יוכל לבצע את פעולות הקריאה-הגדלה-כתיבה בכל רגע נתון.\n\n**קטע הקוד המתוקן:**\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <pthread.h>\n#include <sys/wait.h>\n\nint global_counter = 0;\npthread_mutex_t counter_mutex = PTHREAD_MUTEX_INITIALIZER; // אתחול מנעול\n\nvoid* thread_func(void* arg) {\n    int thread_local_id = *(int*)arg;\n    for (int i = 0; i < 5; ++i) {\n        pthread_mutex_lock(&counter_mutex);   // נעילת המנעול לפני גישה למשתנה המשותף\n        global_counter++;\n        pthread_mutex_unlock(&counter_mutex); // שחרור המנעול לאחר הגישה\n    }\n    printf(\"Thread %d (PID %d) finished. global_counter = %d\\n\", thread_local_id, getpid(), global_counter);\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[2];\n    int thread_ids[2];\n\n    printf(\"Main process (PID %d) starts. global_counter = %d\\n\", getpid(), global_counter);\n\n    pid_t pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        exit(1);\n    } else if (pid == 0) { // Child process\n        printf(\"Child process (PID %d, PPID %d) created.\\n\", getpid(), getppid());\n        global_counter = 100;\n        for (int i = 0; i < 2; ++i) {\n            thread_ids[i] = i + 10;\n            pthread_create(&threads[i], NULL, thread_func, &thread_ids[i]);\n        }\n        for (int i = 0; i < 2; ++i) {\n            pthread_join(threads[i], NULL);\n        }\n        printf(\"Child process (PID %d) finished its threads. Final global_counter = %d\\n\", getpid(), global_counter); // (1) Output for child\n    } else { // Parent process\n        printf(\"Parent process (PID %d) after fork.\\n\", getpid());\n        for (int i = 0; i < 2; ++i) {\n            thread_ids[i] = i + 1;\n            pthread_create(&threads[i], NULL, thread_func, &thread_ids[i]);\n        }\n        for (int i = 0; i < 2; ++i) {\n            pthread_join(threads[i], NULL);\n        }\n        printf(\"Parent process (PID %d) finished its threads. Final global_counter = %d\\n\", getpid(), global_counter); // (2) Output for parent before wait\n        wait(NULL);\n        printf(\"Parent process (PID %d) after waiting for child. Final global_counter = %d\\n\", getpid(), global_counter); // (3) Output for parent after wait\n    }\n\n    pthread_mutex_destroy(&counter_mutex); // ניקוי המנעול\n    return 0;\n}\n```\n\n**הסבר:**\nעל ידי הוספת `pthread_mutex_lock()` לפני הגישה ל-`global_counter` ו-`pthread_mutex_unlock()` מיד אחריה, אנו מבטיחים שרק תהליכון אחד יכול לבצע את הקטע הקריטי (critical section) בו המשתנה משתנה. זה מונע מצבי מרוץ ואובדן הגדלות. כתוצאה מכך:\n*   בתהליך האב, `global_counter` יתחיל ב-0 ויגדל ב-10 פעמים (5 מכל אחד משני התהליכונים), ולכן ערכו הסופי יהיה 10.\n*   בתהליך הבן, `global_counter` יתחיל ב-100 ויגדל ב-10 פעמים (5 מכל אחד משני התהליכונים), ולכן ערכו הסופי יהיה 110."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

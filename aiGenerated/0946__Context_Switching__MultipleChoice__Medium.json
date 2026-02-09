@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Context Switching",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 07:04:28",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1290,
+      "output_tokens": 523,
+      "total_tokens": 4054
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Context Switching",
+      "Processes",
+      "Threads"
+    ],
+    "content": {
+      "text": "מהי הפעולה המהותית ביותר המבדילה בין החלפת הקשר (context switch) בין שני תהליכים שונים לבין החלפת הקשר בין שני תהליכונים (threads) באותו תהליך?",
+      "code_snippet": null,
+      "options": [
+        "א. שמירה וטעינה של ערכי אוגרי המעבד הכלליים (general purpose registers).",
+        "ב. שמירה וטעינה של מונה התוכנית (Program Counter).",
+        "ג. עדכון אוגר טבלת הדפים (page table base register) במעבד.",
+        "ד. מעבר ממצב משתמש (user mode) למצב ליבה (kernel mode) ובחזרה.",
+        "ה. העתקת תוכן המחסנית של התהליך/תהליכון היוצא."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "החלפת הקשר בין תהליכים שונים דורשת החלפת מרחב כתובות וירטואלי, ולכן הקרנל חייב לעדכן את אוגרי ניהול הזיכרון במעבד, כגון אוגר טבלת הדפים (page table base register), כך שהתהליך החדש יפעל במרחב הכתובות הנכון לו. לעומת זאת, תהליכונים (threads) באותו תהליך חולקים את אותו מרחב כתובות, ולכן פעולה זו אינה נדרשת בהחלפת הקשר ביניהם. שאר הפעולות (שמירת אוגרים כלליים, מונה תוכנית ומעבר בין מצבי ריצה) נדרשות בשני סוגי החלפות הקשר, ולכן אינן מהוות את ההבדל המהותי ביניהן."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

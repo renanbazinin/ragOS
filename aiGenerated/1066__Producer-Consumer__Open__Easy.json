@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Producer-Consumer",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 07:43:56",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3452,
+      "output_tokens": 1840,
+      "total_tokens": 8958
+    }
+  },
+  "question": {
+    "id": 2,
+    "type": "Open",
+    "topic": [
+      "Synchronization",
+      "Concurrency",
+      "Threads",
+      "Semaphores",
+      "Mutexes",
+      "Producer-Consumer"
+    ],
+    "content": {
+      "text": "נתונה בעיית היצרן-צרכן הקלאסית עם חוצץ מוגבל בגודל N. עליכם לממש את הפונקציות של היצרן והצרכן באמצעות סמפורים ומנעול (mutex) על מנת להבטיח סנכרון נכון ולמנוע תנאי מרוץ. יש להתייחס לחוצץ כאל משאב משותף שיש לגשת אליו באופן הדדי בלעדי.\nהניחו כי קיימות הפונקציות הבאות (אין צורך לממש אותן):\n- `Item produce_item()`: מייצרת פריט חדש.\n- `void consume_item(Item item)`: צורכת פריט נתון.\n- `void add_item_to_buffer(Item item)`: מוסיפה פריט לחוצץ המשותף. פונקציה זו אינה בטוחה לשימוש מקבילי.\n- `Item remove_item_from_buffer()`: מוציאה פריט מהחוצץ המשותף. פונקציה זו אינה בטוחה לשימוש מקבילי.\n\nכתבו את פונקציות ה-`producer` ו-`consumer` (פונקציות ראשיות של חוטים) ואת הגדרות המשתנים הגלובליים הנדרשים (עם ערכי אתחול).",
+      "code_snippet": "/* Assume N is defined as the buffer size, e.g., #define N 10 */\n/* Assume Item is a defined type */\n\n// Global variables and initialization:\n// TODO: Define global semaphores and mutex here, with initial values.\n\nvoid* producer(void* arg) {\n    // TODO: Implement producer logic\n    return NULL;\n}\n\nvoid* consumer(void* arg) {\n    // TODO: Implement consumer logic\n    return NULL;\n}\n"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון לבעיית היצרן-צרכן הקלאסית משתמש בשלושה אובייקטי סנכרון:\n1.  `pthread_mutex_t mutex`: מנעול הדדיות (mutex) המבטיח שרק חוט אחד (יצרן או צרכן) יוכל לגשת לחוצץ המשותף בכל רגע נתון, ובכך מונע תנאי מרוץ על הנתונים בחוצץ.\n2.  `sem_t empty`: סמפור המייצג את מספר המקומות הריקים בחוצץ. הוא מאותחל לגודל החוצץ (N). יצרן ממתין על סמפור זה לפני הוספת פריט, וצרכן מאותת עליו לאחר הסרת פריט.\n3.  `sem_t full`: סמפור המייצג את מספר המקומות המלאים בחוצץ (כלומר, מספר הפריטים הזמינים לצריכה). הוא מאותחל ל-0. צרכן ממתין על סמפור זה לפני הסרת פריט, ויצרן מאותת עליו לאחר הוספת פריט.\n\n**מימוש:**\n```c\n#include <pthread.h>\n#include <semaphore.h>\n#include <stdio.h>\n\n#define N 10 /* גודל החוצץ */\n\ntypedef int Item; /* לדוגמה, פריט הוא מספר שלם */\n\n/* פונקציות עזר (אין צורך לממש אותן) */\n/* (הערה: מימוש דמה לצורך קומפילציה, לא חלק מהפתרון הנדרש) */\nItem produce_item() { static int count = 0; return count++; }\nvoid consume_item(Item item) { printf(\"Consumed: %d\\n\", item); }\nvoid add_item_to_buffer(Item item) { /* ... */ }\nItem remove_item_from_buffer() { /* ... */ return 0; }\n\n// משתנים גלובליים\nsem_t empty;   // מספר מקומות ריקים בחוצץ, מאותחל ל-N\nsem_t full;    // מספר פריטים מלאים בחוצץ, מאותחל ל-0\npthread_mutex_t mutex; // מנעול להגנה על הגישה לחוצץ, מאותחל למצב פתוח (unlocked)\n\nvoid* producer(void* arg) {\n    while (1) {\n        Item item = produce_item(); // 1. ייצור פריט\n\n        sem_wait(&empty);           // 2. המתן למקום ריק בחוצץ (אם החוצץ מלא, חכה)\n        pthread_mutex_lock(&mutex); // 3. נעל גישה לחוצץ כדי למנוע גישה מקבילית\n\n        add_item_to_buffer(item);   // 4. הוסף פריט לחוצץ\n        // printf(\"Producer added: %d\\n\", item); // להדגמה בלבד\n\n        pthread_mutex_unlock(&mutex); // 5. שחרר גישה לחוצץ\n        sem_post(&full);            // 6. אותת שיש פריט מלא בחוצץ (הגדל את מונה הפריטים המלאים)\n    }\n    return NULL;\n}\n\nvoid* consumer(void* arg) {\n    while (1) {\n        sem_wait(&full);            // 1. המתן לפריט מלא בחוצץ (אם החוצץ ריק, חכה)\n        pthread_mutex_lock(&mutex); // 2. נעל גישה לחוצץ כדי למנוע גישה מקבילית\n\n        Item item = remove_item_from_buffer(); // 3. הוצא פריט מהחוצץ\n\n        pthread_mutex_unlock(&mutex); // 4. שחרר גישה לחוצץ\n        sem_post(&empty);           // 5. אותת שיש מקום ריק בחוצץ (הגדל את מונה המקומות הריקים)\n\n        consume_item(item);         // 6. צרוך את הפריט\n    }\n    return NULL;\n}\n\n/* פונקציית main לדוגמה לצורך אתחול והרצת החוטים, לא נדרש כחלק מהפתרון לשאלה */\n/*\nint main() {\n    // אתחול הסמפורים והמנעול\n    sem_init(&empty, 0, N); // 0 = shared between threads of a process\n    sem_init(&full, 0, 0);\n    pthread_mutex_init(&mutex, NULL);\n\n    pthread_t prod_tid, cons_tid;\n    pthread_create(&prod_tid, NULL, producer, NULL);\n    pthread_create(&cons_tid, NULL, consumer, NULL);\n\n    pthread_join(prod_tid, NULL);\n    pthread_join(cons_tid, NULL);\n\n    sem_destroy(&empty);\n    sem_destroy(&full);\n    pthread_mutex_destroy(&mutex);\n\n    return 0;\n}\n*/\n```"
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

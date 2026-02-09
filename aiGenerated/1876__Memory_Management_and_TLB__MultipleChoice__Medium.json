@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Memory Management and TLB",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 21:21:50",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1050,
+      "output_tokens": 576,
+      "total_tokens": 2926
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Memory Management",
+      "TLB",
+      "Paging",
+      "Virtual Memory"
+    ],
+    "content": {
+      "text": "במערכת המשתמשת בזיכרון וירטואלי ובדפדוף (paging), כאשר מתרחש TLB Miss עבור כתובת וירטואלית מסוימת, מהו השלב הבא שמתבצע בדרך כלל על ידי החומרה/מערכת ההפעלה, בהנחה שהדף המבוקש אכן נמצא בזיכרון הפיזי (RAM)?",
+      "code_snippet": null,
+      "options": [
+        "א. פנייה לדיסק (HDD) כדי לטעון את הדף החסר לזיכרון הפיזי.",
+        "ב. בדיקת טבלת הדפים (Page Table) בזיכרון הראשי (RAM) כדי למצוא את הכתובת הפיזית המתאימה.",
+        "ג. הכתובת הווירטואלית מומרת באופן מיידי לכתובת פיזית מכיוון שה-TLB רק מהווה מטמון.",
+        "ד. מתרחשת שגיאת דף (Page Fault) המצריכה התערבות מערכת ההפעלה."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "כאשר מתרחש TLB Miss, המשמעות היא שהתרגום מכתובת וירטואלית לפיזית אינו נמצא ב-TLB. השלב הבא הוא לבדוק את טבלת הדפים הראשית, שנמצאת בזיכרון הראשי (RAM). אם הדף נמצא בזיכרון הפיזי (כפי שמצוין בשאלה), טבלת הדפים תכיל את הכתובת הפיזית, ה-TLB יעודכן, והגישה לזיכרון תתבצע. פנייה לדיסק (א') או שגיאת דף (ד') מתרחשות רק אם הדף אינו נמצא בזיכרון הפיזי. המרה מיידית (ג') אינה אפשרית ללא המידע מטבלת הדפים או ה-TLB."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

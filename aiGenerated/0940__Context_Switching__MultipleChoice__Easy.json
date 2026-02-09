@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Context Switching",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 07:03:17",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 956,
+      "output_tokens": 373,
+      "total_tokens": 2283
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Context Switching"
+    ],
+    "content": {
+      "text": "איזה סוג מידע נשמר בדרך כלל במהלך החלפת הקשר (context switch)?",
+      "code_snippet": null,
+      "options": [
+        "א. רק מזהה התהליך (Process ID) ושם התוכנית.",
+        "ב. רק כתובות הזיכרון הוירטואליות של התהליך.",
+        "ג. תוכן אוגרי המעבד (CPU registers), מונה התוכנית (Program Counter) ומצב המחסנית (Stack Pointer).",
+        "ד. תוכן מטמון הנתונים (Data Cache) בלבד.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג'. במהלך החלפת הקשר, מערכת ההפעלה שומרת את מצבו הנוכחי של התהליך שנעצר, הכולל את תוכן אוגרי המעבד, מונה התוכנית (Program Counter) ומצב המחסנית (Stack Pointer), בתוך בלוק בקרת התהליך (PCB) שלו. מידע זה חיוני כדי לאפשר לתהליך להמשיך מנקודה זו מאוחר יותר."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "Security",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 09:46:12",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 968,
+      "output_tokens": 1256,
+      "total_tokens": 5418
+    }
+  },
+  "question": {
+    "id": 6,
+    "type": "MultipleChoice",
+    "topic": [
+      "Security",
+      "Race Conditions",
+      "TOCTOU",
+      "Privilege Escalation",
+      "setuid"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C בעלת הרשאת setuid (לדוגמה, בבעלות משתמש root) המבצעת את קטע הקוד הבא. משתמש רגיל מריץ תוכנית זו על קובץ שבבעלותו, אשר בתחילה אין לו הרשאות כתיבה עבור אחרים (e.g., chmod 600 myfile).\n\nאיזו טענה מתארת בצורה הטובה ביותר פגיעות אבטחה פוטנציאלית בקטע קוד זה?",
+      "code_snippet": "#include <unistd.h>\n#include <fcntl.h>\n#include <stdio.h>\n#include <sys/stat.h>\n\nint main(int argc, char *argv[]) {\n    if (argc < 2) {\n        fprintf(stderr, \"Usage: %s <filename>\\n\", argv[0]);\n        return 1;\n    }\n\n    char *filename = argv[1];\n\n    // Check if the user has write permission\n    if (access(filename, W_OK) == 0) {\n        // If yes, open the file for writing\n        int fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0644);\n        if (fd == -1) {\n            perror(\"open\");\n            return 1;\n        }\n        write(fd, \"Sensitive data\\n\", 15);\n        close(fd);\n        printf(\"Successfully wrote to %s\\n\", filename);\n    } else {\n        fprintf(stderr, \"Access denied to %s\\n\", filename);\n        return 1;\n    }\n\n    return 0;\n}",
+      "options": [
+        "א. אין פגיעות אבטחה משמעותית, מכיוון שהתוכנית בודקת הרשאות באמצעות access() לפני פתיחת הקובץ.",
+        "ב. פגיעות מסוג Buffer Overflow המאפשרת למשתמש להזריק קוד זדוני לתוכנית.",
+        "ג. פגיעות מסוג TOCTOU (Time-of-check-to-time-of-use) המאפשרת למשתמש זדוני לשנות את הקובץ (לדוגמה, הרשאותיו או להחליף אותו בקישור סימבולי לקובץ מערכת קריטי) בין הבדיקה לפתיחה, ובכך לגרום לתוכנית בעלת הרשאות root לבצע פעולה בלתי מורשית (כתיבה לקובץ שאינו שלה או כתיבה לקובץ מערכת קריטי).",
+        "ד. פגיעות מסוג Race Condition המאפשרת למשתמש זדוני ליצור קישור קשיח (hard link) לקובץ מערכת קריטי בין הבדיקה לפתיחה, ובכך לגרום לתוכנית לכתוב לקישור הקשיח.",
+        "ה. התוכנית תמיד תיכשל בפתיחת הקובץ, מכיוון שהקריאה ל-access() בודקת הרשאות עבור המשתמש האמיתי (real user ID) ולא עבור ה-effective user ID של התוכנית."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "התשובה הנכונה היא ג'. קטע הקוד מדגים פגיעות מסוג TOCTOU (Time-of-check-to-time-of-use). הפונקציה access() בודקת את הרשאות הקובץ על בסיס ה-real user ID של המשתמש המריץ את התוכנית. לאחר מכן, הפונקציה open() מנסה לפתוח את הקובץ על בסיס ה-effective user ID של התוכנית, שבמקרה זה הוא root. בין קריאה ל-access() לבין קריאה ל-open(), קיים חלון זמן קצר. משתמש זדוני יכול לנצל חלון זמן זה כדי לשנות את הקובץ ש-filename מצביע עליו. לדוגמה, המשתמש יכול לשנות את הרשאות הקובץ (לדוגמה, להפוך אותו לבלתי ניתן לכתיבה עבור כולם), או, פגיעות חמורה יותר, להחליף את הקובץ בקישור סימבולי (symlink) לקובץ מערכת קריטי (כגון /etc/shadow). מכיוון ש-open() מתבצעת עם הרשאות root, היא תצליח לכתוב לקובץ המערכת הקריטי הזה, ובכך תאפשר הסלמת הרשאות או שיבוש מערכת. האפשרות ד' פחות מדויקת מכיוון ש-hard link אינו משנה את הקובץ המקורי אלא יוצר שם נוסף לאותו קובץ, ושימוש ב-symlink הוא וקטור התקפה נפוץ יותר בהקשר זה."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

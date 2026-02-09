@@ -1,0 +1,52 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions and Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 11:21:56",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3651,
+      "output_tokens": 2148,
+      "total_tokens": 10970
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Concurrency",
+      "Race Conditions",
+      "Mutexes",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C הבאה המשתמשת בספריה `pthread`. התוכנית יוצרת מספר תהליכונים (threads) שכל אחד מהם מגדיל משתנה גלובלי משותף `counter` מספר רב של פעמים. עיין בקוד ונתח את התנהגותו:",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n\n#define NUM_THREADS 5\n#define ITERATIONS_PER_THREAD 100000\n\nint counter = 0;\n\nvoid *incrementer(void *arg) {\n    for (int i = 0; i < ITERATIONS_PER_THREAD; i++) {\n        counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    printf(\"Initial counter value: %d\\n\", counter);\n\n    for (int i = 0; i < NUM_THREADS; i++) {\n        if (pthread_create(&threads[i], NULL, incrementer, NULL) != 0) {\n            perror(\"Failed to create thread\");\n            return 1;\n        }\n    }\n\n    for (int i = 0; i < NUM_THREADS; i++) {\n        if (pthread_join(threads[i], NULL) != 0) {\n            perror(\"Failed to join thread\");\n            return 1;\n        }\n    }\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "7.1",
+        "text": "מהו טווח הערכים האפשריים של המשתנה `counter` שיודפס בסיום ריצת התוכנית? הסבר מדוע נוצר טווח זה.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "7.2",
+        "text": "כיצד ניתן לשנות את הקוד הנתון כדי להבטיח שהערך הסופי של `counter` יהיה תמיד מדויק (כלומר, סכום כל ההגדלות)? הוסף את השינויים הנדרשים לקוד והסבר כיצד הם פותרים את הבעיה.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "לשאלה 7.1:\nהערך הצפוי והנכון של `counter` בסיום ריצת התוכנית הוא `NUM_THREADS * ITERATIONS_PER_THREAD` = 5 * 100,000 = 500,000.\nאולם, טווח הערכים האפשריים שיודפס בפועל הוא בין 1 (מינימום תיאורטי, אם כל התהליכונים קוראים את 0, ואז רק אחד מצליח לכתוב 1 לפני שהשאר כותבים את 1 שלהם, אך בפועל נדיר ביותר) לבין 500,000. לרוב, הערך הסופי יהיה נמוך מהערך הצפוי.\nהסיבה לכך היא תנאי מרוץ (race condition). הפעולה `counter++` אינה אטומית. היא מורכבת משלוש פעולות בסיסיות ברמת המעבד:\n1.  קריאת הערך הנוכחי של `counter` מהזיכרון לתוך אוגר.\n2.  הגדלת הערך באוגר.\n3.  כתיבת הערך החדש מהאוגר בחזרה לזיכרון של `counter`.\nכאשר מספר תהליכונים מנסים לבצע את הפעולה בו-זמנית ללא סנכרון, ייתכן ששני תהליכונים או יותר יקראו את אותו ערך של `counter`, יגדילו אותו בנפרד, ולאחר מכן יכתבו את הערך המוגדל בחזרה. במקרה כזה, חלק מההגדלות \"יאבדו\" מכיוון שרק ההגדלה האחרונה שנכתבה תשרוד עבור אותו ערך קריאה משותף. לדוגמה, אם `counter` הוא 0, תהליכון A קורא 0, תהליכון B קורא 0. תהליכון A מגדיל ל-1 וכותב 1. תהליכון B מגדיל ל-1 וכותב 1. במקום ש-`counter` יהיה 2, הוא נשאר 1. לכן, הערך הסופי יהיה בדרך כלל נמוך מהערך הצפוי של 500,000.\n\nלשאלה 7.2:\nכדי להבטיח שהערך הסופי של `counter` יהיה תמיד מדויק, יש להשתמש במנגנון סנכרון, כגון מנעול (mutex). מנעול מבטיח שרק תהליכון אחד יוכל לגשת לקטע קריטי (critical section) בו-זמנית, ובכך מונע תנאי מרוץ.\nהשינויים הנדרשים לקוד הם:\n1.  **הוספת משתנה `pthread_mutex_t` גלובלי:**\n    `pthread_mutex_t mutex;`\n2.  **אתחול המנעול ב-`main` לפני יצירת התהליכונים:**\n    `pthread_mutex_init(&mutex, NULL);`\n3.  **נעילת המנעול לפני הכניסה לקטע הקריטי (הפעולה `counter++`) בתוך הפונקציה `incrementer`:**\n    `pthread_mutex_lock(&mutex);`\n4.  **שחרור המנעול מיד לאחר היציאה מהקטע הקריטי באותה פונקציה:**\n    `pthread_mutex_unlock(&mutex);`\n5.  **השמדת המנעול ב-`main` לאחר שכל התהליכונים סיימו את ריצתם:**\n    `pthread_mutex_destroy(&mutex);`\n\n**קוד לדוגמה עם התיקון:**\n```c\n#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n\n#define NUM_THREADS 5\n#define ITERATIONS_PER_THREAD 100000\n\nint counter = 0;\npthread_mutex_t mutex; // 1. Add global mutex variable\n\nvoid *incrementer(void *arg) {\n    for (int i = 0; i < ITERATIONS_PER_THREAD; i++) {\n        pthread_mutex_lock(&mutex); // 3. Lock mutex\n        counter++;\n        pthread_mutex_unlock(&mutex); // 4. Unlock mutex\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n    pthread_mutex_init(&mutex, NULL); // 2. Initialize mutex\n\n    printf(\"Initial counter value: %d\\n\", counter);\n\n    for (int i = 0; i < NUM_THREADS; i++) {\n        if (pthread_create(&threads[i], NULL, incrementer, NULL) != 0) {\n            perror(\"Failed to create thread\");\n            return 1;\n        }\n    }\n\n    for (int i = 0; i < NUM_THREADS; i++) {\n        if (pthread_join(threads[i], NULL) != 0) {\n            perror(\"Failed to join thread\");\n            return 1;\n        }\n    }\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    pthread_mutex_destroy(&mutex); // 5. Destroy mutex\n    return 0;\n}\n```\nעל ידי שימוש במנעול, אנו מבטיחים שרק תהליכון אחד יכול לבצע את הקטע הקריטי (`counter++`) בכל רגע נתון. כאשר תהליכון אחד מחזיק את המנעול, כל תהליכון אחר שינסה לנעול אותו ייחסם עד שהמנעול ישוחרר. זה מבטיח שכל פעולת הגדלה תתבצע במלואה באופן אטומי מבחינת הגישה למשתנה המשותף, ובכך נמנע אובדן עדכונים והערך הסופי של `counter` יהיה תמיד 500,000."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

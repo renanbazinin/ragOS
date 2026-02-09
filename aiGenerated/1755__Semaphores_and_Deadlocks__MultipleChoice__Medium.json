@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Deadlocks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 20:33:02",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1047,
+      "output_tokens": 907,
+      "total_tokens": 4671
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Semaphores",
+      "Deadlocks",
+      "Concurrency",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתונים שני סמפורים בינאריים, semA ו-semB, המאותחלים ל-1. קיימים שני תהליכונים (threads) המבצעים את קטעי הקוד הבאים:\n\n",
+      "code_snippet": "sem_t semA, semB; // Semaphores initialized to 1\n\n// Thread 1\nvoid* thread_func1(void* arg) {\n    sem_wait(&semA);\n    // ... some work ...\n    sem_wait(&semB);\n    // ... critical section ...\n    sem_post(&semB);\n    sem_post(&semA);\n    return NULL;\n}\n\n// Thread 2\nvoid* thread_func2(void* arg) {\n    sem_wait(&semB);\n    // ... some work ...\n    sem_wait(&semA);\n    // ... critical section ...\n    sem_post(&semA);\n    sem_post(&semB);\n    return NULL;\n}",
+      "options": [
+        "א. קיפאון (deadlock) אינו אפשרי במצב זה.",
+        "ב. קיפאון יתרחש בוודאות בכל הרצה של התוכנית.",
+        "ג. קיפאון אפשרי, אך אינו מובטח, והוא תלוי בתזמון (scheduling) של התהליכונים.",
+        "ד. קיפאון אפשרי רק אם הסמפורים semA ו-semB היו מאותחלים ל-0."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "התשובה הנכונה היא ג'. קיפאון אפשרי במצב זה מכיוון שמתקיימים כל ארבעת התנאים לקיפאון:\n1.  **Mutual Exclusion (מניעה הדדית):** הסמפורים מספקים מניעה הדדית, כלומר, רק תהליכון אחד יכול להחזיק בסמפור מסוים בכל רגע נתון.\n2.  **Hold and Wait (החזקה והמתנה):** כל תהליכון מחזיק בסמפור אחד (thread 1 ב-semA, thread 2 ב-semB) וממתין לרכישת הסמפור השני.\n3.  **No Preemption (אי-הפקעה):** לא ניתן להפקיע סמפור מתהליכון שמחזיק בו; הוא חייב לשחרר אותו מרצון.\n4.  **Circular Wait (המתנה מעגלית):** קיים מעגל המתנה: thread 1 ממתין ל-semB שמוחזק על ידי thread 2, ו-thread 2 ממתין ל-semA שמוחזק על ידי thread 1.\n\nקיפאון אינו מובטח מכיוון שהוא תלוי בתזמון של מערכת ההפעלה. לדוגמה, אם thread 1 יבצע את כל קטע הקוד שלו (ירכוש את semA, ירכוש את semB, ישחרר את semB, ישחרר את semA) לפני ש-thread 2 יתחיל בכלל או לפני ש-thread 2 יגיע לניסיון רכישת semA, לא יתרחש קיפאון. רק אם שני התהליכונים יגיעו למצב שבו כל אחד מחזיק בסמפור אחד ומנסה לרכוש את השני, יתרחש קיפאון."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

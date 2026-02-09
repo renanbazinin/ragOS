@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Producer-Consumer",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 07:46:56",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1877,
+      "output_tokens": 1956,
+      "total_tokens": 6358
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Producer-Consumer",
+      "Synchronization",
+      "Semaphores",
+      "Mutexes",
+      "Race Conditions"
+    ],
+    "content": {
+      "text": "מערכת יצרן-צרכן (Producer-Consumer) ממומשת באמצעות מאגר עגול מוגבל בגודלו (bounded circular buffer). המערכת משתמשת בסמפורים `empty` ו-`full` כדי לוודא שהיצרן לא כותב למאגר מלא והצרכן לא קורא ממאגר ריק. קטע הקוד הבא מציג את הפונקציות `producer` ו-`consumer`.\n\nהאם המימוש הנ\"ל של מערכת יצרן-צרכן בטוח לשימוש בסביבה מרובת יצרנים (multiple producers) או מרובת צרכנים (multiple consumers)? נמקו את תשובתכם בפירוט. אם לא, הציעו פתרון מתאים בקוד והסבירו מדוע הוא פותר את הבעיה.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <pthread.h>\n#include <semaphore.h>\n\n#define BUFFER_SIZE 10\n\nint buffer[BUFFER_SIZE];\nint in = 0;\nint out = 0;\n\nsem_t empty; // Counts empty slots\nsem_t full;  // Counts full slots\n\nvoid *producer(void *param) {\n    int item;\n    while (1) {\n        item = rand() % 100; // Produce an item\n        sem_wait(&empty);    // Wait for an empty slot\n        \n        // Critical section for adding item to buffer\n        buffer[in] = item;\n        in = (in + 1) % BUFFER_SIZE;\n        printf(\"Producer produced: %d\\n\", item);\n        \n        sem_post(&full);     // Signal that a slot is full\n        // sleep(1); // Simulate work\n    }\n    return NULL;\n}\n\nvoid *consumer(void *param) {\n    int item;\n    while (1) {\n        sem_wait(&full);     // Wait for a full slot\n        \n        // Critical section for removing item from buffer\n        item = buffer[out];\n        out = (out + 1) % BUFFER_SIZE;\n        printf(\"Consumer consumed: %d\\n\", item);\n        \n        sem_post(&empty);    // Signal that a slot is empty\n        // sleep(1); // Simulate work\n    }\n    return NULL;\n}\n\n// main function would initialize semaphores and create threads\n// For this question, assume main properly initializes and creates threads."
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "המימוש הנוכחי אינו בטוח לשימוש בסביבה מרובת יצרנים או מרובת צרכנים. הסיבה לכך היא שבעוד שהסמפורים `empty` ו-`full` מטפלים היטב בסנכרון של כמות המשאבים הזמינים (מקומות ריקים/מלאים במאגר), הם אינם מספקים הגנה על הקטעים הקריטיים שבהם מתבצעת הגישה בפועל למאגר המשותף (`buffer`) ולמשתנים `in` ו-`out`).\n\nבמקרה של מספר יצרנים, שני יצרנים יכולים לעבור את `sem_wait(&empty)` ולנסות לכתוב בו זמנית לאותו תא במאגר (או לתאים סמוכים באופן שגוי אם `in` מתעדכן בין לבין), מה שיוביל למצב מרוץ (race condition). לדוגמה, יצרן א' קורא את `in`, יצרן ב' קורא את `in`. יצרן א' כותב ל-`buffer[in]`, יצרן ב' כותב ל-`buffer[in]`. יצרן א' מעדכן את `in`, יצרן ב' מעדכן את `in`. תא אחד נכתב פעמיים, או שאחד הערכים נדרס.\n\nבאופן דומה, במקרה של מספר צרכנים, שני צרכנים יכולים לעבור את `sem_wait(&full)` ולנסות לקרוא בו זמנית מאותו תא במאגר (או מתאים סמוכים באופן שגוי אם `out` מתעדכן בין לבין). הדבר יכול לגרום לקריאת אותו פריט מספר פעמים, או לדלג על פריטים.\n\n**פתרון מוצע:**\nכדי לפתור בעיה זו, יש להוסיף מנגנון הדדיות (mutual exclusion) נוסף, לרוב באמצעות מנעול (mutex), שיגן על הקטעים הקריטיים של הגישה למאגר עצמו ולמשתנים `in` ו-`out`.\n\n**קוד מתוקן:**\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <pthread.h>\n#include <semaphore.h>\n\n#define BUFFER_SIZE 10\n\nint buffer[BUFFER_SIZE];\nint in = 0;\nint out = 0;\n\nsem_t empty; // Counts empty slots\nsem_t full;  // Counts full slots\npthread_mutex_t mutex; // Mutex for critical section access to buffer\n\nvoid *producer(void *param) {\n    int item;\n    while (1) {\n        item = rand() % 100; // Produce an item\n        sem_wait(&empty);    // Wait for an empty slot\n        pthread_mutex_lock(&mutex); // Acquire lock for critical section\n        \n        // Critical section for adding item to buffer\n        buffer[in] = item;\n        in = (in + 1) % BUFFER_SIZE;\n        printf(\"Producer produced: %d\\n\", item);\n        \n        pthread_mutex_unlock(&mutex); // Release lock\n        sem_post(&full);     // Signal that a slot is full\n        // sleep(1); // Simulate work\n    }\n    return NULL;\n}\n\nvoid *consumer(void *param) {\n    int item;\n    while (1) {\n        sem_wait(&full);     // Wait for a full slot\n        pthread_mutex_lock(&mutex); // Acquire lock for critical section\n        \n        // Critical section for removing item from buffer\n        item = buffer[out];\n        out = (out + 1) % BUFFER_SIZE;\n        printf(\"Consumer consumed: %d\\n\", item);\n        \n        pthread_mutex_unlock(&mutex); // Release lock\n        sem_post(&empty);    // Signal that a slot is empty\n        // sleep(1); // Simulate work\n    }\n    return NULL;\n}\n\n// main function would also initialize the mutex: pthread_mutex_init(&mutex, NULL);\n```\n\n**הסבר לפתרון:**\nהוספת ה-`pthread_mutex_t mutex` והשימוש בפונקציות `pthread_mutex_lock(&mutex)` ו-`pthread_mutex_unlock(&mutex)` מבטיחים שרק תהליך יצרן אחד (אם יש מספר יצרנים) או תהליך צרכן אחד (אם יש מספר צרכנים) יוכל לגשת לקטעי הקוד המטפלים בגישה למאגר (`buffer`) ולעדכון האינדקסים (`in`, `out`) בכל רגע נתון. זה מונע מצבי מרוץ על המשתנים המשותפים הללו ומבטיח את שלמות הנתונים במאגר. הסמפורים `empty` ו-`full` ממשיכים לטפל בסנכרון הכמותי של המשאבים, בעוד שה-mutex מטפל בסנכרון הגישה הבלעדית למשאב המשותף עצמו."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

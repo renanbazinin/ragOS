@@ -1,0 +1,52 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Deadlocks and Mutexes",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 21:39:38",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2445,
+      "output_tokens": 1733,
+      "total_tokens": 7962
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "Open",
+    "topic": [
+      "Deadlocks",
+      "Mutexes",
+      "Synchronization",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתונה מערכת עם שני תהליכים (P1 ו-P2) ושני משאבים (R1 ו-R2). כל משאב מוגן על ידי מנעול (mutex) משלו: R1 מוגן על ידי `mutex_R1` ו-R2 מוגן על ידי `mutex_R2`. המנעולים מאותחלים כראוי.\nשני התהליכים צריכים לגשת לשני המשאבים כדי לבצע את פעולתם. להלן קטעי קוד הממחישים את אופן הגישה למשאבים עבור כל תהליך:\n\n```c\npthread_mutex_t mutex_R1;\npthread_mutex_t mutex_R2;\n\n// קוד עבור תהליך P1\nvoid process_P1() {\n    pthread_mutex_lock(&mutex_R1);\n    // השתמש ב-R1\n    pthread_mutex_lock(&mutex_R2);\n    // השתמש ב-R1 ו-R2\n    pthread_mutex_unlock(&mutex_R2);\n    pthread_mutex_unlock(&mutex_R1);\n}\n\n// קוד עבור תהליך P2\nvoid process_P2() {\n    pthread_mutex_lock(&mutex_R2);\n    // השתמש ב-R2\n    pthread_mutex_lock(&mutex_R1);\n    // השתמש ב-R1 ו-R2\n    pthread_mutex_unlock(&mutex_R1);\n    pthread_mutex_unlock(&mutex_R2);\n}\n```",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "8.1",
+        "text": "א. האם במערכת זו יכול להתרחש קיפאון (deadlock)? אם כן, הסבירו מדוע ופרטו את ארבעת התנאים לקיפאון המתקיימים בתרחיש זה.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.2",
+        "text": "ב. הציעו פתרון למניעת קיפאון, תוך שימוש במנעולים (mutexes) בלבד, והציגו את קטעי הקוד המתוקנים עבור P1 ו/או P2 במידת הצורך.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "א. כן, קיפאון (deadlock) יכול להתרחש במערכת זו.\n\nההסבר הוא כדלקמן:\nנניח שמתרחש רצף הפעולות הבא:\n1. תהליך P1 מבצע `pthread_mutex_lock(&mutex_R1);` ותופס את `mutex_R1`.\n2. תהליך P2 מבצע `pthread_mutex_lock(&mutex_R2);` ותופס את `mutex_R2`.\n3. תהליך P1 מנסה לבצע `pthread_mutex_lock(&mutex_R2);` אך `mutex_R2` תפוס על ידי P2, ולכן P1 נכנס למצב המתנה.\n4. תהליך P2 מנסה לבצע `pthread_mutex_lock(&mutex_R1);` אך `mutex_R1` תפוס על ידי P1, ולכן P2 נכנס למצב המתנה.\nבשלב זה, שני התהליכים ממתינים זה לזה באופן אינסופי, ומתרחש קיפאון.\n\nארבעת התנאים לקיפאון המתקיימים בתרחיש זה הם:\n*   **מניעה הדדית (Mutual Exclusion)**: כל משאב (mutex_R1, mutex_R2) יכול להיות מוחזק על ידי תהליך אחד בלבד בכל רגע נתון. המנעולים מבטיחים זאת.\n*   **החזק והמתן (Hold and Wait)**: כל תהליך מחזיק במשאב אחד (P1 מחזיק ב-mutex_R1, P2 מחזיק ב-mutex_R2) וממתין למשאב נוסף המוחזק על ידי תהליך אחר.\n*   **אי-הפקעה (No Preemption)**: המנעולים אינם ניתנים להפקעה בכוח מתהליך שמחזיק בהם; רק התהליך המחזיק בהם יכול לשחרר אותם.\n*   **המתנה מעגלית (Circular Wait)**: קיימת שרשרת מעגלית של המתנה: P1 ממתין למשאב ש-P2 מחזיק, ו-P2 ממתין למשאב ש-P1 מחזיק.\n\nב. כדי למנוע קיפאון, יש לשבור אחד מארבעת התנאים. הדרך הנפוצה והקלה ביותר למנוע קיפאון בתרחישים כאלה היא לשבור את תנאי \"המתנה מעגלית\" על ידי אכיפת סדר עקבי לרכישת משאבים. כלומר, כל התהליכים ירכשו את המשאבים באותו סדר.\n\nפתרון מוצע:\nנאכוף שכל התהליכים ירכשו תמיד את `mutex_R1` לפני `mutex_R2`.\nקוד מתוקן עבור תהליך P2 (קוד P1 נשאר כפי שהוא, מכיוון שהוא כבר רוכש את המנעולים בסדר זה):\n\n```c\n// קוד מתוקן עבור תהליך P2\nvoid process_P2_fixed() {\n    pthread_mutex_lock(&mutex_R1); // שינוי הסדר: רוכש קודם את mutex_R1\n    // השתמש ב-R1 (אם נדרש)\n    pthread_mutex_lock(&mutex_R2);\n    // השתמש ב-R1 ו-R2\n    pthread_mutex_unlock(&mutex_R2);\n    pthread_mutex_unlock(&mutex_R1);\n}\n```\n\nהסבר לפתרון:\nעל ידי אכיפת סדר רכישה קבוע (לדוגמה, תמיד קודם `mutex_R1` ואז `mutex_R2`), אנו מבטיחים שלעולם לא יתקיים מצב שבו תהליך מחזיק ב-`mutex_R2` וממתין ל-`mutex_R1`. אם P1 תופס את `mutex_R1` ו-P2 מגיע ומנסה לתפוס אותו, P2 ימתין. הוא לא יוכל לתפוס את `mutex_R2` לפני כן. ברגע ש-P1 ישחרר את `mutex_R1` (לאחר שסיים את פעולתו), P2 יוכל לתפוס אותו ולהמשיך. מצב של המתנה מעגלית נמנע, ובכך נמנע הקיפאון."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

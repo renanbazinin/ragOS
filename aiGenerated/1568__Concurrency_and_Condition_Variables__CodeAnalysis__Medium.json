@@ -1,0 +1,50 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency and Condition Variables",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 11:32:47",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2951,
+      "output_tokens": 1779,
+      "total_tokens": 8638
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Concurrency",
+      "Condition Variables",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתונה תוכנית ה-C++ הבאה המשתמשת במנגנוני תזמון (synchronization primitives) של C++11. נתחו את הקוד וענו על השאלות הבאות:",
+      "code_snippet": "#include <iostream>\n#include <thread>\n#include <mutex>\n#include <condition_variable>\n#include <vector>\n#include <chrono>\n#include <random>\n\nstd::mutex mtx;\nstd::condition_variable cv;\nint arrived_threads = 0;\nconst int NUM_THREADS = 5;\n\nvoid worker_function() {\n    // Simulate some work before arriving\n    std::this_thread::sleep_for(std::chrono::milliseconds(rand() % 100));\n\n    std::unique_lock<std::mutex> lock(mtx);\n    std::cout << \"Thread \" << std::this_thread::get_id() << \" arrived.\\n\";\n    arrived_threads++;\n\n    if (arrived_threads == NUM_THREADS) {\n        std::cout << \"All threads arrived. Signaling...\\n\";\n        cv.notify_all(); // Notify all waiting threads\n    } else {\n        // Wait until all threads have arrived\n        cv.wait(lock, []{ return arrived_threads == NUM_THREADS; });\n    }\n\n    std::cout << \"Thread \" << std::this_thread::get_id() << \" proceeding.\\n\";\n}\n\nint main() {\n    srand(time(NULL)); // For random sleep times\n    std::vector<std::thread> threads;\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        threads.emplace_back(worker_function);\n    }\n\n    for (std::thread& t : threads) {\n        t.join();\n    }\n\n    std::cout << \"Main thread finished.\\n\";\n    return 0;\n}"
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "מהו הפלט האפשרי של התוכנית? נמקו את תשובתכם.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "הסבירו את תפקידם של המשתנים הגלובליים `mtx`, `cv` ו-`arrived_threads` בתזמון התהליכונים.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": 10,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1. **פלט אפשרי:**\nהפלט יכלול 5 הודעות \"Thread X arrived.\", אחריהן הודעה אחת \"All threads arrived. Signaling...\", אחריהן 5 הודעות \"Thread X proceeding.\", ולבסוף הודעה \"Main thread finished.\". סדר ההודעות \"arrived\" בין התהליכונים השונים אינו מובטח, וכך גם סדר ההודעות \"proceeding\". עם זאת, מובטח שכל הודעות ה-\"arrived\" יופיעו לפני הודעת ה-\"Signaling\", וכל הודעות ה-\"proceeding\" יופיעו אחרי הודעת ה-\"Signaling\".\n\nדוגמה לפלט אפשרי (מזהי התהליכונים ישתנו): \n```\nThread 123456 arrived.\nThread 789012 arrived.\nThread 345678 arrived.\nThread 901234 arrived.\nThread 567890 arrived.\nAll threads arrived. Signaling...\nThread 123456 proceeding.\nThread 789012 proceeding.\nThread 345678 proceeding.\nThread 901234 proceeding.\nThread 567890 proceeding.\nMain thread finished.\n```\n\n**נימוק:**\nכל אחד מחמשת התהליכונים שנוצרו (NUM_THREADS = 5) מבצע את הפונקציה `worker_function`. בתוך פונקציה זו, כל תהליכון נועל את המוטקס (`mtx`), מדפיס הודעה על הגעתו, ומגדיל את המונה `arrived_threads`. כאשר המונה מגיע לערך `NUM_THREADS` (כלומר, התהליכון הנוכחי הוא האחרון שהגיע), הוא מדפיס הודעה על כך ומאותת לכל התהליכונים הממתינים באמצעות `cv.notify_all()`. שאר התהליכונים, שהגיעו לפני האחרון, קוראים ל-`cv.wait()`. קריאה זו משחררת באופן אטומי את המוטקס ומכניסה את התהליכון למצב שינה עד שיאותת לו ויתקיים התנאי שהמונה `arrived_threads` שווה ל-`NUM_THREADS`. לאחר שהתהליכונים מתעוררים (או אם היו האחרונים ולא נכנסו למצב המתנה), הם מדפיסים הודעה שהם ממשיכים (`proceeding`). המוטקס מבטיח שרק תהליכון אחד יעדכן את `arrived_threads` בכל רגע נתון, ומשתנה התנאי (`cv`) מאפשר לתהליכונים לחכות ביעילות עד שכל התהליכונים יגיעו לנקודה מסוימת, ובכך יוצר מחסום (barrier) תזמוני.\n\n2. **תפקידי המשתנים הגלובליים:**\n*   **`mtx` (std::mutex):** זהו מנגנון נעילה (lock) המשמש להגנה על המשאב המשותף `arrived_threads`. הוא מבטיח שרק תהליכון אחד יוכל לגשת ולשנות את `arrived_threads` בכל רגע נתון, ובכך מונע תנאי מרוץ (race conditions) ומוודא עקביות בנתונים המשותפים. ה-`std::unique_lock` מבטיח שהמוטקס ישוחרר אוטומטית כאשר הבלוק נגמר או בעת קריאה ל-`cv.wait()`.\n*   **`cv` (std::condition_variable):** זהו משתנה תנאי המשמש לתזמון מורכב יותר בין תהליכונים. הוא מאפשר לתהליכונים להמתין (באמצעות `cv.wait()`) עד שתנאי מסוים יתקיים, ולהתעורר כאשר תהליכון אחר מאותת (באמצעות `cv.notify_all()`) שהתנאי אכן התקיים. במקרה זה, התהליכונים מחכים עד שכל חמשת התהליכונים יגיעו לנקודת המחסום.\n*   **`arrived_threads` (int):** זהו מונה משותף המציין כמה תהליכונים הגיעו עד כה לנקודת המחסום. הוא משמש כחלק מהתנאי שעליו ממתינים התהליכונים (`arrived_threads == NUM_THREADS`)."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

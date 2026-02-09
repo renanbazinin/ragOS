@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Page Replacement",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 07:51:40",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 952,
+      "output_tokens": 383,
+      "total_tokens": 2031
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Memory Management",
+      "Virtual Memory",
+      "Page Replacement"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של אלגוריתמי החלפת עמודים (Page Replacement Algorithms)?",
+      "code_snippet": null,
+      "options": [
+        "א. להבטיח שכל העמודים בזיכרון הפיזי יהיו בשימוש תמיד.",
+        "ב. למצוא עמוד להוציא מהזיכרון הפיזי כאשר מתרחש כשל עמוד ואין מסגרות פנויות.",
+        "ג. להאיץ את טעינת העמודים מהדיסק לזיכרון הפיזי.",
+        "ד. למנוע כשל עמוד (page fault) מלהתרחש.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב'. אלגוריתמי החלפת עמודים מופעלים כאשר מתרחש כשל עמוד (page fault) ואין מסגרות זיכרון פיזיות פנויות. תפקידם הוא לבחור איזה עמוד קיים בזיכרון הפיזי יש להוציא (להחליף) כדי לפנות מקום לעמוד החדש הדרוש."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

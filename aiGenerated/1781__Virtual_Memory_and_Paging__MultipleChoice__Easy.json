@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory and Paging",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 20:47:22",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 949,
+      "output_tokens": 391,
+      "total_tokens": 2698
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Virtual Memory",
+      "Paging"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של שיטת ה-Paging בניהול זיכרון וירטואלי?",
+      "code_snippet": null,
+      "options": [
+        "א. לאפשר לכל תהליך להשתמש במרחב כתובות וירטואלי רציף, גם אם הזיכרון הפיזי שלו אינו רציף.",
+        "ב. להגביל את מספר התהליכים שיכולים לרוץ במקביל.",
+        "ג. להאיץ את פעולות הקלט/פלט על ידי שמירת נתונים בזיכרון המטמון.",
+        "ד. לנהל את קבצי המערכת בדיסק הקשיח."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "א'. מטרתה העיקרית של שיטת ה-Paging היא לאפשר לכל תהליך לראות מרחב כתובות וירטואלי רציף (לוגית), בעוד שהדפים שלו יכולים להיות מפוזרים באופן לא רציף בזיכרון הפיזי. בכך היא גם מסייעת למנוע פרגמנטציה חיצונית ומאפשרת שימוש יעיל בזיכרון הפיזי."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

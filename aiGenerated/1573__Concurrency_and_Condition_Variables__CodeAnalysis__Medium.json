@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency and Condition Variables",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 11:35:28",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2951,
+      "output_tokens": 2176,
+      "total_tokens": 9882
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Concurrency",
+      "Condition Variables",
+      "Threads",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C הבאה המיישמת מנגנון יצרן-צרכן (Producer-Consumer) עם חוצץ חסום (Bounded Buffer) באמצעות Mutex ו-Condition Variables.\nהחוצץ בעל גודל 1, והיצרן מייצר 3 פריטים. הצרכן צורך 3 פריטים.\nניתן להניח שכל קריאות המערכת מצליחות.\n\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <pthread.h>\n#include <unistd.h> // For usleep\n\n#define BUFFER_SIZE 1\n#define NUM_ITEMS 3\n\nint buffer[BUFFER_SIZE];\nint count = 0; // Number of items in buffer\nint in = 0;    // Next write position\nint out = 0;   // Next read position\n\npthread_mutex_t mutex;\npthread_cond_t cond_not_empty; // Signaled when buffer is not empty\npthread_cond_t cond_not_full;  // Signaled when buffer is not full\n\nvoid *producer(void *arg) {\n    for (int i = 0; i < NUM_ITEMS; i++) {\n        pthread_mutex_lock(&mutex);\n\n        while (count == BUFFER_SIZE) {\n            printf(\"Producer: Buffer full, waiting...\\n\");\n            pthread_cond_wait(&cond_not_full, &mutex);\n        }\n\n        buffer[in] = i + 1; // Produce item 1, 2, 3\n        printf(\"Producer: Produced %d\\n\", buffer[in]);\n        in = (in + 1) % BUFFER_SIZE;\n        count++;\n\n        pthread_cond_signal(&cond_not_empty);\n        pthread_mutex_unlock(&mutex);\n        usleep(100000); // Simulate work\n    }\n    printf(\"Producer: Finished.\\n\");\n    return NULL;\n}\n\nvoid *consumer(void *arg) {\n    for (int i = 0; i < NUM_ITEMS; i++) {\n        pthread_mutex_lock(&mutex);\n\n        while (count == 0) {\n            printf(\"Consumer: Buffer empty, waiting...\\n\");\n            pthread_cond_wait(&cond_not_empty, &mutex);\n        }\n\n        int item = buffer[out];\n        printf(\"Consumer: Consumed %d\\n\", item);\n        out = (out + 1) % BUFFER_SIZE;\n        count--;\n\n        pthread_cond_signal(&cond_not_full);\n        pthread_mutex_unlock(&mutex);\n        usleep(150000); // Simulate work\n    }\n    printf(\"Consumer: Finished.\\n\");\n    return NULL;\n}\n\nint main() {\n    pthread_mutex_init(&mutex, NULL);\n    pthread_cond_init(&cond_not_empty, NULL);\n    pthread_cond_init(&cond_not_full, NULL);\n\n    pthread_t prod_tid, cons_tid;\n\n    pthread_create(&prod_tid, NULL, producer, NULL);\n    pthread_create(&cons_tid, NULL, consumer, NULL);\n\n    pthread_join(prod_tid, NULL);\n    pthread_join(cons_tid, NULL);\n\n    pthread_mutex_destroy(&mutex);\n    pthread_cond_destroy(&cond_not_empty);\n    pthread_cond_destroy(&cond_not_full);\n\n    return 0;\n}\n```\n\nתארו רצף אירועים אפשרי שיכול להתרחש במהלך ריצת התוכנית, וציינו את הפלט הסופי ל-stdout. הסבירו מדוע התוכנית מסתיימת בהצלחה (או לא, אם זו התשובה).",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "התוכנית מיישמת נכון את מנגנון היצרן-צרכן עבור חוצץ חסום בגודל 1. השימוש ב-`pthread_mutex_lock` ו-`pthread_mutex_unlock` מבטיח גישה בלעדית למשתנים המשותפים (`buffer`, `count`, `in`, `out`) בכל רגע נתון.\n\nה-`pthread_cond_wait` משחרר את ה-mutex וחוסם את ה-thread עד שיאותת לו. כאשר ה-thread מתעורר, הוא רוכש מחדש את ה-mutex. לולאת ה-`while` סביב ה-`pthread_cond_wait` חיונית כדי להתמודד עם \"התעוררויות שווא\" (spurious wakeups) ולוודא שהתנאי עדיין מתקיים לאחר ההתעוררות.\n\nהיצרן ממתין כאשר החוצץ מלא (`count == BUFFER_SIZE`) ומאותת לצרכן כאשר הוא מוסיף פריט (`pthread_cond_signal(&cond_not_empty)`). הצרכן ממתין כאשר החוצץ ריק (`count == 0`) ומאותת ליצרן כאשר הוא מסיר פריט (`pthread_cond_signal(&cond_not_full)`).\n\nמכיוון שמספר הפריטים שהיצרן מייצר (3) זהה למספר הפריטים שהצרכן צורך (3), והסינכרון מיושם כהלכה, שני ה-threads ישלימו את משימתם ויסתיימו בהצלחה. לא יתרחש deadlock. ה-`usleep` פשוט גורם לעיכובים שמדמים עבודה, אך אינם משנים את הלוגיקה הבסיסית של הסינכרון.\n\n**רצף אירועים ופלט אפשרי:**\n1.  היצרן נכנס ל-mutex, מוסיף את פריט 1 לחוצץ. `count` הופך ל-1. היצרן מאותת ל-`cond_not_empty`. משחרר את ה-mutex. עובר למצב שינה קצר.\n    `Producer: Produced 1`\n2.  הצרכן נכנס ל-mutex, מוציא את פריט 1 מהחוצץ. `count` הופך ל-0. הצרכן מאותת ל-`cond_not_full`. משחרר את ה-mutex. עובר למצב שינה קצר.\n    `Consumer: Consumed 1`\n3.  היצרן מתעורר (או ממשיך לרוץ), נכנס ל-mutex, מוסיף את פריט 2 לחוצץ. `count` הופך ל-1. היצרן מאותת ל-`cond_not_empty`. משחרר את ה-mutex. עובר למצב שינה קצר.\n    `Producer: Produced 2`\n4.  הצרכן מתעורר (או ממשיך לרוץ), נכנס ל-mutex, מוציא את פריט 2 מהחוצץ. `count` הופך ל-0. הצרכן מאותת ל-`cond_not_full`. משחרר את ה-mutex. עובר למצב שינה קצר.\n    `Consumer: Consumed 2`\n5.  היצרן מתעורר (או ממשיך לרוץ), נכנס ל-mutex, מוסיף את פריט 3 לחוצץ. `count` הופך ל-1. היצרן מאותת ל-`cond_not_empty`. משחרר את ה-mutex. עובר למצב שינה קצר.\n    `Producer: Produced 3`\n6.  היצרן מסיים את הלולאה. מדפיס הודעת סיום.\n    `Producer: Finished.`\n7.  הצרכן מתעורר (או ממשיך לרוץ), נכנס ל-mutex, מוציא את פריט 3 מהחוצץ. `count` הופך ל-0. הצרכן מאותת ל-`cond_not_full`. משחרר את ה-mutex. עובר למצב שינה קצר.\n    `Consumer: Consumed 3`\n8.  הצרכן מסיים את הלולאה. מדפיס הודעת סיום.\n    `Consumer: Finished.`\n\nהתוכנית תסיים את ריצתה בהצלחה לאחר ששני ה-threads יסיימו את הלולאות שלהם ויחזירו את השליטה ל-`main`, שיבצע `pthread_join` וינקה את משאבי הסינכרון."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

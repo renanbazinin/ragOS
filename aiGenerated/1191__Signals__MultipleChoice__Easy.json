@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Signals",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 08:36:41",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1021,
+      "output_tokens": 474,
+      "total_tokens": 2753
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Signals"
+    ],
+    "content": {
+      "text": "מהי הדרך העיקרית שבה מערכת הפעלה מודיעה לתהליך על אירועים אסינכרוניים שונים (כגון שגיאות, בקשות סיום, או אירועי קלט/פלט)?",
+      "code_snippet": null,
+      "options": [
+        "א. באמצעות קריאות מערכת (System Calls)",
+        "ב. באמצעות מנגנון ה-IPC (Inter-Process Communication) של צינורות (Pipes)",
+        "ג. באמצעות אותות (Signals)",
+        "ד. באמצעות זיכרון משותף (Shared Memory)",
+        "ה. אף אחת מהתשובות אינה נכונה."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג. אותות הם מנגנון תוכנה המשמש במערכות הפעלה דמויות יוניקס כדי להודיע לתהליך על אירועים אסינכרוניים. אירועים אלו יכולים לכלול שגיאות חומרה (כמו חלוקה באפס), בקשות ממשתמש (כמו Ctrl+C), סיום תהליך ילד, או אירועי קלט/פלט אחרים. קריאות מערכת הן דרך לתהליך לבקש שירותים מהקרנל, לא דרך לקרנל להודיע לתהליך על אירועים אסינכרוניים באופן יזום. IPC וזיכרון משותף הם מנגנונים לתקשורת בין תהליכים, לא הדרך העיקרית של הקרנל להודיע על אירועים אסינכרוניים באופן יזום."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "Security",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 09:43:19",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1049,
+      "output_tokens": 406,
+      "total_tokens": 2451
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Security",
+      "Operating System Fundamentals"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של הפרדת מצב משתמש (user mode) ממצב ליבה (kernel mode) במערכת הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. לשפר את ביצועי המערכת.",
+        "ב. למנוע מתוכניות משתמש לגשת ישירות לחומרה ולנתוני מערכת הפעלה קריטיים.",
+        "ג. לאפשר למספר משתמשים להריץ תוכניות בו זמנית.",
+        "ד. לפשט את פיתוח התוכנה."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "הפרדת מצב משתמש ממצב ליבה היא מנגנון אבטחה קריטי. היא מבטיחה שתוכניות משתמש לא יוכלו לבצע פעולות מסוכנות, כגון גישה ישירה לחומרה, שינוי זיכרון של תהליכים אחרים או שינוי מבני נתונים פנימיים של מערכת ההפעלה, ובכך מגינה על יציבות ואבטחת המערכת כולה מפני קוד זדוני או שגיאות. אפשרויות א', ג' ו-ד' אינן המטרה העיקרית של מנגנון זה."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

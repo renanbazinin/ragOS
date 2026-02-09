@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Signals and System Calls",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 11:53:03",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 926,
+      "output_tokens": 1172,
+      "total_tokens": 3832
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Signals",
+      "System Calls"
+    ],
+    "content": {
+      "text": "תהליך מריץ קטע קוד המכיל קריאת מערכת חוסמת (blocking system call) כמו `read` מקובץ או מהקלט הסטנדרטי. בזמן שהתהליך ממתין לסיום הקריאה, הוא מקבל סיגנל (לדוגמה, SIGINT) עבורו הוגדר handler (באמצעות `sigaction` ללא דגל `SA_RESTART`). מהי התוצאה הסבירה ביותר של קבלת הסיגנל על קריאת המערכת החוסמת, לאחר ביצוע ה-handler?",
+      "code_snippet": "```c\n#include <stdio.h>\n#include <unistd.h>\n#include <signal.h>\n#include <errno.h>\n\nvoid sigint_handler(int signo) {\n    printf(\"\\nReceived SIGINT (%d). Continuing...\\n\", signo);\n    // In a real scenario, you might set a flag or clean up.\n}\n\nint main() {\n    struct sigaction sa;\n    sa.sa_handler = sigint_handler;\n    sigemptyset(&sa.sa_mask);\n    sa.sa_flags = 0; // SA_RESTART is NOT set\n\n    if (sigaction(SIGINT, &sa, NULL) == -1) {\n        perror(\"sigaction\");\n        return 1;\n    }\n\n    char buffer[100];\n    ssize_t bytes_read;\n\n    printf(\"Waiting for input (type something and press Enter) or SIGINT (Ctrl+C)...\n\");\n    bytes_read = read(STDIN_FILENO, buffer, sizeof(buffer));\n\n    if (bytes_read == -1) {\n        if (errno == EINTR) {\n            printf(\"Read system call was interrupted by a signal (errno == EINTR).\\n\");\n        } else {\n            perror(\"read error\");\n        }\n    } else if (bytes_read == 0) {\n        printf(\"End of file (EOF) reached.\\n\");\n    } else {\n        printf(\"Read %zd bytes: '%.*s'\\n\", bytes_read, (int)bytes_read, buffer);\n    }\n\n    return 0;\n}\n```",
+      "options": [
+        "א. קריאת המערכת תופסק מיד, והתהליך יסיים את פעולתו (exit).",
+        "ב. קריאת המערכת תופסק ותחזיר שגיאה עם קוד `EINTR`.",
+        "ג. קריאת המערכת תופסק ותופעל מחדש אוטומטית (restart) על ידי מערכת ההפעלה.",
+        "ד. קריאת המערכת תמשיך לפעול ברקע לאחר ביצוע ה-handler, והתהליך ימשיך בביצוע הקוד שלאחר הקריאה.",
+        "ה. קריאת המערכת תסתיים בהצלחה מיד לאחר ביצוע ה-handler, ותחזיר את הנתונים שנקראו עד כה (אם ישנם)."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "כאשר סיגנל מגיע לתהליך המבצע קריאת מערכת חוסמת (כמו `read`, `write`, `waitpid` ועוד), קריאת המערכת נקטעת (interrupted). לאחר ביצוע ה-handler של הסיגנל, קריאת המערכת מסתיימת ומחזירה את הערך `-1` (המציין שגיאה), כאשר משתנה ה-`errno` מוגדר ל-`EINTR` (Interrupted system call). זהו המנגנון הסטנדרטי המאפשר לתהליכים להגיב לסיגנלים גם בזמן שהם ממתינים לאירועי I/O או אחרים. האפשרות לקטיעת קריאות מערכת היא חשובה לתכנות אמין, ומאפשרת לתהליכים להגיב לסיגנלים (כמו סיום עבודה נקי או טיפול באירועים חשובים) במקום להישאר חסומים לנצח. יש לציין כי קיימת אפשרות להגדיר את ה-handler כך שקריאות מערכת \"איטיות\" יופעלו מחדש אוטומטית (באמצעות הדגל `SA_RESTART` ב-`sigaction`), אך זו אינה ברירת המחדל, והשאלה מציינת במפורש שדגל זה אינו מוגדר."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

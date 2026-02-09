@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Scheduling",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 09:10:12",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1598,
+      "output_tokens": 529,
+      "total_tokens": 3124
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Scheduling",
+      "CPU Scheduling"
+    ],
+    "content": {
+      "text": "הסבירו מהו תזמון מקדים (Preemptive Scheduling) במערכות הפעלה. תנו דוגמה לאלגוריתם תזמון מקדים אחד וציינו יתרון מרכזי שלו על פני אלגוריתם שאינו מקדים.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "תזמון מקדים הוא סוג של אלגוריתם תזמון מעבד שמאפשר למערכת ההפעלה לעצור תהליך רץ ולהעביר את המעבד לתהליך אחר, גם אם התהליך הראשון לא סיים את עבודתו או לא נכנס למצב המתנה. זה קורה בדרך כלל כאשר מגיע תהליך בעל עדיפות גבוהה יותר, או כאשר פגה קוואנטום הזמן (time slice) שהוקצה לתהליך הנוכחי.\n\nדוגמה לאלגוריתם תזמון מקדים היא Round Robin (RR), SRTF (Shortest Remaining Time First), או תזמון מבוסס עדיפויות מקדים.\n\nיתרון מרכזי של תזמון מקדים (כמו RR) על פני אלגוריתם שאינו מקדים (כמו FCFS או SJF לא מקדים) הוא הגברת ההיענות (responsiveness) של המערכת. בתזמון מקדים, תהליכים ארוכים לא יכולים 'לתפוס' את המעבד לזמן בלתי מוגבל, מה שמאפשר לתהליכים קצרים או אינטראקטיביים לקבל זמן מעבד במהירות יחסית. זה גם מסייע למנוע הרעבה (starvation) במקרים מסוימים ומאפשר חלוקה הוגנת יותר של משאבי המעבד בין תהליכים."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

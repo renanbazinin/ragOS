@@ -1,0 +1,59 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Synchronization and Deadlocks",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 09:56:30",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3054,
+      "output_tokens": 2471,
+      "total_tokens": 12198
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Synchronization",
+      "Deadlocks",
+      "Concurrency",
+      "Mutexes",
+      "Dining Philosophers"
+    ],
+    "content": {
+      "text": "מערכת מורכבת מ-N יחידות עיבוד (חוטים) ו-N משאבי נתונים משותפים. כל יחידת עיבוד `i` (כאשר `i` בין 0 ל-N-1) זקוקה לגישה למשאב `i` ולמשאב `(i+1) % N` על מנת לבצע את עבודתה. כל משאב מוגן באמצעות mutex משלו. נתון מימוש נאיבי לפונקציה `worker_thread` המנסה לרכוש את המשאבים בסדר קבוע:\n",
+      "code_snippet": "pthread_mutex_t resources[N_THREADS]; // N_THREADS is a defined constant (e.g., 5)\n\nvoid* worker_thread(void* arg) {\n    long thread_id = (long)arg;\n    long resource1_idx = thread_id;\n    long resource2_idx = (thread_id + 1) % N_THREADS;\n\n    // Naive acquisition order\n    pthread_mutex_lock(&resources[resource1_idx]);\n    // For demonstration, a small delay might be added here to increase deadlock probability:\n    // usleep(100);\n    pthread_mutex_lock(&resources[resource2_idx]);\n    \n    // Perform work with both resources\n    printf(\"Thread %ld acquired resources %ld and %ld. Performing work...\\n\", thread_id, resource1_idx, resource2_idx);\n    // usleep(500); // Simulate work\n    \n    pthread_mutex_unlock(&resources[resource2_idx]);\n    pthread_mutex_unlock(&resources[resource1_idx]);\n    \n    return NULL;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "a",
+        "text": "האם הפתרון הנאיבי המוצג יכול לגרום למצב של קיפאון (Deadlock)? אם כן, תאר תרחיש ספציפי (כולל מצב החוטים והמשאבים) שבו קיפאון כזה אכן מתרחש עבור N=5.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "b",
+        "text": "הצע שינוי לקוד של הפונקציה `worker_thread` באמצעות פרימיטיבי סנכרון סטנדרטיים (כמו mutexes או semaphores) על מנת למנוע קיפאון. המימוש צריך להיות חופשי מקיפאון עבור כל N גדול מ-1. כתוב את הקוד המלא והמעודכן של הפונקציה `worker_thread`.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "c",
+        "text": "נתח את הפתרון שהצעת בסעיף ב' מבחינת התכונות הבאות: מניעת קיפאון (Deadlock-freedom), מניעת הרעבה (Starvation-freedom) והוגנות (Fairness).",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": 15,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "א. כן, הפתרון הנאיבי יכול לגרום למצב של קיפאון (Deadlock).\nתרחיש קיפאון עבור N=5:\n1. כל החוטים (0 עד 4) מתחילים לפעול בו-זמנית ומצליחים לרכוש את המשאב הראשון שלהם לפני שמישהו מהם מנסה לרכוש את המשאב השני. לדוגמה, באמצעות השהיה קצרה לאחר רכישת המשאב הראשון.\n2. מצב המשאבים והחוטים:\n   - חוט 0 רוכש את `resources[0]` ודורש את `resources[1]`.\n   - חוט 1 רוכש את `resources[1]` ודורש את `resources[2]`.\n   - חוט 2 רוכש את `resources[2]` ודורש את `resources[3]`.\n   - חוט 3 רוכש את `resources[3]` ודורש את `resources[4]`.\n   - חוט 4 רוכש את `resources[4]` ודורש את `resources[0]`.\n3. נוצר מצב של המתנה מעגלית (Circular Wait): חוט 0 ממתין למשאב שמוחזק על ידי חוט 1, חוט 1 ממתין למשאב שמוחזק על ידי חוט 2, וכן הלאה, עד שחוט 4 ממתין למשאב שמוחזק על ידי חוט 0. אף חוט אינו יכול להמשיך, וכל המערכת נכנסת לקיפאון.\n\nב. למניעת קיפאון, ניתן לשבור את תנאי ההמתנה המעגלית על ידי הטלת סדר חלקי על רכישת המשאבים. פתרון נפוץ הוא לגרום לחוט אחד (או יותר) לרכוש את המשאבים בסדר הפוך, או להבטיח שכל החוטים ירכשו את המשאבים לפי סדר גלובלי עולה של המזהים שלהם. נשתמש בפתרון אסימטרי שבו חוט אחד (למשל, החוט בעל המזהה הגבוה ביותר N-1) רוכש את המשאבים בסדר הפוך:\n\n```c\npthread_mutex_t resources[N_THREADS]; // N_THREADS is a defined constant (e.g., 5)\n\nvoid* worker_thread(void* arg) {\n    long thread_id = (long)arg;\n    long resource_first_idx;\n    long resource_second_idx;\n\n    if (thread_id == N_THREADS - 1) { // The last thread acquires in reverse order\n        resource_first_idx = (thread_id + 1) % N_THREADS; // e.g., for N=5, thread 4 takes resource 0 first\n        resource_second_idx = thread_id;                   // then resource 4\n    } else { // Other threads acquire in standard order: resource_id then (resource_id + 1) % N\n        resource_first_idx = thread_id;\n        resource_second_idx = (thread_id + 1) % N_THREADS;\n    }\n\n    // printf(\"Thread %ld trying to acquire resource %ld and %ld\\n\", thread_id, resource_first_idx, resource_second_idx);\n\n    pthread_mutex_lock(&resources[resource_first_idx]);\n    // printf(\"Thread %ld acquired resource %ld\\n\", thread_id, resource_first_idx);\n\n    pthread_mutex_lock(&resources[resource_second_idx]);\n    // printf(\"Thread %ld acquired resource %ld and %ld. Performing work...\\n\", thread_id, resource_first_idx, resource_second_idx);\n    \n    // Perform work with both resources\n    printf(\"Thread %ld acquired resources %ld and %ld. Performing work...\\n\", thread_id, resource_first_idx, resource_second_idx);\n    // usleep(500); // Simulate work\n\n    pthread_mutex_unlock(&resources[resource_second_idx]);\n    // printf(\"Thread %ld released resource %ld\\n\", thread_id, resource_second_idx);\n\n    pthread_mutex_unlock(&resources[resource_first_idx]);\n    // printf(\"Thread %ld released resource %ld and finished.\\n\", thread_id, resource_first_idx);\n\n    return NULL;\n}\n```\n\nג. ניתוח הפתרון:\n*   **מניעת קיפאון (Deadlock-freedom):** הפתרון מונע קיפאון. תנאי ההמתנה המעגלית (Circular Wait), שהוא אחד מארבעת התנאים ההכרחיים לקיפאון, נשבר. כל החוטים, למעט חוט N-1, רוכשים את המשאבים לפי סדר עולה של המזהים שלהם (משאב `i` ואז `i+1`). חוט N-1 רוכש את המשאב `0` ואז את המשאב `N-1`. מכיוון ש-`0 < N-1`, גם הוא רוכש את המשאבים בסדר עולה של מזהיהם. כלומר, כל החוטים רוכשים משאבים בסדר עולה לפי האינדקס שלהם, מה שמונע היווצרות מעגל המתנה.\n*   **מניעת הרעבה (Starvation-freedom):** הפתרון הוא חופשי מהרעבה. כל חוט יקבל בסופו של דבר את המשאבים הדרושים לו. מכיוון שאין קיפאון ו-mutexים הם פרימיטיבים שמבטיחים שחוט שממתין ל-mutex ישוחרר בסופו של דבר (כל עוד ה-mutex משוחרר), אף חוט לא ייתקע בהמתנה אינסופית. כל חוט שמסיים את עבודתו משחרר את המשאבים, מה שמאפשר לחוטים אחרים שחסומים להתקדם.\n*   **הוגנות (Fairness):** הפתרון אינו הוגן באופן מוחלט. הוא אינו מבטיח שחוטים יקבלו גישה למשאבים לפי סדר הגעתם או לפי סדר כלשהו אחר. חוט N-1, בשל סדר הרכישה השונה שלו, עשוי להיות בעל יתרון או חסרון תזמוני מסוים. ייתכן שחוטים מסוימים יצליחו לרכוש משאבים לעיתים קרובות יותר מאחרים תלוי בתזמונים הספציפיים של המערכת. mutexים סטנדרטיים בדרך כלל אינם מבטיחים הוגנות מעבר ל-FIFO עבור ה-mutex עצמו, אך לא עבור דפוס רכישת משאבים מורכב יותר."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

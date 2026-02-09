@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "System Calls",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 07:13:56",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1034,
+      "output_tokens": 372,
+      "total_tokens": 2509
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "System Calls"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של קריאת מערכת (System Call)?",
+      "code_snippet": null,
+      "options": [
+        "א. לאפשר לתוכניות משתמש לגשת ישירות לחומרה.",
+        "ב. לספק ממשק לתוכניות משתמש לבקש שירותים ממערכת ההפעלה.",
+        "ג. להריץ קוד במצב משתמש (user mode).",
+        "ד. לנהל הקצאת זיכרון בתוך תהליך בודד.",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב'. קריאת מערכת (System Call) היא הדרך שבה תוכניות משתמש יכולות לבקש שירותים ממערכת ההפעלה, כגון גישה לקבצים, ניהול תהליכים או תקשורת בין תהליכים. היא מאפשרת לתוכניות לבצע פעולות מורשות (privileged operations) שדורשות הרשאות קרנל, מבלי לגשת ישירות לחומרה או למשאבי מערכת קריטיים."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Page Replacement",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 07:52:39",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1059,
+      "output_tokens": 541,
+      "total_tokens": 2912
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Page Replacement",
+      "Virtual Memory",
+      "Memory Management"
+    ],
+    "content": {
+      "text": "במהלך תהליך החלפת דף (Page Replacement), מערכת ההפעלה בוחרת דף לפינוי. אם ה-dirty bit של הדף שנבחר דלוק (set), איזו טענה נכונה לגבי ההשלכות?",
+      "code_snippet": null,
+      "options": [
+        "א. הדף חייב להיכתב חזרה לזיכרון המשני (דיסק) לפני שניתן לפנותו, מה שמגדיל את עלות פעולת ההחלפה.",
+        "ב. הדף לא חייב להיכתב חזרה לזיכרון המשני, כיוון שמערכת ההפעלה יכולה פשוט להתעלם מהשינויים.",
+        "ג. ה-dirty bit הדלוק מעיד שהדף לא היה בשימוש לאחרונה, ולכן הוא מועמד עדיף לפינוי ללא עלות נוספת.",
+        "ד. מצב ה-dirty bit אינו משפיע על עלות פעולת ההחלפה, אלא רק על הקביעה האם הדף הוא מועמד טוב לפינוי."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "כאשר ה-dirty bit של דף דלוק, המשמעות היא שהדף שונה בזיכרון הפיזי מאז שהובא מהדיסק או נכתב אליו לאחרונה. כדי למנוע איבוד מידע ולשמור על עקביות הנתונים, מערכת ההפעלה חייבת לכתוב את תוכן הדף המעודכן בחזרה לזיכרון המשני (הדיסק) לפני שניתן יהיה לפנות את מסגרת הזיכרון הפיזי שהוא תופס. פעולת כתיבה זו לדיסק היא פעולת קלט/פלט יקרה ולכן מגדילה את עלות תהליך החלפת הדף."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

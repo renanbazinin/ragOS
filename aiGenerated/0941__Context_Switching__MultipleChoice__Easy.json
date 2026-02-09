@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Context Switching",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 07:03:25",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 956,
+      "output_tokens": 384,
+      "total_tokens": 2528
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Context Switching",
+      "Processes"
+    ],
+    "content": {
+      "text": "במהלך החלפת הקשר (context switch), איזה מידע נשמר על מנת לאפשר המשך ריצה של תהליך מאוחר יותר?",
+      "code_snippet": null,
+      "options": [
+        "א. רק תוכן הזיכרון של התהליך.",
+        "ב. רק מצב האוגרים (registers) של המעבד.",
+        "ג. מצב האוגרים של המעבד (CPU registers), מונה התוכנית (program counter), ומצב המחסנית (stack pointer).",
+        "ד. כל קבצי המערכת שהתהליך משתמש בהם.",
+        "ה. רק מזהה התהליך (PID) ושם התהליך."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג'. במהלך החלפת הקשר, מערכת ההפעלה שומרת את ההקשר (context) של התהליך הנוכחי. הקשר זה כולל לרוב את מצב האוגרים של המעבד, מונה התוכנית (Program Counter) ומצב המחסנית (Stack Pointer), על מנת שניתן יהיה לשחזר אותו במדויק ולהמשיך את ריצת התהליך מאוחר יותר מנקודה זו."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

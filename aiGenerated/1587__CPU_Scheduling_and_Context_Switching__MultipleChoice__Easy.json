@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "CPU Scheduling and Context Switching",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 11:44:12",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1035,
+      "output_tokens": 351,
+      "total_tokens": 2800
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "CPU Scheduling",
+      "Context Switching"
+    ],
+    "content": {
+      "text": "מהי העלות העיקרית של ביצוע החלפת הקשר (context switch)?",
+      "code_snippet": null,
+      "options": [
+        "א. זמן CPU המבוזבז על שמירת מצב התהליך הנוכחי וטעינת מצב התהליך החדש.",
+        "ב. הגדלת השימוש בזיכרון RAM על ידי מערכת ההפעלה.",
+        "ג. ירידה במהירות הגישה להתקני קלט/פלט.",
+        "ד. צורך לאתחל מחדש את כל התהליכים במערכת."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "החלפת הקשר דורשת שמירה של מצב המעבד (registers, program counter וכו') של התהליך הנוכחי וטעינה של מצב המעבד של התהליך הבא. פעולות אלו צורכות זמן מעבד (overhead) ואינן תורמות ישירות לעבודת התוכנית, ולכן הן נחשבות לעלות העיקרית של החלפת הקשר."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

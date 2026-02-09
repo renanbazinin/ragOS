@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "IPC",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 08:26:00",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1654,
+      "output_tokens": 1106,
+      "total_tokens": 5729
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "IPC",
+      "Pipes"
+    ],
+    "content": {
+      "text": "מהו צינור (pipe) בתקשורת בין תהליכים (IPC)? הסבר בקצרה כיצד שני תהליכים, הורה וילד, יכולים לתקשר באמצעות צינור אנונימי (anonymous pipe) וכתוב קטע קוד ב-C המדגים זאת. תהליך ההורה ישלח הודעה, ותהליך הילד יקבל וידפיס אותה.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <string.h>\n#include <sys/wait.h> // For wait()\n\n#define MSG_SIZE 50\n\nint main() {\n    int pipe_fd[2]; // pipe_fd[0] for read, pipe_fd[1] for write\n    pid_t pid;\n    char write_msg[MSG_SIZE] = \"Hello from parent!\";\n    char read_msg[MSG_SIZE];\n\n    // Create a pipe\n    if (pipe(pipe_fd) == -1) {\n        perror(\"pipe failed\");\n        exit(EXIT_FAILURE);\n    }\n\n    // Fork a child process\n    pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        exit(EXIT_FAILURE);\n    }\n\n    if (pid > 0) { // Parent process\n        close(pipe_fd[0]); // Close unused read end\n\n        printf(\"Parent: Sending message: \\\"%s\\\"\\n\", write_msg);\n        write(pipe_fd[1], write_msg, strlen(write_msg) + 1); // +1 for null terminator\n        close(pipe_fd[1]); // Close write end\n\n        wait(NULL); // Wait for child to finish\n        printf(\"Parent: Child finished.\\n\");\n    } else { // Child process\n        close(pipe_fd[1]); // Close unused write end\n\n        read(pipe_fd[0], read_msg, MSG_SIZE);\n        printf(\"Child: Received message: \\\"%s\\\"\\n\", read_msg);\n        close(pipe_fd[0]); // Close read end\n        exit(EXIT_SUCCESS);\n    }\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הסבר:\nצינור (pipe) הוא מנגנון לתקשורת בין תהליכים (IPC) המאפשר זרימת נתונים חד-כיוונית. הוא פועל כבופר זמני בזיכרון הליבה. צינור אנונימי (anonymous pipe) משמש בדרך כלל לתקשורת בין תהליכים שיש להם קשר הורה-ילד, מכיוון שתיאורי הקבצים של הצינור (קריאה וכתיבה) מורשים מההורה לילד בעת קריאת fork().\n\nבדוגמת הקוד:\n1.  `pipe(pipe_fd)`: יוצר צינור אנונימי ומאכלס את המערך `pipe_fd` בשני תיאורי קבצים: `pipe_fd[0]` לקריאה ו-`pipe_fd[1]` לכתיבה.\n2.  `fork()`: יוצר תהליך ילד.\n3.  **בתהליך ההורה**: סוגר את קצה הקריאה של הצינור (`pipe_fd[0]`) מכיוון שהוא רק כותב. לאחר מכן, הוא כותב את ההודעה לצינור באמצעות `write(pipe_fd[1], ...)`. לבסוף, הוא סוגר את קצה הכתיבה וממתין לסיום תהליך הילד.\n4.  **בתהליך הילד**: סוגר את קצה הכתיבה של הצינור (`pipe_fd[1]`) מכיוון שהוא רק קורא. לאחר מכן, הוא קורא את ההודעה מהצינור באמצעות `read(pipe_fd[0], ...)` ומדפיס אותה. לבסוף, הוא סוגר את קצה הקריאה ומסיים."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

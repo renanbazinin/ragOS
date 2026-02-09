@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Threads and Mutexes",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 20:29:33",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4527,
+      "output_tokens": 2865,
+      "total_tokens": 14711
+    }
+  },
+  "question": {
+    "id": 7,
+    "type": "Open",
+    "topic": [
+      "Threads",
+      "Mutexes",
+      "Synchronization",
+      "Race Conditions",
+      "Deadlock"
+    ],
+    "content": {
+      "text": "נתונה מחלקת `SharedCounter` ב-C++ המיועדת לשימוש על ידי מספר תהליכונים (threads). מטרתה היא לספק מונה שלם בטוח לשימוש בתהליכונים, המאפשר פעולות הגדלה, הקטנה, איפוס, קבלת ערך, הוספה וקבלת הערך החדש, והחלפה מותנית. עם זאת, הקוד הנתון מכיל מספר בעיות סנכרון קריטיות.\n\n**המשימה שלך:**\n1.  זהה את כל בעיות הסנכרון בקוד (כולל מצבי מרוץ, פוטנציאל למבוי סתום, ופרקטיקות נעילה שגויות).\n2.  עבור כל בעיה שזיהית, הסבר בפירוט מדוע היא מהווה בעיה (מהו התרחיש שבו היא מתרחשת ומהן ההשלכות).\n3.  הצע פתרון לכל בעיה וספק קוד C++ מתוקן עבור הפונקציה או החלק הרלוונטי בקוד המקורי.",
+      "code_snippet": "#include <iostream>\n#include <thread>\n#include <mutex>\n#include <vector>\n#include <chrono>\n\nclass SharedCounter {\nprivate:\n    int value;\n    std::mutex mtx;\n\npublic:\n    SharedCounter() : value(0) {}\n\n    void increment() {\n        std::lock_guard<std::mutex> lock(mtx);\n        value++;\n    }\n\n    void decrement() {\n        mtx.lock();\n        value--;\n        mtx.unlock();\n    }\n\n    int get_value() {\n        return value;\n    }\n\n    void reset() {\n        value = 0;\n    }\n\n    int add_and_get(int val) {\n        mtx.lock();\n        value += val;\n        mtx.unlock();\n        return value;\n    }\n\n    bool swap_if_greater(int old_val, int new_val) {\n        std::lock_guard<std::mutex> lock(mtx);\n        int current_val = get_value();\n        if (current_val > old_val) {\n            value = new_val;\n            return true;\n        }\n        return false;\n    }\n};",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הקדמה:\nהקוד הנתון מנסה ליישם מונה משותף (SharedCounter) בטוח לשימוש בתהליכונים, אך הוא מכיל מספר בעיות סנכרון חמורות שעלולות להוביל לשגיאות לוגיות, נתונים לא עקביים ואף למבוי סתום (deadlock). הבעיות נובעות בעיקר משימוש שגוי או חסר במנגנוני נעילה.\n\nפירוט הבעיות והפתרונות:\n\n1.  **בעיה בפונקציה `decrement()`:**\n    *   **תיאור הבעיה:** הפונקציה משתמשת בנעילה ובשחרור ידניים של המנעול (`mtx.lock()`, `mtx.unlock()`) במקום להשתמש במנגנון RAII כמו `std::lock_guard`. אם הפעולה `value--` תזרוק חריגה (exception) מסיבה כלשהי, השורה `mtx.unlock()` לא תתבצע. כתוצאה מכך, המנעול יישאר נעול לצמיתות, וכל תהליכון אחר שינסה לגשת למונה באמצעות נעילה ייכנס למצב של מבוי סתום (deadlock) ולא יוכל להתקדם.\n    *   **פתרון:** יש להשתמש ב-`std::lock_guard<std::mutex>` כדי להבטיח שהמנעול ישוחרר אוטומטית כאשר הפונקציה יוצאת, בין אם באופן רגיל ובין אם עקב חריגה.\n    *   **קוד מתוקן:**\n        ```cpp\n        void decrement() {\n            std::lock_guard<std::mutex> lock(mtx);\n            value--;\n        }\n        ```\n\n2.  **בעיה בפונקציה `get_value()`:**\n    *   **תיאור הבעיה:** הפונקציה מחזירה את ערך המונה (`value`) ללא כל נעילה. זוהי דוגמה קלאסית ל**מצב מרוץ (race condition)**. אם תהליכון אחד קורא את הערך באמצעות `get_value()` באותו זמן שתהליכון אחר משנה אותו (למשל, באמצעות `increment()`, `decrement()`, `reset()`, `add_and_get()` או `swap_if_greater()`), התהליכון הקורא עלול לקבל ערך חלקי, לא עקבי או מיושן. הקריאה אינה אטומית ביחס לשינויים אחרים.\n    *   **פתרון:** יש להגן על קריאת הערך באמצעות המנעול, בדיוק כמו פעולות הכתיבה.\n    *   **קוד מתוקן:**\n        ```cpp\n        int get_value() {\n            std::lock_guard<std::mutex> lock(mtx);\n            return value;\n        }\n        ```\n\n3.  **בעיה בפונקציה `reset()`:**\n    *   **תיאור הבעיה:** הפונקציה מאפסת את ערך המונה (`value = 0`) ללא כל נעילה. זוהי גם דוגמה ל**מצב מרוץ (race condition)**. אם תהליכון אחד מנסה לאפס את המונה בעוד תהליכון אחר משנה אותו, פעולת האיפוס עלולה להיקטע או לדרוס שינויים אחרים, מה שיוביל לערך סופי שגוי ולא צפוי.\n    *   **פתרון:** יש להגן על פעולת האיפוס באמצעות המנעול.\n    *   **קוד מתוקן:**\n        ```cpp\n        void reset() {\n            std::lock_guard<std::mutex> lock(mtx);\n            value = 0;\n        }\n        ```\n\n4.  **בעיות בפונקציה `add_and_get(int val)`:**\n    *   **תיאור הבעיה (חלק א' - נעילה):** בדומה ל-`decrement()`, הפונקציה משתמשת בנעילה ושחרור ידניים (`mtx.lock()`, `mtx.unlock()`). אם `value += val` תזרוק חריגה, המנעול לא ישוחרר ויווצר מצב של מבוי סתום.\n    *   **תיאור הבעיה (חלק ב' - ערך מוחזר):** גם לאחר תיקון בעיית הנעילה הידנית, ישנו מצב מרוץ עדין הקשור לערך המוחזר. הכוונה של \"add_and_get\" היא בדרך כלל להוסיף ערך למונה ולהחזיר את ערכו *מיד לאחר* ההוספה, כחלק בלתי נפרד מהפעולה האטומית. בקוד המקורי, המנעול משוחרר לפני ש-`value` מוחזר. המשמעות היא שבין השחרור של המנעול לבין השורה `return value;`, תהליכון אחר יכול לשנות את `value`. כתוצאה מכך, הערך שיוחזר עלול להיות שונה מהערך שהיה למונה מיד לאחר ההוספה שבוצעה על ידי התהליכון הקורא.\n    *   **פתרון:**\n        *   חלק א': יש להשתמש ב-`std::lock_guard`.\n        *   חלק ב': כדי להבטיח שהערך המוחזר הוא הערך שהיה למונה מיד לאחר ההוספה האטומית, יש להחזיר את `value` כאשר המנעול עדיין מוחזק. ה-`std::lock_guard` מבטיח זאת באופן טבעי.\n    *   **קוד מתוקן:**\n        ```cpp\n        int add_and_get(int val) {\n            std::lock_guard<std::mutex> lock(mtx);\n            value += val;\n            return value; // הערך מוחזר כאשר המנעול עדיין מוחזק\n        }\n        ```\n\n5.  **בעיה בפונקציה `swap_if_greater(int old_val, int new_val)`:**\n    *   **תיאור הבעיה:** הפונקציה משתמשת ב-`std::lock_guard` כראוי כדי להגן על הקטע הקריטי שלה. עם זאת, בתוך הקטע הקריטי המוגן, היא קוראת לפונקציה `get_value()`. כפי שצוין בבעיה 2, הפונקציה `get_value()` אינה מוגנת על ידי מנעול.\n        *   **השלכה ראשונה:** קריאה ל-`get_value()` לא מוגן מתוך פונקציה מוגנת יוצרת חור אבטחה בסנכרון. למרות ש-`swap_if_greater` מחזיקה את המנעול `mtx`, הרי ש-`get_value()` קוראת ישירות ל-`value` ללא נעילה נוספת. אם תהליכונים אחרים (שאינם מוגנים כראוי, כמו `reset()` המקורי או `get_value()` שנקרא מבחוץ) ניגשים ל-`value` במקביל, הנתונים הנקראים על ידי `get_value()` יכולים להיות לא עקביים או שגויים, למרות ש-`swap_if_greater` אמורה להיות מוגנת.\n        *   **השלכה שנייה (פוטנציאל למבוי סתום אם `get_value` הייתה נעולה):** אם `get_value()` הייתה מיושמת באופן שבו היא מנסה לרכוש את אותו מנעול (`mtx`) (לדוגמה, אם היה בה `std::lock_guard<std::mutex> lock2(mtx);`), קריאה כזו מתוך `swap_if_greater` (שכבר מחזיקה את `mtx`) הייתה גורמת ל**מבוי סתום (deadlock)**. הסיבה היא ש-`std::mutex` אינו מנעול רה-כניס (non-recursive), ותהליכון אינו יכול לרכוש אותו פעמיים.\n    *   **פתרון:** כאשר פונקציה כבר מחזיקה מנעול, היא צריכה לגשת ישירות למשתנים המוגנים על ידי אותו מנעול, או לקרוא לפונקציות עזר פנימיות שבהן מניחים שהמנעול כבר מוחזק (ולא מנסות לרכוש אותו שוב). במקרה זה, `swap_if_greater` כבר מחזיקה את המנעול, ולכן יכולה לגשת ישירות ל-`value`.\n    *   **קוד מתוקן:**\n        ```cpp\n        bool swap_if_greater(int old_val, int new_val) {\n            std::lock_guard<std::mutex> lock(mtx);\n            // גישה ישירה ל-value מכיוון שהמנעול כבר מוחזק\n            if (value > old_val) {\n                value = new_val;\n                return true;\n            }\n            return false;\n        }\n        ```"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

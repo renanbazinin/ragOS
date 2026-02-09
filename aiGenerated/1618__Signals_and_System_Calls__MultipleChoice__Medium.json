@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Signals and System Calls",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 11:52:49",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 926,
+      "output_tokens": 602,
+      "total_tokens": 3850
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Signals",
+      "System Calls"
+    ],
+    "content": {
+      "text": "מהי ההתנהגות הטיפוסית של קריאת מערכת חוסמת (blocking system call) שהופסקה על ידי סיגנל, לאחר שמטפל הסיגנל (signal handler) סיים את פעולתו?",
+      "code_snippet": null,
+      "options": [
+        "א. קריאת המערכת תמיד תופעל מחדש (restarted) באופן אוטומטי.",
+        "ב. קריאת המערכת תסתיים ותחזיר שגיאה עם קוד EINTR (Interrupted system call).",
+        "ג. התהליך יסתיים באופן מיידי, מכיוון שסיגנל תמיד גורם לסיום.",
+        "ד. קריאת המערכת תתעלם מהסיגנל ותמשיך את פעולתה כאילו לא קרה דבר.",
+        "ה. ההתנהגות תלויה באופן הגדרת מטפל הסיגנל; בברירת המחדל (ללא SA_RESTART) היא תסתיים ותחזיר שגיאה עם קוד EINTR, אך ניתן להגדיר אותה כך שתופעל מחדש אוטומטית."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ה",
+      "explanation": "ה. כאשר קריאת מערכת חוסמת מופרעת על ידי סיגנל, ומטפל הסיגנל מסיים את פעולתו, ההתנהגות תלויה באופן שבו הוגדר מטפל הסיגנל (באמצעות `sigaction`). כברירת מחדל (או אם לא הוגדר הדגל `SA_RESTART`), קריאת המערכת תסתיים ותחזיר את קוד השגיאה `EINTR` (Interrupted system call). התוכנית צריכה לבדוק שגיאה זו ולטפל בה (לדוגמה, על ידי ניסיון חוזר לבצע את הקריאה). אם הוגדר הדגל `SA_RESTART` בעת רישום מטפל הסיגנל, מערכת ההפעלה תנסה להפעיל מחדש את קריאת המערכת באופן אוטומטי לאחר שמטפל הסיגנל יסיים."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

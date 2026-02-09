@@ -1,0 +1,65 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Threads and Synchronization",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 19:47:10",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3826,
+      "output_tokens": 2301,
+      "total_tokens": 13072
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Threads",
+      "Synchronization",
+      "Semaphores",
+      "Mutexes",
+      "Concurrency Control"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה המשתמשת בחוטים (threads) וסנכרון כדי לעבד פריטים. בתוכנית מוגדרים T חוטים, כאשר כל חוט מבצע N_OPS פעולות. לביצוע כל פעולה נדרש 'חריץ עיבוד' (processing slot), וקיימים MAX_CONCURRENT_SLOTS חריצים זמינים בסך הכל. לאחר סיום עיבוד הפריט, החוט מעדכן מונה גלובלי total_processed_count, ולאחר מכן מבצע משימת 'עיבוד לאחר' (post_processing_task) שאינה דורשת חריץ עיבוד אך אורכת זמן מסוים. יש להניח שכל קריאות המערכת מצליחות ואין בעיות עם זמן הריצה של `usleep`.\n\n**דרישה:** בכל רגע נתון, לא יותר מ-MAX_CONCURRENT_SLOTS חוטים יהיו בשלב ה'עיבוד הפעיל' של הפריט (החלק המדמה `usleep(rand() % 50);`). משימת ה-`post_processing_task()` אינה נחשבת כחלק משלב ה'עיבוד הפעיל' ואין לה לצרוך חריץ עיבוד.",
+      "code_snippet": "#include <pthread.h>\n#include <semaphore.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n\n#define T 5 // Number of threads\n#define N_OPS 10 // Operations per thread\n#define MAX_CONCURRENT_SLOTS 2 // Max threads concurrently processing items\n\nint total_processed_count = 0;\npthread_mutex_t count_mutex;\nsem_t slots_sem; // Limits concurrent processing\n\nvoid post_processing_task() {\n    // Simulate some work that doesn't require a processing slot\n    usleep(rand() % 100);\n}\n\nvoid* worker_thread(void* arg) {\n    for (int i = 0; i < N_OPS; ++i) {\n        // Acquire a slot\n        sem_wait(&slots_sem);\n\n        // Simulate item processing (requires a slot)\n        usleep(rand() % 50);\n\n        pthread_mutex_lock(&count_mutex);\n        total_processed_count++;\n        printf(\"Thread %ld processed item %d. Total processed: %d\\n\",\n               (long)pthread_self(), i + 1, total_processed_count);\n        pthread_mutex_unlock(&count_mutex);\n\n        post_processing_task(); // This task does NOT require a slot\n\n        // Release the slot\n        sem_post(&slots_sem);\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[T];\n    pthread_mutex_init(&count_mutex, NULL);\n    sem_init(&slots_sem, 0, MAX_CONCURRENT_SLOTS);\n\n    for (int i = 0; i < T; ++i) {\n        pthread_create(&threads[i], NULL, worker_thread, NULL);\n    }\n\n    for (int i = 0; i < T; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    printf(\"Final total processed count: %d\\n\", total_processed_count);\n\n    pthread_mutex_destroy(&count_mutex);\n    sem_destroy(&slots_sem);\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "מה יהיה הערך הסופי של המונה total_processed_count בסיום ריצת התוכנית, בהנחה שאין בעיות סנכרון בגישה אליו?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "מהו המספר המקסימלי האמיתי של חוטים שיכולים להיות *במקביל* בשלב ה'עיבוד הפעיל' של הפריט (החלק המדמה `usleep(rand() % 50);`) בכל רגע נתון, בהינתן שהקוד כפי שהוא כרגע רץ, ושמשימת ה-`post_processing_task()` אורכת זמן לא זניח?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.3",
+        "text": "תקנו את פונקציית `worker_thread` כך שתתאים לדרישה המקורית: לכל היותר MAX_CONCURRENT_SLOTS חוטים יהיו בשלב ה'עיבוד הפעיל' של הפריט, ומשימת ה-`post_processing_task()` לא תצרוך חריץ עיבוד. יש לכתוב רק את הפונקציה המתוקנת.",
+        "code_snippet": "void* worker_thread(void* arg) {\n    // ... (your corrected code here)\n}",
+        "options": null
+      },
+      {
+        "id": "1.4",
+        "text": "הסבירו מדוע הקוד המקורי, כפי שמוצג, אינו עומד ביעילות בדרישת ה-MAX_CONCURRENT_SLOTS, וכיצד התיקון שלכם פותר זאת.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.1: הערך הסופי של total_processed_count יהיה T * N_OPS. המונה מוגן באמצעות mutex, כך שאין תנאי מירוץ על עדכון המונה עצמו, וכל פעולה של כל חוט מקדמת אותו פעם אחת.\n\n1.2: המספר המקסימלי האמיתי של חוטים שיכולים להיות במקביל בשלב ה'עיבוד הפעיל' (usleep(rand() % 50);) הוא עדיין MAX_CONCURRENT_SLOTS. הסיבה היא שחוט מחזיק את הסמפור (sem_wait) לפני שהוא נכנס לחלק העיבוד הפעיל, ומשחרר אותו (sem_post) רק לאחר שהוא מסיים גם את ה-post_processing_task(). כלומר, בזמן שמשימת ה-post_processing_task() מתבצעת, החוט עדיין מחזיק את אחד מ'חריצי העיבוד'. למרות שהמשימה עצמה אינה דורשת חריץ, הקוד גורם לה לצרוך אחד כזה בפועל. לכן, בפועל, תמיד יהיו לכל היותר MAX_CONCURRENT_SLOTS חוטים אשר נמצאים או בשלב העיבוד הפעיל או בשלב ה-post_processing_task, שניהם יחד צורכים חריץ.\n\n1.3: פונקציית worker_thread המתוקנת:\n\n```c\nvoid* worker_thread(void* arg) {\n    for (int i = 0; i < N_OPS; ++i) {\n        // Acquire a slot\n        sem_wait(&slots_sem);\n\n        // Simulate item processing (requires a slot)\n        usleep(rand() % 50);\n\n        pthread_mutex_lock(&count_mutex);\n        total_processed_count++;\n        printf(\"Thread %ld processed item %d. Total processed: %d\\n\",\n               (long)pthread_self(), i + 1, total_processed_count);\n        pthread_mutex_unlock(&count_mutex);\n\n        // Release the slot IMMEDIATELY after processing is done\n        sem_post(&slots_sem);\n\n        // Now perform the post-processing task, which does NOT require a slot\n        post_processing_task(); \n    }\n    return NULL;\n}\n```\n\n1.4: הקוד המקורי אינו עומד ביעילות בדרישת ה-MAX_CONCURRENT_SLOTS מכיוון שהוא משחרר את חריץ העיבוד (sem_post) רק *לאחר* ביצוע משימת ה-`post_processing_task()`. המשמעות היא שבזמן שחוט מבצע את ה-`post_processing_task()`, הוא עדיין מחזיק אחד מ'חריצי העיבוד' המוגבלים. הדבר מונע מחוטים אחרים להיכנס לשלב ה'עיבוד הפעיל' של הפריט, גם אם 'חריץ עיבוד' פנוי בפועל. זה מפחית את רמת המקביליות האפקטיבית לשלב העיבוד הפעיל, שכן חריצים מוחזקים שלא לצורך. התיקון פותר זאת על ידי שחרור מיידי של חריץ העיבוד (sem_post) ברגע ששלב ה'עיבוד הפעיל' מסתיים. כך, חוט אחר יכול מיד לתפוס את החריץ הפנוי ולהתחיל בעיבוד, בעוד שהחוט הקודם ממשיך לבצע את ה-`post_processing_task()` באופן עצמאי, מבלי לצרוך חריץ עיבוד יקר."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

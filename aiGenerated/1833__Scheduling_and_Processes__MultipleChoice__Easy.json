@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Scheduling and Processes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 21:06:03",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1031,
+      "output_tokens": 327,
+      "total_tokens": 2411
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Scheduling",
+      "Processes",
+      "Process States"
+    ],
+    "content": {
+      "text": "באיזה מצב נמצא תהליך הממתין לסיום פעולת קלט/פלט (I/O)?",
+      "code_snippet": null,
+      "options": [
+        "א. מצב ריצה (Running)",
+        "ב. מצב מוכן (Ready)",
+        "ג. מצב המתנה (Waiting/Blocked)",
+        "ד. מצב סיום (Terminated)",
+        "ה. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג'. כאשר תהליך מבצע פעולת קלט/פלט וחייב להמתין לסיומה, הוא עובר למצב המתנה (Waiting/Blocked). במצב זה, התהליך אינו יכול לרוץ על המעבד עד שפעולת הקלט/פלט תושלם והוא יועבר בחזרה למצב מוכן על ידי המתזמן."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

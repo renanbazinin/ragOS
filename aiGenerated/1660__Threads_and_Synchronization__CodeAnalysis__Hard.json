@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Threads and Synchronization",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 19:48:39",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3826,
+      "output_tokens": 2951,
+      "total_tokens": 14185
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Threads",
+      "Synchronization",
+      "Deadlock",
+      "Starvation",
+      "Resource Management",
+      "Mutexes",
+      "Condition Variables"
+    ],
+    "content": {
+      "text": "נתונה מערכת מרובת חוטים המנהלת מספר סוגי משאבים. ישנם NUM_RESOURCE_TYPES סוגי משאבים, הממוספרים מ-0 עד NUM_RESOURCE_TYPES-1. לכל סוג משאב i, קיימים INITIAL_INSTANCES מופעים זמינים. חוטים מעוניינים לרכוש בו-זמנית מופע אחד משני סוגי משאבים *שונים* (res1_type ו-res2_type), לבצע עבודה כלשהי, ולאחר מכן לשחרר אותם.\n\nעליכם לממש את הפונקציות acquire_two_resources(int res1_type, int res2_type) ו-release_two_resources(int res1_type, int res2_type). המימוש צריך להבטיח את הדרישות הבאות:\n1. מניעה הדדית (Mutual Exclusion): כל מופע משאב יכול להיות מוחזק על ידי חוט אחד בלבד בכל רגע נתון.\n2. מניעת קיפאון (Deadlock Prevention): המערכת לעולם לא תיכנס למצב קיפאון.\n3. מניעת הרעבה (Starvation Prevention): חוט שמבקש משאבים יצליח לרכוש אותם בסופו של דבר, בהנחה שהם משוחררים.\n4. שימוש במנעולים ומשתני תנאי בלבד: אין להשתמש בפקודות מכונה אטומיות או אובייקטי סנכרון אחרים (כמו סמפורים). יש להימנע מ-spinning על-ידי שימוש נכון במשתני תנאי.\n\nשימו לב: יש להניח ש-res1_type ו-res2_type תמיד יהיו ערכים חוקיים ו-res1_type != res2_type.",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h> // For sleep\n#include <algorithm> // For std::min/max\n\n#define NUM_RESOURCE_TYPES 3 // מספר סוגי המשאבים\n#define INITIAL_INSTANCES 1  // מספר המופעים הזמינים מכל סוג משאב\n\n// Global state for resources\nint available_instances[NUM_RESOURCE_TYPES];\n\n// Synchronization primitives\npthread_mutex_t global_lock;\npthread_cond_t resource_cond[NUM_RESOURCE_TYPES];\n\nvoid init_resources() {\n    pthread_mutex_init(&global_lock, NULL);\n    for (int i = 0; i < NUM_RESOURCE_TYPES; ++i) {\n        available_instances[i] = INITIAL_INSTANCES;\n        pthread_cond_init(&resource_cond[i], NULL);\n    }\n}\n\nvoid destroy_resources() {\n    pthread_mutex_destroy(&global_lock);\n    for (int i = 0; i < NUM_RESOURCE_TYPES; ++i) {\n        pthread_cond_destroy(&resource_cond[i]);\n    }\n}\n\n// Function to acquire two distinct resources\nvoid acquire_two_resources(int res1_type, int res2_type) {\n    // יש לממש כאן\n}\n\n// Function to release two distinct resources\nvoid release_two_resources(int res1_type, int res2_type) {\n    // יש לממש כאן\n}\n\n// Example thread function (provided for context, not part of the solution)\ntypedef struct {\n    int id;\n    int r1;\n    int r2;\n} thread_arg_t;\n\nvoid* thread_func(void* arg) {\n    thread_arg_t* args = (thread_arg_t*)arg;\n    printf(\"Thread %d: Requesting resources %d and %d\\n\", args->id, args->r1, args->r2);\n    acquire_two_resources(args->r1, args->r2);\n    printf(\"Thread %d: Acquired resources %d and %d. Working...\\n\", args->id, args->r1, args->r2);\n    sleep(1); // Simulate work\n    release_two_resources(args->r1, args->r2);\n    printf(\"Thread %d: Released resources %d and %d. Exiting.\\n\", args->id, args->r1, args->r2);\n    return NULL;\n}\n\nint main() {\n    init_resources();\n\n    pthread_t threads[5];\n    thread_arg_t args[5];\n\n    // Scenario demonstrating potential deadlock and need for ordering/fairness\n    args[0] = (thread_arg_t){0, 0, 1}; // T0 wants (0, 1)\n    args[1] = (thread_arg_t){1, 1, 0}; // T1 wants (1, 0)\n    args[2] = (thread_arg_t){2, 0, 2}; // T2 wants (0, 2)\n    args[3] = (thread_arg_t){3, 2, 1}; // T3 wants (2, 1)\n    args[4] = (thread_arg_t){4, 1, 2}; // T4 wants (1, 2)\n\n    for (int i = 0; i < 5; ++i) {\n        pthread_create(&threads[i], NULL, thread_func, &args[i]);\n    }\n\n    for (int i = 0; i < 5; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    destroy_resources();\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון מבוסס על הטלת סדר גלובלי על רכישת המשאבים כדי למנוע קיפאון. כל חוט המבקש שני משאבים (res1_type, res2_type) ירכוש אותם תמיד בסדר עולה של המזהים שלהם (כלומר, קודם את המשאב בעל המזהה הנמוך יותר, ואז את המשאב בעל המזהה הגבוה יותר). זה מבטיח שאין תלות מעגלית, ובכך מונע קיפאון.\n\nלצורך סנכרון, נשתמש במנעול גלובלי (global_lock) כדי להגן על המשתנים available_instances ובמשתנה תנאי נפרד (resource_cond) עבור כל סוג משאב. חוטים ימתינו על משתנה התנאי המתאים אם המשאב המבוקש אינו זמין.\n\n**פונקציית acquire_two_resources:**\n1. החוט קובע את הסדר הקנוני לרכישת המשאבים: first_res יהיה המשאב בעל המזהה הקטן יותר, ו-second_res יהיה המשאב בעל המזהה הגדול יותר. אנו משתמשים ב-std::min ו-std::max לשם כך.\n2. החוט נועל את ה-global_lock.\n3. החוט נכנס ללולאה (while) ובודק אם המופע של first_res זמין. אם available_instances[first_res] שווה 0, הוא ממתין על resource_cond[first_res] באמצעות pthread_cond_wait, אשר משחרר את המנעול באופן אטומי ומחכה. כאשר הוא מתעורר, הוא נועל מחדש את המנעול ובודק שוב את התנאי (spurious wakeups). כאשר המשאב זמין, הוא רוכש אותו (מפחית את available_instances[first_res]).\n4. באופן דומה, החוט נכנס ללולאה (while) ובודק אם המופע של second_res זמין. אם available_instances[second_res] שווה 0, הוא ממתין על resource_cond[second_res]. כאשר המשאב זמין, הוא רוכש אותו (מפחית את available_instances[second_res]).\n5. לאחר שרכש את שני המשאבים, החוט משחרר את ה-global_lock.\n\n**פונקציית release_two_resources:**\n1. החוט נועל את ה-global_lock.\n2. החוט משחרר את res1_type (מגדיל את available_instances[res1_type]) ומודיע לחוטים הממתינים על resource_cond[res1_type] באמצעות pthread_cond_broadcast (כדי למנוע הרעבה).\n3. החוט משחרר את res2_type (מגדיל את available_instances[res2_type]) ומודיע לחוטים הממתינים על resource_cond[res2_type] באמצעות pthread_cond_broadcast.\n4. לאחר ששחרר את שני המשאבים, החוט משחרר את ה-global_lock.\n\n**מניעת קיפאון:** הטלת סדר רכישה עולמי (תמיד קודם משאב קטן ואז גדול) מונעת תלות מעגלית, ולכן מונעת קיפאון. חוטים תמיד מנסים לרכוש את המשאב בעל המזהה הנמוך יותר לפני המשאב בעל המזהה הגבוה יותר. לכן, לא ייתכן מצב שבו חוט A מחזיק במשאב X וממתין למשאב Y, וחוט B מחזיק במשאב Y וממתין למשאב X, אם X ו-Y שונים ו-X < Y.\n**מניעת הרעבה:** שימוש ב-pthread_cond_broadcast במקום pthread_cond_signal מבטיח שכל החוטים הממתינים על משאב מסוים יתעוררו כאשר הוא משתחרר, ויקבלו הזדמנות לרכוש אותו. זה עוזר למנוע הרעבה, שכן כל חוט בסופו של דבר יתעורר ויבדוק שוב את התנאי שלו. גם אם חוט אחר ירכוש את המשאב, החוט המורעב ימשיך להמתין ויתעורר שוב בפעם הבאה שהמשאב ישוחרר.",
+      "code_snippet": "void acquire_two_resources(int res1_type, int res2_type) {\n    // Ensure canonical order to prevent deadlock\n    int first_res = std::min(res1_type, res2_type);\n    int second_res = std::max(res1_type, res2_type);\n\n    pthread_mutex_lock(&global_lock);\n\n    // Acquire the first resource in canonical order\n    while (available_instances[first_res] == 0) {\n        pthread_cond_wait(&resource_cond[first_res], &global_lock);\n    }\n    available_instances[first_res]--;\n\n    // Acquire the second resource in canonical order\n    while (available_instances[second_res] == 0) {\n        pthread_cond_wait(&resource_cond[second_res], &global_lock);\n    }\n    available_instances[second_res]--;\n\n    pthread_mutex_unlock(&global_lock);\n}\n\nvoid release_two_resources(int res1_type, int res2_type) {\n    pthread_mutex_lock(&global_lock);\n\n    // Release res1_type and signal waiting threads\n    available_instances[res1_type]++;\n    pthread_cond_broadcast(&resource_cond[res1_type]);\n\n    // Release res2_type and signal waiting threads\n    available_instances[res2_type]++;\n    pthread_cond_broadcast(&resource_cond[res2_type]);\n\n    pthread_mutex_unlock(&global_lock);\n}"
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

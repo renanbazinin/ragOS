@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Producer-Consumer",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 10:27:52",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1632,
+      "output_tokens": 1233,
+      "total_tokens": 5689
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Semaphores",
+      "Producer-Consumer",
+      "Concurrency",
+      "Deadlock"
+    ],
+    "content": {
+      "text": "נתון קטע קוד המממש את בעיית היצרן-צרכן (Producer-Consumer Problem) באמצעות סמפורים. גודל הבאפר הוא `BUFFER_SIZE` (לצורך השאלה, נניח `BUFFER_SIZE = 5`). קיימים מספר תהליכי יצרן ותהליכי צרכן הפועלים במקביל. שימו לב לסדר פעולות הסמפורים בפונקציית היצרן.\n\nבמצב בו הבאפר *מלא לחלוטין* (כלומר, כל `BUFFER_SIZE` המקומות תפוסים) וכל תהליכי היצרן מנסים להוסיף פריטים, איזו בעיה תתעורר בהכרח במערכת?",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <semaphore.h>\n\n#define BUFFER_SIZE 5\n\nint buffer[BUFFER_SIZE];\nint in = 0;\nint out = 0;\n\nsem_t mutex;    // Mutual exclusion for buffer access\nsem_t empty;    // Counts empty slots\nsem_t full;     // Counts full slots\n\nvoid *producer(void *arg) {\n    int item; // Assume item is produced elsewhere\n    \n    // Problematic order of semaphore operations\n    sem_wait(&mutex); // 1. Acquire mutex first\n    sem_wait(&empty); // 2. Then wait for an empty slot\n\n    // Critical Section: add item to buffer\n    buffer[in] = item;\n    in = (in + 1) % BUFFER_SIZE;\n    // End Critical Section\n\n    sem_post(&mutex); // 3. Release mutex\n    sem_post(&full);  // 4. Signal that a slot is full\n    \n    return NULL;\n}\n\nvoid *consumer(void *arg) {\n    int item;\n\n    sem_wait(&full);  // 1. Wait for a full slot\n    sem_wait(&mutex); // 2. Acquire mutex\n\n    // Critical Section: remove item from buffer\n    item = buffer[out];\n    out = (out + 1) % BUFFER_SIZE;\n    // End Critical Section\n\n    sem_post(&mutex); // 3. Release mutex\n    sem_post(&empty); // 4. Signal that a slot is empty\n    \n    return NULL;\n}\n\nint main() {\n    sem_init(&mutex, 0, 1);           // Initialize mutex to 1 (binary semaphore)\n    sem_init(&empty, 0, BUFFER_SIZE); // Initialize empty to BUFFER_SIZE\n    sem_init(&full, 0, 0);            // Initialize full to 0\n\n    // ... (thread creation and joining logic would go here)\n    return 0;\n}",
+      "options": [
+        "א. תנאי מרוץ (Race Condition) בגישה לבאפר.",
+        "ב. גלישת באפר (Buffer Overflow).",
+        "ג. קיפאון (Deadlock).",
+        "ד. מחסור בזיכרון (Out of Memory).",
+        "ה. התוכנית תרוץ כרגיל ללא בעיות."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג'. בקטע הקוד הנתון, תהליך היצרן מבצע `sem_wait(&mutex)` לפני `sem_wait(&empty)`. במצב שבו הבאפר מלא לחלוטין, הסמפור `empty` יהיה 0. כאשר תהליך יצרן מנסה להוסיף פריט, הוא יצליח לרכוש את המוטקס (`mutex`) ולאחר מכן יחסם בניסיון לבצע `sem_wait(&empty)`. אם מספר תהליכי יצרן ינסו לעשות זאת, הם ירכשו את המוטקס בזה אחר זה (כאשר כל אחד משחרר את המוטקס לאחר שנחסם על `empty`, רק כדי שאחר ירכוש אותו וייחסם גם הוא), או שהמוטקס יישאר תפוס על ידי יצרן אחד שחסום על `empty`. בכל מקרה, המוטקס לא יהיה זמין לתהליכי הצרכן.\n\nתהליכי הצרכן, אשר צריכים את המוטקס כדי לגשת לבאפר ולפנות מקום (ובכך לאפשר ל-`empty` לעלות ולשחרר את היצרנים), לא יוכלו לרכוש אותו. כתוצאה מכך, גם תהליכי היצרן וגם תהליכי הצרכן ייחסמו וייכנסו למצב של קיפאון (Deadlock)."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

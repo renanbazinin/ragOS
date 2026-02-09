@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Producer-Consumer",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 07:43:32",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3452,
+      "output_tokens": 2446,
+      "total_tokens": 9069
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "Open",
+    "topic": [
+      "Synchronization",
+      "Producer-Consumer",
+      "Semaphores",
+      "Mutexes",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתונה בעיית היצרן-צרכן הקלאסית: ישנו חוט יצרן המייצר פריטים ומוסיף אותם למאגר משותף, וחוט צרכן הצורך פריטים מהמאגר. המאגר הוא מאגר חסום בגודל N.\nיש לממש את פונקציות ה-`producer` וה-`consumer` תוך שימוש בסמפורים ובמנעול הדדי (mutex) על מנת להבטיח סנכרון נכון ולמנוע מצבי מירוץ וקיפאון.\nיש להניח שקיימות הפונקציות הבאות (אין צורך לממש אותן):\n- `Item produce_item()`: מייצרת פריט חדש.\n- `void consume_item(Item item)`: צורכת פריט נתון.\n- `void add_item_to_buffer(Item item)`: מוסיפה פריט למאגר המשותף. פונקציה זו אינה בטוחה לשימוש במקביל.\n- `Item remove_item_from_buffer()`: מסירה ומחזירה פריט מהמאגר המשותף. פונקציה זו אינה בטוחה לשימוש במקביל.\n\nיש להשתמש במשתנים הגלובליים הבאים (יש לציין את ערכי האתחול בהערה):\n- `sem_t empty;` // סמפור המונה את מספר המקומות הפנויים במאגר.\n- `sem_t full;` // סמפור המונה את מספר הפריטים המלאים במאגר.\n- `pthread_mutex_t mutex;` // מנעול הדדי להגנה על גישה למאגר המשותף.\n- `const int N = 10;` // גודל המאגר.",
+      "code_snippet": "C\n#include <semaphore.h>\n#include <pthread.h>\n\n// Assume Item is defined, e.g., typedef int Item;\ntypedef int Item;\n\n// Global variables (student needs to define and initialize)\n// sem_t empty;   // init to N\n// sem_t full;    // init to 0\n// pthread_mutex_t mutex; // init to PTHREAD_MUTEX_INITIALIZER\n// const int N = 10; // Buffer size\n\n// Given functions (do not implement these)\nItem produce_item();\nvoid consume_item(Item item);\nvoid add_item_to_buffer(Item item);\nItem remove_item_from_buffer();\n\nvoid* producer(void* arg) {\n    // Your implementation here\n    return NULL;\n}\n\nvoid* consumer(void* arg) {\n    // Your implementation here\n    return NULL;\n}\n",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "בעיית יצרן-צרכן נפתרת באמצעות שלושה אובייקטי סנכרון: סמפור `empty` המונה את מספר המקומות הפנויים במאגר (מאותחל ל-N, גודל המאגר), סמפור `full` המונה את מספר הפריטים המלאים במאגר (מאותחל ל-0), ומנעול הדדי `mutex` המגן על הגישה למאגר המשותף עצמו.\n\nהיצרן מבצע את הפעולות הבאות:\n1.  מייצר פריט חדש (`produce_item()`).\n2.  ממתין למקום פנוי במאגר באמצעות `sem_wait(&empty)`. פעולה זו מקטינה את מונה המקומות הפנויים וחוסמת את היצרן אם המאגר מלא.\n3.  נועל את הגישה למאגר המשותף באמצעות `pthread_mutex_lock(&mutex)` כדי למנוע מצבי מירוץ כאשר הוא מוסיף פריט.\n4.  מוסיף את הפריט למאגר באמצעות `add_item_to_buffer(item)`.\n5.  משחרר את הגישה למאגר באמצעות `pthread_mutex_unlock(&mutex)`.\n6.  מאותת שיש פריט מלא במאגר באמצעות `sem_post(&full)`. פעולה זו מגדילה את מונה הפריטים המלאים ומעירה צרכנים ממתינים במידת הצורך.\n\nהצרכן מבצע את הפעולות הבאות:\n1.  ממתין לפריט מלא במאגר באמצעות `sem_wait(&full)`. פעולה זו מקטינה את מונה הפריטים המלאים וחוסמת את הצרכן אם המאגר ריק.\n2.  נועל את הגישה למאגר המשותף באמצעות `pthread_mutex_lock(&mutex)` כדי למנוע מצבי מירוץ כאשר הוא מסיר פריט.\n3.  מסיר את הפריט מהמאגר באמצעות `remove_item_from_buffer()`.\n4.  משחרר את הגישה למאגר באמצעות `pthread_mutex_unlock(&mutex)`.\n5.  מאותת שיש מקום פנוי במאגר באמצעות `sem_post(&empty)`. פעולה זו מגדילה את מונה המקומות הפנויים ומעירה יצרנים ממתינים במידת הצורך.\n6.  צורך את הפריט (`consume_item(item)`).\n\nהמנעול ההדדי מבטיח שרק חוט אחד יוכל לגשת למאגר המשותף בכל רגע נתון, ובכך מונע מצבי מירוץ בגישה לנתוני המאגר. הסמפורים מבטיחים שהיצרן לא ינסה להוסיף פריט למאגר מלא, והצרכן לא ינסה להסיר פריט ממאגר ריק.",
+      "code_snippet": "C\n#include <semaphore.h>\n#include <pthread.h>\n#include <stdio.h> // Included for potential debugging prints, not strictly required for logic\n\n// Assume Item is defined\ntypedef int Item;\n\n// Global variables (initialization should happen in main or similar setup function)\nsem_t empty;   // Number of free spots, init to N\nsem_t full;    // Number of items in buffer, init to 0\npthread_mutex_t mutex; // Protects buffer access, init to PTHREAD_MUTEX_INITIALIZER\nconst int N = 10; // Buffer size\n\n// Dummy functions (student uses these, not implements)\n// In a real scenario, these would interact with a shared buffer array\nItem produce_item() {\n    static int counter = 0;\n    return counter++;\n}\n\nvoid consume_item(Item item) {\n    // printf(\"Consumer consumed item: %d\\n\", item);\n}\n\nvoid add_item_to_buffer(Item item) {\n    // This would typically add 'item' to a shared buffer (e.g., circular array)\n    // For this problem, assume it's an abstract operation.\n    // printf(\"Producer added item: %d\\n\", item);\n}\n\nItem remove_item_from_buffer() {\n    // This would typically remove and return an item from a shared buffer\n    // For this problem, assume it's an abstract operation.\n    return 0; // Dummy return\n}\n\nvoid* producer(void* arg) {\n    Item item;\n    while (1) {\n        item = produce_item();      // 1. Produce an item\n        sem_wait(&empty);           // 2. Wait for an empty slot (decrement empty, block if 0)\n        pthread_mutex_lock(&mutex); // 3. Lock buffer access\n        add_item_to_buffer(item);   // 4. Add item to buffer\n        pthread_mutex_unlock(&mutex); // 5. Unlock buffer access\n        sem_post(&full);            // 6. Signal that a slot is full (increment full)\n        // Optional: sleep or other work to simulate time\n    }\n    return NULL;\n}\n\nvoid* consumer(void* arg) {\n    Item item;\n    while (1) {\n        sem_wait(&full);            // 1. Wait for a full slot (decrement full, block if 0)\n        pthread_mutex_lock(&mutex); // 2. Lock buffer access\n        item = remove_item_from_buffer(); // 3. Remove item from buffer\n        pthread_mutex_unlock(&mutex); // 4. Unlock buffer access\n        sem_post(&empty);           // 5. Signal that a slot is empty (increment empty)\n        consume_item(item);         // 6. Consume the item\n        // Optional: sleep or other work to simulate time\n    }\n    return NULL;\n}\n\n/*\n// Example main function for testing the setup:\nint main() {\n    // Initialize semaphores and mutex\n    sem_init(&empty, 0, N); // N empty slots\n    sem_init(&full, 0, 0);  // 0 full slots\n    pthread_mutex_init(&mutex, NULL); // Initialize mutex\n\n    pthread_t prod_tid, cons_tid;\n\n    // Create producer and consumer threads\n    pthread_create(&prod_tid, NULL, producer, NULL);\n    pthread_create(&cons_tid, NULL, consumer, NULL);\n\n    // Join threads (in a real app, these might run indefinitely)\n    pthread_join(prod_tid, NULL);\n    pthread_join(cons_tid, NULL);\n\n    // Clean up resources\n    sem_destroy(&empty);\n    sem_destroy(&full);\n    pthread_mutex_destroy(&mutex);\n\n    return 0;\n}\n*/"
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

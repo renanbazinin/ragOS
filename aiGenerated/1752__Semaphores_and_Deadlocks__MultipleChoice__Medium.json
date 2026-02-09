@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Deadlocks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 20:32:16",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1047,
+      "output_tokens": 951,
+      "total_tokens": 3578
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Semaphores",
+      "Deadlocks",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "בהינתן קטע הקוד הבא המדמה שימוש בסמפורים ממונים (counting semaphores) על ידי שני תהליכונים (threads):\n\nאיזו מהטענות הבאות נכונה לגבי התרחשות קיפאון (Deadlock) בתרחיש זה?",
+      "code_snippet": "sem_t s1, s2;\n\nvoid* thread1_func(void* arg) {\n    sem_wait(&s1);\n    // מבצע עבודה כלשהי\n    sem_wait(&s2);\n    // מבצע עבודה נוספת\n    sem_post(&s2);\n    sem_post(&s1);\n    return NULL;\n}\n\nvoid* thread2_func(void* arg) {\n    sem_wait(&s2);\n    // מבצע עבודה כלשהי\n    sem_wait(&s1);\n    // מבצע עבודה נוספת\n    sem_post(&s1);\n    sem_post(&s2);\n    return NULL;\n}\n\nint main() {\n    sem_init(&s1, 0, 1); // סמפור בינארי\n    sem_init(&s2, 0, 1); // סמפור בינארי\n    pthread_t t1, t2;\n    pthread_create(&t1, NULL, thread1_func, NULL);\n    pthread_create(&t2, NULL, thread2_func, NULL);\n    pthread_join(t1, NULL);\n    pthread_join(t2, NULL);\n    sem_destroy(&s1);\n    sem_destroy(&s2);\n    return 0;\n}",
+      "options": [
+        "א. קיפאון לעולם לא יתרחש, שכן כל תהליכון מבצע שחרור (sem_post) עבור כל סמפור שרכש.",
+        "ב. קיפאון תמיד יתרחש, מכיוון שקיים מעגל המתנה (circular wait) מובנה ברכישת הסמפורים.",
+        "ג. קיפאון עשוי להתרחש, וניתן למנוע אותו על ידי הבטחה ששני התהליכונים ירכשו את הסמפורים באותו סדר עקבי.",
+        "ד. קיפאון עשוי להתרחש, אך לא ניתן למנוע אותו רק על ידי שינוי סדר רכישת הסמפורים."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "התשובה הנכונה היא ג'. קיפאון עשוי להתרחש בתרחיש זה. אם thread1 רוכש את s1 ו-thread2 רוכש את s2, ואז כל אחד מהם מנסה לרכוש את הסמפור השני (s2 על ידי thread1 ו-s1 על ידי thread2), שניהם יחסמו באופן בלתי הפיך, מה שיוביל לקיפאון. קיפאון לא יתרחש תמיד, למשל אם thread1 מספיק לרכוש ולשחרר את שני הסמפורים לפני ש-thread2 מצליח לרכוש את s2. הדרך הקלאסית למנוע קיפאון כזה, הנובע מתלות מעגלית (circular wait) על משאבים, היא על ידי קביעת סדר רכישה גלובלי (resource ordering) לכל המשאבים המשותפים, ובכך להבטיח שכל התהליכונים ירכשו אותם באותו סדר. בכך מבוטל התנאי של מעגל המתנה, שהוא אחד מארבעת התנאים ההכרחיים לקיפאון."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

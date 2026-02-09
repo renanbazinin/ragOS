@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Concurrency and Condition Variables",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 11:34:59",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2951,
+      "output_tokens": 2271,
+      "total_tokens": 9750
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Concurrency",
+      "Condition Variables",
+      "Pthreads"
+    ],
+    "content": {
+      "text": "נתונה תוכנית המממשת את בעיית היצרן-צרכן (Producer-Consumer) באמצעות mutex ומשתני תנאי (condition variables). קוד התוכנית מצורף:\n\nמה תהיה ההשפעה של שינוי הלולאות `while` בתנאי ההמתנה (שורות 20 ו-38 בקוד המצורף) לביטויי `if`? כלומר, אם השורה `while (count == BUFFER_SIZE)` ביצרן תשונה ל-`if (count == BUFFER_SIZE)` והשורה `while (count == 0)` בצרכן תשונה ל-`if (count == 0)`.\nא. התוכנית תמשיך לעבוד כרגיל, אין הבדל מהותי.\nב. התוכנית עלולה להיכנס למצב של Deadlock.\nג. התוכנית עלולה לייצר או לצרוך פריטים בצורה שגויה (לדרוס נתונים קיימים או לקרוא נתונים לא חוקיים).\nד. גם ב' וגם ג' עלולים לקרות.",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n\n#define BUFFER_SIZE 5\n\nint buffer[BUFFER_SIZE];\nint count = 0; // Number of items in buffer\nint in = 0;    // Next write position\nint out = 0;   // Next read position\n\npthread_mutex_t mutex;\npthread_cond_t cond_not_full;\npthread_cond_t cond_not_empty;\n\nvoid *producer(void *arg) {\n    for (int i = 0; i < 10; ++i) { // Produce 10 items\n        pthread_mutex_lock(&mutex);\n\n        while (count == BUFFER_SIZE) { // Line 20\n            printf(\"Producer: Buffer full, waiting...\\n\");\n            pthread_cond_wait(&cond_not_full, &mutex);\n        }\n\n        buffer[in] = i;\n        printf(\"Producer: Produced %d at index %d\\n\", i, in);\n        in = (in + 1) % BUFFER_SIZE;\n        count++;\n\n        pthread_cond_signal(&cond_not_empty);\n        pthread_mutex_unlock(&mutex);\n        usleep(rand() % 100000);\n    }\n    return NULL;\n}\n\nvoid *consumer(void *arg) {\n    for (int i = 0; i < 10; ++i) { // Consume 10 items\n        pthread_mutex_lock(&mutex);\n\n        while (count == 0) { // Line 38\n            printf(\"Consumer: Buffer empty, waiting...\\n\");\n            pthread_cond_wait(&cond_not_empty, &mutex);\n        }\n\n        int item = buffer[out];\n        printf(\"Consumer: Consumed %d from index %d\\n\", item, out);\n        out = (out + 1) % BUFFER_SIZE;\n        count--;\n\n        pthread_cond_signal(&cond_not_full);\n        pthread_mutex_unlock(&mutex);\n        usleep(rand() % 150000);\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t prod_tid, cons_tid;\n\n    pthread_mutex_init(&mutex, NULL);\n    pthread_cond_init(&cond_not_full, NULL);\n    pthread_cond_init(&cond_not_empty, NULL);\n\n    pthread_create(&prod_tid, NULL, producer, NULL);\n    pthread_create(&cons_tid, NULL, consumer, NULL);\n\n    pthread_join(prod_tid, NULL);\n    pthread_join(cons_tid, NULL);\n\n    pthread_mutex_destroy(&mutex);\n    pthread_cond_destroy(&cond_not_full);\n    pthread_cond_destroy(&cond_not_empty);\n\n    return 0;\n}",
+      "options": [
+        "א. התוכנית תמשיך לעבוד כרגיל, אין הבדל מהותי.",
+        "ב. התוכנית עלולה להיכנס למצב של Deadlock.",
+        "ג. התוכנית עלולה לייצר או לצרוך פריטים בצורה שגויה (לדרוס נתונים קיימים או לקרוא נתונים לא חוקיים).",
+        "ד. גם ב' וגם ג' עלולים לקרות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ד",
+      "explanation": "התשובה הנכונה היא ד'.\nשינוי הלולאות `while` לביטויי `if` בתנאי ההמתנה של משתני התנאי הוא טעות נפוצה וקריטית בשימוש במשתני תנאי.\nכאשר חוט (thread) מתעורר מקריאה ל-`pthread_cond_wait`, הוא לא בהכרח מתעורר בגלל שהתנאי שהוא ממתין לו אכן התקיים. יכולות להיות מספר סיבות להתעוררות:\n1.  **התעוררות שווא (Spurious wakeup):** חוטים יכולים להתעורר באופן ספונטני גם ללא קריאה ל-`signal` או `broadcast`. זוהי התנהגות מותרת על פי תקן POSIX.\n2.  **התעוררות מרובת חוטים (Multiple threads waking up):** אם מספר חוטים ממתינים על אותו משתנה תנאי, וחוט אחר קורא ל-`pthread_cond_signal` (שמעיר חוט אחד) או `pthread_cond_broadcast` (שמעיר את כולם), ייתכן שעד שהחוט שהתעורר יצליח לרכוש מחדש את המוטקס ולבדוק את התנאי, חוט אחר שהתעורר כבר שינה את המצב והתנאי כבר לא מתקיים עבורו.\n\nאם נשתמש ב-`if` במקום `while`, החוט יבדוק את התנאי רק פעם אחת לפני הכניסה ל-`wait`. כאשר הוא יתעורר מה-`wait` (מכל סיבה שהיא), הוא ימשיך מיד בביצוע הקוד שבא אחרי ה-`if` מבלי לבדוק מחדש אם התנאי עדיין תקף.\nזה עלול להוביל לשתי בעיות עיקריות:\n*   **צריכה/ייצור שגוי (Incorrect Consumption/Production):**\n    *   **היצרן:** אם היצרן מתעורר (למשל, מ-spurious wakeup או מכיוון שצרכן אחר צרך פריט אך הבאפר עדיין מלא יחסית), הוא ינסה להכניס פריט לבאפר גם אם הוא עדיין מלא (כי `count == BUFFER_SIZE` יתקיים שוב לאחר ההתעוררות והוא לא יבדוק זאת). זה יוביל לדריסת נתונים קיימים.\n    *   **הצרכן:** אם הצרכן מתעורר (למשל, מ-spurious wakeup או מכיוון שיצרן אחר ייצר פריט אך הבאפר עדיין ריק יחסית), הוא ינסה לקרוא פריט מהבאפר גם אם הוא עדיין ריק (כי `count == 0` יתקיים שוב לאחר ההתעוררות והוא לא יבדוק זאת). זה יוביל לקריאת נתונים לא חוקיים (garbage values) או ל-undefined behavior.\n*   **Deadlock:** במערכת מורכבת יותר עם מספר יצרנים וצרכנים, או בתרחישים ספציפיים, אם חוט מתעורר ומוצא שהתנאי עדיין לא מתקיים, אך הוא ממשיך בביצוע הקוד, הוא עשוי להגיע למצב בו הוא מנסה לבצע פעולה בלתי אפשרית מבלי להמתין שוב. לדוגמה, אם היצרן מתעורר כשהבאפר עדיין מלא, הוא יכתוב פריט, אך מכיוון שהבאפר היה מלא, הוא ידרוס פריט קיים ולא יאותת לצרכן. הצרכן, אם יתעורר כשהבאפר ריק, ינסה לקרוא פריט, אך מכיוון שהבאפר היה ריק, הוא יקרא ערך שגוי ולא יאותת ליצרן. במצב זה, תיתכן סיטואציה שבה כל החוטים נמצאים במצב המתנה או שהם כבר סיימו את פעולתם באופן שגוי, מה שמוביל למצב של Deadlock או לתוכנית שאינה מסיימת את עבודתה כראוי.\n\nלכן, יש לבדוק תמיד את התנאי בלולאת `while` לאחר ההתעוררות מ-`pthread_cond_wait`, כדי לוודא שהתנאי אכן מתקיים לפני שממשיכים בביצוע הקוד הקריטי."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

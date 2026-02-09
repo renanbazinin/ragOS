@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Signals",
+    "requested_type": "Open",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 08:42:23",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4591,
+      "output_tokens": 848,
+      "total_tokens": 7151
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Signals"
+    ],
+    "content": {
+      "text": "כתוב תוכנית C פשוטה המדגימה טיפול באות (signal). התוכנית צריכה ללכוד את אות SIGINT (הנשלח בדרך כלל בלחיצה על Ctrl+C) ובמקום לסיים את ריצתה, להדפיס הודעה מתאימה (לדוגמה: \"Caught SIGINT! Press Ctrl+\\ to quit.\") ולהמשיך לרוץ. התוכנית צריכה לאפשר יציאה מסודרת רק באמצעות אות SIGQUIT (Ctrl+\\).",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "כדי לטפל באותות, נשתמש בפונקציות מהספרייה `<signal.h>`. \n1.  **הגדרת פונקציית טיפול (Signal Handler):** ניצור פונקציה `sigint_handler` שתקבל את מספר האות כפרמטר ותבוצע כאשר `SIGINT` יתקבל. פונקציה זו תדפיס הודעה מתאימה.\n2.  **רישום ה-Handler:** נשתמש ב-`signal(SIGINT, sigint_handler);` בתוך `main` כדי לרשום את `sigint_handler` כפונקציית הטיפול עבור `SIGINT`.\n3.  **השארת התוכנית רצה:** כדי שהתוכנית לא תסיים את ריצתה מיד, נשתמש בלולאה אינסופית המכילה קריאה ל-`pause()`. הפונקציה `pause()` משעה את ביצוע התהליך עד לקבלת אות כלשהו.\n4.  **טיפול ב-SIGQUIT:** כברירת מחדל, `SIGQUIT` גורם לסיום התהליך וליצירת קובץ core dump. אם לא נרשום handler מיוחד עבורו, הוא יפעל כרגיל ויאפשר יציאה מהתוכנית.\n\n**קוד לדוגמה:**\n```c\n#include <stdio.h>\n#include <signal.h>\n#include <unistd.h> // for pause()\n\n// פונקציית טיפול עבור SIGINT\nvoid sigint_handler(int signum) {\n    printf(\"\\nCaught SIGINT (%d)! Press Ctrl+\\\\ to quit.\\n\", signum);\n    // לאחר טיפול באות, התוכנית ממשיכה מנקודת הקריאה ל-pause().\n}\n\nint main() {\n    printf(\"Program started. Try pressing Ctrl+C (SIGINT) to see the handler in action.\\n\");\n    printf(\"To quit, press Ctrl+\\\\ (SIGQUIT).\\n\");\n\n    // רישום פונקציית הטיפול עבור SIGINT\n    signal(SIGINT, sigint_handler);\n\n    // לולאה אינסופית שממתינה לאותות\n    while (1) {\n        pause(); // השהיית התהליך עד לקבלת אות\n    }\n\n    return 0; // קוד זה לעולם לא יגיע אליו אם יוצאים עם SIGQUIT\n}\n```"
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "IPC and Processes",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 19:41:50",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2411,
+      "output_tokens": 1537,
+      "total_tokens": 6374
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "IPC",
+      "Processes",
+      "Pipes"
+    ],
+    "content": {
+      "text": "בתכנות מערכות הפעלה, תקשורת בין תהליכים (IPC) היא מנגנון חיוני. נתון תרחיש בו תהליך הורה ותהליך ילד צריכים לתקשר באמצעות צינור (pipe).",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "כתבו תוכנית C המשתמשת ב-`fork()` וב-`pipe()` על מנת לממש את התרחיש הבא:\n1. התהליך ההורה ייצר N מספרים שלמים אקראיים (לדוגמה N=10) וישלח אותם דרך הצינור לתהליך הילד.\n2. התהליך הילד יקבל את המספרים דרך הצינור, יחשב את סכומם הכולל, וידפיס את הסכום הסופי.\n3. ודאו סיום תקין של שני התהליכים וטיפול נכון בקצוות הצינור.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "הסבירו בקצרה (עד 50 מילים) מדוע סגירת קצוות הצינור שאינם בשימוש היא קריטית לתקינות התוכנית, במיוחד עבור תהליך הילד.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "פתרון 10.1:\nלהלן דוגמת קוד ב-C המממשת את התרחיש הנדרש:\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n#include <time.h>\n\n#define NUM_COUNT 10 // מספר המספרים שההורה ישלח\n#define BUFFER_SIZE sizeof(int)\n\nint main() {\n    int pipefd[2]; // pipefd[0] לקריאה, pipefd[1] לכתיבה\n    pid_t pid;\n\n    // יצירת הצינור\n    if (pipe(pipefd) == -1) {\n        perror(\"pipe\");\n        exit(EXIT_FAILURE);\n    }\n\n    // יצירת תהליך ילד\n    pid = fork();\n\n    if (pid == -1) {\n        perror(\"fork\");\n        exit(EXIT_FAILURE);\n    }\n\n    if (pid == 0) { // קוד רץ בתהליך הילד\n        close(pipefd[1]); // הילד סוגר את קצה הכתיבה של הצינור - הוא רק קורא\n        int number, sum = 0;\n        printf(\"Child process (PID %d): Starting to receive numbers.\\n\", getpid());\n        \n        // קריאה מהצינור עד שההורה סוגר את קצה הכתיבה שלו\n        while (read(pipefd[0], &number, BUFFER_SIZE) > 0) {\n            sum += number;\n            printf(\"Child process (PID %d): Received %d, current sum %d\\n\", getpid(), number, sum);\n        }\n        close(pipefd[0]); // הילד סוגר את קצה הקריאה שלו\n        printf(\"Child process (PID %d): Final sum is %d\\n\", getpid(), sum);\n        exit(EXIT_SUCCESS);\n    } else { // קוד רץ בתהליך ההורה\n        close(pipefd[0]); // ההורה סוגר את קצה הקריאה של הצינור - הוא רק כותב\n        srand(time(NULL)); // אתחול מחולל המספרים האקראיים\n        printf(\"Parent process (PID %d): Starting to send numbers.\\n\", getpid());\n        \n        // שליחת N מספרים אקראיים לילד\n        for (int i = 0; i < NUM_COUNT; i++) {\n            int random_num = rand() % 100; // מספר אקראי בין 0 ל-99\n            write(pipefd[1], &random_num, BUFFER_SIZE);\n            printf(\"Parent process (PID %d): Sent %d\\n\", getpid(), random_num);\n            sleep(1); // הדמיית עבודה כלשהי\n        }\n        close(pipefd[1]); // ההורה סוגר את קצה הכתיבה שלו - מסמן לילד שאין עוד נתונים\n        wait(NULL); // ההורה ממתין לסיום תהליך הילד\n        printf(\"Parent process (PID %d): Child terminated. Exiting.\\n\", getpid());\n        exit(EXIT_SUCCESS);\n    }\n\n    return 0;\n}\n```\n\nפתרון 10.2:\nסגירת קצוות הצינור שאינם בשימוש היא קריטית למספר סיבות. העיקרית שבהן עבור תוכנית זו היא איתות סיום קריאה (EOF) לתהליך הילד. כאשר הילד קורא מהצינור בלולאה (`while (read(...) > 0)`), הוא מצפה שפעולת ה-`read` תחזיר 0 כדי לדעת שהתהליך הכותב סיים לשלוח נתונים וסגר את קצה הכתיבה. אם הילד לא סוגר את קצה הכתיבה שלו, ה-`read` שלו לעולם לא יחזיר 0 (EOF) מכיוון שעדיין קיים לפחות כותב פוטנציאלי (הילד עצמו), והתהליך הילד יתקע בהמתנה לקריאה נוספת. סגירת הקצוות הלא-רלוונטיים גם מונעת דליפות משאבים."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

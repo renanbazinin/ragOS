@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Deadlocks and Mutexes",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 21:40:35",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2445,
+      "output_tokens": 1594,
+      "total_tokens": 7904
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Deadlocks",
+      "Mutexes",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתונות שתי פונקציות, thread_A ו-thread_B, המייצגות שני תהליכונים (threads) המתחרים על שני משאבים משותפים, resource1 ו-resource2. כל משאב מוגן על ידי מנעול (mutex) משלו: mutex1 מגן על resource1 ו-mutex2 מגן על resource2. הקוד הבא מציג את המימוש של שתי הפונקציות:\n\nא. האם קיים פוטנציאל לקיפאון (deadlock) בתרחיש זה? נמקו את תשובתכם והסבירו באיזה אופן הקיפאון יכול להתרחש, תוך התייחסות לתנאים ההכרחיים לקיפאון.\n\nב. הציעו פתרון למניעת הקיפאון. הציגו את הקוד המתוקן עבור שתי הפונקציות (thread_A ו-thread_B) והסבירו כיצד הפתרון שלכם מונע קיפאון.",
+      "code_snippet": "typedef struct { int data; } Resource;\npthread_mutex_t mutex1 = PTHREAD_MUTEX_INITIALIZER;\npthread_mutex_t mutex2 = PTHREAD_MUTEX_INITIALIZER;\nResource resource1;\nResource resource2;\n\nvoid* thread_A(void* arg) {\n    pthread_mutex_lock(&mutex1);\n    // Access resource1\n    printf(\"Thread A acquired mutex1\\n\");\n    pthread_mutex_lock(&mutex2);\n    // Access resource2\n    printf(\"Thread A acquired mutex2\\n\");\n    // Do work with both resources\n    printf(\"Thread A working with both resources\\n\");\n    pthread_mutex_unlock(&mutex2);\n    pthread_mutex_unlock(&mutex1);\n    return NULL;\n}\n\nvoid* thread_B(void* arg) {\n    pthread_mutex_lock(&mutex2);\n    // Access resource2\n    printf(\"Thread B acquired mutex2\\n\");\n    pthread_mutex_lock(&mutex1);\n    // Access resource1\n    printf(\"Thread B acquired mutex1\\n\");\n    // Do work with both resources\n    printf(\"Thread B working with both resources\\n\");\n    pthread_mutex_unlock(&mutex1);\n    pthread_mutex_unlock(&mutex2);\n    return NULL;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "א. קיים פוטנציאל לקיפאון (deadlock) בתרחיש זה. הקיפאון יכול להתרחש באופן הבא:\n\n1.  **Mutual exclusion (מניעה הדדית):** מתקיים, שכן mutexים מבטיחים שרק תהליכון אחד יכול להחזיק במנעול נתון בזמן נתון.\n2.  **Hold and wait (החזק והמתן):** מתקיים. לדוגמה, thread_A יכול לרכוש את mutex1, ואז להמתין ל-mutex2. במקביל, thread_B יכול לרכוש את mutex2, ואז להמתין ל-mutex1.\n3.  **No preemption (אי-הפקעה):** מתקיים, שכן לא ניתן להפקיע מנעול מתהליכון שמחזיק בו בכוח. תהליכון חייב לשחרר את המנעול מרצונו.\n4.  **Circular wait (המתנה מעגלית):** מתקיים. אם thread_A מחזיק ב-mutex1 וממתין ל-mutex2, ו-thread_B מחזיק ב-mutex2 וממתין ל-mutex1, נוצרת שרשרת המתנה מעגלית שבה כל תהליכון ממתין למשאב שמוחזק על ידי תהליכון אחר בשרשרת.\n\nב. הפתרון הנפוץ והפשוט ביותר למניעת קיפאון בתרחיש זה הוא לכפות סדר גלובלי (global ordering) לרכישת המנעולים. אם כל התהליכונים ירכשו את המנעולים תמיד באותו סדר (לדוגמה, תמיד קודם mutex1 ואז mutex2), אזי תנאי ה-'Circular wait' נשבר, ובכך נמנע קיפאון.\n\nקוד מתוקן:\n```c\ntypedef struct { int data; } Resource;\npthread_mutex_t mutex1 = PTHREAD_MUTEX_INITIALIZER;\npthread_mutex_t mutex2 = PTHREAD_MUTEX_INITIALIZER;\nResource resource1;\nResource resource2;\n\nvoid* thread_A_fixed(void* arg) {\n    pthread_mutex_lock(&mutex1);\n    printf(\"Thread A acquired mutex1\\n\");\n    pthread_mutex_lock(&mutex2);\n    printf(\"Thread A acquired mutex2\\n\");\n    // Do work with both resources\n    printf(\"Thread A working with both resources\\n\");\n    pthread_mutex_unlock(&mutex2);\n    pthread_mutex_unlock(&mutex1);\n    return NULL;\n}\n\nvoid* thread_B_fixed(void* arg) {\n    pthread_mutex_lock(&mutex1); // Changed order\n    printf(\"Thread B acquired mutex1\\n\");\n    pthread_mutex_lock(&mutex2); // Changed order\n    printf(\"Thread B acquired mutex2\\n\");\n    // Do work with both resources\n    printf(\"Thread B working with both resources\\n\");\n    pthread_mutex_unlock(&mutex2);\n    pthread_mutex_unlock(&mutex1);\n    return NULL;\n}\n```\n\nהסבר: בפתרון זה, שני התהליכונים (thread_A_fixed ו-thread_B_fixed) מנסים לרכוש את mutex1 ראשון, ולאחר מכן את mutex2. בכך, אנו מבטיחים שלא ייווצר מצב שבו thread_A מחזיק ב-mutex1 וממתין ל-mutex2, בעוד ש-thread_B מחזיק ב-mutex2 וממתין ל-mutex1. תמיד יהיה סדר ברור לרכישת המשאבים, וזה מונע את תנאי ה-'Circular wait'."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

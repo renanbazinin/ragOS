@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Disks",
+    "topic_hint": "Disk Scheduling",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 09:28:19",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1032,
+      "output_tokens": 349,
+      "total_tokens": 2049
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Disk Scheduling",
+      "I/O"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של תזמון דיסקים (Disk Scheduling)?",
+      "code_snippet": null,
+      "options": [
+        "א. להפחית את זמן הגישה הממוצע לדיסק.",
+        "ב. להגדיל את כמות הנתונים שניתן לאחסן בדיסק.",
+        "ג. להבטיח שכל תהליך יקבל גישה לדיסק באותו פרק זמן.",
+        "ד. למנוע שגיאות קריאה/כתיבה בדיסק."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "המטרה העיקרית של תזמון דיסקים היא למזער את זמן הגישה הכולל לדיסק, ובפרט את זמן החיפוש (seek time) ואת זמן ההשהיה הסיבובית (rotational latency), ובכך לשפר את ביצועי מערכת הקלט/פלט. האפשרויות האחרות אינן המטרה העיקרית של תזמון דיסקים."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

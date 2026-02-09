@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Scheduling",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 09:05:09",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 999,
+      "output_tokens": 304,
+      "total_tokens": 2691
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Scheduling",
+      "CPU Scheduling"
+    ],
+    "content": {
+      "text": "מהו תפקידו העיקרי של מתזמן המעבד (CPU Scheduler)?",
+      "code_snippet": null,
+      "options": [
+        "א. להקצות זיכרון לתהליכים.",
+        "ב. לנהל את קבצי המערכת.",
+        "ג. להחליט איזה תהליך יקבל את המעבד ומתי.",
+        "ד. לטפל בפסיקות חומרה."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "ג'. מתזמן המעבד (CPU Scheduler) אחראי על בחירת התהליך הבא שיקבל את המעבד מבין התהליכים המוכנים לריצה, וקביעת משך הזמן שבו ירוץ. שאר האפשרויות מתארות תפקידים של רכיבים אחרים במערכת ההפעלה."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

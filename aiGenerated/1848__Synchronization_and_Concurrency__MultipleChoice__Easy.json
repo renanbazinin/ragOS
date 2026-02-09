@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Synchronization and Concurrency",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 21:12:00",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 998,
+      "output_tokens": 431,
+      "total_tokens": 1801
+    }
+  },
+  "question": {
+    "id": 5,
+    "type": "MultipleChoice",
+    "topic": [
+      "Synchronization",
+      "Concurrency",
+      "Mutex"
+    ],
+    "content": {
+      "text": "מהי המטרה העיקרית של מנעול (mutex) במערכת הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. לאפשר למספר חוטים (threads) לגשת למשאב משותף בו זמנית.",
+        "ב. להבטיח שרק חוט אחד ייגש לקטע קריטי (critical section) בכל רגע נתון.",
+        "ג. למנוע מצב של קיפאון (deadlock) בין חוטים.",
+        "ד. לשפר את ביצועי המערכת על ידי הפעלת יותר מחוט אחד במקביל."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "התשובה הנכונה היא ב'. מנעול (mutex) משמש כדי להגן על קטעים קריטיים של קוד, ובכך מבטיח שרק חוט ביצוע אחד יכול לגשת למשאב משותף או לבצע קטע קוד מסוים בכל רגע נתון. זה מונע מצבי מרוץ (race conditions) ושומר על עקביות הנתונים. מנעולים אינם מונעים deadlocks באופן אוטומטי, ולעיתים אף יכולים לגרום להם אם לא מיושמים נכון. כמו כן, הם אינם מאפשרים גישה סימולטנית למשאב משותף, אלא בדיוק ההיפך."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

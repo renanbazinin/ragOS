@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Producer-Consumer",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 07:38:52",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1101,
+      "output_tokens": 445,
+      "total_tokens": 2580
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Producer-Consumer",
+      "Synchronization",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "במודל היצרן-צרכן (Producer-Consumer), מהי המטרה העיקרית של השימוש במאגר משותף (shared buffer) יחד עם מנגנוני סנכרון?",
+      "code_snippet": null,
+      "options": [
+        "א. למנוע מצב של Deadlock בין היצרן לצרכן.",
+        "ב. להבטיח שהיצרן והצרכן יבצעו את פעולותיהם באותו קצב בדיוק.",
+        "ג. לאפשר ליצרן ולצרכן לפעול באופן אסינכרוני, תוך טיפול בהבדלי מהירויות ביניהם.",
+        "ד. להבטיח גישה בלעדית של היצרן למשאבים, בעוד הצרכן ממתין."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "המטרה העיקרית של מודל היצרן-צרכן, באמצעות מאגר משותף ומנגנוני סנכרון (כמו סמפורים או מנעולים), היא לאפשר ליצרן לייצר פריטים בקצב שלו ולצרכן לצרוך אותם בקצב שלו. המאגר המשותף משמש כ'חוצץ' המאפשר את הפעולה האסינכרונית ומגשר על פערי המהירות הפוטנציאליים בין היצרן לצרכן, מבלי שהם יצטרכו לחכות זה לזה כל הזמן."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

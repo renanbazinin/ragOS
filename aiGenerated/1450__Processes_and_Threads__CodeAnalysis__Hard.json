@@ -1,0 +1,52 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Processes and Threads",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 10:21:54",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2789,
+      "output_tokens": 3665,
+      "total_tokens": 15926
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Processes",
+      "Threads",
+      "Concurrency",
+      "System Calls",
+      "Deadlock"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה, המשתמשת בתהליכונים (threads) ותהליכים (processes):\nיש להניח שכל קריאות המערכת מצליחות. תזכורת: כל הדפסה לפלט הסטנדרטי מתבצעת מיד, ללא חוצץ (buffer) הדפסה או המתנה לירידת שורה.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <pthread.h>\n#include <sys/wait.h>\n\nvolatile int shared_counter = 0;\npthread_mutex_t mutex;\n\nvoid* thread_func(void* arg) {\n    int id = *(int*)arg;\n    printf(\"Thread %d (PID %d) attempting to lock mutex...\\n\", id, getpid());\n    pthread_mutex_lock(&mutex);\n    printf(\"Thread %d (PID %d) locked mutex. Counter before: %d\\n\", id, getpid(), shared_counter);\n    for (int i = 0; i < 2; ++i) {\n        shared_counter++;\n        usleep(10);\n    }\n    printf(\"Thread %d (PID %d) unlocking mutex. Counter after: %d\\n\", id, getpid(), shared_counter);\n    pthread_mutex_unlock(&mutex);\n    return NULL;\n}\n\nint main() {\n    pthread_mutex_init(&mutex, NULL);\n    pthread_t tids[2];\n    int ids[2] = {0, 1};\n\n    printf(\"Main (PID %d) starts.\\n\", getpid());\n\n    // Create threads that might be running when fork happens\n    pthread_create(&tids[0], NULL, thread_func, &ids[0]);\n    // Introduce a small delay to increase chance of tids[0] acquiring mutex before fork\n    usleep(100);\n    pthread_create(&tids[1], NULL, thread_func, &ids[1]);\n\n    // Now, fork. It's possible one of the threads (tids[0] or tids[1]) holds the mutex.\n    pid_t pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        exit(1);\n    } else if (pid == 0) { // Child process\n        printf(\"Child (PID %d) created.\\n\", getpid());\n        \n        // Attempt to lock the mutex in the child's main thread\n        printf(\"Child (PID %d) main thread attempting to lock mutex after fork...\\n\", getpid());\n        pthread_mutex_lock(&mutex); // This is the tricky part!\n        printf(\"Child (PID %d) main thread locked mutex. Counter before: %d\\n\", getpid(), shared_counter);\n        for (int i = 0; i < 3; ++i) {\n            shared_counter++;\n            usleep(10);\n        }\n        printf(\"Child (PID %d) main thread unlocking mutex. Counter after: %d\\n\", getpid(), shared_counter);\n        pthread_mutex_unlock(&mutex);\n\n        printf(\"Child (PID %d) final shared_counter: %d\\n\", getpid(), shared_counter);\n        exit(0);\n    } else { // Parent process\n        printf(\"Parent (PID %d) continues after fork.\\n\", getpid());\n        // Parent waits for its initial threads to finish.\n        pthread_join(tids[0], NULL);\n        pthread_join(tids[1], NULL);\n        printf(\"Parent (PID %d) initial threads joined. shared_counter: %d\\n\", getpid(), shared_counter);\n\n        // Parent's main thread attempts to lock mutex.\n        printf(\"Parent (PID %d) main thread attempting to lock mutex...\\n\", getpid());\n        pthread_mutex_lock(&mutex);\n        printf(\"Parent (PID %d) main thread locked mutex. Counter before: %d\\n\", getpid(), shared_counter);\n        for (int i = 0; i < 3; ++i) {\n            shared_counter++;\n            usleep(10);\n        }\n        printf(\"Parent (PID %d) main thread unlocking mutex. Counter after: %d\\n\", getpid(), shared_counter);\n        pthread_mutex_unlock(&mutex);\n\n        printf(\"Parent (PID %d) final shared_counter: %d\\n\", getpid(), shared_counter);\n        wait(NULL);\n    }\n\n    pthread_mutex_destroy(&mutex);\n    return 0;\n}"
+    },
+    "sub_questions": [
+      {
+        "id": "101.1",
+        "text": "תארו את כל הפלטים האפשריים של התוכנית. הסבירו במפורט את הערכים הסופיים של `shared_counter` בכל תהליך ואת הסדר היחסי של ההדפסות.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "101.2",
+        "text": "האם קיימת בעיה כלשהי שעלולה להתרחש בתוכנית כתוצאה מהשימוש ב-`fork()` יחד עם תהליכונים ו-mutex? אם כן, פרטו את הבעיה, הסבירו מדוע היא מתרחשת, ובאיזה תהליך (אב או בן) היא צפויה להתרחש.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "### 101.1 פלטים אפשריים:\nהתוכנית מובילה למצב של קיפאון (deadlock) בתהליך הבן, ולכן לא תסיים את ריצתה בצורה תקינה. הפלט המלא לעולם לא יודפס במלואו.\n\n**ניתוח מצב המונה `shared_counter`:**\n1.  **לפני `fork()`:** התהליך הראשי (האב) יוצר שני תהליכונים (ID 0 ו-ID 1). כל אחד מהם מבצע לולאה של 2 איטרציות, ובה כל איטרציה מגדילה את `shared_counter` ב-1. מכיוון שיש mutex, התהליכונים יבצעו את ההגדלות באופן סדרתי. ה-`usleep(100)` לאחר יצירת תהליכון 0 מגדיל מאוד את הסיכוי שתהליכון 0 יספיק לנעול את ה-mutex ולהתחיל (ואף לסיים) את פעולתו לפני קריאת ה-`fork()`.\n    *   אם ה-`fork()` מתרחש לאחר שתהליכון 0 סיים את 2 ההגדלות שלו וטרם שחרר את ה-mutex (או שחרר ו-`tids[1]` נעל), אז `shared_counter` באב יהיה 2 (או 4 אם `tids[1]` גם הספיק לסיים). התרחיש הסביר ביותר הוא ש-`shared_counter` יהיה 2 בעת קריאת ה-`fork()` (תהליכון 0 סיים את עבודתו ונעל את ה-mutex, ותהליכון 1 ממתין).\n\n2.  **לאחר `fork()`:**\n    *   **תהליך הבן (Child):** נוצר כהעתק של מרחב הכתובות של האב ברגע הקריאה ל-`fork()`. לכן, הערך ההתחלתי של `shared_counter` בתהליך הבן יהיה זהה לערך שלו באב ברגע ה-`fork()` (לדוגמה, 2). ה-mutex גם הוא משוכפל במצב שבו היה באב בזמן ה-`fork()`. כפי שיפורט בסעיף הבא, זה יוביל לקיפאון כשהתהליך הבן ינסה לנעול את ה-mutex.\n    *   **תהליך האב (Parent):** ממשיך את ריצתו. תהליכונים 0 ו-1 ממשיכים לרוץ ומשלימים את פעולתם. לאחר ששניהם מסיימים, `shared_counter` באב יהיה 4 (2 הגדלות מ-`tids[0]` + 2 הגדלות מ-`tids[1]`). לאחר מכן, התהליך הראשי של האב נועל את ה-mutex, מגדיל את `shared_counter` ב-3 פעמים (לולאה של 3 איטרציות) ומגיע לערך סופי של `4 + 3 = 7`.\n\n**סדר הדפסת הפלט:**\nהפלט הראשוני של 'Main starts' יודפס ראשון. לאחר מכן, הדפסות ה-`printf` מתוך `thread_func` עבור תהליכונים 0 ו-1 יופיעו בסדר כלשהו, כאשר כל תהליכון ידפיס 'attempting to lock', 'locked', 'unlocking'.\nלאחר ה-`fork()`, תהליך הבן ידפיס 'Child created' ו-'Child main thread attempting to lock mutex after fork...'. בשלב זה, תהליך הבן ייתקע בקיפאון.\nתהליך האב ימשיך להדפיס 'Parent continues after fork.', ואז את ההדפסות של 'Parent initial threads joined.' ו-'Parent main thread attempting to lock mutex...'. הדפסות ה-`printf` מתוך ה-`thread_func` של תהליכונים 0 ו-1 יכולות להשתלב עם ההדפסות של האב לפני ואחרי ה-`fork()`.\n\n**דוגמה לסדר פלט אפשרי (בהנחה ש-shared_counter = 2 בעת ה-fork):**\n```\nMain (PID 1000) starts.\nThread 0 (PID 1000) attempting to lock mutex...\nThread 0 (PID 1000) locked mutex. Counter before: 0\nThread 0 (PID 1000) unlocking mutex. Counter after: 2\nThread 1 (PID 1000) attempting to lock mutex...\nChild (PID 1001) created.\nChild (PID 1001) main thread attempting to lock mutex after fork...\nParent (PID 1000) continues after fork.\nThread 1 (PID 1000) locked mutex. Counter before: 2\nThread 1 (PID 1000) unlocking mutex. Counter after: 4\nParent (PID 1000) initial threads joined. shared_counter: 4\nParent (PID 1000) main thread attempting to lock mutex...\nParent (PID 1000) main thread locked mutex. Counter before: 4\nParent (PID 1000) main thread unlocking mutex. Counter after: 7\nParent (PID 1000) final shared_counter: 7\n```\nהתהליך הבן יהיה תקוע בקיפאון ולא יודפסו ממנו פלטים נוספים לאחר שורה 'Child (PID 1001) main thread attempting to lock mutex after fork...'. התהליך האב יסיים את ריצתו וימתין ללא הגבלת זמן לבן התקוע.\n\n### 101.2 בעיה בתוכנית:\n**הבעיה:** קיפאון (Deadlock) בתהליך הבן.\n\n**הסבר:**\n1.  **יצירת תהליכונים לפני `fork()`:** התהליך האב (הראשי) יוצר שני תהליכונים (`tids[0]` ו-`tids[1]`). בשל ה-`usleep(100)` לאחר יצירת `tids[0]`, סביר מאוד ש-`tids[0]` יספיק לנעול את ה-`mutex` ולהתחיל את פעולתו לפני קריאת ה-`fork()`.\n2.  **התנהגות `fork()` עם תהליכונים:** כאשר `fork()` נקרא בתהליך מרובה תהליכונים (multi-threaded process), רק התהליכון שקרא ל-`fork()` (התהליכון הראשי במקרה זה) ממשיך להתקיים בתהליך הבן. כל שאר התהליכונים (כמו `tids[0]` ו-`tids[1]`) אינם משוכפלים לתהליך הבן.\n3.  **העתקת מצב ה-mutex:** ה-`fork()` יוצר העתק של מרחב הכתובות של האב עבור הבן, כולל מצב ה-`mutex`. אם בזמן הקריאה ל-`fork()` תהליכון כלשהו באב (לדוגמה, `tids[0]`) החזיק בנעילה על ה-`mutex`, אז בתהליך הבן ה-`mutex` ישוכפל במצב 'נעול'.\n4.  **הקיפאון:** בתהליך הבן, ה-`mutex` נמצא במצב נעול, אך אין אף תהליכון בתהליך הבן שמחזיק בנעילה הזו (כי `tids[0]` לא שוכפל). כאשר התהליכון הראשי של הבן מנסה לקרוא ל-`pthread_mutex_lock(&mutex)`, הוא מנסה לנעול mutex שכבר נעול, אך אינו בבעלות אף אחד מתוך התהליכים הקיימים בבן. המערכת חושבת שה-mutex נעול אך לא יכולה לשחרר אותו או להעניק בעלות. לכן, הקריאה ל-`pthread_mutex_lock()` בתהליך הבן תיתקע ללא הגבלת זמן, ותגרום לקיפאון.\n\n**התהליך בו הבעיה צפויה להתרחש:** הבעיה צפויה להתרחש **בתהליך הבן** (`else if (pid == 0)`), בשורה שבה הוא מנסה לנעול את ה-mutex: `pthread_mutex_lock(&mutex);`.\n\n**פתרון אפשרי (לא נדרש בשאלה אך להשלמת ההסבר):** כדי למנוע קיפאון כזה, ישנן מספר גישות:\n*   לאחר `fork()` בתהליך הבן, יש לקרוא ל-`exec` בהקדם האפשרי, שכן `exec` מחליף את מרחב הכתובות כולו ומאתחל את כל המשאבים.\n*   אם לא ניתן לקרוא ל-`exec`, יש לוודא שכל ה-mutex-ים פתוחים לפני קריאת `fork()`.\n*   ניתן להשתמש ב-`pthread_atfork()` כדי לרשום handler-ים שירוצו לפני ה-`fork()`, באב לאחר ה-`fork()`, ובבן לאחר ה-`fork()`, על מנת לטפל במצבי נעילה של mutex-ים."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

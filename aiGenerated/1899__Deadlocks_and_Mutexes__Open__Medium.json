@@ -1,0 +1,51 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Deadlocks and Mutexes",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 21:38:59",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2445,
+      "output_tokens": 2134,
+      "total_tokens": 10212
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "Open",
+    "topic": [
+      "Deadlocks",
+      "Mutexes",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתון קטע קוד בשפת C המדמה שני תהליכונים (threads) המנסים לגשת לשני משאבים שונים, כאשר כל משאב מוגן על ידי מנעול (mutex). התהליכונים מנסים לרכוש את המנעולים בסדר שונה, מה שעלול להוביל לקיפאון (deadlock).",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h> // For sleep\n\npthread_mutex_t mutexA;\npthread_mutex_t mutexB;\n\nvoid* thread1_func(void* arg) {\n    printf(\"Thread 1: Trying to acquire mutexA...\\n\");\n    pthread_mutex_lock(&mutexA);\n    printf(\"Thread 1: Acquired mutexA, trying to acquire mutexB...\\n\");\n    sleep(1); // Simulate work or delay\n    pthread_mutex_lock(&mutexB);\n    printf(\"Thread 1: Acquired mutexA and mutexB. Doing critical work.\\n\");\n    // Critical section\n    pthread_mutex_unlock(&mutexB);\n    pthread_mutex_unlock(&mutexA);\n    printf(\"Thread 1: Released mutexA and mutexB.\\n\");\n    return NULL;\n}\n\nvoid* thread2_func(void* arg) {\n    printf(\"Thread 2: Trying to acquire mutexB...\\n\");\n    pthread_mutex_lock(&mutexB);\n    printf(\"Thread 2: Acquired mutexB, trying to acquire mutexA...\\n\");\n    sleep(1); // Simulate work or delay\n    pthread_mutex_lock(&mutexA);\n    printf(\"Thread 2: Acquired mutexB and mutexA. Doing critical work.\\n\");\n    // Critical section\n    pthread_mutex_unlock(&mutexA);\n    pthread_mutex_unlock(&mutexB);\n    printf(\"Thread 2: Released mutexB and mutexA.\\n\");\n    return NULL;\n}\n\nint main() {\n    pthread_t tid1, tid2;\n\n    pthread_mutex_init(&mutexA, NULL);\n    pthread_mutex_init(&mutexB, NULL);\n\n    pthread_create(&tid1, NULL, thread1_func, NULL);\n    pthread_create(&tid2, NULL, thread2_func, NULL);\n\n    pthread_join(tid1, NULL);\n    pthread_join(tid2, NULL);\n\n    pthread_mutex_destroy(&mutexA);\n    pthread_mutex_destroy(&mutexB);\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "8.1",
+        "text": "א. זהה והסבר אילו מבין ארבעת התנאים ההכרחיים לקיפאון (deadlock) מתקיימים בקטע קוד זה. התנאים הם: Mutual exclusion, Hold-and-wait, No preemption, Circular wait.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.2",
+        "text": "ב. הצג פתרון מונע קיפאון על ידי שינוי קטע הקוד הנתון. הסבר בקצרה מדוע הפתרון שלך מונע קיפאון.",
+        "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h> // For sleep\n\npthread_mutex_t mutexA;\npthread_mutex_t mutexB;\n\nvoid* thread1_func(void* arg) {\n    printf(\"Thread 1: Trying to acquire mutexA...\\n\");\n    pthread_mutex_lock(&mutexA); // Acquire A first\n    printf(\"Thread 1: Acquired mutexA, trying to acquire mutexB...\\n\");\n    sleep(1);\n    pthread_mutex_lock(&mutexB); // Then acquire B\n    printf(\"Thread 1: Acquired mutexA and mutexB. Doing critical work.\\n\");\n    // Critical section\n    pthread_mutex_unlock(&mutexB);\n    pthread_mutex_unlock(&mutexA);\n    printf(\"Thread 1: Released mutexB and mutexA.\\n\");\n    return NULL;\n}\n\nvoid* thread2_func(void* arg) {\n    printf(\"Thread 2: Trying to acquire mutexA...\\n\"); // Acquire A first\n    pthread_mutex_lock(&mutexA);\n    printf(\"Thread 2: Acquired mutexA, trying to acquire mutexB...\\n\");\n    sleep(1);\n    pthread_mutex_lock(&mutexB); // Then acquire B\n    printf(\"Thread 2: Acquired mutexA and mutexB. Doing critical work.\\n\");\n    // Critical section\n    pthread_mutex_unlock(&mutexB);\n    pthread_mutex_unlock(&mutexA);\n    printf(\"Thread 2: Released mutexB and mutexA.\\n\");\n    return NULL;\n}\n\nint main() {\n    pthread_t tid1, tid2;\n\n    pthread_mutex_init(&mutexA, NULL);\n    pthread_mutex_init(&mutexB, NULL);\n\n    pthread_create(&tid1, NULL, thread1_func, NULL);\n    pthread_create(&tid2, NULL, thread2_func, NULL);\n\n    pthread_join(tid1, NULL);\n    pthread_join(tid2, NULL);\n\n    pthread_mutex_destroy(&mutexA);\n    pthread_mutex_destroy(&mutexB);\n\n    return 0;\n}",
+        "options": null
+      }
+    ],
+    "points": 10,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "חלק א': זיהוי תנאי הקיפאון\n1.  **מניעה הדדית (Mutual Exclusion):** כן. מנעולים (mutexes) משמשים להגנה על המשאבים, מה שמבטיח שרק תהליכון אחד יכול להחזיק במנעול מסוים בכל רגע נתון.\n2.  **החזק והמתן (Hold and Wait):** כן. תהליכון 1 רוכש את mutexA וממתין ל-mutexB. תהליכון 2 רוכש את mutexB וממתין ל-mutexA. שני התהליכונים מחזיקים במשאב אחד (מנעול) בזמן שהם ממתינים למשאב אחר.\n3.  **אי-הפקעה (No Preemption):** כן. לא ניתן להפקיע מנעול מתהליכון שמחזיק בו בכוח. תהליכון חייב לשחרר את המנעול מרצונו.\n4.  **המתנה מעגלית (Circular Wait):** כן. תהליכון 1 ממתין ל-mutexB המוחזק על ידי תהליכון 2. תהליכון 2 ממתין ל-mutexA המוחזק על ידי תהליכון 1. נוצר מעגל המתנה: תהליכון 1 -> ממתין ל-Mutex B -> מוחזק על ידי תהליכון 2 -> ממתין ל-Mutex A -> מוחזק על ידי תהליכון 1.\n\nחלק ב': פתרון למניעת קיפאון\nהפתרון המקובל למניעת המתנה מעגלית (ובכך קיפאון) הוא לאכוף סדר רכישה עקבי של המנעולים. שני התהליכונים חייבים לרכוש את המנעולים באותו סדר מוגדר מראש (לדוגמה, תמיד mutexA ולאחר מכן mutexB). קטע הקוד המתוקן מטה מדגים זאת בתוך סעיף ב'.\n\n**הסבר לפתרון:**\nהפתרון מונע קיפאון על ידי אכיפת סדר רכישה עקבי של המנעולים. שני התהליכונים רוכשים כעת את mutexA ולאחר מכן את mutexB. על ידי ביטול התנאי של 'המתנה מעגלית' (Circular Wait), אנו מבטיחים שלא ייווצר מצב בו תהליכונים ממתינים זה לזה במעגל סגור. אם תהליכון אחד מחזיק ב-mutexA, התהליכון השני ימתין עד ש-mutexA ישוחרר לפני שינסה לרכוש אותו ואז את mutexB. כך לא יווצר מצב בו כל אחד מחזיק במנעול אחד וממתין לשני."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

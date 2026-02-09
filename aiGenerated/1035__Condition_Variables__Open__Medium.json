@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Condition Variables",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 07:33:16",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2619,
+      "output_tokens": 1478,
+      "total_tokens": 7359
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Condition Variables",
+      "Synchronization",
+      "Producer-Consumer"
+    ],
+    "content": {
+      "text": "נתונה בעיית תיאום בין יצרן (Producer) לצרכן (Consumer) המשתפים מאגר נתונים (buffer) בגודל קבוע. היצרן מוסיף פריטים למאגר והצרכן צורך אותם. נכתב קוד ראשוני המשתמש במנעול (mutex) ובמשתני תנאי (condition variables) `cond_full` ו-`cond_empty` לתיאום.\nהסתכל על קטע הקוד הבא עבור פונקציית הצרכן (`consumer_func`).\n1.  זהה שגיאה פוטנציאלית בקטע הקוד, או מצב שעלול להוביל להתנהגות שגויה או לא יעילה.\n2.  הסבר מדוע זו שגיאה/בעיה וכיצד היא יכולה להתבטא.\n3.  הצע תיקון לקוד והסבר את התיקון.",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n\n#define BUFFER_SIZE 5\n\nint buffer[BUFFER_SIZE];\nint count = 0;\nint in = 0;\nint out = 0;\n\npthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;\npthread_cond_t cond_full = PTHREAD_COND_INITIALIZER;\npthread_cond_t cond_empty = PTHREAD_COND_INITIALIZER;\n\nvoid *consumer_func(void *arg) {\n    int item;\n    while (1) {\n        pthread_mutex_lock(&mutex);\n\n        // Problematic line\n        if (count == 0) {\n            pthread_cond_wait(&cond_empty, &mutex);\n        }\n\n        item = buffer[out];\n        out = (out + 1) % BUFFER_SIZE;\n        count--;\n        printf(\"Consumed: %d, Count: %d\\n\", item, count);\n\n        pthread_cond_signal(&cond_full);\n        pthread_mutex_unlock(&mutex);\n        usleep(rand() % 100000);\n    }\n    return NULL;\n}",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.  **השגיאה הפוטנציאלית:** השימוש בביטוי `if (count == 0)` במקום `while (count == 0)` לפני הקריאה ל-`pthread_cond_wait(&cond_empty, &mutex);`. \n\n2.  **הסבר השגיאה והתבטאותה:**\n    *   **התעוררויות שווא (Spurious Wakeups):** תקן POSIX מאפשר ל-`pthread_cond_wait` לחזור (להתעורר) גם ללא קריאה מפורשת ל-`pthread_cond_signal` או `pthread_cond_broadcast`. אם הצרכן מתעורר באופן שוואי, ובודק את התנאי `count == 0` רק פעם אחת באמצעות `if`, הוא ימשיך לבצע את הקוד גם אם המאגר עדיין ריק. זה יכול לגרום לקריאת נתונים לא תקפים (Garbage values) או, במקרה גרוע יותר, לגישה מחוץ לגבולות המערך אם `count` יורד מתחת ל-0.\n    *   **ריבוי צרכנים (Lost Signal / Race Condition):** אם ישנם מספר צרכנים הממתינים על `cond_empty`, ופריט אחד נוסף למאגר, `pthread_cond_signal` יעיר רק אחד מהם. אם אותו צרכן מעבד את הפריט ומרוקן את המאגר, ומיד לאחר מכן צרכן נוסף מתעורר (אולי עקב התעוררות שווא או בגלל שקיבל סיגנל מאוחר), הוא יבדוק את התנאי עם `if` וימצא שהמאגר ריק, אך ימשיך בכל זאת, שכן הוא לא יחזור להמתין.\n\n3.  **תיקון והסבר:**\n    התיקון הוא לשנות את `if (count == 0)` ל-`while (count == 0)`.\n    ```c\n    void *consumer_func(void *arg) {\n        int item;\n        while (1) {\n            pthread_mutex_lock(&mutex);\n\n            // תיקון: שימוש בלולאת while כדי לוודא שהתנאי אכן מתקיים לאחר ההתעוררות\n            while (count == 0) {\n                pthread_cond_wait(&cond_empty, &mutex);\n            }\n\n            item = buffer[out];\n            out = (out + 1) % BUFFER_SIZE;\n            count--;\n            printf(\"Consumed: %d, Count: %d\\n\", item, count);\n\n            pthread_cond_signal(&cond_full);\n            pthread_mutex_unlock(&mutex);\n            usleep(rand() % 100000);\n        }\n        return NULL;\n    }\n    ```\n    השימוש בלולאת `while` מבטיח שהצרכן יבדוק מחדש את התנאי (`count == 0`) מיד לאחר שהוא מתעורר מהמתנה. אם התנאי עדיין לא מתקיים (לדוגמה, בגלל התעוררות שווא, או בגלל שצרכן אחר כבר צרך את הפריט והמאגר התרוקן שוב), הצרכן יחזור אוטומטית למצב המתנה (`pthread_cond_wait`) עד שהתנאי יתקיים בוודאות. זהו דפוס שימוש סטנדרטי ונכון עם משתני תנאי."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

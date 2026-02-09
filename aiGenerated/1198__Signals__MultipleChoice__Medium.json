@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Signals",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 08:38:21",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 923,
+      "output_tokens": 1210,
+      "total_tokens": 4487
+    }
+  },
+  "question": {
+    "id": 4,
+    "type": "MultipleChoice",
+    "topic": [
+      "Signals",
+      "Process Management",
+      "System Calls"
+    ],
+    "content": {
+      "text": "בהינתן קטע הקוד הבא:\n\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <signal.h>\n#include <sys/wait.h>\n\nvoid handler(int signum) {\n    if (signum == SIGUSR1) {\n        printf(\"Received SIGUSR1 in process %d\\n\", getpid());\n    }\n}\n\nint main() {\n    struct sigaction sa;\n    sa.sa_handler = handler;\n    sigemptyset(&sa.sa_mask);\n    sa.sa_flags = 0; \n\n    if (sigaction(SIGUSR1, &sa, NULL) == -1) {\n        perror(\"sigaction\");\n        exit(EXIT_FAILURE);\n    }\n\n    pid_t pid = fork();\n\n    if (pid == -1) {\n        perror(\"fork\");\n        exit(EXIT_FAILURE);\n    } else if (pid == 0) { // Child process\n        // The child process will wait for a signal\n        pause(); \n        exit(EXIT_SUCCESS); // Child exits after handling signal (or receiving any signal)\n    } else { // Parent process\n        // Parent sends the signal to the child after a short delay\n        sleep(1); \n        kill(pid, SIGUSR1);\n        wait(NULL); // Parent waits for child to exit\n    }\n\n    return 0;\n}\n```\n\nמה יקרה כאשר תהליך האב (parent) ישלח את האות `SIGUSR1` לתהליך הבן (child)?",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <signal.h>\n#include <sys/wait.h>\n\nvoid handler(int signum) {\n    if (signum == SIGUSR1) {\n        printf(\"Received SIGUSR1 in process %d\\n\", getpid());\n    }\n}\n\nint main() {\n    struct sigaction sa;\n    sa.sa_handler = handler;\n    sigemptyset(&sa.sa_mask);\n    sa.sa_flags = 0; \n\n    if (sigaction(SIGUSR1, &sa, NULL) == -1) {\n        perror(\"sigaction\");\n        exit(EXIT_FAILURE);\n    }\n\n    pid_t pid = fork();\n\n    if (pid == -1) {\n        perror(\"fork\");\n        exit(EXIT_FAILURE);\n    } else if (pid == 0) { // Child process\n        // The child process will wait for a signal\n        pause(); \n        exit(EXIT_SUCCESS); // Child exits after handling signal (or receiving any signal)\n    } else { // Parent process\n        // Parent sends the signal to the child after a short delay\n        sleep(1); \n        kill(pid, SIGUSR1);\n        wait(NULL); // Parent waits for child to exit\n    }\n\n    return 0;\n}\n",
+      "options": [
+        "א. תהליך הבן יסיים את פעולתו באופן מיידי מכיוון שלא הגדיר handler משלו עבור SIGUSR1.",
+        "ב. תהליך הבן יתעלם מהאות SIGUSR1 ולא תתרחש שום פעולה מיוחדת.",
+        "ג. ה-handler שהוגדר על ידי תהליך האב יופעל בתהליך הבן, ויודפס \"Received SIGUSR1 in process <child_pid>\".",
+        "ד. תהליך האב יקבל שגיאה בעת ניסיון לשלוח את האות, מכיוון שתהליכים בנים אינם יורשים handlers.",
+        "ה. תהליך הבן יעבור למצב zombie עד שתהליך האב יקבל את האות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "כאשר תהליך מבצע `fork()`, תהליך הבן יורש עותק של טבלת ה-signal dispositions (הגדרות הטיפול באותות) של תהליך האב. משמעות הדבר היא שכל ה-signal handlers שהוגדרו על ידי האב לפני ה-`fork()` (כולל ה-handler עבור `SIGUSR1` במקרה זה) יהיו פעילים גם בתהליך הבן. לכן, כאשר תהליך האב שולח את `SIGUSR1` לתהליך הבן, ה-handler שהוגדר יופעל בתהליך הבן, וידפיס את ההודעה המתאימה."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

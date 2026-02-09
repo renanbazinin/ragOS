@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Signals",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 08:38:47",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 923,
+      "output_tokens": 455,
+      "total_tokens": 2653
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "MultipleChoice",
+    "topic": [
+      "Signals",
+      "Process Management"
+    ],
+    "content": {
+      "text": "מה יקרה אם האות `SIGINT` נחסם באמצעות `sigprocmask`, לאחר מכן התהליך מקבל את `SIGINT` מספר פעמים (לדוגמה, על ידי לחיצה חוזרת על Ctrl+C), ואז האות `SIGINT` מוסר חסימתו?",
+      "code_snippet": null,
+      "options": [
+        "א. מטפל האותות עבור `SIGINT` יופעל פעם אחת בלבד.",
+        "ב. מטפל האותות עבור `SIGINT` יופעל כמספר הפעמים שהאות התקבל בזמן החסימה.",
+        "ג. התהליך יסתיים מיד עם הסרת חסימת `SIGINT` (בהנחה שפעולת ברירת המחדל היא סיום התהליך).",
+        "ד. האותות יאבדו ולא יקרה דבר."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "א",
+      "explanation": "כאשר אות נחסם, הוא אינו מועבר לתהליך באופן מיידי אלא נשאר במצב 'ממתין' (pending). עבור אותות סטנדרטיים (שאינם Real-time signals), מספר קבלות של אותו אות בזמן שהוא חסום יתמזגו לאות ממתין יחיד. לכן, כאשר חסימת האות מוסרת, מטפל האותות (או פעולת ברירת המחדל אם לא הוגדר מטפל) יופעל פעם אחת בלבד עבור האות הממתין."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

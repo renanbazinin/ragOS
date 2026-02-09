@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "File Systems",
+    "topic_hint": "File Systems and RAID",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-08 21:00:48",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1064,
+      "output_tokens": 290,
+      "total_tokens": 2340
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "File Systems",
+      "RAID"
+    ],
+    "content": {
+      "text": "איזו רמת RAID מספקת עמידות לתקלות (fault tolerance) על ידי שיקוף (mirroring) מלא של הנתונים בין דיסקים?",
+      "code_snippet": null,
+      "options": [
+        "א. RAID 0",
+        "ב. RAID 1",
+        "ג. RAID 5",
+        "ד. כל התשובות האחרות אינן נכונות."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "ב. RAID 1, הידוע גם כ-mirroring, משקף את כל הנתונים בין שני דיסקים או יותר. זה מבטיח שאם דיסק אחד נכשל, עותק זהה של הנתונים זמין באופן מיידי על דיסק אחר, ובכך מספק עמידות לתקלות גבוהה."
+    },
+    "difficulty_estimation": "Easy"
+  }
+}

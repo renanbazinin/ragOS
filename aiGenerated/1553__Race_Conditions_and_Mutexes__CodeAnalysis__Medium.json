@@ -1,0 +1,51 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions and Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-08 11:22:24",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3651,
+      "output_tokens": 2076,
+      "total_tokens": 9425
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Race Conditions",
+      "Mutexes",
+      "Concurrency",
+      "Threads"
+    ],
+    "content": {
+      "text": "נתונה התוכנית הבאה, המשתמשת בתהליכונים (threads) כדי להגדיל משתנה גלובלי משותף. ניתן להניח שכל קריאות המערכת (למשל, pthread_create, pthread_join) מצליחות.",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n\n#define NUM_THREADS 5\n#define INCREMENTS_PER_THREAD 100000\n\nint counter = 0;\n\nvoid* incrementer(void* arg) {\n    for (int i = 0; i < INCREMENTS_PER_THREAD; i++) {\n        counter++;\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    for (int i = 0; i < NUM_THREADS; i++) {\n        if (pthread_create(&threads[i], NULL, incrementer, NULL) != 0) {\n            perror(\"Failed to create thread\");\n            return 1;\n        }\n    }\n\n    for (int i = 0; i < NUM_THREADS; i++) {\n        if (pthread_join(threads[i], NULL) != 0) {\n            perror(\"Failed to join thread\");\n            return 1;\n        }\n    }\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    return 0;\n}"
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "מהו הערך התיאורטי (הצפוי) של המשתנה 'counter' בסיום ריצת התוכנית? האם התוכנית תמיד תדפיס ערך זה? אם לא, הסבירו מדוע וציינו ערך אפשרי שונה.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "כדי לפתור את הבעיה שהוצגה בסעיף הקודם, הוחלט להוסיף מנגנון סנכרון מסוג mutex. היכן יש להוסיף את קריאות ה-lock וה-unlock בקוד הפונקציה `incrementer` כדי להבטיח שהערך הסופי של 'counter' יהיה תמיד נכון? כתבו את קטע הקוד הרלוונטי (כולל אתחול ושחרור המוטקס ב-main) והסבירו את השפעתו על ביצועי התוכנית (במונחים כלליים).",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "10.1. הערך התיאורטי (הצפוי) של המשתנה 'counter' בסיום ריצת התוכנית הוא `NUM_THREADS * INCREMENTS_PER_THREAD = 5 * 100000 = 500000`.\n\nהתוכנית לא תמיד תדפיס ערך זה. קיימת כאן תנאי מרוץ (race condition). מספר תהליכונים מנסים לגשת ולשנות את המשתנה הגלובלי המשותף 'counter' בו זמנית ללא מנגנון סנכרון. הפעולה `counter++` אינה אטומית. היא מורכבת משלושה שלבים: קריאת הערך הנוכחי של 'counter' מהזיכרון, הגדלת הערך, וכתיבת הערך החדש בחזרה לזיכרון. אם שני תהליכונים קוראים את אותו ערך של 'counter' לפני שאחד מהם הספיק לכתוב את הערך המוגדל בחזרה, אחד מהגידולים יאבד. לדוגמה, אם 'counter' הוא 10, ושני תהליכונים קוראים שניהם 10. שניהם מגדילים ל-11. שניהם כותבים 11. במצב זה, 'counter' היה אמור להיות 12, אך הוא 11. לכן, הערך בפועל יהיה בדרך כלל נמוך מהערך הצפוי, ויהיה שונה מריצה לריצה.\n\nערך אפשרי שונה (לרוב נמוך יותר) יכול להיות, לדוגמה, 498765.\n\n10.2. כדי לפתור את תנאי המרוץ ולהבטיח שהערך הסופי של 'counter' יהיה תמיד נכון, יש להגן על הגישה למשתנה המשותף 'counter' באמצעות mutex. יש להצהיר ולאתחל את המוטקס ב-`main` לפני יצירת התהליכונים, ולשחרר אותו ב-`main` לאחר סיום כל התהליכונים.\n\nהקוד המעודכן:\n\n```c\n#include <stdio.h>\n#include <pthread.h>\n\n#define NUM_THREADS 5\n#define INCREMENTS_PER_THREAD 100000\n\nint counter = 0;\npthread_mutex_t mutex; // הצהרה על המוטקס\n\nvoid* incrementer(void* arg) {\n    for (int i = 0; i < INCREMENTS_PER_THREAD; i++) {\n        pthread_mutex_lock(&mutex);   // נעילת המוטקס לפני גישה לקטע הקריטי\n        counter++;                     // קטע קריטי\n        pthread_mutex_unlock(&mutex); // שחרור המוטקס לאחר הגישה\n    }\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n    pthread_mutex_init(&mutex, NULL); // אתחול המוטקס\n\n    for (int i = 0; i < NUM_THREADS; i++) {\n        if (pthread_create(&threads[i], NULL, incrementer, NULL) != 0) {\n            perror(\"Failed to create thread\");\n            pthread_mutex_destroy(&mutex); // שחרור המוטקס במקרה של כשל\n            return 1;\n        }\n    }\n\n    for (int i = 0; i < NUM_THREADS; i++) {\n        if (pthread_join(threads[i], NULL) != 0) {\n            perror(\"Failed to join thread\");\n            pthread_mutex_destroy(&mutex); // שחרור המוטקס במקרה של כשל\n            return 1;\n        }\n    }\n\n    pthread_mutex_destroy(&mutex); // שחרור המוטקס בסיום\n\n    printf(\"Final counter value: %d\\n\", counter);\n\n    return 0;\n}\n```\n\n**השפעה על ביצועים:**\nהוספת מנגנון סנכרון כמו mutex מבטיחה נכונות, אך בדרך כלל באה על חשבון ביצועים. כל פעם שתהליכון רוצה לגשת למשתנה 'counter', הוא צריך לנעול את המוטקס. אם המוטקס כבר נעול על ידי תהליכון אחר, התהליכון המבקש ייכנס למצב המתנה (blocking) עד שהמוטקס ישוחרר. זה גורם לטוריזציה (serialization) של הגישה לקטע הקריטי (critical section), שבו ה-`counter++` מתבצע. כתוצאה מכך, במקום שכל התהליכונים יבצעו את פעולותיהם באופן מקבילי לחלוטין (אך שגוי), הם ימתינו בתור לגישה למשתנה המשותף. זה יאט את זמן הריצה הכולל של התוכנית, במיוחד כאשר ישנם תהליכונים רבים או כאשר קטע הקריטי ארוך יחסית. במקרה זה, הפעולה `counter++` היא קצרה מאוד, כך שההאטה תהיה בעיקר בגלל התקורה של קריאות ה-lock/unlock עצמן ועלויות החלפת הקשר (context switching) בין תהליכונים הממתינים למוטקס. עם זאת, נכונות התוצאה חשובה יותר מביצועים במקרים רבים, ולכן השימוש במוטקס הכרחי כאן."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

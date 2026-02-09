@@ -1,0 +1,52 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Deadlocks and Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-08 21:33:33",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4085,
+      "output_tokens": 3347,
+      "total_tokens": 13125
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Deadlocks",
+      "Mutexes",
+      "Concurrency",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "מערכת מרובת-חוטים (multi-threaded) מנהלת מספר משאבים משותפים, כאשר כל משאב מוגן על ידי `pthread_mutex_t` משלו. חוטים במערכת צריכים לבצע משימות הדורשות גישה בלעדית לשני משאבים ספציפיים בו-זמנית. הקוד הבא מדגים את המנגנון שבו חוטים מנסים לרכוש את המנעולים עבור שני המשאבים הנדרשים, מבצעים עבודה קריטית, ומשחררים אותם. נתחו את הקוד וענו על השאלות הבאות:",
+      "code_snippet": "#include <stdio.h>\n#include <pthread.h>\n#include <unistd.h> // For usleep\n\n#define NUM_RESOURCES 5\n\npthread_mutex_t resources_mutex[NUM_RESOURCES];\n\n// Function to simulate some work\nvoid do_work() {\n    usleep(10000); // Simulate work for 10ms\n}\n\n// Task function that attempts to acquire two resources\nvoid* task_function(void* arg) {\n    int* resource_ids = (int*)arg;\n    int res1_id = resource_ids[0];\n    int res2_id = resource_ids[1];\n\n    printf(\"Thread %lu: Trying to acquire resource %d and %d\\n\", pthread_self(), res1_id, res2_id);\n\n    // Acquire first resource\n    pthread_mutex_lock(&resources_mutex[res1_id]);\n    printf(\"Thread %lu: Acquired resource %d\\n\", pthread_self(), res1_id);\n\n    do_work(); // Simulate some work while holding the first mutex\n\n    // Acquire second resource\n    pthread_mutex_lock(&resources_mutex[res2_id]);\n    printf(\"Thread %lu: Acquired resource %d\\n\", pthread_self(), res2_id);\n\n    // Perform critical section work\n    printf(\"Thread %lu: Performing critical work with resources %d and %d\\n\", pthread_self(), res1_id, res2_id);\n    do_work();\n\n    // Release resources\n    pthread_mutex_unlock(&resources_mutex[res2_id]);\n    printf(\"Thread %lu: Released resource %d\\n\", pthread_self(), res2_id);\n\n    pthread_mutex_unlock(&resources_mutex[res1_id]);\n    printf(\"Thread %lu: Released resource %d\\n\", pthread_self(), res1_id);\n\n    return NULL;\n}\n\n// Main function to set up threads and resources\nint main() {\n    for (int i = 0; i < NUM_RESOURCES; ++i) {\n        pthread_mutex_init(&resources_mutex[i], NULL);\n    }\n\n    pthread_t tid1, tid2;\n    int task1_res_ids[] = {0, 1}; // Thread 1 wants R0 then R1\n    int task2_res_ids[] = {1, 0}; // Thread 2 wants R1 then R0\n\n    printf(\"Starting threads...\\n\");\n    pthread_create(&tid1, NULL, task_function, (void*)task1_res_ids);\n    pthread_create(&tid2, NULL, task_function, (void*)task2_res_ids);\n\n    pthread_join(tid1, NULL);\n    pthread_join(tid2, NULL);\n\n    printf(\"Threads finished.\\n\");\n\n    for (int i = 0; i < NUM_RESOURCES; ++i) {\n        pthread_mutex_destroy(&resources_mutex[i]);\n    }\n\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "101.1",
+        "text": "זהו את הבעיה: האם קיפאון (deadlock) יכול להתרחש במערכת המתוארת? אם כן, תארו תרחיש ריצה ספציפי (באמצעות החוטים `tid1` ו-`tid2` והמשאבים 0 ו-1 כפי שמוגדר בפונקציית `main`) שמוביל לקיפאון, והסבירו מדוע הוא מתרחש בהתבסס על ארבעת התנאים של קיפאון.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "101.2",
+        "text": "פתרון: תקנו את פונקציית `task_function` כך שתמנע קיפאונות לכל צירוף של `res1_id` ו-`res2_id` (בתנאי ש-`res1_id != res2_id`), תוך שמירה על הדרישה ששני המשאבים יוחזקו בו-זמנית במהלך הקטע הקריטי. הציגו את הקוד המתוקן עבור `task_function` והסבירו את הפתרון.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1. **זיהוי הבעיה ותאור תרחיש קיפאון:**\n   כן, קיפאון (deadlock) יכול להתרחש במערכת המתוארת. תרחיש הקיפאון עם החוטים `tid1` ו-`tid2` והמשאבים 0 ו-1 הוא כדלקמן:\n   *   **חוט `tid1`** מופעל, מנסה לרכוש את `resources_mutex[0]`. הוא מצליח ותופס את המנעול. (Acquired R0)\n   *   **חוט `tid2`** מופעל (ייתכן לאחר ש-`tid1` רכש את `resources_mutex[0]` וביצע `do_work()`), מנסה לרכוש את `resources_mutex[1]`. הוא מצליח ותופס את המנעול. (Acquired R1)\n   *   **חוט `tid1`** ממשיך ומוכן לרכוש את `resources_mutex[1]`. אך `resources_mutex[1]` מוחזק כעת על ידי `tid2`, ולכן `tid1` נחסם וממתין לשחרורו.\n   *   **חוט `tid2`** ממשיך ומוכן לרכוש את `resources_mutex[0]`. אך `resources_mutex[0]` מוחזק כעת על ידי `tid1`, ולכן `tid2` נחסם וממתין לשחרורו.\n   \n   בשלב זה, שני החוטים חסומים באופן הדדי, כאשר כל אחד מהם מחזיק במשאב שהשני ממתין לו, ויוצר מצב של קיפאון.\n\n   **הסבר בהתבסס על ארבעת התנאים של קיפאון:**\n   *   **Mutual Exclusion (מניעה הדדית):** כל משאב (מנעול) מוגן על ידי מנעול `pthread_mutex_t` המבטיח שרק חוט אחד יכול להחזיק בו בזמן נתון. תנאי זה מתקיים.\n   *   **Hold and Wait (החזקה והמתנה):** חוט `tid1` מחזיק ב-`resources_mutex[0]` וממתין ל-`resources_mutex[1]`. חוט `tid2` מחזיק ב-`resources_mutex[1]` וממתין ל-`resources_mutex[0]`. תנאי זה מתקיים.\n   *   **No Preemption (אי-השתלטות):** לא ניתן לכפות על חוט לשחרר משאב שהוא מחזיק בו. משאבים משוחררים רק מרצונם החופשי של החוטים המחזיקים בהם. תנאי זה מתקיים.\n   *   **Circular Wait (המתנה מעגלית):** קיים מעגל של חוטים ממתינים. `tid1` ממתין ל-`resources_mutex[1]` שמוחזק על ידי `tid2`, ו-`tid2` ממתין ל-`resources_mutex[0]` שמוחזק על ידי `tid1`. תנאי זה מתקיים.\n\n   מכיוון שכל ארבעת התנאים מתקיימים, קיפאון אכן אפשרי.\n\n2. **פתרון ותיקון הקוד:**\n   כדי למנוע קיפאון, נשבור את תנאי ה-Circular Wait על ידי אכיפת סדר רכישה עקבי של משאבים. נחליט שחוטים תמיד ירכשו את המנעול עם ה-ID הקטן יותר תחילה, ולאחר מכן את המנעול עם ה-ID הגדול יותר. זה מבטיח שכל זוג חוטים המנסה לרכוש את אותם שני משאבים יעשה זאת באותו סדר, ובכך ימנע המתנה מעגלית.\n\n   **קוד `task_function` מתוקן:**\n   ```c\nvoid* task_function(void* arg) {\n    int* resource_ids = (int*)arg;\n    int res_id_a = resource_ids[0];\n    int res_id_b = resource_ids[1];\n\n    // Determine the acquisition order based on resource IDs\n    int first_res_to_acquire = (res_id_a < res_id_b) ? res_id_a : res_id_b;\n    int second_res_to_acquire = (res_id_a < res_id_b) ? res_id_b : res_id_a;\n\n    printf(\"Thread %lu: Trying to acquire resource %d and %d (ordered: %d then %d)\\n\", \n           pthread_self(), res_id_a, res_id_b, first_res_to_acquire, second_res_to_acquire);\n\n    // Acquire first resource (smaller ID)\n    pthread_mutex_lock(&resources_mutex[first_res_to_acquire]);\n    printf(\"Thread %lu: Acquired resource %d\\n\", pthread_self(), first_res_to_acquire);\n\n    do_work(); // Simulate some work while holding the first mutex\n\n    // Acquire second resource (larger ID)\n    pthread_mutex_lock(&resources_mutex[second_res_to_acquire]);\n    printf(\"Thread %lu: Acquired resource %d\\n\", pthread_self(), second_res_to_acquire);\n\n    // Perform critical section work\n    printf(\"Thread %lu: Performing critical work with resources %d and %d\\n\", \n           pthread_self(), res_id_a, res_id_b);\n    do_work();\n\n    // Release resources (in reverse order of acquisition is good practice)\n    pthread_mutex_unlock(&resources_mutex[second_res_to_acquire]);\n    printf(\"Thread %lu: Released resource %d\\n\", pthread_self(), second_res_to_acquire);\n\n    pthread_mutex_unlock(&resources_mutex[first_res_to_acquire]);\n    printf(\"Thread %lu: Released resource %d\\n\", pthread_self(), first_res_to_acquire);\n\n    return NULL;\n}\n   ```\n\n   **הסבר הפתרון:**\n   הפתרון מיישם היררכיית משאבים מלאכותית. במקום לרכוש את המשאבים בסדר שהם ניתנו כקלט (`res1_id` ואז `res2_id`), החוטים קודם כל קובעים איזה משאב מבין השניים הוא בעל ה-ID הנמוך יותר, ואיזה הוא בעל ה-ID הגבוה יותר. לאחר מכן, הם תמיד רוכשים את המנעול של המשאב בעל ה-ID הנמוך קודם, ורק אחר כך את המנעול של המשאב בעל ה-ID הגבוה. \n   \n   לדוגמה, אם `tid1` רוצה `(0, 1)` ו-`tid2` רוצה `(1, 0)`:\n   *   שני החוטים יזהו ש-`0` הוא המשאב בעל ה-ID הנמוך יותר, ו-`1` הוא בעל ה-ID הגבוה יותר.\n   *   שניהם ינסו לרכוש את `resources_mutex[0]` ראשון. רק אחד מהם יצליח. נניח `tid1` הצליח.\n   *   `tid1` יחזיק ב-`resources_mutex[0]` וינסה לרכוש את `resources_mutex[1]`. \n   *   `tid2` ימתין על `resources_mutex[0]` עד ש-`tid1` ישחרר אותו (לאחר ש-`tid1` יסיים את כל העבודה וישחרר את שני המנעולים).\n   \n   בצורה זו, לעולם לא ייווצר מצב שבו חוט A מחזיק במנעול X וממתין למנעול Y, בעוד שחוט B מחזיק במנעול Y וממתין למנעול X, כאשר X ו-Y הם אותם משאבים. תמיד המנעול בעל ה-ID הנמוך יירכש לפני המנעול בעל ה-ID הגבוה, ובכך נמנע תנאי ההמתנה המעגלית (Circular Wait), והקיפאון נמנע."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}
