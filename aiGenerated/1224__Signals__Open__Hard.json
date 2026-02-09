@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Signals",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-09 20:34:42",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3748,
+      "output_tokens": 2755,
+      "total_tokens": 11652
+    }
+  },
+  "question": {
+    "id": 9,
+    "type": "Open",
+    "topic": [
+      "Signals",
+      "Process Synchronization",
+      "Inter-Process Communication"
+    ],
+    "content": {
+      "text": "תרחיש: תהליך אב (Parent) יוצר תהליך בן (Child). תהליך הבן מבצע עבודה מסוימת, ולאחר מכן שולח סיגנל `SIGUSR1` לתהליך האב. לאחר שליחת הסיגנל, תהליך הבן ממשיך לבצע עבודה נוספת קצרה, ולבסוף מסיים את ריצתו.\n\nתהליך האב צריך להמתין לקבלת הסיגנל `SIGUSR1` מהבן. כאשר האב מקבל את הסיגנל, עליו להדפיס הודעה המעידה על קבלת הסיגנל, ורק לאחר מכן להמתין לסיום ריצתו של הבן. יש להבטיח שהאב לא יפספס את הסיגנל `SIGUSR1` גם אם הוא נשלח מוקדם מדי על ידי הבן (לפני שהאב קורא ל-`sigsuspend`), ושהאב ימתין בצורה נכונה לסיום הבן.\n\nמשימה: כתבו תוכנית C/C++ המממשת את התרחיש המתואר. עליכם להשתמש בפונקציות `fork()`, `kill()`, `sigaction()`, `sigprocmask()` ו-`sigsuspend()` כנדרש. יש להקפיד על טיפול נכון במצבי מרוץ (race conditions) ועל סנכרון מדויק בין האב לבן.\n\nפלט התוכנית צריך להיראות בערך כך:\n```\nParent: Blocking SIGUSR1.\nParent: Forking child...\nParent: Waiting for SIGUSR1 from child.\nChild: Starting first work.\nChild: First work done. Sending SIGUSR1 to parent.\nChild: Starting second work.\nParent: Received SIGUSR1!\nChild: Second work done. Exiting.\nParent: Child process terminated.\n```",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון דורש שימוש נכון במנגנוני סיגנלים כדי למנוע מצבי מרוץ ולהבטיח קבלת סיגנל אמינה.\n\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <signal.h>\n#include <sys/wait.h>\n\n// דגל גלובלי המציין אם SIGUSR1 התקבל\nvolatile sig_atomic_t sigusr1_received = 0;\n\n// ה-handler לסיגנל SIGUSR1\nvoid sig_handler(int signo) {\n    if (signo == SIGUSR1) {\n        sigusr1_received = 1;\n        printf(\"Parent: Received SIGUSR1!\\n\");\n    }\n}\n\nint main() {\n    pid_t pid;\n    sigset_t new_mask, old_mask, wait_mask;\n    struct sigaction sa;\n\n    // 1. אתחול מבנה sigaction\n    sa.sa_handler = sig_handler;\n    sigemptyset(&sa.sa_mask); // לא לחסום סיגנלים בתוך ה-handler\n    sa.sa_flags = 0; // ללא דגלים מיוחדים\n\n    // הגדרת ה-handler עבור SIGUSR1\n    if (sigaction(SIGUSR1, &sa, NULL) == -1) {\n        perror(\"sigaction\");\n        exit(EXIT_FAILURE);\n    }\n\n    // 2. חסימת SIGUSR1 בתהליך האב באופן ראשוני\n    sigemptyset(&new_mask);\n    sigaddset(&new_mask, SIGUSR1);\n\n    printf(\"Parent: Blocking SIGUSR1.\\n\");\n    if (sigprocmask(SIG_BLOCK, &new_mask, &old_mask) == -1) {\n        perror(\"sigprocmask SIG_BLOCK\");\n        exit(EXIT_FAILURE);\n    }\n\n    printf(\"Parent: Forking child...\\n\");\n    pid = fork();\n\n    if (pid == -1) {\n        perror(\"fork\");\n        exit(EXIT_FAILURE);\n    }\n\n    if (pid == 0) { // תהליך הבן\n        printf(\"Child: Starting first work.\\n\");\n        sleep(1); // הדמיית עבודה ראשונה\n        printf(\"Child: First work done. Sending SIGUSR1 to parent.\\n\");\n        if (kill(getppid(), SIGUSR1) == -1) {\n            perror(\"kill\");\n            exit(EXIT_FAILURE);\n        }\n        printf(\"Child: Starting second work.\\n\");\n        sleep(1); // הדמיית עבודה שנייה\n        printf(\"Child: Second work done. Exiting.\\n\");\n        exit(EXIT_SUCCESS);\n    } else { // תהליך האב\n        printf(\"Parent: Waiting for SIGUSR1 from child.\\n\");\n\n        // הכנת סט סיגנלים עבור sigsuspend שיבטל את חסימת SIGUSR1\n        wait_mask = old_mask; // מתחילים עם המסכה הישנה (לפני חסימת SIGUSR1)\n        sigdelset(&wait_mask, SIGUSR1); // מוודאים ש-SIGUSR1 אינו חסום ב-wait_mask\n\n        // המתנה אטומית ל-SIGUSR1\n        // הלולאה חשובה אם סיגנלים אחרים שאינם חסומים עלולים להפריע ל-sigsuspend\n        while (!sigusr1_received) {\n            // sigsuspend מחליפה באופן אטומי את מסכת הסיגנלים של התהליך ל-'wait_mask'\n            // ומשעה את התהליך עד לקבלת סיגנל. כאשר סיגנל נלכד, ה-handler מבוצע,\n            // ולאחר מכן sigsuspend חוזרת, ומשחזרת את מסכת הסיגנלים המקורית.\n            sigsuspend(&wait_mask);\n        }\n\n        // בשלב זה, sigusr1_received הוא 1, כלומר SIGUSR1 טופל.\n        // מסכת הסיגנלים המקורית שוחזרה, כך ש-SIGUSR1 חסום שוב.\n\n        printf(\"Parent: SIGUSR1 handled. Now waiting for child termination.\\n\");\n        \n        // המתנה לסיום תהליך הבן\n        if (wait(NULL) == -1) {\n            perror(\"wait\");\n            exit(EXIT_FAILURE);\n        }\n        printf(\"Parent: Child process terminated.\\n\");\n\n        // שחזור מסכת הסיגנלים המקורית (מלפני החסימה הראשונית)\n        if (sigprocmask(SIG_SETMASK, &old_mask, NULL) == -1) {\n            perror(\"sigprocmask SIG_SETMASK\");\n            exit(EXIT_FAILURE);\n        }\n    }\n\n    return 0;\n}\n```\n\n**הסבר לפתרון:**\n1.  **הגדרת Handler ל-SIGUSR1**: אנו מגדירים פונקציית `sig_handler` שתטפל ב-`SIGUSR1`. בתוך ה-handler, אנו מעדכנים דגל גלובלי (`sigusr1_received`) ל-1 כדי לסמן שהסיגנל התקבל. חשוב שהדגל יהיה מסוג `volatile sig_atomic_t` כדי להבטיח גישה בטוחה ואטומית מתוך ה-handler.\n\n2.  **חסימת SIGUSR1 באב**: לפני קריאת ה-`fork()`, תהליך האב חוסם את `SIGUSR1` באמצעות `sigprocmask(SIG_BLOCK, &new_mask, &old_mask)`. פעולה זו מבטיחה שאם הבן ישלח את הסיגנל מיד לאחר ה-`fork()` ולפני שהאב מגיע ל-`sigsuspend()`, הסיגנל ימתין בתור (pending) ולא יילכד מיד. זה מונע מצב מרוץ שבו הסיגנל נשלח לפני שהאב מוכן להמתין לו באופן אטומי, ובכך מונע פספוס של הסיגנל.\n\n3.  **תהליך הבן**: תהליך הבן מבצע את עבודתו הראשונה, שולח את `SIGUSR1` לאב באמצעות `kill(getppid(), SIGUSR1)`, ממשיך בעבודתו השנייה, ולבסוף מסיים.\n\n4.  **המתנה אטומית לסיגנל באב באמצעות `sigsuspend()`**: לאחר ה-`fork()`, תהליך האב מכין סט סיגנלים חדש (`wait_mask`) שבו `SIGUSR1` אינו חסום (על ידי הסרתו מהמסכה `old_mask` ששמרה את מצב הסיגנלים לפני החסימה הראשונית). האב קורא ל-`sigsuspend(&wait_mask)` בתוך לולאת `while (!sigusr1_received)`. פונקציה זו מבצעת שתי פעולות באופן אטומי: היא מחליפה זמנית את מסכת הסיגנלים של התהליך ל-`wait_mask` (ובכך מבטלת את חסימת `SIGUSR1`), ומכניסה את התהליך למצב שינה עד לקבלת סיגנל כלשהו (שאינו חסום). כאשר `SIGUSR1` מתקבל, ה-handler מופעל, ומיד לאחר מכן `sigsuspend()` חוזרת (עם ערך החזרה -1 ו-`errno` שווה ל-`EINTR`), תוך שהיא משחזרת את מסכת הסיגנלים המקורית של התהליך (זו שהייתה פעילה לפני הקריאה ל-`sigsuspend`, כלומר המסכה שבה `SIGUSR1` חסום). הלולאה סביב `sigsuspend` מבטיחה שאם `sigsuspend` הופרעה על ידי סיגנל אחר (שאינו `SIGUSR1`), התהליך יחזור להמתין ל-`SIGUSR1` עד לקבלתו.\n\n5.  **המתנה לסיום הבן**: לאחר ש-`sigsuspend()` חוזרת והדגל `sigusr1_received` מציין שהסיגנל התקבל, האב יודע שהסיגנל טופל. כעת הוא יכול להמתין בבטחה לסיום הבן באמצעות `wait(NULL)`, ובכך להבטיח שהאב מגיב לסיגנל לפני שהוא מטפל בסיום הבן.\n\n6.  **שחזור מסכת הסיגנלים**: לבסוף, האב משחזר את מסכת הסיגנלים המקורית שלו (זו שהייתה לפני החסימה הראשונית של `SIGUSR1`) באמצעות `sigprocmask(SIG_SETMASK, &old_mask, NULL)`."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Producer-Consumer",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-09 20:42:21",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4898,
+      "output_tokens": 3353,
+      "total_tokens": 16260
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Semaphores",
+      "Producer-Consumer",
+      "Deadlock",
+      "Livelock",
+      "Concurrency",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתונה מערכת יצרן-צרכן עם חיץ חסום בגודל `BUFFER_SIZE`. החיץ יכול להכיל שני סוגי מוצרים: `TYPE_A` ו-`TYPE_B`. ישנם יצרנים המייצרים מוצרים משני הסוגים, וצרכנים רגילים הצורכים מוצר בודד מכל סוג. בנוסף, קיימים צרכנים מיוחדים (`SpecialConsumer`) אשר צורכים מוצר אחד מסוג `TYPE_A` ומוצר אחד מסוג `TYPE_B` באופן אטומי (כלומר, או שניהם נצרכים או אף אחד מהם).\nלצורך הסנכרון, הוגדרו הסמפורים הבאים:\n*   `mutex`: סמפור בינארי לאבטחת הגישה לחיץ המשותף. מאותחל ל-1.\n*   `empty`: סמפור המונה מקומות פנויים בחיץ. מאותחל ל-`BUFFER_SIZE`.\n*   `full_A`: סמפור המונה מוצרים מסוג `TYPE_A` זמינים בחיץ. מאותחל ל-0.\n*   `full_B`: סמפור המונה מוצרים מסוג `TYPE_B` זמינים בחיץ. מאותחל ל-0.\n\nלהלן מימוש חלקי של הפונקציות `produce_A` (יצרן של `TYPE_A`) ו-`consume_A` (צרכן של `TYPE_A`), וכן מימוש של הפונקציה `special_consume_AB` (צרכן מיוחד של `TYPE_A` ו-`TYPE_B`). הפונקציות `add_item_A`, `remove_item_A`, `add_item_B`, `remove_item_B` מוסיפות/מסירות פריטים מהחיץ בהתאמה ואינן בטוחות לשימוש במקביל.",
+      "code_snippet": "#define BUFFER_SIZE 10\n\nsem_t mutex; // init to 1\nsem_t empty; // init to BUFFER_SIZE\nsem_t full_A; // init to 0\nsem_t full_B; // init to 0\n\n// Assume buffer operations (add_item_A, remove_item_A, add_item_B, remove_item_B) exist\n// and are not thread-safe, requiring mutex.\n\nvoid produce_A(ItemA item) {\n    sem_wait(&empty);\n    sem_wait(&mutex);\n    add_item_A(item); // Adds item to buffer\n    sem_post(&mutex);\n    sem_post(&full_A);\n}\n\nvoid consume_A() {\n    sem_wait(&full_A);\n    sem_wait(&mutex);\n    ItemA item = remove_item_A(); // Removes item from buffer\n    sem_post(&mutex);\n    sem_post(&empty);\n    // consume_item_A(item);\n}\n\n// Special consumer for one A and one B item\nvoid special_consume_AB() {\n    sem_wait(&full_A); // Tries to acquire A\n    sem_wait(&full_B); // Tries to acquire B\n\n    sem_wait(&mutex);\n    ItemA itemA = remove_item_A();\n    ItemB itemB = remove_item_B();\n    sem_post(&mutex);\n\n    sem_post(&empty); // Release 2 empty slots\n    sem_post(&empty);\n    // consume_items_AB(itemA, itemB);\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "האם המימוש של `special_consume_AB` עלול לגרום למצב של קיפאון (deadlock)? אם כן, תארו תרחיש ספציפי המוביל לקיפאון. אם לא, הסבירו מדוע.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "סטודנט טען כי מכיוון ש-`special_consume_AB` תמיד מנסה לתפוס את `full_A` לפני `full_B`, לא יכול להיווצר קיפאון בין שני חוטים המריצים `special_consume_AB`. האם טענתו נכונה? הסבירו מדוע כן או מדוע לא, תוך התייחסות לתנאי הקיפאון של Coffman.",
+        "code_snippet": null,
+        "options": [
+          "הטענה נכונה",
+          "הטענה לא נכונה"
+        ]
+      },
+      {
+        "id": "1.3",
+        "text": "תקנו את הפונקציה `special_consume_AB` כך שתעבוד באופן תקין ללא קיפאון או הרעבה (livelock). ניתן להוסיף משתנים גלובליים ולהיעזר בקריאה `sem_trywait`, אובייקטי סנכרון ופעולות אטומיות כרצונכם. יש לתאר בקצרה את הפתרון ולכתוב קוד ברור. יש לציין משתנים גלובליים נוספים וערכי אתחול שלהם.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "הטענה לא נכונה",
+      "explanation": "1.1: כן, המימוש הנתון עלול לגרום לקיפאון. נתאר תרחיש:\nנתוני אתחול: `BUFFER_SIZE = 1`. החיץ ריק. `mutex=1, empty=1, full_A=0, full_B=0`.\n1.  חוט יצרן של `TYPE_A` (P_A) רץ ומייצר מוצר `A`:\n    *   `sem_wait(&empty);` (`empty` הופך ל-0).\n    *   `sem_wait(&mutex);`\n    *   `add_item_A();`\n    *   `sem_post(&mutex);`\n    *   `sem_post(&full_A);` (`full_A` הופך ל-1).\n    המצב כעת: בחיץ יש פריט `A`, `empty=0`, `full_A=1`, `full_B=0`.\n2.  חוט צרכן מיוחד (SC_AB) רץ:\n    *   `sem_wait(&full_A);` (מצליח, `full_A` הופך ל-0).\n    *   `sem_wait(&full_B);` (נחסם, ממתין ל-`full_B` שערכו 0). SC_AB מחזיק כעת את המשאב `full_A` (הוא הקטין את ערכו) וממתין ל-`full_B`.\n3.  חוט יצרן של `TYPE_B` (P_B) מנסה לרוץ:\n    *   `sem_wait(&empty);` (נחסם, ממתין ל-`empty` שערכו 0). P_B ממתין למשאב `empty`.\n\nנוצר מצב של קיפאון:\n*   SC_AB ממתין ל-`full_B` (שערכו 0). `full_B` יכול להשתחרר רק על ידי יצרן `TYPE_B` (P_B).\n*   P_B ממתין ל-`empty` (שערכו 0). `empty` יכול להשתחרר רק כאשר צרכן כלשהו (במקרה זה SC_AB) יסיים לצרוך פריטים וישחרר מקומות פנויים.\nזהו מעגל המתנה: SC_AB -> `full_B` -> P_B -> `empty` -> SC_AB (באופן עקיף). כל תנאי הקיפאון של Coffman מתקיימים: הדרה הדדית, החזק והמתן, אי-נתיקנות, והמתנה מעגלית.\n\n1.2: הטענה לא נכונה. הסטודנט מתייחס לתנאי 'המתנה מעגלית' (Circular Wait) באופן מצומצם מדי. אמנם בתוך הפונקציה `special_consume_AB` הסדר של תפיסת `full_A` ו-`full_B` קבוע, אך ישנם משאבים נוספים במערכת (`empty`, `mutex`) וחוטים נוספים (יצרנים, צרכנים רגילים) המתחרים על משאבים אלו.\nכפי שהודגם בסעיף 1.1, קיפאון נוצר כאשר יש מעגל המתנה בין חוטים הממתינים למשאבים שמוחזקים על ידי חוטים אחרים במעגל. במקרה שתואר, `special_consume_AB` מחזיק `full_A` וממתין ל`full_B`, בעוד `produce_B` ממתין ל`empty`, ו`empty` יכול להשתחרר רק אם `special_consume_AB` יתקדם. זוהי המתנה מעגלית שכוללת משאבים שונים וחוטים שונים, למרות שהסדר הפנימי ב-`special_consume_AB` הוא קבוע. תנאי הקיפאון של Coffman מתקיימים: הדרה הדדית (על סמפורים), החזק והמתן (SC_AB מחזיק `full_A` וממתין ל`full_B`), אי-נתיקנות (לא ניתן לקחת סמפור מחוט), והמתנה מעגלית (כפי שתואר).\n\n1.3: כדי לתקן את הפונקציה `special_consume_AB` כך שתעבוד באופן תקין ללא קיפאון או הרעבה, ננקוט בגישה של 'תפוס הכל או לא כלום' באמצעות `sem_trywait` יחד עם מנגנון חזרה (rollback) במקרה של כישלון. בנוסף, כדי למנוע הרעבה (livelock) במקרה של ניסיונות חוזרים ונשנים, נשתמש בסמפור גלובלי הוגן (`master`) שיבטיח שרק חוט אחד ינסה לתפוס את המשאבים בכל רגע נתון.\n\nמשתנים גלובליים נוספים:\n`sem_t master; // מאותחל ל-1`\n\n```c\nvoid special_consume_AB_fixed() {\n    while (true) {\n        sem_wait(&master); // תפוס מנעול גלובלי כדי למנוע livelock ולאפשר ניסיון בלעדי\n\n        int acquired_A = 0;\n        int acquired_B = 0;\n\n        // נסה לתפוס את full_A\n        if (sem_trywait(&full_A) == 0) {\n            acquired_A = 1;\n            // אם הצליח, נסה לתפוס את full_B\n            if (sem_trywait(&full_B) == 0) {\n                acquired_B = 1;\n                // הצלחנו לתפוס את שניהם, צא מלולאת הניסיונות\n                break;\n            }\n        }\n\n        // אם הגענו לכאן, לא הצלחנו לתפוס את שני המשאבים (או A או B נכשלו)\n        // שחרר את כל המשאבים שנתפסו בניסיון זה (rollback)\n        if (acquired_B) {\n            sem_post(&full_B);\n        }\n        if (acquired_A) {\n            sem_post(&full_A);\n        }\n        sem_post(&master); // שחרר את המנעול הגלובלי ואפשר לחוט אחר לנסות\n        yield(); // וותר על המעבד כדי לתת לחוטים אחרים הזדמנות לייצר או לצרוך\n    }\n\n    // --- קטע קריטי: לאחר ששני הסמפורים full_A ו-full_B נתפסו בהצלחה ---\n    sem_wait(&mutex); // תפוס mutex לגישה לחיץ הפיזי\n    ItemA itemA = remove_item_A();\n    ItemB itemB = remove_item_B();\n    sem_post(&mutex); // שחרר mutex\n\n    sem_post(&empty); // שחרר 2 מקומות פנויים\n    sem_post(&empty);\n\n    sem_post(&master); // שחרר את המנעול הגלובלי לאחר סיום הפעולה האטומית\n    // consume_items_AB(itemA, itemB); // המשך עיבוד הפריטים\n}\n```\nפתרון זה מונע קיפאון על ידי שימוש בגישת 'תפוס הכל או לא כלום' (acquire all or none), שבה חוט משחרר משאבים שנתפסו אם אינו מצליח לתפוס את כולם. הוא מונע livelock (הרעבה של ה-`special_consume_AB` עצמו) על ידי שימוש במנעול גלובלי הוגן (`master`) המבטיח שכל חוט יקבל תור לנסות לתפוס את המשאבים. ה-`yield()` מסייע להוגנות בכך שהוא נותן לחוטים אחרים הזדמנות לרוץ (לדוגמה, יצרנים שיכולים לייצר את הפריטים החסרים)."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

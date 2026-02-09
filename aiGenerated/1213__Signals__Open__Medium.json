@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Signals",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-09 20:33:25",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2023,
+      "output_tokens": 1188,
+      "total_tokens": 5941
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "Open",
+    "topic": [
+      "Signals"
+    ],
+    "content": {
+      "text": "כתוב קטע קוד ב-C המדגים כיצד לחסום באופן זמני את קבלת האות SIGINT (Ctrl+C) במהלך קטע קריטי בתוכנית. לאחר סיום הקטע הקריטי, יש לשחזר את מסכת האותות המקורית. הסבר במילים שלך מה יקרה אם האות SIGINT יישלח בזמן שהתוכנית נמצאת בקטע הקריטי, וכיצד היא תטופל לאחר שחרור החסימה.",
+      "code_snippet": "```c\n#include <stdio.h>\n#include <signal.h>\n#include <unistd.h> // For sleep\n\nvoid sigint_handler(int signo) {\n    printf(\"Received SIGINT! Signal number: %d\\n\", signo);\n}\n\nint main() {\n    // 1. Register sigint_handler for SIGINT\n\n    sigset_t new_mask, old_mask;\n    // 2. Initialize new_mask and add SIGINT to it\n\n    // 3. Block SIGINT, saving the old mask\n\n    printf(\"Entering critical section (sleeping for 5 seconds). Try sending SIGINT now...\\n\");\n    sleep(5); // Critical section\n\n    // 4. Restore original signal mask\n\n    printf(\"Exited critical section. SIGINT is now unblocked. Sleeping for 5 more seconds to allow pending signals or new signals.\\n\");\n    sleep(5); // Allow time for pending signals or new signals\n\n    printf(\"Program finished.\\n\");\n    return 0;\n}\n```",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הפתרון דורש שימוש בפונקציות `sigprocmask` ו-`sigset_t`. ראשית, יש להגדיר מטפל לאות `SIGINT` באמצעות `signal` או `sigaction`. לאחר מכן, יש ליצור סט של אותות (`sigset_t`) ולהוסיף אליו את `SIGINT`. באמצעות `sigprocmask` עם `SIG_BLOCK`, נאפשר לחסום את קבלת `SIGINT` ולשמור את מסכת האותות הקודמת. בתוך הקטע הקריטי, אם `SIGINT` יישלח, הוא לא יטופל מיד אלא יהפוך ל\"אות ממתין\" (pending signal). לאחר היציאה מהקטע הקריטי, נשתמש שוב ב-`sigprocmask` עם `SIG_SETMASK` כדי לשחזר את מסכת האותות המקורית. ברגע ש-`SIGINT` לא חסום יותר, האות הממתין יימסר לתוכנית, ומטפל האות (`sigint_handler`) יופעל.\n\n```c\n#include <stdio.h>\n#include <signal.h>\n#include <unistd.h> // For sleep\n\nvoid sigint_handler(int signo) {\n    printf(\"Received SIGINT! Signal number: %d\\n\", signo);\n}\n\nint main() {\n    // 1. Register sigint_handler for SIGINT\n    if (signal(SIGINT, sigint_handler) == SIG_ERR) {\n        perror(\"signal\");\n        return 1;\n    }\n\n    sigset_t new_mask, old_mask;\n    // 2. Initialize new_mask and add SIGINT to it\n    sigemptyset(&new_mask);\n    sigaddset(&new_mask, SIGINT);\n\n    // 3. Block SIGINT, saving the old mask\n    if (sigprocmask(SIG_BLOCK, &new_mask, &old_mask) == -1) {\n        perror(\"sigprocmask SIG_BLOCK\");\n        return 1;\n    }\n    printf(\"SIGINT is now blocked.\\n\");\n\n    printf(\"Entering critical section (sleeping for 5 seconds). Try sending SIGINT now...\\n\");\n    sleep(5); // Critical section\n\n    // 4. Restore original signal mask\n    if (sigprocmask(SIG_SETMASK, &old_mask, NULL) == -1) {\n        perror(\"sigprocmask SIG_SETMASK\");\n        return 1;\n    }\n    printf(\"Exited critical section. SIGINT is now unblocked. Sleeping for 5 more seconds to allow pending signals or new signals.\\n\");\n    sleep(5); // Allow time for pending signals or new signals\n\n    printf(\"Program finished.\\n\");\n    return 0;\n}\n```"
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

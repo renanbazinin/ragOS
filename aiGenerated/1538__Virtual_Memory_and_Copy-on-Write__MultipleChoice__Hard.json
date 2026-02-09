@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory and Copy-on-Write",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-09 20:51:19",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 975,
+      "output_tokens": 1849,
+      "total_tokens": 7097
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "MultipleChoice",
+    "topic": [
+      "Virtual Memory",
+      "Copy-on-Write"
+    ],
+    "content": {
+      "text": "נתונה תוכנית ה-C הבאה, המשתמשת במערך גלובלי המשתרע על פני שני דפים בגודל 4KB כל אחד. תהליך האב מבצע fork ליצירת תהליך בן. בהנחה שמערכת ההפעלה מיישמת Copy-on-Write (CoW) עבור זיכרון נתונים בתהליכי fork, וכי גודל דף הוא 4096 בתים וגודל int הוא 4 בתים:\n```c\n#include <unistd.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <sys/wait.h>\n\n#define PAGE_SIZE 4096\n#define ARRAY_SIZE (2 * PAGE_SIZE / sizeof(int))\n\nint global_array[ARRAY_SIZE];\n\nint main() {\n    for (int i = 0; i < ARRAY_SIZE; ++i) {\n        global_array[i] = i;\n    }\n\n    pid_t pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        exit(1);\n    } else if (pid == 0) { // Child process\n        // Child reads from the first page\n        int val1 = global_array[0];\n        // Child reads from the second page\n        int val2 = global_array[ARRAY_SIZE - 1];\n\n        // Child modifies an element in the first page\n        global_array[0] = 100;\n\n        // Child modifies an element in the second page\n        global_array[ARRAY_SIZE - 1] = 200;\n\n        exit(0);\n    } else { // Parent process\n        wait(NULL);\n\n        printf(\"Parent: global_array[0]=%d, global_array[%d]=%d\\n\", global_array[0], ARRAY_SIZE - 1, global_array[ARRAY_SIZE - 1]);\n    }\n\n    return 0;\n}\n```\nכמה דפי זיכרון פיזיים *נוספים* הוקצו באופן ספציפי עקב פעולות Copy-on-Write בתהליך הבן, ומה יהיו הערכים הסופיים של `global_array[0]` ושל `global_array[ARRAY_SIZE - 1]` בתהליך *האב* לאחר שהבן סיים את ביצועו ויצא?",
+      "code_snippet": null,
+      "options": [
+        "א. הוקצו 2 דפים נוספים; בתהליך האב: global_array[0]=100, global_array[2047]=2047.",
+        "ב. הוקצו 2 דפים נוספים; בתהליך האב: global_array[0]=0, global_array[2047]=2047.",
+        "ג. הוקצו 4 דפים נוספים; בתהליך האב: global_array[0]=0, global_array[2047]=2047.",
+        "ד. הוקצו 2 דפים נוספים; בתהליך האב: global_array[0]=100, global_array[2047]=200.",
+        "ה. הוקצו 0 דפים נוספים; בתהליך האב: global_array[0]=0, global_array[2047]=2047."
+      ]
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ב",
+      "explanation": "הסבר:\n1.  **אתחול ו-fork**: לפני ה-fork, המערך `global_array` מאותחל ומאכלס שני דפים פיזיים. כאשר מתבצעת קריאה ל-`fork()`, מערכת ההפעלה מיישמת Copy-on-Write (CoW). המשמעות היא שגם תהליך האב וגם תהליך הבן מקבלים מיפויים וירטואליים לאותם דפים פיזיים שהכילו את `global_array`, אך דפים אלו מסומנים כקריאה בלבד (read-only) בטבלאות הדפים של שניהם.\n2.  **פעולות קריאה בבן**: הקריאות `global_array[0]` ו-`global_array[ARRAY_SIZE - 1]` בתהליך הבן הן פעולות קריאה. הן אינן גורמות ל-CoW page fault מכיוון שהדפים מותרים לקריאה.\n3.  **פעולות כתיבה בבן**: גודל המערך `ARRAY_SIZE` הוא `(2 * 4096 / 4) = 2048`. המערך מאכלס שני דפים פיזיים, כאשר `global_array[0]` נמצא בדף הראשון ו-`global_array[2047]` (שזה `global_array[ARRAY_SIZE - 1]`) נמצא בדף השני.\n    *   הפקודה `global_array[0] = 100;` היא ניסיון כתיבה לדף הראשון. מכיוון שהדף מסומן כ-read-only, תתרחש פסיקת דף (page fault) מסוג CoW. מערכת ההפעלה תקצה דף פיזי *חדש*, תעתיק אליו את התוכן המקורי של הדף הראשון, ותעדכן את טבלת הדפים של הבן כך שהכתובת הווירטואלית של הדף הראשון תצביע כעת לדף הפיזי החדש, ותסמן אותו כ-read-write עבור הבן. זהו דף פיזי נוסף אחד.\n    *   באופן דומה, הפקודה `global_array[ARRAY_SIZE - 1] = 200;` היא ניסיון כתיבה לדף השני. גם כאן תתרחש פסיקת דף CoW. מערכת ההפעלה תקצה דף פיזי *נוסף* אחר, תעתיק אליו את התוכן המקורי של הדף השני, ותעדכן את טבלת הדפים של הבן כך שהכתובת הווירטואלית של הדף השני תצביע לדף הפיזי הנוסף השני, ותסמן אותו כ-read-write עבור הבן. זהו דף פיזי נוסף שני.\n    *   סה\"כ הוקצו 2 דפים פיזיים *נוספים* עקב פעולות CoW.\n4.  **מצב הזיכרון בתהליך האב**: תהליך האב ממשיך להצביע על הדפים הפיזיים *המקוריים*. מכיוון שהבן עבד על עותקים משלו של הדפים לאחר ה-CoW, השינויים שביצע הבן אינם משפיעים על הזיכרון הפיזי של האב. לכן, כאשר האב ידפיס את הערכים, הוא יראה את הערכים המקוריים: `global_array[0]` יהיה 0 (כמו באתחול), ו-`global_array[2047]` יהיה 2047 (שכן הערכים אותחלו מ-0 עד `ARRAY_SIZE - 1`).\n\nלסיכום, הוקצו 2 דפים פיזיים נוספים, ובתהליך האב הערכים יהיו `global_array[0]=0` ו-`global_array[2047]=2047`."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Scheduling and Processes",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-09 21:05:40",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2768,
+      "output_tokens": 2291,
+      "total_tokens": 7844
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "Scheduling",
+      "Processes",
+      "Process States",
+      "System Calls",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C הבאה המשתמשת בקריאות מערכת ליצירת תהליכים (fork, exec, wait). ענו על השאלות הבאות בהתבסס על הקוד ועל הבנתכם את פעולת מערכת ההפעלה.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\nint main() {\n    pid_t pid;\n    printf(\"Parent: Before fork\\n\");\n\n    pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        exit(1);\n    } else if (pid == 0) { // Child process\n        printf(\"Child: After fork\\n\");\n        execlp(\"/bin/echo\", \"echo\", \"Child: Executing echo command\", NULL);\n        perror(\"exec failed\"); // Should not reach here if exec succeeds\n        exit(1);\n    } else { // Parent process\n        printf(\"Parent: After fork, child PID is %d\\n\", pid);\n        wait(NULL);\n        printf(\"Parent: Child finished\\n\");\n    }\n\n    printf(\"Parent: Exiting\\n\");\n    return 0;\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "כמה תהליכים (כולל התהליך הראשי) נוצרים בסך הכל במהלך ריצה תקינה של התוכנית?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "בהנחה שמתזמן המעבד הוא פרה-אמפטיבי (preemptive), מהם כל הפלטים האפשריים של התוכנית? הסבירו בקצרה כל פלט אפשרי.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.3",
+        "text": "תארו את מצבי התהליך (Running, Ready, Waiting/Blocked) של תהליך האב ושל תהליך הבן, מרגע שקריאת ה-`fork` חוזרת בתהליך האב ועד לסיום התוכנית. ציינו מתי מתרחשים מעברי מצב עיקריים.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.1:\nבמהלך ריצה תקינה של התוכנית נוצרים 2 תהליכים בסך הכל: תהליך האב המקורי ותהליך הבן שנוצר על ידי קריאת ה-`fork`.\n\n1.2:\nהפלטים האפשריים תלויים בסדר התזמון בין תהליך האב לתהליך הבן לאחר ה-`fork`.\n\n*   **אפשרות 1: האב ממשיך לרוץ מיד לאחר ה-`fork` לפני שהבן מספיק לבצע `exec` או אפילו `printf`:**\n    ```\n    Parent: Before fork\n    Parent: After fork, child PID is <PID>\n    Child: After fork\n    Child: Executing echo command\n    Parent: Child finished\n    Parent: Exiting\n    ```\n    הסבר: תהליך האב מדפיס את הודעה \"Parent: Before fork\", מבצע `fork`, מדפיס הודעה \"Parent: After fork...\", ומגיע ל-`wait`. בשלב זה הוא נכנס למצב המתנה (Waiting) עד שהבן יסיים. תהליך הבן מתחיל לרוץ, מדפיס הודעה \"Child: After fork\", מבצע `exec` (שמדפיס את הודעת ה-`echo`), ומסיים. לאחר סיום הבן, האב מתעורר מ-`wait`, מדפיס הודעה \"Parent: Child finished\", ומסיים עם הודעה \"Parent: Exiting\".\n\n*   **אפשרות 2: הבן רץ מיד לאחר ה-`fork` לפני שהאב מספיק להדפיס את הודעת ה-PID שלו:**\n    ```\n    Parent: Before fork\n    Child: After fork\n    Child: Executing echo command\n    Parent: After fork, child PID is <PID>\n    Parent: Child finished\n    Parent: Exiting\n    ```\n    הסבר: תהליך האב מדפיס הודעה \"Parent: Before fork\", מבצע `fork`. המתזמן בוחר להריץ את הבן. הבן מדפיס הודעה \"Child: After fork\", מבצע `exec` (שמדפיס את הודעת ה-`echo`), ומסיים. כעת, האב מתעורר (או מתזמן לרוץ אם היה במצב Ready), מדפיס הודעה \"Parent: After fork...\" (אפילו אם הבן כבר סיים, ה-PID עדיין נכון), ממשיך ל-`wait` (שחוזר מיד כי הבן כבר סיים), מדפיס הודעה \"Parent: Child finished\", ומסיים עם הודעה \"Parent: Exiting\".\n\nאין אפשרויות נוספות מכיוון שהודעה \"Parent: Before fork\" תמיד תודפס ראשונה, והודעות \"Parent: Child finished\" ו-\"Parent: Exiting\" תמיד תודפסנה לאחר סיום הבן, כאשר הודעה \"Parent: Exiting\" תמיד תודפס אחרונה על ידי האב.\n\n1.3:\nתיאור מצבי התהליך מרגע חזרת ה-`fork` בתהליך האב:\n\n*   **שלב 1: מיד לאחר `fork`**\n    *   **תהליך האב:** מצב `Ready` (אלא אם המתזמן החליט להריץ אותו מיד). הוא מוכן להדפיס את ה-PID של הבן.\n    *   **תהליך הבן:** מצב `Ready`. הוא מוכן להדפיס את הודעתו הראשונה.\n    *   הסבר: שני התהליכים מוכנים לריצה, והמתזמן יבחר מי מהם ירוץ ראשון.\n\n*   **שלב 2: תהליך האב רץ (לפני `wait`)**\n    *   **תהליך האב:** מצב `Running`. הוא מדפיס את הודעת ה-PID של הבן.\n    *   **תהליך הבן:** מצב `Ready` (אם לא רץ קודם). הוא ממתין לתורו.\n    *   הסבר: אם האב מגיע ל-`wait(NULL)` לפני שהבן מסיים, הוא יעבור למצב `Waiting/Blocked`.\n\n*   **שלב 3: תהליך הבן רץ**\n    *   **תהליך הבן:** מצב `Running`. הוא מדפיס את הודעה \"Child: After fork\", ואז `exec` מחליף את תמונת הזיכרון שלו ומריץ את `/bin/echo`. בזמן ש-`echo` רץ, הבן עדיין במצב `Running`.\n    *   **תהליך האב:** מצב `Ready` (אם לא הגיע ל-`wait` עדיין) או `Waiting/Blocked` (אם הגיע ל-`wait`).\n    *   הסבר: המתזמן בחר להריץ את הבן. קריאת ה-`exec` אינה יוצרת תהליך חדש, אלא מחליפה את קוד התוכנית של תהליך הבן הקיים.\n\n*   **שלב 4: תהליך הבן מסיים (לאחר `exec`)**\n    *   **תהליך הבן:** מצב `Terminated` (סיים את ריצתו). הוא הפך ל-\"זומבי\" עד שהאב יבצע `wait`.\n    *   **תהליך האב:**\n        *   אם היה במצב `Waiting/Blocked` (בגלל `wait`), הוא עובר למצב `Ready`.\n        *   אם היה במצב `Ready` (כי לא הגיע ל-`wait` עדיין), הוא נשאר `Ready` (או עובר ל-`Running` אם המתזמן בוחר בו).\n    *   הסבר: סיום הבן שולח סיגנל לאב, מעיר אותו אם הוא ממתין ב-`wait`. אם האב לא ביצע `wait` עדיין, הבן הופך לזומבי עד ש-`wait` יבוצע.\n\n*   **שלב 5: תהליך האב מסיים**\n    *   **תהליך האב:** מצב `Running` (מדפיס הודעות \"Parent: Child finished\" ו-\"Parent: Exiting\"), ואז עובר למצב `Terminated`.\n    *   **תהליך הבן:** `Terminated` (אם טופל על ידי `wait` של האב), או יטופל על ידי `init` אם האב מסיים לפני `wait`.\n    *   הסבר: האב מסיים את שארית הקוד ויוצא מהמערכת."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

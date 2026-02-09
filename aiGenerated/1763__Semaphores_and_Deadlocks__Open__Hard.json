@@ -1,0 +1,64 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Deadlocks",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-09 21:02:48",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4395,
+      "output_tokens": 4291,
+      "total_tokens": 19949
+    }
+  },
+  "question": {
+    "id": 101,
+    "type": "Open",
+    "topic": [
+      "Semaphores",
+      "Deadlocks",
+      "Resource Management",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "במערכת מרובת חוטים, קיימים N חוטי עבודה. המערכת מנהלת שני סוגי משאבים: ליבות מעבד (CPU Cores) ויחידות מעבד גרפי (GPU Units). קיימות C ליבות CPU זמינות ו-G יחידות GPU זמינות בסך הכל. כל חוט עבודה נדרש לתפוס `c_needed` ליבות CPU ו-`g_needed` יחידות GPU *בו-זמנית* על מנת לבצע את משימתו. לאחר סיום המשימה, החוט משחרר את כל המשאבים שתפס. נניח ש-`c_needed` ו-`g_needed` הם תמיד חיוביים וקטנים או שווים ל-C ול-G בהתאמה.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "101.1",
+        "text": "ספקו מימוש ב-C/C++ עבור פונקציות `acquire_resources` ו-`release_resources` המשתמשות בסמפורים לניהול המשאבים. המימוש צריך להיות פשוט ככל האפשר, תוך שימוש בשני סמפורים מונים (אחד ל-CPU ואחד ל-GPU). הציגו את מבנה ה-`ResourceManager` ואת קוד הפונקציות. **שימו לב: עבור חלק מהחוטים, המשאבים נרכשים בסדר CPU ואז GPU, ועבור חוטים אחרים, המשאבים נרכשים בסדר GPU ואז CPU.**",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "101.2",
+        "text": "האם המימוש שהוצג בסעיף 101.1 יכול להוביל למצב של קיפאון (deadlock)? אם כן, הסבירו בפירוט מדוע, ותארו תרחיש ספציפי (רצף אירועים) שיגרום לקיפאון במערכת. נמקו את תשובתכם בהתבסס על ארבעת התנאים של קיפאון (מניעה הדדית, אחיזה והמתנה, אי-הפקעה, המתנה מעגלית).",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "101.3",
+        "text": "הציעו שינוי למימוש הפונקציות `acquire_resources` ו-`release_resources` על מנת למנוע קיפאון. ספקו את הקוד המעודכן עבור הפונקציות הללו והסבירו את אסטרטגיית המניעה. נמקו בקצרה מדוע המימוש החדש מונע קיפאון.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "101.4",
+        "text": "האם המימוש למניעת קיפאון שהוצג בסעיף 101.3 מבטיח גם חופש מהרעבה (starvation)? נמקו בקצרה. כיצד ניתן לשפר את המימוש על מנת למנוע הרעבה (אין צורך בקוד מלא, רק הסבר קונספטואלי)?",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "פתרון:\n\n1.  **מימוש ראשוני עם פוטנציאל לקיפאון:**\n    המימוש הבא מציג שתי פונקציות רכישה שונות, המדמות את המצב בו חוטים שונים רוכשים משאבים בסדר שונה, מה שמוביל לפוטנציאל לקיפאון.\n\n    ```c\n    #include <semaphore.h>\n    #include <stdio.h>\n    #include <stdlib.h>\n\n    typedef struct {\n        sem_t cpu_sem; // סמפור מונה עבור ליבות CPU\n        sem_t gpu_sem; // סמפור מונה עבור יחידות GPU\n    } ResourceManager;\n\n    // אתחול מנהל המשאבים\n    void init_resource_manager(ResourceManager *rm, int C, int G) {\n        sem_init(&rm->cpu_sem, 0, C);\n        sem_init(&rm->gpu_sem, 0, G);\n    }\n\n    // השמדת מנהל המשאבים\n    void destroy_resource_manager(ResourceManager *rm) {\n        sem_destroy(&rm->cpu_sem);\n        sem_destroy(&rm->gpu_sem);\n    }\n\n    // פונקציית רכישה עבור חוטים שתופסים CPU ואז GPU\n    void acquire_resources_cpu_then_gpu(ResourceManager *rm, int c_needed, int g_needed) {\n        for (int i = 0; i < c_needed; ++i) {\n            sem_wait(&rm->cpu_sem);\n        }\n        for (int i = 0; i < g_needed; ++i) {\n            sem_wait(&rm->gpu_sem);\n        }\n    }\n\n    // פונקציית רכישה עבור חוטים שתופסים GPU ואז CPU\n    void acquire_resources_gpu_then_cpu(ResourceManager *rm, int c_needed, int g_needed) {\n        for (int i = 0; i < g_needed; ++i) {\n            sem_wait(&rm->gpu_sem);\n        }\n        for (int i = 0; i < c_needed; ++i) {\n            sem_wait(&rm->cpu_sem);\n        }\n    }\n\n    // פונקציית שחרור משאבים (סדר השחרור אינו קריטי לקיפאון אך מומלץ לשחרר בסדר הפוך לרכישה או בסדר קבוע)\n    void release_resources(ResourceManager *rm, int c_needed, int g_needed) {\n        for (int i = 0; i < c_needed; ++i) {\n            sem_post(&rm->cpu_sem);\n        }\n        for (int i = 0; i < g_needed; ++i) {\n            sem_post(&rm->gpu_sem);\n        }\n    }\n    ```\n\n2.  **ניתוח קיפאון (Deadlock Analysis):**\n    כן, המימוש שהוצג בסעיף 101.1 יכול להוביל למצב של קיפאון. ננתח זאת בהתבסס על ארבעת התנאים של קיפאון:\n\n    *   **מניעה הדדית (Mutual Exclusion):** מתקיים. ליבות CPU ויחידות GPU הן משאבים בלתי ניתנים לשיתוף במקביל מעבר לכמות הזמינה (C ו-G בהתאמה), והסמפורים אוכפים זאת. רק חוט אחד יכול להקטין את ערך הסמפור מתחת ל-1 בכל פעם (עבור יחידה ספציפית).\n    *   **אחיזה והמתנה (Hold and Wait):** מתקיים. חוט יכול לרכוש חלק מהמשאבים (למשל, ליבות CPU) ואז להיחסם בהמתנה למשאבים אחרים (יחידות GPU), תוך כדי שהוא ממשיך להחזיק במשאבים שכבר תפס.\n    *   **אי-הפקעה (No Preemption):** מתקיים. המשאבים (ליבות CPU ויחידות GPU) אינם ניתנים להפקעה מחוט שמחזיק בהם. חוט משחרר אותם רק מרצונו החופשי לאחר שסיים את משימתו.\n    *   **המתנה מעגלית (Circular Wait):** מתקיים. בגלל שחלק מהחוטים רוכשים משאבים בסדר שונה (CPU ואז GPU) מאחרים (GPU ואז CPU), יכול להיווצר מעגל המתנה.\n\n    **תרחיש קיפאון ספציפי:**\n    נניח `C = 1` (ליבת CPU אחת), `G = 1` (יחידת GPU אחת), `c_needed = 1`, `g_needed = 1`. ישנם שני חוטים: חוט A המשתמש ב-`acquire_resources_cpu_then_gpu` וחוט B המשתמש ב-`acquire_resources_gpu_then_cpu`.\n\n    1.  **חוט A** מתחיל בביצוע `acquire_resources_cpu_then_gpu`.\n        *   הוא קורא ל-`sem_wait(&rm->cpu_sem)` ומצליח (CPU = 0). חוט A מחזיק כעת את ליבת ה-CPU.\n    2.  **מתרחש החלף הקשר (context switch) לחוט B.**\n    3.  **חוט B** מתחיל בביצוע `acquire_resources_gpu_then_cpu`.\n        *   הוא קורא ל-`sem_wait(&rm->gpu_sem)` ומצליח (GPU = 0). חוט B מחזיק כעת את יחידת ה-GPU.\n    4.  **מתרחש החלף הקשר לחוט A.**\n    5.  **חוט A** ממשיך בביצוע `acquire_resources_cpu_then_gpu`.\n        *   הוא קורא ל-`sem_wait(&rm->gpu_sem)`. מכיוון ש-GPU = 0 (חוט B מחזיק אותה), חוט A נחסם בהמתנה ל-GPU. חוט A מחזיק CPU וממתין ל-GPU.\n    6.  **מתרחש החלף הקשר לחוט B.**\n    7.  **חוט B** ממשיך בביצוע `acquire_resources_gpu_then_cpu`.\n        *   הוא קורא ל-`sem_wait(&rm->cpu_sem)`. מכיוון ש-CPU = 0 (חוט A מחזיק אותה), חוט B נחסם בהמתנה ל-CPU. חוט B מחזיק GPU וממתין ל-CPU.\n\n    בשלב זה, חוט A ממתין למשאב שחוט B מחזיק, וחוט B ממתין למשאב שחוט A מחזיק. נוצר מעגל המתנה, ושני החוטים נמצאים בקיפאון.\n\n3.  **מניעת קיפאון (Deadlock Prevention):**\n    האסטרטגיה הנפוצה ביותר למניעת קיפאון במקרה זה היא **הקפדה על סדר רכישה עקבי וגלובלי של משאבים** (Resource Ordering). אם כל החוטים במערכת ירכשו את המשאבים באותו סדר קבוע (למשל, תמיד CPU ואז GPU), אזי תנאי ההמתנה המעגלית נשבר, ולא ייתכן קיפאון.\n\n    ```c\n    #include <semaphore.h>\n    #include <stdio.h>\n    #include <stdlib.h>\n\n    // מבנה מנהל המשאבים (זהה לקודם)\n    typedef struct {\n        sem_t cpu_sem;\n        sem_t gpu_sem;\n    } ResourceManager;\n\n    // אתחול והשמדה (זהים לקודם)\n    void init_resource_manager(ResourceManager *rm, int C, int G) {\n        sem_init(&rm->cpu_sem, 0, C);\n        sem_init(&rm->gpu_sem, 0, G);\n    }\n\n    void destroy_resource_manager(ResourceManager *rm) {\n        sem_destroy(&rm->cpu_sem);\n        sem_destroy(&rm->gpu_sem);\n    }\n\n    // פונקציית רכישה בטוחה מקיפאון (תמיד CPU ואז GPU)\n    void acquire_resources_safe(ResourceManager *rm, int c_needed, int g_needed) {\n        // רכוש את כל יחידות ה-CPU הנדרשות\n        for (int i = 0; i < c_needed; ++i) {\n            sem_wait(&rm->cpu_sem);\n        }\n        // רכוש את כל יחידות ה-GPU הנדרשות\n        for (int i = 0; i < g_needed; ++i) {\n            sem_wait(&rm->gpu_sem);\n        }\n    }\n\n    // פונקציית שחרור משאבים (מומלץ בסדר הפוך לרכישה, כלומר GPU ואז CPU)\n    void release_resources_safe(ResourceManager *rm, int c_needed, int g_needed) {\n        // שחרר יחידות GPU תחילה\n        for (int i = 0; i < g_needed; ++i) {\n            sem_post(&rm->gpu_sem);\n        }\n        // שחרר יחידות CPU לאחר מכן\n        for (int i = 0; i < c_needed; ++i) {\n            sem_post(&rm->cpu_sem);\n        }\n    }\n    ```\n\n    **הנמקה למניעת קיפאון:**\n    המימוש החדש מונע קיפאון על ידי שבירת תנאי **ההמתנה המעגלית**. כאשר כל החוטים רוכשים את המשאבים באותו סדר קבוע (למשל, תמיד CPU ואז GPU), לא ייתכן שחוט A ימתין ל-GPU שחוט B מחזיק, בעוד שחוט B ממתין ל-CPU שחוט A מחזיק. אם חוט B מחזיק GPU, הוא חייב היה לרכוש את ה-CPU לפני כן (לפי הסדר הקבוע), ולכן הוא לא יכול להמתין כעת ל-CPU. אם הוא ממתין ל-CPU, הוא עדיין לא רכש GPU, ולכן לא יכול להיות חלק ממעגל המתנה.\n\n4.  **חופש מהרעבה (Starvation) ושיפור:**\n    לא, המימוש למניעת קיפאון שהוצג בסעיף 101.3 **אינו מבטיח בהכרח חופש מהרעבה**. למרות שהוא מונע קיפאון, ייתכן שחוט מסוים ימתין לזמן בלתי מוגבל לרכישת משאבים, בעוד שחוטים אחרים מצליחים לרכוש ולשחרר משאבים באופן עקבי. זה יכול לקרות אם תמיד יש מספיק משאבים כדי לספק בקשות של חוטים חדשים או חוטים שהרגע שחררו משאבים, לפני שהחוט המורעב מצליח לתפוס את תורו.\n\n    **כיצד ניתן לשפר למניעת הרעבה (קונספטואלית):**\n    כדי למנוע הרעבה, ניתן להוסיף מנגנון הוגנות (fairness) למערכת. מספר גישות אפשריות:\n    *   **תור המתנה (Queueing Mechanism):** ניתן להשתמש בסמפור בינארי נוסף (mutex) שיגן על קטע הקוד של רכישת המשאבים. כל חוט שרוצה לרכוש משאבים יצטרך קודם לתפוס את ה-mutex הזה. אם ה-mutex ממומש באופן הוגן (למשל, FIFO), זה יבטיח שחוטים יכנסו לקטע הרכישה לפי סדר הגעתם. בתוך קטע זה, הם ינסו לרכוש את כל המשאבים בבת אחת. אם לא ניתן לרכוש את כל המשאבים, הם ישחררו את ה-mutex וינסו שוב מאוחר יותר, או ימתינו על משתנה תנאי (condition variable).\n    *   **רכישה אטומית של כל המשאבים (Atomic Acquisition):** כדי לשבור את תנאי 'אחיזה והמתנה' באופן יעיל יותר, ניתן לדרוש מחוט לרכוש את *כל* המשאבים הנדרשים לו בבת אחת (all-or-none). אם הוא לא מצליח לרכוש את כולם, הוא לא רוכש אף אחד. זה דורש לרוב שימוש ב-mutex גלובלי או בסמפור נוסף שיאפשר לחוט אחד בלבד בכל פעם לבדוק זמינות משאבים ולרכוש אותם באופן בלעדי. זה אמנם מפחית את הרעבה אך עלול לפגוע במקביליות.\n    *   **מערכת עדיפויות (Priority System):** ניתן להקצות עדיפויות לחוטים. חוטים בעלי עדיפות גבוהה יותר יקבלו משאבים לפני חוטים בעלי עדיפות נמוכה יותר. יש להיזהר מיישום כזה שכן הוא יכול להוביל ל\"היפוך עדיפויות\" (priority inversion) או להרעבת חוטים בעלי עדיפות נמוכה.\n\n    פתרון פשוט יותר, אם כי פחות יעיל מבחינת מקביליות, הוא להשתמש בסמפור בינארי אחד (mutex) סביב כל לוגיקת ה-`acquire_resources_safe`. זה יבטיח שרק חוט אחד ינסה לרכוש משאבים בכל רגע נתון, ובכך למעשה ימנע הרעבה על ידי סריאליזציה של תהליך הרכישה."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

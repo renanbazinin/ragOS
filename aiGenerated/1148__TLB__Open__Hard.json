@@ -1,0 +1,58 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "TLB",
+    "requested_type": "Open",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-09 20:32:02",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4186,
+      "output_tokens": 5802,
+      "total_tokens": 32147
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "TLB",
+      "Memory Management",
+      "Virtual Memory",
+      "Cache"
+    ],
+    "content": {
+      "text": "נתונה מערכת עם כתובות וירטואליות ברוחב 32 ביט וכתובות פיזיות ברוחב 28 ביט. גודל דף הוא 4KB. ה-TLB במערכת מכיל 8 כניסות והוא בעל אסוציאטיביות של 2-way set-associative (כלומר, 2 כניסות לכל סט), עם מדיניות החלפה LRU (Least Recently Used) בתוך כל סט. ה-TLB מרוקן (flushed) בעת אתחול המערכת וריק לחלוטין לפני הרצת הקוד. יש להניח שלכל דף וירטואלי (VPN) יש מסגרת פיזית (PFN) מתאימה כפי שצוין בטבלה. יש לפרט ולנמק את כל החישובים.\n\nהמערך `arr` מתחיל בכתובת וירטואלית `0x0000_1000`. גודל `int` הוא 4 בתים.\n\nטבלת מיפויים (לצורך השאלה):\nVPN (Virtual Page Number) | PFN (Physical Frame Number)\n--------------------------|-----------------------------\n0x00001                   | 0x100\n0x00002                   | 0x101\n0x00003                   | 0x102\n0x00004                   | 0x103\n0x00005                   | 0x104\n0x00006                   | 0x105\n0x00007                   | 0x106\n0x00008                   | 0x107\n0x00009                   | 0x108\n0x0000A                   | 0x109\n",
+      "code_snippet": "#define NUM_PAGES 10 // המערך משתרע על פני 10 דפים\n#define PAGE_SIZE_INTS (4096 / 4) // 1024 שלמים לדף\n\nint arr[NUM_PAGES * PAGE_SIZE_INTS]; // סה\"כ 10240 שלמים\n\nvoid process_array_complex() {\n    // מעבר ראשון: גישה לאלמנט הראשון בכל דף\n    for (int i = 0; i < NUM_PAGES; i++) {\n        arr[i * PAGE_SIZE_INTS] = arr[i * PAGE_SIZE_INTS] + 1;\n    }\n\n    // מעבר שני: גישה לאלמנט השני בכל דף\n    for (int i = 0; i < NUM_PAGES; i++) {\n        arr[i * PAGE_SIZE_INTS + 1] = arr[i * PAGE_SIZE_INTS + 1] + 1;\n    }\n}",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "1.1",
+        "text": "כמה סטים יש ב-TLB? כיצד מחולקת כתובת וירטואלית למספר דף וירטואלי (VPN), אינדקס TLB ותגית TLB?",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.2",
+        "text": "עקוב אחר ביצוע הפונקציה `process_array_complex()` וחשב את המספר הכולל של TLB misses. הצג את התוכן הסופי של ה-TLB (עבור כל סט, רשום את כניסות ה-TLB בסדר LRU, כאשר הכניסה האחרונה שהייתה בשימוש היא הראשונה). (ניתן להניח שכל גישה לזיכרון בתוך הלולאה (קריאה וכתיבה ל-arr[...]) נחשבת לגישה ל-TLB פעם אחת בלבד).",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "1.3",
+        "text": "נניח שמתרחשת החלפת הקשר (context switch) בדיוק לאחר סיום הלולאה הראשונה, והמערכת מבצעת TLB flush (ניקוי מלא של ה-TLB). כיצד ישתנה המספר הכולל של TLB misses? נמק.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "1.1: חישוב מבנה ה-TLB:\n*   גודל דף: 4KB = 2^12 בתים. לכן, 12 ביטים משמשים ל-Offset.\n*   רוחב כתובת וירטואלית: 32 ביט. מספר הדף הווירטואלי (VPN) הוא 32 - 12 = 20 ביטים.\n*   מספר כניסות ב-TLB: 8. אסוציאטיביות: 2-way set-associative.\n*   מספר הסטים ב-TLB: 8 כניסות / 2 כניסות לסט = 4 סטים. מכיוון שיש 4 סטים (2^2), נדרשים 2 ביטים עבור אינדקס ה-TLB.\n*   אינדקס ה-TLB נלקח בדרך כלל מהביטים הנמוכים של ה-VPN (לאחר ה-Offset). לכן, אינדקס ה-TLB הוא 2 הביטים הנמוכים ביותר של ה-VPN.\n*   תגית ה-TLB (TLB Tag): נותרו 20 - 2 = 18 ביטים עבור התגית, שהם הביטים הגבוהים יותר של ה-VPN.\n\nחלוקת הכתובת הווירטואלית:\n| חלק הכתובת | טווח ביטים | גודל (ביטים) |\n| :---------- | :---------- | :------------ |\n| TLB Tag     | [31:14]     | 18            |\n| TLB Index   | [13:12]     | 2             |\n| Page Offset | [11:0]      | 12            |\n\n1.2: מעקב אחר ביצוע הפונקציה `process_array_complex()` וחישוב TLB misses:\nהמערך `arr` מתחיל בכתובת וירטואלית `0x0000_1000`. גודל `int` הוא 4 בתים. `PAGE_SIZE_INTS` הוא 1024. `NUM_PAGES` הוא 10.\n\nכתובות וירטואליות של הדפים והמיפוי ל-TLB:\n| VPN (Virtual Page Number) | TLB Index (2 bits) | TLB Tag (18 bits) | PFN (Physical Frame Number) |\n| :-------------------------- | :----------------- | :---------------- | :-------------------------- |\n| 0x00001                     | 1                  | 0x00000           | 0x100                       |\n| 0x00002                     | 2                  | 0x00000           | 0x101                       |\n| 0x00003                     | 3                  | 0x00000           | 0x102                       |\n| 0x00004                     | 0                  | 0x00001           | 0x103                       |\n| 0x00005                     | 1                  | 0x00001           | 0x104                       |\n| 0x00006                     | 2                  | 0x00001           | 0x105                       |\n| 0x00007                     | 3                  | 0x00001           | 0x106                       |\n| 0x00008                     | 0                  | 0x00002           | 0x107                       |\n| 0x00009                     | 1                  | 0x00002           | 0x108                       |\n| 0x0000A                     | 2                  | 0x00002           | 0x109                       |\n\nמצב התחלתי: TLB ריק. סך TLB misses = 0.\n\n**מעבר ראשון: `for (int i = 0; i < NUM_PAGES; i++) { arr[i * PAGE_SIZE_INTS] = ...; }`**\nגישות ל-VPNs `0x00001`, `0x00002`, `0x00003`, `0x00004`, `0x00005`, `0x00006`, `0x00007`, `0x00008`, `0x00009`, `0x0000A`.\n\n1.  `i=0`: `arr[0]` (VPN `0x00001`, Index 1, Tag `0x00000`). TLB Miss.\n    *   סט 1: `[{T:0x00000, PFN:0x100}]` (LRU: `0x00000`) \n    *   Misses = 1.\n2.  `i=1`: `arr[1024]` (VPN `0x00002`, Index 2, Tag `0x00000`). TLB Miss.\n    *   סט 2: `[{T:0x00000, PFN:0x101}]` (LRU: `0x00000`)\n    *   Misses = 2.\n3.  `i=2`: `arr[2048]` (VPN `0x00003`, Index 3, Tag `0x00000`). TLB Miss.\n    *   סט 3: `[{T:0x00000, PFN:0x102}]` (LRU: `0x00000`)\n    *   Misses = 3.\n4.  `i=3`: `arr[3072]` (VPN `0x00004`, Index 0, Tag `0x00001`). TLB Miss.\n    *   סט 0: `[{T:0x00001, PFN:0x103}]` (LRU: `0x00001`)\n    *   Misses = 4.\n5.  `i=4`: `arr[4096]` (VPN `0x00005`, Index 1, Tag `0x00001`). TLB Miss.\n    *   סט 1: `[{T:0x00001, PFN:0x104}, {T:0x00000, PFN:0x100}]` (LRU: `0x00001`, `0x00000`)\n    *   Misses = 5.\n6.  `i=5`: `arr[5120]` (VPN `0x00006`, Index 2, Tag `0x00001`). TLB Miss.\n    *   סט 2: `[{T:0x00001, PFN:0x105}, {T:0x00000, PFN:0x101}]` (LRU: `0x00001`, `0x00000`)\n    *   Misses = 6.\n7.  `i=6`: `arr[6144]` (VPN `0x00007`, Index 3, Tag `0x00001`). TLB Miss.\n    *   סט 3: `[{T:0x00001, PFN:0x106}, {T:0x00000, PFN:0x102}]` (LRU: `0x00001`, `0x00000`)\n    *   Misses = 7.\n8.  `i=7`: `arr[7168]` (VPN `0x00008`, Index 0, Tag `0x00002`). TLB Miss.\n    *   סט 0: `[{T:0x00002, PFN:0x107}, {T:0x00001, PFN:0x103}]` (LRU: `0x00002`, `0x00001`)\n    *   Misses = 8.\n9.  `i=8`: `arr[8192]` (VPN `0x00009`, Index 1, Tag `0x00002`). TLB Miss. (סט 1 מלא, `0x00000` הוא ה-LRU).\n    *   סט 1: `[{T:0x00002, PFN:0x108}, {T:0x00001, PFN:0x104}]` (LRU: `0x00002`, `0x00001`). `0x00000` הוצא.\n    *   Misses = 9.\n10. `i=9`: `arr[9216]` (VPN `0x0000A`, Index 2, Tag `0x00002`). TLB Miss. (סט 2 מלא, `0x00000` הוא ה-LRU).\n    *   סט 2: `[{T:0x00002, PFN:0x109}, {T:0x00001, PFN:0x105}]` (LRU: `0x00002`, `0x00001`). `0x00000` הוצא.\n    *   Misses = 10.\n\n**מצב TLB לאחר הלולאה הראשונה:**\n*   סט 0: `[{T:0x00002, PFN:0x107}, {T:0x00001, PFN:0x103}]`\n*   סט 1: `[{T:0x00002, PFN:0x108}, {T:0x00001, PFN:0x104}]`\n*   סט 2: `[{T:0x00002, PFN:0x109}, {T:0x00001, PFN:0x105}]`\n*   סט 3: `[{T:0x00001, PFN:0x106}, {T:0x00000, PFN:0x102}]`\n**סה\"כ TLB misses לאחר הלולאה הראשונה = 10.**\n\n**מעבר שני: `for (int i = 0; i < NUM_PAGES; i++) { arr[i * PAGE_SIZE_INTS + 1] = ...; }`**\nגישות ל-VPNs `0x00001`, `0x00002`, `0x00003`, `0x00004`, `0x00005`, `0x00006`, `0x00007`, `0x00008`, `0x00009`, `0x0000A`.\n\n1.  `i=0`: `arr[1]` (VPN `0x00001`, Index 1, Tag `0x00000`). TLB Miss. (הוצא במעבר הקודם)\n    *   סט 1: `[{T:0x00000, PFN:0x100}, {T:0x00002, PFN:0x108}]` (LRU: `0x00000`, `0x00002`). `0x00001` הוצא.\n    *   Misses = 11.\n2.  `i=1`: `arr[1025]` (VPN `0x00002`, Index 2, Tag `0x00000`). TLB Miss. (הוצא במעבר הקודם)\n    *   סט 2: `[{T:0x00000, PFN:0x101}, {T:0x00002, PFN:0x109}]` (LRU: `0x00000`, `0x00002`). `0x00001` הוצא.\n    *   Misses = 12.\n3.  `i=2`: `arr[2049]` (VPN `0x00003`, Index 3, Tag `0x00000`). TLB Hit.\n    *   סט 3: `[{T:0x00000, PFN:0x102}, {T:0x00001, PFN:0x106}]` (LRU: `0x00000`, `0x00001`)\n    *   Misses = 12.\n4.  `i=3`: `arr[3073]` (VPN `0x00004`, Index 0, Tag `0x00001`). TLB Hit.\n    *   סט 0: `[{T:0x00001, PFN:0x103}, {T:0x00002, PFN:0x107}]` (LRU: `0x00001`, `0x00002`)\n    *   Misses = 12.\n5.  `i=4`: `arr[4097]` (VPN `0x00005`, Index 1, Tag `0x00001`). TLB Hit.\n    *   סט 1: `[{T:0x00001, PFN:0x104}, {T:0x00000, PFN:0x100}]` (LRU: `0x00001`, `0x00000`)\n    *   Misses = 12.\n6.  `i=5`: `arr[5121]` (VPN `0x00006`, Index 2, Tag `0x00001`). TLB Hit.\n    *   סט 2: `[{T:0x00001, PFN:0x105}, {T:0x00000, PFN:0x101}]` (LRU: `0x00001`, `0x00000`)\n    *   Misses = 12.\n7.  `i=6`: `arr[6145]` (VPN `0x00007`, Index 3, Tag `0x00001`). TLB Hit.\n    *   סט 3: `[{T:0x00001, PFN:0x106}, {T:0x00000, PFN:0x102}]` (LRU: `0x00001`, `0x00000`)\n    *   Misses = 12.\n8.  `i=7`: `arr[7169]` (VPN `0x00008`, Index 0, Tag `0x00002`). TLB Hit.\n    *   סט 0: `[{T:0x00002, PFN:0x107}, {T:0x00001, PFN:0x103}]` (LRU: `0x00002`, `0x00001`)\n    *   Misses = 12.\n9.  `i=8`: `arr[8193]` (VPN `0x00009`, Index 1, Tag `0x00002`). TLB Hit.\n    *   סט 1: `[{T:0x00002, PFN:0x108}, {T:0x00001, PFN:0x104}]` (LRU: `0x00002`, `0x00001`)\n    *   Misses = 12.\n10. `i=9`: `arr[9217]` (VPN `0x0000A`, Index 2, Tag `0x00002`). TLB Hit.\n    *   סט 2: `[{T:0x00002, PFN:0x109}, {T:0x00001, PFN:0x105}]` (LRU: `0x00002`, `0x00001`)\n    *   Misses = 12.\n\n**סה\"כ TLB misses = 12.**\n\n**התוכן הסופי של ה-TLB (בסדר LRU - האחרון בשימוש ראשון):**\n*   סט 0: `[{T:0x00002, PFN:0x107}, {T:0x00001, PFN:0x103}]`\n*   סט 1: `[{T:0x00002, PFN:0x108}, {T:0x00001, PFN:0x104}]`\n*   סט 2: `[{T:0x00002, PFN:0x109}, {T:0x00001, PFN:0x105}]`\n*   סט 3: `[{T:0x00001, PFN:0x106}, {T:0x00000, PFN:0x102}]`\n\n1.3: השפעת TLB flush לאחר הלולאה הראשונה:\nלאחר הלולאה הראשונה, היו 10 TLB misses. מצב ה-TLB היה מלא בחלקו עם הכניסות שפורטו בסעיף 1.2.\nאם מתבצע TLB flush לאחר הלולאה הראשונה, כל 8 הכניסות ב-TLB מתרוקנות.\nכאשר הלולאה השנייה מתחילה, כל 10 הגישות לזיכרון יהיו TLB misses מכיוון שה-TLB ריק לחלוטין. ה-TLB יתמלא מחדש באותם מיפויים (או יתחיל תהליך של מילוי והחלפה מחדש).\n\nלכן, מספר ה-TLB misses ישתנה מ-12 ל-20:\n*   10 misses מהלולאה הראשונה.\n*   10 misses מהלולאה השנייה (לאחר ה-flush).\n\nהשינוי במספר ה-TLB misses יהיה תוספת של 8 misses (20 - 12 = 8). הסיבה לכך היא ש-8 הגישות בלולאה השנייה, שבמצב רגיל היו hits, הופכות ל-misses עקב ריקון ה-TLB."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

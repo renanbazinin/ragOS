@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Threads and Synchronization",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-09 20:57:35",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 1971,
+      "output_tokens": 1324,
+      "total_tokens": 5950
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Threads",
+      "Synchronization",
+      "Race Conditions"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C++ המשתמשת בחוטים כדי להגדיל ולהקטין מונה משותף. התוכנית יוצרת 5 חוטי \"מגדיל\" (incrementer) ו-5 חוטי \"מקטין\" (decrementer). כל חוט מבצע 10,000 פעולות על המונה.\nקראו את קטע הקוד הבא וענו על השאלה:\nמהו הערך הסופי האפשרי של המונה `shared_counter` לאחר שכל החוטים סיימו את פעולתם? האם הערך הסופי מובטח להיות 0? הסבירו.",
+      "code_snippet": "#include <iostream>\n#include <thread>\n#include <vector>\n// #include <mutex> // Mutex is intentionally not used or misused\n\nint shared_counter = 0;\n// std::mutex counter_mutex; // If declared, it's not used correctly here\n\nvoid incrementer_thread() {\n    for (int i = 0; i < 10000; ++i) {\n        shared_counter++;\n    }\n}\n\nvoid decrementer_thread() {\n    for (int i = 0; i < 10000; ++i) {\n        shared_counter--;\n    }\n}\n\nint main() {\n    std::vector<std::thread> threads;\n\n    for (int i = 0; i < 5; ++i) {\n        threads.push_back(std::thread(incrementer_thread));\n        threads.push_back(std::thread(decrementer_thread));\n    }\n\n    for (std::thread& t : threads) {\n        t.join();\n    }\n\n    std::cout << \"Final counter value: \" << shared_counter << std::endl;\n    return 0;\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הערך הסופי של המונה `shared_counter` אינו מובטח להיות 0. למרות שיש סך הכל 50,000 הגדלות ו-50,000 הקטנות (5 חוטים * 10,000 פעולות כל אחד לכל כיוון), התוכנית סובלת מתנאי מירוץ (race condition) על המשתנה הגלובלי `shared_counter`. פעולות הגדלה והקטנה (`++` ו-`--`) אינן אטומיות. כל פעולה כזו מורכבת משלושה שלבים: קריאת הערך הנוכחי של המונה, שינוי הערך, וכתיבת הערך החדש בחזרה לזיכרון. כאשר מספר חוטים מנסים לבצע את הפעולות הללו במקביל ללא מנגנון סנכרון (כמו mutex), ייתכן שעדכונים ילכו לאיבוד. לדוגמה, אם שני חוטים קוראים את אותו ערך של `shared_counter`, שניהם מגדילים אותו, ושניהם כותבים את הערך החדש, רק אחד העדכונים ישתקף בזיכרון. לכן, הערך הסופי יכול להיות כל מספר בטווח רחב (לרוב קרוב ל-0 אך לא בהכרח 0), תלוי בלוח הזמנים הספציפי של ריצת החוטים. הערך 0 יתקבל רק במקרה, ולא מובטח. כדי להבטיח שהערך הסופי יהיה 0, יש להשתמש במנעול (mutex) כדי להגן על הגישה ל-`shared_counter` בתוך הפונקציות `incrementer_thread` ו-`decrementer_thread`, כפי שמוצג בקוד המתוקן.",
+      "code_snippet": "#include <iostream>\n#include <thread>\n#include <vector>\n#include <mutex> // Mutex is now correctly included and used\n\nint shared_counter = 0;\nstd::mutex counter_mutex; // Correctly declared for synchronization\n\nvoid incrementer_thread() {\n    for (int i = 0; i < 10000; ++i) {\n        std::lock_guard<std::mutex> lock(counter_mutex); // Protect shared_counter\n        shared_counter++;\n    }\n}\n\nvoid decrementer_thread() {\n    for (int i = 0; i < 10000; ++i) {\n        std::lock_guard<std::mutex> lock(counter_mutex); // Protect shared_counter\n        shared_counter--;\n    }\n}\n\nint main() {\n    std::vector<std::thread> threads;\n\n    for (int i = 0; i < 5; ++i) {\n        threads.push_back(std::thread(incrementer_thread));\n        threads.push_back(std::thread(decrementer_thread));\n    }\n\n    for (std::thread& t : threads) {\n        t.join();\n    }\n\n    std::cout << \"Final counter value: \" << shared_counter << std::endl;\n    return 0;\n}"
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

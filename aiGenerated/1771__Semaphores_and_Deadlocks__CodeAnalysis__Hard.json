@@ -1,0 +1,51 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Deadlocks",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-09 21:04:46",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4285,
+      "output_tokens": 2449,
+      "total_tokens": 10208
+    }
+  },
+  "question": {
+    "id": 8,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Semaphores",
+      "Deadlocks",
+      "Synchronization",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתונה המערכת הבאה המשתמשת בסמפורים להגנה על משאבים משותפים. המערכת כוללת שני סוגי חוטים (Thread Type 1 ו-Thread Type 2) ושני משאבים (Resource 1 ו-Resource 2), המיוצגים על ידי סמפורים בינאריים. שני הסמפורים מאותחלים לערך 1.\nחוטי Thread Type 1 מנסים לתפוס את Resource 1 ולאחר מכן את Resource 2. חוטי Thread Type 2 מנסים לתפוס את Resource 2 ולאחר מכן את Resource 1. לאחר תפיסת שני המשאבים, החוט מבצע פעולה כלשהי, ומשחרר את המשאבים בסדר הפוך מסדר התפיסה.",
+      "code_snippet": "sem_t resource1;\nsem_t resource2;\n\nvoid* thread_type1(void* arg) {\n    printf(\"Thread Type 1: Attempting to acquire Resource 1...\\n\");\n    sem_wait(&resource1);\n    printf(\"Thread Type 1: Acquired Resource 1. Attempting to acquire Resource 2...\\n\");\n    sleep(1); // Simulate some work or context switch\n    sem_wait(&resource2);\n    printf(\"Thread Type 1: Acquired both resources. Working...\\n\");\n    sleep(2);\n    sem_post(&resource2);\n    printf(\"Thread Type 1: Released Resource 2.\\n\");\n    sem_post(&resource1);\n    printf(\"Thread Type 1: Released Resource 1. Done.\\n\");\n    return NULL;\n}\n\nvoid* thread_type2(void* arg) {\n    printf(\"Thread Type 2: Attempting to acquire Resource 2...\\n\");\n    sem_wait(&resource2);\n    printf(\"Thread Type 2: Acquired Resource 2. Attempting to acquire Resource 1...\\n\");\n    sleep(1); // Simulate some work or context switch\n    sem_wait(&resource1);\n    printf(\"Thread Type 2: Acquired both resources. Working...\\n\");\n    sleep(2);\n    sem_post(&resource1);\n    printf(\"Thread Type 2: Released Resource 1.\\n\");\n    sem_post(&resource2);\n    printf(\"Thread Type 2: Released Resource 2. Done.\\n\");\n    return NULL;\n}"
+    },
+    "sub_questions": [
+      {
+        "id": "8.1",
+        "text": "א. האם המימוש הנתון עלול להוביל למצב של קיפאון (Deadlock)? אם כן, תארו תרחיש ספציפי (רצף אירועים) שבו מתרחש קיפאון והסבירו מדוע הוא נוצר בהתבסס על ארבעת התנאים ההכרחיים לקיפאון.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "8.2",
+        "text": "ב. תקנו את הקוד על מנת למנוע קיפאון, תוך שמירה על השימוש בסמפורים ועל המבנה הכללי של התוכנית. כתבו את הקוד המתוקן והסבירו בקצרה מדוע התיקון מונע קיפאון ואיזה תנאי הכרחי לקיפאון הוא מפר.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": 15,
+    "solution": {
+      "is_present_in_file": false,
+      "correct_option": null,
+      "explanation": "פתרון שאלה 8:\n\n**סעיף א':**\nכן, המימוש הנתון עלול להוביל למצב של קיפאון (Deadlock).\n\n**תרחיש קיפאון:**\n1.  חוט A (מסוג Thread Type 1) מתחיל ריצה ומבצע `sem_wait(&resource1);`. כעת חוט A מחזיק ב-Resource 1.\n2.  חוט B (מסוג Thread Type 2) מתחיל ריצה ומבצע `sem_wait(&resource2);`. כעת חוט B מחזיק ב-Resource 2.\n3.  חוט A מנסה כעת לתפוס את Resource 2 על ידי קריאה ל-`sem_wait(&resource2);`. מכיוון ש-Resource 2 מוחזק על ידי חוט B, חוט A נחסם וממתין.\n4.  חוט B מנסה כעת לתפוס את Resource 1 על ידי קריאה ל-`sem_wait(&resource1);`. מכיוון ש-Resource 1 מוחזק על ידי חוט A, חוט B נחסם וממתין.\nבשלב זה, שני החוטים חסומים באופן הדדי: חוט A ממתין למשאב שמוחזק על ידי חוט B, וחוט B ממתין למשאב שמוחזק על ידי חוט A. אף חוט לא יכול להתקדם, ולכן נוצר קיפאון.\n\n**הסבר על בסיס תנאי הקיפאון:**\n*   **מניעה הדדית (Mutual Exclusion):** מתקיים. כל משאב (Resource 1, Resource 2) מוגן על ידי סמפור בינארי, מה שאומר שרק חוט אחד יכול להחזיק בו זמנית בכל משאב.\n*   **החזקה והמתנה (Hold and Wait):** מתקיים. חוט A מחזיק ב-Resource 1 וממתין ל-Resource 2. חוט B מחזיק ב-Resource 2 וממתין ל-Resource 1.\n*   **אי-הפקעה (No Preemption):** מתקיים. המשאבים אינם נלקחים בכוח מהחוטים שמחזיקים בהם; חוט יכול לשחרר משאב רק מרצונו, באמצעות `sem_post`.\n*   **המתנה מעגלית (Circular Wait):** מתקיים. חוט A ממתין למשאב שמוחזק על ידי חוט B, וחוט B ממתין למשאב שמוחזק על ידי חוט A, ובכך נוצרת שרשרת המתנה מעגלית.\n\n**סעיף ב':**\nניתן למנוע קיפאון על ידי שבירת תנאי ההמתנה המעגלית. הדרך הנפוצה ביותר לעשות זאת היא על ידי אכיפת סדר עקבי בתפיסת המשאבים. כלומר, כל החוטים חייבים לתפוס את המשאבים באותו סדר. במקרה זה, נגרום לשני סוגי החוטים לתפוס קודם את Resource 1 ולאחר מכן את Resource 2.\n\n**קוד מתוקן:**\n```c\n#include <stdio.h>\n#include <pthread.h>\n#include <semaphore.h>\n#include <unistd.h> // for sleep\n\nsem_t resource1;\nsem_t resource2;\n\nvoid* thread_type1(void* arg) {\n    printf(\"Thread Type 1: Attempting to acquire Resource 1...\\n\");\n    sem_wait(&resource1);\n    printf(\"Thread Type 1: Acquired Resource 1. Attempting to acquire Resource 2...\\n\");\n    sleep(1); \n    sem_wait(&resource2);\n    printf(\"Thread Type 1: Acquired both resources. Working...\\n\");\n    sleep(2);\n    sem_post(&resource2);\n    printf(\"Thread Type 1: Released Resource 2.\\n\");\n    sem_post(&resource1);\n    printf(\"Thread Type 1: Released Resource 1. Done.\\n\");\n    return NULL;\n}\n\nvoid* thread_type2_fixed(void* arg) {\n    // שינוי: תפיסת Resource 1 לפני Resource 2\n    printf(\"Thread Type 2 Fixed: Attempting to acquire Resource 1...\\n\");\n    sem_wait(&resource1); // Changed order\n    printf(\"Thread Type 2 Fixed: Acquired Resource 1. Attempting to acquire Resource 2...\\n\");\n    sleep(1); \n    sem_wait(&resource2);\n    printf(\"Thread Type 2 Fixed: Acquired both resources. Working...\\n\");\n    sleep(2);\n    sem_post(&resource2);\n    printf(\"Thread Type 2 Fixed: Released Resource 2.\\n\");\n    sem_post(&resource1);\n    printf(\"Thread Type 2 Fixed: Released Resource 1. Done.\\n\");\n    return NULL;\n}\n```\n\n**הסבר מדוע התיקון מונע קיפאון:**\nהתיקון מונע קיפאון על ידי שבירת תנאי **ההמתנה המעגלית**. כעת, כל החוטים (גם Thread Type 1 וגם Thread Type 2) תופסים את המשאבים באותו סדר: קודם Resource 1, ולאחר מכן Resource 2.\nבמצב זה, לא ייתכן שחוט A יחזיק ב-Resource 1 וימתין ל-Resource 2, בעוד חוט B יחזיק ב-Resource 2 וימתין ל-Resource 1. אם חוט A תפס את Resource 1, וחוט B מנסה גם הוא לתפוס את Resource 1, חוט B ייחסם על `resource1` עד שחוט A ישחרר אותו (לאחר שסיים להשתמש בשני המשאבים). חוט B לא ינסה לתפוס את Resource 2 לפני שיתפוס את Resource 1, ובכך נמנעת המתנה מעגלית ומונע קיפאון."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

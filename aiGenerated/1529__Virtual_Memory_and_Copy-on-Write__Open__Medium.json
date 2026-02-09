@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory and Copy-on-Write",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-09 20:50:51",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2412,
+      "output_tokens": 2035,
+      "total_tokens": 9532
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "Virtual Memory",
+      "Copy-on-Write",
+      "Process Management"
+    ],
+    "content": {
+      "text": "נתונה מערכת הפעלה התומכת בזיכרון וירטואלי ובמנגנון Copy-on-Write (CoW). גודל דף במערכת הוא 4KB. נתבונן בקטע הקוד הבא. נניח שקטע הקוד (text segment) של התוכנית תופס דף פיזי אחד, והמחסנית (stack) של כל תהליך תופסת דף פיזי אחד. המשתנה הגלובלי `global_array` נמצא ב-data segment.\n\nכמה מסגרות זיכרון פיזי (physical frames) בסך הכל נצרכות על ידי התהליכים (האב והבן יחד) בשתי נקודות זמן:\n1. בסיום שלב 1 (מיד לאחר אתחול המערך ולפני קריאה ל-fork).\n2. בסיום שלב 2 (לאחר שהאב והבן סיימו את פעולתם וכל השינויים בוצעו).\nנמקו את תשובתכם והסבירו את תפקידו של מנגנון CoW בתרחיש זה.",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n\n#define ARRAY_SIZE 2048 // 2048 integers * 4 bytes/integer = 8192 bytes = 2 pages\n\nint global_array[ARRAY_SIZE];\n\nint main() {\n    int i;\n    pid_t pid;\n\n    // Initialize the array (Stage 1)\n    for (i = 0; i < ARRAY_SIZE; i++) {\n        global_array[i] = i;\n    }\n\n    printf(\"Parent: Initializing array. Stage 1 complete.\\n\");\n\n    pid = fork();\n\n    if (pid < 0) {\n        perror(\"fork failed\");\n        exit(1);\n    } else if (pid == 0) { // Child process\n        printf(\"Child: Starting execution.\\n\");\n        // Child modifies first half of the array (Stage 2 - Child)\n        for (i = 0; i < ARRAY_SIZE / 2; i++) {\n            global_array[i] = -i;\n        }\n        printf(\"Child: Modified first half of array. Stage 2 Child complete.\\n\");\n        exit(0);\n    } else { // Parent process\n        printf(\"Parent: Waiting for child.\\n\");\n        // Parent modifies second half of the array (Stage 2 - Parent)\n        for (i = ARRAY_SIZE / 2; i < ARRAY_SIZE; i++) {\n            global_array[i] = -i;\n        }\n        wait(NULL); // Wait for the child to finish\n        printf(\"Parent: Modified second half of array and waited for child. Stage 2 Parent complete.\\n\");\n    }\n\n    printf(\"Process %d: Exiting.\\n\", getpid());\n    return 0;\n}"
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הסבר וחישוב:\n\nגודל המערך `global_array` הוא `2048 * sizeof(int) = 2048 * 4 = 8192` בתים. מכיוון שגודל דף הוא 4KB (4096 בתים), המערך תופס `8192 / 4096 = 2` דפים פיזיים.\n\n**1. בסיום שלב 1 (לפני הקריאה ל-fork):**\nבשלב זה קיים רק תהליך האב. הזיכרון הפיזי הנצרך הוא:\n*   דף פיזי אחד עבור קטע הקוד (text segment).\n*   דף פיזי אחד עבור המחסנית (stack) של תהליך האב.\n*   שני דפים פיזיים עבור המשתנה הגלובלי `global_array` (שכבר אותחל).\nסה\"כ מסגרות זיכרון פיזי נצרכות: `1 (קוד) + 1 (מחסנית) + 2 (מערך נתונים) = 4` מסגרות.\n\n**2. בסיום שלב 2 (לאחר שהאב והבן סיימו את פעולתם):**\nלאחר קריאת ה-`fork()`, נוצר תהליך הבן. מנגנון ה-Copy-on-Write (CoW) נכנס לפעולה:\n*   **קטע קוד (text segment):** קטע הקוד משותף בין תהליך האב לתהליך הבן, ולכן נצרכת רק מסגרת פיזית אחת עבורו.\n*   **מחסנית (stack):** לכל תהליך יש מחסנית פרטית משלו. לכן, נצרכות 2 מסגרות פיזיות (אחת לאב ואחת לבן).\n*   **מערך נתונים (`global_array`):** המערך תופס 2 דפים פיזיים. עם יצירת תהליך הבן, שני הדפים הללו משותפים בין האב לבן במצב 'קריאה בלבד' (read-only) באמצעות CoW. רק כאשר אחד התהליכים מנסה לכתוב לדף משותף, מנגנון CoW משכפל את הדף ונותן עותק פרטי לתהליך הכותב.\n    *   הבן משנה את החצי הראשון של המערך (`global_array[0]` עד `global_array[ARRAY_SIZE/2 - 1]`). חלק זה של המערך נמצא בדף הפיזי הראשון. כאשר הבן כותב לדף זה, מנגנון CoW משכפל את הדף הראשון, והבן מקבל עותק פרטי משלו של הדף. כעת הדף הפיזי המקורי הראשון שייך בלעדית לאב (מכיוון שרק הוא עדיין מצביע אליו), והדף החדש שנוצר שייך לבן.\n    *   האב משנה את החצי השני של המערך (`global_array[ARRAY_SIZE/2]` עד `global_array[ARRAY_SIZE - 1]`). חלק זה של המערך נמצא בדף הפיזי השני. כאשר האב כותב לדף זה, מנגנון CoW משכפל את הדף השני, והאב מקבל עותק פרטי משלו של הדף. כעת הדף הפיזי המקורי השני שייך בלעדית לבן (מכיוון שרק הוא עדיין מצביע אליו), והדף החדש שנוצר שייך לאב.\n    *   לכן, בסיום שלב 2, ארבעה דפים פיזיים מוקצים עבור המערך `global_array`: הדף המקורי הראשון (עבור האב), הדף החדש של הבן (עבור החצי הראשון), הדף המקורי השני (עבור הבן), והדף החדש של האב (עבור החצי השני).\nסה\"כ מסגרות זיכרון פיזי נצרכות: `1 (קוד) + 2 (מחסניות) + 4 (מערך נתונים) = 7` מסגרות.\n\n**תפקידו של מנגנון CoW:**\nמנגנון CoW מאפשר חיסכון משמעותי בזיכרון פיזי ובזמן יצירת תהליכים (fork). במקום לשכפל את כל מרחב הכתובות של האב לבן מיד עם ה-fork, ה-CoW משתף את הדפים הפיזיים בין האב לבן במצב קריאה בלבד. רק כאשר אחד מהתהליכים מנסה לכתוב לדף משותף, נוצר עותק פרטי של אותו דף עבור התהליך הכותב. בתרחיש זה, הוא חסך את שכפול שני הדפים של המערך מיד, ורק כאשר האב והבן כתבו לחלקים שונים של המערך, נוצרו עותקים רק לדפים הספציפיים שעברו שינוי, ולא לכל המערך."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

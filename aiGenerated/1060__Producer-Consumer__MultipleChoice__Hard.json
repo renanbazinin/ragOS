@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Producer-Consumer",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-09 20:26:29",
+    "examples_used": 2,
+    "token_usage": {
+      "prompt_tokens": 970,
+      "output_tokens": 1611,
+      "total_tokens": 11313
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "topic": [
+      "Producer-Consumer",
+      "Synchronization",
+      "Condition Variables",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתונה המחלקה הבאה המממשת תבנית Producer-Consumer תוך שימוש ב-`std::mutex` ו-`std::condition_variable` ב-C++:\n\n```cpp\n#include <iostream>\n#include <vector>\n#include <queue>\n#include <thread>\n#include <mutex>\n#include <condition_variable>\n\nconst int BUFFER_SIZE = 5;\nstd::queue<int> buffer;\nstd::mutex mtx;\nstd::condition_variable cv_not_empty;\nstd::condition_variable cv_not_full;\n\nvoid producer(int id) {\n    for (int i = 0; i < 10; ++i) {\n        std::unique_lock<std::mutex> lock(mtx);\n        // Potential issue: using 'if' instead of 'while'\n        if (buffer.size() == BUFFER_SIZE) {\n            cv_not_full.wait(lock);\n        }\n        buffer.push(i);\n        std::cout << \"Producer \" << id << \" produced: \" << i << std::endl;\n        cv_not_empty.notify_one(); \n        std::this_thread::sleep_for(std::chrono::milliseconds(50));\n    }\n}\n\nvoid consumer(int id) {\n    for (int i = 0; i < 10; ++i) {\n        std::unique_lock<std::mutex> lock(mtx);\n        // Potential issue: using 'if' instead of 'while'\n        if (buffer.empty()) {\n            cv_not_empty.wait(lock);\n        }\n        int item = buffer.front();\n        buffer.pop();\n        std::cout << \"Consumer \" << id << \" consumed: \" << item << std::endl;\n        cv_not_full.notify_one();\n        std::this_thread::sleep_for(std::chrono::milliseconds(100));\n    }\n}\n```\n\nאיזה מהבאים *אינו* נכון לגבי ההשלכות האפשריות של הקוד הנתון, במערכת מרובת ליבות עם מספר רב של מפיקים וצרכנים?",
+      "code_snippet": null,
+      "options": [
+        "א. צרכן עשוי לנסות לגשת לאיבר ממחיץ ריק (underflow), מה שיוביל להתנהגות בלתי מוגדרת (Undefined Behavior).",
+        "ב. מפיק עשוי לנסות להוסיף איבר למחיץ מלא (overflow), מה שיוביל לחריגה מגודל המחיץ המתוכנן.",
+        "ג. ייתכן שיתרחש מצב של קיפאון (Deadlock) במערכת, כאשר מפיקים וצרכנים ממתינים באופן הדדי ללא יכולת להתקדם.",
+        "ד. הקוד יפעל תמיד באופן תקין אך יהיה פחות יעיל עקב התעוררויות שווא (Spurious Wakeups) שאינן מטופלות כראוי."
+      ]
+    },
+    "sub_questions": null,
+    "points": 5,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": "ג",
+      "explanation": "הקוד הנתון מכיל טעות קריטית בשימוש במשתני תנאי (condition variables): במקום להשתמש בלולאת `while` לבדיקת התנאי לפני קריאה ל-`wait`, נעשה שימוש ב-`if`. הסיבה לכך היא שקיימות שתי בעיות עיקריות ש-'if' אינו פותר:\n1.  **התעוררויות שווא (Spurious Wakeups)**: תהליך יכול להתעורר מקריאה ל-`wait` גם אם לא נשלח לו סיגנל, או אם התנאי עדיין לא מתקיים. עם `if`, התהליך לא יבדוק שוב את התנאי וימשיך בביצוע, למרות שהתנאי לא מאפשר זאת.\n2.  **מרוץ (Race Conditions) לאחר התעוררות**: גם אם תהליך מתעורר כתוצאה מסיגנל אמיתי, ייתכן שתהליך אחר (מאותו סוג או מסוג אחר) יתפוס את המנעול וישנה את המצב (למשל, יצרוך את הפריט האחרון) לפני שהתהליך שהתעורר יצליח לבדוק את התנאי. במקרה זה, `if` לא יבדוק שוב את התנאי וימשיך בביצוע שגוי.\n\nלכן:\n*   **א' נכון**: צרכן שהתעורר (בגלל התעוררות שווא או מרוץ) עשוי לגלות שהמחיץ ריק כאשר הוא מגיע לבצע `buffer.front()` או `buffer.pop()`, מה שיוביל לשגיאת זמן ריצה (Undefined Behavior).\n*   **ב' נכון**: מפיק שהתעורר (בגלל התעוררות שווא או מרוץ) עשוי לגלות שהמחיץ מלא כאשר הוא מגיע לבצע `buffer.push()`, מה שיוביל לחריגה מגודל המחיץ המתוכנן ולשגיאת לוגיקה.\n*   **ד' אינו נכון**: הקוד *לא* יפעל תמיד באופן תקין. כפי שהוסבר, הוא צפוי להיתקל בשגיאות זמן ריצה (UB) או לוגיקה. יעילות היא שיקול משני לעומת נכונות. הטענה שהקוד יפעל תקין תמיד היא שגויה לחלוטין.\n*   **ג' אינו נכון**: טעות ה-`if` במקום `while` בדרך כלל מובילה לשגיאות לוגיות, חריגות (exceptions) או התנהגות בלתי מוגדרת (UB), אך לא למצב של קיפאון (Deadlock). קיפאון מתרחש כאשר תהליכים ממתינים באופן מעגלי למשאבים שתפוסים על ידי תהליכים אחרים. במקרה זה, התהליכים דווקא לא ממתינים כראוי אלא ממשיכים בביצוע כאשר אסור להם, מה שמוביל לשגיאות אחרות (כמו א' וב'). לכן, הטענה שיתרחש Deadlock אינה נכונה בהכרח כתוצאה ישירה של באג זה."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

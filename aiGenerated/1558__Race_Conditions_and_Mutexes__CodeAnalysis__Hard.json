@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions and Mutexes",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-09 20:51:41",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 5488,
+      "output_tokens": 1492,
+      "total_tokens": 10200
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Race Conditions",
+      "Mutexes",
+      "Deadlock",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתונה מערכת המטפלת בשני משאבי כסף משותפים, resourceA ו-resourceB, המוגנים באמצעות מנעולים נפרדים, mutexA ו-mutexB בהתאמה. המערכת כוללת שתי פונקציות להעברת כסף בין המשאבים. נתחו את קטע הקוד הבא והשיבו על השאלה:\n\nהאם הקוד הנתון נכון לשימוש במערכת מרובת חוטים? אם לא, זהו את הבעיה/בעיות, הסבירו כיצד הן עלולות להתרחש, והציעו פתרון מתוקן.",
+      "code_snippet": "```c\n#include <stdio.h>\n#include <pthread.h>\n\nint resourceA = 100;\nint resourceB = 100;\n\npthread_mutex_t mutexA;\npthread_mutex_t mutexB;\n\nvoid init_resources() {\n    pthread_mutex_init(&mutexA, NULL);\n    pthread_mutex_init(&mutexB, NULL);\n}\n\nvoid destroy_resources() {\n    pthread_mutex_destroy(&mutexA);\n    pthread_mutex_destroy(&mutexB);\n}\n\n// Function 1: Transfer from A to B\nvoid transfer_A_to_B(int amount) {\n    if (amount <= 0) return;\n\n    pthread_mutex_lock(&mutexA);\n    pthread_mutex_lock(&mutexB);\n\n    if (resourceA >= amount) {\n        resourceA -= amount;\n        resourceB += amount;\n    }\n\n    pthread_mutex_unlock(&mutexB);\n    pthread_mutex_unlock(&mutexA);\n}\n\n// Function 2: Transfer from B to A\nvoid transfer_B_to_A(int amount) {\n    if (amount <= 0) return;\n\n    pthread_mutex_lock(&mutexB);\n    pthread_mutex_lock(&mutexA);\n\n    if (resourceB >= amount) {\n        resourceB -= amount;\n        resourceA += amount;\n    }\n\n    pthread_mutex_unlock(&mutexA);\n    pthread_mutex_unlock(&mutexB);\n}\n\n// פונקציות אלו מופעלות על ידי מספר חוטים במקביל.\n```",
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "הקוד הנתון אינו נכון לשימוש במערכת מרובת חוטים. הבעיה המרכזית היא קיפאון (Deadlock).\n\n**הסבר הבעיה (קיפאון):**\nקיפאון יכול להתרחש בתרחיש הבא:\n1.  חוט A (לדוגמה, המפעיל את `transfer_A_to_B`) מצליח לתפוס את `mutexA`.\n2.  במקביל, חוט B (לדוגמה, המפעיל את `transfer_B_to_A`) מצליח לתפוס את `mutexB`.\n3.  כעת, חוט A מנסה לתפוס את `mutexB` אך הוא חסום מכיוון ש-`mutexB` מוחזק על ידי חוט B.\n4.  באותו זמן, חוט B מנסה לתפוס את `mutexA` אך הוא חסום מכיוון ש-`mutexA` מוחזק על ידי חוט A.\nשני החוטים חסומים באופן הדדי וממתינים זה לזה לשחרר את המשאב שהם צריכים, מה שיוצר קיפאון והמערכת מפסיקה להתקדם.\n\n**פתרון מתוקן:**\nכדי למנוע קיפאון, יש להקפיד על סדר אחיד בלקיחת המנעולים בכל הפונקציות שצריכות לגשת לשני המשאבים. לדוגמה, תמיד יש לנעול קודם את `mutexA` ואז את `mutexB`.\n\n**קוד מתוקן:**\n```c\n// Function 1: Transfer from A to B (unchanged, as it already follows the A then B order)\nvoid transfer_A_to_B(int amount) {\n    if (amount <= 0) return;\n\n    pthread_mutex_lock(&mutexA);\n    pthread_mutex_lock(&mutexB);\n\n    if (resourceA >= amount) {\n        resourceA -= amount;\n        resourceB += amount;\n    }\n\n    pthread_mutex_unlock(&mutexB);\n    pthread_mutex_unlock(&mutexA);\n}\n\n// Function 2: Transfer from B to A (corrected to lock A then B)\nvoid transfer_B_to_A(int amount) {\n    if (amount <= 0) return;\n\n    pthread_mutex_lock(&mutexA); // השתנה: נעל קודם את mutexA\n    pthread_mutex_lock(&mutexB); // השתנה: לאחר מכן נעל את mutexB\n\n    if (resourceB >= amount) {\n        resourceB -= amount;\n        resourceA += amount;\n    }\n\n    pthread_mutex_unlock(&mutexB);\n    pthread_mutex_unlock(&mutexA);\n}\n```\n\nבפתרון מתוקן זה, אנו מבטיחים שכל חוט שמבקש לגשת לשני המשאבים ינסה לתפוס את `mutexA` קודם, ורק לאחר מכן את `mutexB`. בדרך זו, לא יכול להיווצר מצב שבו חוט אחד מחזיק ב-`mutexA` ומחכה ל-`mutexB`, בעוד חוט אחר מחזיק ב-`mutexB` ומחכה ל-`mutexA`. זה מבטל את תנאי ההמתנה המעגלית (Circular Wait) ובכך מונע קיפאון."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "IPC and Processes",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-09 20:57:16",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 2411,
+      "output_tokens": 2369,
+      "total_tokens": 8155
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "Open",
+    "topic": [
+      "IPC",
+      "Processes"
+    ],
+    "content": {
+      "text": "נתונה מערכת הפעלה התומכת בתקשורת בין-תהליכית (IPC) באמצעות צינורות (pipes). נרצה לממש תרחיש בו תהליך אב (parent process) מייצר רשימת מספרים שלמים ושולח אותה לתהליך בן (child process). התהליך הבן יחשב את סכום המספרים הללו ויחזיר את הסכום לתהליך האב. תהליך האב ידפיס את הסכום שהתקבל.\n\nא. כתוב קטע קוד ב-C/C++ המממש את התרחיש המתואר, תוך שימוש בפונקציות `fork()` ו-`pipe()`.\nב. הסבר את מנגנון ה-IPC שבו השתמשת. ציין את חשיבות סגירת קצוות הצינור שאינם בשימוש בכל תהליך.",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": null,
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "א. קטע קוד ב-C/C++:\n```c\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h> // For fork, pipe, read, write, close\n#include <sys/wait.h> // For wait\n\n#define NUM_COUNT 5\n\nint main() {\n    int parent_to_child_pipe[2]; // fd[0] for read, fd[1] for write\n    int child_to_parent_pipe[2]; // fd[0] for read, fd[1] for write\n    pid_t pid;\n\n    // יצירת צינורות\n    if (pipe(parent_to_child_pipe) == -1) {\n        perror(\"pipe parent_to_child_pipe\");\n        exit(EXIT_FAILURE);\n    }\n    if (pipe(child_to_parent_pipe) == -1) {\n        perror(\"pipe child_to_parent_pipe\");\n        exit(EXIT_FAILURE);\n    }\n\n    pid = fork();\n\n    if (pid == -1) {\n        perror(\"fork\");\n        exit(EXIT_FAILURE);\n    }\n\n    if (pid == 0) { // תהליך בן\n        // סגירת קצוות צינור שאינם בשימוש בתהליך הבן\n        close(parent_to_child_pipe[1]); // הבן לא כותב לצינור זה\n        close(child_to_parent_pipe[0]); // הבן לא קורא מצינור זה\n\n        int numbers[NUM_COUNT];\n        int sum = 0;\n\n        // קריאת מספרים מהאב\n        if (read(parent_to_child_pipe[0], numbers, sizeof(int) * NUM_COUNT) == -1) {\n            perror(\"child read\");\n            exit(EXIT_FAILURE);\n        }\n\n        // חישוב הסכום\n        for (int i = 0; i < NUM_COUNT; i++) {\n            sum += numbers[i];\n        }\n\n        // כתיבת הסכום חזרה לאב\n        if (write(child_to_parent_pipe[1], &sum, sizeof(int)) == -1) {\n            perror(\"child write\");\n            exit(EXIT_FAILURE);\n        }\n\n        // סגירת קצוות הצינור הנותרים\n        close(parent_to_child_pipe[0]);\n        close(child_to_parent_pipe[1]);\n\n        exit(EXIT_SUCCESS);\n\n    } else { // תהליך אב\n        // סגירת קצוות צינור שאינם בשימוש בתהליך האב\n        close(parent_to_child_pipe[0]); // האב לא קורא מצינור זה\n        close(child_to_parent_pipe[1]); // האב לא כותב לצינור זה\n\n        int numbers_to_send[NUM_COUNT] = {10, 20, 30, 40, 50};\n        int received_sum;\n\n        // כתיבת מספרים לבן\n        if (write(parent_to_child_pipe[1], numbers_to_send, sizeof(int) * NUM_COUNT) == -1) {\n            perror(\"parent write\");\n            exit(EXIT_FAILURE);\n        }\n\n        // המתנה לסיום הבן\n        wait(NULL);\n\n        // קריאת הסכום מהבן\n        if (read(child_to_parent_pipe[0], &received_sum, sizeof(int)) == -1) {\n            perror(\"parent read\");\n            exit(EXIT_FAILURE);\n        }\n\n        printf(\"Parent received sum from child: %d\\n\", received_sum);\n\n        // סגירת קצוות הצינור הנותרים\n        close(parent_to_child_pipe[1]);\n        close(child_to_parent_pipe[0]);\n    }\n\n    return 0;\n}\n```\n\nב. הסבר מנגנון ה-IPC וחשיבות סגירת קצוות:\nהפתרון משתמש בשני צינורות (pipes) לתקשורת דו-כיוונית בין תהליך האב לתהליך הבן. צינור אחד (`parent_to_child_pipe`) משמש לשליחת נתונים מהאב לבן, והצינור השני (`child_to_parent_pipe`) משמש לשליחת הנתונים מהבן לאב.\n\n1.  **יצירת צינורות**: לפני קריאה ל-`fork()`, נוצרים שני צינורות באמצעות הפונקציה `pipe()`. כל קריאה ל-`pipe()` יוצרת שני מתארי קבצים (file descriptors): אחד לקריאה (`fd[0]`) ואחד לכתיבה (`fd[1]`).\n2.  **יצירת תהליך בן**: הפונקציה `fork()` יוצרת תהליך בן, שהוא העתק כמעט זהה של תהליך האב. מתארי הקבצים של הצינורות משוכפלים לשני התהליכים, כך שלשניהם יש גישה לאותם צינורות.\n3.  **סגירת קצוות צינור מיותרים**: זוהי נקודה קריטית. כל תהליך סוגר את הקצוות של הצינורות שאינם בשימוש עבורו:\n    *   **בתהליך האב**: סוגר את קצה הקריאה של הצינור `parent_to_child_pipe` (כי הוא רק כותב לצינור זה) ואת קצה הכתיבה של הצינור `child_to_parent_pipe` (כי הוא רק קורא מצינור זה).\n    *   **בתהליך הבן**: סוגר את קצה הכתיבה של הצינור `parent_to_child_pipe` (כי הוא רק קורא מצינור זה) ואת קצה הקריאה של הצינור `child_to_parent_pipe` (כי הוא רק כותב לצינור זה).\n    \n    **חשיבות סגירת הקצוות**: סגירת קצוות הצינור שאינם בשימוש חיונית ממספר סיבות:\n    *   **מניעת קיפאון (deadlock)**: אם תהליך האב לא יסגור את קצה הקריאה של הצינור `parent_to_child_pipe`, הוא עלול להישאר פתוח. במצב כזה, כאשר תהליך הבן יסיים לקרוא את כל הנתונים, הפונקציה `read()` לא תחזיר EOF (End-Of-File) מכיוון שעדיין קיים כותב פוטנציאלי (האב עצמו, דרך מתאר הקובץ הפתוח לקריאה). הדבר עלול לגרום לתהליך הבן להיתקע (לחכות לנתונים נוספים שלעולם לא יגיעו). באופן דומה, אם תהליך הבן לא יסגור את קצה הכתיבה של הצינור `child_to_parent_pipe`, תהליך האב עלול להיתקע בניסיון לקרוא נתונים מהבן.\n    *   **שחרור משאבים**: סגירת מתארי קבצים משחררת משאבים של המערכת, מונעת דליפות מתארי קבצים ומבטיחה ניהול יעיל של משאבי מערכת ההפעלה.\n4.  **תקשורת**: תהליך האב כותב את רשימת המספרים לצינור `parent_to_child_pipe`. תהליך הבן קורא את המספרים מצינור זה, מחשב את סכומם, וכותב את הסכום לצינור `child_to_parent_pipe`. תהליך האב ממתין לסיום תהליך הבן באמצעות `wait(NULL)`, ולאחר מכן קורא את הסכום מצינור `child_to_parent_pipe` ומדפיס אותו.\n5.  **סגירת קצוות סופיים**: בסיום השימוש, כל תהליך סוגר את הקצוות הנותרים של הצינורות כדי לשחרר את כל המשאבים."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}

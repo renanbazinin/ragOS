@@ -1,0 +1,52 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Deadlocks",
+    "requested_type": "CodeAnalysis",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-09 21:04:19",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 4285,
+      "output_tokens": 2984,
+      "total_tokens": 14877
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "CodeAnalysis",
+    "topic": [
+      "Semaphores",
+      "Deadlocks",
+      "Concurrency",
+      "Synchronization"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המשתמשת בסמפורים ובחוטים (threads) לניהול גישה למשאבים. המערכת מורכבת מ-N חוטים ומ-N משאבים, כאשר כל משאב מוגן על ידי סמפור בינארי משלו. כל חוט (thread_id) מנסה לרכוש שני משאבים ספציפיים: את משאב מספר `thread_id` ואת משאב מספר `(thread_id + 1) % N`. הקוד מציג את לוגיקת הרכישה והשחרור של המשאבים על ידי החוטים.\n\n```c\n#include <stdio.h>\n#include <pthread.h>\n#include <semaphore.h>\n#include <unistd.h> // For sleep\n\n#define NUM_THREADS 5\n#define NUM_SEMAPHORES NUM_THREADS // One semaphore per \"resource\"\n\nsem_t resources[NUM_SEMAPHORES];\n\nvoid* thread_function(void* arg) {\n    long thread_id = (long)arg;\n    long resource1_idx = thread_id;\n    long resource2_idx = (thread_id + 1) % NUM_SEMAPHORES;\n\n    printf(\"Thread %ld: Trying to acquire resource %ld...\\n\", thread_id, resource1_idx);\n    sem_wait(&resources[resource1_idx]);\n    printf(\"Thread %ld: Acquired resource %ld. Trying to acquire resource %ld...\\n\", thread_id, resource1_idx, resource2_idx);\n\n    // Introduce a delay to increase the chance of deadlock\n    sleep(1);\n\n    sem_wait(&resources[resource2_idx]);\n    printf(\"Thread %ld: Acquired resource %ld and %ld. Performing work...\\n\", thread_id, resource1_idx, resource2_idx);\n\n    // Simulate work\n    sleep(2);\n\n    printf(\"Thread %ld: Releasing resource %ld and %ld.\\n\", thread_id, resource1_idx, resource2_idx);\n    sem_post(&resources[resource2_idx]);\n    sem_post(&resources[resource1_idx]);\n\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    for (int i = 0; i < NUM_SEMAPHORES; ++i) {\n        sem_init(&resources[i], 0, 1); // Initialize each semaphore to 1 (binary semaphore)\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, thread_function, (void*)(long)i);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    for (int i = 0; i < NUM_SEMAPHORES; ++i) {\n        sem_destroy(&resources[i]);\n    }\n\n    printf(\"All threads finished.\\n\");\n    return 0;\n}\n```",
+      "code_snippet": null,
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "תארו איזו בעיה קריטית עלולה להתרחש במערכת זו כאשר `NUM_THREADS` גדול מ-1. הסבירו מדוע בעיה זו מתרחשת, תוך התייחסות לתנאים ההכרחיים לקיומה.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "הציעו שינוי בקוד שימנע את הבעיה שתיארתם. הציגו את הקוד המתוקן והסבירו בקצרה מדוע הפתרון שלכם מונע את הבעיה.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "### סעיף 10.1: זיהוי והסבר הבעיה\nהבעיה הקריטית שעלולה להתרחש במערכת זו כאשר `NUM_THREADS` גדול מ-1 היא **קיפאון (Deadlock)**.\n\n**הסבר מדוע הקיפאון מתרחש:**\nקיפאון מתרחש כאשר כל ארבעת התנאים ההכרחיים לקיומו מתקיימים במערכת בו זמנית:\n1.  **הדדיות (Mutual Exclusion):** כל משאב מוגן על ידי סמפור בינארי (`sem_init(&resources[i], 0, 1)`), מה שאומר שרק חוט אחד יכול להחזיק משאב ספציפי בכל רגע נתון. תנאי זה מתקיים.\n2.  **החזקה והמתנה (Hold and Wait):** חוט רוכש את המשאב הראשון (`resource1_idx`) באמצעות `sem_wait(&resources[resource1_idx])` ומחזיק בו, ואז ממתין לרכוש את המשאב השני (`resource2_idx`) באמצעות `sem_wait(&resources[resource2_idx])`. תנאי זה מתקיים.\n3.  **ללא ביטול מוקדם (No Preemption):** ברגע שחוט רוכש סמפור, הוא לא יכול להילקח ממנו בכוח; רק החוט עצמו יכול לשחרר אותו באמצעות `sem_post()`. תנאי זה מתקיים.\n4.  **המתנה מעגלית (Circular Wait):** זהו התנאי המרכזי שמוביל לקיפאון במקרה זה. לכל חוט `i` יש דרישה למשאב `i` ולמשאב `(i+1) % N`. אם לדוגמה `NUM_THREADS = 5`:\n    *   חוט 0 רוכש את משאב 0 וממתין למשאב 1.\n    *   חוט 1 רוכש את משאב 1 וממתין למשאב 2.\n    *   ... (וכן הלאה)\n    *   חוט 4 רוכש את משאב 4 וממתין למשאב 0.\n    נוצרת שרשרת מעגלית שבה כל חוט ממתין למשאב שמוחזק על ידי החוט הבא בשרשרת. אף חוט אינו יכול להתקדם, וכל החוטים נכנסים לקיפאון.\n\nההשהיה (`sleep(1)`) בקוד מגדילה את הסבירות לתרחיש קיפאון על ידי מתן הזדמנות לחוטים אחרים לרכוש משאבים לפני שחוט משלים את רכישת שני המשאבים שלו, ובכך מאפשרת את היווצרות המעגל הקטלני.\n\n### סעיף 10.2: פתרון והסבר\n**הפתרון:** כדי למנוע קיפאון, נשבור את תנאי ההמתנה המעגלית על ידי אכיפת סדר עקבי לרכישת משאבים. כל החוטים יצטרכו לרכוש את המשאבים שלהם בסדר גלובלי מוגדר (לדוגמה, תמיד לרכוש את המשאב בעל האינדקס הנמוך יותר תחילה, ולאחר מכן את המשאב בעל האינדקס הגבוה יותר). זה מבטיח שלא תיווצר שרשרת מעגלית של המתנה.\n\n**הקוד המתוקן:**\n```c\n#include <stdio.h>\n#include <pthread.h>\n#include <semaphore.h>\n#include <unistd.h> // For sleep\n\n#define NUM_THREADS 5\n#define NUM_SEMAPHORES NUM_THREADS\n\nsem_t resources[NUM_SEMAPHORES];\n\nvoid* thread_function_fixed(void* arg) {\n    long thread_id = (long)arg;\n    long res_a = thread_id;\n    long res_b = (thread_id + 1) % NUM_SEMAPHORES;\n\n    // Ensure consistent ordering: acquire the lower indexed resource first\n    long first_resource_idx = (res_a < res_b) ? res_a : res_b;\n    long second_resource_idx = (res_a < res_b) ? res_b : res_a;\n\n    printf(\"Thread %ld: Trying to acquire resource %ld (lower index)...\\n\", thread_id, first_resource_idx);\n    sem_wait(&resources[first_resource_idx]);\n    printf(\"Thread %ld: Acquired resource %ld. Trying to acquire resource %ld (higher index)...\\n\", thread_id, first_resource_idx, second_resource_idx);\n\n    sleep(1); // Still include delay to test robustness\n\n    sem_wait(&resources[second_resource_idx]);\n    printf(\"Thread %ld: Acquired resource %ld and %ld. Performing work...\\n\", thread_id, first_resource_idx, second_resource_idx);\n\n    sleep(2);\n\n    printf(\"Thread %ld: Releasing resource %ld and %ld.\\n\", thread_id, first_resource_idx, second_resource_idx);\n    sem_post(&resources[second_resource_idx]);\n    sem_post(&resources[first_resource_idx]);\n\n    return NULL;\n}\n\nint main() {\n    pthread_t threads[NUM_THREADS];\n\n    for (int i = 0; i < NUM_SEMAPHORES; ++i) {\n        sem_init(&resources[i], 0, 1); // Initialize each semaphore to 1 (binary semaphore)\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_create(&threads[i], NULL, thread_function_fixed, (void*)(long)i);\n    }\n\n    for (int i = 0; i < NUM_THREADS; ++i) {\n        pthread_join(threads[i], NULL);\n    }\n\n    for (int i = 0; i < NUM_SEMAPHORES; ++i) {\n        sem_destroy(&resources[i]);\n    }\n\n    printf(\"All threads finished.\\n\");\n    return 0;\n}\n```\n\n**הסבר הפתרון:**\nעל ידי אכיפת סדר רכישה עקבי (כל חוט רוכש תמיד קודם את הסמפור בעל האינדקס הנמוך מבין השניים הנדרשים לו, ורק אחר כך את הסמפור בעל האינדקס הגבוה), אנו מונעים את תנאי ההמתנה המעגלית. כעת, לא יכולה להיווצר שרשרת שבה חוט A ממתין למשאב שחוט B מחזיק, בעוד חוט B ממתין למשאב שחוט A מחזיק. לדוגמה, חוט 0 ירכוש את משאב 0 ואז את משאב 1. חוט 1 ירכוש את משאב 1 ואז את משאב 2. חוט `N-1` (שבמקור ניסה לרכוש `N-1` ואז `0`) ירכוש כעת את משאב 0 ואז את משאב `N-1` (על פי כלל הסדר העולה). באופן זה, אם חוט כלשהו מחזיק משאב בעל אינדקס גבוה, הוא בהכרח כבר רכש ושחרר את כל המשאבים בעלי האינדקסים הנמוכים יותר שהיו נחוצים לו (או שהוא עדיין לא רכש אותם). מצב זה מונע את היווצרות המעגל ומבטיח שהמערכת תתקדם ללא קיפאון, אם כי ייתכנו חסימות רגילות עד שהמשאבים ישוחררו."
+    },
+    "difficulty_estimation": "Hard"
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "metadata": {
+    "source": "ai_generated",
+    "subject": "Virtualization",
+    "topic_hint": "System Calls",
+    "requested_type": "Open",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-09 20:25:38",
+    "examples_used": 3,
+    "token_usage": {
+      "prompt_tokens": 3372,
+      "output_tokens": 2563,
+      "total_tokens": 13915
+    }
+  },
+  "question": {
+    "id": 10,
+    "type": "Open",
+    "topic": [
+      "System Calls",
+      "Process Management",
+      "File I/O",
+      "Concurrency"
+    ],
+    "content": {
+      "text": "נתונה תוכנית C המשתמשת בקריאות מערכת ליצירת תהליכים ולניהול קבצים. התוכנית הראשית `main_prog.c` פותחת קובץ בשם `output.txt`, כותבת אליו, ולאחר מכן יוצרת תהליך בן באמצעות `fork()`. התהליך הבן כותב גם הוא לקובץ זה, ולאחר מכן מבצע קריאת מערכת `execve()` כדי להריץ תוכנית אחרת, `child_prog.c`. התוכנית `child_prog.c` מקבלת את מתאר הקובץ (file descriptor) בירושה, וכותבת גם היא לקובץ. התהליך האב ממתין לסיום התהליך הבן, ולאחר מכן כותב שוב לקובץ וסוגר אותו.\n\nנתוני קוד המקור:\n\n**`main_prog.c`:**",
+      "code_snippet": "#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <sys/wait.h>\n#include <fcntl.h>\n\nint main() {\n    int fd;\n    pid_t pid;\n    char *filename = \"output.txt\";\n    char *child_prog_args[] = {\"./child_prog\", NULL};\n    char *child_prog_env[] = {NULL};\n\n    // Open file for writing, create if not exists, truncate if exists\n    // The lowest available file descriptor will be 3 (0, 1, 2 are stdin, stdout, stderr)\n    fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0644);\n    if (fd == -1) {\n        perror(\"open\");\n        return 1;\n    }\n\n    // Parent writes initial message\n    write(fd, \"Parent initial write.\\n\", 22);\n\n    pid = fork();\n\n    if (pid == -1) {\n        perror(\"fork\");\n        close(fd);\n        return 1;\n    } else if (pid == 0) { // Child process\n        write(fd, \"Child before exec.\\n\", 19);\n        printf(\"Child (PID %d): Executing another program...\\n\", getpid());\n        // Execute another program. File descriptors are inherited by default.\n        // The 'fd' variable here is 3, same as in parent.\n        execve(\"./child_prog\", child_prog_args, child_prog_env);\n        perror(\"execve\"); // Should not reach here if execve is successful\n        close(fd); // In case of execve failure\n        exit(1);\n    } else { // Parent process\n        write(fd, \"Parent after fork.\\n\", 19);\n        printf(\"Parent (PID %d): Waiting for child (PID %d)...\\n\", getpid(), pid);\n        wait(NULL); // Wait for child to finish\n        write(fd, \"Parent after child finished.\\n\", 29);\n        printf(\"Parent (PID %d): Child finished, closing file.\\n\", getpid());\n        close(fd);\n    }\n\n    return 0;\n}\n\n**`child_prog.c`:**\n#include <stdio.h>\n#include <stdlib.h>\n#include <unistd.h> // For write\n#include <fcntl.h>  // For O_WRONLY etc, though not strictly needed here\n\nint main(int argc, char *argv[]) {\n    // The file descriptor 3 was inherited from the parent process (main_prog.c)\n    // and points to the same file description as in the parent.\n    // This means it shares the file offset.\n    int inherited_fd = 3; \n    \n    write(inherited_fd, \"Exec'd program write.\\n\", 22);\n    printf(\"Exec'd program (PID %d): Finished writing and exiting.\\n\", getpid());\n    // The file descriptor is automatically closed when this process exits.\n    // However, the *file description* remains open due to the parent still holding a reference.\n    return 0;\n}\n",
+      "options": null
+    },
+    "sub_questions": [
+      {
+        "id": "10.1",
+        "text": "מה יהיה התוכן הסופי של הקובץ `output.txt` לאחר ששתי התוכניות יסיימו את ריצתן? יש להסביר את הסדר שבו הכתיבות מתרחשות.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.2",
+        "text": "הסבר כיצד מתארי קבצים ומיקום הכתיבה בקובץ (file offset) מושפעים מקריאות המערכת `fork()` ו-`execve()` בתרחיש זה.",
+        "code_snippet": null,
+        "options": null
+      },
+      {
+        "id": "10.3",
+        "text": "האם יש הבדל בין `execve()` לבין `system()` מבחינת ירושת מתארי קבצים? נמק.",
+        "code_snippet": null,
+        "options": null
+      }
+    ],
+    "points": null,
+    "solution": {
+      "is_present_in_file": true,
+      "correct_option": null,
+      "explanation": "10.1. תוכן הקובץ `output.txt` יהיה רצף של כל הכתיבות. הכתיבה הראשונה \"Parent initial write.\" תמיד תופיע בתחילת הקובץ, והכתיבה האחרונה \"Parent after child finished.\" תמיד תופיע בסוף הקובץ. שלוש הכתיבות האחרות (\"Child before exec.\", \"Parent after fork.\", \"Exec'd program write.\") יופיעו ביניהן, בסדר שאינו דטרמיניסטי ונקבע על ידי מתזמן המערכת. כל הכתיבות יבוצעו ברצף, אחת אחרי השנייה, מכיוון שכל התהליכים והתוכניות המעורבים חולקים את אותו \"תיאור קובץ\" (file description) בקרנל, הכולל את מצביע המיקום הנוכחי בקובץ (file offset). לכן, כל כתיבה מקדמת את המצביע הזה, והכתיבה הבאה תתחיל מהנקודה שבה הסתיימה הכתיבה הקודמת. \n\nדוגמה אפשרית לתוכן הקובץ (בהתאם לסדר ריצה מסוים):\n```\nParent initial write.\nChild before exec.\nParent after fork.\nExec'd program write.\nParent after child finished.\n```\n\n10.2. \n*   **`fork()`:** כאשר מתבצעת קריאת המערכת `fork()`, התהליך הבן מקבל עותק של טבלת מתארי הקבצים של התהליך האב. עם זאת, מתארי הקבצים בתהליך האב ובתהליך הבן מצביעים על אותו \"תיאור קובץ\" (file description) בקרנל. תיאור הקובץ מכיל מידע כמו מצביע המיקום הנוכחי בקובץ (file offset) ומצב הגישה. לכן, כל פעולת כתיבה (או קריאה) שתבוצע על ידי התהליך האב או התהליך הבן באמצעות מתאר הקובץ המשותף, תקדם את אותו מצביע מיקום בקובץ. כתוצאה מכך, הכתיבות של שניהם יתבצעו ברצף בקובץ, אחת אחרי השנייה.\n*   **`execve()`:** כאשר קריאת המערכת `execve()` מופעלת על ידי התהליך הבן, זיכרון התהליך הנוכחי (קוד, נתונים, מחסנית וערימה) מוחלף בתוכנית החדשה (`child_prog.c`). עם זאת, טבלת מתארי הקבצים של התהליך נשמרת כברירת מחדל. המשמעות היא שהתוכנית החדשה (`child_prog.c`) יורשת את מתארי הקבצים הפתוחים מהתהליך שקרא ל-`execve()` (במקרה זה, התהליך הבן של `main_prog.c`). מכיוון שמתאר הקובץ `fd=3` היה פתוח והצביע על תיאור הקובץ המשותף, `child_prog.c` ממשיכה להשתמש ב-`fd=3` אשר מצביע לאותו תיאור קובץ משותף, ולכן לאותו מצביע מיקום בקובץ כמו התהליך האב (`main_prog.c`).\n\n10.3. כן, קיים הבדל עקרוני, אף על פי ששניהם מובילים לירושת מתארי קבצים. \n*   **`execve()`:** זוהי קריאת מערכת ישירה שמחליפה את תמונת התהליך הנוכחית בתוכנית חדשה. מתארי קבצים פתוחים נשמרים כברירת מחדל (אלא אם סומנו בדגל `FD_CLOEXEC`).\n*   **`system()`:** זוהי פונקציית ספרייה (libc) ולא קריאת מערכת ישירה. היא בדרך כלל מממשת את פעולתה על ידי קריאה ל-`fork()` ליצירת תהליך בן, ולאחר מכן התהליך הבן קורא ל-`execve()` כדי להריץ מעטפת (shell, למשל `/bin/sh -c`) אשר מפעילה את הפקודה הנדרשת. התהליך האב המקורי ממתין לסיום התהליך הבן באמצעות `wait()`. מבחינת ירושת מתארי קבצים, התוכנית שרצה בפועל (דרך המעטפת) אכן יורשת את מתארי הקבצים מהתהליך שקרא ל-`system()`, מכיוון שהיא עוברת דרך `execve()`. ההבדל העיקרי הוא ש-`system()` מוסיפה שכבת ביניים של מעטפת, מה שעלול להשפיע על הסביבה, ניתוב מחדש של סטנדרטים (stdin/stdout/stderr) או התנהגויות נוספות של המעטפת, שאינן קיימות בשימוש ישיר ב-`execve()`."
+    },
+    "difficulty_estimation": "Medium"
+  }
+}
