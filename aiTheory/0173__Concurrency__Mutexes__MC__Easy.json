@@ -1,0 +1,46 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Mutexes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:33:29",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      10,
+      11,
+      13,
+      14,
+      16
+    ],
+    "token_usage": {
+      "prompt_tokens": 2001,
+      "output_tokens": 620,
+      "total_tokens": 5111
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Mutexes"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהי המטרה העיקרית של שימוש במנעול (mutex) לצורך סנכרון גישה לקטע קריטי במערכת הפעלה?",
+      "code_snippet": "mutex_t shared_resource_mutex;\n\nvoid access_critical_section() {\n    lock(&shared_resource_mutex);\n    // קטע קריטי: גישה למשאב משותף\n    // Critical Section: Access shared resource\n    unlock(&shared_resource_mutex);\n}",
+      "options": [
+        "א. לאפשר למספר חוטים להיכנס לקטע הקריטי במקביל, בתנאי שהם משתמשים במשאבים שונים.",
+        "ב. להבטיח שרק חוט אחד בלבד יוכל לבצע את הקטע הקריטי בכל רגע נתון.",
+        "ג. לזרז את ביצוע הקוד בתוך הקטע הקריטי על ידי פיצולו למשימות קטנות יותר.",
+        "ד. למנוע לחלוטין מצבי רעב (starvation) של חוטים הממתינים להיכנס לקטע הקריטי."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "התשובה הנכונה היא ב'. מטרתו העיקרית של מנעול (mutex), כפי שמוזכר בחומר ההרצאה, היא לסנכרן בין חוטים ולהבטיח מניעה הדדית (mutual exclusion) בקטעים קריטיים. מניעה הדדית פירושה שרק חוט אחד בלבד יכול להיכנס לקטע הקריטי בכל רגע נתון. כאשר חוט מנסה לבצע פעולת lock על מנעול שכבר תפוס, הוא נחסם (blocking) וממתין עד שהמנעול ישוחרר. זה מונע מצבי מרוץ (race conditions) ומבטיח עקביות בגישה למשאבים משותפים. האפשרויות האחרות אינן נכונות: מנעול אינו מאפשר למספר חוטים להיכנס בו זמנית (א'), אינו מאיץ את הביצוע (ג') אלא יוצר סריאליזציה, ואינו מבטיח מניעת רעב באופן מוחלט (ד') אלא בעיקר מניעת כניסה בו זמנית."
+    }
+  }
+}

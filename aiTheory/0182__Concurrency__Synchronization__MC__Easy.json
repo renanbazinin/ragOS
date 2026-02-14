@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Synchronization",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:35:52",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      10,
+      11,
+      13,
+      15
+    ],
+    "token_usage": {
+      "prompt_tokens": 2007,
+      "output_tokens": 607,
+      "total_tokens": 4291
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Synchronization"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "בהתבסס על הדוגמה שבה חוט A וחוט B מנסים להוסיף ערכים למערך `arr` באמצעות המשתנה המשותף `next` ללא סנכרון, כפי שמתואר בקטע הקוד הבא, כאשר `next` ו-`arr` הם משאבים משותפים:\n\n```c\nmy_slot = next;\narr[my_slot] = value;\nnext = next + 1;\n```\n\nמהי הבעיה הקלאסית של סינכרון שעלולה להתרחש במצב זה?",
+      "code_snippet": "my_slot_A = next;\narr[my_slot_A] = value_A;\nnext = next+ 1;",
+      "options": [
+        "א. רעב (Starvation), שבו חוט אחד לא מצליח להתקדם לעולם.",
+        "ב. דריסת נתונים (Data Overwriting), שבה ערך שנכתב על ידי חוט אחד נמחק או נדרס על ידי חוט אחר.",
+        "ג. חסימה (Blocking), שבה חוטים ממתינים לקלט/פלט ואינם יכולים לבצע עבודה אחרת במקביל.",
+        "ד. אי-ניצול של Cache Affinity, המוביל לירידה בביצועים."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "חומר ההרצאה מתאר במפורש את הבעיה: \"חוט A... יכתוב את הערך שלו לאותו מספר 6 וידרוס את מה ש-B כתב לשם. זו בעיה קלאסית של סינכרון: שני חוטים שרוצים לגשת למשאב משותף אבל מפריעים אחד לשני בקוד.\" תיאור זה תואם באופן מדויק ל'דריסת נתונים' (Data Overwriting), שבה פעולת כתיבה של חוט אחד על משאב משותף מוחקת או משנה באופן בלתי רצוי את הנתונים שנכתבו על ידי חוט אחר, עקב חוסר סנכרון. האפשרויות האחרות אינן מתארות את הבעיה הספציפית והקלאסית שהודגמה בחומר המצורף בהקשר זה."
+    }
+  }
+}

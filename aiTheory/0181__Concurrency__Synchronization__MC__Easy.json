@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Synchronization",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:35:40",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      10,
+      11,
+      13,
+      15
+    ],
+    "token_usage": {
+      "prompt_tokens": 2007,
+      "output_tokens": 597,
+      "total_tokens": 4014
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Synchronization"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "לפי חומר ההרצאה, איזו בעיית סינכרון קלאסית מתוארת במצב שבו שני חוטים (threads) ניגשים למשתנה משותף (`next`) ומשנים אותו באופן שמוביל לדריסת מידע במערך (`arr`)?",
+      "code_snippet": "Thread A\nmy_slot_A = next;\narr[my_slot_A] = value_A;\nnext = next+ 1;\n\nThread B\nmy_slot_B = next;\narr[my_slot_B] = value_B;\nnext = next+ 1;",
+      "options": [
+        "א. מצב מרוץ (Race Condition)",
+        "ב. הרעבה (Starvation)",
+        "ג. מבוי סתום (Deadlock)",
+        "ד. איבוד אות (Lost Signal)"
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "חומר ההרצאה מתאר במפורש את המקרה שבו \"שני חוטים שרוצים לגשת למשאב משותף אבל מפריעים אחד לשני בקוד\", ונותן כדוגמה את הגישה למשתנה `next` ולמערך `arr`. הבעיה מתרחשת כאשר חוט A קורא את `next`, מתבצע context switch, חוט B גם קורא את אותו `next` (שעדיין לא עודכן על ידי A), ואז שניהם מנסים לכתוב לאותו מיקום או למיקומים שגויים, מה שמוביל לדריסת מידע. מצב זה, שבו התוצאה תלויה בסדר הלא צפוי של פעולות החוטים הניגשים למשאב משותף, נקרא \"מצב מרוץ\" (Race Condition). האפשרויות האחרות (הרעבה, מבוי סתום, איבוד אות) מתארות בעיות סינכרון אחרות, שחלקן אמנם מוזכרות בחומר ההרצאה, אך אינן מתאימות לתיאור הבעיה הספציפית והקלאסית של דריסת נתונים הנגרמת מגישה לא מתואמת למשתנה משותף כפי שהודגם."
+    }
+  }
+}

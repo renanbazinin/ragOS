@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Locks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 17:31:35",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      16,
+      11,
+      13
+    ],
+    "token_usage": {
+      "prompt_tokens": 2137,
+      "output_tokens": 544,
+      "total_tokens": 4562
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Locks"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "איזו מהתכונות הבאות מתארת נכונה את מנעול ה-`TestAndSet` כפי שתואר בחומר הקורס?",
+      "code_snippet": "while (TestAndSet(&flag, 1))\n  ; // spin-wait\n// critical section\nflag = 0;",
+      "options": [
+        "א. הוא מקיים מניעה הדדית ומניעת קיפאון, אך אינו מבטיח הוגנות מלאה.",
+        "ב. הוא אינו מקיים מניעה הדדית, אך מבטיח מניעת קיפאון והוגנות מלאה.",
+        "ג. הוא מקיים הוגנות מלאה, אך אינו מבטיח מניעה הדדית או מניעת קיפאון.",
+        "ד. הוא מקיים מניעה הדדית, אך אינו מבטיח מניעת קיפאון או הוגנות מלאה."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "המנעול מבוסס `TestAndSet` שתואר בחומר הקורס נחשב ל\"נכון\", מה שמרמז על כך שהוא מקיים מניעה הדדית (mutual exclusion) – בכל רגע נתון יש לכל היותר חוט אחד בקטע הקריטי. בנוסף, בחומר נאמר במפורש כי הוא \"מקיים deadlock freedom (מניעת קיפאון)\", כלומר אם חוטים מנסים לתפוס את המנעול, מישהו מצליח ולא נוצר מצב שכולם תקועים. עם זאת, מצוין כי \"אין בו הוגנות מלאה מבחינת תזמון - ייתכן שחוט יתפוס את המנעול מיד לאחר ששחרר אותו ולא ייתן לחוטים אחרים להשתמש בו\", כלומר הוא אינו מבטיח הוגנות (starvation-freedom). לכן, התכונות הנכונות הן מניעה הדדית ומניעת קיפאון, אך ללא הוגנות מלאה."
+    }
+  }
+}

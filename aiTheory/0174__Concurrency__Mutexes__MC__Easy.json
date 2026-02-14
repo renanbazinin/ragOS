@@ -1,0 +1,46 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Mutexes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:33:42",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      10,
+      11,
+      13,
+      14,
+      16
+    ],
+    "token_usage": {
+      "prompt_tokens": 2001,
+      "output_tokens": 483,
+      "total_tokens": 4548
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Mutexes"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהי המטרה העיקרית של שימוש במנעול (mutex) בסנכרון בין חוטים?",
+      "code_snippet": null,
+      "options": [
+        "א. לאפשר לחוטים מרובים לגשת למשאב משותף בו זמנית.",
+        "ב. להבטיח שרק חוט אחד בלבד יחזיק במשאב משותף בכל רגע נתון.",
+        "ג. לפתור בעיות קיפאון (deadlock) על ידי שינוי סדר לקיחת המשאבים.",
+        "ד. לאותת לחוטים אחרים להתעורר כאשר משאב מתפנה."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "על פי חומר ההרצאה (הרצאה 11, קטע 12), מנעול (mutex) הוא אובייקט שנועד לסנכרן בין חוטים. מצבו 'תפוס' מייצג שחוט אחד בלבד מחזיק במשאב כרגע. מטרתו העיקרית היא להבטיח מניעה הדדית (mutual exclusion), כלומר שרק חוט אחד יוכל להיות בקטע הקריטי ולהשתמש במשאב המוגן על ידי המנעול בכל רגע נתון. אפשרות א' הפוכה למטרה זו. אפשרות ג' מתארת אסטרטגיה ספציפית למניעת קיפאון (שבירת סימטריה), ולא את מטרת המנעול עצמו. אפשרות ד' מתארת פעולה של משתני תנאי (condition variables), אשר עובדים בשילוב עם מנעולים, אך אינה המטרה העיקרית של המנעול עצמו."
+    }
+  }
+}

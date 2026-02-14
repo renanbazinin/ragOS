@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Locks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:31:01",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      16,
+      11,
+      13
+    ],
+    "token_usage": {
+      "prompt_tokens": 2137,
+      "output_tokens": 361,
+      "total_tokens": 4197
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Locks"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "על פי חומר הקורס, מהי התכונה הבסיסית ביותר שצריכה להתקיים במנעול טוב?",
+      "code_snippet": null,
+      "options": [
+        "א. מניעה הדדית (Mutual Exclusion)",
+        "ב. חופש מקיפאון (Deadlock Freedom)",
+        "ג. הוגנות (Starvation-freedom)",
+        "ד. היכולת לתמוך בריבוי מעבדים"
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "חומר הקורס (Lecture 11, chunk 27) מגדיר שלמנעול טוב יש שלוש תכונות. הוא מציין במפורש כי 'מניעה הדדית - התכונה הבסיסית שצריכה להיות למנעול: בכל רגע נתון יש לכל היותר חוט אחד בקטע הקריטי'. תכונות חופש מקיפאון והוגנות הן גם תכונות חשובות של מנעול, אך הן אינן מוגדרות כ'בסיסית ביותר' כמו מניעה הדדית. האפשרות הרביעית אינה נכללת בין שלוש התכונות המוגדרות בחומר הקורס למנעול טוב."
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Locks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-14 17:32:45",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      16,
+      11,
+      13
+    ],
+    "token_usage": {
+      "prompt_tokens": 2137,
+      "output_tokens": 870,
+      "total_tokens": 5863
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Locks"
+    ],
+    "difficulty_estimation": "Hard",
+    "content": {
+      "text": "בהתבסס על ההגדרות והדוגמאות למנעולים שנדונו בחומר הקורס, איזו מבין הטענות הבאות אודות תכונות של מנעולים היא הנכונה ביותר?",
+      "code_snippet": null,
+      "options": [
+        "א. מנעול שמבטיח מניעה הדדית (mutual exclusion) בהכרח ימנע מצב של קיפאון (deadlock freedom).",
+        "ב. מנעול שאינו מקיים מניעה הדדית (mutual exclusion) אינו יכול לקיים את תכונת מניעת הקיפאון (deadlock freedom).",
+        "ג. מנעול שמקיים הוגנות (starvation-freedom) בהכרח ימנע מצב של קיפאון (deadlock freedom).",
+        "ד. מנעול שמקיים מניעת קיפאון (deadlock freedom) בהכרח יבטיח הוגנות (starvation-freedom)."
+      ]
+    },
+    "solution": {
+      "correct_option": "ג",
+      "explanation": "התכונה deadlock freedom מבטיחה שאם חוטים מנסים לתפוס את המנעול, אז מישהו יצליח בסופו של דבר, כלומר לא יווצר מצב שכל החוטים תקועים בהמתנה למנעול. התכונה starvation-freedom (הוגנות) היא חזקה יותר, וקובעת שכל חוט שמנסה לתפוס את המנעול יצליח לעשות זאת בסופו של דבר. אם מנעול מקיים starvation-freedom, הרי שכל חוט שממתין למנעול יקבל אותו בסופו של דבר. מצב זה שולל בהכרח קיפאון (deadlock), שבו כל החוטים תקועים ואינם יכולים להתקדם. לכן, מנעול שמקיים הוגנות בהכרח מקיים גם מניעת קיפאון. \nנתבונן באפשרויות האחרות:\nא. טענה זו אינה נכונה. מנעול יכול לקיים מניעה הדדית אך עדיין לגרום לקיפאון במערכת רחבה יותר (לדוגמה, אם חוט תופס מנעול ונתקע תוך כדי המתנה למשאב אחר, ויוצר תלות מעגלית). בנוסף, ההגדרה של deadlock freedom מתייחסת ל'קוד של המנעול לבד', וגם שם, מנעול יכול לספק מניעה הדדית (רק אחד נכנס) אבל אם תהליך שקיבל אותו לא ישחרר אותו לעולם (למשל, קריסה), אז יגרם קיפאון לכל האחרים.\nב. טענה זו אינה נכונה. מנעול ה-`turn` שהוצג בחומר הקורס (Lecture 16, chunk 9) אינו מקיים מניעה הדדית (שני חוטים יכולים להיכנס לקטע הקריטי בו-זמנית), אך הוכח במפורש כי הוא מקיים deadlock freedom.\nד. טענה זו אינה נכונה. מנעול TestAndSet (Lecture 11, chunk 42) מקיים deadlock freedom, אך אינו מבטיח הוגנות מלאה (starvation-freedom), שכן חוט יכול לתפוס את המנעול שוב ושוב ולא לאפשר לחוטים אחרים להתקדם."
+    }
+  }
+}

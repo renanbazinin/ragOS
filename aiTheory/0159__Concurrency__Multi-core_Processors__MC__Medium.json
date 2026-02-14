@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Multi-core Processors",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 17:29:51",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      10,
+      12,
+      15
+    ],
+    "token_usage": {
+      "prompt_tokens": 2191,
+      "output_tokens": 660,
+      "total_tokens": 4793
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Multi-core Processors"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "איזה מהיתרונות הבאים של תזמון מרובה תורים (Multi-queue multiprocessor scheduling) במערכות מרובות ליבות תורם ישירות לשיפור ביצועי המערכת על ידי ניצול יעיל של זיכרון המטמון (cache)?",
+      "code_snippet": null,
+      "options": [
+        "א. שיפור ה-cache affinity על ידי הבטחה שתהליך ירוץ על אותו מעבד אליו שויך בתחילה, ובכך מקטין את הצורך בטעינת נתונים מחדש מזיכרון הראשי.",
+        "ב. הפחתה משמעותית של הצורך במנגנוני נעילה (locks) בין מעבדים שונים, כיוון שכל מעבד מנהל תור עבודה משלו.",
+        "ג. אפשרות למעבר מהיר ויעיל יותר של תהליכים בין מעבדים שונים כדי לאזן עומסים באופן דינמי.",
+        "ד. הקטנת העלות של יצירת חוטים חדשים (kernel threads) ושל החלפת הקשר (context switch) ביניהם."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "תזמון מרובה תורים (Multi-queue multiprocessor scheduling) מקצה לכל מעבד תור עבודה משלו. ברגע שתהליך משויך לתור של מעבד מסוים, הוא ירוץ באופן עקבי על אותו מעבד. עקביות זו מבטיחה שימור של \"cache affinity\", כלומר, הנתונים שהתהליך השתמש בהם בעבר נשארים במטמון הפרטי (L1 cache) של אותו מעבד. כתוצאה מכך, פחות נדרש לגשת לזיכרון הראשי (RAM) האיטי יותר, והתהליך יכול לגשת לנתונים שלו במהירות גבוהה יותר מהמטמון, מה שמשפר משמעותית את ביצועי המערכת. אפשרויות ב', ג' ו-ד' מתארות היבטים אחרים או שגויים: אפשרות ב' היא אכן יתרון של השיטה אך אינה קשורה ישירות לניצול המטמון. אפשרות ג' מתארת פעולה שמנוגדת ל-cache affinity ופוגעת בביצועים. אפשרות ד' מתייחסת לעלות של חוטים, שאינה קשורה ישירות לשיטת התזמון או ל-cache affinity."
+    }
+  }
+}

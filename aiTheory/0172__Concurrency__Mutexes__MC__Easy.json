@@ -1,0 +1,46 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Mutexes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:33:14",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      10,
+      11,
+      13,
+      14,
+      16
+    ],
+    "token_usage": {
+      "prompt_tokens": 2001,
+      "output_tokens": 483,
+      "total_tokens": 4412
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Mutexes"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהי המטרה העיקרית של מנעול (mutex) במערכת הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. לאפשר לשני חוטים או יותר להיכנס לקטע קריטי במקביל.",
+        "ב. להבטיח מניעה הדדית (mutual exclusion) בקטע קריטי, כך שרק חוט אחד יבצע אותו בכל רגע נתון.",
+        "ג. לספק מנגנון לשליחת אותות (signals) בין חוטים שאינם חולקים משאבים.",
+        "ד. לפתור בעיות קיפאון (deadlock) באופן אוטומטי בכל מצב."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "מנעול (mutex) הוא אובייקט שנועד לסנכרן בין חוטים. מטרתו העיקרית היא להבטיח מניעה הדדית (mutual exclusion) בקטע קריטי, כלומר, שרק חוט אחד יוכל להחזיק במשאב או להיכנס לקטע קריטי מסוים בכל רגע נתון. כאשר חוט מנסה לנעול mutex שכבר תפוס, הוא נחסם וממתין עד שה-mutex ישוחרר על ידי החוט האחר, ורק אז יוכל לתפוס אותו בעצמו. מידע זה מופיע בבירור בחומר ההרצאה, לדוגמה ב-Lecture 11, chunk 12, שם מצוין כי 'מנעול - mutex הוא אובייקט חדש שנועד לסנכרן בין החוטים' וכי הוא מייצג 'את המצב שמישהו (חוט אחד בלבד) מחזיק את המשאב כרגע'."
+    }
+  }
+}

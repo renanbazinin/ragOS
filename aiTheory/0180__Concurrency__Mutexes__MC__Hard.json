@@ -1,0 +1,46 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Mutexes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-14 17:35:30",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      10,
+      11,
+      13,
+      14,
+      16
+    ],
+    "token_usage": {
+      "prompt_tokens": 2001,
+      "output_tokens": 756,
+      "total_tokens": 5200
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Mutexes"
+    ],
+    "difficulty_estimation": "Hard",
+    "content": {
+      "text": "בהתבסס על החומר הנלמד, מדוע הפעולות של שחרור מנעול (unlock) והמתנה לאות (wait_for_signal) בתוך קריאת wait למשתנה תנאי חייבות להיות אטומיות?",
+      "code_snippet": "void wait(condition_variable *cv1, mutex *m1) {\n    // -> Atomic:\n    unlock(m1);\n    wait_for_signal(cv1);\n    // after waking up:\n    lock(m1);\n}",
+      "options": [
+        "א. כדי למנוע מצב תחרות (race condition) שבו אות (signal) עלול להישלח ולאבד לפני שהחוט מצליח להיכנס למצב המתנה, מה שיוביל לקיפאון (deadlock) או הרעבה (starvation) של החוט.",
+        "ב. כדי להבטיח שחוט אחר לא יוכל לתפוס את המנעול בין שחרורו לבין כניסת החוט למצב המתנה, ובכך למנוע הפרה של מניעה הדדית (mutual exclusion).",
+        "ג. כדי להפחית את תקורה של החלפת הקשרים (context switches) בין חוטים הממתינים על אותו משתנה תנאי.",
+        "ד. כדי להבטיח שהחוט המתעורר תמיד יחזיק את המנעול מחדש לפני שימשיך בביצוע הקטע הקריטי שלו."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "הפעולות של שחרור המנעול והמתנה לאות חייבות להיות אטומיות כדי למנוע מצב תחרותי חמור המכונה 'אובדן אות' (lost wakeup). אם הפעולות לא היו אטומיות, ייתכן שחוט ישחרר את המנעול, ומיד לאחר מכן (לפני שהוא מספיק לקרוא ל-'wait_for_signal' ולהיחסם) יתבצע מיתוג הקשר לחוט אחר. החוט השני עשוי לתפוס את המנעול, לסיים את עבודתו בקטע הקריטי, ולשלוח אות ('signal') למשתנה התנאי. אם החוט הראשון עדיין לא נחסם, האות יישלח 'לריק' וילך לאיבוד. כאשר החוט הראשון ינסה לבסוף להיחסם על משתנה התנאי, הוא ימתין ללא הגבלת זמן לאות שכבר נשלח ולא יגיע שוב (אלא אם כן יישלח אות נוסף בעתיד), מה שעלול להוביל לקיפאון (deadlock) או הרעבה (starvation). האטומיות מבטיחה שברגע שהמנעול שוחרר, החוט נחסם מיד על משתנה התנאי, ואין חלון זמן שבו אות יכול ללכת לאיבוד."
+    }
+  }
+}
