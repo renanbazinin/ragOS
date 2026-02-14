@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Locks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-14 17:33:02",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      16,
+      11,
+      13
+    ],
+    "token_usage": {
+      "prompt_tokens": 2137,
+      "output_tokens": 658,
+      "total_tokens": 5557
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Locks"
+    ],
+    "difficulty_estimation": "Hard",
+    "content": {
+      "text": "בהתבסס על ההגדרות והדוגמאות הנידונות בחומר הלימוד, במיוחד לאור תכונות מנעול ה-`TestAndSet`, איזה מהמשפטים הבאים נכון לגבי הקשר בין \"deadlock freedom\" לבין \"הוגנות (starvation-freedom)\"?",
+      "code_snippet": null,
+      "options": [
+        "א. מנעול המבטיח \"הוגנות\" בהכרח מקיים גם \"deadlock freedom\".",
+        "ב. מנעול המבטיח \"deadlock freedom\" בהכרח מקיים גם \"הוגנות\".",
+        "ג. \"deadlock freedom\" ו\"הוגנות\" הן תכונות בלתי תלויות לחלוטין.",
+        "ד. מנעול אינו יכול לקיים בו זמנית גם \"deadlock freedom\" וגם \"הוגנות\"."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "ההגדרה של 'הוגנות' (starvation-freedom) בחומר הלימוד קובעת ש'כל חוט יצליח לתפוס את המנעול בסופו של דבר'. לעומת זאת, 'deadlock freedom' קובע ש'אם מנסים לתפוס את המנעול, אז מישהו מצליח'. אם כל חוט מצליח בסופו של דבר לתפוס את המנעול (הוגנות), אז בהכרח ניתן להסיק שלפחות חוט אחד מצליח (deadlock freedom). לכן, תכונת ה'הוגנות' חזקה יותר וגוררת בהכרח את תכונת ה-'deadlock freedom'. חומר הלימוד מחזק זאת בכך שהוא מציין שמנעול ה-`TestAndSet` 'מקיים deadlock freedom (מניעת קיפאון)' אך 'אין בו הוגנות מלאה מבחינת תזמון - ייתכן שחוט יתפוס את המנעול מיד לאחר ששחרר אותו ולא ייתן לחוטים אחרים להשתמש בו'. עובדה זו מפריכה את טענה ב', לפיה deadlock freedom גורר הוגנות. טענות ג' ו-ד' שגויות, שכן התכונות אינן בלתי תלויות (הוגנות חזקה יותר מ-deadlock freedom) ובהחלט ניתן לממש מנעולים המקיימים את שתיהן (כמו 'מנעולי תור' המוזכרים בשיעור)."
+    }
+  }
+}

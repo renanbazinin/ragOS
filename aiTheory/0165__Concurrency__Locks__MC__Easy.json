@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Locks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:31:23",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      16,
+      11,
+      13
+    ],
+    "token_usage": {
+      "prompt_tokens": 2137,
+      "output_tokens": 385,
+      "total_tokens": 4380
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Locks"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "איזו תכונה נחשבת לדרישה הבסיסית ביותר ממנעול?",
+      "code_snippet": null,
+      "options": [
+        "א. מניעה הדדית (Mutual Exclusion)",
+        "ב. חופש מקיפאון (Deadlock Freedom)",
+        "ג. הוגנות (Starvation-freedom)",
+        "ד. מניעת invalidate ב-cache"
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "על פי חומר ההרצאה (הרצאה 11, קטע 27), מניעה הדדית מוגדרת כ-\"התכונה הבסיסית שצריכה להיות למנעול\". תכונה זו מבטיחה שבכל רגע נתון יהיה לכל היותר חוט אחד בקטע הקריטי. למרות שחופש מקיפאון והוגנות הן תכונות רצויות למנעול טוב, ההרצאה מציינת במפורש ש\"לא כולן חייבות להתקיים\", למעט מניעה הדדית שהיא הדרישה הבסיסית. מניעת invalidate ב-cache היא אופטימיזציה שרלוונטית לסוגים מסוימים של מנעולים (כמו מנעולי תור), ולא תכונה בסיסית של עצם הגדרת המנעול."
+    }
+  }
+}

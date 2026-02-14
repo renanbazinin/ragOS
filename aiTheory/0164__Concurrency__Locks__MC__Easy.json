@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Locks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:31:12",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      16,
+      11,
+      13
+    ],
+    "token_usage": {
+      "prompt_tokens": 2137,
+      "output_tokens": 379,
+      "total_tokens": 4223
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Locks"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "על פי חומר ההרצאה, איזו תכונה נחשבת לתכונה הבסיסית וההכרחית ביותר של מנעול?",
+      "code_snippet": null,
+      "options": [
+        "א. מניעה הדדית (Mutual Exclusion)",
+        "ב. חופש מקיפאון (Deadlock Freedom)",
+        "ג. הוגנות (Starvation-Freedom)",
+        "ד. היכולת להשתמש במנגנון TestAndSet"
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "על פי חומר ההרצאה (Lecture 11, chunk 27), מניעה הדדית מוגדרת כ'התכונה הבסיסית שצריכה להיות למנעול: בכל רגע נתון יש לכל היותר חוט אחד בקטע הקריטי'. תכונות כמו חופש מקיפאון והוגנות הן תכונות רצויות למנעול טוב, אך מניעה הדדית היא התכונה הבסיסית וההכרחית ביותר. היכולת להשתמש במנגנון TestAndSet (כפי שמוזכר ב-Lecture 11, chunk 42) היא שיטת מימוש למנעול, ולא תכונה מהותית של המנעול עצמו."
+    }
+  }
+}

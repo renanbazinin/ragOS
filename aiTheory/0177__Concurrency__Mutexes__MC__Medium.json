@@ -1,0 +1,46 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Mutexes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 17:34:23",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      10,
+      11,
+      13,
+      14,
+      16
+    ],
+    "token_usage": {
+      "prompt_tokens": 2001,
+      "output_tokens": 536,
+      "total_tokens": 5252
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Mutexes"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "מהי המטרה העיקרית של שימוש במנעול (mutex) במערכת הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. למנוע מצב של רעב (starvation) בחוטים הממתינים למשאב.",
+        "ב. להבטיח שמניעה הדדית (mutual exclusion) תתקיים בקטע קריטי.",
+        "ג. לאפשר לחוטים מרובים להיכנס לקטע קריטי בו-זמנית.",
+        "ד. לסנכרן בין חוטים על ידי העברת הודעות ביניהם."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "על פי חומר ההרצאה (Lecture 11, chunk 12), מנעול (mutex) הוא אובייקט שנועד לסנכרן בין חוטים. מטרתו המרכזית היא להבטיח שמניעה הדדית (mutual exclusion) תתקיים בקטע קריטי. מניעה הדדית פירושה, כפי שמוזכר גם ב-Lecture 16 (chunk 8), ש'שני חוטים לא יכולים להיות בקטע הקריטי במקביל', ובכך רק חוט אחד בלבד יוכל להחזיק במשאב בכל רגע נתון. זה מונע התנגשויות ובעיות עקביות בגישה למשאבים משותפים. אפשרות א' אינה נכונה מכיוון שמנעול אינו מבטיח מניעת רעב באופן מובנה. אפשרות ג' אינה נכונה מכיוון שהיא הפוכה למטרת המנעול, שנועד למנוע כניסה בו-זמנית. אפשרות ד' אינה נכונה מכיוון שמנעול לבדו אינו משמש ככלי להעברת הודעות ישירה בין חוטים, אלא לסנכרון גישה למשאבים."
+    }
+  }
+}
