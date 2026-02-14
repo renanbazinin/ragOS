@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { Brain, FileText, Filter, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Shuffle, ArrowLeft, Layers, Hash, ListChecks } from 'lucide-react';
+import { Brain, FileText, Filter, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Shuffle, ArrowLeft, Layers, Hash, ListChecks, BookOpen } from 'lucide-react';
 import { getAIQuestions, getAIStats, getExams, getExam, getAllExamQuestions, getExamFilterOptions } from './localData';
 import type { AIQuestionItem, AIStats, ExamSummary, ExamData, QuestionJSON, ExamQuestion, AllExamQuestionsResponse, ExamFilterOptions } from './types';
 import PracticeCard from './PracticeCard';
@@ -178,7 +178,11 @@ export default function PracticePage() {
           </div>
           <Link to="/" className="nav-link">
             <ArrowLeft size={18} />
-            Back to Search
+            Home
+          </Link>
+          <Link to="/theory" className="nav-link">
+            <BookOpen size={18} />
+            Theory
           </Link>
         </div>
       </header>

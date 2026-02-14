@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './index.css'
 import App from './App.tsx'
 import PracticePage from './PracticePage.tsx'
+import TheoryPage from './TheoryPage.tsx'
 
 // Handle SPA redirect from 404.html on GitHub Pages
 const redirect = sessionStorage.redirect as string | undefined;
@@ -26,6 +27,7 @@ createRoot(document.getElementById('root')!).render(
       <Routes>
         <Route path="/" element={<App />} />
         <Route path="/practice" element={<PracticePage />} />
+        <Route path="/theory" element={<TheoryPage />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,

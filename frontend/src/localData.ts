@@ -11,6 +11,9 @@ import type {
   ExamQuestion,
   AllExamQuestionsResponse,
   ExamFilterOptions,
+  TheoryQuestionItem,
+  TheoryQuestionsResponse,
+  TheoryStats,
 } from './types';
 
 const BASE = import.meta.env.BASE_URL;
@@ -39,6 +42,7 @@ let _aiCache: (QuestionJSON & {
   _generated_at: string;
   _subject: string;
 })[] | null = null;
+let _theoryCache: TheoryQuestionItem[] | null = null;
 
 async function loadExams(): Promise<RawExam[]> {
   if (_examsCache) return _examsCache;
@@ -301,5 +305,90 @@ export async function getAllExamQuestions(params: {
       topics: Object.fromEntries(Object.entries(topicCounts).sort((a, b) => b[1] - a[1])),
       years: Object.fromEntries(Object.entries(yearCounts).sort(([a], [b]) => a.localeCompare(b))),
     },
+  };
+}
+
+// ── Theory questions (from summaryBOOK) ─────────────────────────────────────
+
+async function loadTheory(): Promise<TheoryQuestionItem[]> {
+  if (_theoryCache) return _theoryCache;
+  const res = await fetch(`${BASE}data/theory-questions.json`);
+  _theoryCache = await res.json();
+  return _theoryCache!;
+}
+
+export async function getTheoryQuestions(params: {
+  subject?: string;
+  topic?: string;
+  topics?: string[];
+  difficulty?: string;
+  page?: number;
+  page_size?: number;
+}): Promise<TheoryQuestionsResponse> {
+  const all = await loadTheory();
+  let filtered = [...all];
+
+  if (params.subject) {
+    const s = params.subject;
+    filtered = filtered.filter(q => q._subject === s);
+  }
+  if (params.topics && params.topics.length > 0) {
+    const selected = params.topics.map(t => t.toLowerCase());
+    filtered = filtered.filter(q => {
+      const qTopics = Array.isArray(q.topic) ? q.topic : [String(q.topic || '')];
+      return selected.some(sel => qTopics.some(tp => tp.toLowerCase().includes(sel)));
+    });
+  } else if (params.topic) {
+    const t = params.topic.toLowerCase();
+    filtered = filtered.filter(q => {
+      const topics = Array.isArray(q.topic) ? q.topic : [String(q.topic || '')];
+      return topics.some(tp => tp.toLowerCase().includes(t));
+    });
+  }
+  if (params.difficulty) {
+    filtered = filtered.filter(q =>
+      q.difficulty_estimation === params.difficulty ||
+      q._requested_difficulty === params.difficulty
+    );
+  }
+
+  const page = params.page ?? 1;
+  const pageSize = params.page_size ?? 20;
+  const total = filtered.length;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const start = (page - 1) * pageSize;
+  const pageQuestions = filtered.slice(start, start + pageSize);
+
+  return {
+    questions: pageQuestions,
+    total,
+    page,
+    page_size: pageSize,
+    total_pages: totalPages,
+  };
+}
+
+export async function getTheoryStats(): Promise<TheoryStats> {
+  const all = await loadTheory();
+  const subjects: Record<string, number> = {};
+  const difficulties: Record<string, number> = {};
+  const topics: Record<string, number> = {};
+
+  for (const q of all) {
+    const s = q._subject || q.subject || 'Unknown';
+    subjects[s] = (subjects[s] || 0) + 1;
+    const d = q.difficulty_estimation || q._requested_difficulty || 'Unknown';
+    difficulties[d] = (difficulties[d] || 0) + 1;
+    const tl = Array.isArray(q.topic) ? q.topic : [String(q.topic || '')];
+    for (const tp of tl) {
+      if (tp) topics[tp] = (topics[tp] || 0) + 1;
+    }
+  }
+
+  return {
+    total: all.length,
+    subjects: Object.fromEntries(Object.entries(subjects).sort((a, b) => b[1] - a[1])),
+    difficulties,
+    topics: Object.fromEntries(Object.entries(topics).sort((a, b) => b[1] - a[1])),
   };
 }
