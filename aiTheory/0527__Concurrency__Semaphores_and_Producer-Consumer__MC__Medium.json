@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Producer-Consumer",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 19:02:05",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      14
+    ],
+    "token_usage": {
+      "prompt_tokens": 1809,
+      "output_tokens": 415,
+      "total_tokens": 3320
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Semaphores and Producer-Consumer"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "בבעיית היצרן/צרכן (bounded buffer) הממומשת באמצעות סמפורים, מהם הערכים ההתחלתיים הנכונים עבור הסמפורים `empty` ו-`full` בהתאמה, בהינתן שהבאפר בגודל `MAX`?",
+      "code_snippet": "init(&empty, MAX);\ninit(&full, 0);",
+      "options": [
+        "א. empty = MAX, full = 0",
+        "ב. empty = 0, full = MAX",
+        "ג. empty = 1, full = MAX",
+        "ד. empty = MAX, full = 1"
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "לפי חומר ההרצאה, במימוש בעיית היצרן/צרכן באמצעות סמפורים, הסמפור `empty` מייצג את מספר המדפים הפנויים בבאפר. בתחילה, כל המדפים בבאפר פנויים, ולכן ערכו ההתחלתי הוא `MAX` (גודל הבאפר המקסימלי). הסמפור `full` מייצג את מספר המדפים המלאים בבאפר. בתחילה, הבאפר ריק לחלוטין, ולכן ערכו ההתחלתי הוא `0`. הקטע קוד שסופק בהרצאה מדגים זאת במפורש: `init(&empty, MAX); init(&full, 0);`"
+    }
+  }
+}

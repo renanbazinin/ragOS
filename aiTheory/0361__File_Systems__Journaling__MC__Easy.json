@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Journaling",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:21:29",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      21
+    ],
+    "token_usage": {
+      "prompt_tokens": 1706,
+      "output_tokens": 658,
+      "total_tokens": 4841
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Journaling"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "על פי חומר ההרצאה, מה מאפיין נקודת \"checkpoint\" בהקשר של כתיבת טרנזקציה ל-journal?",
+      "code_snippet": null,
+      "options": [
+        "א. זוהי נקודת הזמן שבה ידוע בוודאות שהטרנזקציה נכתבה במלואה ל-journal ואושרה על ידי הדיסק.",
+        "ב. זוהי הנקודה שבה ה-Txe (Transaction End) נכתב ל-journal, מה שמסמן את סיום הטרנזקציה.",
+        "ג. זוהי הנקודה שבה ה-metadata של הטרנזקציה נכתב למיקומו הסופי במערכת הקבצים.",
+        "ד. זוהי הנקודה שבה ה-journal superblock מתעדכן לשחרור מקום שהתפנה ב-journal."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "על פי חומר ההרצאה (Lecture 21, chunk 26), נקודת \"checkpoint\" מוגדרת כנקודת הזמן שבה אנחנו יודעים בוודאות שהטרנזקציה שלנו נכתבה במלואה ל-journal ואושרה על ידי הדיסק באמצעות פעולת סנכרון (fsync). ברגע שהנתונים נכתבו פיזית לדיסק ב-journal, זוהי נקודת ה-checkpoint, המאפשרת למערכת לדעת שאם תקרוס, הטרנזקציה שמורה במלואה ב-journal וניתן יהיה לשחזר אותה.\nאפשרות ב' מתארת את שלב ה-Journal commit (כתיבת Txe), שמסמן את הפיכת הטרנזקציה ל'מחויבת' (committed), אך ה-checkpoint עצמו (לפי Chunk 26) מתייחס לכתיבת כל הטרנזקציה ל-journal ואישורה.\nאפשרות ג' מתארת שלב מאוחר יותר בפרוטוקול הסופי (גם הוא נקרא \"Checkpoint\" ב-Chunk 38), שבו ה-metadata נכתב למיקומו הקבוע, אך זו לא ההגדרה הבסיסית של נקודת הביטחון ב-journal עצמו כפי שהוצגה בתחילה.\nאפשרות ד' מתארת את שלב שחרור המקום ב-journal, שהוא שלב שמתרחש לאחר השלמת הטרנזקציה והעברתה מה-journal."
+    }
+  }
+}

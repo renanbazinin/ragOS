@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Processes and Scheduling",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 18:53:21",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      2,
+      3
+    ],
+    "token_usage": {
+      "prompt_tokens": 1977,
+      "output_tokens": 515,
+      "total_tokens": 4145
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Processes and Scheduling"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "לפי מחזור החיים של תהליך, לאיזה מצב יעבור תהליך הנמצא כרגע במצב \"Running\" כאשר מערכת ההפעלה מחליטה להפסיק את ריצתו (לדוגמה, עקב פסיקת שעון) ולהריץ תהליך אחר במקומו?",
+      "code_snippet": null,
+      "options": [
+        "א. Blocked, מכיוון שהוא ממתין לתורו לריצה.",
+        "ב. Ready, מכיוון שהוא מוכן לרוץ אך אינו רץ כרגע על המעבד.",
+        "ג. Terminated, מכיוון שזמן הריצה שלו פג.",
+        "ד. Running שוב, לאחר שהמתזמן יבחר אותו מחדש באופן מיידי."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "החומר המצורף מסביר כי כאשר מערכת ההפעלה מחליטה להפסיק תהליך שרץ (לדוגמה, עקב פסיקת שעון) ולהריץ תהליך אחר במקומו, פעולה זו נקראת 'Descheduled'. לאחר פעולה זו, התהליך עובר למצב 'Ready'. מצב 'Ready' מתאר תהליך שמוכן לרוץ אך אינו רץ כרגע על המעבד, והוא ממתין להיבחר על ידי המתזמן מתוך רשימת התהליכים המוכנים להרצה. מצב 'Blocked' (אפשרות א') שמור לתהליכים הממתינים לאירוע חיצוני (כגון קלט/פלט) ולא לתור מעבד. מצב 'Terminated' (אפשרות ג') מציין סיום הרצה מלא של התהליך. אפשרות ד' אינה נכונה מכיוון שהשאלה מציינת שהמתזמן החליט להריץ תהליך אחר במקומו."
+    }
+  }
+}

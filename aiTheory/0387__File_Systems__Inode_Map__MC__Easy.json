@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Inode Map",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:26:57",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      22
+    ],
+    "token_usage": {
+      "prompt_tokens": 1897,
+      "output_tokens": 452,
+      "total_tokens": 3256
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Inode Map"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהו תפקידו העיקרי של ה-CR (checkpoint region) במערכת הקבצים, בהקשר ל-imap?",
+      "code_snippet": null,
+      "options": [
+        "א. הוא מצביע לגרסה העדכנית ביותר של ה-imap (או לחלקיו).",
+        "ב. הוא מכיל את הנתונים בפועל של כל קבצי ה-inode.",
+        "ג. הוא מתעדכן לעיתים קרובות מאוד כדי להבטיח עקביות מיידית של ה-imap.",
+        "ד. הוא משמש כמטמון זמני לערכי imap הנמצאים בשימוש פעיל."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "החומר המצוין בבירור כי ה-CR (checkpoint region) הוא מצביע קבוע במערכת הקבצים שתפקידו להצביע לגרסה העדכנית ביותר של ה-imap. אם ה-imap מחולק לחלקים, ה-CR יכיל מצביעים לגרסה העדכנית של כל חלק. זה מאפשר למערכת לשחזר את ה-imap המעודכן גם לאחר אתחול המחשב על ידי קריאת ה-CR. האפשרויות האחרות אינן נכונות: ה-CR אינו מכיל את נתוני ה-inodes עצמם (ב'), הוא מתעדכן לעיתים רחוקות ולא לעיתים קרובות כדי למנוע פגיעה בביצועים (ג'), ואינו מטמון זמני אלא מנגנון הצבעה קבוע (ד')."
+    }
+  }
+}

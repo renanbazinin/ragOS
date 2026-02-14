@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Atomic Operations",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 17:49:41",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      11,
+      13,
+      14
+    ],
+    "token_usage": {
+      "prompt_tokens": 1793,
+      "output_tokens": 566,
+      "total_tokens": 5101
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Atomic Operations"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "מהי ההגדרה הנכונה ביותר ל\"פעולה אטומית\" (Atomic Operation) בהקשר של מערכות הפעלה מרובות תהליכים (multithreaded/multiprocess)?",
+      "code_snippet": null,
+      "options": [
+        "א. פעולה המבוצעת על ידי פקודת חומרה ייעודית בלבד, כגון __sync_fetch_and_add.",
+        "ב. פעולה המובטחת להתבצע כולה ללא הפרעה או התערבות של תהליכים (threads) אחרים, כאילו הייתה פעולה יחידה.",
+        "ג. פעולה שתמיד משתמשת במנגנון מנעולים (mutexes) כדי להבטיח גישה בלעדית למשאב.",
+        "ד. פעולה שתמיד מחזירה ערך בוליאני המציין הצלחה או כישלון של הביצוע."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "פעולה אטומית היא פעולה שמובטחת להתבצע כיחידה שלמה ובלתי ניתנת לחלוקה (indivisible). המשמעות היא שמרגע שהפעולה מתחילה, היא מסתיימת לפני שכל תהליך או חוט אחר יכול לצפות או לשנות את הנתונים המעורבים בפעולה זו. זה מונע מצבי מרוץ (race conditions) ומבטיח עקביות נתונים, כפי שתואר במקרה של 'atomicity violation' בשיעור. המנגנונים להשגת אטומיות יכולים להיות פקודות חומרה ייעודיות (כמו TestAndSet או __sync_fetch_and_add) או באמצעות מנעולים (mutexes) המגינים על קטע קוד קריטי. לכן, תשובה א' ו-ג' אינן נכונות מכיוון שהן מתארות רק דרך אחת להשגת אטומיות, ולא את ההגדרה הכללית של הפעולה עצמה. תשובה ד' אינה רלוונטית להגדרת אטומיות."
+    }
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Spinlocks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-14 17:40:55",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      16,
+      11,
+      13,
+      15
+    ],
+    "token_usage": {
+      "prompt_tokens": 2126,
+      "output_tokens": 1320,
+      "total_tokens": 8275
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Spinlocks"
+    ],
+    "difficulty_estimation": "Hard",
+    "content": {
+      "text": "בהתבסס על קוד ה-`FlakyLock` הנתון, אילו מהטענות הבאות נכונה לגבי תכונותיו של המנעול?",
+      "code_snippet": "typedef struct { int turn; int busy; } FlakyLock;\nvoid init(FlakyLock *lock) {\n    lock->busy = 0;\n}\nvoid lock(FlakyLock *lock, int me) {\n    do {\n        do {\n            lock->turn = me;\n        } while (lock->busy);\n        lock->busy = 1;\n    } while (lock->turn != me);\n}\nvoid unlock(FlakyLock *lock) {\n    lock->busy = 0;\n}",
+      "options": [
+        "א. המנעול מקיים מניעה הדדית, אך אינו מונע קיפאון ואינו הוגן.",
+        "ב. המנעול מקיים מניעה הדדית ומונע קיפאון, אך אינו הוגן.",
+        "ג. המנעול אינו מקיים מניעה הדדית, אך מונע קיפאון והוא הוגן.",
+        "ד. המנעול מקיים את כל שלוש התכונות: מניעה הדדית, מניעת קיפאון והוגנות."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "הבה ננתח את תכונות ה-`FlakyLock` המוצג בקוד:\n\n**1. מניעה הדדית (Mutual Exclusion):**\nהמנעול **מקיים** מניעה הדדית. כאשר חוט (נניח חוט A) נכנס לקטע הקריטי, הוא מבטיח ש-`lock->busy` יהיה 1 לפני הכניסה. כל חוט אחר (נניח חוט B) שינסה להיכנס, יבצע קודם `lock->turn = B;` ולאחר מכן יגיע ללולאה הפנימית `while (lock->busy)`. מכיוון ש-`lock->busy` הוא 1 (נקבע על ידי חוט A), חוט B ימתין (spin) בלולאה זו ולא יוכל להמשיך עד שחוט A ישחרר את המנעול (יגדיר `lock->busy = 0`). לכן, רק חוט אחד יכול להימצא בקטע הקריטי בכל רגע נתון.\n\n**2. מניעת קיפאון (Deadlock Freedom):**\nהמנעול **אינו מונע** קיפאון. ניתן להדגים תרחיש קיפאון כזה:\nא. מצב התחלתי: `lock->busy = 0`.\nב. חוט A (עם מזהה `me=1`) קורא לפונקציה `lock` ומבצע `lock->turn = 1;`.\nג. חוט B (עם מזהה `me=2`) קורא לפונקציה `lock` ומבצע `lock->turn = 2;`. כעת `lock->turn` שווה 2.\nד. חוט A ממשיך בביצוע: הוא יוצא מהלולאה הפנימית `do { ... } while (lock->busy);` מכיוון ש-`lock->busy` הוא 0.\nה. חוט A מבצע `lock->busy = 1;`.\nו. חוט A ממשיך בביצוע: הוא נכנס ללולאה החיצונית `do { ... } while (lock->turn != me);`. התנאי `lock->turn != 1` (כלומר `2 != 1`) הוא אמיתי, ולכן חוט A מתחיל להמתין (spin) בלולאה זו.\nז. חוט B ממשיך בביצוע: הוא נכנס ללולאה הפנימית `do { ... } while (lock->busy);`. התנאי `lock->busy` (כלומר `1`) הוא אמיתי, ולכן חוט B מתחיל להמתין (spin) בלולאה זו.\nבשלב זה, חוט A ממתין ש-`lock->turn` יהפוך ל-1 (אך הוא 2), וחוט B ממתין ש-`lock->busy` יהפוך ל-0 (אך הוא 1). שני החוטים תקועים בלולאות המתנה אינסופיות, וזהו מצב קיפאון.\n\n**3. הוגנות (Fairness):**\nהמנעול **אינו הוגן**. מכיוון שקיים מצב של קיפאון, הוגנות אינה מושגת. גם ללא קיפאון, המנגנון של `lock->turn = me;` בתוך לולאה מאפשר לחוטים שונים 'לדרוס' זה את ערך ה-`turn` של זה שוב ושוב. אין מנגנון שמבטיח שחוטים יקבלו את המנעול לפי סדר בקשתם, בניגוד למנעולים כמו `Ticket Lock` המוזכרים בחומר ההרצאה, המבטיחים הוגנות על ידי מתן מספר תור לכל חוט.\n\nלסיכום, המנעול מקיים מניעה הדדית, אך סובל מקיפאון ואינו הוגן. לכן, אפשרות א' היא הנכונה."
+    }
+  }
+}

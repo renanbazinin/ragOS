@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Ticket Locks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 17:42:22",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      16,
+      11,
+      13
+    ],
+    "token_usage": {
+      "prompt_tokens": 2333,
+      "output_tokens": 551,
+      "total_tokens": 4700
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Ticket Locks"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "מהו המנגנון העיקרי המבטיח הוגנות במנעול מסוג Ticket Lock?",
+      "code_snippet": null,
+      "options": [
+        "א. כל חוט לוקח מספר כרטיס ייחודי וממתין שתורו יגיע לפי משתנה התור הכללי.",
+        "ב. הוא משתמש בפקודת CompareAndSwap כדי לתפוס את המנעול באופן אטומי.",
+        "ג. הוא מונע מכל החוטים לבצע invalidate במטמון בו-זמנית על ידי שימוש במערך דגלים.",
+        "ד. הוא מבטיח שחוט ששחרר את המנעול לא יוכל לתפוס אותו שוב מיד."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "מנעול ה-Ticket Lock תוכנן במיוחד כדי להבטיח הוגנות (fairness). הוא עושה זאת על ידי הקצאת מספר כרטיס (ticket) ייחודי לכל חוט המבקש להיכנס לקטע הקריטי. קיים גם משתנה גלובלי ('turn') המציין את תורו של מי להיכנס. חוטים ממתינים בלולאה (spin-wait) עד שמספר הכרטיס שלהם תואם למשתנה ה-'turn'. כאשר חוט מסיים את הקטע הקריטי, הוא מקדם את משתנה ה-'turn' ב-1, ובכך מאפשר לחוט הבא בתור להיכנס באופן מסודר. מנגנון זה יוצר תור מפורש ומונע הרעבה (starvation) מכיוון שכל חוט יקבל את תורו בסופו של דבר. אפשרות ב' מתארת מנגנון של מנעולי TAS/CAS, אפשרות ג' מתארת מנגנון של מנעול תור מסוג Anderson, ואילו אפשרות ד' מתארת תוצאה משנית של מנגנון הכרטיסים ולא את המנגנון העיקרי המבטיח הוגנות."
+    }
+  }
+}

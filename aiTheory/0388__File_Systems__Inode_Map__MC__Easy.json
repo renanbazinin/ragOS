@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Inode Map",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:27:06",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      22
+    ],
+    "token_usage": {
+      "prompt_tokens": 1897,
+      "output_tokens": 410,
+      "total_tokens": 3537
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Inode Map"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהו התפקיד העיקרי של ה-imap (Inode Map) במערכת הקבצים כפי שתואר בחומר ההרצאה?",
+      "code_snippet": null,
+      "options": [
+        "א. להצביע לגרסה העדכנית ביותר של כל inode.",
+        "ב. לאחסן את הנתונים בפועל של הקבצים.",
+        "ג. לשמש כ-Checkpoint Region (CR) קבוע במיקום מוגדר.",
+        "ד. לתעדכן בכל פעולת קריאה מהדיסק על מנת לשפר ביצועים."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "על פי חומר ההרצאה, ה-imap (Inode Map) הוא המיפוי העדכני שאומר לנו היכן נמצאת הגרסה הכי עדכנית של כל inode. לדוגמה, 'ה-imap מצביע על הגרסה העדכנית של inode k' וכן 'הוא יגיד לנו איפה הגרסה הכי עדכנית של אותו inode'. אפשרויות ב', ג' ו-ד' אינן נכונות: ה-imap אינו מאחסן את נתוני הקבצים ישירות, הוא אינו ה-CR אלא ה-CR מצביע אליו, והוא אינו מתעדכן בכל קריאה אלא כאשר סגמנטים מתעדכנים וה-CR עצמו מתעדכן לעיתים רחוקות."
+    }
+  }
+}

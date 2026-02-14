@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Disks",
+    "topic_hint": "RAID",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:44:46",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      18,
+      19
+    ],
+    "token_usage": {
+      "prompt_tokens": 1982,
+      "output_tokens": 361,
+      "total_tokens": 3740
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Disks",
+    "topic": [
+      "RAID"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "בהתבסס על חומר ההרצאה, מהי הטענה הנכונה ביותר לגבי RAID-4 ו-RAID-5?",
+      "code_snippet": null,
+      "options": [
+        "א. RAID-5 עדיף באופן מובהק על RAID-4, ואין סיבה להשתמש ב-RAID-4.",
+        "ב. RAID-4 מציע ביצועי כתיבה טובים יותר מ-RAID-5.",
+        "ג. RAID-5 מתאים רק לביצועים ללא אמינות, בניגוד ל-RAID-4.",
+        "ד. RAID-4 ו-RAID-5 זהים לחלוטין בכל מאפייניהם."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "חומר ההרצאה מציין במפורש כי \"RAID-5 is strictly better than RAID-4\" וכן \"אין סיבה להשתמש ב-raid-4\". לכן, הטענה ש-RAID-5 עדיף באופן מובהק על RAID-4 היא הנכונה. אפשרויות ב', ג' ו-ד' אינן נתמכות על ידי חומר ההרצאה או סותרות אותו ישירות."
+    }
+  }
+}

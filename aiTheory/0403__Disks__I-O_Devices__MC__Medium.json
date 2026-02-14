@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Disks",
+    "topic_hint": "I/O Devices",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 18:31:16",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      17,
+      18
+    ],
+    "token_usage": {
+      "prompt_tokens": 2181,
+      "output_tokens": 1221,
+      "total_tokens": 6644
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Disks",
+    "topic": [
+      "I/O Devices"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "איזו מהאפשרויות הבאות מתארת נכונה יתרון מרכזי של שימוש ב-Memory-Mapped I/O לתקשורת עם התקני חומרה, בהשוואה לגישה ישירה לרגיסטרים של ההתקן באמצעות פקודות מיוחדות?",
+      "code_snippet": "/*\n * דוגמה לגישה להתקן דרך Memory-Mapped I/O\n * נניח ש-device_ptr הוא מצביע לאזור זיכרון הממופה להתקן חומרה (למשל, בקר מסך)\n */\n\n#define COMMAND_REGISTER_OFFSET 0x00\n#define STATUS_REGISTER_OFFSET  0x04\n#define DATA_BUFFER_OFFSET      0x1000\n\n#define START_OPERATION_CMD     0x01\n#define DEVICE_READY_BIT        0x01\n\nvolatile unsigned int *device_registers = (volatile unsigned int *)0xF0000000; // כתובת בסיס ממופה\n\n// כתיבה לרגיסטר פקודה (לדוגמה, פקודת \"התחל פעולה\")\ndevice_registers[COMMAND_REGISTER_OFFSET / sizeof(unsigned int)] = START_OPERATION_CMD;\n\n// קריאה מרגיסטר סטטוס (לדוגמה, בדיקת אם ההתקן פנוי)\nif (device_registers[STATUS_REGISTER_OFFSET / sizeof(unsigned int)] & DEVICE_READY_BIT) {\n    // ההתקן פנוי\n}\n\n// כתיבת נתונים דרך אזור נתונים ממופה\nvolatile unsigned char *data_buffer = (volatile unsigned char *)(0xF0000000 + DATA_BUFFER_OFFSET);\n\ndata_buffer[0] = 'H';\ndata_buffer[1] = 'e';\ndata_buffer[2] = 'l';\n// ... ועוד\n\n/*\n * בדוגמה זו, הגישה להתקן מתבצעת באמצעות פעולות זיכרון רגילות\n * (קריאה/כתיבה למצביעים), ללא צורך בפקודות קלט/פלט מיוחדות או מעבר ל-kernel mode\n * עבור כל פעולה, במידה והזיכרון ממופה למרחב כתובות של התהליך.\n */",
+      "options": [
+        "א. Memory-Mapped I/O מאפשר גישה לרכיבי החומרה הן למשתמש והן למערכת ההפעלה ללא צורך במעבר ל-kernel mode, תוך שימוש במנגנון הזיכרון הווירטואלי הקיים.",
+        "ב. Memory-Mapped I/O דורש שימוש בפקודות מכונה מיוחדות לכל פעולת קריאה וכתיבה, מה שמבטיח אבטחה גבוהה יותר.",
+        "ג. Memory-Mapped I/O מוגבל לגישה לרגיסטרים מסוג \"status\" בלבד, ואינו מאפשר שליטה בפעולות \"command\" או העברת נתונים \"data\".",
+        "ד. Memory-Mapped I/O מפשט את תהליך התקנת הדרייברים בכך שהוא מבטל את הצורך בקוד ספציפי לכל התקן."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "אפשרות א' נכונה. על פי חומר ההרצאה, Memory-Mapped I/O מאפשר גישה לרכיבי חומרה הן למשתמש והן למערכת ההפעלה ללא צורך בפקודות מיוחדות או במעבר ל-kernel mode. זה מתאפשר על ידי שימוש במנגנון הזיכרון הווירטואלי הקיים, הממפה דפי זיכרון לחומרה, ובכך מאפשר גישה אליה כאילו הייתה מערך בזיכרון (למשל, גישה לפיקסלים במסך). אפשרויות ב', ג' ו-ד' שגויות: ב' שגויה כיוון ש-Memory-Mapped I/O דווקא מבטל את הצורך בפקודות מכונה מיוחדות או קריאות מערכת. ג' שגויה מכיוון ש-Memory-Mapped I/O אינו מוגבל לגישה לרגיסטרי סטטוס בלבד, אלא יכול לשמש לכל סוגי האינטראקציה (קריאה וכתיבה לנתונים, פקודות וסטטוס) עם החומרה הממופה. ד' שגויה כיוון ש-Memory-Mapped I/O הוא מנגנון גישה לחומרה, אך אינו מבטל את הצורך בדרייברים, שהם קוד ספציפי שמיישם את הממשק האחיד לתקשורת עם החומרה."
+    }
+  }
+}

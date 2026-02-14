@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Synchronization",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 17:36:20",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      10,
+      11,
+      13,
+      15
+    ],
+    "token_usage": {
+      "prompt_tokens": 2007,
+      "output_tokens": 764,
+      "total_tokens": 5070
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Synchronization"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "איזו בעיית סנכרון מתוארת בקטע הקוד הבא, וכיצד הפתרון המוצע בחומר ההרצאה מתמודד איתה?",
+      "code_snippet": "Thread A (Blocked)\nlock(&m1);\n// wait for mmmBop\nif (!done)\n  wait(&cv1, &m1);\nbaDuBop();\nunlock(&m1);\n\nThread B\nmmmBop();\ndone = 1;\nsignal(&cv1);\nLost signal",
+      "options": [
+        "א. הבעיה היא \"Lost signal\" (איתות אבוד), מכיוון ש-signal() נקרא לפני ש-wait() נכנס למצב המתנה. הפתרון הוא לתפוס מנעול (lock) גם בצד של Thread B לפני הגישה למשתנה done והקריאה ל-signal().",
+        "ב. הבעיה היא \"Race Condition\" (תנאי מירוץ) על המשתנה done. הפתרון הוא להשתמש ב-mutex יחיד המגן על כל הבלוק של Thread A ו-Thread B.",
+        "ג. הבעיה היא \"Deadlock\" (מבוי סתום), מכיוון ש-Thread A נחסם ו-Thread B לא מצליח לשחרר אותו. הפתרון הוא להחליף את ה-condition variable ב-semaphore.",
+        "ד. הבעיה היא \"Starvation\" (הרעבה), שבה Thread A לא מצליח להתקדם לעולם. הפתרון הוא להשתמש במנגנון lock-free."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "הבעיה המתוארת בקטע הקוד היא בעיית \"Lost signal\" (איתות אבוד), כפי שמצוין במפורש בחומר ההרצאה (Lecture 13, chunk 41). היא מתרחשת כאשר חוט B קורא ל-`signal(&cv1)` ומסמן שאירוע התרחש, אך חוט A עדיין לא הספיק לקרוא ל-`wait(&cv1, &m1)` ולהיכנס למצב המתנה. כתוצאה מכך, האיתות \"אובד\" ואף חוט לא ממתין לו, וחוט A עלול להמתין ללא סוף למרות שהאירוע כבר התרחש. הפתרון, כפי שמוצג בחומר ההרצאה, הוא שימוש במנעול (mutex) גם בצד של חוט B, סביב הגישה למשתנה `done` והקריאה ל-`signal()`. זה מבטיח שחוטים A ו-B לא יוכלו להתערבב בצורה שתגרום לאובדן האיתות, מכיוון שחוט B יתפוס את המנעול לפני ה-signal, וחוט A יחזיק בו כשהוא קורא ל-wait, ובכך מובטח סדר פעולות נכון."
+    }
+  }
+}

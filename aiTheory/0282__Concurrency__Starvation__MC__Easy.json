@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Starvation",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:02:44",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      16,
+      13
+    ],
+    "token_usage": {
+      "prompt_tokens": 1782,
+      "output_tokens": 477,
+      "total_tokens": 4056
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Starvation"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהי ההגדרה הנכונה ביותר למצב \"הרעבה\" (Starvation) במערכת הפעלה, כפי שנלמד בקורס?",
+      "code_snippet": null,
+      "options": [
+        "א. חוט אחד חסום ואינו יכול להתקדם, בעוד שחוטים אחרים במערכת ממשיכים להתקדם ולבצע פעולות.",
+        "ב. כל החוטים במערכת חסומים ואינם יכולים להתקדם, וממתינים זה לזה למשאבים.",
+        "ג. חוט תפס משאב קריטי ומחזיק בו ללא הגבלה, ובכך מונע מכל שאר החוטים לגשת אליו.",
+        "ד. חוטים רבים מתחרים על גישה למשאב, והמערכת אינה מצליחה להקצות את המשאב לאף אחד מהם."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "התשובה הנכונה היא א'. על פי ההגדרה שנלמדה בקורס (Lecture 16, chunk 0), תהליך (חוט) מורעב הוא תהליך שחסום בזמן שחוטים אחרים מתקדמים. מצב זה שונה מקיפאון (Deadlock), שבו כל החוטים חסומים ואינם מתקדמים כלל (Lecture 16, chunk 1). כמו כן, אם חוט תופס משאב ומחזיק בו לנצח, זו אינה הרעבה אלא באג בקוד, שכן בהרעבה, המשאב משתחרר אך לעולם אינו מגיע לחוט המורעב (Lecture 16, chunk 11)."
+    }
+  }
+}

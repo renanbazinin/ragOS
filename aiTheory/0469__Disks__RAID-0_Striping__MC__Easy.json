@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Disks",
+    "topic_hint": "RAID-0 Striping",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:47:22",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      18,
+      19
+    ],
+    "token_usage": {
+      "prompt_tokens": 2045,
+      "output_tokens": 389,
+      "total_tokens": 3713
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Disks",
+    "topic": [
+      "RAID-0 Striping"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהי המטרה העיקרית של טכניקת ה-striping ב-RAID-0?",
+      "code_snippet": null,
+      "options": [
+        "א. שיפור ביצועים על ידי פיצול נתונים לרוחב דיסקים מרובים.",
+        "ב. הבטחת עמידות בפני תקלות על ידי שכפול נתונים.",
+        "ג. הגדלת נפח האחסון הכולל של המערכת.",
+        "ד. הקטנת צריכת החשמל של מערך הדיסקים."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "החומר המצורף מציין במפורש כי RAID-0 משתמש בטכניקת ה-striping שנועדה 'לשפר את הביצועים'. הרעיון מאחורי פיזור הנתונים (סקטורים) לסירוגין בין הדיסקים הוא לאפשר ניצול מקבילי שלהם בזמן פעולות קריאה סדרתיות, מה שמוביל ל'הגברת הביצועים בכמעט פי 2'. כמו כן, צוין במפורש כי RAID-0 מיועד ל-'Performance and no reliability', מה שמדגיש את מטרתו העיקרית בשיפור הביצועים."
+    }
+  }
+}

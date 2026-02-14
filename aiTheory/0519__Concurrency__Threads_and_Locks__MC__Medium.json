@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Threads and Locks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 18:59:55",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      10,
+      11
+    ],
+    "token_usage": {
+      "prompt_tokens": 1789,
+      "output_tokens": 737,
+      "total_tokens": 5017
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Threads and Locks"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "בהתבסס על קטע הקוד הבא, המציג ניסיון לסינכרון בין שני חוטים באמצעות משתנה `turn`, מדוע מנגנון זה אינו יעיל ועלול לגרום לבעיית חסימה (deadlock) או המתנת שווא אינסופית?",
+      "code_snippet": "Thread A\nwhile (turn != A)\n  ; // busy-wait\n// critical section\nturn = B;\n\nThread B\nwhile (turn != B)\n  ; // busy-wait\n// critical section\nturn = A;",
+      "options": [
+        "א. אם החוט שהתור שלו (לדוגמה, חוט A כאשר `turn == A`) עסוק בביצוע פעולות אחרות ואינו מעוניין להיכנס לקטע הקריטי באופן מיידי, החוט השני (חוט B) ייכנס ללולאת המתנה אינסופית ולא יוכל להתקדם.",
+        "ב. קיימת בעיית תחרות (race condition) בין בדיקת ערך המשתנה `turn` לבין עדכונו, מה שעלול לאפשר לשני חוטים להיכנס לקטע הקריטי בו-זמנית.",
+        "ג. המנגנון אינו מבטיח סדר כניסה הוגן (fairness) בין החוטים, וחוט אחד עלול להישאר מורעב (starved) לנצח גם אם החוט השני מסיים את הקטע הקריטי שלו.",
+        "ד. המשתנה `turn` אינו מוגדר כ-`volatile`, ולכן המהדר עלול לבצע אופטימיזציות שימנעו את עדכונו הנכון בין החוטים."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "ההסבר הנכון הוא שהמנגנון המוצג סובל מבעיה של חסימה הדדית (deadlock) או המתנת שווא (busy-wait) שאינה נגמרת. כפי שמתואר בחומר ההרצאה (Lecture 11, chunk 34), אם התור שייך לחוט מסוים (לדוגמה, חוט A) אך חוט A מבצע פעולות אחרות ואינו מעוניין להיכנס לקטע הקריטי כרגע, חוט B ימשיך להמתין בלולאה אינסופית (`while (turn != B)`). חוט B לעולם לא יקבל את תורו מכיוון שחוט A לא ישנה את ערך המשתנה `turn` ל-B, שכן הוא אינו נכנס לקטע הקריטי כלל. מנגנון מנעול תקין צריך לאפשר לחוט אחר לתפוס את המנעול אם החוט הנוכחי אינו זקוק לו, אחרת נוצר מצב של deadlock."
+    }
+  }
+}

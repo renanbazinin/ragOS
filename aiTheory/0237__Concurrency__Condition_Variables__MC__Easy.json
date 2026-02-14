@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Condition Variables",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:51:21",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      11,
+      14
+    ],
+    "token_usage": {
+      "prompt_tokens": 1903,
+      "output_tokens": 459,
+      "total_tokens": 3762
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Condition Variables"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהו התפקיד העיקרי של משתנה תנאי (Condition Variable) בסנכרון בין תהליכונים (threads) במערכת הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. להגן על קטע קריטי מגישה בו-זמנית של מספר תהליכונים.",
+        "ב. לאפשר לתהליכונים להמתין עד שתנאי מסוים יתקיים, ורק אז להמשיך בביצוע.",
+        "ג. לספק מנגנון לספירה אטומית של משאבים משותפים.",
+        "ד. לאפשר תקשורת ישירה בין תהליכונים באמצעות העברת הודעות."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "משתנה תנאי (Condition Variable) משמש בעיקר כדי לאפשר לתהליכונים להמתין באופן יעיל עד שיתקיים תנאי מסוים, שעלול להשתנות על ידי תהליכון אחר. לדוגמה, חוט A יכול להמתין באמצעות פעולת `wait` עד שחוט B יסיים פעולה מסוימת ויאותת לו (signal) שהתנאי התקיים. זהו מנגנון בסיסי לפתרון בעיות סנכרון כמו בעיית יצרן/צרכן, כפי שמתואר בחומר ההרצאה. אפשרות א' מתארת את תפקידו של מנעול (mutex), אפשרות ג' מתארת סמפור (semaphore), ואפשרות ד' מתארת מנגנון אחר לתקשורת."
+    }
+  }
+}

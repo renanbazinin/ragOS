@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Disks",
+    "topic_hint": "RAID",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:44:27",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      18,
+      19
+    ],
+    "token_usage": {
+      "prompt_tokens": 1982,
+      "output_tokens": 238,
+      "total_tokens": 3172
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Disks",
+    "topic": [
+      "RAID"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "על פי חומר ההרצאה, איזו רמת RAID נחשבת לעדיפה באופן מוחלט על RAID-4?",
+      "code_snippet": null,
+      "options": [
+        "א. RAID-0",
+        "ב. RAID-1",
+        "ג. RAID-5",
+        "ד. JBOD"
+      ]
+    },
+    "solution": {
+      "correct_option": "ג",
+      "explanation": "חומר ההרצאה מציין במפורש כי 'RAID-5 is strictly better than RAID-4' וכי 'אין סיבה להשתמש ב-raid-4'. קביעות אלו מבהירות ש-RAID-5 עדיף על RAID-4."
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Journaling",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:21:53",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      21
+    ],
+    "token_usage": {
+      "prompt_tokens": 1706,
+      "output_tokens": 505,
+      "total_tokens": 3063
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Journaling"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "בהקשר של מערכות קבצים מבוססות יומן (Journaling), מהי ההגדרה הנכונה ל'נקודת ביקורת' (checkpoint)?",
+      "code_snippet": null,
+      "options": [
+        "א. הנקודה שבה ה-Txb נכתב לדיסק, המסמן את תחילת הטרנזקציה.",
+        "ב. הנקודה שבה כל הטרנזקציה (כולל נתונים ומטא-דאטה) נכתבה ליומן והדיסק אישר את הכתיבה הפיזית.",
+        "ג. הנקודה שבה המטא-דאטה נכתב למיקומו הסופי במערכת הקבצים.",
+        "ד. הנקודה שבה ה-journal superblock מתעדכן כדי לשחרר מקום ביומן."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "לפי חומר ההרצאה (chunk 26), 'נקודת ביקורת' (checkpoint) מוגדרת כנקודת הזמן שבה אנחנו יודעים בוודאות שהטרנזקציה שלנו נמצאת באופן מלא ב-journal, לאחר שקראנו ל-fsync וקיבלנו אישור מהדיסק שהנתונים נכתבו פיזית. אופציה ב' מתארת זאת במדויק. אופציה א' מתייחסת רק לתחילת הטרנזקציה (Txb), אופציה ג' מתארת שלב מאוחר יותר של כתיבת מטא-דאטה למיקום הסופי (שלב ה-Checkpoint ב-final protocol, אך לא הגדרת ה-checkpoint כפי שהוצגה בהקשר זה), ואופציה ד' מתייחסת לניהול מקום ביומן באמצעות ה-journal superblock, שהינו תהליך שונה."
+    }
+  }
+}

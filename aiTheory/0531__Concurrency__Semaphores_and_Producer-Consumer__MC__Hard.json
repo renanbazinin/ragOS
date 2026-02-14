@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Producer-Consumer",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-14 19:03:08",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      14
+    ],
+    "token_usage": {
+      "prompt_tokens": 1809,
+      "output_tokens": 910,
+      "total_tokens": 5563
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Semaphores and Producer-Consumer"
+    ],
+    "difficulty_estimation": "Hard",
+    "content": {
+      "text": "בבעיית היצרן-צרכן (bounded buffer) עם מספר יצרנים וצרכנים המשתמשים בסמפורים `empty` ו-`full` לסנכרון, מהי התוצאה הסבירה והקריטית ביותר אם הסמפור `empty` יאותחל ל-0 והסמפור `full` יאותחל לערך המקסימלי (MAX) של הבאפר?",
+      "code_snippet": "```c\n// Initialization as per lecture material:\n// sem_t empty, full;\n// sem_init(&empty, 0, MAX); // MAX empty slots initially\n// sem_init(&full, 0, 0);    // 0 full slots initially\n\n// Producer's logic (simplified):\n// sem_wait(&empty); // Decrement empty count (wait for free slot)\n// // Add item to buffer\n// sem_post(&full);  // Increment full count (signal item added)\n\n// Consumer's logic (simplified):\n// sem_wait(&full);  // Decrement full count (wait for item)\n// // Remove item from buffer\n// sem_post(&empty); // Increment empty count (signal slot freed)\n```",
+      "options": [
+        "א. יצרנים יחסמו מיד (לא יוכלו להוסיף פריטים), בעוד שצרכנים ינסו לגשת לבאפר ריק.",
+        "ב. צרכנים יחסמו מיד (לא יוכלו לצרוך פריטים), בעוד שיצרנים ימלאו את הבאפר ללא הגבלה.",
+        "ג. גם יצרנים וגם צרכנים יכנסו למצב קיפאון (deadlock) באופן מיידי.",
+        "ד. המערכת תתפקד נכון בתחילה אך תסבול מתנאי מרוץ (race conditions) כאשר הבאפר יתמלא או יתרוקן."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "הסמפור `empty` מייצג את מספר המקומות הפנויים בבאפר, ובתחילת העבודה, כאשר הבאפר ריק, הוא מאותחל ל-MAX (מספר המקומות הכולל). הסמפור `full` מייצג את מספר המקומות המלאים בבאפר, ובתחילה הוא מאותחל ל-0. \n\nאם `empty` יאותחל ל-0 במקום ל-MAX, כל יצרן שינסה להוסיף פריט לבאפר (באמצעות `sem_wait(&empty)`) יחסם מיד, מכיוון שערך הסמפור הוא 0, מה שמעיד לכאורה שאין מקומות פנויים. \n\nאם `full` יאותחל ל-MAX במקום ל-0, כל צרכן שינסה לצרוך פריט (באמצעות `sem_wait(&full)`) יצליח מיד, מכיוון שערך הסמפור הוא MAX, מה שמעיד לכאורה שהבאפר מלא. כתוצאה מכך, הצרכנים ינסו לגשת למקומות בבאפר שאינם מכילים פריטים תקפים (כי הבאפר ריק בפועל), מה שיוביל לשגיאות לוגיות, קריסה או התנהגות בלתי צפויה. \n\nלכן, התוצאה הקריטית ביותר היא יצרנים שיחסמו מיד וצרכנים שינסו לגשת לבאפר ריק."
+    }
+  }
+}

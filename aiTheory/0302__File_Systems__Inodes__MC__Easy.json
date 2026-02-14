@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Inodes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:07:14",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      20,
+      22
+    ],
+    "token_usage": {
+      "prompt_tokens": 1834,
+      "output_tokens": 357,
+      "total_tokens": 3730
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Inodes"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "איזה מן הפרטים הבאים אינו נשמר בדרך כלל בתוך ה-inode עצמו, אלא במבנה נתונים אחר במערכת הקבצים?",
+      "code_snippet": null,
+      "options": [
+        "א. גודל הקובץ",
+        "ב. הרשאות הגישה לקובץ",
+        "ג. סוג הקובץ",
+        "ד. שם הקובץ"
+      ]
+    },
+    "solution": {
+      "correct_option": "ד",
+      "explanation": "ה-inode מכיל מטא-נתונים חיוניים על הקובץ, כגון סוג הקובץ, גודלו, הרשאות הגישה אליו, ומיקום בלוקי הנתונים שלו בדיסק, כפי שצוין בחומר ההרצאה: \"inode: סוג, גודל, הרשאות גישה, איפה המידע שלו נמצא ועוד..\". לעומת זאת, שם הקובץ אינו נשמר בתוך ה-inode עצמו. שמות קבצים נשמרים בדרך כלל בתוך רשומות ספרייה (directory entries), אשר מקשרות את השם למספר ה-inode המתאים."
+    }
+  }
+}

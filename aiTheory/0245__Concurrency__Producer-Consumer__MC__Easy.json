@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Producer-Consumer",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:53:34",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      14
+    ],
+    "token_usage": {
+      "prompt_tokens": 1516,
+      "output_tokens": 463,
+      "total_tokens": 3297
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Producer-Consumer"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מתי חוט צרכן (Consumer) נכנס למצב המתנה (wait) בפתרון הנכון לבעיית היצרן-צרכן (Producer-Consumer) עם באפר חסום?",
+      "code_snippet": "Consumer:\n```c\nlock(&m1);\nwhile (count == 0)\n    wait(&empty, &m1);\nbaDuBop();\n--count;\nsignal(&full);\nunlock(&m1);\n```",
+      "options": [
+        "א. כאשר המחסן (buffer) מלא לחלוטין.",
+        "ב. כאשר המחסן (buffer) ריק לחלוטין.",
+        "ג. כאשר חוט יצרן (Producer) אחר תפוס בביצוע פעולה.",
+        "ד. כאשר חוט צרכן (Consumer) אחר מחזיק את המנעול (lock)."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "התשובה הנכונה היא ב'. חוט צרכן ממתין כאשר המחסן (buffer) ריק לחלוטין (count == 0), כלומר אין פריטים לצרוך. מנגנון זה מונע מצרכנים לנסות לגשת לנתונים שאינם קיימים. חוט הצרכן ימתין על משתנה תנאי (condition variable) ייעודי (כמו `empty` בדוגמת הקוד), ויתעורר רק כאשר חוט יצרן יוסיף פריט למחסן וישלח סיגנל. דוגמת הקוד המצורפת מדגימה זאת במפורש בשורה `while (count == 0) wait(&empty, &m1);`."
+    }
+  }
+}

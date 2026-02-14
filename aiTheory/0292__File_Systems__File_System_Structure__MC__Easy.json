@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "File System Structure",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:05:00",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      20,
+      21
+    ],
+    "token_usage": {
+      "prompt_tokens": 1825,
+      "output_tokens": 448,
+      "total_tokens": 4088
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "File System Structure"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהו תפקידו העיקרי של ה-inode במערכת קבצים?",
+      "code_snippet": null,
+      "options": [
+        "א. לאחסן מטא-דאטה אודות קובץ או תיקייה, כגון סוג, הרשאות ומיקומי בלוקי הנתונים שלו.",
+        "ב. לאחסן את שם הקובץ ואת תוכן הקובץ עצמו.",
+        "ג. לשמור רשימה מקושרת של כל הקבצים הקיימים במערכת הקבצים.",
+        "ד. לשמש כ-cache מהיר לגישה לנתונים הנפוצים ביותר."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "על פי חומר ההרצאה, inode הוא אזור מסוים בדיסק שמכיל את ה-metadata, כלומר את כל המידע על הקבצים. המידע המפורט שנשמר ב-inode כולל: סוג (קובץ/תיקייה), UID, הרשאות (rwx), גודל, בלוקי נתונים (Data blocks), זמני גישה/יצירה וספירת קישורים. לכן, תפקידו העיקרי הוא לאחסן מטא-דאטה קריטי אודות קבצים ותיקיות, כולל הפניות למיקומי הנתונים הפיזיים שלהם בדיסק. אפשרויות ב', ג' ו-ד' אינן מתארות נכונה את תפקידו או תוכנו של ה-inode על פי החומר."
+    }
+  }
+}

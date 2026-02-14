@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Ticket Locks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 17:42:39",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      16,
+      11,
+      13
+    ],
+    "token_usage": {
+      "prompt_tokens": 2333,
+      "output_tokens": 654,
+      "total_tokens": 5901
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Ticket Locks"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "על פי חומר ההרצאה, מהו היתרון המרכזי שמנעול Ticket Lock מציע בהשוואה למנעולים פשוטים יותר שאינם מנעולי תור, כגון מנעול המבוסס על TestAndSet?",
+      "code_snippet": null,
+      "options": [
+        "א. הוא מבטיח מניעה הדדית (Mutual Exclusion) בין חוטים בקטע הקריטי.",
+        "ב. הוא מספק הוגנות (Fairness) ומונע הרעבה (Starvation Freedom) על ידי הקצאת תור.",
+        "ג. הוא מפחית באופן משמעותי את עומס ה-BUS ואת ה-cache invalidations בזמן המתנה למנעול.",
+        "ד. הוא מבטיח חופש מקיפאון (Deadlock Freedom) בכל מצב אפשרי של תזמון."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "התשובה הנכונה היא ב'. חומר ההרצאה מציין במפורש: 'נראה רעיון למנעול שיש בו הוגנות: TICKET LOCK:'. מנעול ה-Ticket Lock תוכנן במיוחד כדי לפתור את בעיית ההוגנות והרעבה, אשר אינן מובטחות במנעולים פשוטים יותר כמו TestAndSet. הוא עושה זאת על ידי הקצאת מספר תור (ticket) לכל חוט המבקש את המנעול, ושמירה על משתנה 'turn' שקובע איזה חוט מורשה להיכנס לקטע הקריטי. חוטים ממתינים בלולאה עד שמספר התור שלהם תואם את ערך ה-'turn', ובכך מבטיחים כניסה מסודרת והוגנת לקטע הקריטי לפי סדר בקשתם. אפשרויות א' ו-ד' (מניעה הדדית וחופש מקיפאון) הן תכונות בסיסיות הנדרשות מכל מנעול נכון, וקיימות גם במנעולים כמו TestAndSet (כפי שצוין בחומר ההרצאה), ולכן אינן היתרון המרכזי המבדיל של Ticket Lock. אפשרות ג' (הפחתת עומס על ה-BUS) היא יתרון כללי יותר של 'מנעולי תור' אך לא מודגשת כמאפיין ייחודי של מנגנון ה-Ticket Lock הספציפי בחומר, אשר מתמקד בהוגנות."
+    }
+  }
+}

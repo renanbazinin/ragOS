@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Disks",
+    "topic_hint": "Sequential vs Random Access",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 18:39:31",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      17,
+      18,
+      19
+    ],
+    "token_usage": {
+      "prompt_tokens": 2093,
+      "output_tokens": 638,
+      "total_tokens": 5397
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Disks",
+    "topic": [
+      "Sequential vs Random Access"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "מהו הגורם העיקרי להבדל בביצועים בין גישה סדרתית (Sequential Access) לגישה אקראית (Random Access) לדיסק קשיח?",
+      "code_snippet": null,
+      "options": [
+        "א. גישה סדרתית מפחיתה באופן משמעותי את הצורך בתנועת ראש הקריאה/כתיבה (seek time) וזמן ההמתנה לסיבוב הדיסק (rotational latency), שהם המרכיבים הדומיננטיים בזמן ה-I/O.",
+        "ב. בגישה סדרתית, הדיסק יכול להעביר יותר מידע בכל פעולת העברה (transfer time), מה שמגדיל את קצב ה-I/O.",
+        "ג. בגישה אקראית, מערכת ההפעלה אינה יכולה ליישם אלגוריתמי תזמון יעילים כמו Shortest Seek Time First (SSTF) ולכן הביצועים יורדים.",
+        "ד. גישה סדרתית מאפשרת ניצול מקבילי של מספר דיסקים במערכי RAID, בעוד שגישה אקראית אינה מאפשרת זאת."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "החומר המצוין בשיעור מבהיר כי זמן ה-I/O לדיסק מורכב בעיקר מזמן תנועת ראש הקריאה/כתיבה (seek time) וזמן ההמתנה לסיבוב הדיסק (rotational latency), כאשר זמן העברת המידע (transfer time) נחשב זניח. גישה סדרתית מאפשרת לקרוא או לכתוב בלוקים רציפים של נתונים תוך מזעור תנועות הראש וזמני ההמתנה לסיבוב, ובכך מפחיתה באופן דרמטי את המרכיבים הדומיננטיים בזמן ה-I/O. לעומת זאת, גישה אקראית דורשת תנועות ראש תכופות וזמני המתנה ארוכים יותר עבור כל פעולת קריאה/כתיבה, מה שמפחית את הביצועים הכוללים. לכן, הפחתת זמני ה-seek וה-rotation היא הסיבה העיקרית לביצועים העדיפים של גישה סדרתית."
+    }
+  }
+}

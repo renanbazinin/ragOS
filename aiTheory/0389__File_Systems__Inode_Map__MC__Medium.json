@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Inode Map",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 18:27:20",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      22
+    ],
+    "token_usage": {
+      "prompt_tokens": 1897,
+      "output_tokens": 627,
+      "total_tokens": 4609
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Inode Map"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "מהו המאפיין העיקרי של ה-Inode Map (imap) במערכת קבצים המתוארת, וכיצד הוא מאותר לאחר אתחול המערכת?",
+      "code_snippet": null,
+      "options": [
+        "א. ה-imap הוא מבנה יחיד וקבוע במיקומו הפיזי בדיסק, וה-CR (Checkpoint Region) מצביע אליו ישירות.",
+        "ב. ה-imap מורכב מחלקים הכתובים לדיסק במיקומים משתנים יחד עם עדכוני סגמנטים. ה-CR, הממוקם בנקודה קבועה, מכיל מצביעים לגרסאות העדכניות של כל חלקי ה-imap.",
+        "ג. ה-imap נשמר כולו בזיכרון הפעיל בלבד ואינו נכתב לדיסק כלל, ולכן נבנה מחדש מאפס בכל אתחול.",
+        "ד. ה-imap הוא מבנה היררכי קבוע המכיל הפניות לכל ה-inodes במערכת, ורק ה-CR מתעדכן כדי לשקף שינויים בגרסאות ה-inodes."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "החומר המצורף מציין כי ה-imap מחולק לחלקים ('מדובר על imap אחד שמחולק לחלקים'). חלקים אלו נכתבים לדיסק יחד עם הסגמנטים המעודכנים ('כל סגמנט שאנחנו מעדכנים – כותבים את החלק/החלקים הרלוונטיים שהתעדכנו ב-imap'), מה שמרמז על מיקומים פיזיים משתנים ('כי הוא גם כל הזמן מתעדכן ומשתנה'). כדי לאתר את ה-imap לאחר אתחול, משתמשים ב-CR (Checkpoint Region) שנמצא במיקום קבוע ('ה-cr לא זז, הוא כל הזמן במיקום קבוע') ומכיל מצביעים לגרסאות העדכניות של כל חלקי ה-imap ('ה-CR ... יצביע לגרסה העדכנית ביותר של ה-imap. אם יש כמה חלקים ל-imap אז יהיו בו מצביעים לגרסה העדכנית של כל חלק'). לכן, אפשרות ב' היא הנכונה ביותר."
+    }
+  }
+}

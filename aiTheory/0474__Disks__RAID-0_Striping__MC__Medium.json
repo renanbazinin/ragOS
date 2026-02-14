@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Disks",
+    "topic_hint": "RAID-0 Striping",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 18:48:14",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      18,
+      19
+    ],
+    "token_usage": {
+      "prompt_tokens": 2045,
+      "output_tokens": 476,
+      "total_tokens": 4189
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Disks",
+    "topic": [
+      "RAID-0 Striping"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "מהי הסיבה העיקרית לשיפור הביצועים במערך RAID-0 (striping) עבור פעולות קריאה/כתיבה סדרתיות?",
+      "code_snippet": null,
+      "options": [
+        "א. פיזור סקטורים לסירוגין בין דיסקים פיזיים מאפשר ניצול מקבילי של הדיסקים.",
+        "ב. שכפול נתונים על פני מספר דיסקים מפחית את זמן האחזור בקריאה.",
+        "ג. שימוש בזיכרון מטמון (cache) גדול יותר עבור נתוני הדיסק.",
+        "ד. פישוט מבנה מערכת הקבצים על ידי איחוד דיסקים לוגיים."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "החומר המצורף מציין במפורש כי טכניקת ה-striping ב-RAID-0 נועדה לשפר ביצועים על ידי חלוקת סקטורים לסירוגין בין דיסקים פיזיים. הרעיון הוא שרוב פעולות הדיסק הן סדרתיות, וכאשר יש צורך לקרוא מספר סקטורים ברצף, ניתן לנצל את הדיסקים במקביל, מה שגורם להגברת הביצועים. אפשרות ב' מתארת mirroring (RAID-1), שאינו המנגנון של RAID-0. אפשרויות ג' ו-ד' אינן הסיבה העיקרית והספציפית לשיפור הביצועים ב-RAID-0 כפי שתואר בחומר, אשר מתמקד בניצול מקבילי של הדיסקים."
+    }
+  }
+}

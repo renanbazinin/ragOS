@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Atomic Operations",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:48:20",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      11,
+      13,
+      14
+    ],
+    "token_usage": {
+      "prompt_tokens": 1793,
+      "output_tokens": 642,
+      "total_tokens": 4743
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Atomic Operations"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהי התכונה המרכזית של פעולה אטומית במערכות הפעלה?",
+      "code_snippet": "int TestAndSet(int* old_ptr, int new) {\n  int old = *old_ptr;\n  *old_ptr = new;\n  return old;\n}",
+      "options": [
+        "א. היא תמיד מבוצעת מהר יותר מפעולה לא אטומית.",
+        "ב. היא מבוצעת במלואה ללא אפשרות להפרעה מצד רכיבים אחרים של המערכת.",
+        "ג. היא דורשת שימוש במנעולים (mutexes) כדי להבטיח את שלמותה.",
+        "ד. היא יכולה להתבצע באופן חלקי אם המערכת נכנסת למצב עומס גבוה."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "החומר המצוין בשיעור 11 (chunk 38) מתאר פעולות אטומיות כ'פעולות חומרה שיש במעבד, שבבת אחת עושות כמה פעולות' ומציין כי פעולה כמו `__sync_fetch_and_add` 'מתבצע בפקודה אחת (במקום 3)'. בנוסף, בשיעור 11 (chunk 40), הפקודה `TestAndSet` מתוארת ככזו ש'עושה את קטע הקוד הזה באופן אטומי בבת אחת'. הגדרות אלו מדגישות כי פעולה אטומית היא יחידה בלתי ניתנת לחלוקה, המבוצעת במלואה ללא הפרעה חיצונית. לכן, אפשרות ב' ('היא מבוצעת במלואה ללא אפשרות להפרעה מצד רכיבים אחרים של המערכת') היא הנכונה ביותר. אפשרות א' אינה נכונה, שכן החומר (שיעור 11, chunk 40) מציין כי פעולות אטומיות אינן תמיד יעילות יותר. אפשרות ג' מתארת אמצעי להשגת אטומיות עבור קטעי קוד גדולים יותר (כפי שמוצג בשיעור 14, chunk 42), אך לא את התכונה המהותית של פעולה אטומית עצמה. אפשרות ד' סותרת ישירות את עקרון האטומיות."
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Context Switching and Processes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:58:23",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      2,
+      6
+    ],
+    "token_usage": {
+      "prompt_tokens": 2014,
+      "output_tokens": 629,
+      "total_tokens": 5315
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Context Switching and Processes"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהי המטרה העיקרית של מנגנון ה-Context Switch (החלפת הקשר) במערכת הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. לאפשר למספר תהליכים לחלוק את המעבד וליצור אשליה של מקביליות.",
+        "ב. להעביר את השליטה במעבד ממצב משתמש למצב ליבה לצורך ביצוע פעולות מורשות.",
+        "ג. לשמור את כל תוכן הזיכרון של תהליך שהוקפא על הדיסק הקשיח.",
+        "ד. לעדכן את רגיסטרי ה-Base וה-Bounds במעבד כדי לאפשר גישה לזיכרון וירטואלי."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "מנגנון ה-Context Switch (החלפת הקשר) מתואר בחומר כדרך שבה מערכת ההפעלה מוציאה תהליך אחד מהמעבד וטוענת תהליך חדש במקומו (Lecture 2, chunk 16). מטרתו העיקרית היא לאפשר למספר תהליכים לרוץ על מעבד יחיד על ידי החלפה מהירה ביניהם, ובכך ליצור אשליה של מקביליות (Lecture 2, chunk 16: 'כי אז תיעלם האשליה של המקביליות'). אפשרות ב' מתארת מעבר מצב (mode switch) אשר יכול להיות חלק מאירוע שגורם ל-context switch (לדוגמה, system call או פסיקת שעון, Lecture 2, chunks 24 ו-32), אך אינה המטרה העיקרית של ה-context switch עצמו. אפשרות ג' אינה מדויקת; ה-context switch שומר את מצב התהליך (כולל רגיסטרים, מיקומי זיכרון, קבצים פתוחים - Lecture 2, chunk 20) ולא בהכרח את כל תוכן הזיכרון על הדיסק. אפשרות ד' היא פעולה ספציפית שמתרחשת במהלך context switch הקשורה לניהול זיכרון (עדכון רגיסטרי Base&Bounds, Lecture 6, chunk 15), אך זו אינה המטרה הכוללת והעיקרית של המנגנון כולו."
+    }
+  }
+}

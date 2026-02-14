@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Synchronization",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-14 17:37:16",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      10,
+      11,
+      13,
+      15
+    ],
+    "token_usage": {
+      "prompt_tokens": 2007,
+      "output_tokens": 930,
+      "total_tokens": 7679
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Synchronization"
+    ],
+    "difficulty_estimation": "Hard",
+    "content": {
+      "text": "בהתייחס לבעיית \"אובדן אות\" (Lost Signal) עם משתני תנאי (Condition Variables), כפי שהוצגה בחומר הלימוד, התרחיש הבעייתי מתואר כך:\n```c\nThread A\nlock(&m1);\n// wait for mmmBop\nif (!done)\n  wait(&cv1, &m1);\nbaDuBop();\nunlock(&m1);\n\nThread B\nmmmBop();\ndone = 1;\nsignal(&cv1);\nLost signal\n```\nמהי ההשלכה המרכזית של מצב זה, וכיצד הפתרון המוצע בחומר הלימוד מונע אותה?",
+      "code_snippet": "Thread A\nlock(&m1);\n// wait for mmmBop\nif (!done)\n  wait(&cv1, &m1);\nbaDuBop();\nunlock(&m1);\n\nThread B\nmmmBop();\ndone = 1;\nsignal(&cv1);\nLost signal",
+      "options": [
+        "א. ההשלכה המרכזית היא ש-Thread A ייכנס למצב של המתנה אינסופית, והפתרון הוא לוודא שגם Thread B יתפוס וישחרר את המנעול (lock) סביב עדכון משתנה התנאי והאיתות.",
+        "ב. ההשלכה המרכזית היא \"הרעבה\" (starvation) של Thread A, והפתרון הוא שימוש במנגנון lock-free המאפשר התקדמות כוללת של המערכת.",
+        "ג. ההשלכה המרכזית היא פגיעה ב-cache affinity עקב מיתוגי הקשר תכופים, והפתרון הוא יישום אלגוריתם תזמון המעדיף ריצת חוטים על אותו מעבד.",
+        "ד. ההשלכה המרכזית היא כתיבת נתונים שגויה למשאב משותף (race condition), והפתרון הוא שימוש במנעול גלובלי יחיד לכל המשאבים המשותפים במערכת."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "החומר המצורף מתאר את בעיית ה-Lost Signal: כאשר Thread A בודק את `done` ומוצא אותו שקר, הוא מתכוון לקרוא ל-`wait`. אם מתבצע מיתוג הקשר (context switch) ל-Thread B לפני ש-Thread A הספיק לקרוא ל-`wait`, ו-Thread B מסיים את עבודתו (מגדיר `done = 1`) ומשגר אות (signal), האות אובד מכיוון שאף אחד לא ממתין לו. כאשר Thread A חוזר לרוץ, הוא קורא ל-`wait` ונכנס למצב של המתנה אינסופית, כיוון שהאות שכבר שוגר לא יגיע אליו. הפתרון לבעיה זו, כפי שמצוין בחומר הלימוד, הוא \"שימוש במנעול גם בצד השני\" – כלומר, גם Thread B חייב לתפוס את אותו המנעול (`m1`) לפני שהוא מעדכן את `done` ומשגר את ה-`signal`. פעולה זו מבטיחה שגישה למשתנה התנאי `done` וקריאות ל-`wait`/`signal` יהיו אטומיות, ומונעת את מיתוג הקשר בנקודה קריטית שיכולה לגרום לאובדן האות. לכן, אפשרות א' מתארת נכונה את ההשלכה המרכזית ואת הפתרון המוצע."
+    }
+  }
+}

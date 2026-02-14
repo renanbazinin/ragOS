@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Starvation",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 18:03:06",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      16,
+      13
+    ],
+    "token_usage": {
+      "prompt_tokens": 1782,
+      "output_tokens": 456,
+      "total_tokens": 3630
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Starvation"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "מהי ההבחנה הנכונה בין הרעבה (Starvation) לקיפאון (Deadlock) במערכת הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. אם יש הרעבה במערכת, בהכרח יש גם קיפאון.",
+        "ב. אם יש קיפאון במערכת, בהכרח יש גם הרעבה.",
+        "ג. הרעבה מתרחשת כאשר חוט אחד חסום ואינו מתקדם, בזמן שחוטים אחרים ממשיכים להתקדם, בעוד קיפאון הוא מצב שבו כל החוטים המעורבים חסומים ואינם יכולים להתקדם.",
+        "ד. הרעבה וקיפאון הם מונחים שונים המתארים את אותו סוג של בעיית סנכרון."
+      ]
+    },
+    "solution": {
+      "correct_option": "ג",
+      "explanation": "על פי חומר ההרצאה, הרעבה מוגדרת כמצב שבו 'תהליך (חוט) שחסום בזמן שחוטים אחרים מתקדמים'. לעומת זאת, קיפאון הוא מצב שבו 'אף חוט לא מתקדם', כלומר כולם חסומים. הטענות בחומר ההרצאה מבהירות כי אם יש הרעבה, לא בהכרח יש קיפאון (כי לא כולם חסומים), ואם יש קיפאון, לא בהכרח יש הרעבה (כי בקיפאון כולם חסומים, ולא רק אחד בזמן שאחרים מתקדמים). לכן, אפשרות ג' מתארת נכונה את ההבחנה בין שני המצבים."
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Data Blocks and Bitmaps",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 18:11:17",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      20,
+      21
+    ],
+    "token_usage": {
+      "prompt_tokens": 1783,
+      "output_tokens": 588,
+      "total_tokens": 4179
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Data Blocks and Bitmaps"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "במערכת קבצים המשתמשת במנגנון bitmap לניהול בלוקי נתונים (data blocks), איזו בעיה עלולה להתרחש אם המערכת קורסת לאחר שבלוק נתונים וביט המפה שלו (data bitmap) עודכנו בהצלחה, אך לפני שה-inode המתאים עודכן להצביע לבלוק זה?",
+      "code_snippet": null,
+      "options": [
+        "א. ה-inode bitmap יסמן בטעות inode כתפוס, למרות שאין לו בלוקי נתונים משויכים.",
+        "ב. בלוק הנתונים יישאר מסומן כפנוי ב-data bitmap, למרות שהוא מכיל נתונים.",
+        "ג. ייווצר \"ליג' זיכרון\" (memory leak) – בלוק נתונים יהיה מסומן כתפוס ב-data bitmap אך אף inode לא יצביע אליו.",
+        "ד. המערכת תתקן אוטומטית את חוסר העקביות בעת העלייה מחדש, מכיוון שה-inode bitmap עדיין תקין."
+      ]
+    },
+    "solution": {
+      "correct_option": "ג",
+      "explanation": "על פי חומר ההרצאה, ב-Lecture 21 (chunk 12), תחת סעיף (iii) נכתב: \"נניח וקרסנו לאחר עדכון ה-data block וה-data bitmap – הבעיה שתהיה כאן היא ליג' זיכרון. כלומר יש בלוק דאטה עם נתונים, שמעודכן שהוא תפוס, אך אף אחד לא מצביע אליו.\" מצב זה מתאר בדיוק את הבעיה המוצגת באפשרות ג'. אפשרות א' מתארת בעיה הקשורה ל-inode bitmap ולא לתרחיש הספציפי. אפשרות ב' מתארת תרחיש קריסה אחר (סעיף ii בחומר ההרצאה), שבו ה-data bitmap עדיין מסמן את הבלוק כפנוי. אפשרות ד' אינה נכונה מכיוון שחומר ההרצאה מתאר את הבעיה ולא פתרון אוטומטי מיידי."
+    }
+  }
+}

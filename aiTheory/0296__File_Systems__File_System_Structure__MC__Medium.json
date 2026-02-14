@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "File System Structure",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 18:05:50",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      20,
+      21
+    ],
+    "token_usage": {
+      "prompt_tokens": 1825,
+      "output_tokens": 475,
+      "total_tokens": 3946
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "File System Structure"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "מהו התפקיד העיקרי של ה-inode במערכת קבצים, כפי שתואר בחומר הלימוד?",
+      "code_snippet": null,
+      "options": [
+        "א. לאחסן את התוכן בפועל של הקובץ (כלומר, את הנתונים).",
+        "ב. לשמש כמבנה נתונים על הדיסק המכיל את כל המטא-דאטה של הקובץ, כגון הרשאות, גודל ומצביעים לבלוקי הנתונים.",
+        "ג. לתעד את רשימת הקבצים הפנויים במערכת הקבצים.",
+        "ד. לשמש כ-cache בזיכרון עבור גישות מהירות לנתוני קבצים שבהם נעשה שימוש תכוף."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "החומר מציין במפורש כי ה-inode הוא \"איזור מסוים בדיסק שיכיל את ה-metadata, כלומר את כל המידע על הקבצים\". הוא מכיל פרטים כמו סוג הקובץ, בעלים, הרשאות (rwx), גודל, זמני גישה ויצירה, וחשוב מכך, מצביעים לבלוקי הנתונים של הקובץ. תפקידו הוא לאפשר למערכת הקבצים לאתר ולנהל את המידע אודות קובץ מסוים, בניגוד לתוכן הקובץ עצמו (אשר מאוחסן בבלוקי הנתונים שאליהם ה-inode מפנה). אפשרויות א, ג ו-ד אינן מתארות את תפקידו המוגדר של ה-inode בחומר הלימוד."
+    }
+  }
+}

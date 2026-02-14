@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Producer-Consumer",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 17:54:37",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      14
+    ],
+    "token_usage": {
+      "prompt_tokens": 1516,
+      "output_tokens": 918,
+      "total_tokens": 4695
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Producer-Consumer"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "בפתרון בעיית היצרן-צרכן (bounded buffer) באמצעות משתני תנאי (condition variables), מדוע שימוש במשתנה תנאי יחיד (לדוגמה, `cv1`) עלול להוביל למצב של קיפאון (deadlock)?",
+      "code_snippet": "Producer:\n```c\nlock(&m1);\nmmmBop();\nwhile (count < MAX)\n    wait(&cv1, &m1);\n++count;\nsignal(&cv1);\nunlock(&m1);\n```\n\nConsumer:\n```c\nlock(&m1);\nwhile (count == 0)\n    wait(&cv1, &m1);\nbaDuBop();\n--count;\nsignal(&cv1);\nunlock(&m1);\n```",
+      "options": [
+        "א. מכיוון ש-`signal(&cv1)` מעיר חוט באופן אקראי, וייתכן שיצרן ינסה להעיר צרכן, אך במקום זאת יתעורר יצרן אחר שכבר חסום (או להיפך), מה שמונע התקדמות.",
+        "ב. מכיוון ש-`wait()` עם משתנה תנאי יחיד אינו משחרר את המנעול, ובכך חוסם גישה של חוטים אחרים.",
+        "ג. מכיוון שהמונה `count` אינו מעודכן באופן אטומי כאשר משתמשים במשתנה תנאי יחיד, מה שגורם לחוסר עקביות בנתונים.",
+        "ד. מכיוון שקריאות ל-`signal()` אינן נשמרות בתור, ולכן אם אין חוטים ממתינים, הסיגנל אובד."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "התשובה הנכונה היא א'. כפי שמוסבר בחומר ההרצאה (Lecture 14, chunk 11), כאשר משתמשים במשתנה תנאי יחיד (`cv1`) לניהול הן של מצב \"מאגר ריק\" והן של מצב \"מאגר מלא\", קריאה ל-`signal(&cv1)` מעירה חוט אחד מתוך כלל החוטים הממתינים על `cv1`. הבעיה היא שהמערכת אינה מבחינה האם החוט שהתעורר הוא יצרן או צרכן. לדוגמה, אם צרכן מסיים לצרוך פריט ומשחרר מקום במאגר, הוא אמור להעיר יצרן. אך אם במקרה ישנם רק צרכנים הממתינים על `cv1` (כי המאגר היה ריק), הסיגנל עלול להעיר צרכן אחר שעדיין אינו יכול להתקדם (כי המאגר עדיין ריק או כבר רוקן), בעוד שהיצרנים ממתינים על `cv1` למקרה שהמאגר יהיה מלא. במצב כזה, יצרנים יכולים להיות חסומים (כי הם חושבים שהמאגר מלא ואין מקום) וצרכנים יכולים להיות חסומים (כי הם חושבים שהמאגר ריק ואין פריטים), מה שמוביל לקיפאון כפי שמודגם ב-Lecture 14, chunk 12: \"Deadlock\". הפתרון הנכון הוא להשתמש בשני משתני תנאי נפרדים: `full` עבור יצרנים ו-`empty` עבור צרכנים, כפי שמוצג ב-Lecture 14, chunk 14."
+    }
+  }
+}

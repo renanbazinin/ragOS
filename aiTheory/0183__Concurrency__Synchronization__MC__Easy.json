@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Synchronization",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:36:05",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      10,
+      11,
+      13,
+      15
+    ],
+    "token_usage": {
+      "prompt_tokens": 2007,
+      "output_tokens": 596,
+      "total_tokens": 4486
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Synchronization"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "על פי חומר ההרצאה, איזו בעיה קלאסית של סינכרון מתוארת כאשר שני חוטים (threads) ניגשים למשאב משותף (כמו המשתנה `next` בדוגמה) ומפריעים אחד לשני בקוד, מה שעלול להוביל לכתיבת נתונים שגויה?",
+      "code_snippet": "Thread A\nmy_slot_A = next;\narr[my_slot_A] = value_A;\nnext = next+ 1;\n\nThread B\nmy_slot_B = next;\narr[my_slot_B] = value_B;\nnext = next+ 1;",
+      "options": [
+        "א. מצב מרוץ (Race Condition)",
+        "ב. הרעבה (Starvation)",
+        "ג. מבוי סתום (Deadlock)",
+        "ד. זיקת מטמון (Cache Affinity)"
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "הבעיה המתוארת בחומר ההרצאה, שבה שני חוטים ניגשים למשאב משותף (`next` ו-`arr`) באופן לא מתואם ופעולותיהם משתלבות זו בזו באופן לא צפוי, נקראת 'מצב מרוץ' (Race Condition). מצב זה מוביל לכך שתוצאת הפעולה תלויה בסדר הספציפי שבו הפקודות מתבצעות, ועלולה לגרום לשגיאות כמו דריסת נתונים, כפי שמוסבר בדוגמה בה חוט A דורס את הערך שחוט B כתב. חומר ההרצאה מציין זאת במפורש כ\"בעיה קלאסית של סינכרון: שני חוטים שרוצים לגשת למשאב משותף אבל מפריעים אחד לשני בקוד\". הרעבה ומבוי סתום הן בעיות סינכרון אחרות אך אינן מתארות את המקרה הספציפי הזה של הפרעה בגישה לנתונים משותפים. זיקת מטמון קשורה לתזמון תהליכים וביצועים ולא לבעיית סינכרון של נתונים משותפים."
+    }
+  }
+}

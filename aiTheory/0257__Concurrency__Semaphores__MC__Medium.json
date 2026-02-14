@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 17:56:35",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      10,
+      14
+    ],
+    "token_usage": {
+      "prompt_tokens": 2016,
+      "output_tokens": 879,
+      "total_tokens": 5450
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Semaphores"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "בשימוש בסמפורים לצורך הגבלת כמות החוטים הרצים במקביל בקטע קוד מסוים (Thread Throttling), מסיבות של משאבי מערכת מוגבלים (לדוגמה, זיכרון), כיצד יש לאתחל את הסמפור ומהי מטרת פעולות ה-`sem_wait` וה-`sem_post` בהקשר זה?",
+      "code_snippet": "sem_t throttle_sem;\nsem_init(&throttle_sem, 0, max_concurrent_threads);\n// ...\n// Before entering resource-intensive section\nsem_wait(&throttle_sem);\n// ... resource-intensive code ...\n// After exiting resource-intensive section\nsem_post(&throttle_sem);",
+      "options": [
+        "א. יש לאתחל את הסמפור לערך המייצג את מספר החוטים המקסימלי המותרים במקביל. פעולת `sem_wait` מקטינה את ערך הסמפור ו'תופסת' מקום לחוט להיכנס לקטע הקוד, ופעולת `sem_post` מגדילה את ערך הסמפור ומשחררת 'מקום' לחוט אחר.",
+        "ב. יש לאתחל את הסמפור ל-1, בדומה לסמפור בינארי. פעולת `sem_wait` מבטיחה מניעה הדדית בקטע הקוד, ופעולת `sem_post` משחררת את המנעול.",
+        "ג. יש לאתחל את הסמפור ל-0. פעולת `sem_wait` ממתינה עד שחוט אחר יבצע `sem_post` כדי לאפשר המשך, ופעולת `sem_post` מאפשרת לחוט הבא להיכנס מיד.",
+        "ד. אין צורך לאתחל את הסמפור לערך ספציפי, מכיוון שמערכת ההפעלה מטפלת בכך אוטומטית. `sem_wait` ו-`sem_post` משמשות רק לסנכרון לוגי ואינן קשורות להגבלת משאבים פיזיים."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "החומר המצוין בשיעור קובע במפורש כי בשימוש בסמפורים להגבלת כמות החוטים בקטע קוד מסוים (Thread Throttling) מסיבות של משאבי מערכת מוגבלים (כגון זיכרון), יש לאתחל את הסמפור ל'כמות המקסימלית שאנחנו רוצים להחזיק במקביל'. כל חוט לפני כניסתו לקטע הקוד מבצע `sem_wait` (מקטין את ערך הסמפור ותופס 'מקום'), וכשהוא מסיים, הוא מבצע `sem_post` (מגדיל את ערך הסמפור ומשחרר 'מקום'). כך, מספר החוטים המקסימלי המורשים בקטע הקוד נשמר על פי ערך האתחול של הסמפור. אפשרות ב' מתארת שימוש בסמפור בינארי למניעה הדדית, אפשרות ג' מתארת אתחול שגוי ופעולות שגויות בהקשר זה, ואפשרות ד' שגויה לחלוטין לגבי הצורך באתחול וייעוד הסמפורים."
+    }
+  }
+}

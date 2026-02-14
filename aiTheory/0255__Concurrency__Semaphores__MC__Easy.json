@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:56:04",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      10,
+      14
+    ],
+    "token_usage": {
+      "prompt_tokens": 2016,
+      "output_tokens": 311,
+      "total_tokens": 3284
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Semaphores"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מה מציין סמפור בינארי שערכו 1?",
+      "code_snippet": null,
+      "options": [
+        "א. המנעול פנוי וניתן להיכנס לקטע הקריטי.",
+        "ב. המנעול תפוס ולא ניתן להיכנס לקטע הקריטי.",
+        "ג. ישנם שני חוטים הממתינים להיכנס לקטע הקריטי.",
+        "ד. הסמפור משמש לויסות כמות החוטים ולא למניעה הדדית."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "על פי חומר ההרצאה, סמפור בינארי שערכו 1 מייצג שהמנעול פנוי. כאשר המנעול פנוי, חוט יכול לבצע פעולת wait, להקטין את ערך הסמפור ל-0, ולהיכנס לקטע הקריטי. כאשר ערך הסמפור הוא 0, המנעול תפוס."
+    }
+  }
+}

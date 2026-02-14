@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Producer-Consumer",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 19:01:57",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      14
+    ],
+    "token_usage": {
+      "prompt_tokens": 1809,
+      "output_tokens": 419,
+      "total_tokens": 4006
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Semaphores and Producer-Consumer"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "בבעיית היצרן-צרכן (bounded buffer) הממומשת באמצעות סמפורים, מהם ערכי האתחול הנכונים עבור הסמפורים `full` ו-`empty`, בהינתן ש-`MAX` הוא גודל הבאפר המקסימלי?",
+      "code_snippet": null,
+      "options": [
+        "א. הסמפור full מאותחל ל-0, והסמפור empty מאותחל ל-MAX.",
+        "ב. הסמפור full מאותחל ל-MAX, והסמפור empty מאותחל ל-0.",
+        "ג. הסמפור full מאותחל ל-1, והסמפור empty מאותחל ל-MAX.",
+        "ד. הסמפור full מאותחל ל-MAX, והסמפור empty מאותחל ל-1."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "ההסבר מהחומר המצורף מציין במפורש: 'הסמפור full מייצג כמה מדפים מלאים, ובתור התחלה אף מדף לא מלא ולכן הוא מאותחל ל-0.' וכן: 'הסמפור empty לעומת זאת מייצג כמה מדפים פנויים יש לנו... ולכן בתור התחלה יש לנו MAX מדפים פנויים'. מכאן שהאפשרות הנכונה היא ש-full מאותחל ל-0 ו-empty מאותחל ל-MAX."
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions and Mutexes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 19:04:02",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      16,
+      11,
+      13
+    ],
+    "token_usage": {
+      "prompt_tokens": 2030,
+      "output_tokens": 603,
+      "total_tokens": 6276
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Race Conditions and Mutexes"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "על פי חומר ההרצאה, מנעול שבו שני חוטים (thread 0 ו-thread 1) יכולים להיכנס לקטע קריטי בו-זמנית, כפי שתואר בדוגמה שבה מנגנון ה-'turn' מוגדר כך ששני החוטים יוצאים מיד מלולאת ה-`while` ונכנסים לקטע הקריטי, אינו מקיים איזו תכונה חיונית של מנעולים?",
+      "code_snippet": null,
+      "options": [
+        "א. מניעה הדדית (Mutual Exclusion)",
+        "ב. חופש מקיפאון (Deadlock Freedom)",
+        "ג. הוגנות (Fairness)",
+        "ד. מניעת תחרות (Contention Avoidance)"
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "ההסבר בחומר ההרצאה (Lecture 16, chunk 8) קובע במפורש: \"מניעה הדדית פירושה: שני חוטים לא יכולים להיות בקטע הקריטי במקביל. אם זה לא מתקיים, זה אומר שייתכן ושני חוטים מחזיקים במנעול בו זמנית, כלומר שני חוטים נמצאים בקטע הקריטי במקביל.\" הדוגמה המתוארת, שבה חוט 0 וחוט 1 נכנסים לקטע הקריטי בו-זמנית עקב כשל במנגנון ה-`turn` של המנעול, מראה בדיוק מצב שבו תנאי המניעה ההדדית מופר. לכן, המנעול אינו מקיים מניעה הדדית. חופש מקיפאון (deadlock freedom) והוגנות (fairness) הן תכונות חשובות אחרות של מנעולים, אך הכשל הספציפי המתואר בדוגמה זו מתייחס ישירות להפרת המניעה ההדדית, שהיא תנאי בסיסי למניעת תנאי מרוץ (race conditions). מניעת תחרות היא אסטרטגיה לשיפור ביצועים (כמו במנעול עם Exponential Backoff), ולא תכונה בסיסית של נכונות המנעול כמו מניעה הדדית."
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Threads and Locks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-14 19:00:15",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      10,
+      11
+    ],
+    "token_usage": {
+      "prompt_tokens": 1789,
+      "output_tokens": 719,
+      "total_tokens": 5705
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Threads and Locks"
+    ],
+    "difficulty_estimation": "Hard",
+    "content": {
+      "text": "נתונה שיטת הסינכרון הבאה בין שני חוטים (A ו-B) לקטע קריטי:",
+      "code_snippet": "int turn = A; // A or B\n\n// Thread A\nwhile (turn != A)\n  ; // busy-wait\n// critical section\nturn = B;\n\n// Thread B\nwhile (turn != B)\n  ; // busy-wait\n// critical section\nturn = A;",
+      "options": [
+        "א. הוא עלול לגרום למצב של קיפאון (deadlock), שבו חוט B ממתין באופן אינסופי לקבל את התור, בעוד שחוט A, שאליו שייך התור, אינו נכנס לקטע הקריטי ולכן אינו משחרר אותו.",
+        "ב. המנגנון אינו מבטיח הדרה הדדית (mutual exclusion), מכיוון ששני החוטים עלולים לזהות את המשתנה `turn` כמתאים להם בו-זמנית.",
+        "ג. חוט A עלול לסבול מרעב (starvation) מכיוון שאם חוט B ירצה להיכנס לקטע הקריטי פעמים רבות ברצף, הוא ימנע מ-A את הגישה.",
+        "ד. המנגנון סובל מבעיית יעילות חמורה עקב המתנה פעילה (busy-waiting), אך הוא עדיין מבטיח נכונות (correctness) בהדרה הדדית ובהתקדמות."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "הסבר: מנגנון זה, המבוסס על משתנה 'תור' (`turn`), סובל מבעיית התקדמות (progress) חמורה. לפי חומר ההרצאה (Lecture 11, chunk 34), אם התור שייך לחוט A (כלומר `turn == A`), אך חוט A מבצע משימות אחרות ואינו מעוניין להיכנס לקטע הקריטי באותו רגע, חוט B ייכנס ללולאת המתנה פעילה (busy-wait) אינסופית. חוט B ימתין ש-`turn` יהפוך ל-B, אך זה לעולם לא יקרה מכיוון שחוט A לא נכנס לקטע הקריטי ולכן לא ישנה את ערך `turn`. מצב זה מתואר בהרצאה כקיפאון (deadlock), שבו חוט B חסום לצמיתות ואינו יכול להתקדם. המנגנון אמנם מבטיח הדרה הדדית (mutual exclusion) – רק חוט אחד יכול להיות בקטע הקריטי בכל רגע נתון – אך הוא נכשל בהבטחת התקדמות במקרה הספציפי המתואר."
+    }
+  }
+}

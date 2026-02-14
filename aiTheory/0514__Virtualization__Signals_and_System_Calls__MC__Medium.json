@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Signals and System Calls",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 18:58:37",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      9,
+      5
+    ],
+    "token_usage": {
+      "prompt_tokens": 1862,
+      "output_tokens": 772,
+      "total_tokens": 4779
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Signals and System Calls"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "מהו המאפיין המבדיל המרכזי בין \"פסיקה\" (interrupt) לבין \"סיגנל\" (signal) בהקשר של יכולת תהליך משתמש להתערב בטיפול בהם?",
+      "code_snippet": "int main(int argc, char *argv[])\n{\n    struct sigaction act;\n    sigemptyset(&act.sa_mask);\n    act.sa_handler = signal_handler;\n    act.sa_flags = 0;\n    \n    sigaction(SIGCHLD, &act, NULL);\n    if (fork()) {\n        while (1);\n    }\n}",
+      "options": [
+        "א. תהליך משתמש יכול להגדיר פונקציית טיפול (signal handler) עבור סיגנל, ואף לבחור להתעלם ממנו, בעוד שפסיקות מטופלות באופן בלעדי על ידי מערכת ההפעלה ותהליכי משתמש אינם יכולים להשפיע עליהן או לבטל אותן.",
+        "ב. פסיקות וסיגנלים שניהם אירועים שה-kernel מטפל בהם בלבד, ההבדל היחיד הוא שסיגנלים יכולים לשמש לתקשורת בין תהליכים.",
+        "ג. תהליכי משתמש יכולים לבטל פסיקות, אך רק מערכת ההפעלה יכולה להגדיר דרך טיפול בסיגנלים.",
+        "ד. סיגנלים תמיד גורמים להפסקת ריצת התהליך, בעוד פסיקות יכולות להיות מטופלות ברקע מבלי להשפיע על ריצת התהליך."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "החומר המצוין מדגיש כי בעוד ש\"פסיקות\" (interrupts) הן אירועים ברמת מערכת ההפעלה המטופלים באופן בלעדי על ידי קוד ה-kernel, ותהליכי משתמש אינם יכולים להשפיע עליהן או לבטל אותן (\"אבל לא יכולים להשפיע על פסיקה ובטח שלא לבטל אותה\"), \"סיגנלים\" הם אירועים ברמת התהליך. עבור סיגנלים, תהליכי משתמש יכולים להתערב בטיפול בהם על ידי הגדרת פונקציית טיפול (signal handler) מותאמת אישית, כפי שניתן לראות בדוגמת הקוד עם `sigaction` ו-`signal_handler`. כמו כן, תהליכים יכולים לבחור להתעלם מסיגנלים מסוימים, למשל על ידי שימוש ב-`SIG_IGN` עבור `SIGCHLD`, מה שמונע יצירת תהליכי זומבי ומדגים שליטה של תהליך המשתמש על אופן הטיפול בסיגנל. לכן, תשובה א' נכונה ומדויקת בהתאם לחומר."
+    }
+  }
+}

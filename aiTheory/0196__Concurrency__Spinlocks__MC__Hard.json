@@ -1,0 +1,46 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Spinlocks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-14 17:40:26",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      16,
+      11,
+      13,
+      15
+    ],
+    "token_usage": {
+      "prompt_tokens": 2126,
+      "output_tokens": 1218,
+      "total_tokens": 6717
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Spinlocks"
+    ],
+    "difficulty_estimation": "Hard",
+    "content": {
+      "text": "בהתבסס על קוד המנעול FlakyLock הנתון, ובהתחשב בהגדרות של מניעה הדדית (Mutual Exclusion), מניעת קיפאון (Deadlock Freedom) ומהוגנות (Fairness) כפי שנלמדו בקורס:\n\n```c\ntypedef struct { int turn; int busy; } FlakyLock;\nvoid init(FlakyLock *lock) {\n    lock->busy = 0;\n}\nvoid lock(FlakyLock *lock, int me) {\n    do {\n        do {\n            lock->turn = me;\n        } while (lock->busy);\n        lock->busy = 1;\n    } while (lock->turn != me);\n}\nvoid unlock(FlakyLock *lock) {\n    lock->busy = 0;\n}\n```\n\nאילו מבין התכונות הבאות מקיים המנעול FlakyLock?",
+      "code_snippet": null,
+      "options": [
+        "א. אף אחת מהתכונות (מניעה הדדית, מניעת קיפאון, מהוגנות) אינה מובטחת.",
+        "ב. המנעול מקיים מניעה הדדית בלבד.",
+        "ג. המנעול מקיים מניעה הדדית ומניעת קיפאון, אך לא מהוגנות.",
+        "ד. המנעול מקיים את כל שלוש התכונות: מניעה הדדית, מניעת קיפאון ומהוגנות."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "המנעול FlakyLock אינו מקיים אף אחת מהתכונות המבוקשות:\n\n1.  **מניעה הדדית (Mutual Exclusion):** המנעול אינו מבטיח מניעה הדדית. נניח שחוט T1 (עם `me=1`) קורא ל-`lock(lock, 1)`. הוא מבצע `lock->turn = 1;` ולאחר מכן `lock->busy = 1;`. כעת, לפני ש-T1 מספיק לבדוק את התנאי `lock->turn != me` בלולאה החיצונית, חוט T2 (עם `me=2`) קורא ל-`lock(lock, 2)`. T2 מבצע `lock->turn = 2;` (ובכך דורס את הערך ש-T1 כתב). כעת T2 יתחיל להמתין בלולאה הפנימית `while (lock->busy)` מכיוון ש-`lock->busy` הוא 1. T1, לעומת זאת, יגיע לבדיקה `while (lock->turn != 1)`. מכיוון ש-`lock->turn` הוא כעת 2 (לאחר ש-T2 דרס אותו), התנאי `2 != 1` הוא אמת, ו-T1 יכנס ללולאת המתנה אינסופית. במצב זה, אף חוט לא נכנס לקטע הקריטי, וגם אף חוט לא יכול להתקדם, מה שמצביע על כשל במנגנון המניעה ההדדית וקיפאון.\n\n2.  **מניעת קיפאון (Deadlock Freedom):** כפי שהוסבר לעיל, המנעול אינו מונע קיפאון. במצב שבו `lock->turn` נדרס על ידי חוט אחד בזמן שחוט אחר כבר קבע את `lock->busy = 1`, החוט שקבע את `busy` ייתקע בלולאה החיצונית `while (lock->turn != me)` מכיוון שערך ה-`turn` שלו כבר אינו תואם את ה-`me` שלו. במקביל, החוט שדרס את ה-`turn` ייתקע בלולאה הפנימית `while (lock->busy)` כי `busy` הוא 1. אף חוט לא יתקדם, ויתרחש קיפאון.\n\n3.  **מהוגנות (Fairness):** המנעול אינו מקיים מהוגנות. אין בו מנגנון תור מוגדר (כמו במנעול כרטיסים - Ticket Lock שהוצג בהרצאה) שיבטיח שחוטים יכנסו לקטע הקריטי לפי סדר בקשתם. קביעת `lock->turn = me` היא פעולה שחשופה לתחרות (race condition) ולדריסה, ואין שום ערובה שחוט יקבל את המנעול, גם אם הוא המתין זמן רב. חוט יכול להיות 'מורעב' (starved) מכיוון שחוטים אחרים דורסים שוב ושוב את ערך ה-`turn` שלו.\n\nלכן, אף אחת מהתכונות אינה מובטחת על ידי מנעול FlakyLock זה.",
+      "code_snippet_explanation": null
+    }
+  }
+}

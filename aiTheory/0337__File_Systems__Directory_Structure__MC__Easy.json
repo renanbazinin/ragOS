@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Directory Structure",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:15:51",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      20,
+      21
+    ],
+    "token_usage": {
+      "prompt_tokens": 2034,
+      "output_tokens": 328,
+      "total_tokens": 3013
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Directory Structure"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "איזה פרט מידע, הנשמר ב-inode, מאפשר למערכת הקבצים להבחין בין קובץ רגיל לבין תיקייה (directory)?",
+      "code_snippet": null,
+      "options": [
+        "א. ה-UID (מזהה הבעלים)",
+        "ב. ה-Type (סוג הקובץ)",
+        "ג. ה-Size (גודל הקובץ בבתים)",
+        "ד. ה-Links count (מספר הקישורים לקובץ)"
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "על פי חומר ההרצאה, ה-inode מכיל מטא-דאטה על קבצים, ואחד מהפרטים המפורטים הוא 'Type (file / directory)'. פרט מידע זה מציין במפורש האם הרשומה היא קובץ רגיל או תיקייה, ובכך מאפשר למערכת הקבצים להבחין ביניהם. שאר הפרטים כמו UID, Size או Links count אינם משמשים ישירות למטרה זו."
+    }
+  }
+}

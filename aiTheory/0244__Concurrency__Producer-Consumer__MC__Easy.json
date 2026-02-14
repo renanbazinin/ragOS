@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Producer-Consumer",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:53:23",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      14
+    ],
+    "token_usage": {
+      "prompt_tokens": 1516,
+      "output_tokens": 406,
+      "total_tokens": 3758
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Producer-Consumer"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "על פי חומר ההרצאה, מהו התפקיד המרכזי של היצרנים (producers) בבעיית ה-producer/consumer?",
+      "code_snippet": "Producer:\n```c\nlock(&m1);\nmmmBop();\nwhile (count < MAX)\n    wait(&full, &m1);\n++count; // Represents adding an item\nsignal(&empty);\nunlock(&m1);\n```",
+      "options": [
+        "א. להוציא איברים מהמחסן המשותף.",
+        "ב. להוסיף איברים חדשים למחסן המשותף.",
+        "ג. להמתין כשהמחסן אינו ריק.",
+        "ד. לשלוח סיגנל לצרכנים כאשר המחסן מלא."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "חומר ההרצאה מציין במפורש כי 'היצרנים מייצרים איברים חדשים שנכנסים לתור'. תפקידם העיקרי הוא לייצר ולהוסיף נתונים למחסן המשותף (התור או ה-bounded buffer), כפי שמודגם גם בקטע הקוד בביטוי `++count;` המייצג הוספת פריט. שאר האפשרויות מתארות תפקידים של הצרכנים, המתנה במצבים שונים, או פעולות שגויות."
+    }
+  }
+}

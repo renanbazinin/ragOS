@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Disks",
+    "topic_hint": "Device Model",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:33:19",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      17,
+      18
+    ],
+    "token_usage": {
+      "prompt_tokens": 2247,
+      "output_tokens": 456,
+      "total_tokens": 3768
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Disks",
+    "topic": [
+      "Device Model"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהו המאפיין העיקרי של מערכת RAID מנקודת מבטה של מערכת ההפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. מערכת ההפעלה רואה את כל הדיסקים הפיזיים בנפרד ומנהלת כל אחד מהם באופן עצמאי.",
+        "ב. מערכת ההפעלה רואה דיסק לוגי אחד בלבד, מבלי לדעת על קיומם של מספר דיסקים פיזיים.",
+        "ג. מערכת ההפעלה נדרשת להשתמש בפקודות מיוחדות וקריאות מערכת כדי לתקשר עם מנגנון ה-RAID.",
+        "ד. מנגנון ה-RAID מנוהל בלעדית על ידי התוכנה שרצה, ללא כל מעורבות של מערכת ההפעלה."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "על פי חומר ההרצאה, מערכת RAID (Redundant Array of Independent Disks) נחשבת ל'דיסק מדומה' או 'דיסק לוגי'. הן התוכנית והן מערכת ההפעלה רואות דיסק אחד בלבד, ואינן מודעות לכך שמאחורי הקלעים קיימים מספר דיסקים פיזיים. מנגנון ה-RAID (רכיב חומרה או קוד) מטפל בפיצול ובניהול הנתונים באופן שקוף לחלוטין למערכת ההפעלה ולתוכנה. לכן, התשובה הנכונה היא שמערכת ההפעלה רואה דיסק לוגי אחד בלבד."
+    }
+  }
+}

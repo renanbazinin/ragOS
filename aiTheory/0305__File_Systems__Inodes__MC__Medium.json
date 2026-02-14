@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Inodes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 18:07:45",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      20,
+      22
+    ],
+    "token_usage": {
+      "prompt_tokens": 1834,
+      "output_tokens": 505,
+      "total_tokens": 3819
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Inodes"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "על פי חומר ההרצאה, אילו פרטים נשמרים ב-inode עבור קובץ נתון במערכת קבצים?",
+      "code_snippet": null,
+      "options": [
+        "א. הנתונים הבינאריים בפועל של תוכן הקובץ.",
+        "ב. מטה-דאטה אודות הקובץ, כגון סוג, גודל, הרשאות גישה, וכן הפניות לבלוקים המכילים את תוכן הקובץ.",
+        "ג. מפת סיביות (bitmap) המציינת אם ה-inode פנוי או תפוס לשימוש.",
+        "ד. מספר הגרסה העדכני של ה-inode כפי שמתועד במבנה ה-imap."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "חומר ההרצאה מציין במפורש כי inode מכיל 'סוג, גודל, הרשאות גישה, איפה המידע שלו נמצא ועוד..', ובנוסף 'מכיל את מספרי הבלוקים בהם נמצא התוכן של אותו קובץ'. זהו תיאור מדויק של מטה-דאטה הכולל הפניות לבלוקי הנתונים של הקובץ.\nא. שגויה, ה-inode מכיל הפניות לבלוקי הנתונים, לא את הנתונים עצמם של הקובץ.\nג. שגויה, מפת סיביות (inode bitmap) היא מבנה נפרד המשמש למעקב אחר זמינות Inodes, ולא חלק מה-inode עצמו.\nד. שגויה, ה-imap הוא המבנה שמצביע על הגרסה העדכנית של ה-inode, ולא ה-inode עצמו שומר את מספר הגרסה שלו לצרכי מעקב ב-imap."
+    }
+  }
+}

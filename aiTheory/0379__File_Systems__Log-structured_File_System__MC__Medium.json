@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Log-structured File System",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 18:25:26",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      20,
+      21,
+      22
+    ],
+    "token_usage": {
+      "prompt_tokens": 2062,
+      "output_tokens": 601,
+      "total_tokens": 4145
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Log-structured File System"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "על פי חומר ההרצאה, מהי הבעיה העיקרית שמערכות קבצים מבוססות יומן (LFS - Log-structured File System) מנסות לפתור?",
+      "code_snippet": null,
+      "options": [
+        "א. ביצועים ירודים של פעולות קריאה מהדיסק עקב היעדר מנגנוני מטמון (cache) יעילים.",
+        "ב. פרגמנטציה חיצונית של נתונים על הדיסק המאטה את הגישה לקבצים.",
+        "ג. חוסר היעילות של פעולות כתיבה לדיסק, לאור העובדה שפעולות קריאה רבות משרתות מהזיכרון המטמון.",
+        "ד. הקושי בניהול גרסאות קבצים ישנות ופינוי שטח דיסק מיותר."
+      ]
+    },
+    "solution": {
+      "correct_option": "ג",
+      "explanation": "חומר ההרצאה מציין במפורש כי מערכת קבצים מסוג LFS נועדה להתמודד עם הבעיה ש'פעולות הכתיבה הן הבעיה העיקרית שלנו'. ההסבר לכך הוא ש'כשאנחנו קוראים נתונים, אזי יש לנו cache ה-inodes, bitmaps, data הרבה פעמים נשארים כבר בזיכרון. זה הופך את פעולות הקריאה להרבה יותר קלות'. לכן, LFS מתמקדת בשיפור יעילות הכתיבה לדיסק, תוך התחשבות בכך שפעולות קריאה כבר מואצות על ידי זיכרון המטמון. אפשרות א' אינה נכונה מכיוון שפעולות קריאה דווקא יעילות יחסית בזכות המטמון. אפשרות ב' אינה הבעיה העיקרית הספציפית ש-LFS מתייחסת אליה בהקשר זה. אפשרות ד' מתארת מנגנון (garbage collection) המשמש ב-LFS, אך אינה הבעיה העיקרית שלשמה פותחה המערכת, אלא פתרון לבעיה משנית הנוצרת כתוצאה משיטת הכתיבה."
+    }
+  }
+}

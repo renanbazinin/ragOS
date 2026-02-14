@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory and Page Tables",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 18:56:04",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      6,
+      7
+    ],
+    "token_usage": {
+      "prompt_tokens": 2016,
+      "output_tokens": 526,
+      "total_tokens": 4250
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Virtual Memory and Page Tables"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "על פי חומר ההרצאה, איזו בעיה מרכזית בארגון טבלאות דפים רגילות (Single-level Page Tables) נפתרת על ידי שימוש בטבלאות דפים היררכיות (Multi-Level Page Tables)?",
+      "code_snippet": null,
+      "options": [
+        "א. האצת תהליך התרגום מכתובת וירטואלית לפיזית על ידי ה-MMU.",
+        "ב. הפחתת בעיית הפיצול הפנימי (Internal Fragmentation) בזיכרון הפיזי.",
+        "ג. הקטנת גודל הזיכרון הנדרש לאחסון טבלאות הדפים עצמן, במיוחד עבור מרחבי כתובות גדולים ודלילים.",
+        "ד. מתן אפשרות לתהליכים שונים לשתף מסגרות זיכרון פיזיות."
+      ]
+    },
+    "solution": {
+      "correct_option": "ג",
+      "explanation": "החומר מציין במפורש כי אחת הבעיות המרכזיות בטבלאות דפים היא שגודלן יכול להיות \"מאוד איטי\" (Lecture 7, chunk 11) וכי \"בתור התחלה, נטפל בבעיה הראשונה\" שהיא גודל טבלת הדפים. הפתרון המוצע לבעיה זו, לאחר שנדחה הפתרון של הגדלת דפים (עקב פרגמנטציה פנימית), הוא שימוש ב\"Multi-Level Page table – טבלת דפים היררכית\" (Lecture 7, chunk 16). מטרתה היא למנוע הקצאת זיכרון עבור דפים וירטואליים שאינם בשימוש, ובכך להקטין את טביעת הרגל של טבלת הדפים בזיכרון הפיזי. לכן, האפשרות הנכונה היא ג."
+    }
+  }
+}

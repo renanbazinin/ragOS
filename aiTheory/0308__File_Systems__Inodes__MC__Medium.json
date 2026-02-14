@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Inodes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 18:08:18",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      20,
+      22
+    ],
+    "token_usage": {
+      "prompt_tokens": 1834,
+      "output_tokens": 552,
+      "total_tokens": 3940
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Inodes"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "על פי חומר ההרצאה, מהו התפקיד העיקרי של inode במערכת קבצים?",
+      "code_snippet": null,
+      "options": [
+        "א. לאחסן את התוכן הממשי של הקובץ (כלומר, את הנתונים עצמם).",
+        "ב. לתאר את המאפיינים (מטא-דאטה) של הקובץ ולציין את מספרי הבלוקים בהם נמצא תוכן הקובץ.",
+        "ג. לשמור רשימה של כל ה-inodes הפנויים במערכת הקבצים.",
+        "ד. למפות את הגרסאות העדכניות ביותר של כל ה-inodes במערכת."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "על פי חומר ההרצאה (Lecture 20, chunk 5), inode מכיל את הפרטים על קובץ כגון 'סוג, גודל, הרשאות גישה' וכן 'איפה המידע שלו נמצא' ו'מכיל את מספרי הבלוקים בהם נמצא התוכן של אותו קובץ'. לכן, התפקיד העיקרי של inode הוא לתאר את המאפיינים (מטא-דאטה) של הקובץ ולציין היכן נמצאים בלוקי הנתונים שלו, מה שהופך את אפשרות ב' לנכונה.\nאפשרות א' שגויה מכיוון שה-inode מצביע על מיקום הנתונים אך אינו מכיל את הנתונים עצמם. הנתונים מאוחסנים בבלוקי נתונים נפרדים.\nאפשרות ג' מתארת את תפקידו של ה-inode bitmap, שמשמש למעקב אחר inodes פנויים (Lecture 20, chunk 28).\nאפשרות ד' מתארת את תפקידו של ה-IMAP (Inode Map), שאחראי למפות את הגרסאות העדכניות ביותר של ה-inodes (Lecture 22, chunk 1, 2)."
+    }
+  }
+}

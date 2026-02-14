@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Deadlocks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:58:10",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      16,
+      15
+    ],
+    "token_usage": {
+      "prompt_tokens": 2076,
+      "output_tokens": 393,
+      "total_tokens": 3868
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Deadlocks"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "לפי חומר הקורס, כמה תנאים חייבים להתקיים כדי שיתרחש קיפאון (deadlock), וכמה תנאים מספיק למנוע כדי למנוע קיפאון?",
+      "code_snippet": null,
+      "options": [
+        "א. כל ארבעת התנאים חייבים להתקיים; מספיק למנוע תנאי אחד.",
+        "ב. כל ארבעת התנאים חייבים להתקיים; יש למנוע את כל ארבעת התנאים.",
+        "ג. מספיק שתנאי אחד יתקיים; מספיק למנוע תנאי אחד.",
+        "ד. מספיק שתנאי אחד יתקיים; יש למנוע את כל ארבעת התנאים."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "חומר הקורס מציין במפורש: \"בשביל שיקרה קיפאון, אז כל ארבעת התנאים להתקיים.\" וגם \"בשביל למנוע קיפאון, מספיק למנוע תנאי אחד מבין הארבעה\". לכן, כדי שיתרחש קיפאון, כל ארבעת התנאים חייבים להתקיים. וכדי למנוע קיפאון, מספיק למנוע קיום של תנאי אחד מתוך הארבעה."
+    }
+  }
+}

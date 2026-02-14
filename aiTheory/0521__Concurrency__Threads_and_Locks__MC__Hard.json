@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Threads and Locks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-14 19:00:31",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      10,
+      11
+    ],
+    "token_usage": {
+      "prompt_tokens": 1789,
+      "output_tokens": 975,
+      "total_tokens": 5205
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Threads and Locks"
+    ],
+    "difficulty_estimation": "Hard",
+    "content": {
+      "text": "נתון קטע הקוד הבא המנסה לממש מנגנון נעילה (lock) עבור שני חוטים (Thread A ו-Thread B) המשתפים משתנה `turn` (המאותחל ל-A):\n\n```c\n// Initial state: turn = A\n\nThread A\nwhile (turn != A)\n  ; // busy-wait\n// critical section\nturn = B;\n\nThread B\nwhile (turn != B)\n  ; // busy-wait\n// critical section\nturn = A;\n```\n\nבהתבסס על חומר ההרצאה, מהי הבעיה העיקרית במנגנון נעילה זה, במיוחד במקרה שבו חוט A אינו מעוניין להיכנס לקטע הקריטי כשתורו?",
+      "code_snippet": "// Initial state: turn = A\n\nThread A\nwhile (turn != A)\n  ; // busy-wait\n// critical section\nturn = B;\n\nThread B\nwhile (turn != B)\n  ; // busy-wait\n// critical section\nturn = A;",
+      "options": [
+        "א. המנגנון אינו מבטיח הדדיות (mutual exclusion), מכיוון ששני חוטים עלולים להיכנס לקטע הקריטי בו-זמנית במקרים מסוימים.",
+        "ב. המנגנון עלול להוביל למצב של קיפאון (deadlock) או \"רעב\" (starvation) ממושך, כאשר חוט אחד מחכה לתורו ללא הגבלה משום שהחוט השני, שלו התור, אינו מעוניין להיכנס לקטע הקריטי.",
+        "ג. המנגנון מבזבז משאבי מעבד יקרים באמצעות לולאת המתנה פעילה (busy-waiting), אך אינו סובל מבעיות לוגיות של סנכרון מעבר לכך.",
+        "ד. המנגנון דורש יחסי אב-ילד בין החוטים כדי לפעול כראוי, דבר שאינו מובטח בקוד המוצג."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "הקוד המוצג מממש מנגנון נעילה המבוסס על משתנה `turn` המבטיח תור קפדני בין חוטים. הבעיה העיקרית, כפי שמתוארת בחומר ההרצאה (Lecture 11, chunk 34), מתרחשת כאשר חוט אחד (לדוגמה, חוט A) אינו מעוניין או אינו צריך להיכנס לקטע הקריטי כאשר התור שלו. במצב כזה, חוט A לא ישנה את ערך המשתנה `turn` ל-B, ולכן חוט B יישאר בלולאת המתנה פעילה (busy-wait) לנצח, מחכה לתורו שלעולם לא יגיע. מצב זה הוא למעשה קיפאון (deadlock), שכן חוט B חסום ואינו יכול להתקדם, והחוט A אינו מבצע את הפעולה שתשחרר את חוט B. חומר ההרצאה מציין במפורש: \"חוט B ייכנס ללולאה אינסופית ויחכה. שוב קורה לנו deadlock - חוט B מחכה לתורו אבל אף פעם לא יגיע תורו.\" אפשרות א' אינה נכונה מכיוון שהמנגנון מנסה לאכוף הדדיות באמצעות תור קפדני. אפשרות ג' נכונה חלקית בכך שהוא משתמש ב-busy-waiting, אך היא מחמיצה את הבעיה הלוגית החמורה יותר של קיפאון. אפשרות ד' אינה רלוונטית כלל לנושא מנגנוני נעילה או לבעיה הספציפית בקוד."
+    }
+  }
+}

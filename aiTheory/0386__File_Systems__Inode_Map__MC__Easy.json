@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Inode Map",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:26:49",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      22
+    ],
+    "token_usage": {
+      "prompt_tokens": 1897,
+      "output_tokens": 392,
+      "total_tokens": 3291
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Inode Map"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהי המטרה העיקרית של ה-Inode Map (imap) במערכת הקבצים, כפי שתואר בחומר ההרצאה?",
+      "code_snippet": null,
+      "options": [
+        "א. לשמור את הגרסה העדכנית ביותר של כל inode.",
+        "ב. לתעד את כל הגרסאות ההיסטוריות של כל inode לצורך שחזור.",
+        "ג. למפות בלוקים פיזיים בדיסק לבלוקים לוגיים בקובץ.",
+        "ד. לאחסן את הנתונים בפועל של הקבצים."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "על פי חומר ההרצאה, ה-imap (Inode Map) מצביע על הגרסה העדכנית של inode מסוים (למשל, \"ה-imap מצביע על הגרסה העדכנית של inode k\"). כמו כן, נכתב כי הוא \"יגיד לנו איפה הגרסה הכי עדכנית של אותו inode\". תפקידו העיקרי הוא לספק גישה מהירה למיקום הפיזי של הגרסה האחרונה של כל inode. אפשרויות ב', ג' ו-ד' אינן מתארות נכונה את תפקידו המרכזי של ה-imap כפי שהוצג בחומר ההרצאה."
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Crash Consistency",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 18:19:40",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      20,
+      21,
+      22
+    ],
+    "token_usage": {
+      "prompt_tokens": 1936,
+      "output_tokens": 607,
+      "total_tokens": 4773
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Crash Consistency"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "מהי אחת המגבלות המרכזיות של כלי ה-File System Checker (fsck) בהתמודדות עם בעיות Crash Consistency, כפי שתוארה בחומר ההרצאה?",
+      "code_snippet": null,
+      "options": [
+        "א. הוא אינו יכול לזהות מצב שבו inode מצביע לבלוק נתונים (data block) שמסומן כתפוס ב-bitmap, אך בפועל מכיל \"זבל\" ולא את הנתונים המצופים.",
+        "ב. הוא אינו יכול לתקן בעיות הנובעות מקריסה שהתרחשה לפני הכתיבה הראשונה של נתונים לקובץ.",
+        "ג. הוא דורש הפעלה ידנית על ידי המשתמש ואינו רץ אוטומטית בעת עליית המערכת לאחר קריסה.",
+        "ד. הוא גורם לפגיעה משמעותית בביצועים בזמן ריצה, בדומה ל-cleaner המטפל ב\"סגמנטים קרים\", ועל כן אינו מופעל לעיתים קרובות."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "התשובה הנכונה היא א'. חומר ההרצאה מציין במפורש מגבלה זו של כלי ה-fsck: \"אם מערכת הקבצים שלנו נראית תקינה ויש בעיה, הוא לא יוכל לתקן אותה. למשל: נניח ויש לנו inode שמצביע ל-דאטה כלשהו, בלי data block שנכתב לשם, וב-bitmap הדאטה הזה מסומן כתפוס. כלומר מצב מערכת הקבצים נראה תקין, אף לא כתבנו את הדאטה לדאטה בלוק בפועל. יש שם זבל. את המצב הזה הכלי הנ\"ל לא יכול לגלות.\" (הרצאה 21, קטע 15). מגבלה זו נובעת מכך שהכלי בודק עקביות מבנית (metadata consistency) אך אינו יכול לאמת את תוכן הנתונים בפועל. אפשרויות ב', ג' ו-ד' אינן מתוארות כמגבלות של fsck בחומר ההרצאה, או שהן סותרות מידע הקיים בו."
+    }
+  }
+}

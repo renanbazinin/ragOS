@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Disks",
+    "topic_hint": "Disk Scheduling",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:42:30",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      18
+    ],
+    "token_usage": {
+      "prompt_tokens": 2024,
+      "output_tokens": 542,
+      "total_tokens": 4421
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Disks",
+    "topic": [
+      "Disk Scheduling"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מדוע אלגוריתם SPTF (Shortest Positioning Time First) מיושם בדרך כלל בתוך בקר הדיסק ולא על ידי מערכת ההפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. מכיוון שמערכת ההפעלה אינה מודעת למבנה הפיזי של הדיסק ולזמני הגישה המדויקים.",
+        "ב. מכיוון שאלגוריתם SPTF מונע לחלוטין תופעות של הרעבה (starvation) ולכן עדיף להשאירו לטיפול הדיסק.",
+        "ג. מכיוון שמערכת ההפעלה מתעדפת בקשות קריאה על פני בקשות כתיבה, מה שעלול לשבש את יעילות SPTF.",
+        "ד. מכיוון שהדיסק אינו מסוגל לקבל מספר בקשות במקביל ממערכת ההפעלה, ולכן עליו לתזמן אותן בעצמו."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "התשובה הנכונה היא א'. החומר המצוין בשיעור קובע במפורש כי אלגוריתם SPTF מבוצע בתוך הדיסק משום ש\"מערכת ההפעלה לא מודעת למבנה של הדיסק, לכן יכול לקרוא מצב בו מערכת ההפעלה תעשה תזמון שגוי\". הדיסק, לעומת זאת, \"יודע בדיוק כמה זמן כל פעולה תיקח ולכן הוא יכול לחשב\" את זמן המיקום הקצר ביותר. אפשרות ב' אינה הסיבה העיקרית להטמעת SPTF בתוך הדיסק, אלא תוצאה של אופן ביצועו (טיפול בסט של בקשות). אפשרויות ג' ו-ד' אינן נתמכות ישירות על ידי החומר כהסבר להטמעת SPTF בתוך הדיסק."
+    }
+  }
+}

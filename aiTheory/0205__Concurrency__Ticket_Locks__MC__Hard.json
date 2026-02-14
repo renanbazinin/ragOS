@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Ticket Locks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-14 17:43:20",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      16,
+      11,
+      13
+    ],
+    "token_usage": {
+      "prompt_tokens": 2333,
+      "output_tokens": 870,
+      "total_tokens": 6824
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Ticket Locks"
+    ],
+    "difficulty_estimation": "Hard",
+    "content": {
+      "text": "מנעול ה-Ticket Lock, כפי שתואר בחומר ההרצאה, משתייך לקטגוריית \"מנעולי התור\" (queue locks) אשר נועדו, בין היתר, לצמצם את עומס תעבורת ה-BUS הנגרם כתוצאה מ-cache invalidations רבים בעת שחרור מנעול. בהתבסס על אופן פעולתו של ה-Ticket Lock, איזה היבט במימושו עלול להגביל את יעילותו בהשגת מטרה זו, בהשוואה למנעולי תור אחרים המיועדים ספציפית לבעיית ה-cache invalidation?",
+      "code_snippet": null,
+      "options": [
+        "א. העובדה שחוטים הממתינים למנעול מבצעים spin-wait במקום לעבור למצב חסום, מה שמבזבז משאבי מעבד.",
+        "ב. השימוש במשתנה `turn` יחיד ומשותף שכל החוטים הממתינים עליו מבצעים קריאות חוזרות ונשנות (spin-read), מה שגורם ל-cache invalidations נרחבים בכל פעם שערכו מתעדכן על ידי החוט המשחרר את המנעול.",
+        "ג. הצורך בפעולה אטומית (כמו fetch-and-add) לצורך קבלת ה\"כרטיס\" (ticket), פעולה אשר עדיין מחייבת תקשורת ל-BUS ועלולה לגרום ל-cache invalidations מקומיים.",
+        "ד. חוסר היכולת להבטיח מניעה הדדית (mutual exclusion) בתרחישי עומס גבוהים, המאפשר למספר חוטים להיכנס לקטע הקריטי בו-זמנית."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "ההסבר הנכון הוא ב'. מנעולי תור, ובכללם ה-Ticket Lock, נועדו לטפל בבעיית ההוגנות ובמקרים מסוימים גם בבעיות ביצועים הקשורות ל-cache invalidations. עם זאת, למרות ש-Ticket Lock מבטיח הוגנות על ידי מתן תור כרונולוגי לכל חוט המבקש להיכנס לקטע הקריטי, אופן ההמתנה שלו (spin-wait) מתבצע על משתנה `turn` יחיד ומשותף. כאשר החוט המסיים את הקטע הקריטי מעדכן את `turn` (מקדם אותו ב-1), השינוי במשתנה זה גורם ל-cache invalidation בכל הליבות האחרות שמחזיקות עותק שלו ב-cache שלהן, מכיוון שכל החוטים הממתינים קוראים באופן תדיר את `turn` כדי לבדוק האם הגיע תורם. מצב זה יוצר תעבורת BUS משמעותית של invalidations ו-cache misses, ובכך מגביל את יעילותו של ה-Ticket Lock בהפחתת עומס ה-BUS בהשוואה למנעולי תור מתוחכמים יותר (כמו מנעול אנדרסון המוזכר בהרצאה), שבהם כל חוט ממתין על משתנה או תא זיכרון ייעודי משלו, ובכך מצמצם את היקף ה-cache invalidations המשותפים."
+    }
+  }
+}

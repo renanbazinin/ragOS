@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Condition Variables",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 17:51:55",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      11,
+      14
+    ],
+    "token_usage": {
+      "prompt_tokens": 1903,
+      "output_tokens": 967,
+      "total_tokens": 5465
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Condition Variables"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "מדוע בפתרון בעיית ה-Producer/Consumer (יצרן/צרכן) באמצעות condition variables (משתני תנאי) נהוג להשתמש בשני משתני תנאי נפרדים (לדוגמה, `empty` ו-`full`), ולא במשתנה תנאי יחיד?",
+      "code_snippet": "/* Example pseudo-code for Producer/Consumer with two condition variables */\n\npthread_mutex_t buffer_mutex;\npthread_cond_t empty_cv; // Consumers wait on this when buffer is empty\npthread_cond_t full_cv;  // Producers wait on this when buffer is full\nint item_count = 0;     // Number of items currently in the buffer\nconst int BUFFER_SIZE = 10;\n\n// Producer thread logic:\nvoid producer() {\n    pthread_mutex_lock(&buffer_mutex);\n    while (item_count == BUFFER_SIZE) { // If buffer is full, wait for space\n        pthread_cond_wait(&full_cv, &buffer_mutex);\n    }\n    // Produce item and add to buffer\n    item_count++;\n    pthread_cond_signal(&empty_cv); // Signal consumers that buffer is not empty\n    pthread_mutex_unlock(&buffer_mutex);\n}\n\n// Consumer thread logic:\nvoid consumer() {\n    pthread_mutex_lock(&buffer_mutex);\n    while (item_count == 0) { // If buffer is empty, wait for items\n        pthread_cond_wait(&empty_cv, &buffer_mutex);\n    }\n    // Consume item from buffer\n    item_count--;\n    pthread_cond_signal(&full_cv); // Signal producers that buffer is not full\n    pthread_mutex_unlock(&buffer_mutex);\n}",
+      "options": [
+        "א. כדי למנוע מצב של קיפאון (deadlock) הנוצר כאשר יצרן וצרכן חוסמים זה את זה על אותו משתנה תנאי.",
+        "ב. כדי לאפשר לחוטים להתחלף ביניהם באופן אקראי ולשפר את ביצועי המערכת על ידי מקביליות מוגברת.",
+        "ג. מכיוון ש-condition variable יחיד יכול לטפל רק בסוג אחד של אירועים (למשל, רק \"מלא\" או רק \"ריק\"), ולא בשניהם יחד.",
+        "ד. על מנת לאפשר לחוטים לגשת ישירות לערך המספרי הפנימי של משתנה התנאי ולשנות אותו באופן אטומי."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "התשובה הנכונה היא א'. החומר המצוין בשיעור 14 (chunk 13) מסביר כי שימוש במשתנה תנאי יחיד עבור בעיית היצרן/צרכן עלול להוביל למצב של קיפאון (deadlock). במצב כזה, צרכן יכול להיות חסום כי המחסן ריק, ויצרן יכול להיות חסום כי המחסן מלא, אך שניהם ממתינים על אותו משתנה תנאי. הפתרון לבעיה זו הוא שימוש בשני משתני תנאי נפרדים: אחד (`empty`) עליו ממתינים הצרכנים כאשר המחסן ריק ומופעל עליו סיגנל על ידי יצרנים שמוסיפים פריט; ואחד (`full`) עליו ממתינים היצרנים כאשר המחסן מלא ומופעל עליו סיגנל על ידי צרכנים שמוציאים פריט. הפרדה זו מבטיחה שההודעות (signals) וההמתנות (waits) יתאימו לתנאים הספציפיים (מחסן ריק או מלא) וימנעו קיפאון."
+    }
+  }
+}

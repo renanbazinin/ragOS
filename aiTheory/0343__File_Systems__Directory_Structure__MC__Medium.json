@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Directory Structure",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 18:16:53",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      20,
+      21
+    ],
+    "token_usage": {
+      "prompt_tokens": 2034,
+      "output_tokens": 391,
+      "total_tokens": 4213
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Directory Structure"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "על פי חומר ההרצאה, איזה רכיב בתוך ה-inode מאפשר למערכת הקבצים להבחין בין קובץ רגיל לבין ספרייה (directory)?",
+      "code_snippet": null,
+      "options": [
+        "א. השדה `Type` (סוג) המאוחסן ב-inode.",
+        "ב. רשימת `Data blocks` (בלוקי נתונים) שאליהם ה-inode מצביע.",
+        "ג. ה-`Links count` (מספר קישורים) של ה-inode.",
+        "ד. ה-`Size` (גודל) של הקובץ המופיע ב-inode."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "חומר ההרצאה מציין במפורש כי בין המידע הנשמר ב-inode נכלל השדה `Type` (סוג), אשר מוגדר כ-`(file / directory)`. שדה זה הוא המנגנון המיועד והעיקרי שבאמצעותו מערכת הקבצים מבחינה בין קובץ רגיל לבין ספרייה. בעוד ששדות אחרים כמו `Data blocks`, `Links count` או `Size` עשויים להיות שונים בין קבצים וספריות, השדה `Type` הוא המזהה המפורש לסוג האובייקט."
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Superblock",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-14 18:14:54",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      20,
+      21,
+      22
+    ],
+    "token_usage": {
+      "prompt_tokens": 1676,
+      "output_tokens": 704,
+      "total_tokens": 4731
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Superblock"
+    ],
+    "difficulty_estimation": "Hard",
+    "content": {
+      "text": "במערכת קבצים המשלבת מנגנון Journaling, מהו התפקיד המהותי והדינמי ביותר של ה-superblock, כפי שמתואר בהקשר של התאוששות לאחר קריסת מערכת?",
+      "code_snippet": null,
+      "options": [
+        "א. הוא מאחסן מצביע המורה על הטרנזקציה הבאה ביומן שיש להתחיל ממנה בתהליך השחזור, ובכך מאפשר למערכת לחדש פעילות בצורה יעילה מבלי לבצע מחדש פעולות שהושלמו.",
+        "ב. הוא כולל מידע סטטי על גודל הדיסק, מספר בלוקי הנתונים וה-inodes, ומיקומי ה-bitmaps, המשמשים לניהול המבנה הכללי של מערכת הקבצים.",
+        "ג. הוא מכיל את הקוד האתחולי (boot code) שאחראי על טעינת מערכת ההפעלה לזיכרון בעת הדלקת המחשב.",
+        "ד. הוא מנהל את טבלאות המיפוי של דפים ל-chunks בזיכרון ה-SSD, תוך מתן עדיפות לנתונים עדכניים באזור זמני (log table)."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "התשובה הנכונה היא א'. לפי חומר ההרצאה (Lecture 21, chunk 33), ה-superblock משמש לאחסון מצביע המציין את הטרנזקציה הבאה ביומן (Journal) שיש לטפל בה. עדכון מצביע זה לאחר סיום טרנזקציה מאפשר למערכת להתאושש ביעילות מקריסה: במקום להתחיל את תהליך השחזור מההתחלה, המערכת קוראת את ה-superblock ויודעת בדיוק מאיפה להמשיך, מה שחוסך זמן ומשאבים. אפשרות ב' מתארת תפקיד נכון של ה-superblock (Lecture 20, chunk 28) – שמירת מידע סטטי על מבנה מערכת הקבצים – אך אינה התפקיד הדינמי המהותי בהקשר של שחזור. אפשרות ג' מתארת את תפקידו של בלוק האתחול (boot block), שלפעמים קודם ל-superblock (Lecture 20, chunk 28), ולא את תפקיד ה-superblock עצמו. אפשרות ד' מתייחסת למנגנון מיפוי פנימי של SSD (Lecture 22, chunk 54), שאינו קשור ישירות לתפקיד ה-superblock במערכת הקבצים."
+    }
+  }
+}

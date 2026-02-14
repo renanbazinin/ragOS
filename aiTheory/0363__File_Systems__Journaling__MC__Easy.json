@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Journaling",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:21:45",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      21
+    ],
+    "token_usage": {
+      "prompt_tokens": 1706,
+      "output_tokens": 383,
+      "total_tokens": 3328
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Journaling"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהם הסימונים המשמשים לציון תחילתה וסיומה של טרנזקציה ביומן (Journal) במערכת קבצים?",
+      "code_snippet": null,
+      "options": [
+        "א. Txb ו-Txe",
+        "ב. Checkpoint ו-Commit",
+        "ג. Metadata ו-Data",
+        "ד. Journal Superblock ו-Free"
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "על פי חומר ההרצאה (Lecture 21, chunk 24), 'Txb' (Transaction Begin) הוא סט של ביטים מיוחדים המציינים את תחילתו של note חדש ביומן, ואילו 'Txe' (Transaction End) הוא סט של ביטים המציינים את סיום הטרנזקציה. סימונים אלו תוחמים את הנתונים והמטא-דאטה השייכים לטרנזקציה ספציפית ב-journal. האפשרויות האחרות מתארות מושגים שונים: Checkpoint ו-Commit הם שלבים בתהליך הטיפול בטרנזקציה, Metadata ו-Data הם תוכן הטרנזקציה, ו-Journal Superblock ו-Free הם מנגנונים לניהול היומן."
+    }
+  }
+}

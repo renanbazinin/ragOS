@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Condition Variables",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:50:51",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      11,
+      14
+    ],
+    "token_usage": {
+      "prompt_tokens": 1903,
+      "output_tokens": 464,
+      "total_tokens": 4198
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Condition Variables"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "אילו מבין הפעולות הבאות קשורות לשימוש במשתני תנאי (Condition Variables) במערכת הפעלה, כפי שמוצג במימוש בלינוקס?",
+      "code_snippet": "```c\n// wait:\npthread_cond_wait(pthread_cond_t *c, pthread_mutex_t *m);\n// signal:\npthread_cond_signal(pthread_cond_t *c);\n// broadcast:\npthread_cond_broadcast(pthread_cond_t *c);\n```",
+      "options": [
+        "א. wait, signal, broadcast",
+        "ב. lock, unlock, try_lock",
+        "ג. p, v, up",
+        "ד. create, delete, execute"
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "הפעולות `wait`, `signal` ו-`broadcast` הן הפעולות הסטנדרטיות לטיפול במשתני תנאי (Condition Variables). על פי חומר ההרצאה, מימוש משתני התנאי בלינוקס משתמש בפונקציות `pthread_cond_wait`, `pthread_cond_signal` ו-`pthread_cond_broadcast`. פעולות אלו מאפשרות לחוטים להמתין לתנאי מסוים שיתקיים (`wait`) ולהודיע לחוט אחד (`signal`) או לכל החוטים הממתינים (`broadcast`) שהתנאי התקיים. האפשרויות האחרות מתייחסות לפעולות של מנעולים (mutexes) או סמפורים, שאינן הפעולות הישירות של משתני תנאי."
+    }
+  }
+}

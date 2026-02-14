@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Disks",
+    "topic_hint": "Device Model",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:32:58",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      17,
+      18
+    ],
+    "token_usage": {
+      "prompt_tokens": 2247,
+      "output_tokens": 443,
+      "total_tokens": 4067
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Disks",
+    "topic": [
+      "Device Model"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהו המאפיין העיקרי של מודל ההתקן (Device Model) שמערכת RAID מציגה למערכת ההפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. היא מציגה דיסק לוגי יחיד, גם אם בפועל קיימים מספר דיסקים פיזיים.",
+        "ב. היא דורשת ממערכת ההפעלה לנהל באופן ישיר את פיצול הנתונים בין הדיסקים הפיזיים.",
+        "ג. היא חושפת למערכת ההפעלה את הגישה הישירה לכל פלטה ומסלול פיזי בדיסק.",
+        "ד. היא ממפה כל דיסק פיזי לאזור זיכרון נפרד באמצעות Memory-Mapped I/O."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "מערכת RAID (Redundant Array of Independent Disks) נועדה לפשט את הגישה לדיסקים מרובים עבור מערכת ההפעלה והיישומים. כפי שמצוין בחומר ההרצאה, מערכת RAID נחשבת ל'דיסק מדומה' או 'דיסק לוגי'. מערכת ההפעלה רואה דיסק לוגי אחד בלבד, ואינה יודעת על קיומם של מספר דיסקים פיזיים מאחורי הקלעים. מנגנון ה-RAID (חומרה או קוד) הוא זה שמטפל באופן שקוף בפיצול, שכפול וניהול הנתונים על פני הדיסקים הפיזיים."
+    }
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Synchronization",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 17:36:37",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      10,
+      11,
+      13,
+      15
+    ],
+    "token_usage": {
+      "prompt_tokens": 2007,
+      "output_tokens": 828,
+      "total_tokens": 5234
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Synchronization"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "בהתבסס על בעיית ה-\"Lost Signal\" המתוארת בחומר ההרצאה (Lecture 13, chunk 41), איזו בעיה מרכזית היא מדגימה בשימוש במשתני תנאי (Condition Variables) ללא הגנה מתאימה, וכיצד היא נפתרת?",
+      "code_snippet": "Thread A (Blocked)\nlock(&m1);\n// wait for mmmBop\nif (!done)\n  wait(&cv1, &m1);\nbaDuBop();\nunlock(&m1);\n\nThread B\nmmmBop();\ndone = 1;\nsignal(&cv1);\nLost signal",
+      "options": [
+        "א. הבעיה היא שחוט המאותת (signaling thread) עלול לשלוח את האות לפני שחוט הממתין (waiting thread) נכנס למצב המתנה, מה שגורם לאובדן האות. הפתרון הוא לתפוס מנעול (mutex) גם בצד של החוט המאותת וגם בצד של החוט הממתין.",
+        "ב. הבעיה היא שחוט הממתין עלול להיכנס ללולאה אינסופית בבדיקת התנאי. הפתרון הוא להשתמש בפעולה signalAll במקום signal.",
+        "ג. הבעיה היא שחוט המאותת עלול לשנות את התנאי אך לא לאותת על כך, מה שמוביל לקיפאון (deadlock). הפתרון הוא לוודא שכל שינוי בתנאי מלווה באיתות.",
+        "ד. הבעיה היא שחוטים רבים מדי מנסים לגשת למשאב משותף בו-זמנית, מה שגורם לתחרות על המעבד. הפתרון הוא להגביל את מספר החוטים שיכולים לרוץ במקביל."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "הבעיה המרכזית המודגמת ב-\"Lost Signal\" היא שחוט B (המאותת) יכול לשנות את המצב (done = 1) ולשלוח את האות (signal(&cv1)) לפני שחוט A (הממתין) הגיע לנקודה שבה הוא קורא ל-wait(&cv1, &m1). במצב כזה, האות נשלח אך אין חוט שממתין לו, ולכן הוא \"אובד\". כאשר חוט A יגיע לבסוף ל-wait, הוא ימתין לאות שלעולם לא יגיע, למרות שהתנאי כבר התקיים. הפתרון, כפי שמוצג בחומר ההרצאה, הוא להגן על הגישה למשתנה התנאי ולמשתנה המצב (done) באמצעות מנעול (mutex) משותף לשני החוטים. על ידי כך, חוט B לא יוכל לשנות את המצב ולאותת מבלי לתפוס את המנעול, וחוט A לא יוכל לבדוק את התנאי ולהיכנס למצב המתנה מבלי לתפוס את אותו מנעול. זה מבטיח שלא תהיה התערבות בין הפעולות ובכך מונע את אובדן האות."
+    }
+  }
+}

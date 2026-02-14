@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Ticket Locks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 17:42:57",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      16,
+      11,
+      13
+    ],
+    "token_usage": {
+      "prompt_tokens": 2333,
+      "output_tokens": 687,
+      "total_tokens": 6226
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Ticket Locks"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "מהו היתרון העיקרי של מנעול Ticket Lock בהשוואה למנעולים פשוטים יותר כמו TestAndSet (TAS) או CompareAndSwap (CAS)?",
+      "code_snippet": null,
+      "options": [
+        "א. הוא מבטיח הוגנות (fairness) בכך שהוא מעניק גישה לקטע הקריטי לפי סדר בקשת הכניסה של החוטים.",
+        "ב. הוא מונע קיפאון (deadlock) בצורה יעילה יותר ממנעולי TAS/CAS.",
+        "ג. הוא מפחית את עומס ה-invalidate על ה-cache על ידי שימוש במספר משתני נעילה.",
+        "ד. הוא מאפשר למספר חוטים להיכנס לקטע הקריטי בו-זמנית אם המנעול זמין."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "מנעול Ticket Lock, בניגוד למנעולים פשוטים יותר כמו TestAndSet (TAS) או CompareAndSwap (CAS), תוכנן במיוחד כדי להבטיח הוגנות (fairness). החומר מציין במפורש: \"נראה רעיון למנעול שיש בו הוגנות: TICKET LOCK\". הוא עושה זאת על ידי הקצאת \"כרטיס\" (מספר תור) לכל חוט המבקש להיכנס לקטע הקריטי, ורק כאשר ה\"תור\" (turn) הכללי תואם את מספר הכרטיס של החוט, הוא מקבל גישה. מנעולי TAS/CAS, כפי שהחומר מציין, \"אינם בהכרח הוגנים\" וייתכן שחוט יתפוס את המנעול שוב ושוב מבלי לאפשר לחוטים אחרים גישה, מה שמוביל להרעבה. אפשרות ב' אינה נכונה מכיוון שגם מנעולי TAS/CAS מונעים קיפאון. אפשרות ג' מתארת יתרון כללי של \"מנעולי תור\" (queue locks) בהפחתת עומס על ה-cache, אך התיאור הספציפי של מנגנון ה-Ticket Lock בחומר מתמקד בהוגנות באמצעות מנגנון תור, ולא מפרט כיצד הוא משיג הפחתה בעומס ה-cache בדרך של ריבוי משתני נעילה לכל חוט כמו במנעול אנדרסון. אפשרות ד' אינה נכונה מכיוון שמנעול נועד להבטיח מניעה הדדית, כלומר שרק חוט אחד יוכל להיכנס לקטע הקריטי בכל רגע נתון."
+    }
+  }
+}

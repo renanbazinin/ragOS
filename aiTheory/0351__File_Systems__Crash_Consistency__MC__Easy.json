@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Crash Consistency",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:19:02",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      20,
+      21,
+      22
+    ],
+    "token_usage": {
+      "prompt_tokens": 1936,
+      "output_tokens": 662,
+      "total_tokens": 4385
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Crash Consistency"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהי המטרה העיקרית של התמודדות עם בעיית Crash Consistency במערכות קבצים?",
+      "code_snippet": null,
+      "options": [
+        "א. להבטיח שמערכת הקבצים תישאר במצב תקין (consistent) גם לאחר קריסה בלתי צפויה.",
+        "ב. למנוע אובדן נתונים של המשתמש בכל מצב, גם אם הנתונים לא נכתבו פיזית לדיסק.",
+        "ג. לשפר את ביצועי הגישה האקראית לקבצים גדולים.",
+        "ד. להפעיל תוכנית File System Checker (fsck) באופן יזום בכל פעם שמבוצעת פעולת כתיבה."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "ההרצאה מגדירה במפורש את בעיית Crash Consistency כדרך להתמודד עם קריסות \"בלי להשאיר את מערכת הקבצים שלנו במצב לא תקין\" (הרצאה 21, קטע 4). המטרה היא \"לקחת את מערכת הקבצים ולהעביר אותה ממצב תקין אחד למצב תקין אחר באופן אטומי\" (הרצאה 21, קטע 13). לכן, המטרה העיקרית היא להבטיח את תקינות ועקביות מערכת הקבצים לאחר קריסה.\nאפשרויות אחרות אינן נכונות מכיוון:\nב. ההרצאה מציינת במפורש כי מניעת אובדן נתוני משתמש אינה המטרה העיקרית של Crash Consistency: \"אם משתמש איבד את הנתונים זה לא מעניין אותנו, אנחנו לא יכולים למנוע שהם יאבדו אם הנתונים לא נכתבו\" (הרצאה 21, קטע 13).\nג. שיפור ביצועי גישה אקראית נדון בהקשר של מבני נתונים של מערכת קבצים (הרצאה 20, קטע 13), ולא כמטרה של Crash Consistency.\nד. בעוד ש-File System Checker (fsck) הוא פתרון לבעיית Crash Consistency, הוא אינו המטרה עצמה. בנוסף, fsck מופעל בדרך כלל לאחר קריסה, בזמן עליית המחשב, ולא באופן יזום בכל פעולת כתיבה (הרצאה 21, קטע 15)."
+    }
+  }
+}

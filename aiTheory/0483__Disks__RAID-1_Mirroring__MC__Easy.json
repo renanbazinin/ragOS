@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Disks",
+    "topic_hint": "RAID-1 Mirroring",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:50:08",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      18,
+      19
+    ],
+    "token_usage": {
+      "prompt_tokens": 2120,
+      "output_tokens": 498,
+      "total_tokens": 3756
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Disks",
+    "topic": [
+      "RAID-1 Mirroring"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהו המאפיין המרכזי של RAID-1, המכונה גם mirroring, על פי חומר ההרצאה?",
+      "code_snippet": null,
+      "options": [
+        "א. שכפול מלא של כל הנתונים בין מספר דיסקים פיזיים, על מנת להבטיח יתירות ואמינות גבוהה.",
+        "ב. פיצול נתונים לבלוקים קטנים וחלוקתם לסירוגין (striping) בין דיסקים שונים לצורך שיפור ביצועי קריאה וכתיבה.",
+        "ג. שמירת נתוני זוגיות (parity) מבוזרים על פני כל הדיסקים, המאפשרים שחזור נתונים במקרה של כשל בדיסק אחד.",
+        "ד. איחוד מספר דיסקים פיזיים לדיסק לוגי יחיד שקוף למערכת ההפעלה, ללא כל שכפול או פיצול פנימי."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "על פי חומר ההרצאה, RAID-1 נקרא \"mirroring\" והוא מתאר מצב שבו \"נשכפל את הנתונים בין כולם (כל בלוק יהיה משוכפל בין כל הדיסקים)\". המטרה העיקרית של שכפול זה היא יתירות, כך ש\"אם דיסק אחד יתקלקל, נוכל להביא את הנתונים מדיסק אחר\", מה שמבטיח אמינות גבוהה. אפשרות ב' מתארת את RAID-0 (striping), אפשרות ג' מתארת את RAID-5 (parity מבוזר), ואילו אפשרות ד' מתארת איחוד דיסקים ללא מנגנון ספציפי של RAID-1."
+    }
+  }
+}

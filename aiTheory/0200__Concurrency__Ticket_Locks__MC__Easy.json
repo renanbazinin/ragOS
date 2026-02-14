@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Ticket Locks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:41:57",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      16,
+      11,
+      13
+    ],
+    "token_usage": {
+      "prompt_tokens": 2333,
+      "output_tokens": 564,
+      "total_tokens": 5801
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Ticket Locks"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהו היתרון המרכזי של מנגנון ה-Ticket Lock בהשוואה למנעולים פשוטים יותר שאינם מבטיחים סדר כניסה, כמו TestAndSet?",
+      "code_snippet": null,
+      "options": [
+        "א. הוא מבטיח הוגנות בכך שחוטים נכנסים לקטע הקריטי לפי סדר בקשתם (First-Come, First-Served).",
+        "ב. הוא מונע קיפאון (deadlock) באופן מוחלט בכל תרחיש אפשרי.",
+        "ג. הוא מפחית משמעותית את העומס על ה-BUS על ידי מניעת פקודות invalidate מרובות.",
+        "ד. הוא מבטיח מניעה הדדית (mutual exclusion) בין חוטים בקטע הקריטי."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "החומר המצורף מציין במפורש כי מנגנון ה-Ticket Lock הוצג כ'רעיון למנעול שיש בו הוגנות' (Lecture 11, chunk 45). המנגנון משיג זאת על ידי כך שכל חוט המעוניין להיכנס לקטע קריטי לוקח 'כרטיס' (מספר תור), והכניסה לקטע הקריטי מתאפשרת רק לחוט שהגיע תורו (כאשר מספר הכרטיס שלו תואם למשתנה ה-'turn' הגלובלי). בדרך זו, חוטים נכנסים לקטע הקריטי לפי הסדר בו ביקשו גישה, מה שמבטיח הוגנות (First-Come, First-Served). מנעולים פשוטים יותר כמו TestAndSet או CompareAndSwap אכן מבטיחים מניעה הדדית וחופש מקיפאון, אך אינם בהכרח הוגנים מבחינת תזמון, כפי שמוזכר בחומר הלימוד (Lecture 11, chunk 42, 45).",
+      "explanation_reference": "Lecture 11, chunk 45; Lecture 11, chunk 42"
+    }
+  }
+}

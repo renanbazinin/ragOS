@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Producer-Consumer",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-14 19:02:50",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      14
+    ],
+    "token_usage": {
+      "prompt_tokens": 1809,
+      "output_tokens": 701,
+      "total_tokens": 3995
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Semaphores and Producer-Consumer"
+    ],
+    "difficulty_estimation": "Hard",
+    "content": {
+      "text": "בבעיית היצרן/צרכן (bounded buffer) הממומשת באמצעות סמפורים, כפי שתואר בחומר ההרצאה, נהוג לאתחל את הסמפור 'empty' לערך המייצג את גודל הבאפר המקסימלי (MAX), ואת הסמפור 'full' ל-0. מה תהיה ההשלכה המיידית העיקרית אם הסמפור 'empty' יאותחל בטעות ל-0 במקום לערכו הנכון MAX, כאשר מנסים להפעיל את המערכת?",
+      "code_snippet": "init(&empty, 0); // Incorrect initialization\ninit(&full, 0);\nint fill = 0;\nint use = 0;\nint buff[MAX];\n\n// ... Producer thread logic would then include:\n// sem_wait(&empty);",
+      "options": [
+        "א. כל הצרכנים יחסמו מיד בניסיון לצרוך פריט, מכיוון שהסמפור 'full' יהיה גם הוא 0.",
+        "ב. כל היצרנים יחסמו מיד בניסיון להוסיף פריט לבאפר, גם אם הבאפר ריק לחלוטין.",
+        "ג. יתאפשר ליצרנים להוסיף פריטים ללא הגבלה, מה שיוביל לגלישת באפר (buffer overflow).",
+        "ד. לא תהיה כל השפעה מיידית, שכן הסמפור 'empty' רלוונטי רק לאחר שהבאפר מתמלא."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "הסמפור 'empty' מייצג את מספר המדפים הפנויים בבאפר. תפקידו הוא לוודא שליצרנים יש מקום פנוי להניח בו פריטים לפני שהם מוסיפים אותם. יצרן מבצע פעולת `sem_wait(&empty)` לפני הוספת פריט. אם הסמפור 'empty' מאותחל ל-0 במקום ל-MAX, הרי שכל יצרן שינסה להוסיף פריט לבאפר יבצע `sem_wait` על ערך 0. פעולה זו תגרום לו להיחסם מיד, מכיוון שהסמפור לא יכול לרדת מתחת ל-0 והחוט ימתין עד שערך הסמפור יהפוך לחיובי. מצב זה יתרחש גם אם הבאפר ריק לחלוטין פיזית, מכיוון שערכו של הסמפור שגוי. לכן, כל היצרנים יחסמו מיד ולא יוכלו להוסיף פריטים."
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Disks",
+    "topic_hint": "RAID",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-14 18:46:50",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      18,
+      19
+    ],
+    "token_usage": {
+      "prompt_tokens": 1982,
+      "output_tokens": 629,
+      "total_tokens": 5256
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Disks",
+    "topic": [
+      "RAID"
+    ],
+    "difficulty_estimation": "Hard",
+    "content": {
+      "text": "בהתבסס על חומר ההרצאה הנתון, אילו מההיגדים הבאים נכון לגבי RAID-4 ו-RAID-5?",
+      "code_snippet": null,
+      "options": [
+        "א. למרות ש-RAID-4 ו-RAID-5 מציגים זמן אחזור קריאה וכתיבה זהים בטבלה, RAID-5 נחשב עדיף באופן מוחלט ואין סיבה להשתמש ב-RAID-4.",
+        "ב. RAID-4 מציע יתרון באמינות על פני RAID-5, כיוון שהוא תומך בגיבוי של יותר מדיסקים במקרה של כשל.",
+        "ג. RAID-5 מיועד בעיקר לשיפור ביצועי קריאה רנדומלית, בעוד RAID-4 מתמקד ביעילות אחסון נתונים סדרתיים.",
+        "ד. זמן אחזור הכתיבה (Write Latency) ב-RAID-4 עדיף על זה של RAID-5, מה שהופך אותו לבחירה טובה יותר ליישומים עתירי כתיבה."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "חומר ההרצאה מציין במפורש כי 'RAID-5 is strictly better than RAID-4' וכי 'אין סיבה להשתמש ב-raid-4'. למרות שטבלת ההשוואה מציגה עבור שניהם זמן אחזור קריאה (Read Latency) של D וזמן אחזור כתיבה (Write Latency) של 2D, והם תומכים שניהם בכשל של דיסק אחד (1), ההצהרה המפורשת על עדיפותו המוחלטת של RAID-5 ואי הצורך ב-RAID-4 גוברת. לכן, ההיגד באפשרות א' הוא הנכון ביותר על פי חומר ההרצאה. אפשרויות ב' ו-ד' שגויות על פי הטבלה המציגה ערכים זהים לאמינות (1 דיסק כשל) ולזמני כתיבה. אפשרות ג' שגויה כיוון שהחומר לא מייחס ל-RAID-4 התמחות ב-I/O סדרתי, ואף מציין ש-RAID-5 מומלץ גם עבור Sequential I/O וגם עבור Capacity and reliability."
+    }
+  }
+}

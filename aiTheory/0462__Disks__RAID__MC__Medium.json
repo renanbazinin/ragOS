@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Disks",
+    "topic_hint": "RAID",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 18:45:24",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      18,
+      19
+    ],
+    "token_usage": {
+      "prompt_tokens": 1982,
+      "output_tokens": 524,
+      "total_tokens": 4846
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Disks",
+    "topic": [
+      "RAID"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "איזו מהטענות הבאות לגבי מערכות RAID נכונה על פי חומר ההרצאה?",
+      "code_snippet": null,
+      "options": [
+        "א. RAID-0 משפר ביצועים ואמינות גם יחד על ידי פיצול נתונים בין דיסקים.",
+        "ב. אין סיבה ממשית להשתמש ב-RAID-4, שכן RAID-5 עדיף ממנו באופן מובהק.",
+        "ג. מערכת RAID דורשת ממערכת ההפעלה לנהל את פיצול הנתונים והכפלתם באופן מפורש.",
+        "ד. JBOD מספק מנגנון שקוף וקל לניהול דיסקים מרובים, ומשמש כאלטרנטיבה מודרנית ל-RAID."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "חומר ההרצאה מציין במפורש כי \"RAID-5 is strictly better than RAID-4\" וכי \"אין סיבה להשתמש ב-raid-4\". לכן, טענה ב' נכונה. טענה א' אינה נכונה מכיוון ש-RAID-0 משפר ביצועים אך אינו מספק אמינות, ואף מגדיל את הסיכון לאובדן נתונים במקרה של כשל דיסק בודד. טענה ג' אינה נכונה מכיוון שמנגנון ה-RAID נועד להיות שקוף לחלוטין למערכת ההפעלה וליישומים, ונתפס כדיסק לוגי יחיד, בדומה לזיכרון וירטואלי. טענה ד' אינה נכונה, שכן JBOD אינו מנגנון שקוף וקל לניהול; הוא דורש מהיישומים לנהל את פיצול המידע באופן ידני, בניגוד למנגנון ה-RAID שבא לפתור בעיה זו."
+    }
+  }
+}

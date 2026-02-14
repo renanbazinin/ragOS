@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Journaling",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 18:22:49",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      21
+    ],
+    "token_usage": {
+      "prompt_tokens": 1706,
+      "output_tokens": 426,
+      "total_tokens": 4252
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Journaling"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "לפי פרוטוקול ה-journaling הסופי, הידוע גם כ-ordered journaling, המתואר בחומר ההרצאה, מהי הפעולה העיקרית המבוצעת בשלב ה-\"Checkpoint\"?",
+      "code_snippet": null,
+      "options": [
+        "א. כתיבת הנתונים (data) למיקומם הסופי בדיסק, והמתנה לסיומה.",
+        "ב. כתיבת חסימת ההתחייבות של הטרנזקציה (Txe) ל-journal.",
+        "ג. כתיבת המטא-דאטה (metadata) למיקומיו הסופיים בדיסק.",
+        "ד. סימון הטרנזקציה כפנויה לשימוש עתידי ב-journal superblock."
+      ]
+    },
+    "solution": {
+      "correct_option": "ג",
+      "explanation": "החומר המצורף (Lecture 21, chunk 38) מפרט את פרוטוקול ה-journaling הסופי, הידוע כ-ordered journaling. שלב 4 בפרוטוקול זה הוא \"Checkpoint\", ותפקידו המוגדר הוא \"Write metadata to final locations\" (כתיבת המטא-דאטה למיקומיה הסופיים). אפשרות א' מתארת את שלב 1 (Data write), אפשרות ב' מתארת את שלב 3 (Journal commit), ואפשרות ד' מתארת את שלב 5 (Free). לכן, האפשרות הנכונה היא ג'."
+    }
+  }
+}

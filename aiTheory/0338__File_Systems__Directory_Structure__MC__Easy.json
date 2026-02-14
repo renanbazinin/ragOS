@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Directory Structure",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:16:00",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      20,
+      21
+    ],
+    "token_usage": {
+      "prompt_tokens": 2034,
+      "output_tokens": 332,
+      "total_tokens": 3456
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Directory Structure"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "על פי חומר ההרצאה, איזה שדה ב-inode מאפשר למערכת הקבצים להבחין אם ה-inode מייצג קובץ רגיל או תיקייה?",
+      "code_snippet": null,
+      "options": [
+        "א. ה-UID (מזהה הבעלים).",
+        "ב. שדה ה\"סוג\" (Type).",
+        "ג. מספר בלוקי הנתונים.",
+        "ד. ספירת הקישורים (Links count)."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "חומר ההרצאה מציין בפירוש שבין המידע הנשמר ב-inode קיים שדה \"Type\" המגדיר האם ה-inode הוא מסוג \"file\" (קובץ) או \"directory\" (תיקייה). שדה זה הוא המנגנון הישיר המאפשר למערכת הקבצים להבחין בין השניים. שאר האפשרויות מתארות מידע אחר ב-inode שאינו משמש להבחנה בין קובץ לתיקייה."
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Disks",
+    "topic_hint": "Sequential vs Random Access",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 18:40:18",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      17,
+      18,
+      19
+    ],
+    "token_usage": {
+      "prompt_tokens": 2093,
+      "output_tokens": 672,
+      "total_tokens": 4952
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Disks",
+    "topic": [
+      "Sequential vs Random Access"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "מדוע גישה סדרתית (sequential access) לדיסק קשיח מהירה יותר באופן משמעותי מגישה אקראית (random access)?",
+      "code_snippet": null,
+      "options": [
+        "א. גישה סדרתית ממזערת את הצורך בתנועת ראש הקריאה/כתיבה (seek time) ואת זמן ההמתנה לסיבוב הדיסק (rotation latency), שהם המרכיבים הדומיננטיים בזמן ה-I/O הכולל.",
+        "ב. הדיסק הקשיח מתוכנן לאחסן נתונים סדרתית בלבד, וגישה אקראית דורשת המרה פנימית לגישה סדרתית.",
+        "ג. גישה סדרתית מאפשרת העברת מידע בכמויות קטנות יותר אך בתדירות גבוהה יותר, מה שמשפר את הביצועים.",
+        "ד. זמן העברת המידע (T_transfer) בגישה סדרתית ארוך יותר, ולכן קצב הנתונים הכולל גבוה יותר."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "החומר המצורף מציין כי זמן ה-I/O הכולל לסקטור מורכב מזמן ה-seek (תנועת ראש הקריאה/כתיבה), זמן ה-rotation (המתנה לסיבוב הדיסק) וזמן ה-transfer (העברת המידע). החומר מדגיש כי זמן ה-transfer הוא זניח, וכי המרכיבים הדומיננטיים בזמן ה-I/O הם ה-seek וה-rotation. בגישה אקראית, ראש הקריאה/כתיבה נדרש לנוע בין מיקומים שונים בדיסק, מה שגורם לזמני seek ו-rotation גבוהים. לעומת זאת, בגישה סדרתית, לאחר ה-seek וה-rotation הראשוניים, הנתונים הבאים ממוקמים בסמוך ויכולים להיקרא ברצף עם מינימום או ללא תנועת ראש נוספת ומינימום המתנה לסיבוב. לכן, גישה סדרתית ממזערת את זמני ה-seek וה-rotation, ובכך מביאה לביצועים מהירים יותר, כפי שהחומר מציין במפורש: 'אנחנו יודעים ש-S>R' (כאשר S הוא קצב קריאה סדרתית ו-R הוא קצב קריאה אקראית)."
+    }
+  }
+}

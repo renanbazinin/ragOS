@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Paging and TLB",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-14 18:55:53",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      7
+    ],
+    "token_usage": {
+      "prompt_tokens": 2169,
+      "output_tokens": 690,
+      "total_tokens": 4815
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Paging and TLB"
+    ],
+    "difficulty_estimation": "Hard",
+    "content": {
+      "text": "תהליך מבצע גישה לכתובת וירטואלית מסוימת. ה-MMU בודק תחילה את ה-TLB ומגלה שהמיפוי אינו קיים (TLB miss). כתוצאה מכך, ה-MMU ממשיך לבצע חיפוש בטבלת הדפים כדי למצוא את רשומת טבלת הדפים (PTE) המתאימה. איזה מהמצבים הבאים, שנמצא ב-PTE שהתגלה, יגרום ל-MMU להוציא **trap** למערכת ההפעלה *לפני* השלמת התרגום לכתובת פיזית וגישה לזיכרון?",
+      "code_snippet": null,
+      "options": [
+        "א. ביט ה-`valid` ברשומת ה-PTE הוא 0.",
+        "ב. ביט ה-`dirty` ברשומת ה-PTE הוא 1.",
+        "ג. ביט ה-`reference` ברשומת ה-PTE הוא 1.",
+        "ד. ביט ה-`protection` ברשומת ה-PTE מאפשר את סוג הגישה שהתהליך מנסה לבצע."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "לאחר TLB miss, ה-MMU ניגש לטבלת הדפים כדי לאחזר את ה-PTE. בשלב זה, ה-MMU בודק את תקינות המיפוי וההרשאות. אם ביט ה-`valid` ב-PTE הוא 0, פירוש הדבר שהדף אינו תקף או אינו בשימוש על ידי התהליך. במקרה זה, ה-MMU יוציא מיד **trap** למערכת ההפעלה, כפי שמצוין בחומר ההרצאה: \"אם ביט זה הוא 0 אז המיפוי הזה לא תקף... אם תהליך מנסה לגשת לדף כזה, כשה-mmu רואה שהביט הוא 0 הוא מוציא שגיאה למערכת ההפעלה (trap)\".\n\nאפשרויות ב' ו-ג' (ביטי ה-`dirty` וה-`reference`) הם ביטי סטטוס המציינים אם הדף השתנה או נגיש לאחרונה, ואינם גורמים ל-trap מיידי. אפשרות ד' מציינת כי ביט ה-`protection` מאפשר את הגישה המבוקשת, ולכן לא תתרחש שגיאה או trap בגין הפרת הרשאה."
+    }
+  }
+}

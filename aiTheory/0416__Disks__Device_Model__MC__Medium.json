@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Disks",
+    "topic_hint": "Device Model",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 18:34:11",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      17,
+      18
+    ],
+    "token_usage": {
+      "prompt_tokens": 2247,
+      "output_tokens": 525,
+      "total_tokens": 4038
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Disks",
+    "topic": [
+      "Device Model"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "כיצד מערכת RAID (Redundant Array of Independent Disks) מציגה את עצמה למערכת ההפעלה, על פי עקרונות המודל ההתקני?",
+      "code_snippet": null,
+      "options": [
+        "א. כדיסק קשיח לוגי יחיד, תוך ניהול שקוף של מספר דיסקים פיזיים מתחת לפני השטח.",
+        "ב. כמספר דיסקים פיזיים נפרדים, המחייב את מערכת ההפעלה לנהל את פיצול הנתונים והעמידות.",
+        "ג. כהתקן I/O הממופה לזיכרון, המאפשר גישה ישירה לסקטורים פיזיים ללא צורך במעבר ל-kernel mode.",
+        "ד. כמנגנון תוכנה בלבד הפועל במרחב המשתמש, המטפל בעצמו בעמידות ובביצועים של הדיסקים."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "החומר המצוין בשיעור 18 (chunk 25 ו-26) מסביר שמערכת RAID נחשבת \"דיסק מדומה\" או \"דיסק לוגי\". מבחינת מערכת ההפעלה והתוכניות, היא רואה דיסק קשיח אחד, למרות שבפועל מדובר במספר דיסקים פיזיים. מנגנון ה-RAID (בין אם ממומש בחומרה ובין אם בקוד) הוא שקוף לחלוטין עבור מערכת ההפעלה, והוא מפצל את הנתונים, מכפל קבצים ומטפל בעמידות ובביצועים מאחורי הקלעים. לכן, הגישה הנכונה היא שהמערכת מוצגת כדיסק לוגי יחיד, המנהל באופן שקוף את המורכבות הפיזית."
+    }
+  }
+}

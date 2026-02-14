@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Signals and System Calls",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 18:59:12",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      9,
+      5
+    ],
+    "token_usage": {
+      "prompt_tokens": 1862,
+      "output_tokens": 811,
+      "total_tokens": 5377
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Signals and System Calls"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "מהו ההבדל המהותי ביותר בין \"סיגנלים\" (signals) ל\"פסיקות\" (interrupts) בהקשר של יכולת תהליך משתמש להתערב בטיפול בהם?",
+      "code_snippet": "// signal2.c\nvoid signal_handler(int signal) {\n    if (signal == SIGCHLD) {\n        int rc = wait(NULL);\n        printf(\"child terminated %d (pid:%d)\\n\", rc, getpid());\n    }\n}\n\nint main(int argc, char *argv[])\n{\n    struct sigaction act;\n    sigemptyset(&act.sa_mask);\n    act.sa_handler = signal_handler;\n    act.sa_flags = 0;\n    \n    sigaction(SIGCHLD, &act, NULL);\n    if (fork()) {\n        while (1);\n    }\n}",
+      "options": [
+        "א. פסיקות הן אירועים פנימיים למערכת ההפעלה שאינם ניתנים לשינוי או ביטול על ידי תהליכי משתמש, בעוד שסיגנלים הם אירועים שבהם תהליכי משתמש יכולים להתערב, למשל על ידי הגדרת פונקציית טיפול או התעלמות מהם.",
+        "ב. סיגנלים הם תמיד תוצאה של פעולת משתמש (כמו לחיצה על Ctrl+C), בעוד שפסיקות הן תמיד אירועים חומרתיים בלבד.",
+        "ג. פסיקות משמשות בעיקר לתקשורת בין תהליכים, ואילו סיגנלים מצביעים על שגיאות חמורות במערכת.",
+        "ד. תהליכי משתמש יכולים לבטל פסיקות בצורה יזומה, אך אינם יכולים להשפיע על אופן הטיפול בסיגנלים."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "על פי חומר הלימוד, פסיקות (interrupts) הן אירועים פנימיים למערכת ההפעלה, ותהליכי משתמש אינם יכולים להשפיע עליהן או לבטל אותן. המעבד מטפל בהן באמצעות טבלת כתובות של ה-kernel. לעומת זאת, סיגנלים (signals) הם אירועים המיועדים לתהליכים, ולכל תהליך יש טבלת אירועים משלו. תהליכי משתמש *כן* יכולים להתערב באופן הטיפול בסיגנלים אלו; לדוגמה, הם יכולים להגדיר פונקציית טיפול (signal handler) עבור סיגנל מסוים, כפי שמוצג בדוגמת הקוד עבור SIGCHLD, או לבחור להתעלם מסיגנל (למשל, SIG_IGN עבור SIGCHLD כדי למנוע זומבים). רק מערכת ההפעלה יכולה לבטל פסיקות, בעוד שסיגנלים נתונים לשליטת תהליך המשתמש במידה מסוימת."
+    }
+  }
+}

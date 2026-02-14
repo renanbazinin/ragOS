@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Disks",
+    "topic_hint": "Device Model",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 18:33:41",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      17,
+      18
+    ],
+    "token_usage": {
+      "prompt_tokens": 2247,
+      "output_tokens": 410,
+      "total_tokens": 4150
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Disks",
+    "topic": [
+      "Device Model"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "לפי מודל ההתקן של דיסק קשיח, מהו 'צילינדר' (cylinder)?",
+      "code_snippet": null,
+      "options": [
+        "א. סט של סקטורים זהים על פני משטח אחד של פלטה.",
+        "ב. אותה טבעת (track) על פני כל המשטחים של הפלטות בדיסק.",
+        "ג. המוט המרכזי המחובר למנוע ומסובב את הפלטות.",
+        "ד. צד אחד של פלטה מגנטית שעליו נשמרים נתונים."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "על פי חומר ההרצאה (Lecture 17, chunk 25), 'סט של עיגולים (tracks) זהים על פני צלחות שונות נקראים צילינדר (cylinder)'. צילינדר מייצג את כל ה-tracks הנמצאים באותו רדיוס על כל משטחי הפלטות בדיסק. אפשרות א' אינה נכונה מכיוון שסקטור הוא יחידת אחסון קטנה יותר בתוך track, וצילינדר מתייחס ל-tracks על פני מספר משטחים. אפשרות ג' מתארת את ה-spindle (מוט הסיבוב). אפשרות ד' מתארת surface (משטח) של פלטה."
+    }
+  }
+}

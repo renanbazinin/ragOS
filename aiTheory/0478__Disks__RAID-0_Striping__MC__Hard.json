@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Disks",
+    "topic_hint": "RAID-0 Striping",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-14 18:49:11",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      18,
+      19
+    ],
+    "token_usage": {
+      "prompt_tokens": 2045,
+      "output_tokens": 542,
+      "total_tokens": 5171
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Disks",
+    "topic": [
+      "RAID-0 Striping"
+    ],
+    "difficulty_estimation": "Hard",
+    "content": {
+      "text": "בהתבסס על עקרונות ה-Striping ב-RAID-0, איזו קביעה לגבי אמינות הנתונים (Data Reliability) במערכת היא הנכונה ביותר?",
+      "code_snippet": null,
+      "options": [
+        "א. RAID-0 משפר את אמינות הנתונים על ידי פיזורם בין דיסקים מרובים, ומאפשר שחזור במקרה של כשל בדיסק בודד.",
+        "ב. כשל בדיסק פיזי בודד במערך RAID-0 יוביל לאובדן פוטנציאלי של כלל הנתונים המאוחסנים במערך.",
+        "ג. RAID-0 אינו משפיע כלל על אמינות הנתונים, שכן מטרתו היחידה היא שיפור ביצועי קריאה וכתיבה.",
+        "ד. אמינות הנתונים ב-RAID-0 תלויה בגודל ה-chunk size; ככל שה-chunk גדול יותר, כך האמינות גבוהה יותר."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "החומר המצוין בשיעור קובע במפורש כי RAID-0 מיועד לביצועים (Performance) אך ללא אמינות (no reliability). טכניקת ה-Striping ב-RAID-0 מפצלת את הנתונים לסירוגין בין דיסקים פיזיים שונים ללא יצירת עותקים מיותרים או מידע שחזור (parity). כתוצאה מכך, אם דיסק פיזי בודד במערך כזה כושל, חלקים מהנתונים של כל הקבצים (או רבים מהם) הופכים לבלתי נגישים, מה שמוביל לאובדן מוחלט של כלל הנתונים המאוחסנים במערך הווירטואלי. זוהי ההשלכה המרכזית של היעדר אמינות ב-RAID-0."
+    }
+  }
+}

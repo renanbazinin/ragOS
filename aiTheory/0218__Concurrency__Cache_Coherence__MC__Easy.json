@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Cache Coherence",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:46:35",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      16,
+      15
+    ],
+    "token_usage": {
+      "prompt_tokens": 2018,
+      "output_tokens": 410,
+      "total_tokens": 3586
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Cache Coherence"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהי הבעיה העיקרית הנוצרת כאשר למספר מעבדים יש מטמונים (caches) משלהם והם ניגשים לנתונים משותפים?",
+      "code_snippet": null,
+      "options": [
+        "א. מעבדים שונים עשויים לקרוא ערכים לא מעודכנים של נתונים משותפים.",
+        "ב. כל המעבדים חייבים לגשת ל-RAM בכל פעם שהם רוצים לקרוא נתונים.",
+        "ג. קטעים קריטיים אינם ניתנים ליישום במצב זה.",
+        "ד. יש צורך בסנכרון בין תהליכים שאינם חולקים זיכרון."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "על פי חומר ההרצאה (Lecture 15, chunk 23), הבעיה המרכזית הנוצרת היא שאם מעבד אחד קורא נתון לתוך המטמון שלו ומשנה את ערכו, והזיכרון הראשי עדיין לא מעודכן, מעבד אחר שינסה לקרוא את אותו נתון יקבל 'ערך לא תקין'. זוהי בעיית עקביות המטמונים (cache coherence), שבה יש להבטיח שכל המעבדים רואים את הגרסה העדכנית ביותר של נתונים משותפים."
+    }
+  }
+}

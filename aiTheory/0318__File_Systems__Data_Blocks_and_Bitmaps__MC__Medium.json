@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Data Blocks and Bitmaps",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 18:10:50",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      20,
+      21
+    ],
+    "token_usage": {
+      "prompt_tokens": 1783,
+      "output_tokens": 636,
+      "total_tokens": 4653
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Data Blocks and Bitmaps"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "במהלך פעולת כתיבה לקובץ, מערכת הקבצים מקצה בלוק נתונים חדש (data block) ומעדכנת את ה-inode כך שיצביע עליו. אם קריסה מתרחשת לאחר ששני עדכונים אלו בוצעו אך לפני ש-data bitmap עודכן לסמן את הבלוק כתפוס, מהו המצב הלא תקין שעלול להיווצר?",
+      "code_snippet": null,
+      "options": [
+        "א. ה-data bitmap יסמן את בלוק הנתונים כפנוי, למרות שה-inode מצביע אליו, ועלול להיווצר מצב שבו בלוק זה יוקצה מחדש לקובץ אחר.",
+        "ב. יתרחש \"זליגת זיכרון\" (memory leak), כאשר בלוק הנתונים מסומן כתפוס ב-data bitmap אך אף inode אינו מצביע עליו.",
+        "ג. הקובץ יכיל נתונים חלקיים או שגויים, אך מערכת הקבצים תזהה את הבלוקים כפנויים ותוכל לשחזר אותם בקלות.",
+        "ד. ה-inode עצמו יסומן כפנוי ב-inode bitmap, מה שיאפשר הקצאה חוזרת של ה-inode לקובץ אחר ויגרום לאובדן הקובץ המקורי."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "התשובה הנכונה היא א'. לפי חומר ההרצאה (Lecture 21, chunk 12, סעיף ii), אם קריסה מתרחשת לאחר שבלוק הנתונים החדש עודכן ולאחר שה-inode עודכן להצביע עליו, אך לפני שה-data bitmap עודכן לסמן את הבלוק כתפוס, הבעיה שנוצרת היא שה-data bitmap עדיין מצביע על הבלוק כפנוי. מצב זה עלול להוביל לכך שבלוק זה יוקצה מאוחר יותר לקובץ אחר, בעוד שה-inode המקורי עדיין מצביע עליו, מה שיוצר חוסר עקביות חמור במערכת הקבצים ומצב לא תקין. אפשרות ב' מתארת מצב הפוך, שבו ה-data bitmap עודכן אך ה-inode לא (סעיף iii בחומר ההרצאה)."
+    }
+  }
+}

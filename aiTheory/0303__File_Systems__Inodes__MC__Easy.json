@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Inodes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:07:26",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      20,
+      22
+    ],
+    "token_usage": {
+      "prompt_tokens": 1834,
+      "output_tokens": 387,
+      "total_tokens": 4217
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Inodes"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "איזה סוג מידע עיקרי מאוחסן ב-inode עבור קובץ במערכת קבצים?",
+      "code_snippet": null,
+      "options": [
+        "א. סוג הקובץ, גודלו, הרשאות גישה ומספרי הבלוקים המכילים את תוכן הקובץ.",
+        "ב. שם הקובץ המלא ונתיבו במערכת הקבצים.",
+        "ג. הגרסה העדכנית ביותר של ה-imap עבור ה-inode.",
+        "ד. מידע על בלוק ה-Super Block ומיקום ה-inode bitmap."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "לפי חומר ההרצאה, inode מכיל פרטים על הקובץ כגון סוג הקובץ, גודלו, הרשאות גישה וכן את מספרי הבלוקים בדיסק שבהם נמצא התוכן של הקובץ ('איפה המידע שלו נמצא'). אפשרויות ב', ג' ו-ד' מתארות מידע המאוחסן במקומות אחרים במערכת הקבצים (כמו בערכי תיקיות עבור שמות קבצים, ב-imap עבור מיפויים של inodes, או ב-Super Block עבור מידע כללי על מערכת הקבצים), ולא ב-inode עצמו."
+    }
+  }
+}

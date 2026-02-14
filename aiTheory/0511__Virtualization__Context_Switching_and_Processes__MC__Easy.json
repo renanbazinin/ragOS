@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Context Switching and Processes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:57:52",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      2,
+      6
+    ],
+    "token_usage": {
+      "prompt_tokens": 2014,
+      "output_tokens": 428,
+      "total_tokens": 3922
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Context Switching and Processes"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "איזה מהבאים נשמר כחלק ממצב תהליך (process context) במהלך פעולת context switch?",
+      "code_snippet": null,
+      "options": [
+        "א. מצב המעבד (כגון רגיסטרים), מיקומי זיכרון וקבצים פתוחים.",
+        "ב. רק ה-ID של התהליך וזמן הריצה הכולל שלו.",
+        "ג. רק הכתובת הפיזית של ה-PCB בזיכרון הראשי.",
+        "ד. רק תוכן המטמון (cache) של המעבד."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "המנגנון של context switch (החלפה בין תהליכים) נועד לאפשר למערכת ההפעלה להשהות תהליך אחד ולטעון תהליך אחר, תוך שמירה על היכולת לחדש את התהליך שהופסק מאותה נקודה. לשם כך, מערכת ההפעלה שומרת את כל המידע הנדרש עבור הריצה של התהליך המושעה. על פי החומר, מידע זה כולל את מצב המעבד (כגון ערכי הרגיסטרים), מיקומי הזיכרון שהתהליך מחזיק ומשתמש בהם, ואת הקבצים הפתוחים של התהליך. מידע זה נשמר ב-PCB (Process Control Block) של התהליך. לכן, אפשרות א' היא הנכונה ביותר."
+    }
+  }
+}
