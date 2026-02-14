@@ -57,6 +57,7 @@ export default function TheoryPage() {
         difficulty: filterDifficulty || undefined,
         page,
         page_size: 20,
+        shuffle: shuffled,
       });
       setQuestions(res.questions);
       setTotalPages(res.total_pages);
@@ -66,15 +67,13 @@ export default function TheoryPage() {
     } finally {
       setLoading(false);
     }
-  }, [filterSubject, filterTopics, filterDifficulty, page]);
+  }, [filterSubject, filterTopics, filterDifficulty, page, shuffled]);
 
   useEffect(() => {
     loadQuestions();
   }, [loadQuestions]);
 
-  const displayQuestions = shuffled
-    ? [...questions].sort(() => Math.random() - 0.5)
-    : questions;
+  const displayQuestions = questions;
 
   // Available topics for the selected subject
   const filteredTopicsList = stats

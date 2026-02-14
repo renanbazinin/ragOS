@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Eye, EyeOff, CheckCircle, XCircle } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Eye, EyeOff, CheckCircle, XCircle, Shuffle } from 'lucide-react';
 import type { QuestionJSON } from './types';
 import { FormattedText } from './FormattedText';
 
@@ -9,31 +9,79 @@ interface Props {
   source?: string;
 }
 
+const HEBREW_LETTERS = ['א', 'ב', 'ג', 'ד', 'ה', 'ו'];
+
 const difficultyColor: Record<string, string> = {
   Easy: '#22c55e',
   Medium: '#f59e0b',
   Hard: '#ef4444',
 };
 
+/** Fisher-Yates shuffle returning a new array of indices */
+function shuffleIndices(len: number): number[] {
+  const arr = Array.from({ length: len }, (_, i) => i);
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
 export default function PracticeCard({ question, index, source }: Props) {
   const [showSolution, setShowSolution] = useState(false);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [answerShuffleKey, setAnswerShuffleKey] = useState(0);
 
   const difficulty = question.difficulty_estimation || 'Unknown';
   const content = question.content || { text: '', code_snippet: null, options: null };
   const isMultipleChoice = question.type === 'MultipleChoice' && content.options;
+
+  // Compute shuffled order of options (re-shuffles when answerShuffleKey changes)
+  const optionOrder = useMemo(() => {
+    if (!content.options) return [];
+    return answerShuffleKey === 0
+      ? content.options.map((_, i) => i) // original order on first render
+      : shuffleIndices(content.options.length);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [answerShuffleKey, content.options?.length]);
+
+  // Build display options with re-labeled Hebrew letters
+  const displayOptions = useMemo(() => {
+    if (!content.options || optionOrder.length === 0) return null;
+    return optionOrder.map((origIdx, newIdx) => {
+      const origText = content.options![origIdx];
+      // Strip existing letter prefix (e.g. "א. ") and re-label
+      const stripped = origText.replace(/^[א-ו][.)]\s*/, '');
+      return {
+        text: `${HEBREW_LETTERS[newIdx]}. ${stripped}`,
+        origIdx,
+        letter: HEBREW_LETTERS[newIdx],
+      };
+    });
+  }, [content.options, optionOrder]);
+
+  // Find the correct original index from the solution letter
+  const correctOrigIdx = useMemo(() => {
+    if (!question.solution?.correct_option || !content.options) return -1;
+    const correctLetter = question.solution.correct_option.trim().charAt(0);
+    return content.options.findIndex(opt => opt.trim().charAt(0) === correctLetter);
+  }, [question.solution, content.options]);
 
   const handleSubmit = () => {
     setSubmitted(true);
     setShowSolution(true);
   };
 
+  const handleShuffleAnswers = () => {
+    if (submitted) return;
+    setSelectedOption(null);
+    setAnswerShuffleKey(k => k + 1);
+  };
+
   const isCorrect = () => {
-    if (!question.solution?.correct_option || selectedOption === null) return false;
-    const correctLetter = question.solution.correct_option.trim();
-    const optionLetter = question.content.options?.[selectedOption]?.trim().charAt(0);
-    return correctLetter === optionLetter;
+    if (correctOrigIdx < 0 || selectedOption === null || !displayOptions) return false;
+    return displayOptions[selectedOption].origIdx === correctOrigIdx;
   };
 
   return (
@@ -68,13 +116,12 @@ export default function PracticeCard({ question, index, source }: Props) {
         )}
 
         {/* Multiple choice with interactive selection */}
-        {isMultipleChoice && (
+        {isMultipleChoice && displayOptions && (
           <ul className="options-list interactive">
-            {content.options!.map((opt, i) => {
+            {displayOptions.map((d, i) => {
               let optionClass = 'option-item';
-              if (submitted && question.solution?.correct_option) {
-                const optLetter = opt.trim().charAt(0);
-                if (optLetter === question.solution.correct_option.trim()) {
+              if (submitted) {
+                if (d.origIdx === correctOrigIdx) {
                   optionClass += ' option-correct';
                 } else if (i === selectedOption) {
                   optionClass += ' option-wrong';
@@ -89,9 +136,9 @@ export default function PracticeCard({ question, index, source }: Props) {
                   className={optionClass}
                   onClick={() => !submitted && setSelectedOption(i)}
                 >
-                  {submitted && question.solution?.correct_option && (
+                  {submitted && (
                     <span className="option-icon">
-                      {opt.trim().charAt(0) === question.solution.correct_option.trim()
+                      {d.origIdx === correctOrigIdx
                         ? <CheckCircle size={16} />
                         : i === selectedOption
                           ? <XCircle size={16} />
@@ -99,7 +146,7 @@ export default function PracticeCard({ question, index, source }: Props) {
                       }
                     </span>
                   )}
-                  {opt}
+                  {d.text}
                 </li>
               );
             })}
@@ -138,13 +185,18 @@ export default function PracticeCard({ question, index, source }: Props) {
         {/* Action buttons */}
         <div className="practice-actions">
           {isMultipleChoice && !submitted && (
-            <button
-              className="submit-btn"
-              onClick={handleSubmit}
-              disabled={selectedOption === null}
-            >
-              Check Answer
-            </button>
+            <>
+              <button
+                className="submit-btn"
+                onClick={handleSubmit}
+                disabled={selectedOption === null}
+              >
+                Check Answer
+              </button>
+              <button className="shuffle-btn" onClick={handleShuffleAnswers} title="Shuffle answer options">
+                <Shuffle size={16} /> Shuffle Answers
+              </button>
+            </>
           )}
 
           {question.solution && (question.solution.is_present_in_file || question.solution.explanation) && (

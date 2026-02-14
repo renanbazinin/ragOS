@@ -73,6 +73,7 @@ export default function PracticePage() {
         difficulty: filterDifficulty || undefined,
         page,
         page_size: 20,
+        shuffle: shuffled,
       });
       setAiQuestions(res.questions);
       setTotalPages(res.total_pages);
@@ -82,7 +83,7 @@ export default function PracticePage() {
     } finally {
       setLoading(false);
     }
-  }, [filterTopics, filterSubject, filterType, filterDifficulty, page]);
+  }, [filterTopics, filterSubject, filterType, filterDifficulty, page, shuffled]);
 
   useEffect(() => {
     if (tab === 'ai') {
@@ -155,7 +156,8 @@ export default function PracticePage() {
     } else {
       return [];
     }
-    if (shuffled) {
+    // For exams (non-AI), still shuffle client-side since they don't use the data layer shuffle
+    if (shuffled && tab !== 'ai') {
       return [...questions].sort(() => Math.random() - 0.5);
     }
     return questions;
