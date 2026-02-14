@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Spinlocks and Cache Coherence",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-14 19:06:48",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      16,
+      14,
+      15
+    ],
+    "token_usage": {
+      "prompt_tokens": 2074,
+      "output_tokens": 1275,
+      "total_tokens": 11676
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Spinlocks and Cache Coherence"
+    ],
+    "difficulty_estimation": "Hard",
+    "content": {
+      "text": "בהתבסס על מימוש ה-`FlakyLock` המצורף, ובהתחשב בתנאים לקיום קיפאון (deadlock) כפי שתוארו בחומר ההרצאה, איזו מהטענות הבאות נכונה לגבי מנעול זה?",
+      "code_snippet": "typedef struct { int turn; int busy; } FlakyLock;\nvoid init(FlakyLock *lock) {\n    lock->busy = 0;\n}\nvoid lock(FlakyLock *lock, int me) {\n    do {\n        do {\n            lock->turn = me;\n        } while (lock->busy);\n        lock->busy = 1;\n    } while (lock->turn != me);\n}\nvoid unlock(FlakyLock *lock) {\n    lock->busy = 0;\n}",
+      "options": [
+        "א. המנעול מקיים מניעה הדדית (mutual exclusion) ומהוגנות (fairness), אך לא מונע קיפאון (deadlock freedom).",
+        "ב. המנעול אינו מקיים מניעה הדדית, אך מונע קיפאון ומהוגנות.",
+        "ג. המנעול אינו מונע קיפאון, בין היתר, עקב יצירת מצב של \"המתנה מעגלית\" (circular wait) פנימית בין חוטים המנסים לרכוש אותו.",
+        "ד. המנעול מקיים את כל שלושת התכונות: מניעה הדדית, מניעת קיפאון ומהוגנות, אך רק עבור שני חוטים בלבד."
+      ]
+    },
+    "solution": {
+      "correct_option": "ג",
+      "explanation": "המנעול `FlakyLock` אכן אינו מונע קיפאון (deadlock). ניתן להדגים זאת בתרחיש הבא עם שני חוטים, T1 (me=1) ו-T2 (me=2):\n1.  T1 קובע `lock->turn = 1`.\n2.  T2 קובע `lock->turn = 2` (דורס את הערך הקודם ב-`lock->turn`).\n3.  T1 בודק `while (lock->busy)`. נניח ש-`lock->busy` הוא 0, אז T1 ממשיך.\n4.  T1 קובע `lock->busy = 1`.\n5.  T1 בודק `while (lock->turn != me)`. כעת `lock->turn` הוא 2 (כי T2 דרס אותו), ו-`me` של T1 הוא 1. התנאי `(2 != 1)` מתקיים, ולכן T1 נכשל בתנאי וחוזר ללולאה החיצונית `do`.\n6.  T1 קובע שוב `lock->turn = 1` (דורס את הערך של T2 ב-`lock->turn`).\n7.  T2 בודק `while (lock->busy)`. כעת `lock->busy` הוא 1 (כי T1 קבע אותו). לכן T2 נתקע בלולאה הפנימית `do { ... } while (lock->busy);` וממתין ש-`lock->busy` יהפוך ל-0.\n8.  T1 בודק `while (lock->busy)`. גם T1 רואה ש-`lock->busy` הוא 1 (כי T1 קבע אותו קודם). לכן גם T1 נתקע בלולאה הפנימית `do { ... } while (lock->busy);` וממתין ש-`lock->busy` יהפוך ל-0.\n\nבמצב זה, שני החוטים (T1 ו-T2) ממתינים ש-`lock->busy` יהפוך ל-0. רק פונקציית `unlock` יכולה לאפס את `lock->busy`. אך כדי שחוט יקרא ל-`unlock`, עליו לרכוש קודם את המנעול ולהיכנס לאזור הקריטי, מה שאינו מתאפשר במצב הנוכחי. זוהי דוגמה למצב של \"המתנה מעגלית\" (circular wait) פנימית, שבה כל חוט ממתין למצב שרק חוט אחר יכול לשנות (בפועל, שניהם ממתינים למצב שאיש מהם לא יכול לשנות), וזאת אחד מארבעת התנאים לקיום קיפאון כפי שתוארו בהרצאה.\n\nלכן, המנעול אינו מונע קיפאון. מכיוון שהוא יכול להיכנס לקיפאון, הוא גם אינו מקיים מהוגנות (fairness), שכן אין ערובה שחוט יקבל גישה תוך זמן סופי. לגבי מניעה הדדית, אם המנעול נכנס לקיפאון לפני שמישהו נכנס לאזור הקריטי, אז אף אחד לא נמצא באזור הקריטי, ולכן מבחינה טכנית מניעה הדדית מתקיימת באופן ריק. אך מנעול שמונע כניסה לאזור הקריטי עקב קיפאון אינו מועיל."
+    }
+  }
+}

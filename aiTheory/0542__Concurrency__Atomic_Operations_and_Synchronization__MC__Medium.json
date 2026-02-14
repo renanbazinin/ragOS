@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Atomic Operations and Synchronization",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 19:07:23",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      11,
+      14,
+      15
+    ],
+    "token_usage": {
+      "prompt_tokens": 1926,
+      "output_tokens": 618,
+      "total_tokens": 5524
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Atomic Operations and Synchronization"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "איזו מהטענות הבאות מתארת בצורה הטובה ביותר את מאפייני פעולת ה-`TestAndSet` כפי שהוצגה בחומר ההרצאה?",
+      "code_snippet": "int TestAndSet(int* old_ptr, int new) {\n  int old = *old_ptr;\n  *old_ptr = new;\n  return old;\n}",
+      "options": [
+        "א. זוהי פקודת מכונה אשר מבצעת באופן אטומי קריאה של ערך מזיכרון, כתיבת ערך חדש לאותו מיקום, והחזרת הערך המקורי שנקרא.",
+        "ב. היא מיועדת במיוחד להגדלת מונה משותף (counter) באופן אטומי ומבטיחה נכונות גם בריצה מקבילית.",
+        "ג. היא מאפשרת לחוט עבודה לבדוק את ערכו הפנימי של סמפור ולהקטין אותו רק אם הוא חיובי, אחרת החוט נכנס למצב שינה.",
+        "ד. זהו מנגנון סינכרון כללי ויעיל יותר ממנעולים (mutexes) לפתרון הפרות אטומיות בקטעי קוד מורכבים."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "החומר מציין במפורש שפעולת ה-`TestAndSet` היא פקודת מכונה שממומשת באופן אטומי. היא מקבלת מצביע לערך שנרצה לשנות וערך חדש, כותבת את הערך החדש למיקום הזיכרון ומחזירה את הערך שהיה בו לפני כן (כפי שמתואר גם ב-sequential specification בקטע הקוד). תשובה ב' מתארת יותר את `__sync_fetch_and_add` כדוגמה להגדלת מונה. תשובה ג' מתארת את פעולת ה-`wait` של סמפור. תשובה ד' אינה נכונה, שכן `TestAndSet` משמשת לבניית מנעולים, והמנעולים הם הפתרון הכללי להפרות אטומיות, ולא נאמר שהיא יעילה יותר ממנעולים לקטעי קוד מורכבים, אלא שהיא מאפשרת לממש אותם."
+    }
+  }
+}

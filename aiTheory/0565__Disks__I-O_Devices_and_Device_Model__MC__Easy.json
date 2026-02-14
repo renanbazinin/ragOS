@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Disks",
+    "topic_hint": "I/O Devices and Device Model",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 19:13:24",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      17,
+      18
+    ],
+    "token_usage": {
+      "prompt_tokens": 2301,
+      "output_tokens": 391,
+      "total_tokens": 3602
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Disks",
+    "topic": [
+      "I/O Devices and Device Model"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "על פי החומר הנלמד, מהם שלושת הסוגים העיקריים של רגיסטרים המרכיבים בדרך כלל את ממשק ההתקן (I/O device) ומשמשים לתקשורת איתו?",
+      "code_snippet": null,
+      "options": [
+        "א. Status, Command, Data",
+        "ב. Program Counter, Stack Pointer, General Purpose",
+        "ג. Cache, TLB, Page Table",
+        "ד. Read, Write, Execute"
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "על פי החומר הנלמד (Lecture 17, chunk 2), ממשק הרכיב (I/O device) בנוי בדרך כלל מרגיסטרים משלושה סוגים עיקריים: רגיסטר Status לקריאת מצב הרכיב (בדרך כלל לקריאה בלבד), רגיסטר Command לכתיבת הפעולה הרצויה שהרכיב יבצע, ורגיסטר Data להעברת נתונים שהרכיב יכול להשתמש בהם עבור הפעולה. אפשרויות ב', ג' ו-ד' מתייחסות למושגים אחרים במערכות הפעלה או ארכיטקטורת מעבד ואינן מתארות את רגיסטרי ממשק ההתקן."
+    }
+  }
+}

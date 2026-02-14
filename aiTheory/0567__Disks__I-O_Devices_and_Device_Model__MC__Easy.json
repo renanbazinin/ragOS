@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Disks",
+    "topic_hint": "I/O Devices and Device Model",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 19:13:43",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      17,
+      18
+    ],
+    "token_usage": {
+      "prompt_tokens": 2301,
+      "output_tokens": 404,
+      "total_tokens": 3823
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Disks",
+    "topic": [
+      "I/O Devices and Device Model"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "על פי חומר ההרצאה, ממה מורכב ממשק רכיב חומרה טיפוסי דרכו מתקשרת מערכת ההפעלה/המעבד עם הרכיב?",
+      "code_snippet": null,
+      "options": [
+        "א. רגיסטר מצב (Status), רגיסטר פקודה (Command), ורגיסטר נתונים (Data).",
+        "ב. רגיסטר קריאה, רגיסטר כתיבה, ורגיסטר ביצוע.",
+        "ג. רגיסטר קלט, רגיסטר פלט, ורגיסטר בקרה.",
+        "ד. רכיב זיכרון, רכיב מעבד, ורכיב אחסון."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "חומר ההרצאה מציין במפורש שממשק הרכיב בנוי מרגיסטרים, ובדרך כלל ישנם 3 סוגים: רגיסטר מצב (status) לקריאת המצב הנוכחי של הרכיב, רגיסטר פקודה (command) לכתיבת הפעולה הרצויה, ורגיסטר נתונים (data) להעברת נתונים שהרכיב ישתמש בהם עבור הפעולה. לכן, אפשרות א' מתארת במדויק את המבנה הפנימי של ממשק הרכיב כפי שתואר."
+    }
+  }
+}

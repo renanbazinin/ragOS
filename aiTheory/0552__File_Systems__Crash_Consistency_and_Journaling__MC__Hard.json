@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Crash Consistency and Journaling",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-14 19:10:09",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      21
+    ],
+    "token_usage": {
+      "prompt_tokens": 1920,
+      "output_tokens": 656,
+      "total_tokens": 6123
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Crash Consistency and Journaling"
+    ],
+    "difficulty_estimation": "Hard",
+    "content": {
+      "text": "בהינתן שמערכת קבצים משתמשת ב-Journaling (write-ahead logging) עם מנגנון יומן מחזורי (cyclic journal) ו-journal superblock, איזה גורם משפיע באופן המובהק ביותר על זמן ההתאוששות (recovery time) מקריסה?",
+      "code_snippet": null,
+      "options": [
+        "א. גודלו הכולל של שטח הדיסק המוקצה ליומן (journal).",
+        "ב. מספר הטרנזקציות ביומן שלא בוצעו בהצלחה למערכת הקבצים בפועל ושמצביע ה\"התחלה\" ב-journal superblock מפנה אליהן.",
+        "ג. קצב הכתיבה של רשומות חדשות (notes) ליומן.",
+        "ד. מספר ה-inodes הכולל במערכת הקבצים."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "החומר המצורף מסביר כי במנגנון Journaling, במקרה של קריסה, יש לעבור על ה-log ולבצע מחדש (redo logging) את הפעולות שטרם נכתבו בהצלחה למערכת הקבצים. עוד מצוין כי ה-journal הוא סופי ומופעל באופן מחזורי, כאשר ה-journal superblock מכיל מצביע ל'התחלה' – הטרנזקציה הראשונה שצריך להתייחס אליה ושטרם בוצעה בהצלחה לדיסק. לכן, זמן ההתאוששות תלוי באופן ישיר בכמות הטרנזקציות הללו שצריך לעבד מחדש, מה שמכונה 'מספר הטרנזקציות ביומן שלא בוצעו בהצלחה למערכת הקבצים בפועל ושמצביע ה\"התחלה\" ב-journal superblock מפנה אליהן'. גודלו הכולל של היומן (אפשרות א') קובע את המגבלה העליונה על מספר הטרנזקציות שיכולות להיות בו זמנית, אך לא את המספר בפועל שיש לעבד בכל רגע נתון לאחר קריסה. קצב הכתיבה (אפשרות ג') משפיע על קצב מילוי היומן אך לא ישירות על זמן ההתאוששות מקריסה ספציפית. מספר ה-inodes (אפשרות ד') אינו רלוונטי לזמן ההתאוששות מהיומן."
+    }
+  }
+}

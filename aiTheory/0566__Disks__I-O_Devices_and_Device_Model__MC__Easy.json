@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Disks",
+    "topic_hint": "I/O Devices and Device Model",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 19:13:34",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      17,
+      18
+    ],
+    "token_usage": {
+      "prompt_tokens": 2301,
+      "output_tokens": 356,
+      "total_tokens": 4105
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Disks",
+    "topic": [
+      "I/O Devices and Device Model"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "על פי חומר ההרצאה, אילו סוגי רגיסטרים משמשים בדרך כלל בממשק של רכיב חומרה לתקשורת עם מערכת ההפעלה/המעבד?",
+      "code_snippet": null,
+      "options": [
+        "א. Status, Command, Data",
+        "ב. Memory, Cache, Control",
+        "ג. Read, Write, Execute",
+        "ד. Input, Output, Process"
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "חומר ההרצאה מציין שממשק הרכיב בנוי מרגיסטרים, ובדרך כלל ישנם שלושה סוגים: Status – רגיסטר לקריאת המצב הנוכחי של הרכיב (לרוב לקריאה בלבד, כמו עסוק/פנוי). Command – רגיסטר לכתיבת הפעולה הרצויה שהרכיב יבצע (למשל, לכתוב או לקרוא). Data – רגיסטר להעברת נתונים שהרכיב ישתמש בהם עבור הפעולה. מערכת ההפעלה/המעבד מתקשרים בדרך כלל עם רגיסטרים אלו."
+    }
+  }
+}

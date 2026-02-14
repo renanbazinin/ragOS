@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "File System Structure and Directories",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 19:11:18",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      20,
+      21
+    ],
+    "token_usage": {
+      "prompt_tokens": 1963,
+      "output_tokens": 403,
+      "total_tokens": 3362
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "File System Structure and Directories"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "איזה סוג מידע מאוחסן בדרך כלל ב-inode במערכת קבצים?",
+      "code_snippet": null,
+      "options": [
+        "א. רשימה של כל שמות הקבצים בתיקייה מסוימת.",
+        "ב. מטא-דאטה (metadata) אודות קובץ או תיקייה, כגון סוג, הרשאות, גודל ובלוקי נתונים.",
+        "ג. קוד מערכת ההפעלה האחראי על ניהול הקבצים.",
+        "ד. המיקום הפיזי של כל הסקטורים הפנויים בדיסק."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "על פי חומר ההרצאה, ה-inode הוא אזור מסוים בדיסק שמכיל את ה-metadata, כלומר את כל המידע על הקבצים. מידע זה כולל פרטים כמו סוג (קובץ/תיקייה), זיהוי בעלים (UID), הרשאות גישה (rwx), גודל בבתים, הפניות לבלוקי הנתונים וזמני גישה/יצירה. הוא אינו מכיל רשימת שמות קבצים (שנמצאים בדרך כלל במבנה התיקיות), קוד מערכת הפעלה, או מידע על סקטורים פנויים בדיסק."
+    }
+  }
+}
