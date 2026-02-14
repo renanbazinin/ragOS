@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Inodes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:07:04",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      20,
+      22
+    ],
+    "token_usage": {
+      "prompt_tokens": 1834,
+      "output_tokens": 408,
+      "total_tokens": 3171
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Inodes"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "על פי חומר ההרצאה, אילו סוגי מידע מאוחסנים בדרך כלל ב-inode עבור קובץ?",
+      "code_snippet": null,
+      "options": [
+        "א. התוכן הממשי של הקובץ (הנתונים).",
+        "ב. שם הקובץ המלא ונתיבו במערכת הקבצים.",
+        "ג. מטא-נתונים על הקובץ, כגון סוגו, גודלו, הרשאות הגישה שלו ומיקומי בלוקי הנתונים שלו.",
+        "ד. כל מבנה ה-imap עבור כל הקבצים במערכת."
+      ]
+    },
+    "solution": {
+      "correct_option": "ג",
+      "explanation": "החומר המצוין בהרצאה קובע במפורש כי inode מכיל \"סוג, גודל, הרשאות גישה, איפה המידע שלו נמצא ועוד..\". מידע זה מתאר את המאפיינים של הקובץ ואת מיקומו הפיזי בדיסק, אך לא את תוכן הקובץ עצמו (שנמצא בבלוקי נתונים אליהם ה-inode מפנה), ולא את שמו (שנמצא במבני ספריות). אפשרות ד' שגויה מכיוון ש-imap הוא מבנה נפרד המצביע על הגרסאות העדכניות של ה-inodes, ולא חלק מ-inode יחיד."
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Superblock",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:13:19",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      20,
+      21,
+      22
+    ],
+    "token_usage": {
+      "prompt_tokens": 1676,
+      "output_tokens": 693,
+      "total_tokens": 4126
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Superblock"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהו התפקיד העיקרי של ה-Super Block במערכת קבצים?",
+      "code_snippet": null,
+      "options": [
+        "א. הוא מכיל מידע חיוני על מבנה מערכת הקבצים, כגון סוג מערכת הקבצים, גודל הדיסק, מספר בלוקי נתונים ומיקום מפות הסיביות (bitmaps).",
+        "ב. הוא מאחסן את התוכן של קבצים ותיקיות בתוך מערכת הקבצים.",
+        "ג. הוא מכיל את קוד האתחול הראשוני של מערכת ההפעלה.",
+        "ד. הוא משמש לתיעוד היסטוריית הטרנזקציות ב-journal לצורך שחזור."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "התשובה הנכונה היא א'. לפי חומר ההרצאה (הרצאה 20, קטע 28), ה-Super Block הוא בלוק המכיל נתונים חיוניים על הכונן ומערכת הקבצים כולה. מידע זה כולל את סוג מערכת הקבצים (כדי לדעת איזה קוד להריץ), גודל הדיסק, מספר בלוקי הנתונים (data blocks), מספר ה-inodes, ומיקומם של מפות הסיביות (bitmaps) עבור בלוקים ו-inodes. בלעדי מידע זה, מערכת ההפעלה לא תוכל להבין ולנהל את מבנה הקבצים על הדיסק.\n\nאפשרויות אחרות שגויות:\n*   ב' שגויה: תוכן הקבצים מאוחסן בבלוקי נתונים (data blocks), לא ב-Super Block.\n*   ג' שגויה: קוד האתחול הראשוני של מערכת ההפעלה נמצא בדרך כלל ב\"בלוק אתחול\" (boot block), שלעיתים קרובות קודם ל-Super Block, אך אינו ה-Super Block עצמו.\n*   ד' שגויה: בעוד שה-Super Block ב-journaling file systems יכול להכיל מצביעים או מידע הקשור ל-journal לצורך שחזור (כפי שמוזכר בהרצאה 21, קטע 33), תפקידו העיקרי והכללי, כפי שהוגדר בהרצאה 20, הוא לספק מידע מבני כללי על מערכת הקבצים כולה, ולא רק על ה-journal. התפקיד המתואר באפשרות א' הוא רחב יותר ומהווה את ההגדרה הבסיסית של ה-Super Block."
+    }
+  }
+}

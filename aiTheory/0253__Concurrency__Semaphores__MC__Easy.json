@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:55:50",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      10,
+      14
+    ],
+    "token_usage": {
+      "prompt_tokens": 2016,
+      "output_tokens": 404,
+      "total_tokens": 3316
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Semaphores"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהו הערך ההתחלתי שצריך להגדיר לסמפור בינארי על מנת שישמש כמנגנון למניעה הדדית (mutual exclusion)?",
+      "code_snippet": "sem_t semlock;\nsem_init(&semlock, 0, init_value);",
+      "options": [
+        "א. 0",
+        "ב. 1",
+        "ג. כל מספר חיובי",
+        "ד. תלוי במספר התהליכים המשתמשים בסמפור"
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "החומר המצורף מציין במפורש כי סמפור בינארי, המשמש כמנעול למניעה הדדית, צריך להיות מאותחל לערך 1. כפי שצויין: \"התשובה: 1. קודם כל, ה-semaphore הזה נקרא binary semaphore - סמפור בינארי – זה מנעול והערך שלו יכול להיות רק 1 או 0. אנחנו נותנים את הסמפור להיות 1.\" ערך 1 מסמן שהמנעול פנוי, וחוט שקורא ל-wait יקטין אותו ל-0 וייכנס לקטע הקריטי, וחוטים אחרים ימתינו. לאחר מכן, ה-post יחזיר את הערך ל-1 וישחרר את המנעול."
+    }
+  }
+}

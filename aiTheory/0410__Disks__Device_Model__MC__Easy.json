@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Disks",
+    "topic_hint": "Device Model",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:33:09",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      17,
+      18
+    ],
+    "token_usage": {
+      "prompt_tokens": 2247,
+      "output_tokens": 432,
+      "total_tokens": 4452
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Disks",
+    "topic": [
+      "Device Model"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהי התכונה העיקרית של מערך RAID (Redundant Array of Independent Disks) מנקודת מבטה של מערכת ההפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. מערכת ההפעלה רואה אותו כדיסק לוגי יחיד, למרות שהוא מורכב ממספר דיסקים פיזיים.",
+        "ב. מערכת ההפעלה רואה ומנהלת כל דיסק פיזי בנפרד בתוך המערך.",
+        "ג. מערכת ההפעלה נדרשת להשתמש בפקודות מיוחדות כדי לפצל ולשכפל נתונים על פני הדיסקים במערך.",
+        "ד. RAID הוא מנגנון המשמש למיפוי זיכרון (memory-mapped I/O) עבור התקני אחסון."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "על פי חומר ההרצאה, RAID נחשב ל'דיסק מדומה' או 'דיסק לוגי'. מערכת ההפעלה 'לא תדע שמדובר בדיסק מדומה' ומבחינתה 'יש הארד דיסק אחד'. המנגנון של RAID 'שקוף לחלוטין עבור מערכת ההפעלה', והוא מטפל בפיצול וניהול הנתונים על פני הדיסקים הפיזיים באופן אוטומטי. לכן, מערכת ההפעלה רואה את מערך ה-RAID כדיסק לוגי יחיד."
+    }
+  }
+}

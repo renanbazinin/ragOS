@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Disks",
+    "topic_hint": "Disk Scheduling",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 18:43:19",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      18
+    ],
+    "token_usage": {
+      "prompt_tokens": 2024,
+      "output_tokens": 533,
+      "total_tokens": 4016
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Disks",
+    "topic": [
+      "Disk Scheduling"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "מדוע אלגוריתם תזמון הדיסק Shortest Positioning Time First (SPTF) מיושם בדרך כלל בתוך בקר הדיסק ולא ישירות על ידי מערכת ההפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. מערכת ההפעלה אינה מודעת למבנה הפיזי של הדיסק ולכן אינה יכולה לחשב במדויק את זמן המיקום הקצר ביותר.",
+        "ב. אלגוריתם SPTF מבטיח שכל הבקשות יטופלו ללא הרעבה, תכונה שלא ניתן להבטיח על ידי מערכת ההפעלה.",
+        "ג. בקר הדיסק יכול לבצע פעולות תזמון מהר יותר ממערכת ההפעלה, מה שמוביל לשיפור ביצועים משמעותי.",
+        "ד. מערכת ההפעלה מעדיפה תמיד לאחד בקשות סדרתיות לפני שליחתן לדיסק, מה שמתנגש עם עקרונות SPTF."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "החומר המצוין מציין במפורש כי 'מערכת ההפעלה לא מודעת למבנה של הדיסק, לכן יכול לקרוא מצב בו מערכת ההפעלה תעשה תזמון שגוי. לכן האלגוריתם הזה מבוצע בתוך הדיסק.' (Lecture 18, chunk 15). ידע זה על המבנה הפיזי של הדיסק (כמו מיקום ראש הקריאה/כתיבה הנוכחי) חיוני לחישוב מדויק של זמן המיקום הקצר ביותר (seek time + rotation latency) ולכן האלגוריתם מיושם בצורה יעילה יותר בתוך בקר הדיסק עצמו. האפשרויות האחרות אינן הסיבה העיקרית המפורטת בחומר."
+    }
+  }
+}

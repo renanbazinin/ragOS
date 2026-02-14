@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Disks",
+    "topic_hint": "I/O Devices",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:29:43",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      17,
+      18
+    ],
+    "token_usage": {
+      "prompt_tokens": 2181,
+      "output_tokens": 419,
+      "total_tokens": 3175
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Disks",
+    "topic": [
+      "I/O Devices"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "לשם איזו מטרה משמש רגיסטר מסוג 'command' בממשק של רכיב חומרה?",
+      "code_snippet": null,
+      "options": [
+        "א. לקרוא את המצב הנוכחי של הרכיב (כגון עסוק/פנוי).",
+        "ב. להעביר נתונים שהרכיב יכול להשתמש בהם עבור הפעולה המבוקשת.",
+        "ג. להורות לרכיב את הפעולה שאנו רוצים שיבצע (כגון כתיבה או קריאה).",
+        "ד. למפות זיכרון וירטואלי לרכיב החומרה כדי לאפשר גישה ישירה."
+      ]
+    },
+    "solution": {
+      "correct_option": "ג",
+      "explanation": "על פי חומר ההרצאה, ממשק רכיב חומרה בנוי מרגיסטרים מסוגים שונים. רגיסטר מסוג 'command' משמש כדי 'לכתוב אליו, אומרים לרכיב את הפעולה שאנחנו רוצים לבצע. למשל לכתוב / לקרוא'.\nאפשרות א' מתארת רגיסטר מסוג 'status'.\nאפשרות ב' מתארת רגיסטר מסוג 'data'.\nאפשרות ד' מתארת את מנגנון ה-memory mapped I/O, שהוא שיטה לגישה לרכיבי חומרה אך אינו סוג של רגיסטר בפני עצמו."
+    }
+  }
+}

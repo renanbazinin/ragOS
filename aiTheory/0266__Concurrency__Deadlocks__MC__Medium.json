@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Deadlocks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 17:58:42",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      16,
+      15
+    ],
+    "token_usage": {
+      "prompt_tokens": 2076,
+      "output_tokens": 547,
+      "total_tokens": 5195
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Deadlocks"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "בהינתן קטע הקוד הבא, איזה מושג או תופעה הקטע מדגים בצורה הטובה ביותר בהקשר של קיפאון (deadlock)?",
+      "code_snippet": "//Thread 1::\nlock(&L1);\nlock(&L2);\n\n//Thread 2::\nlock(&L2);\nlock(&L1);",
+      "options": [
+        "א. המתנה מעגלית (circular wait)",
+        "ב. חוסר תכונת הרכבה של מנעולים (lack of composition property for locks)",
+        "ג. אי-קיום \"deadlock freedom\" במנעול יחיד",
+        "ד. באג כללי של מקביליות (general concurrency bug)"
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "התשובה הנכונה היא א. המתנה מעגלית (circular wait). קטע הקוד מדגים מצב קלאסי של המתנה מעגלית, שבו חוט 1 תופס את המנעול L1 ומנסה לתפוס את L2, בעוד חוט 2 תופס את המנעול L2 ומנסה לתפוס את L1. כפי שמתואר בחומר ההרצאה, 'המתנה מעגלית' היא מצב בו חוטים שונים תופסים משאבים בסדר הפוך, וזהו תנאי הכרחי לקיומו של קיפאון. במצב כזה, כל חוט מחכה למנעול שהחוט השני מחזיק בו, וכתוצאה מכך אף אחד מהם לא יכול להתקדם. האפשרויות האחרות אינן מתארות באופן מדויק את התופעה הספציפית המודגמת בקוד: חוסר תכונת הרכבה הוא מאפיין כללי יותר של מנעולים, אי-קיום deadlock freedom מתייחס למנעול יחיד בעוד כאן מדובר בשני מנעולים, ובאג כללי של מקביליות הוא תיאור כללי מדי."
+    }
+  }
+}

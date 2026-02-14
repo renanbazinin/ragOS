@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Journaling",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 18:22:06",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      21
+    ],
+    "token_usage": {
+      "prompt_tokens": 1706,
+      "output_tokens": 706,
+      "total_tokens": 4247
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Journaling"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "על פי פרוטוקול 'metadata journaling' (או 'ordered journaling') כפי שתואר בחומר ההרצאה, מהו הסדר הנכון של הפעולות?",
+      "code_snippet": null,
+      "options": [
+        "א. כתיבת הדאטה למיקומו הסופי בדיסק ← כתיבת תוכן הטרנזקציה (TxB ו-metadata) ליומן ← כתיבת בלוק ה-commit של הטרנזקציה (Txe) ליומן ← כתיבת ה-metadata למיקומיו הסופיים.",
+        "ב. כתיבת תוכן הטרנזקציה (TxB ו-metadata) ליומן ← כתיבת הדאטה למיקומו הסופי בדיסק ← כתיבת בלוק ה-commit של הטרנזקציה (Txe) ליומן ← כתיבת ה-metadata למיקומיו הסופיים.",
+        "ג. כתיבת הדאטה למיקומו הסופי בדיסק ← כתיבת בלוק ה-commit של הטרנזקציה (Txe) ליומן ← כתיבת תוכן הטרנזקציה (TxB ו-metadata) ליומן ← כתיבת ה-metadata למיקומיו הסופיים.",
+        "ד. כתיבת ה-metadata למיקומיו הסופיים ← כתיבת הדאטה למיקומו הסופי בדיסק ← כתיבת תוכן הטרנזקציה (TxB ו-metadata) ליומן ← כתיבת בלוק ה-commit של הטרנזקציה (Txe) ליומן."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "על פי חומר ההרצאה, ובפרט פרוטוקול ה-'Final protocol' ב-chunk 38, הסדר הנכון של הפעולות ב-'metadata journaling' הוא כדלקמן:\n1.  **Data write**: כתיבת הדאטה למיקום הסופי בדיסק והמתנה לסיום הכתיבה.\n2.  **Journal write**: כתיבת תוכן הטרנזקציה (TxB ו-metadata) ליומן והמתנה לסיום הכתיבה.\n3.  **Journal commit**: כתיבת בלוק ה-commit של הטרנזקציה (Txe) ליומן והמתנה לסיום הכתיבה, מה שמסמן שהטרנזקציה בוצעה בהצלחה ביומן.\n4.  **Checkpoint**: כתיבת ה-metadata למיקומיו הסופיים.\n\nאפשרות א' משקפת במדויק סדר פעולות זה, המבטיח עקביות ושחזור נתונים במקרה של קריסה."
+    }
+  }
+}

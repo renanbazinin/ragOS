@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Disks",
+    "topic_hint": "Device Model",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 18:33:53",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      17,
+      18
+    ],
+    "token_usage": {
+      "prompt_tokens": 2247,
+      "output_tokens": 561,
+      "total_tokens": 4427
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Disks",
+    "topic": [
+      "Device Model"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "על פי חומר ההרצאה, מהו המודל הלוגי של יחידת אחסון (דיסק) שמערכת הפעלה רואה כאשר היא עובדת עם מערכת RAID?",
+      "code_snippet": null,
+      "options": [
+        "א. מערכת ההפעלה רואה דיסק לוגי יחיד המורכב מבלוקים/סקטורים, כאשר מנגנון ה-RAID מטפל בשקיפות בפיצול ובמיפוי לדיסקים הפיזיים המרובים.",
+        "ב. מערכת ההפעלה מודעת לכל הדיסקים הפיזיים המחוברים ומנהלת בעצמה את פיצול הנתונים ביניהם לצורך ביצועים וגיבוי.",
+        "ג. מערכת ההפעלה מתייחסת לכל פלטה ומשטח (platter and surface) של הדיסקים הפיזיים כיחידות אחסון נפרדות, ומבצעת מיפוי באמצעות צילינדרים.",
+        "ד. מערכת ההפעלה משתמשת ב-Memory Mapped I/O כדי לגשת ישירות לבקר הדיסק, ומכאן מנהלת את סיבוב ה-spindle וקריאת ה-RPM."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "חומר ההרצאה מתאר את מערכת RAID (Redundant Array of Independent Disks) כדיסק מדומה או לוגי. מנגנון ה-RAID שקוף לחלוטין למערכת ההפעלה ולתוכניות. מבחינת מערכת ההפעלה, היא רואה דיסק לוגי אחד בלבד, המחולק לבלוקים/סקטורים, ואינה מודעת למספר הדיסקים הפיזיים שמאחוריו. מנגנון ה-RAID הוא זה שמנהל את פיצול הנתונים, הכפלתם ומיפויים לדיסקים הפיזיים בפועל, וכל זאת באופן שקוף לחלוטין למערכת ההפעלה."
+    }
+  }
+}

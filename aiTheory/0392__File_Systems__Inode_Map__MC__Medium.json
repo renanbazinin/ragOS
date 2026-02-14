@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Inode Map",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 18:28:00",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      22
+    ],
+    "token_usage": {
+      "prompt_tokens": 1897,
+      "output_tokens": 587,
+      "total_tokens": 4265
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Inode Map"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "מדוע מפת ה-inodes (imap) במערכת קבצים מסוג LFS מחולקת לחלקים, וכיצד המערכת מאתרת את הגרסאות העדכניות של חלקי ה-imap לאחר אתחול המחשב?",
+      "code_snippet": null,
+      "options": [
+        "א. ה-imap מחולק לחלקים על מנת לאפשר כתיבה מקבילית של inodes שונים, והמערכת מאתרת אותם על ידי שמירת העותק השלם שלהם בזיכרון ה-RAM בלבד.",
+        "ב. ה-imap מחולק לחלקים בגלל גודלו המשתנה ותלותו במספר ה-inodes במערכת, וה-Checkpoint Region (CR) מכיל מצביעים לגרסאות העדכניות של כל חלק של ה-imap.",
+        "ג. ה-imap מחולק לחלקים כדי למנוע שגיאות קריאה וכתיבה במקרה של קריסת דיסק, והוא תמיד נשמר במיקום לוגי קבוע בדיסק.",
+        "ד. ה-imap מחולק לחלקים כדי לייעל את תהליך הקצאת הבלוקים לנתונים, והמערכת בונה אותו מחדש באמצעות סריקת כל בלוקי הנתונים הקיימים."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "החומר המצוין בשיעור מסביר כי ה-imap יכול להיות בגדלים שונים, התלויים בכמות ה-inodes במערכת, ולכן הוא מפורק לחלקים. כמו כן, כדי לאתר את הגרסאות העדכניות של חלקי ה-imap לאחר אתחול המחשב (או בכל עת), קיים ה-Checkpoint Region (CR) – מצביע קבוע שמכיל מצביעים לגרסאות העדכניות של כל חלק ב-imap. כאשר המחשב נדלק מחדש, המערכת קוראת את ה-CR, ודרכו היא מאתרת את כל חלקי ה-imap העדכניים ומשחזרת אותו לעבודה תקינה. לכן, תשובה ב' היא הנכונה ביותר."
+    }
+  }
+}

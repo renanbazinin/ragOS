@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Journaling",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 18:22:19",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      21
+    ],
+    "token_usage": {
+      "prompt_tokens": 1706,
+      "output_tokens": 596,
+      "total_tokens": 4252
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Journaling"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "מהי המטרה העיקרית של ה-`journal superblock` במערכת קבצים מבוססת יומן (journaling) כפי שתוארה בחומר הלימוד?",
+      "code_snippet": null,
+      "options": [
+        "א. לנהל את המקום הפנוי ביומן ולאפשר שימוש מחזורי ביומן על ידי מעקב אחר הטרנזקציות הפעילות או הממתינות לביצוע.",
+        "ב. לסנכרן את כתיבת הנתונים (data) לדיסק הראשי לפני כתיבת המטא-דאטה (metadata) ליומן.",
+        "ג. לסמן את נקודת ה-checkpoint, המבטיחה שכל הטרנזקציה נכתבה ליומן וניתן להתחיל לכתוב לדיסק הראשי.",
+        "ד. להגדיר את תחילתה וסיומה של טרנזקציה בודדת ביומן באמצעות סמנים מיוחדים (Txb ו-Txe)."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "על פי חומר הלימוד (Lecture 21, chunk 31), ה-journal הוא סופי ולכן יש צורך במנגנון לניהול המקום בו. ה-`journal superblock` מתואר כמבנה קטן שנוסף ליומן, המכיל מצביעים (כמו מצביע להתחלה) שמטרתם לעקוב אחר הטרנזקציות שטרם בוצעו בהצלחה או שנכתבו לדיסק, ובכך לאפשר שימוש מחזורי ביומן על ידי מחיקת טרנזקציות שהושלמו. לכן, מטרתו העיקרית היא לנהל את המקום ביומן ולאפשר את ניצולו מחדש באופן מחזורי. אפשרות ב' מתארת את סדר הפעולות בכתיבה ליומן, לא את תפקיד ה-superblock. אפשרות ג' מתארת את מושג ה-checkpoint, שהוא נקודת זמן, לא מבנה ה-superblock. אפשרות ד' מתארת את תפקידם של Txb ו-Txe, לא את תפקיד ה-superblock."
+    }
+  }
+}

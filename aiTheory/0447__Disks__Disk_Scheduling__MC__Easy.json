@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Disks",
+    "topic_hint": "Disk Scheduling",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:42:18",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      18
+    ],
+    "token_usage": {
+      "prompt_tokens": 2024,
+      "output_tokens": 464,
+      "total_tokens": 3481
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Disks",
+    "topic": [
+      "Disk Scheduling"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "איזה מבין התיאורים הבאים מתאר בצורה הטובה ביותר את אלגוריתם תזמון הדיסק First Come, First Served (FCFS)?",
+      "code_snippet": null,
+      "options": [
+        "א. הדיסק מטפל בבקשות לפי הזמן הקצר ביותר למיקום ראש הקריאה/כתיבה.",
+        "ב. מערכת ההפעלה מטפלת בבקשות לפי סדר הגעתן.",
+        "ג. מערכת ההפעלה מאחדת בקשות לסקטורים סמוכים לבקשה אחת.",
+        "ד. הדיסק מבצע תזמון אופטימלי על ידי חיזוי בקשות עתידיות."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "אלגוריתם First Come, First Served (FCFS) מטפל בבקשות לדיסק לפי הסדר שבו הן מתקבלות (First Come) ומוגשות (First Served). החומר מציין במפורש: \"First come, First served (FCFS): נטפל בבקשות לפי הסדר.\" אפשרות א' מתארת את Shortest Positioning Time First (SPTF), שבו מטפלים בבקשה שלוקח הכי פחות זמן לטפל בה. אפשרות ג' מתארת אופטימיזציה של איחוד בקשות סמוכות, שאינה אלגוריתם תזמון בפני עצמו אלא טכניקה לשיפור יעילות. אפשרות ד' מתארת תזמון אופטימלי שאינו אפשרי בפועל מכיוון שאי אפשר לדעת מה יגיע בעתיד."
+    }
+  }
+}

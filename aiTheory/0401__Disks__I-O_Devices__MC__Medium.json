@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Disks",
+    "topic_hint": "I/O Devices",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 18:30:38",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      17,
+      18
+    ],
+    "token_usage": {
+      "prompt_tokens": 2181,
+      "output_tokens": 1075,
+      "total_tokens": 5626
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Disks",
+    "topic": [
+      "I/O Devices"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "מהי אחת המטרות העיקריות של גישת ה-Memory-Mapped I/O במערכות הפעלה, וכיצד היא מתייחסת לגישה לרכיבי חומרה כגון רגיסטרים של דיסק קשיח?",
+      "code_snippet": "/* Pseudo-code for Memory-Mapped I/O interaction */\n/* Imagine 'device_memory_ptr' is a pointer to a memory region\n   that has been mapped to a hardware device's registers. */\n\n// Accessing device status register\nint status_reg_value = device_memory_ptr[STATUS_REGISTER_OFFSET];\n\n// Writing to device command register\ndevice_memory_ptr[COMMAND_REGISTER_OFFSET] = SOME_COMMAND_VALUE;\n\n// Transferring data to device data register\ndevice_memory_ptr[DATA_REGISTER_OFFSET] = DATA_TO_WRITE;\n\n// No special I/O instructions are used; it's just memory access.",
+      "options": [
+        "א. היא מאפשרת למשתמש ולמערכת ההפעלה לגשת ישירות לרכיבי חומרה דרך מרחב כתובות הזיכרון הווירטואלי, אך מונעת מיפוי ישיר של רגיסטרים שעלולים לגרום נזק, כמו רגיסטרי שליטה של דיסק קשיח.",
+        "ב. היא דורשת שימוש בפקודות מכונה מיוחדות ובמעבר ל-kernel mode כדי לתקשר עם חומרה, ומאפשרת מיפוי ישיר של כל רגיסטר חומרה ללא הגבלה.",
+        "ג. היא מפשטת את התקשורת עם רכיבי חומרה על ידי שימוש בממשק אחיד הממומש על ידי דרייברים, ובכך מבטלת את הצורך בגישה ישירה לזיכרון הווירטואלי.",
+        "ד. היא משמשת בעיקר לשיפור מהירות הקריאה/כתיבה לדיסקים מרובים במקביל (כמו ב-RAID), ולא קשורה לדרך הגישה לרגיסטרים של התקנים בודדים."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "גישת ה-Memory-Mapped I/O מאפשרת למשתמש ולמערכת ההפעלה לגשת לרכיבי חומרה באמצעות מיפוי חלקים ממרחב הזיכרון הווירטואלי ישירות לחומרה (Lecture 17, chunk 17). הגישה הזו מייתרת את הצורך בפקודות מיוחדות או במעבר למצב ליבה (kernel mode), ומאפשרת אינטראקציה עם החומרה כאילו היא מערך בזיכרון. עם זאת, מערכת ההפעלה אוכפת הגבלות אבטחה ומונעת מיפוי ישיר של רגיסטרים שעלולים לגרום נזק למערכת, כגון רגיסטרי שליטה של דיסק קשיח, אך כן מאפשרת מיפוי נתונים בתוכו (Lecture 17, chunk 20).\n\nאפשרויות אחרות שגויות מכיוון:\n- **ב:** גישת ה-Memory-Mapped I/O אינה דורשת פקודות מיוחדות או מעבר ל-kernel mode, והיא אינה מאפשרת מיפוי בלתי מוגבל של כל רגיסטר חומרה (Lecture 17, chunk 17, 20).\n- **ג:** תיאור זה מתייחס למנגנון הדרייברים (מנהלי התקן), שמספק ממשק אחיד לתקשורת עם חומרה ספציפית, ולא ל-Memory-Mapped I/O. בנוסף, Memory-Mapped I/O מתבססת דווקא על גישה לזיכרון הווירטואלי (Lecture 17, chunk 21).\n- **ד:** תיאור זה מתייחס למערכי RAID, שמטרתם לשפר ביצועים ואמינות באמצעות מספר דיסקים (Lecture 18, chunk 27), ואינו קשור ישירות לדרך הגישה לרגיסטרים של התקני קלט/פלט בודדים באמצעות Memory-Mapped I/O."
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Disks",
+    "topic_hint": "Hard Disk Performance",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-14 18:38:21",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      17,
+      18,
+      19
+    ],
+    "token_usage": {
+      "prompt_tokens": 1665,
+      "output_tokens": 595,
+      "total_tokens": 5148
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Disks",
+    "topic": [
+      "Hard Disk Performance"
+    ],
+    "difficulty_estimation": "Hard",
+    "content": {
+      "text": "בהינתן מערך RAID 0 המורכב מ-N דיסקים, ובהינתן שמהירות קריאה סדרתית מדיסק בודד היא S MB/sec ומהירות קריאה אקראית היא R MB/sec, כאשר ידוע ש-S > R. איזו מהטענות הבאות מתארת נכונה את ביצועי הקריאה של מערך ה-RAID 0?",
+      "code_snippet": null,
+      "options": [
+        "א. ביצועי קריאה סדרתית הם N*S MB/sec, ואילו ביצועי קריאה אקראית הם N*R MB/sec.",
+        "ב. גם ביצועי קריאה סדרתית וגם ביצועי קריאה אקראית הם N*S MB/sec.",
+        "ג. ביצועי קריאה סדרתית הם N*R MB/sec, ואילו ביצועי קריאה אקראית הם N*S MB/sec.",
+        "ד. ביצועי קריאה סדרתית ואקראית כאחד אינם משתפרים משמעותית ב-RAID 0 מכיוון שאין מנגנון זוגיות (parity) לשיפור ביצועים."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "החומר המצורף קובע במפורש כי עבור קריאה סדרתית במערך RAID 0 עם N דיסקים, הביצועים הם N*S MB/sec. באופן דומה, החומר מציין במפורש כי גם עבור קריאה אקראית, הביצועים של מערך ה-RAID 0 הם N*S MB/sec, למרות שמהירות קריאה אקראית מדיסק בודד (R) נמוכה בדרך כלל ממהירות קריאה סדרתית (S). הטקסט מדגיש כי ב-RAID 0 \"מנצלים את כל הדיסקים ומשפרים את הביצועים באופן משמעותי\" פי N, ומציין את N*S MB/sec לשני סוגי הקריאות. לכן, אפשרות ב' היא הנכונה ביותר לפי החומר."
+    }
+  }
+}

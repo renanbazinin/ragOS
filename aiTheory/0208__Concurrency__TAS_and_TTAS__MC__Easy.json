@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "TAS and TTAS",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:44:12",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      12,
+      13
+    ],
+    "token_usage": {
+      "prompt_tokens": 1941,
+      "output_tokens": 670,
+      "total_tokens": 4134
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "TAS and TTAS"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהו ההבדל המבני העיקרי בין מנעול TAS למנעול TTAS, כפי שתואר בחומר ההרצאה?",
+      "code_snippet": "void lock()\n{\n    while (true) {\n        while (state) {}\n        if (!testAndSet(state, true))\n            return;\n    }\n}",
+      "options": [
+        "א. מנעול TTAS כולל לולאה פנימית שבודקת באופן תמידי את מצב המנעול לפני ניסיון לבצע את פעולת testAndSet.",
+        "ב. מנעול TAS משתמש בפעולת testAndSet בעוד שמנעול TTAS משתמש בפעולת compareAndSwap.",
+        "ג. מנעול TTAS מיושם באמצעות מערך תאים גדול, בניגוד למנעול TAS.",
+        "ד. מנעול TAS מציג ביצועים טובים יותר באופן משמעותי ממנעול TTAS בסביבת ריבוי חוטים."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "ההסבר המפורט בחומר ההרצאה מציין שמנעול TTAS (Test-and-Test-and-Set) דומה למנעול TAS (Test-and-Set), \"מלבד הלולאה הפנימית\". קוד ה-TTAS המוצג מראה בבירור את הלולאה הפנימית `while (state) {}` שתפקידה לבדוק את מצב המנעול (state) ורק כאשר הוא נראה פנוי (state הוא false), אז הוא מנסה לתפוס אותו באמצעות `testAndSet`. לולאה זו היא ההבדל המבני העיקרי בין שני המנעולים, והיא מאפשרת הפחתה משמעותית של תעבורת ה-BUS על ידי קריאה חוזרת ונשנית של מצב המנעול מהמטמון המקומי (cache), ובכך משפרת את הביצועים באופן דרמטי לעומת TAS. אפשרות ב' אינה נכונה מכיוון ששני המנעולים משתמשים ב-testAndSet. אפשרות ג' מתייחסת לבעיה או מאפיין של מנעול אחר או מנגנון מתקדם יותר ולא להבדל המבני הבסיסי בין TAS ו-TTAS עצמם. אפשרות ד' אינה נכונה מכיוון שמנעול TTAS מציג ביצועים טובים בהרבה ממנעול TAS בסביבת ריבוי חוטים."
+    }
+  }
+}

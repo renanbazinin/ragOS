@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Data Blocks and Bitmaps",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:09:53",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      20,
+      21
+    ],
+    "token_usage": {
+      "prompt_tokens": 1783,
+      "output_tokens": 531,
+      "total_tokens": 3454
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Data Blocks and Bitmaps"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מה תפקידו העיקרי של 'מפת סיביות לנתונים' (Data Bitmap) במערכת קבצים?",
+      "code_snippet": null,
+      "options": [
+        "א. לסמן אילו בלוקים של נתונים תפוסים ואילו פנויים.",
+        "ב. לסמן אילו inodes תפוסים ואילו פנויים.",
+        "ג. לרשום את שמות הקבצים והתיקיות במערכת.",
+        "ד. לשמור את התוכן בפועל של קבצי המערכת."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "מפת סיביות לנתונים (Data Bitmap) משמשת במערכת קבצים כדי לעקוב אחר מצב בלוקי הנתונים. כל ביט במפה מייצג בלוק נתונים אחד, כאשר ערך '1' מציין שהבלוק תפוס וערך '0' מציין שהבלוק פנוי. זה מאפשר למערכת הקבצים למצוא במהירות בלוקים פנויים לכתיבת נתונים חדשים או לדעת אילו בלוקים נמצאים בשימוש, כפי שמתואר בחומר ההרצאה (Lecture 20, chunk 27): 'בלוק שני ל-data bitmap- (d), כלוק שאומר אותו דבר, רק עבור הבלוקים של ה-data, אילה בלוקים של data פנויים ואילה לא. הרעיון של bitmap: אם למשל יש לנו 56 בלוקים של data, אז נשמור מספר בינארי בגודל 56, שבו בכל מקום שבלוק תפוס יהיה 1 ובכל מקום שבלוק פנוי יהיה 0'. אפשרויות ב', ג' ו-ד' מתארות פונקציות של רכיבים אחרים במערכת הקבצים או תיאור שגוי של תפקיד ה-Data Bitmap."
+    }
+  }
+}

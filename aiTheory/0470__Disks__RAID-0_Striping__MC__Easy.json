@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Disks",
+    "topic_hint": "RAID-0 Striping",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:47:31",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      18,
+      19
+    ],
+    "token_usage": {
+      "prompt_tokens": 2045,
+      "output_tokens": 449,
+      "total_tokens": 3602
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Disks",
+    "topic": [
+      "RAID-0 Striping"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהי המטרה העיקרית של טכניקת ה-striping המשמשת ב-RAID-0?",
+      "code_snippet": null,
+      "options": [
+        "א. לשפר את ביצועי הקריאה והכתיבה על ידי פיצול נתונים בין דיסקים שונים.",
+        "ב. לספק יתירות נתונים ואמינות גבוהה במקרה של כשל דיסק.",
+        "ג. לשכפל את כל הנתונים על פני מספר דיסקים כדי למנוע אובדן מידע.",
+        "ד. לאחד מספר דיסקים פיזיים לדיסק לוגי יחיד מבלי לשפר ביצועים."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "RAID-0, המכונה גם Striping, מיועד בראש ובראשונה לשפר את ביצועי ה-I/O (קריאה וכתיבה) של המערכת. הוא עושה זאת על ידי פיצול סקטורים או בלוקים של נתונים (בהתאם ל-chunk size) וחלוקתם לסירוגין בין מספר דיסקים פיזיים. גישה זו מאפשרת לבצע פעולות קריאה וכתיבה מקבילות על דיסקים שונים, ובכך להגביר את קצב העברת הנתונים באופן משמעותי, לעיתים קרובות כמעט פי שניים עבור פעולות סדרתיות. המטרה העיקרית היא הגברת ביצועים, ולא אמינות או יתירות נתונים."
+    }
+  }
+}

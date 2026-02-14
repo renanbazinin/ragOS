@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores and Producer-Consumer",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 19:02:15",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      14
+    ],
+    "token_usage": {
+      "prompt_tokens": 1809,
+      "output_tokens": 547,
+      "total_tokens": 3674
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Semaphores and Producer-Consumer"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "בבעיית היצרן/צרכן (Producer/Consumer) הממומשת באמצעות סמפורים עבור באפר חסום בגודל MAX, מהם הערכים ההתחלתיים הנכונים עבור הסמפורים `empty` ו-`full`?",
+      "code_snippet": "init(&empty, MAX);\ninit(&full, 0);\nint fill = 0;\nint use = 0;\nint buff[MAX];",
+      "options": [
+        "א. הסמפור `empty` מאותחל ל-`MAX`, והסמפור `full` מאותחל ל-`0`.",
+        "ב. הסמפור `empty` מאותחל ל-`0`, והסמפור `full` מאותחל ל-`MAX`.",
+        "ג. גם הסמפור `empty` וגם הסמפור `full` מאותחלים ל-`1`.",
+        "ד. גם הסמפור `empty` וגם הסמפור `full` מאותחלים ל-`MAX`."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "האפשרות הנכונה היא א'. בבעיית היצרן/צרכן עם באפר חסום, אנו משתמשים בשני סמפורים עיקריים: `empty` ו-`full`. הסמפור `empty` מייצג את מספר המדפים הפנויים (או המקומות הריקים) בבאפר. בתחילת הדרך, כל המדפים בבאפר פנויים, ולכן הוא מאותחל לגודל המקסימלי של הבאפר (`MAX`). הסמפור `full` לעומת זאת, מייצג את מספר המדפים המלאים (או האיברים שנמצאים בבאפר). בתחילת הדרך, הבאפר ריק מאיברים, ולכן הוא מאותחל ל-0. מידע זה מצוי במפורש בחומר ההרצאה, לדוגמה ב-Lecture 14 (chunk 25)."
+    }
+  }
+}

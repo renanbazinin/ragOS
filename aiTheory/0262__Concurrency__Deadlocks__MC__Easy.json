@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Deadlocks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:57:50",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      16,
+      15
+    ],
+    "token_usage": {
+      "prompt_tokens": 2076,
+      "output_tokens": 533,
+      "total_tokens": 4205
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Deadlocks"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהי המתנה מעגלית (circular wait) בהקשר של קיפאון (deadlock)?",
+      "code_snippet": "/*\n//Thread 1::\nlock(&L1);\nlock(&L2);\n\n//Thread 2::\nlock(&L2);\nlock(&L1);\n*/",
+      "options": [
+        "א. מצב בו חוטים שונים תופסים משאבים בסדר הפוך, כך שכל חוט ממתין למשאב שמוחזק על ידי חוט אחר במעגל.",
+        "ב. מצב בו חוט אחד מנסה לתפוס את אותו מנעול פעמיים ברצף.",
+        "ג. מצב בו חוטים מחכים למשאבים שאינם זמינים כלל במערכת.",
+        "ד. מצב בו כל החוטים במערכת תקועים כתוצאה מכשל חומרה."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "על פי חומר ההרצאה, המתנה מעגלית (circular wait) היא אחד מארבעת התנאים ההכרחיים לקיומו של קיפאון (deadlock). מצב זה מתאר מצב בו חוטים שונים תופסים משאבים (כמו מנעולים) בסדר הפוך. הדוגמה שניתנה בהרצאה ממחישה זאת: חוט 1 תופס את L1 ואז מנסה לתפוס את L2, בעוד שחוט 2 תופס את L2 ואז מנסה לתפוס את L1. במקרה זה, כל חוט ממתין למשאב שמוחזק על ידי חוט אחר במעגל, ונוצר קיפאון מכיוון שאף חוט לא יכול להתקדם ולשחרר את המשאבים שברשותו. שאר האפשרויות אינן תואמות את ההגדרה של המתנה מעגלית כפי שהוצגה בחומר."
+    }
+  }
+}

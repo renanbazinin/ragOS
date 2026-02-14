@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "File System Structure",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:04:32",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      20,
+      21
+    ],
+    "token_usage": {
+      "prompt_tokens": 1825,
+      "output_tokens": 403,
+      "total_tokens": 3710
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "File System Structure"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהי מטרתו העיקרית של ה-inode במערכת קבצים, כפי שתואר בחומר השיעור?",
+      "code_snippet": null,
+      "options": [
+        "א. לאחסן את הנתונים בפועל של הקובץ.",
+        "ב. לשמור את כל המידע על הקובץ (metadata).",
+        "ג. לתאם את הגישה לדיסק עבור פעולות קריאה וכתיבה.",
+        "ד. לנהל רשימה של מקומות פנויים בדיסק."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "על פי חומר השיעור, \"נשמור איזור מסוים בדיסק שיכיל את ה-metadata, כלומר את כל המידע על הקבצים, ונקרא לאזור הזה inode.\" ה-inode מכיל פרטים כמו סוג הקובץ, בעלים, הרשאות, גודל, ובלוקי נתונים (הפניות אליהם), שכולם מהווים metadata על הקובץ. אפשרות א' שגויה מכיוון שה-inode אינו מכיל את נתוני הקובץ בפועל, אלא מצביע על בלוקי הנתונים. אפשרויות ג' וד' מתארות תפקידים אחרים של מערכת הקבצים שאינם מטרתו העיקרית של ה-inode עצמו."
+    }
+  }
+}

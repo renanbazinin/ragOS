@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "TAS and TTAS",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:44:24",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      12,
+      13
+    ],
+    "token_usage": {
+      "prompt_tokens": 1941,
+      "output_tokens": 630,
+      "total_tokens": 4208
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "TAS and TTAS"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהו המאפיין המבני העיקרי של מנעול TTAS (Test-and-Test-and-Set) שמבדיל אותו ממנעול TAS (Test-and-Set) ותורם לביצועיו העדיפים?",
+      "code_snippet": "void lock()\n{\n    while (true) {\n        while (state) {}\n        if (!testAndSet(state, true))\n            return;\n    }\n}",
+      "options": [
+        "א. מנעול TTAS כולל לולאה פנימית שקוראת שוב ושוב את מצב המנעול לפני ניסיון לתפוס אותו באמצעות testAndSet.",
+        "ב. מנעול TTAS משתמש במנגנון 'backoff' אקראי כדי למנוע התנגשויות בין חוטים.",
+        "ג. מנעול TTAS מבצע את פעולת ה-testAndSet פחות פעמים ממנעול TAS.",
+        "ד. מנעול TTAS דורש מערך גדול של תאים בזיכרון משותף כדי לנהל תור המתנה."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "מנעול TTAS נבדל ממנעול TAS בכך שהוא כולל לולאה פנימית (`while (state) {}`) שקוראת שוב ושוב את מצב המנעול (state) ורק כאשר הוא נראה פנוי, הוא מנסה לתפוס אותו באמצעות הפעולה האטומה `testAndSet`. לולאה פנימית זו מפחיתה באופן משמעותי את מספר פעולות ה-`testAndSet` האטומיות המבוצעות על ידי חוטים ממתינים. פעולות אטומיות אלו כרוכות בתקורה גבוהה יותר (כמו תקשורת ב-BUS לצורך שמירה על קוהרנטיות מטמון במעבדים מרובי ליבות) בהשוואה לקריאה רגילה של משתנה, ולכן צמצומן משפר את הביצועים באופן ניכר, כפי שמוצג בגרפים של ביצועי TTAS לעומת TAS. האפשרויות האחרות אינן מתארות את ההבדל המבני העיקרי או שהן מתארות תוצאות או מאפיינים של מנגנוני נעילה אחרים/מורכבים יותר."
+    }
+  }
+}

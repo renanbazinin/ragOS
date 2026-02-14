@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Superblock",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 18:14:04",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      20,
+      21,
+      22
+    ],
+    "token_usage": {
+      "prompt_tokens": 1676,
+      "output_tokens": 449,
+      "total_tokens": 4218
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Superblock"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "מהו התפקיד המרכזי של ה-Super Block במערכת קבצים?",
+      "code_snippet": null,
+      "options": [
+        "א. לאחסן את הנתונים בפועל של קבצים ותיקיות.",
+        "ב. לנהל את המיפוי בין בלוקים לוגיים לפיזיים עבור זיכרון SSD.",
+        "ג. להכיל מידע בסיסי אודות מבנה מערכת הקבצים, גודלה, ומיקום מבני הנתונים החשובים שלה.",
+        "ד. לשמור רשימה מקושרת של כל ה-inodes במערכת."
+      ]
+    },
+    "solution": {
+      "correct_option": "ג",
+      "explanation": "ה-Super Block הוא בלוק חיוני המכיל מידע מטא-נתונים קריטי על מערכת הקבצים והכונן. כפי שמצוין בחומר ההרצאה, הוא מכיל נתונים כמו סוג מערכת הקבצים (כדי לדעת איזה קוד להריץ), גודל הדיסק, מספר בלוקי הנתונים (data blocks), מספר ה-inodes, ומיקום מפות הסיביות (bitmaps) לניהול בלוקים פנויים ו-inodes פנויים. במערכות קבצים עם Journal, הוא גם מכיל מצביעים חיוניים לשחזור טרנזקציות. לכן, תפקידו המרכזי הוא להכיל מידע בסיסי אודות מבנה מערכת הקבצים, גודלה, ומיקום מבני הנתונים החשובים שלה."
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Journaling",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-14 18:24:18",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      21
+    ],
+    "token_usage": {
+      "prompt_tokens": 1706,
+      "output_tokens": 754,
+      "total_tokens": 5393
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Journaling"
+    ],
+    "difficulty_estimation": "Hard",
+    "content": {
+      "text": "בהתייחס לפרוטוקול הסופי של Journaling מסוג \"Metadata Journaling\" (או \"Ordered Journaling\"), המתואר בחומר ההרצאה, ובהנחה ששלב \"Journal commit\" (כתיבת Txe ליומן) הושלם בהצלחה, מהי המטרה העיקרית של שלב ה-\"Checkpoint\" (שלב 4: \"Write metadata to final locations\")?",
+      "code_snippet": null,
+      "options": [
+        "א. להבטיח שהנתונים (data) עצמם נכתבו באופן עמיד למיקומם הסופי בדיסק.",
+        "ב. לסמן את הטרנזקציה ביומן כפעולה שבוצעה בהצלחה וניתן לפנות את מקומה.",
+        "ג. ליישם את שינויי המטא-דאטה מתוך היומן למיקומם הקבוע במבני מערכת הקבצים העיקריים.",
+        "ד. להבטיח את עמידות הטרנזקציה כולה ביומן, כך שניתן יהיה לשחזר אותה לאחר קריסה."
+      ]
+    },
+    "solution": {
+      "correct_option": "ג",
+      "explanation": "חומר ההרצאה מתאר את הפרוטוקול הסופי של Metadata Journaling (chunk 38). שלבים 1 עד 3 מבטיחים את כתיבת הנתונים למיקומם הסופי ואת רישום הטרנזקציה כולה (כולל Txb, metadata ו-Txe) ביומן, וכי הטרנזקציה \"committed\" (ממומשת/מחויבת) ביומן. שלב ה-\"Checkpoint\" (שלב 4) מוגדר במפורש כ-\"Write metadata to final locations\" (כתיבת מטא-דאטה למיקומם הסופי). לאחר שהטרנזקציה כבר ממומשת ביומן (committed), מטרת שלב זה היא ליישם בפועל את שינויי המטא-דאטה, שתועדו ביומן, אל המבנים הקבועים של מערכת הקבצים מחוץ ליומן. לכן, תשובה ג' מתארת במדויק מטרה זו.\n\nתשובה א' שגויה, כיוון שכתיבת הנתונים הסופית מתבצעת בשלב 1 (\"Data write\").\nתשובה ב' שגויה, כיוון שסימון הטרנזקציה כפנויה ביומן מתבצע בשלב 5 (\"Free\"), שהוא שלב מאוחר יותר.\nתשובה ד' שגויה, כיוון שעמידות הטרנזקציה ביומן ויכולת השחזור שלה לאחר קריסה מושגות עם השלמת שלב 3 (\"Journal commit\"), אשר מסמן את הטרנזקציה כ-\"committed\" ביומן."
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Disks",
+    "topic_hint": "RAID-0 Striping",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:47:42",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      18,
+      19
+    ],
+    "token_usage": {
+      "prompt_tokens": 2045,
+      "output_tokens": 528,
+      "total_tokens": 4202
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Disks",
+    "topic": [
+      "RAID-0 Striping"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהי המטרה העיקרית של טכניקת Striping ב-RAID-0?",
+      "code_snippet": null,
+      "options": [
+        "א. שיפור ביצועי קריאה וכתיבה על ידי פיזור נתונים לסירוגין בין דיסקים שונים.",
+        "ב. הבטחת יתירות נתונים ושרידות במקרה של כשל דיסק בודד.",
+        "ג. הקטנת שטח האחסון הנדרש עבור הנתונים במערכת.",
+        "ד. יצירת דיסק לוגי יחיד שקוף למערכת ההפעלה המדמה דיסק פיזי גדול יותר."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "לפי חומר ההרצאה, RAID-0 משתמש בטכניקת Striping שמטרתה העיקרית היא שיפור ביצועים. טכניקה זו מחלקת את הסקטורים (או בלוקים) של הנתונים לסירוגין בין מספר דיסקים פיזיים. רעיון זה מאפשר ניצול מקבילי של הדיסקים לפעולות קריאה וכתיבה סדרתיות, ובכך מגביר את הביצועים באופן משמעותי, כפי שצוין בשיעור: 'זה גורם להגברת הביצועים בכמעט פי 2'. האפשרויות האחרות אינן המטרה העיקרית של ה-striping ב-RAID-0; לדוגמה, יתירות (אמינות) מתוארת כמאפיין שאינו קיים ב-RAID-0 ('no reliability'), והקטנת שטח האחסון אינה מטרה של RAID-0. יצירת דיסק לוגי שקוף היא מאפיין כללי של RAID, אך לא המטרה הספציפית של טכניקת ה-striping עצמה."
+    }
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Spinlocks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 17:39:44",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      16,
+      11,
+      13,
+      15
+    ],
+    "token_usage": {
+      "prompt_tokens": 2126,
+      "output_tokens": 1052,
+      "total_tokens": 6473
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Spinlocks"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "בהתבסס על מימוש המנעול `FlakyLock` הנתון, איזו מהטענות הבאות מתארת נכונה את תכונותיו ביחס למניעה הדדית, מניעת קיפאון והוגנות?",
+      "code_snippet": "typedef struct { int turn; int busy; } FlakyLock;\nvoid init(FlakyLock *lock) {\n    lock->busy = 0;\n}\nvoid lock(FlakyLock *lock, int me) {\n    do {\n        do {\n            lock->turn = me;\n        } while (lock->busy);\n        lock->busy = 1;\n    } while (lock->turn != me);\n}\nvoid unlock(FlakyLock *lock) {\n    lock->busy = 0;\n}",
+      "options": [
+        "א. המנעול מקיים מניעה הדדית ומניעת קיפאון, אך אינו מבטיח הוגנות.",
+        "ב. המנעול מקיים מניעה הדדית והוגנות, אך עלול לגרום לקיפאון.",
+        "ג. המנעול אינו מקיים מניעה הדדית, אך מבטיח מניעת קיפאון והוגנות.",
+        "ד. המנעול מקיים את כל שלוש התכונות: מניעה הדדית, מניעת קיפאון והוגנות."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "הסבר מפורט:\n\n*   **מניעה הדדית (Mutual Exclusion):** המנעול מקיים מניעה הדדית. חוט יכול להיכנס לקטע הקריטי רק אם הוא מצליח להגדיר את `lock->busy = 1` וגם לוודא שערך `lock->turn` עדיין תואם את ה-`me` שלו. אם חוט אחר משנה את `lock->turn` לפני שהחוט הנוכחי מצליח לבדוק את התנאי `lock->turn != me`, החוט הנוכחי יחזור ללולאה החיצונית וינסה שוב. זה מבטיח שרק חוט אחד יכול להיכנס לקטע הקריטי בכל רגע נתון, שכן אם חוט אחד נמצא בקטע הקריטי, `lock->busy` יהיה 1, וימנע מחוטים אחרים להתקדם מעבר ללולאה הפנימית.\n\n*   **מניעת קיפאון (Deadlock Freedom):** המנעול מונע קיפאון. החוטים מבצעים \"ספין-וויט\" (busy-wait) על המנעול. אין תלות מעגלית שמונעת מכל החוטים להתקדם. ברגע שהמנעול משוחרר (על ידי קריאה ל-`unlock`), אחד מהחוטים הממתינים יצליח בסופו של דבר לתפוס אותו, גם אם יש תחרות קשה על משתנה `turn`. המצב המתואר ב-`Lecture 11 (chunk 34)` שבו חוט מחכה ל-`turn` של חוט אחר שאינו מעוניין להיכנס כלל, אינו מתרחש כאן, שכן חוט שמעוניין להיכנס ינסה באופן אקטיבי להגדיר את `turn` לעצמו.\n\n*   **הוגנות (Fairness):** המנעול אינו מבטיח הוגנות. אין מנגנון שמבטיח שחוטים יקבלו את המנעול לפי סדר הגעתם. חוט יכול להידחק שוב ושוב על ידי חוטים אחרים שמשנים את `lock->turn` שלו, לפני שהוא מספיק להשלים את תהליך התפיסה. זהו מאפיין נפוץ במנעולי ספין פשוטים כמו TAS, כפי שמצוין ב-`Lecture 11 (chunk 45)`: \"שני המנעולים הללו דומים, שניהם מונעים deadlock אבל אינם בהכרח הוגנים.\" מנעול ה-Ticket Lock מוזכר כדוגמה למנעול עם הוגנות, תכונה שאינה קיימת ב-`FlakyLock`."
+    }
+  }
+}

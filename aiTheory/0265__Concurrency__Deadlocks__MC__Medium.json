@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Deadlocks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 17:58:27",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      16,
+      15
+    ],
+    "token_usage": {
+      "prompt_tokens": 2076,
+      "output_tokens": 683,
+      "total_tokens": 5304
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Deadlocks"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "מהי הטענה הנכונה ביותר לגבי תכונת \"deadlock freedom\" של מנעולים, כפי שהוצגה בחומר הלימוד?",
+      "code_snippet": null,
+      "options": [
+        "א. מנעול המקיים \"deadlock freedom\" מבטיח שלא יכול לקרות קיפאון בשימוש בו לבדו, אך תכונה זו אינה מבטיחה היעדר קיפאון כאשר משתמשים במספר מנעולים יחד.",
+        "ב. \"deadlock freedom\" היא תנאי מוקדם הכרחי לקיומו של קיפאון, המתאר מצב של המתנה מעגלית בין חוטים שונים.",
+        "ג. אם כל מנעול בנפרד במערכת מקיים \"deadlock freedom\", אזי המערכת כולה מובטחת להיות חופשית מקיפאון.",
+        "ד. תכונת \"deadlock freedom\" מבטיחה שכל החוטים במערכת יתקדמו תמיד, ללא קשר לסדר תפיסת המשאבים."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "התשובה הנכונה היא א'. חומר הלימוד מציין במפורש כי \"מנעול שכן מקיים זאת [deadlock freedom], מבטיח שלא יכול להיות deadlock בשימוש בו, אבל זה נכון רק עבור שימוש במנעול יחיד\". בנוסף, מודגש כי \"ל-deadlock אין תכונת הרכבה. כלומר אם ניקח שני מנעולים שבשניהם אין deadlocks ונשתמש בשניהם, זה לא מבטיח שלא יהיו לנו deadlocks\" (שיעור 15, קטע 0). \nאפשרות ב' שגויה מכיוון שהיא מתארת את תנאי \"circular wait\" (המתנה מעגלית), שהוא אחד מארבעת התנאים ההכרחיים לקיום קיפאון, ולא את תכונת \"deadlock freedom\" עצמה. \nאפשרות ג' שגויה מכיוון שהיא סותרת את העיקרון שלחופש מקיפאון \"אין תכונת הרכבה\" (no composition property).\nאפשרות ד' שגויה מכיוון ש\"deadlock freedom\" מתייחסת למנעול בודד ואינה מבטיחה התקדמות ללא קשר לסדר תפיסת המשאבים כאשר מדובר במספר מנעולים; סדר תפיסת המשאבים הוא קריטי ויכול להוביל לקיפאון (כפי שמוצג בדוגמת ה-circular wait)."
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Log-structured File System",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:24:34",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      20,
+      21,
+      22
+    ],
+    "token_usage": {
+      "prompt_tokens": 2062,
+      "output_tokens": 407,
+      "total_tokens": 3358
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Log-structured File System"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "על פי חומר ההרצאה, מהי הבעיה העיקרית שמערכת הקבצים LFS (Log-structured File System) נועדה לפתור?",
+      "code_snippet": null,
+      "options": [
+        "א. שיפור ביצועי קריאה מהדיסק על ידי שימוש ב-cache.",
+        "ב. שיפור ביצועי כתיבה לדיסק, מכיוון שפעולות קריאה מטופלות היטב על ידי cache.",
+        "ג. הפחתת פרגמנטציה חיצונית בדיסק על ידי הקצאת בלוקים רציפים.",
+        "ד. הבטחת עמידות נתונים במקרה של קריסת מערכת באופן אוטומטי."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "חומר ההרצאה מציין במפורש כי 'רוב הפעולות שאנחנו מבצעים את הכתיבות על הדיסק הן פעולות כתיבה. כי כשאנחנו קוראים נתונים, אזי יש לנו cache ה-inodes, bitmaps, data הרבה פעמים נשארים כבר בזיכרון. זה הופך את פעולות הקריאה להרבה יותר קלות ולכן פעולות הכתיבה הן הבעיה העיקרית שלנו'. מכאן, המטרה העיקרית של LFS היא לשפר את ביצועי הכתיבה לדיסק."
+    }
+  }
+}

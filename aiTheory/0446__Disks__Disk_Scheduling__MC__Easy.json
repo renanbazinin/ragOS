@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Disks",
+    "topic_hint": "Disk Scheduling",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:42:09",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      18
+    ],
+    "token_usage": {
+      "prompt_tokens": 2024,
+      "output_tokens": 409,
+      "total_tokens": 4251
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Disks",
+    "topic": [
+      "Disk Scheduling"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהו המאפיין העיקרי של אלגוריתם תזמון הדיסק First Come, First Served (FCFS)?",
+      "code_snippet": null,
+      "options": [
+        "א. מטפל בבקשות לפי סדר הגעתן למערכת ההפעלה.",
+        "ב. בוחר תמיד את הבקשה שדורשת את זמן המיקום הקצר ביותר.",
+        "ג. משלב בקשות סמוכות לקריאה אחת רציפה.",
+        "ד. מבוצע אך ורק בתוך הדיסק עצמו, ללא מעורבות מערכת ההפעלה."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "אלגוריתם FCFS (First Come, First Served) הוא שיטת תזמון דיסק פשוטה וישירה. המאפיין העיקרי שלו, כפי שמוצג בחומר ההרצאה, הוא טיפול בבקשות בדיוק לפי הסדר שבו הגיעו למערכת. גישה זו אינה מתחשבת במיקום הפיזי של הנתונים על הדיסק או בזמן הנדרש לביצוע הבקשה, אלא רק בסדר כרונולוגי של קבלת הבקשות. אפשרויות ב', ג' ו-ד' מתארות מאפיינים של אלגוריתמים אחרים או אופטימיזציות שונות בתזמון דיסק."
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Directory Structure",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 18:16:41",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      20,
+      21
+    ],
+    "token_usage": {
+      "prompt_tokens": 2034,
+      "output_tokens": 455,
+      "total_tokens": 4034
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Directory Structure"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "מהו אחד ממרכיבי המטא-דאטה החיוניים הנשמרים ב-inode, המאפשר למערכת הקבצים להבחין בין קובץ רגיל לבין ספרייה?",
+      "code_snippet": null,
+      "options": [
+        "א. מספר הקישורים (Links count)",
+        "ב. סוג האובייקט (Type)",
+        "ג. גודל הקובץ בבתים (Size)",
+        "ד. מפת סיביות של נתונים (Data Bmap)"
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "ה-inode הוא מבנה נתונים בדיסק המכיל את כל המטא-דאטה אודות קובץ או ספרייה. על פי חומר ההרצאה, אחד מהשדות המפורטים כחלק ממרכיבי ה-inode הוא \"Type (file / directory)\". שדה זה הוא המאפיין הישיר והברור ביותר המאפשר למערכת הקבצים להבחין האם ה-inode מתאר קובץ רגיל (file) או ספרייה (directory). שדות אחרים כמו \"Links count\" מציינים כמה קישורים (נתיבים) קיימים לאובייקט, אך אינם מגדירים את סוגו באופן בלעדי (גם לקבצים וגם לספריות יכולים להיות קישורים). \"Size\" מתאר את גודל התוכן, ו\"Data Bmap\" היא מפת סיביות כללית המנהלת הקצאת בלוקים, ולא חלק ישיר ממטא-דאטה של inode ספציפי המגדיר את סוגו."
+    }
+  }
+}

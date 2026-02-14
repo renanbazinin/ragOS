@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Disks",
+    "topic_hint": "RAID-1 Mirroring",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 18:50:42",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      18,
+      19
+    ],
+    "token_usage": {
+      "prompt_tokens": 2120,
+      "output_tokens": 488,
+      "total_tokens": 5043
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Disks",
+    "topic": [
+      "RAID-1 Mirroring"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "על פי חומר הקורס, מהי המטרה העיקרית של RAID-1 (mirroring)?",
+      "code_snippet": null,
+      "options": [
+        "א. לשפר באופן דרמטי את מהירות הקריאה והכתיבה על ידי פיצול סקטורים לסירוגין בין דיסקים.",
+        "ב. להבטיח זמינות נתונים ושרידות מפני כשל של דיסק יחיד, באמצעות שכפול מלא של כל הנתונים על פני מספר דיסקים.",
+        "ג. לייעל את ניצול שטח האחסון הכולל על ידי מניעת שכפול נתונים.",
+        "ד. לאפשר שחזור נתונים באמצעות שמירת נתוני זוגיות (parity) בנפרד מהנתונים המקוריים."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "חומר הקורס מגדיר את RAID-1 (mirroring) כשיטה שבה 'נשכפל את הנתונים בין כולם (כל בלוק יהיה משוכפל בין כל הדיסקים)'. בנוסף, צוין כי 'אם דיסק אחד יתקלקל, נוכל להביא את הנתונים מדיסק אחר', מה שמדגיש את מטרת היתירות והשרידות. אפשרות א' מתארת את RAID-0 (striping) שמטרתו העיקרית היא שיפור ביצועים. אפשרות ג' אינה נכונה מכיוון ש-RAID-1 משכפל נתונים ולכן אינו מייעל את ניצול שטח האחסון. אפשרות ד' מתארת מנגנוני RAID מבוססי parity כגון RAID-5, ולא RAID-1."
+    }
+  }
+}

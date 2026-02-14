@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "TAS and TTAS",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:44:36",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      12,
+      13
+    ],
+    "token_usage": {
+      "prompt_tokens": 1941,
+      "output_tokens": 564,
+      "total_tokens": 4222
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "TAS and TTAS"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "בהתבסס על קטע הקוד של מנעול Test-and-Test-and-Set (TTAS) המצורף, מהו המאפיין המבני העיקרי שמבדיל אותו ממנעול Test-and-Set (TAS) פשוט?",
+      "code_snippet": "void lock()\n{\n    while (true) {\n        while (state) {}\n        if (!testAndSet(state, true))\n            return;\n    }\n}",
+      "options": [
+        "א. מנעול TTAS כולל לולאה פנימית (`while (state) {}`) שבודקת את מצב המנעול ללא ניסיון לתפוס אותו, לפני קריאה ל-`testAndSet`.",
+        "ב. מנעול TTAS משתמש בפונקציה אטומית שונה לחלוטין מ-`testAndSet` כדי לתפוס את המנעול.",
+        "ג. מנעול TTAS אינו דורש לולאה חיצונית אינסופית, בניגוד ל-TAS.",
+        "ד. מנעול TTAS מבצע את הפעולה `testAndSet` רק פעם אחת בכל ניסיון נעילה מוצלח."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "החומר המצורף מציין במפורש כי \"מנעול TTAS דומה ל-TAS, מלבד הלולאה הפנימית (שעלולה להיראות מיותרת)\". קטע הקוד של TTAS מדגים לולאה פנימית זו (`while (state) {}`). לולאה זו מאפשרת לחוטים הממתינים לבדוק באופן חוזר ונשנה את מצב המנעול (state) מבלי לבצע פעולת `testAndSet` יקרה ב-BUS המשותף בכל פעם. רק כאשר ה-state מצביע על כך שהמנעול פנוי, מתבצע ניסיון לתפוס אותו באמצעות `testAndSet`. בכך נמנע עומס מיותר על ה-BUS ומשתפרים הביצועים באופן משמעותי לעומת TAS."
+    }
+  }
+}

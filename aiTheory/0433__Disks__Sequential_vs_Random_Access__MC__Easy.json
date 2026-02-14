@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Disks",
+    "topic_hint": "Sequential vs Random Access",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:38:34",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      17,
+      18,
+      19
+    ],
+    "token_usage": {
+      "prompt_tokens": 2093,
+      "output_tokens": 536,
+      "total_tokens": 4756
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Disks",
+    "topic": [
+      "Sequential vs Random Access"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מדוע גישה סדרתית (sequential access) לדיסק קשיח היא לרוב מהירה יותר מגישה אקראית (random access)?",
+      "code_snippet": null,
+      "options": [
+        "א. גישה סדרתית מפחיתה באופן משמעותי את זמני החיפוש (seek time) ואת זמני ההמתנה לסיבוב (rotational latency).",
+        "ב. גישה סדרתית מאפשרת דחיסת נתונים טובה יותר על הדיסק, ובכך מקצרת את זמן ההעברה.",
+        "ג. גישה סדרתית דורשת פחות משאבי מעבד לצורך ניהול בקשות ה-I/O.",
+        "ד. גישה סדרתית מאפשרת לדיסק לבצע קריאות וכתיבות במקביל באופן טבעי יותר."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "על פי חומר ההרצאה, זמן פעולת I/O מורכב בעיקר מזמן חיפוש (seek time) וזמן המתנה לסיבוב (rotational latency), בעוד שזמן העברת המידע עצמו זניח יחסית ($T_{I/O} = T_{seek} + T_{rotation} + T_{transfer}$). גישה סדרתית לנתונים ממוקמים ברצף על הדיסק מפחיתה את הצורך בתנועה רבה של ראש הקריאה/כתיבה (seek) וממזערת את זמן ההמתנה למיקום הנכון על הפלטה (rotation). חומר ההרצאה אף מציין במפורש כי מהירות קריאה סדרתית (S) גבוהה יותר ממהירות קריאה אקראית (R), כלומר S > R. לכן, הפחתת זמני ה-seek וה-rotation היא הסיבה העיקרית ליתרון בביצועים של גישה סדרתית."
+    }
+  }
+}

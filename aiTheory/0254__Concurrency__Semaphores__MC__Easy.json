@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:55:57",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      10,
+      14
+    ],
+    "token_usage": {
+      "prompt_tokens": 2016,
+      "output_tokens": 432,
+      "total_tokens": 3313
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Semaphores"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהו הערך ההתחלתי הנכון שיש להגדיר לסמפור בינארי (binary semaphore) על מנת שישמש כמנעול רגיל (mutual exclusion) לקטע קריטי?",
+      "code_snippet": "init(&semlock, ?);\n// ...\nwait(&semlock);\n// critical section\npost(&semlock);",
+      "options": [
+        "א. 0",
+        "ב. 1",
+        "ג. -1",
+        "ד. כל ערך חיובי גדול מ-0"
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "סמפור בינארי (binary semaphore) משמש כמנעול רגיל (mutual exclusion) והערך שלו יכול להיות רק 1 או 0. על מנת שהמנעול יהיה פנוי בתחילה ויאפשר לחוט הראשון להיכנס לקטע הקריטי, יש לאתחל את הסמפור לערך 1. כאשר חוט קורא לפעולת wait, ערך הסמפור קטן ב-1 (הופך ל-0), והחוט נכנס לקטע הקריטי. כל חוט שינסה להיכנס לאחר מכן ימתין, מכיוון שערך הסמפור הוא 0. לאחר שהחוט מסיים את הקטע הקריטי, הוא קורא לפעולת post, אשר מעלה את ערך הסמפור ב-1 (הופך ל-1) ומאפשר לחוטים ממתינים להיכנס."
+    }
+  }
+}

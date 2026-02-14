@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Spinlocks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:38:33",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      16,
+      11,
+      13,
+      15
+    ],
+    "token_usage": {
+      "prompt_tokens": 2126,
+      "output_tokens": 464,
+      "total_tokens": 4117
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Spinlocks"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהי תכונה נפוצה של מנעולי ספין בסיסיים, כגון אלו המבוססים על פקודת CompareAndSwap (CAS)?",
+      "code_snippet": "while (CompareAndSwap(&flag, 0, 1))\n  ; // spin-wait\n// critical section\nflag = 0;",
+      "options": [
+        "א. הם מונעים קיפאון (deadlock) אך אינם מבטיחים הוגנות (fairness).",
+        "ב. הם תמיד מבטיחים הוגנות (fairness) אך אינם מונעים קיפאון (deadlock).",
+        "ג. הם תמיד מונעים קיפאון (deadlock) ותמיד מבטיחים הוגנות (fairness).",
+        "ד. הם אינם מונעים קיפאון (deadlock) וגם אינם מבטיחים הוגנות (fairness)."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "התשובה הנכונה היא א'. על פי חומר ההרצאה (Lecture 11, chunk 45), מנעולים המבוססים על פקודות כמו CompareAndSwap (CAS) דומים למנעולי TAS, ו\"שניהם מונעים deadlock אבל אינם בהכרח הוגנים.\" כלומר, מנעולים אלו מונעים מצב של קיפאון שבו חוטים חוסמים זה את זה ללא התקדמות, אך אינם מבטיחים שחוטים יקבלו גישה לקטע הקריטי בסדר מסוים או באופן שווה, מה שמהווה חוסר הוגנות פוטנציאלי."
+    }
+  }
+}

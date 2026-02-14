@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Data Blocks and Bitmaps",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-14 18:11:49",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      20,
+      21
+    ],
+    "token_usage": {
+      "prompt_tokens": 1783,
+      "output_tokens": 1362,
+      "total_tokens": 8407
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Data Blocks and Bitmaps"
+    ],
+    "difficulty_estimation": "Hard",
+    "content": {
+      "text": "בעת הוספת בלוק נתונים חדש לקובץ קיים, מערכת הקבצים מבצעת סדרת פעולות כתיבה לדיסק. בהתבסס על המידע אודות סדר פעולות אלו והשלכות קריסה, איזו בעיה ספציפית תתרחש אם מערכת הקבצים קורסת *מיד לאחר* עדכון ה-data bitmap לסימון בלוק חדש כתפוס, אך *לפני* עדכון ה-inode של הקובץ כדי שיצביע על הבלוק החדש?",
+      "code_snippet": "// Simplified pseudo-code illustrating key write operations for adding a new data block\n// This sequence is derived from the lecture material (Lecture 20, chunk 31)\n\n// Assume 'new_block_id' is a free data block found using the data bitmap\n// Assume 'current_inode' is the in-memory representation of the file's inode\n\n// 1. Mark the chosen data block as busy in the data bitmap on disk.\n//    (This corresponds to \"Write updated data bitmap\" in the lecture)\ndisk_write(DATA_BITMAP_BLOCK_ADDRESS, new_block_id, BUSY_STATE);\n\n// --- CRASH POINT: If the system crashes here ---\n// The data bitmap on disk marks 'new_block_id' as busy.\n// However, 'current_inode' (and its on-disk version) does NOT yet point to 'new_block_id'.\n// This leads to the \"memory leak\" scenario.\n\n// 2. Update the file's inode to point to the newly allocated data block on disk.\n//    (This corresponds to \"Write updated inode with new block location\")\ncurrent_inode.data_pointers[next_available_slot] = new_block_id;\ndisk_write(INODE_TABLE_BLOCK_ADDRESS, current_inode.id, current_inode);\n\n// 3. Write the actual data content to the new data block on disk.\n//    (This corresponds to \"Write the actual block itself\")\ndisk_write(DATA_BLOCK_ADDRESS(new_block_id), new_data_content);",
+      "options": [
+        "א. בלוק הנתונים החדש יסומן כפנוי ב-data bitmap, למרות שה-inode כבר מצביע עליו, מה שיוביל לשימוש חוזר בבלוק על ידי קובץ אחר ואיבוד נתונים.",
+        "ב. ה-data bitmap יסמן את הבלוק כתפוס, אך אף inode לא יצביע אליו, מה שיוביל ל\"דליפת זיכרון\" (memory leak) של בלוק הנתונים – בלוק תפוס אך בלתי נגיש.",
+        "ג. ה-inode של הקובץ יצביע על בלוק נתונים שטרם נכתב בפועל על הדיסק, מה שיוביל לשגיאות קריאה עתידיות מהקובץ.",
+        "ד. מערכת הקבצים תיכנס למצב שבו לא ניתן יהיה לאתר את הקובץ כלל, מכיוון שה-inode שלו יהיה במצב לא עקבי ולא ישקף את גודלו האמיתי."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "התשובה הנכונה היא ב'. לפי חומר ההרצאה (Lecture 21, chunk 12, תרחיש iii), אם מתרחשת קריסה לאחר עדכון ה-data bitmap לסימון בלוק כתפוס, אך לפני שעדכון ה-inode מתרחש (כדי שיצביע על הבלוק החדש), אנו נותרים במצב שבו ה-data bitmap מסמן את הבלוק כתפוס, אך אף inode במערכת אינו מצביע עליו. מצב זה מתואר כ\"דליפת זיכרון\" (memory leak), שכן הבלוק תפוס ולא ניתן לשימוש חוזר, אך הוא גם בלתי נגיש לחלוטין מכיוון שאין דרך להגיע אליו דרך היררכיית הקבצים. חומר ההרצאה מציין שזו אחת הסיבות מדוע \"שתי הפעולות הראשונות שלנו לא יכולות להיות כתיבה ל-data bitmap ועדכון ה-inode\" (Lecture 21, chunk 12, נקודה ראשונה).\n\nלגבי האפשרויות האחרות:\nא. תרחיש זה מתאר קריסה לאחר עדכון ה-inode וה-data block, כאשר ה-data bitmap עדיין מסמן את הבלוק כפנוי (Lecture 21, chunk 12, תרחיש ii). זהו מצב הפוך לזה המתואר בשאלה.\nג. בעיה זו עלולה להתרחש אם ה-inode עודכן להצביע על בלוק, אך התוכן של הבלוק עצמו טרם נכתב או לא נכתב כראוי. השאלה מתמקדת בקריסה *לפני* עדכון ה-inode, לא *אחרי* כתיבת ה-inode אך *לפני* כתיבת הדאטה.\nד. זוהי מסקנה כללית מדי. הבעיה הספציפית והחמורה יותר המתוארת במצב זה היא \"דליפת זיכרון\" של בלוק הנתונים, ולא אי-איתור כללי של הקובץ (שכן ה-inode הקיים עדיין קיים, רק לא מכיל את הבלוק החדש)."
+    }
+  }
+}

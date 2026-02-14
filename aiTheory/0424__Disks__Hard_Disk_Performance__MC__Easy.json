@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Disks",
+    "topic_hint": "Hard Disk Performance",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:36:15",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      17,
+      18,
+      19
+    ],
+    "token_usage": {
+      "prompt_tokens": 1665,
+      "output_tokens": 472,
+      "total_tokens": 3423
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Disks",
+    "topic": [
+      "Hard Disk Performance"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "איזו מהטענות הבאות מתארת נכונה את היתרון העיקרי של RAID-0 בהקשר לביצועי דיסק קשיח?",
+      "code_snippet": null,
+      "options": [
+        "א. RAID-0 מבטיח אמינות גבוהה במקרה של כשל דיסק בודד.",
+        "ב. RAID-0 משפר משמעותית את מהירות הקריאה והכתיבה על ידי פיצול נתונים בין דיסקים מרובים.",
+        "ג. RAID-0 מאפשר פעולות אטומיות על מספר סקטורים בו-זמנית, מה שאינו מובטח בחומרה הרגילה.",
+        "ד. RAID-0 מקטין את עומס העבודה על הדיסק המהיר ביותר במערכת על ידי שימוש בדיסק זוגיות."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "RAID-0, כפי שמתואר בחומר ההרצאה, הוא מנגנון שמטרתו העיקרית היא לשפר ביצועים. הוא עושה זאת על ידי פיצול המידע (stripping) על פני מספר דיסקים, ובכך מאפשר לבצע פעולות קריאה וכתיבה במקביל על כל הדיסקים. כתוצאה מכך, הביצועים משתפרים משמעותית, ואף יכולים להגיע לפי N (מספר הדיסקים) מקצב העברת הנתונים של דיסק בודד, הן בקריאה סדרתית והן בקריאה אקראית (N*S mb/sec), כפי שמצוין בפירוש בחומר."
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Ticket Locks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:42:10",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      16,
+      11,
+      13
+    ],
+    "token_usage": {
+      "prompt_tokens": 2333,
+      "output_tokens": 695,
+      "total_tokens": 4946
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Ticket Locks"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהו המאפיין המרכזי המבטיח הוגנות במנעול מסוג Ticket Lock?",
+      "code_snippet": "int ticket = 0; // next available ticket number\nint turn = 0;   // ticket number of the thread whose turn it is\n\nvoid acquire_lock() {\n    int my_ticket = atomic_fetch_and_add(&ticket, 1); // Atomically get a ticket and increment global ticket counter\n    while (my_ticket != turn) {\n        // spin-wait\n    }\n}\n\nvoid release_lock() {\n    atomic_add(&turn, 1); // Atomically increment turn to allow the next thread\n}",
+      "options": [
+        "א. שימוש בפקודת מכונה אטומית TestAndSet למניעת כניסה בו-זמנית לקטע הקריטי.",
+        "ב. הקצאת מספר תור (כרטיס) לכל חוט המבקש להיכנס, והמתנה עד שמספר התור שלו יתאים למשתנה גלובלי המצביע על התור הנוכחי.",
+        "ג. יישום אסטרטגיית Backoff אקספוננציאלית להפחתת עומס על ה-BUS בעת המתנה.",
+        "ד. שמירת רשימת חוטים ממתינים במערך דגלים (flags) ועדכון הדגלים באופן אטומי."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "מנעול ה-Ticket Lock תוכנן במיוחד כדי לספק הוגנות (fairness). הוא עושה זאת על ידי כך שכל חוט שרוצה להיכנס לקטע קריטי מקבל מספר תור (כרטיס) ייחודי באמצעות פעולה אטומית (לדוגמה, `atomic_fetch_and_add`). החוטים ממתינים בלולאה (spin-wait) עד שהמספר שהוקצה להם (my_ticket) יהיה זהה למשתנה גלובלי `turn` המציין איזה כרטיס נמצא כעת בתור. כאשר חוט מסיים את הקטע הקריטי, הוא מקדם את משתנה ה-`turn` במספר אחד, ובכך מאפשר לחוט הבא בתור להיכנס. מנגנון זה מבטיח שחוטים ייכנסו לקטע הקריטי בסדר שבו ביקשו להיכנס, ובכך מונע הרעבה (starvation) ומבטיח הוגנות. אפשרויות א', ג' ו-ד' מתארות מנגנונים או מנעולים אחרים שאינם המאפיין המרכזי להוגנות של Ticket Lock."
+    }
+  }
+}

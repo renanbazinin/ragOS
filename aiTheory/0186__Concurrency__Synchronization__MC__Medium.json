@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Synchronization",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 17:36:50",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      10,
+      11,
+      13,
+      15
+    ],
+    "token_usage": {
+      "prompt_tokens": 2007,
+      "output_tokens": 724,
+      "total_tokens": 4648
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Synchronization"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "בהתייחס לדוגמה משיעור 11, שבה שני חוטים (A ו-B) ניגשים למשתנים משותפים `next` ו-`arr`, ומתרחש מצב שבו חוט אחד דורס את הנתונים שנכתבו על ידי חוט אחר, איזו בעיה קלאסית של סינכרון מתוארת?",
+      "code_snippet": "Thread A\nmy_slot_A = next;\narr[my_slot_A] = value_A;\nnext = next+ 1;\n\nThread B\nmy_slot_B = next;\narr[my_slot_B] = value_B;\nnext = next+ 1;",
+      "options": [
+        "א. מצב מרוץ (Race Condition)",
+        "ב. רעב (Starvation)",
+        "ג. אובדן אות (Lost Signal)",
+        "ד. חוסר זיקה למטמון (Lack of Cache Affinity)"
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "הדוגמה מתארת מצב שבו מספר חוטים ניגשים למשאב משותף (במקרה זה, המשתנה `next` והמערך `arr`) בו-זמנית, ולפחות אחד מהם מבצע פעולת כתיבה. סדר הפעולות אינו ודאי, והתוצאה הסופית תלויה בסדר הביצוע הספציפי של הפקודות על ידי המעבד. במצב זה, חוט A קורא את `next`, מתרחש מיתוג הקשר, חוט B קורא גם הוא את `next` (שעדיין מכיל את הערך הישן), חוט B ממשיך וכותב ל-`arr` ומעדכן את `next`. כאשר חוט A ממשיך, הוא כותב למיקום שגוי (המיקום שקרא בתחילה) ודורס את הנתונים של חוט B. מצב זה, שבו התוצאה של הריצה תלויה בסדר הלא-דטרמיניסטי של הפעולות, מכונה 'מצב מרוץ' (Race Condition), והוא בעיה קלאסית של סינכרון כפי שמצוין במפורש בחומר הלימוד. אפשרויות ב' (רעב) וג' (אובדן אות) מתארות בעיות סינכרון ספציפיות אחרות המוזכרות בחומר, אך אינן מתאימות לתיאור הבעיה המרכזית בדוגמה זו. אפשרות ד' (חוסר זיקה למטמון) היא בעיה הקשורה לביצועים בתזמון מקבילי ואינה בעיית סינכרון של נתונים משותפים."
+    }
+  }
+}

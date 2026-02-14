@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Disks",
+    "topic_hint": "Sequential vs Random Access",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:39:15",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      17,
+      18,
+      19
+    ],
+    "token_usage": {
+      "prompt_tokens": 2093,
+      "output_tokens": 520,
+      "total_tokens": 4419
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Disks",
+    "topic": [
+      "Sequential vs Random Access"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מדוע גישה סדרתית (Sequential Access) לדיסק קשיח יעילה יותר באופן כללי מגישה אקראית (Random Access)?",
+      "code_snippet": null,
+      "options": [
+        "א. היא מפחיתה באופן משמעותי את זמן ה-seek ואת זמן ההמתנה לסיבוב (rotational latency).",
+        "ב. היא מאפשרת לדיסק לטפל בבקשות בכל סדר שיבחר.",
+        "ג. היא מקטינה את נפח האחסון הכולל של הדיסק.",
+        "ד. היא דורשת פחות צריכת חשמל מהדיסק."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "הגישה הסדרתית לדיסק קשיח יעילה יותר מגישה אקראית מכיוון שהיא מפחיתה באופן דרמטי את הצורך בתנועה פיזית של ראש הקריאה/כתיבה (seek time) ואת זמן ההמתנה לסיבוב (rotational latency). חומר ההרצאה מציין כי $T_{I/O} = T_{seek} + T_{rotation} + T_{transfer}$ וכי $T_{seek}$ ו-$T_{rotation}$ הם הגורמים המשמעותיים ביותר בזמן הגישה לדיסק. בגישה סדרתית, ראש הדיסק נע ברצף על פני סקטורים סמוכים, מה שממזער את ההשהיות הללו. בגישה אקראית, לעומת זאת, הראש נאלץ לנוע למקומות שונים בדיסק עבור כל בקשה, מה שמוביל לזמני seek ו-rotation ארוכים יותר ולביצועים נמוכים יותר (כפי שמצוין כי מהירות קריאה סדרתית, S, גדולה ממהירות קריאה אקראית, R, כלומר S > R)."
+    }
+  }
+}

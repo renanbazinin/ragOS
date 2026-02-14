@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Inodes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:07:35",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      20,
+      22
+    ],
+    "token_usage": {
+      "prompt_tokens": 1834,
+      "output_tokens": 299,
+      "total_tokens": 3471
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Inodes"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "איזה מהפרטים הבאים **אינו** נשמר ישירות בתוך inode?",
+      "code_snippet": null,
+      "options": [
+        "א. גודל הקובץ",
+        "ב. הרשאות הגישה לקובץ",
+        "ג. שם הקובץ",
+        "ד. מספרי הבלוקים המכילים את תוכן הקובץ"
+      ]
+    },
+    "solution": {
+      "correct_option": "ג",
+      "explanation": "על פי חומר ההרצאה, inode מכיל פרטים כגון סוג הקובץ, גודלו, הרשאות הגישה שלו, וכן את מספרי הבלוקים בדיסק המכילים את תוכן הקובץ ('איפה המידע שלו נמצא'). שם הקובץ אינו נזכר כפרט הנשמר בתוך ה-inode בחומר ההרצאה, ולכן הוא התשובה הנכונה לשאלה מה אינו נשמר ישירות ב-inode."
+    }
+  }
+}

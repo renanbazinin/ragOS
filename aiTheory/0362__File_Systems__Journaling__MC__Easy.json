@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Journaling",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:21:36",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      21
+    ],
+    "token_usage": {
+      "prompt_tokens": 1706,
+      "output_tokens": 356,
+      "total_tokens": 3097
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Journaling"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהם הביטים המיוחדים המסמנים את תחילתה וסיומה של טרנזקציה ב-journal?",
+      "code_snippet": null,
+      "options": [
+        "א. Txb ו-Txe",
+        "ב. Checkpoint ו-Free",
+        "ג. Metadata ו-Data",
+        "ד. Journal Superblock ו-Pointer"
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "על פי חומר ההרצאה (Chunk 24), Txb (Transaction Begin) הם ביטים מיוחדים המציינים את תחילתה של טרנזקציה חדשה ב-journal. Txe (Transaction End) הם ביטים מיוחדים המסמנים את סיום הטרנזקציה. מבנה זה מוצג גם בתרשים: | Txb | metadata | Data | Txe |. שאר האפשרויות אינן נכונות: Checkpoint ו-Free מתארים שלבים בפרוטוקול או נקודות זמן, Metadata ו-Data הם תוכן הטרנזקציה, ו-Journal Superblock ו-Pointer הם מבנים לניהול ה-journal כולו, לא סימונים לטרנזקציה בודדת."
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "File System Structure",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 18:05:13",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      20,
+      21
+    ],
+    "token_usage": {
+      "prompt_tokens": 1825,
+      "output_tokens": 577,
+      "total_tokens": 4499
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "File System Structure"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "לפי חומר ההרצאה, מהי המטרה העיקרית של Inode במערכת קבצים ומהי אחת ההשלכות של אופן השימוש בו בפעולות בסיסיות כמו פתיחת קובץ?",
+      "code_snippet": null,
+      "options": [
+        "א. Inode מאחסן את תוכן הקובץ עצמו, והשימוש בו מוביל לגישה אחת בלבד לדיסק לפתיחת קובץ.",
+        "ב. Inode מכיל את המטא-דאטה (metadata) של הקובץ, כגון סוג, הרשאות ובלוקי נתונים, והגישה אליו כרוכה במספר רב של גישות לדיסק בפעולת פתיחת קובץ.",
+        "ג. Inode משמש לניהול רשימת המקומות הפנויים בדיסק, והוא תמיד נטען לזיכרון הראשי כדי למנוע גישות לדיסק.",
+        "ד. Inode הוא מבנה נתונים זמני שנוצר בזיכרון הראשי בלבד בעת ריצת התוכנית, ואינו נשמר בדיסק."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "חומר ההרצאה מציין במפורש כי Inode הוא אזור בדיסק המכיל את המטא-דאטה (metadata) של הקבצים, כלומר את כל המידע עליהם, ולא את תוכן הקובץ עצמו. המטא-דאטה כוללת פרטים כמו סוג הקובץ, UID, הרשאות (rwx), גודל בבתים, בלוקי נתונים, זמנים ומספר קישורים. בנוסף, ההרצאה מדגישה כי פעולות בסיסיות כמו פתיחת קובץ (/foo/bar) דורשות מספר רב של גישות לדיסק (למשל, 5 גישות רק כדי לפתוח קובץ, ללא קריאה), מכיוון שיש צורך לחצות את נתיב הקובץ על ידי קריאת Inodes ובלוקי נתונים שונים מהדיסק."
+    }
+  }
+}

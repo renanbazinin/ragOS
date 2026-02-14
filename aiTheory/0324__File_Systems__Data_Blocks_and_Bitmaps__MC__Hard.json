@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Data Blocks and Bitmaps",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-14 18:13:07",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      20,
+      21
+    ],
+    "token_usage": {
+      "prompt_tokens": 1783,
+      "output_tokens": 1336,
+      "total_tokens": 9595
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Data Blocks and Bitmaps"
+    ],
+    "difficulty_estimation": "Hard",
+    "content": {
+      "text": "במהלך פעולת כתיבה לקובץ המצריכה הקצאת בלוק נתונים חדש, איזה סדר פעולות בין עדכון ה-data bitmap לעדכון ה-inode נחשב בטוח יותר למניעת חוסר עקביות חמור במקרה של קריסת מערכת, על פי חומר ההרצאה?",
+      "code_snippet": "/*\n// Pseudocode for crucial steps in allocating a new data block and updating inode\n// Assume 'new_block_addr' is the address of the newly allocated block\n// Assume 'inode_ptr' is a pointer to the relevant inode\n\n// Sequence 1: Update Data Bitmap THEN Inode (Option א)\nvoid sequence_A(int new_block_addr, Inode* inode_ptr) {\n    // 1. Mark block as taken in data bitmap\n    update_data_bitmap(new_block_addr, TAKEN); \n    // CRASH HERE: Block is marked taken, but no inode points to it.\n    // (Memory leak, recoverable by fsck - less severe inconsistency)\n\n    // 2. Update inode to point to the new block\n    inode_ptr->data_block_pointers[...]= new_block_addr;\n    write_inode_to_disk(inode_ptr);\n    // CRASH HERE: Block is marked taken, inode points to it, but data might be old/garbage.\n    // (Inconsistent, but less severe than data corruption)\n}\n\n// Sequence 2: Update Inode THEN Data Bitmap (Option ב)\nvoid sequence_B(int new_block_addr, Inode* inode_ptr) {\n    // 1. Update inode to point to the new block\n    inode_ptr->data_block_pointers[...]= new_block_addr;\n    write_inode_to_disk(inode_ptr);\n    // CRASH HERE: Inode points to block, but data bitmap marks it FREE.\n    // (SEVERE: Another process might allocate it, leading to data corruption for original file)\n\n    // 2. Mark block as taken in data bitmap\n    update_data_bitmap(new_block_addr, TAKEN); \n}\n*/",
+      "options": [
+        "א. עדכון ה-data bitmap לפני עדכון ה-inode.",
+        "ב. עדכון ה-inode לפני עדכון ה-data bitmap.",
+        "ג. אין חשיבות לסדר העדכונים, כל עוד שניהם מתרחשים באותה טרנזקציה אטומית.",
+        "ד. עדכון בלוק הנתונים (data block) בפועל חייב להתרחש לפני כל עדכון של מטה-הנתונים (inode או data bitmap)."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "חומר ההרצאה מציג שני תרחישי קריסה אפשריים ומשמעויותיהם:\n\n1.  **קריסה לאחר עדכון ה-inode וה-data block, כאשר ה-data bitmap עדיין מסמן שהבלוק פנוי (Lecture 21, chunk 12, סעיף ii):** במצב זה, ה-inode מצביע לבלוק נתונים, אך ה-data bitmap עדיין מסמן את הבלוק כפנוי. זוהי בעיה חמורה מאוד, שכן בלוק זה עלול להיות מוקצה מחדש לקובץ אחר, מה שיוביל לשחיתות נתונים (data corruption) בקובץ המקורי. ההרצאה מציינת: \"ה-data bitmap עדיין מסמן שהבלוק הזה פנוי ומישהו אחר יכול להשתמש בו בהמשך וקורה מצב שבו inode שלנו מצביע לבלוק שלא מסומן כתפוס ב-bitmap, וזו בעיה במערכת הקבצים.\"\n\n2.  **קריסה לאחר עדכון ה-data block וה-data bitmap, כאשר ה-inode עדיין אינו מצביע אליו (Lecture 21, chunk 12, סעיף iii):** במצב זה, ה-data bitmap מסמן את הבלוק כתפוס, אך ה-inode עדיין אינו מצביע אליו. זוהי בעיית \"דליפת זיכרון\" (memory leak), מכיוון שהבלוק מסומן כתפוס אך אינו נגיש לקבצים. בעיה זו פחות חמורה, והחומר מציין ש-\"fsck\" יכול לשחזר אותה על ידי בדיקה אם כל בלוק שמסומן כתפוס, יש inode שמצביע אליו. אם לא, הוא מסומן כפנוי.\n\nכדי למנוע את המצב החמור ביותר של שחיתות נתונים (תרחיש 1), עדיף לעדכן קודם את ה-data bitmap (לסמן את הבלוק כתפוס) ורק לאחר מכן לעדכן את ה-inode שיצביע אליו. סדר פעולות זה (א') ממזער את הסיכון לשחיתות נתונים במקרה של קריסה, גם אם הוא עלול להוביל ל\"דליפת זיכרון\" זמנית שניתנת לשחזור. סדר זה גם תואם את רצף הפעולות הכללי המתואר בהרצאה (Lecture 20, chunk 31) עבור כתיבה לקובץ: \"Write updated data bitmap\" לפני \"Write updated inode\"."
+    }
+  }
+}

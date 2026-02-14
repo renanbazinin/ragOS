@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Processes and Scheduling",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 18:53:36",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      2,
+      3
+    ],
+    "token_usage": {
+      "prompt_tokens": 1977,
+      "output_tokens": 698,
+      "total_tokens": 4943
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Processes and Scheduling"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "איזו מהטענות הבאות מתארת נכונה את עקרון הפעולה של מתזמן ה-Lottery Scheduling, כפי שתואר בחומר הקורס?",
+      "code_snippet": null,
+      "options": [
+        "א. המתזמן בוחר תהליך באופן אקראי על בסיס כמות \"כרטיסי הגרלה\" שברשותו, כאשר כמות גדולה יותר של כרטיסים מעניקה הסתברות גבוהה יותר להיבחר לריצה.",
+        "ב. המתזמן מקצה זמן מעבד באופן שווה בין כל התהליכים הפעילים במערכת, ללא קשר לעדיפות או כרטיסים.",
+        "ג. המתזמן תמיד נותן עדיפות לתהליכים בעלי זמן הריצה הקצר ביותר, על מנת למקסם את קצב השלמת הג'ובים.",
+        "ד. המתזמן בוחר תהליך לריצה רק לאחר שהוא יוצא ממצב Blocked, ואינו מתחשב בתהליכים במצב Ready."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "המתזמן Lottery Scheduling פועל על ידי הקצאת \"כרטיסי הגרלה\" לתהליכים השונים. כפי שמתואר בחומר הקורס (Lecture 3, chunk 28), המתזמן בוחר תהליך לריצה באופן אקראי מבין התהליכים הקיימים במערכת, כאשר ההסתברות של תהליך להיבחר פרופורציונלית למספר הכרטיסים שברשותו. לדוגמה, אם לתהליך A יש 150 כרטיסים ולתהליך B יש 50 כרטיסים מתוך סך הכל 200 כרטיסים, אז A יזכה ב-75% מזמן המעבד ו-B ב-25%. לכן, אפשרות א' מתארת נכונה את עקרון הפעולה.\nאפשרויות ב', ג' ו-ד' אינן מתארות נכונה את Lottery Scheduling. אפשרות ב' סותרת את העיקרון של הקצאה פרופורציונלית (ולא שווה). אפשרות ג' מתארת אלגוריתם תזמון אחר (כמו Shortest Job First), שאינו Lottery Scheduling. אפשרות ד' שגויה מיסודה, שכן מתזמן בוחר תהליכים מתוך רשימת ה-Ready, ולא מתוך ה-Blocked, כפי שמוסבר בתיאור מחזור החיים של תהליך (Lecture 2, chunk 34, 35)."
+    }
+  }
+}

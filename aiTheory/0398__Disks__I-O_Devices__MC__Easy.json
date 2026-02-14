@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Disks",
+    "topic_hint": "I/O Devices",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:29:57",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      17,
+      18
+    ],
+    "token_usage": {
+      "prompt_tokens": 2181,
+      "output_tokens": 530,
+      "total_tokens": 4514
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Disks",
+    "topic": [
+      "I/O Devices"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מערכת ההפעלה/המעבד מתקשרת עם רכיבי חומרה, כגון דיסק און קי, על מנת לקרוא את מצבם ולפקד עליהם לבצע פעולות. מהו המנגנון הבסיסי שבאמצעותו מתבצעת תקשורת ישירה זו עם הרכיב?",
+      "code_snippet": null,
+      "options": [
+        "א. באמצעות רישומים (Registers) מסוג status, command ו-data.",
+        "ב. על ידי מיפוי זיכרון (memory mapped I/O) של כל רכיבי החומרה לזיכרון וירטואלי.",
+        "ג. דרך מנהל התקן (Driver) ייעודי המגדיר ממשק אחיד לתקשורת.",
+        "ד. באמצעות שליחת פקודות מכונה מיוחדות (special machine instructions) בלבד, ללא שימוש ברישומים."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "החומר המצורף מציין במפורש כי \"ממשק הרכיב בנוי מרגיסטרים. בדרך כלל יש 3 סוגים: status, command, data\". רישומים אלו מהווים את המנגנון הבסיסי והישיר שבאמצעותו מערכת ההפעלה/המעבד יכולה לקרוא את מצב הרכיב (status), לכתוב אליו פקודות לביצוע פעולות (command), ולהעביר נתונים (data) עבור הפעולות הללו. אפשרות ב' מתארת שיטת גישה לרישומים, אך לא את הרישומים עצמם כמנגנון התקשורת. אפשרות ג' מתארת שכבת הפשטה גבוהה יותר (דרייבר) שמשתמשת במנגנון הרישומים. אפשרות ד' אינה נכונה שכן התקשורת מתבצעת דרך רישומים."
+    }
+  }
+}

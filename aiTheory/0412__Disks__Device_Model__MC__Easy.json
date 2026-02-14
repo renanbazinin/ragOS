@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Disks",
+    "topic_hint": "Device Model",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:33:29",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      17,
+      18
+    ],
+    "token_usage": {
+      "prompt_tokens": 2247,
+      "output_tokens": 472,
+      "total_tokens": 4150
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Disks",
+    "topic": [
+      "Device Model"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "לפי חומר ההרצאה, כיצד מערכת הפעלה תופסת מערך אחסון המוגדר כ-RAID?",
+      "code_snippet": null,
+      "options": [
+        "א. כמספר דיסקים פיזיים נפרדים, כאשר היא אחראית לפיצול הנתונים ביניהם.",
+        "ב. כדיסק לוגי יחיד, כאשר רכיב חומרה או תוכנה ייעודי מטפל במיפוי לדיסקים הפיזיים.",
+        "ג. כמערך זיכרון וירטואלי הממופה ישירות ל-RAM, ללא מעורבות דיסקים פיזיים.",
+        "ד. כיחידת אחסון בעלת מהירות קבועה של סיבובים לדקה (RPM), ללא קשר למספר הדיסקים."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "התשובה הנכונה היא ב'. חומר ההרצאה מציין שמערכת RAID (Redundant Array of Independent Disks) נחשבת ל\"דיסק מדומה\" או \"דיסק לוגי\" עבור מערכת ההפעלה והתוכניות. מערכת ההפעלה רואה דיסק אחד בלבד (מבחינתה יש הארד דיסק אחד), בעוד שמאחורי הקלעים, רכיב חומרה או קוד מיוחד מנהל את הדיסקים הפיזיים בפועל ומבצע את פיצול ו/או שכפול הנתונים באופן שקוף לחלוטין למערכת ההפעלה. לכן, מערכת ההפעלה תופסת את מערך ה-RAID כדיסק לוגי יחיד."
+    }
+  }
+}

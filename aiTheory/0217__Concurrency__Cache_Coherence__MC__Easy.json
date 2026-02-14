@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Cache Coherence",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:46:27",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      16,
+      15
+    ],
+    "token_usage": {
+      "prompt_tokens": 2018,
+      "output_tokens": 440,
+      "total_tokens": 3865
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Cache Coherence"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהי הבעיה העיקרית המתוארת בהקשר של מטמונים מקומיים במערכת מרובת מעבדים, כאשר מעבד אחד משנה ערך במטמון שלו?",
+      "code_snippet": null,
+      "options": [
+        "א. חוסר עקביות (inconsistency) בנתונים בין המטמונים השונים לבין הזיכרון הראשי.",
+        "ב. ירידה במהירות הגישה לזיכרון הראשי עבור כל המעבדים.",
+        "ג. המעבד ששינה את הערך אינו יכול לקרוא אותו שוב מהמטמון שלו.",
+        "ד. נוצרת בעיית עומס יתר על המטמון המקומי של המעבד ששינה את הנתון."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "החומר המצורף מתאר במפורש את הבעיה: כאשר מעבד משנה ערך במטמון המקומי שלו, הזיכרון הראשי אינו מתעדכן מיד. אם מעבד אחר ינסה לקרוא את אותו ערך, הוא יקבל ערך לא תקין (מיושן). מצב זה של עותקים שונים של אותו נתון שמחזיקים ערכים שונים (במטמונים ובזיכרון הראשי) הוא בעיית חוסר העקביות (Cache Coherence Problem). האפשרות ש'יהיה מאוד איטי' היא פתרון אפשרי לבעיה זו, לא הבעיה עצמה."
+    }
+  }
+}

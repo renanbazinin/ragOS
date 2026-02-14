@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Disks",
+    "topic_hint": "RAID-1 Mirroring",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:50:16",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      18,
+      19
+    ],
+    "token_usage": {
+      "prompt_tokens": 2120,
+      "output_tokens": 426,
+      "total_tokens": 3478
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Disks",
+    "topic": [
+      "RAID-1 Mirroring"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהו המאפיין העיקרי של RAID-1 (mirroring) כפי שתואר בחומר הקורס?",
+      "code_snippet": null,
+      "options": [
+        "א. פיצול נתונים (striping) לסירוגין בין דיסקים שונים כדי לשפר ביצועים.",
+        "ב. שכפול מלא של נתונים בין דיסקים שונים כדי להגביר אמינות ועמידות לכשלים.",
+        "ג. שמירת נתונים בפורמט דחוס על דיסק יחיד.",
+        "ד. איחוד מספר דיסקים פיזיים לדיסק וירטואלי יחיד ללא כל שכפול או פיצול נתונים."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "התשובה הנכונה היא ב'. חומר הקורס מתאר את RAID-1 כ-mirroring, שבו 'נשכפל את הנתונים בין כולם (כל בלוק יהיה משוכפל בין כל הדיסקים)'. המטרה העיקרית של שכפול זה היא להבטיח אמינות ועמידות בפני כשלים, כפי שצוין: 'אם דיסק אחד יתקלקל, נוכל להביא את הנתונים מדיסק אחר'. אפשרות א' מתארת RAID-0 (striping), אפשרות ג' ו-ד' אינן מתארות את העקרונות של RAID-1 כפי שתוארו."
+    }
+  }
+}

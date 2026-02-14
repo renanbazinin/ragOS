@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Threads and Locks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 18:59:39",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      10,
+      11
+    ],
+    "token_usage": {
+      "prompt_tokens": 1789,
+      "output_tokens": 747,
+      "total_tokens": 4870
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Threads and Locks"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "מנגנון מנעול פשוט המשתמש במשתנה `turn` בכדי לאכוף גישה בלעדית לקטע קריטי, כפי שמוצג בקוד הבא:\n\n```c\n// Thread A\nwhile (turn != A)\n  ; // busy-wait\n// critical section\nturn = B;\n\n// Thread B\nwhile (turn != B)\n  ; // busy-wait\n// critical section\nturn = A;\n```\n\nעלול להיתקל בבעיה חמורה כאשר חוט (לדוגמה, חוט A) אינו זקוק לקטע הקריטי בזמן שתורו להיכנס. איזו מהבעיות הבאות מתארת נכונה את הכשל העיקרי של מנגנון זה במצב כזה, על פי חומר ההרצאה?",
+      "code_snippet": "// Thread A\nwhile (turn != A)\n  ; // busy-wait\n// critical section\nturn = B;\n\n// Thread B\nwhile (turn != B)\n  ; // busy-wait\n// critical section\nturn = A;",
+      "options": [
+        "א. חוט B ייכנס ללולאת המתנה אינסופית (busy-wait) ולא יוכל להיכנס לקטע הקריטי לעולם, מה שיגרום למצב של קיפאון (deadlock).",
+        "ב. שני החוטים עלולים להיכנס לקטע הקריטי בו-זמנית עקב חוסר אטומיות בפעולות הבדיקה וההשמה.",
+        "ג. חוט B יבזבז משאבי מעבד בהמתנה פעילה אך בסופו של דבר יוכל להיכנס לקטע הקריטי לאחר שחוט A יסיים את פעולותיו האחרות.",
+        "ד. מנגנון זה דורש שחוטים יבצעו `join` זה לזה כדי להבטיח סנכרון תקין."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "חומר ההרצאה מסביר כי מנגנון המנעול המבוסס על משתנה `turn` נכשל במצב שבו חוט A, שאליו שייך התור כרגע (`turn == A`), מבצע דברים אחרים ואינו נכנס לקטע הקריטי. במקרה כזה, חוט B, הממתין לתורו (`while (turn != B)`), ייכנס ללולאה אינסופית של המתנה פעילה (`busy-wait`) ולא יוכל להמשיך, מכיוון שחוט A לעולם לא ישנה את ערך `turn` ל-B. מצב זה מתואר במפורש כ\"deadlock\" בחומר ההרצאה (Lecture 11, chunk 34), שבו חוט B מחכה לתורו אך הוא לעולם לא יגיע."
+    }
+  }
+}

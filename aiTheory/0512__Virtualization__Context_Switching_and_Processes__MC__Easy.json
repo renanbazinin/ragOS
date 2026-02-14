@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Context Switching and Processes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:58:06",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      2,
+      6
+    ],
+    "token_usage": {
+      "prompt_tokens": 2014,
+      "output_tokens": 606,
+      "total_tokens": 4546
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Context Switching and Processes"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהי המטרה העיקרית של מנגנון ה-Context Switch (החלפת הקשר) במערכת הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. לאפשר למספר תהליכים לשתף את המעבד וליצור אשליה של הרצה מקבילית.",
+        "ב. לאפשר לתהליך במצב משתמש (user mode) לבצע פעולות מורשות (privileged operations) באופן ישיר.",
+        "ג. לסיים תהליך רץ באופן קבוע ולשחרר את כל המשאבים שלו.",
+        "ד. להגביר את מהירות הביצוע של תהליך יחיד על ידי הקצאת כל משאבי המערכת אליו."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "מנגנון ה-Context Switch (החלפת הקשר) מאפשר למערכת ההפעלה לעצור תהליך אחד שרץ על המעבד, לשמור את מצבו, ולטעון תהליך אחר במקומו. כפי שמצוין בחומר ההרצאה (chunk 16), אם המנגנון יהיה איטי, \"תיעלם האשליה של המקביליות\". מכאן נובע שהמטרה העיקרית של מנגנון זה היא ליצור ולשמר את האשליה שתהליכים רבים רצים במקביל על מעבד בודד, וזאת על ידי שיתוף יעיל של המעבד ביניהם. אפשרויות ב', ג' ו-ד' אינן נכונות: אפשרות ב' מתארת מנגנון של system call המאפשר מעבר ל-kernel mode עבור פעולות מורשות, ולא ביצוע ישיר מ-user mode (chunk 24). אפשרות ג' מתארת סיום תהליך, בעוד ש-context switch משעה ושומר את מצבו של התהליך כדי שיוכל להמשיך מאוחר יותר (chunk 16). אפשרות ד' שגויה מכיוון שהחלפת הקשר מטבעה מוסיפה תקורה ואינה מיועדת להגביר את מהירות הביצוע של תהליך יחיד, אלא לנהל שיתוף משאבי מעבד בין תהליכים שונים."
+    }
+  }
+}

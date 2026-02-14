@@ -17,6 +17,7 @@ import sys
 import json
 import time
 import re
+import random
 import traceback
 import chromadb
 from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
@@ -172,6 +173,67 @@ def safe_filename(topic: str, subject: str, diff: str, idx: int) -> str:
     return f"{idx:04d}__{subject_slug}__{topic_slug}__MC__{diff}.json"
 
 
+# ── Answer shuffling ─────────────────────────────────────────────────────────
+
+HEBREW_LETTERS = ['א', 'ב', 'ג', 'ד', 'ה', 'ו']
+
+
+def shuffle_options(parsed: dict) -> dict:
+    """Shuffle MC options and update correct_option to match the new order."""
+    content = parsed.get("content", {})
+    solution = parsed.get("solution", {})
+    options = content.get("options")
+    correct = solution.get("correct_option", "") if solution else ""
+
+    if not options or len(options) < 2 or not correct:
+        return parsed
+
+    # Find which option index is correct by matching the Hebrew letter prefix
+    correct_letter = correct.strip().rstrip('.')
+    correct_idx = None
+    for i, opt in enumerate(options):
+        opt_letter = opt.strip().split('.')[0].strip()
+        if opt_letter == correct_letter:
+            correct_idx = i
+            break
+
+    if correct_idx is None:
+        # Fallback: try matching by position (א=0, ב=1, ג=2, ד=3)
+        if correct_letter in HEBREW_LETTERS:
+            correct_idx = HEBREW_LETTERS.index(correct_letter)
+        if correct_idx is None or correct_idx >= len(options):
+            return parsed
+
+    # Strip existing letter prefixes, keep just the text
+    stripped = []
+    for opt in options:
+        text = opt.strip()
+        # Remove patterns like "א. ", "א) ", "1. ", etc.
+        for prefix_pattern in [r'^[א-ו]\.\s*', r'^[א-ו]\)\s*', r'^[א-ו]\s+']:
+            new_text = re.sub(prefix_pattern, '', text)
+            if new_text != text:
+                text = new_text
+                break
+        stripped.append(text)
+
+    # Create indexed pairs and shuffle
+    indexed = list(enumerate(stripped))
+    random.shuffle(indexed)
+
+    # Re-label with Hebrew letters and find new correct position
+    new_options = []
+    new_correct_letter = correct_letter
+    for new_idx, (orig_idx, text) in enumerate(indexed):
+        letter = HEBREW_LETTERS[new_idx]
+        new_options.append(f"{letter}. {text}")
+        if orig_idx == correct_idx:
+            new_correct_letter = letter
+
+    parsed["content"]["options"] = new_options
+    parsed["solution"]["correct_option"] = new_correct_letter
+    return parsed
+
+
 # ── Generate & Save ─────────────────────────────────────────────────────────
 
 
@@ -241,6 +303,9 @@ def generate_and_save(
             print(f"    ✗ Invalid JSON response — skipping")
             return False, usage
 
+    # Shuffle answer options so correct answer isn't always first
+    parsed = shuffle_options(parsed)
+
     # Wrap in standard format
     output = {
         "metadata": {
@@ -263,9 +328,42 @@ def generate_and_save(
     return True, usage
 
 
+# ── Reshuffle existing files ─────────────────────────────────────────────────
+
+def reshuffle_existing_files():
+    """Reshuffle answer options in all existing aiTheory JSON files."""
+    import glob
+    files = sorted(glob.glob(os.path.join(OUTPUT_DIR, "*.json")))
+    if not files:
+        print("No files found in aiTheory/")
+        return
+
+    print(f"Reshuffling answers in {len(files)} files...")
+    shuffled_count = 0
+    for fpath in files:
+        try:
+            with open(fpath, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            q = data.get("question", {})
+            if q.get("content", {}).get("options") and q.get("solution", {}).get("correct_option"):
+                data["question"] = shuffle_options(q)
+                with open(fpath, "w", encoding="utf-8") as f:
+                    json.dump(data, f, ensure_ascii=False, indent=2)
+                shuffled_count += 1
+        except (json.JSONDecodeError, IOError) as e:
+            print(f"  SKIP {os.path.basename(fpath)}: {e}")
+
+    print(f"Done. Reshuffled {shuffled_count}/{len(files)} files.")
+
+
 # ── Main ─────────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
+    # Handle --shuffle mode: reshuffle existing files and exit
+    if "--shuffle" in sys.argv:
+        reshuffle_existing_files()
+        sys.exit(0)
+
     resume = "--resume" in sys.argv
     dry_run = "--dry-run" in sys.argv
 

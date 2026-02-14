@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Directory Structure",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:16:08",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      20,
+      21
+    ],
+    "token_usage": {
+      "prompt_tokens": 2034,
+      "output_tokens": 315,
+      "total_tokens": 3202
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Directory Structure"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "לפי חומר ההרצאה, איזה סוג מידע נשמר ב-inode ומציין האם רשומת מערכת הקבצים היא קובץ רגיל או תיקיה?",
+      "code_snippet": null,
+      "options": [
+        "א. Type (file / directory)",
+        "ב. UID (owner)",
+        "ג. Size (in bytes)",
+        "ד. Data blocks"
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "חומר ההרצאה מפרט את המידע הנשמר ב-inode, וכולל במפורש את השדה 'Type (file / directory)'. שדה זה הוא הקובע האם ה-inode מייצג קובץ רגיל או תיקיה, ובכך מאפשר למערכת הקבצים לדעת את טבעה של הרשומה. שאר האפשרויות הן אכן תכונות של inode אך אינן מציינות את סוג הרשומה (קובץ לעומת תיקיה)."
+    }
+  }
+}

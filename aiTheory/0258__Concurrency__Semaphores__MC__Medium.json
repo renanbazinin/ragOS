@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Semaphores",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 17:56:49",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      10,
+      14
+    ],
+    "token_usage": {
+      "prompt_tokens": 2016,
+      "output_tokens": 665,
+      "total_tokens": 5062
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Semaphores"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "מהו הערך ההתחלתי (init_value) המתאים לסמפור (sem_t) בשני התרחישים הבאים, בהתאמה?\n1. כאשר הוא משמש כמנעול בינארי (binary semaphore) להבטחת מניעה הדדית (mutual exclusion) לקטע קריטי.\n2. כאשר הוא משמש להגבלת מספר החוטים המקסימלי שיכולים להיכנס לקטע קוד מסוים (thread throttling) עקב מגבלות משאבים.",
+      "code_snippet": "```c\n#include <semaphore.h>\nsem_t s;\nsem_init(&s, 0, init_value);\n// ...\nsem_wait(&s);\n// קטע קוד רלוונטי\nsem_post(&s);\n```",
+      "options": [
+        "א. (1) 1, (2) מספר החוטים המקסימלי המותר.",
+        "ב. (1) 0, (2) 1.",
+        "ג. (1) 1, (2) 0.",
+        "ד. (1) מספר החוטים המקסימלי המותר, (2) 1."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "על פי חומר ההרצאה:\n1.  כאשר סמפור משמש כמנעול בינארי (binary semaphore) להבטחת מניעה הדדית (mutual exclusion), ערכו ההתחלתי צריך להיות 1. ערך זה מאפשר לחוט אחד לתפוס את המנעול (פעולת wait) ולהיכנס לקטע הקריטי, תוך הקטנת ערך הסמפור ל-0. כל חוט נוסף שינסה להיכנס ימתין עד שהחוט הנוכחי ישחרר את המנעול (פעולת post) ויעלה את ערך הסמפור חזרה ל-1.\n2.  כאשר סמפור משמש להגבלת כמות החוטים המורשים להיכנס לקטע קוד מסוים (thread throttling) עקב מגבלות משאבים, ערכו ההתחלתי צריך להיות שווה למספר החוטים המקסימלי שאנחנו רוצים לאפשר שירוצו במקביל. כל חוט מבצע פעולת wait לפני הכניסה לקטע הקוד ופעולת post לאחר היציאה ממנו, ובכך הסמפור מווסת את הגישה כך שלא יעלה על הכמות המקסימלית שהוגדרה."
+    }
+  }
+}

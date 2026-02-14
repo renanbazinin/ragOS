@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Producer-Consumer",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:53:43",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      14
+    ],
+    "token_usage": {
+      "prompt_tokens": 1516,
+      "output_tokens": 426,
+      "total_tokens": 3231
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Producer-Consumer"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהו התפקיד העיקרי של ה'יצרן' (Producer) בדפוס התכנות יצרן-צרכן (Producer-Consumer)?",
+      "code_snippet": "Producer:\n```c\nlock(&m1);\nmmmBop();\n++count; // Represents adding an item\nsignal(&cv1);\nunlock(&m1);\n```",
+      "options": [
+        "א. להמתין שהמחסן המשותף יתרוקן לפני הוספת פריטים.",
+        "ב. לייצר ולהוסיף פריטים חדשים למחסן המשותף.",
+        "ג. לצרוך פריטים מהמחסן המשותף כשהוא אינו ריק.",
+        "ד. לאותת לצרכנים כשהמחסן המשותף מלא."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "התפקיד העיקרי של ה'יצרן' (Producer) בדפוס יצרן-צרכן הוא לייצר פריטים חדשים ולהוסיף אותם למבנה נתונים משותף (כמו תור או באפר), אשר ממנו ה'צרכנים' (Consumers) יצרכו אותם. קטע הקוד המצורף מדגים זאת על ידי הגדלת המונה (count), המייצג הוספת פריט למחסן, כפי שמתואר בחומר ההרצאה: \"היצרנים מייצרים איברים חדשים שנכנסים לתור\"."
+    }
+  }
+}

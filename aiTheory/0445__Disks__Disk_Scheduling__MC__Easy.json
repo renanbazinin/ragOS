@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Disks",
+    "topic_hint": "Disk Scheduling",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:41:58",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      18
+    ],
+    "token_usage": {
+      "prompt_tokens": 2024,
+      "output_tokens": 529,
+      "total_tokens": 4657
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Disks",
+    "topic": [
+      "Disk Scheduling"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "איזה מבין אלגוריתמי תזמון הדיסקים הבאים מבוצע בדרך כלל בתוך הדיסק עצמו (בקר הדיסק), ולא על ידי מערכת ההפעלה, בשל חוסר מודעותה של מערכת ההפעלה למבנה הפיזי של הדיסק?",
+      "code_snippet": null,
+      "options": [
+        "א. First Come, First Served (FCFS)",
+        "ב. Shortest Positioning Time First (SPTF)",
+        "ג. אלגוריתם המשלב בקשות עוקבות (sequential requests)",
+        "ד. אלגוריתם אופטימלי (Optimal Algorithm)"
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "החומר מציין במפורש כי אלגוריתם Shortest Positioning Time First (SPTF) מבוצע בתוך הדיסק עצמו. הסיבה לכך היא שמערכת ההפעלה אינה מודעת למבנה הפיזי המדויק של הדיסק (כמו מיקום הראש הקורא/כותב, זמני חיפוש וסיבוב), ולכן אינה יכולה לחשב באופן יעיל איזה בקשה תיקח את הזמן הקצר ביותר. הדיסק, לעומת זאת, יודע בדיוק כמה זמן תיקח כל פעולה ויכול לתזמן את הבקשות בצורה אופטימלית יותר עבורו. FCFS הוא אלגוריתם פשוט שניתן לבצע הן על ידי מערכת ההפעלה והן על ידי הדיסק, אך לא מסיבת חוסר מודעות למבנה הפיזי. שילוב בקשות עוקבות הוא אופטימיזציה שמערכת ההפעלה מבצעת לפני שליחתן לדיסק. אלגוריתם אופטימלי אינו ישים בפועל מכיוון שלא ניתן לדעת את הבקשות שיגיעו בעתיד."
+    }
+  }
+}

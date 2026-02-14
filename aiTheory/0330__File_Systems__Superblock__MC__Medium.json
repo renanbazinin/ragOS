@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Superblock",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 18:14:15",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      20,
+      21,
+      22
+    ],
+    "token_usage": {
+      "prompt_tokens": 1676,
+      "output_tokens": 542,
+      "total_tokens": 3643
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Superblock"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "מהי מטרתו העיקרית של ה-Superblock במערכת קבצים?",
+      "code_snippet": null,
+      "options": [
+        "א. לאחסן את הנתונים בפועל של כל הקבצים במערכת.",
+        "ב. להכיל מידע מטה-דאטה אודות מערכת הקבצים, כגון סוגה, גודלה ומיקום מבנים קריטיים אחרים.",
+        "ג. לנהל את תהליך האתחול של מערכת ההפעלה בעת הדלקת המחשב.",
+        "ד. לשמש כיומן רישום של כל הטרנזקציות במערכת הקבצים לצורך שחזור."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "החומר המצורף מציין כי ה-Superblock הוא בלוק המכיל 'נתונים על הכונן שלנו ועל מערכת הקבצים. יהיה כתוב בו אילו מערכת קבצים מישנן כדי לדעת איזה קוד להריץ על הדיסק, יהיה כתוב מה הגודל של הדיסק, כמה data block, inodes יש לו, איפה ה-bitmaps וכו'.' כלומר, הוא מאחסן מידע מטה-דאטה חיוני על מבנה מערכת הקבצים. אפשרות א' אינה נכונה, שכן נתוני הקבצים עצמם נשמרים בבלוקי נתונים (data blocks). אפשרות ג' אינה נכונה, מכיוון שתהליך האתחול מנוהל על ידי בלוק ה-boot, שלעיתים קודם ל-Superblock. אפשרות ד' אינה נכונה, שכן ה-Superblock אינו יומן הרישום עצמו (Journal), אלא יכול להכיל מצביעים לטרנזקציות ביומן הרישום לצורך שחזור, כחלק ממידע המטה-דאטה שלו."
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Processes and Scheduling",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 18:53:09",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      2,
+      3
+    ],
+    "token_usage": {
+      "prompt_tokens": 1977,
+      "output_tokens": 486,
+      "total_tokens": 4731
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Processes and Scheduling"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "בהתבסס על אלגוריתם תזמון \"Lottery scheduling\" כפי שתואר, אילו תהליכים נחשבים כשירים לזכות ב\"כרטיס\" (ticket) ולהיבחר לריצה על המעבד?",
+      "code_snippet": null,
+      "options": [
+        "א. רק תהליכים הנמצאים במצב Ready.",
+        "ב. כל התהליכים הקיימים במערכת, ללא קשר למצבם הנוכחי.",
+        "ג. תהליכים הנמצאים במצב Running או Ready.",
+        "ד. תהליכים הנמצאים במצב Blocked בלבד, שכן הם ממתינים למשאבים חיצוניים."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "על פי חומר ההרצאה, המתזמן (Scheduler) הוא הלוגיקה שמחליטה איזה תהליך ירוץ בכל רגע נתון. כאשר מערכת ההפעלה בוחרת את התהליך הבא להרצה, היא עושה זאת אך ורק מתוך רשימת התהליכים הנמצאים במצב Ready. תהליכים במצב Running כבר רצים על המעבד, ואילו תהליכים במצב Blocked ממתינים לאירוע חיצוני (כמו סיום קלט/פלט) ואין טעם להריץ אותם; חומר ההרצאה מציין במפורש כי \"מערכת ההפעלה בכלל לא מסתכלת על תהליכים שהם Blocked\". לכן, כל אלגוריתם תזמון, כולל Lottery scheduling, יבחר את התהליך הבא לריצה רק מבין התהליכים המוכנים (Ready) במערכת."
+    }
+  }
+}

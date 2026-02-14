@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Synchronization",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-14 17:37:37",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      10,
+      11,
+      13,
+      15
+    ],
+    "token_usage": {
+      "prompt_tokens": 2007,
+      "output_tokens": 1103,
+      "total_tokens": 6258
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Synchronization"
+    ],
+    "difficulty_estimation": "Hard",
+    "content": {
+      "text": "בהתבסס על קטע הקוד הבא, המתאר תקשורת בין חוטים (Thread A ו-Thread B) באמצעות משתנה תנאי (cv1) ומנעול (m1), כאשר חוט A ממתין לאירוע שחוט B מסמן:\n\n```c\n// Thread A\nlock(&m1);\nif (!done) {\n  wait(&cv1, &m1);\n}\nbaDuBop();\nunlock(&m1);\n\n// Thread B\nmmmBop();\ndone = 1;\nsignal(&cv1);\n```\n\nנניח שחוט A מתחיל לרוץ, מבצע את `lock(&m1)` ובודק את `!done` (שערכו ההתחלתי הוא `true`). לפני שחוט A מספיק לקרוא לפונקציה `wait(&cv1, &m1)`, מתרחש מיתוג הקשר (context switch) לחוט B. חוט B רץ, מבצע את `mmmBop()`, משנה את `done = 1`, ושולח את הסיגנל (`signal(&cv1)`). לאחר מכן, חוט B מסיים (או מתרחש מיתוג קשר חזרה ל-A). כאשר חוט A חוזר לרוץ וממשיך מהנקודה בה עצר (לפני הקריאה ל-`wait`), איזו בעיה צפויה להתרחש?",
+      "code_snippet": "// Thread A\nlock(&m1);\nif (!done) {\n  wait(&cv1, &m1);\n}\nbaDuBop();\nunlock(&m1);\n\n// Thread B\nmmmBop();\ndone = 1;\nsignal(&cv1);",
+      "options": [
+        "א. חוט A ייתקע בהמתנה אינסופית (starvation) מכיוון שהסיגנל מחוט B נשלח כאשר אף חוט לא המתין על cv1, ולכן הסיגנל אבד.",
+        "ב. תתרחש שגיאת זמן ריצה כאשר חוט B ינסה לשלוח סיגנל ל-cv1 מבלי להחזיק במנעול m1.",
+        "ג. חוט A יבצע את baDuBop() באופן מיידי מכיוון שהמשתנה done כבר קיבל את הערך 1 לפני הקריאה ל-wait.",
+        "ד. תתרחש התנגשות (race condition) על המשתנה done שתגרום לערכו להיות בלתי צפוי."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "הבעיה המתוארת היא בעיית \"אובדן סיגנל\" (lost signal), כפי שנדונה בחומר ההרצאה (Lecture 13, chunk 41). לפי תרחיש הריצה, חוט A בודק את `done` ומוצא אותו `false`. לפני שהוא מספיק להיכנס למצב המתנה על `cv1` באמצעות `wait()`, חוט B רץ, משנה את `done` ל-`1`, ושולח את הסיגנל. מכיוון שחוט A טרם קרא ל-`wait`, אף חוט אינו ממתין על `cv1` באותו רגע, ולכן הסיגנל \"אובד\" – אין לו למי להגיע. כאשר חוט A חוזר לרוץ ומגיע לבסוף לקריאה ל-`wait(&cv1, &m1)`, הוא נכנס למצב המתנה אינסופית, שכן הסיגנל שכבר נשלח לא יגיע אליו. אפשרות ב' אינה נכונה מכיוון ששליחת סיגנל אינה דורשת בהכרח שהחוט השולח יחזיק במנעול, אלא שהיא חלק מלוגיקת סינכרון כוללת. אפשרות ג' אינה נכונה מכיוון שחוט A כבר בדק את `done` וראה שהוא `false` לפני ש-B שינה אותו, ולכן הוא ייכנס ל-`wait`. אפשרות ד' אינה מתארת את הבעיה העיקרית; למרות ש-`done` הוא משתנה משותף, ערכו יהיה `1` באופן צפוי לאחר ש-B יסיים, אך חוט A לא יתעורר מההמתנה בגלל אובדן הסיגנל."
+    }
+  }
+}

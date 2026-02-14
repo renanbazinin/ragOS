@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Data Blocks and Bitmaps",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:10:22",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      20,
+      21
+    ],
+    "token_usage": {
+      "prompt_tokens": 1783,
+      "output_tokens": 372,
+      "total_tokens": 3328
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Data Blocks and Bitmaps"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "לפי חומר ההרצאה, מהו התפקיד העיקרי של ה-\"data bitmap\" במערכת קבצים?",
+      "code_snippet": null,
+      "options": [
+        "א. לסמן אילו בלוקים של נתונים (data blocks) פנויים ואילו תפוסים.",
+        "ב. לאחסן את התוכן בפועל של קבצים על הדיסק.",
+        "ג. לרשום את רשימת ה-inodes הפנויים והתפוסים במערכת.",
+        "ד. לשמש כמצביע למיקום הפיזי של קובץ על הדיסק."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "חומר ההרצאה (Lecture 20, chunk 27) מתאר במפורש את ה-data bitmap כבלוק ש\"אומר... רק עבור הבלוקים של ה-data, אילה בלוקים של data פנויים ואילה לא\". הוא מציין כי \"בכל מקום שבלוק תפוס יהיה 1 ובכל מקום שבלוק פנוי יהיה 0\". לכן, תפקידו העיקרי הוא לסמן את מצב הפנוי/תפוס של בלוקי הנתונים."
+    }
+  }
+}

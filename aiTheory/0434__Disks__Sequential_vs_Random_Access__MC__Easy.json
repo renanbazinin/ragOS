@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Disks",
+    "topic_hint": "Sequential vs Random Access",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:38:46",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      17,
+      18,
+      19
+    ],
+    "token_usage": {
+      "prompt_tokens": 2093,
+      "output_tokens": 550,
+      "total_tokens": 4622
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Disks",
+    "topic": [
+      "Sequential vs Random Access"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהי הטענה הנכונה ביותר לגבי ביצועי קריאה סדרתית (Sequential Read) לעומת קריאה אקראית (Random Read) בדיסק קשיח בודד?",
+      "code_snippet": null,
+      "options": [
+        "א. קריאה סדרתית מהירה יותר מקריאה אקראית, בעיקר בשל צמצום זמני ה-seek וה-rotation.",
+        "ב. קריאה אקראית מהירה יותר מקריאה סדרתית, מכיוון שהדיסק יכול לגשת לנתונים בכל סדר.",
+        "ג. אין הבדל משמעותי בביצועים בין קריאה סדרתית לאקראית בדיסק קשיח, מכיוון שזמן ה-transfer הוא זניח.",
+        "ד. קריאה סדרתית איטית יותר מקריאה אקראית, עקב הצורך לעבד את הנתונים לפי סדר קפדני."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "על פי חומר ההרצאה (הרצאה 18, קטע 34), מצוין במפורש שקצב קריאה סדרתית (S) גבוה יותר מקצב קריאה אקראית (R) בדיסק בודד (S>R). הסיבה העיקרית לכך, כפי שמפורט בהרצאה 17, קטע 38, היא שזמן ה-I/O הכולל ($T_{I/O}$) נשלט על ידי זמני ה-seek וה-rotation. בגישה סדרתית, ראש הקריאה/כתיבה נע באופן מינימלי וההמתנה לסיבוב הדיסק מצטמצמת משמעותית, מה שמפחית את התקורה של זמנים אלו בהשוואה לגישה אקראית, בה הראש צריך למקם את עצמו מחדש לעיתים קרובות ולחכות לסקטורים שונים."
+    }
+  }
+}

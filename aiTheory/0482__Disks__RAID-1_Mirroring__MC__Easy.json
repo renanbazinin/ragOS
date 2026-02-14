@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Disks",
+    "topic_hint": "RAID-1 Mirroring",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:49:59",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      18,
+      19
+    ],
+    "token_usage": {
+      "prompt_tokens": 2120,
+      "output_tokens": 454,
+      "total_tokens": 3982
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Disks",
+    "topic": [
+      "RAID-1 Mirroring"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהו המאפיין העיקרי של RAID-1 (mirroring) כפי שתואר בחומר הקורס?",
+      "code_snippet": null,
+      "options": [
+        "א. הנתונים משוכפלים בין כל הדיסקים, כך שכל בלוק נתונים קיים במספר עותקים.",
+        "ב. הנתונים מחולקים לסירוגין (striping) בין הדיסקים ללא כפילות.",
+        "ג. הנתונים נשמרים על דיסק אחד בלבד, וגיבויים נשמרים באופן ידני על דיסקים אחרים.",
+        "ד. נתוני Parity מחושבים ומפוזרים יחד עם הנתונים על פני מספר דיסקים."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "על פי חומר הקורס, RAID-1 נקרא 'mirroring' (שיקוף). המאפיין המרכזי שלו הוא ש'בהינתן כמה דיסקים, נשכפל את הנתונים בין כולם (כל בלוק יהיה משוכפל בין כל הדיסקים)'. כלומר, כל בלוק נתונים קיים במספר עותקים על פני דיסקים שונים. אפשרות ב' מתארת את טכניקת ה-striping המאפיינת את RAID-0. אפשרות ג' מתארת גישה ידנית ללא מנגנון RAID מובנה. אפשרות ד' מתארת מנגנוני RAID מתקדמים יותר כמו RAID-5 המשתמשים ב-parity."
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Threads and Locks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 18:59:24",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      10,
+      11
+    ],
+    "token_usage": {
+      "prompt_tokens": 1789,
+      "output_tokens": 615,
+      "total_tokens": 4237
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Threads and Locks"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "איזו בעיה מרכזית עלולה להתעורר במנגנון נעילה מבוסס משתנה תור (turn), כפי שמוצג להלן, כאשר חוט (Thread) שהגיע תורו אינו מעוניין להיכנס לקטע הקריטי?",
+      "code_snippet": "Thread A\nwhile (turn != A)\n  ; // busy-wait\n// critical section\nturn = B;\n\nThread B\nwhile (turn != B)\n  ; // busy-wait\n// critical section\nturn = A;",
+      "options": [
+        "א. שני חוטים עלולים להיכנס לקטע הקריטי בו-זמנית, ובכך להפר את עקרון ההדרה ההדדית (mutual exclusion).",
+        "ב. נוצר מצב של קיפאון (deadlock), שבו חוט אחד ממתין לתורו ללא סוף, בעוד שהחוט השני אינו מעוניין להיכנס לקטע הקריטי ואינו משנה את התור.",
+        "ג. מנגנון זה גורם לבזבוז משאבי CPU משמעותי עקב לולאת המתנה פעילה (busy-waiting) מתמדת.",
+        "ד. חוטים עלולים לסבול מרעב (starvation), כאשר חוט אחד תמיד מצליח לתפוס את המנעול לפני האחר."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "החומר המצורף (Lecture 11, chunk 34) מתאר את הבעיה באופן מפורש: \"נחשוב על ריצה שבה יש מנעול וכרגע התור הוא של חוט A אבל חוט A מבצע דברים אחרים כרגע ולא קטע קריטי. ... אחרת חוט B ייכנס ללולאה אינסופית ויחכה. שוב קורה לנו deadlock - חוט B מחכה לתורו אבל אף פעם לא יגיע תורו.\"\nלכן, אם חוט אחד אינו זקוק לקטע הקריטי כשתורו מגיע, הוא לא ישחרר את התור לחוט השני, מה שיוביל לכך שהחוט השני ימתין ללא סוף בלולאת busy-wait, וייווצר מצב של קיפאון (deadlock)."
+    }
+  }
+}

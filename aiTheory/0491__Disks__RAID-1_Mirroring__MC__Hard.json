@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Disks",
+    "topic_hint": "RAID-1 Mirroring",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-14 18:52:32",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      18,
+      19
+    ],
+    "token_usage": {
+      "prompt_tokens": 2120,
+      "output_tokens": 1487,
+      "total_tokens": 10118
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Disks",
+    "topic": [
+      "RAID-1 Mirroring"
+    ],
+    "difficulty_estimation": "Hard",
+    "content": {
+      "text": "מערכת הפעלה עושה שימוש במערך RAID-1 הכולל 4 דיסקים פיזיים, כפי שתואר בחומר הקורס (כלומר, mirroring level 2 עם striping). איזה מההיגדים הבאים מתאר בצורה הנכונה ביותר את ההתנהגות הצפויה של המערכת במקרה של כשל בדיסק פיזי אחד, ואת השפעתה על זמינות הנתונים וביצועי הקריאה?",
+      "code_snippet": "/* Pseudo-code for a simplified RAID-10 read operation */\nDiskBlock read_raid10_block(LogicalBlockAddress lba) {\n    // Determine which RAID-1 pair and which physical disk within the pair\n    // to read from based on LBA and current system state (e.g., disk health, load)\n\n    RAID1Pair *pair = get_raid1_pair_for_lba(lba);\n    PhysicalDisk *disk_to_read_from = null;\n\n    if (pair->disk1->is_healthy() && pair->disk2->is_healthy()) {\n        // Both disks healthy, choose one (e.g., based on load, or read from both for performance)\n        disk_to_read_from = choose_disk_from_pair(pair->disk1, pair->disk2);\n    } else if (pair->disk1->is_healthy()) {\n        disk_to_read_from = pair->disk1;\n    } else if (pair->disk2->is_healthy()) {\n        disk_to_read_from = pair->disk2;\n    } else {\n        // Both disks in pair failed - data loss\n        return ERROR_DATA_UNAVAILABLE; // Critical failure\n    }\n\n    if (disk_to_read_from != null) {\n        return disk_to_read_from->read_block(lba_on_physical_disk);\n    }\n    return ERROR_DATA_UNAVAILABLE; // Should not be reached with single disk failure if logic is correct\n}",
+      "options": [
+        "א. המערכת תמשיך לתפקד ללא אובדן נתונים, שכן כל בלוק נתונים משוכפל. ביצועי הקריאה עשויים להיפגע קלות עבור הנתונים שהיו על הדיסק הכושל, שכן הם ייקראו כעת מדיסק בודד במקום משניים.",
+        "ב. כשל של דיסק בודד יוביל לאובדן נתונים חלקי באופן בלתי נמנע, עקב מבנה ה-striping המפזר את הנתונים על פני כל הדיסקים ללא כפילות מלאה בכל מקום.",
+        "ג. המערכת תמשיך לתפקד ללא אובדן נתונים, אך ביצועי הכתיבה יפגעו משמעותית עקב הצורך לשחזר את הדיסק הכושל במקביל לפעולות כתיבה רגילות.",
+        "ד. כשל של דיסק בודד יגרום לקריסת המערכת ולאובדן זמינות הנתונים, שכן ה-striping במקרה זה אינו מספק עמידות לכשל."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "חומר הקורס מתאר מצב שבו 'כשיש לנו יותר משני דיסקים, אנחנו קוראים לזה raid-01 / raid-10 (אבל בקורס כשנגיד raid-1 נכוון לזה)', ומציג טבלה הממחישה מערך RAID-10 (striping מעל זוגות דיסקים ב-mirroring). במקרה של RAID-10, כל בלוק נתונים משוכפל על פני שני דיסקים (mirroring level 2). לכן, כשל של דיסק פיזי בודד אינו מוביל לאובדן נתונים, שכן הנתונים קיימים במדויק על הדיסק המקביל בזוג המראה שלו.\n\nלגבי ביצועים: במצב תקין, מערכי RAID-10 יכולים לשפר ביצועי קריאה על ידי פיצול בקשות קריאה בין הדיסקים המראה, או על ידי בחירה בדיסק הפחות עמוס מבין השניים. כאשר דיסק אחד כושל, היכולת הזו של פיצול קריאות עבור אותם בלוקים ספציפיים שהיו על הדיסק הכושל אובדת, והקריאות יבוצעו מעתה רק מהדיסק הבודד שנותר בזוג המראה. הדבר עלול לגרום לפגיעה קלה בביצועי הקריאה עבור הנתונים הספציפיים הללו, למרות שהמערכת כולה נשארת זמינה וללא אובדן נתונים.\n\n*   א. זו התשובה הנכונה. היא מתארת במדויק את העמידות לכשל (ללא אובדן נתונים) ואת ההשפעה הניואנסית על ביצועי הקריאה במצב של כשל בדיסק בודד במערך RAID-10.\n*   ב. שגויה. RAID-10 מספק כפילות מלאה לכל בלוק, ולכן כשל של דיסק בודד אינו גורם לאובדן נתונים חלקי.\n*   ג. שגויה. אמנם ביצועי הכתיבה עשויים להיפגע במהלך תהליך שחזור הדיסק, אך השאלה מתמקדת בהשפעה על זמינות הנתונים וביצועי הקריאה, וההסבר אינו מדויק לגבי ההשפעה על ביצועי קריאה רגילים לאחר כשל.\n*   ד. שגויה. RAID-10 נועד לספק עמידות לכשל ואינו קורס כתוצאה מכשל של דיסק בודד. תיאור זה מתאים יותר למערך RAID-0."
+    }
+  }
+}

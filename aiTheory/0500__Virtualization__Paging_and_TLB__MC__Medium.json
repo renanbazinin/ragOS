@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Paging and TLB",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 18:54:53",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      7
+    ],
+    "token_usage": {
+      "prompt_tokens": 2169,
+      "output_tokens": 546,
+      "total_tokens": 4608
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Paging and TLB"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "מהי הבעיה העיקרית המתעוררת ב-TLB במהלך החלפת הקשר (context switch), וכיצד היא נפתרת בדרך כלל על פי חומר ההרצאה?",
+      "code_snippet": null,
+      "options": [
+        "א. ה-TLB מכיל מיפויים של התהליך הקודם שאינם רלוונטיים לתהליך החדש, והפתרון הוא הוספת מזהה ASID (Address Space ID) לכל רשומה ב-TLB.",
+        "ב. ה-TLB אינו מסוגל לטפל בגישות זיכרון מקבילות מתהליכים שונים, ולכן יש לרוקן אותו לחלוטין בכל החלפת קשר.",
+        "ג. ה-TLB הופך לפגיע להתקפות אבטחה כאשר תהליכים שונים חולקים אותו, והפתרון הוא הפרדת ה-TLB לתהליכים שונים.",
+        "ד. ה-TLB עלול להכיל מיפויים שגויים עקב שינויים בטבלאות הדפים, והפתרון הוא אימות מחדש של כל רשומה ב-TLB בכל גישה."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "על פי חומר ההרצאה, הבעיה העיקרית בהחלפת קשר (context switch) היא שרשומות ה-TLB אינן מעודכנות או רלוונטיות לתהליך החדש, מכיוון שהן שייכות לתהליך הקודם. הפתרון המצוין בחומר הוא הוספת מזהה ASID (Address Space ID) לכל רשומה ב-TLB. מזהה זה מציין לאיזה תהליך שייכת הרשומה, ובכך מאפשר ל-TLB להבחין בין רשומות של תהליכים שונים ולא לרוקן את ה-TLB כולו, מה שמשפר את הביצועים."
+    }
+  }
+}

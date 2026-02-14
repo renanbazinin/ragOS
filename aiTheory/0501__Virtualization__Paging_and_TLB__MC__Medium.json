@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Paging and TLB",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 18:55:05",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      7
+    ],
+    "token_usage": {
+      "prompt_tokens": 2169,
+      "output_tokens": 543,
+      "total_tokens": 4485
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Paging and TLB"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "מהו התהליך הנכון ביותר המתאר את אופן הפעולה של ה-MMU כאשר מתרחש TLB Miss במהלך תרגום כתובת וירטואלית לכתובת פיזית?",
+      "code_snippet": null,
+      "options": [
+        "א. ה-MMU פונה לטבלת הדפים (Page Table) כדי למצוא את המיפוי הנדרש, ולאחר מכן מעדכן את ה-TLB במיפוי שנמצא.",
+        "ב. ה-MMU מזהה שהמיפוי חסר ב-TLB, ולכן מחזיר שגיאת \"Page Fault\" למערכת ההפעלה באופן מיידי.",
+        "ג. ה-MMU בודק תחילה את ה-TLB, ואם המיפוי אינו נמצא, הוא ממשיך ישירות לזיכרון הפיזי עם הכתובת הוירטואלית.",
+        "ד. ה-MMU מנסה לבנות מחדש את המיפוי ב-TLB על בסיס נתונים קודמים שנשמרו בו, מבלי לגשת לטבלת הדפים."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "ההסבר הנכון הוא א'. על פי חומר ההרצאה, כאשר מתרחש TLB Miss (כלומר, המיפוי בין הכתובת הוירטואלית לכתובת הפיזית אינו נמצא ב-TLB), ה-MMU אינו מחזיר שגיאה מיד. במקום זאת, הוא מבצע את \"התהליך הארוך\" הכולל חיפוש המיפוי בטבלת הדפים (Page Table). לאחר שהמיפוי נמצא בטבלת הדפים, הוא משמש לתרגום הכתובת, ובנוסף, ה-TLB מתעדכן עם המיפוי החדש שנמצא, כדי שגישות עתידיות לאותו מיפוי יהיו מהירות יותר (TLB Hit)."
+    }
+  }
+}

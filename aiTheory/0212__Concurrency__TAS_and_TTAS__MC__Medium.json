@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "TAS and TTAS",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 17:45:09",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      12,
+      13
+    ],
+    "token_usage": {
+      "prompt_tokens": 1941,
+      "output_tokens": 933,
+      "total_tokens": 5034
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "TAS and TTAS"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "מדוע מנעול Test-and-test-and-set (TTAS) מציג שיפור ביצועים משמעותי לעומת מנעול Test-and-set (TAS) במערכות מרובות ליבות, למרות שלכאורה שניהם מבצעים את אותה המטרה?",
+      "code_snippet": "void lock()\n{\n    while (true) {\n        while (state) {} // The inner loop is key\n        if (!testAndSet(state, true))\n            return;\n    }\n}",
+      "options": [
+        "א. לולאת ה-`while (state) {}` הפנימית ב-TTAS מאפשרת לחוטים ממתינים לקרוא את מצב המנעול מזיכרון המטמון (cache) המקומי שלהם, ובכך מפחיתה באופן דרמטי את העומס על ה-BUS המשותף ואת תעבורת הודעות הקוהרנטיות בין המעבדים.",
+        "ב. מנעול TTAS משתמש בפעולת `testAndSet` יעילה יותר מבחינה חישובית מנעול TAS, ולכן הוא מהיר יותר באופן מהותי.",
+        "ג. TTAS מבטיח שכל חוט יקבל גישה למנעול תוך זמן קבוע מראש, מה שמונע רעב (starvation) ומשפר את הביצועים הכוללים.",
+        "ד. TTAS אינו דורש גישה לזיכרון משותף כלל, בניגוד ל-TAS שתמיד ניגש לזיכרון הראשי."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "ההבדל המשמעותי בביצועים בין TTAS ל-TAS נובע מהאופן שבו הם מתקשרים עם מערכת זיכרון המטמון (cache) במערכות מרובות ליבות. במנעול TAS, חוטים ממתינים מבצעים שוב ושוב את פעולת `testAndSet`. פעולה זו היא פעולת קריאה-שינוי-כתיבה (Read-Modify-Write) אטומית, הדורשת בלעדיות על שורת ה-cache המכילה את משתנה המצב של המנעול. כתוצאה מכך, בכל פעם שחוט מנסה לתפוס את המנעול, הוא גורם לפסילת (invalidation) שורת ה-cache בקרב מעבדים אחרים, מה שמוביל לתעבורה גבוהה על ה-BUS המשותף ולזמני המתנה ארוכים. לעומת זאת, במנעול TTAS, הלולאה הפנימית `while (state) {}` מאפשרת לחוטים ממתינים לבצע קריאות בלבד (reads) למשתנה המצב של המנעול. כאשר המנעול תפוס (`state` הוא true), חוטים רבים יכולים לקרוא את הערך הזה מזיכרון המטמון המקומי שלהם (לאחר הפעם הראשונה שבה הוא נטען), מבלי לגרום לפסילת קווי cache אצל מעבדים אחרים או לייצר תעבורה מיותרת על ה-BUS. רק כאשר `state` משתנה ל-false (המנעול משוחרר), שורות ה-cache של המעבדים האחרים נפסלות והם טוענים את הערך החדש. רק אז, כשנראה שהמנעול פנוי, החוטים מנסים לבצע את פעולת `testAndSet` האטומית, ובכך מפחיתים באופן דרמטי את העומס על ה-BUS ואת זמן ההמתנה הכולל."
+    }
+  }
+}

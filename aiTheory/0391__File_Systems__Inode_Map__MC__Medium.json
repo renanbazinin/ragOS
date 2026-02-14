@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Inode Map",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 18:27:45",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      22
+    ],
+    "token_usage": {
+      "prompt_tokens": 1897,
+      "output_tokens": 554,
+      "total_tokens": 4201
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Inode Map"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "בהקשר של מערכת קבצים LFS, מהו התפקיד העיקרי של ה-Checkpoint Region (CR) ביחס למפת ה-Inodes (imap) לאחר הפעלה מחדש של המערכת?",
+      "code_snippet": null,
+      "options": [
+        "א. ה-CR מאחסן את כל הנתונים של ה-imap באופן קבוע, ללא צורך בעדכונים תכופים.",
+        "ב. ה-CR מצביע למיקומה של הגרסה העדכנית ביותר של ה-imap (או לחלקיו), ובכך מאפשר שחזור לאחר קריסה.",
+        "ג. ה-CR אחראי לוודא שכל חלקי ה-imap נכתבים באופן סינכרוני לדיסק בכל עדכון.",
+        "ד. ה-CR משמש כמאגר גיבוי עבור גרסאות קודמות של ה-imap למקרה של שחזור היסטורי."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "ההסבר הנכון הוא 'ב'. על פי חומר ההרצאה, ה-Checkpoint Region (CR) הוא מצביע קבוע במיקום ידוע שמטרתו להצביע לגרסה העדכנית ביותר של מפת ה-Inodes (imap). אם ה-imap מחולק לחלקים, ה-CR יכיל מצביעים לגרסאות העדכניות של כל חלק. כאשר המערכת מופעלת מחדש לאחר כיבוי או קריסה, היא קוראת את ה-CR, וזה מאפשר לה לאתר ולשחזר את ה-imap העדכני מתוך הדיסק כדי להמשיך לפעול כרגיל. חומר ההרצאה מציין במפורש: \"אם נסגור את המחשב ונדליק אותו מחדש, אין בעיה, נקרא את ה-cr, הוא יצביע לכל החלקים של ה-imap, נקרא גם אותם וכך נוכל לשחזר את ה-imap ולעבוד כרגיל.\""
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Race Conditions and Mutexes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 19:03:41",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      16,
+      11,
+      13
+    ],
+    "token_usage": {
+      "prompt_tokens": 2030,
+      "output_tokens": 617,
+      "total_tokens": 5370
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Race Conditions and Mutexes"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "בהתבסס על מנגנון ה-`Exponential Backoff Lock` המתואר בחומר ההרצאה, מהי המטרה העיקרית של השימוש בפונקציות `sleep` ובהכפלת משתנה ה-`delay` בתוך לולאת ה-`lock`?",
+      "code_snippet": "void lock()\n{\n  int delay = MIN_DELAY;\n  while (1) {\n    while (state) {}\n    if (!getAndSet(state, true))\n      return;\n    sleep(random() % delay);\n    if (delay < MAX_DELAY)\n      delay = 2 * delay;\n  }\n}",
+      "options": [
+        "א. להבטיח מניעה הדדית (mutual exclusion) מלאה על המשאב המשותף.",
+        "ב. למנוע מצב של קיפאון (deadlock) בין חוטים הממתינים למנעול.",
+        "ג. להפחית את התחרות (contention) על המנעול כאשר מספר חוטים מנסים לתפוס אותו בו-זמנית.",
+        "ד. להבטיח הוגנות (fairness) בכך שכל חוט יקבל את המנעול בפרק זמן סופי."
+      ]
+    },
+    "solution": {
+      "correct_option": "ג",
+      "explanation": "חומר ההרצאה (Lecture 13, chunk 8) מתאר את מנגנון ה-`Exponential Backoff Lock` ומציין במפורש: \"כך נמנע את התחרות ולא כולם יקפצו על המנעול בבת אחת.\" מטרת השימוש ב-`sleep` והכפלת ה-`delay` היא למנוע מחוטים רבים לנסות לתפוס את המנעול מיד לאחר שחרורו, ובכך להפחית את התחרות (contention) על המנעול. מניעה הדדית היא תכונה בסיסית של מנעול תקין אך אינה המטרה העיקרית של מנגנון ה-backoff עצמו (אלא איך לשפר את ביצועי המנעול תחת עומס). מניעת קיפאון והבטחת הוגנות הן תכונות נפרדות שאינן המטרה המפורשת של מנגנון זה."
+    }
+  }
+}

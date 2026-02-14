@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Inodes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 18:07:56",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      20,
+      22
+    ],
+    "token_usage": {
+      "prompt_tokens": 1834,
+      "output_tokens": 506,
+      "total_tokens": 4252
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Inodes"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "מהו אחד התפקידים המרכזיים של inode במערכת קבצים, כפי שתואר בחומר ההרצאה, וכיצד הוא מסייע באיתור תוכן קובץ?",
+      "code_snippet": null,
+      "options": [
+        "א. inode מכיל את מספרי הבלוקים בדיסק שבהם מאוחסן תוכן הקובץ, גם אם הם אינם רציפים.",
+        "ב. inode מכיל את ה-hash value של שם הקובץ, המשמש לחיפוש מהיר של הקובץ בטבלת ה-directory.",
+        "ג. inode שומר את הגרסה העדכנית ביותר של הקובץ בזיכרון הראשי (RAM) לצורך גישה מהירה.",
+        "ד. inode מציין את המיקום של ה-superblock, המכיל מידע כללי על מערכת הקבצים."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "החומר המצורף מציין במפורש כי 'ב-inode יש כל מיני פרטים על הקובץ, ובין השאר, מכיל את מספרי הבלוקים בהם נמצא התוכן של אותו קובץ (הבלוקים שמכילים את התוכן של הקובץ לא חייבים להיות רציפים בדיסק)'. זהו התפקיד המרכזי של ה-inode בקשר למיקום נתוני הקובץ. אפשרויות ב', ג' ו-ד' אינן נתמכות על ידי חומר ההרצאה; inode אינו מכיל ערכי hash של שמות קבצים, אינו שומר את הקובץ כולו ב-RAM (אלא ה-imap מצביע על הגרסה העדכנית של ה-inode עצמו, שבתורו מכיל מצביעים לנתונים), ואינו מצביע על ה-superblock."
+    }
+  }
+}

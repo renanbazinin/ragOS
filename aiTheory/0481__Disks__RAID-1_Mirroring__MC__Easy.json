@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Disks",
+    "topic_hint": "RAID-1 Mirroring",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:49:49",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      18,
+      19
+    ],
+    "token_usage": {
+      "prompt_tokens": 2120,
+      "output_tokens": 443,
+      "total_tokens": 3460
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Disks",
+    "topic": [
+      "RAID-1 Mirroring"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהי הגישה העיקרית של RAID-1 (mirroring) לניהול נתונים בין דיסקים, כפי שתוארה בחומר ההרצאה?",
+      "code_snippet": null,
+      "options": [
+        "א. שכפול כל בלוק נתונים על פני מספר דיסקים.",
+        "ב. פיצול נתונים (striping) לסירוגין בין דיסקים שונים לשיפור ביצועים.",
+        "ג. שימוש בדיסק אחד לנתונים ובדיסק אחר לשמירת מידע תיקון (parity).",
+        "ד. איחוד מספר דיסקים לדיסק וירטואלי אחד ללא כל שכפול נתונים."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "RAID-1, המכונה גם 'mirroring', מבוסס על שכפול נתונים במטרה להגביר את אמינות המערכת. על פי חומר ההרצאה, ב-RAID-1 \"נשכפל את הנתונים בין כולם (כל בלוק יהיה משוכפל בין כל הדיסקים)\". גישה זו מבטיחה שאם דיסק אחד כושל, הנתונים עדיין זמינים מהדיסק המשוכפל. אפשרות ב' מתארת את RAID-0 (striping), אפשרות ג' מתארת מנגנון המשתמש ב-parity (כמו RAID-4 או RAID-5), ואפשרות ד' אינה כוללת את מנגנון השכפול המרכזי של RAID-1."
+    }
+  }
+}

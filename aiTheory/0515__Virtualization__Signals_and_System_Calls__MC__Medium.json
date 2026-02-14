@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Signals and System Calls",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 18:58:55",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      9,
+      5
+    ],
+    "token_usage": {
+      "prompt_tokens": 1862,
+      "output_tokens": 807,
+      "total_tokens": 5753
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Signals and System Calls"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "בהקשר של מערכות הפעלה, מהו ההבדל המהותי ביותר בין 'פסיקה' (Interrupt) לבין 'סיגנל' (Signal) מבחינת יכולת ההתערבות והשליטה של תהליך משתמש?",
+      "code_snippet": "// signal2.c\nvoid signal_handler(int signal) {\n    if (signal == SIGCHLD) {\n        int rc = wait(NULL);\n        printf(\"child terminated %d (pid:%d)\\n\", rc, getpid());\n    }\n}\n\nint main(int argc, char *argv[])\n{\n    struct sigaction act;\n    sigemptyset(&act.sa_mask);\n    act.sa_handler = signal_handler;\n    act.sa_flags = 0;\n    \n    sigaction(SIGCHLD, &act, NULL);\n    if (fork()) {\n        while (1);\n    }\n}",
+      "options": [
+        "א. פסיקות מטופלות באופן בלעדי על ידי ליבת מערכת ההפעלה, בעוד שתהליכי משתמש יכולים להגדיר דרך טיפול משלהם בסיגנלים או להתעלם מהם.",
+        "ב. סיגנלים משמשים אך ורק לתקשורת בין תהליכים (IPC), בעוד שפסיקות מטפלות באירועי חומרה בלבד.",
+        "ג. תהליכי משתמש יכולים לבטל פסיקות חומרה, אך אינם יכולים למנוע קבלת סיגנלים ממערכת ההפעלה.",
+        "ד. פסיקות וסיגנלים שניהם אירועים פנימיים לתהליך, ותהליכי משתמש יכולים לשלוט באופן מלא בטיפול בשניהם."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "ההבדל המהותי ביותר המוצג בחומר ההרצאה הוא שפסיקות (Interrupts) הן אירועי חומרה המטופלים באופן בלעדי על ידי ליבת מערכת ההפעלה (kernel). חומר ההרצאה מציין שתהליכי משתמש 'לא יכולים להשפיע על פסיקה ובטח שלא לבטל אותה. רק מערכת ההפעלה יכולה לבטל פסיקות'. לעומת זאת, סיגנלים הם אירועים המיועדים לתהליכים, וחומר ההרצאה קובע כי 'אנחנו יכולים להשפיע על הטבלה הזו' (טבלת האירועים של הסיגנלים של התהליך) וכי 'תהליכי משתמש כן יכולים להתערב'. הדבר מתבטא ביכולת להגדיר פונקציית טיפול (handler) באמצעות פונקציות כמו `sigaction` (כפי שמודגם בקוד המצורף), וכן ביכולת להתעלם מסיגנלים (לדוגמה, `SIG_IGN` עבור `SIGCHLD` מונע יצירת זומבים). לכן, תשובה א' משקפת נאמנה את ההבדל הזה."
+    }
+  }
+}

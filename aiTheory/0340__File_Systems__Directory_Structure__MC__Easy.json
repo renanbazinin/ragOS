@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Directory Structure",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:16:19",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      20,
+      21
+    ],
+    "token_usage": {
+      "prompt_tokens": 2034,
+      "output_tokens": 507,
+      "total_tokens": 3958
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Directory Structure"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהו התפקיד העיקרי של ה-inode במערכת קבצים, כפי שתואר בחומר הלימוד?",
+      "code_snippet": null,
+      "options": [
+        "א. לאחסן את התוכן בפועל (data) של קבצים ותיקיות.",
+        "ב. להכיל את המטא-דאטה (metadata) של קבצים ותיקיות.",
+        "ג. לשמור מפת סיביות (bitmap) המציינת אילו בלוקים בדיסק תפוסים.",
+        "ד. לנהל רשימה מקושרת של בלוקים עבור קבצים גדולים."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "על פי חומר הלימוד (שיעור 20, קטע 4), ה-inode הוא \"איזור מסוים בדיסק שיכיל את ה-metadata, כלומר את כל המידע על הקבצים\". כמו כן, רשימת התכולה של ה-inode כוללת 'Type (file / directory)', מה שמצביע על כך שהוא מאחסן מטא-דאטה עבור שני הסוגים – קבצים ותיקיות. אפשרות א' אינה נכונה מכיוון שהתוכן בפועל נשמר בבלוקי נתונים (Data Blocks) ולא ב-inode עצמו. אפשרות ג' מתארת את תפקידו של ה-Data Bitmap או ה-inode Bmap, ולא את ה-inode עצמו. אפשרות ד' מתארת שיטת הקצאת בלוקים (רשימה מקושרת) שבה ה-inode אכן מכיל מצביע לבלוק הראשון, אך תפקידו העיקרי והכללי יותר של ה-inode הוא להכיל את כלל המטא-דאטה, ולא רק לנהל רשימות מקושרות."
+    }
+  }
+}

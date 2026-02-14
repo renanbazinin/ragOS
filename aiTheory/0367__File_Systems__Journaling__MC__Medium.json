@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Journaling",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 18:22:36",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      21
+    ],
+    "token_usage": {
+      "prompt_tokens": 1706,
+      "output_tokens": 712,
+      "total_tokens": 4759
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Journaling"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "איזה מבין התיאורים הבאים מתאר נכונה את סדר הפעולות הנדרש בעת ביצוע טרנזקציה במערכת קבצים מבוססת Journaling מסוג Metadata Journaling (ordered journaling), בהתאם לחומר הנלמד?",
+      "code_snippet": null,
+      "options": [
+        "א. יש לכתוב קודם את הנתונים (Data) למיקומם הסופי בדיסק, לאחר מכן לכתוב את המטא-דאטה (Metadata) ליומן, ורק לבסוף לכתוב את בלוק ה-Txe ליומן.",
+        "ב. יש לכתוב קודם את המטא-דאטה (Metadata) ליומן, לאחר מכן את בלוק ה-Txe ליומן, ורק לבסוף לכתוב את הנתונים (Data) למיקומם הסופי בדיסק.",
+        "ג. יש לכתוב קודם את בלוק ה-Txe ליומן, לאחר מכן את הנתונים (Data) למיקומם הסופי בדיסק, ורק לבסוף לכתוב את המטא-דאטה (Metadata) ליומן.",
+        "ד. כל הנתונים (Data), המטא-דאטה (Metadata) ובלוק ה-Txe נכתבים בו זמנית (concurrently) לדיסק וליומן, ללא סדר קבוע."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "החומר הנלמד מתאר במפורש את הפרוטוקול הסופי (Final protocol) עבור Metadata Journaling (הידוע גם כ-ordered journaling). לפי פרוטוקול זה, סדר הפעולות הקריטיות לשמירה על עקביות הוא: ראשית, כתיבת הנתונים (Data) למיקומם הסופי בדיסק ורק לאחר מכן המתנה לסיום פעולה זו. שנית, כתיבת תוכן הטרנזקציה (בלוק TxB והמטא-דאטה) ליומן והמתנה לסיום פעולה זו. שלישית, כתיבת בלוק ה-commit (Txe) ליומן והמתנה לסיום הכתיבה, מה שמסמן את הטרנזקציה כ-committed. אפשרות א' משקפת סדר זה: כתיבת Data, לאחר מכן Metadata ליומן, ולבסוף Txe ליומן. ציטוט מהחומר: \"נשים לב שכשאנחנו עושים זאת אנחנו חייבים קודם כל לכתוב לדיסק את הדאטה ובו זמנית לכתוב את ה-metadata ליומן, ונתונים שהכל נכתב ורק אחר כך לכתוב את ה-Txe.\"."
+    }
+  }
+}

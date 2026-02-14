@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "File System Structure",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:04:42",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      20,
+      21
+    ],
+    "token_usage": {
+      "prompt_tokens": 1825,
+      "output_tokens": 515,
+      "total_tokens": 3589
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "File System Structure"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "על פי חומר ההרצאה, מהו התפקיד העיקרי של ה-inode במבנה מערכת קבצים?",
+      "code_snippet": null,
+      "options": [
+        "א. לאחסן את התוכן הממשי של קובץ או תיקייה.",
+        "ב. לאחסן מטא-דאטה (metadata) אודות קובץ או תיקייה, הכולל מידע כגון סוג, בעלים, הרשאות ורשימת בלוקי הנתונים.",
+        "ג. לנהל רשימה של כל הבלוקים הפנויים בדיסק לצורך הקצאה עתידית.",
+        "ד. לשמש כבופר זמני לנתונים הנקראים מהדיסק לפני שהם נמסרים ליישום."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "חומר ההרצאה מציין במפורש כי 'נשמור איזור מסוים בדיסק שיכיל את ה-metadata, כלומר את כל המידע על הקבצים, ונקרא לאזור הזה inode.' הרשימה שמופיעה בחומר ההרצאה תחת 'Inode' כוללת פריטים כמו Type (file / directory), UID (owner), rwx (permissions), Data blocks, ועוד, המהווים כולם מטא-דאטה. לכן, התפקיד העיקרי של ה-inode הוא לאחסן מידע זה. אפשרות א' שגויה מכיוון שבלוקי הנתונים (data blocks) הם אלו המאחסנים את התוכן הממשי. אפשרויות ג' ו-ד' מתארות תפקידים של רכיבים אחרים במערכת קבצים (כגון מנהל שטח פנוי או מנגנון מטמון), ולא את התפקיד הישיר של ה-inode עצמו."
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Directory Structure",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 18:16:30",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      20,
+      21
+    ],
+    "token_usage": {
+      "prompt_tokens": 2034,
+      "output_tokens": 398,
+      "total_tokens": 4029
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Directory Structure"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "מהי מטרת השדה \"Links count\" (מספר קישורים) בתוך ה-inode?",
+      "code_snippet": null,
+      "options": [
+        "א. לספור את סך כל הבלוקים של הנתונים שהוקצו לקובץ על הדיסק.",
+        "ב. לציין כמה שמות (נתיבים) שונים קיימים במערכת הקבצים שמצביעים על ה-inode הזה.",
+        "ג. לאחסן את זהות הבעלים של הקובץ (UID).",
+        "ד. לתעד את מועד הגישה האחרון לקובץ או התיקייה."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "על פי חומר ההרצאה, ה-inode מכיל מטא-דאטה אודות קובץ או תיקייה. אחד מהשדות הללו הוא \"Links count (# paths)\", שתפקידו הוא לספור את מספר הנתיבים השונים במערכת הקבצים המצביעים על אותו ה-inode. כלומר, הוא מציין כמה שמות קבצים או תיקיות שונות (קישורים קשיחים) מפנות לנתונים ולמטא-דאטה המיוצגים על ידי ה-inode הספציפי. כאשר ה-links count מגיע לאפס, ה-inode והנתונים המשויכים אליו נמחקים פיזית מהדיסק."
+    }
+  }
+}

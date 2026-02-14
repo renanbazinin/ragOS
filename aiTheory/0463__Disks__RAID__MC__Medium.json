@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Disks",
+    "topic_hint": "RAID",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 18:45:44",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      18,
+      19
+    ],
+    "token_usage": {
+      "prompt_tokens": 1982,
+      "output_tokens": 506,
+      "total_tokens": 6185
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Disks",
+    "topic": [
+      "RAID"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "על פי חומר ההרצאה, איזו מהטענות הבאות לגבי RAID-4 ו-RAID-5 היא הנכונה ביותר?",
+      "code_snippet": null,
+      "options": [
+        "א. RAID-5 מציע ביצועי כתיבה מהירים יותר באופן מובהק מ-RAID-4.",
+        "ב. RAID-4 ו-RAID-5 מספקים את אותה רמת אמינות וביצועים בדיוק, ולכן אין יתרון לאחד על פני השני.",
+        "ג. RAID-5 עדיף באופן מובהק על RAID-4, ולכן אין סיבה להשתמש ב-RAID-4.",
+        "ד. RAID-4 מציע יתרון בביצועי קריאה על פני RAID-5."
+      ]
+    },
+    "solution": {
+      "correct_option": "ג",
+      "explanation": "חומר ההרצאה קובע במפורש כי \"RAID-5 is strictly better than RAID-4\" וכן \"אין סיבה להשתמש ב-raid-4\". קביעות אלו מצביעות על עדיפות מובהקת של RAID-5 על פני RAID-4, כפי שמנוסח באפשרות ג'. שאר האפשרויות אינן נכונות: אפשרויות א' ו-ד' סותרות את טבלת הביצועים שבחומר ההרצאה, שבה מוצגים ערכים זהים ל-Read Latency (D) ול-Write Latency (2D) עבור שני הסוגים. אפשרות ב' סותרת ישירות את הקביעה המפורשת בחומר ההרצאה כי ל-RAID-5 יש עדיפות מובהקת ואין סיבה להשתמש ב-RAID-4, למרות שהטבלה מציגה אמינות (Reliability) זהה (1) עבור שניהם."
+    }
+  }
+}

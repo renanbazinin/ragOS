@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Directory Structure",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 18:17:02",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      20,
+      21
+    ],
+    "token_usage": {
+      "prompt_tokens": 2034,
+      "output_tokens": 342,
+      "total_tokens": 3522
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Directory Structure"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "איזה שדה ב-inode מאפשר למערכת הקבצים להבחין בין קובץ רגיל לבין ספרייה (directory)?",
+      "code_snippet": null,
+      "options": [
+        "א. שדה ה-'Type'",
+        "ב. שדה ה-'Size'",
+        "ג. שדה ה-'Data blocks'",
+        "ד. שדה ה-'Links count'"
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "על פי חומר ההרצאה, ה-inode מכיל metadata אודות קבצים וספריות. אחד מהשדות המפורטים ב-inode הוא 'Type (file / directory)', המציין במפורש האם ה-inode מתאר קובץ רגיל או ספרייה. שדות אחרים כמו 'Size' מתארים את גודל הקובץ/ספרייה, 'Data blocks' מצביע לבלוקי הנתונים בפועל, ו-'Links count' מציין את מספר הנתיבים המצביעים ל-inode, אך אף אחד מהם לא מגדיר את סוג הישות (קובץ או ספרייה) כמו שדה ה-'Type'."
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Paging and TLB",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 18:54:41",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      7
+    ],
+    "token_usage": {
+      "prompt_tokens": 2169,
+      "output_tokens": 652,
+      "total_tokens": 4939
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Paging and TLB"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "בעת מעבר הקשר (Context Switch) בין תהליכים שונים, ה-TLB עלול להכיל מיפויים שאינם רלוונטיים לתהליך החדש. מהו הפתרון שהוצג בחומר הלימוד להתמודדות עם בעיה זו, וכיצד הוא פועל?",
+      "code_snippet": null,
+      "options": [
+        "א. ניקוי מוחלט של כל רשומות ה-TLB (TLB Flush) בכל מעבר קשר כדי להבטיח עקביות.",
+        "ב. הוספת מזהה מרחב כתובות (ASID - Address Space ID) לכל רשומה ב-TLB, המציין לאיזה תהליך הרשומה שייכת ומאפשר שימוש ברשומות מתהליכים שונים במקביל.",
+        "ג. שימוש בביט 'תקף' (Valid Bit) בכל רשומת TLB, אשר מתאפס עבור רשומות שאינן שייכות לתהליך הנוכחי.",
+        "ד. בדיקת ה-Page Table עבור כל גישה לזיכרון וירטואלי לאחר מעבר קשר, עד שה-TLB מתמלא מחדש באופן אוטומטי."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "החומר מציין במפורש כי הפתרון לבעיית עדכון ה-TLB בעת מעבר קשר הוא הוספת מזהה מרחב כתובות (ASID - Address Space ID) לכל רשומה ב-TLB. מזהה זה מאפשר למערכת להבחין בין רשומות השייכות לתהליכים שונים, ובכך למנוע מצב שבו יש צורך לנקות את כל ה-TLB (TLB Flush) או להסתמך על מיפויים שגויים. במקום זאת, ה-TLB יכול להכיל במקביל מיפויים של מספר תהליכים, וה-MMU משתמש ב-ASID כדי לוודא שנעשה שימוש רק במיפויים הרלוונטיים לתהליך הפועל כעת. אפשרות א' (ניקוי TLB) היא פתרון אפשרי אך פחות יעיל מהשימוש ב-ASID. אפשרויות ג' ו-ד' אינן מתארות את הפתרון שהוצג בחומר הלימוד."
+    }
+  }
+}

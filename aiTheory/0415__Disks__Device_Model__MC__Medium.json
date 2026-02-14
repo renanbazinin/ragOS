@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Disks",
+    "topic_hint": "Device Model",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 18:34:02",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      17,
+      18
+    ],
+    "token_usage": {
+      "prompt_tokens": 2247,
+      "output_tokens": 488,
+      "total_tokens": 3983
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Disks",
+    "topic": [
+      "Device Model"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "על פי החומר הנלמד, מהי הגישה שבה מערכת RAID מציגה את מערך הדיסקים הפיזיים למערכת ההפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. היא מציגה דיסק לוגי יחיד, תוך הסתרת הדיסקים הפיזיים הבסיסיים באופן שקוף לחלוטין.",
+        "ב. היא דורשת ממערכת ההפעלה לנהל באופן מפורש כל דיסק פיזי בנפרד.",
+        "ג. היא ממפה כל דיסק פיזי לאזור זיכרון ייעודי באמצעות מנגנון memory mapped I/O.",
+        "ד. היא חושפת את הרכיבים הפיזיים של הדיסקים, כגון פלטות ומסלולים, ישירות למערכת ההפעלה."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "החומר המציין כי מערכת RAID (Redundant Array of Independent Disks) נחשבת ל\"דיסק מדומה\" או \"דיסק לוגי\". ההסבר מפרט שמבחינת מערכת ההפעלה והתוכניות, נראה דיסק אחד, ומנגנון ה-RAID מתפעל את הנתונים על פני הדיסקים הפיזיים השונים באופן שקוף לחלוטין. מערכת ההפעלה \"בטוחה שהיא שולחת אליו רק סקטור אחד\" ואינה מודעת לכמות הדיסקים הפיזיים שמאחורי הקלעים. לכן, התשובה הנכונה היא שהיא מציגה דיסק לוגי יחיד, תוך הסתרת הדיסקים הפיזיים הבסיסיים באופן שקוף."
+    }
+  }
+}

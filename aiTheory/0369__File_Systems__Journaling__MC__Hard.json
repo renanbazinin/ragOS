@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Journaling",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-14 18:23:12",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      21
+    ],
+    "token_usage": {
+      "prompt_tokens": 1706,
+      "output_tokens": 1101,
+      "total_tokens": 6858
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Journaling"
+    ],
+    "difficulty_estimation": "Hard",
+    "content": {
+      "text": "במערכת קבצים המשתמשת ב-metadata journaling (הידועה גם כ-ordered journaling), פרוטוקול הכתיבה הסופי קובע כי יש לכתוב את הנתונים למיקומם הסופי בדיסק ולאמת את השלמת הכתיבה, ורק לאחר מכן לכתוב את בלוק ה-commit (Txe) ליומן. בהתבסס על פרוטוקול זה, מדוע סדר פעולות זה חיוני לשמירה על עקביות הנתונים במקרה של קריסה?",
+      "code_snippet": "/* פרוטוקול הכתיבה הסופי (מתוך חומר ההרצאה): */\n/* Final protocol: */\n1. Data write\n  * Write data to final location, wait for completion\n2. Journal write\n  * Write transaction contents (TxB and metadata), wait for completion\n3. Journal commit\n  * Write transaction commit block (Txe)\n  * Wait for write to complete → transaction is **committed**\n4. Checkpoint\n  * Write metadata to final locations\n5. Free\n  * Later, mark transaction as free in journal superblock",
+      "options": [
+        "א. כדי למנוע מצב שבו ה-Txe נכתב ליומן ומצביע על טרנזקציה שהושלמה, בעוד שהנתונים עצמם טרם נכתבו במלואם למיקומם הסופי בדיסק, מה שיוביל לשחזור שגוי של נתונים ישנים או חלקיים לאחר קריסה.",
+        "ב. מכיוון שה-journal superblock דורש שה-Txe ייכתב רק לאחר שכל הנתונים והמטא-דאטה נמחקו מהיומן, כדי לפנות מקום לטרנזקציות חדשות.",
+        "ג. כדי להבטיח שהיומן לא יתמלא יתר על המידה, על ידי הקפדה על כך שרק המטא-דאטה תישמר ביומן, והנתונים יישמרו ישירות בדיסק ללא תיעוד ביומן.",
+        "ד. משום שבלוק ה-Txe מכיל מצביע למיקום הפיזי של הנתונים בדיסק, ולכן יש לוודא שהנתונים קיימים לפני שהמצביע נכתב."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "התשובה הנכונה היא א'. בחומר ההרצאה (chunk 38) מצוין במפורש: \"נשים לב שכשאנחנו עושים זאת אנחנו חייבים קודם כל לכתוב לדיסק את הדאטה ובו זמנית לכתוב את ה-metadata ליומן, ונתונים שהכל נכתב ורק אחר כך לכתוב את ה-Txe.\" פרוטוקול זה, המכונה metadata journaling או ordered journaling, מבטיח שעקביות הנתונים תישמר. אם בלוק ה-Txe (המסמן את סיום הטרנזקציה והתחייבותה) ייכתב ליומן לפני שהנתונים עצמם נכתבו בהצלחה למיקומם הסופי בדיסק, אזי במקרה של קריסה, מערכת ההפעלה תאמין שהטרנזקציה הושלמה בהצלחה (כפי שהיומן מציין), אך בפועל הנתונים בדיסק יהיו חסרים, לא מעודכנים או פגומים. מצב זה יוביל לשחזור שגוי של מערכת הקבצים. לכן, הכרחי לוודא את שלמות כתיבת הנתונים לפני התחייבות הטרנזקציה ביומן. אפשרות ב' שגויה מכיוון ש-Txe מסמן התחייבות (commit) ולא מחיקה או פינוי מקום ביומן, פעולה המבוצעת מאוחר יותר על ידי ה-journal superblock. אפשרות ג' מתארת את מאפיין כללי של metadata journaling אך אינה מסבירה את חשיבות הסדר הספציפי בין כתיבת הנתונים לכתיבת ה-Txe לצורך עקביות. אפשרות ד' שגויה שכן חומר ההרצאה אינו מציין כי בלוק ה-Txe מכיל מצביע למיקום הפיזי של הנתונים; תפקידו הוא לסמן את סיום הטרנזקציה."
+    }
+  }
+}

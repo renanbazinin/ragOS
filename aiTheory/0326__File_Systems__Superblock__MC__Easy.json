@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Superblock",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 18:13:31",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      20,
+      21,
+      22
+    ],
+    "token_usage": {
+      "prompt_tokens": 1676,
+      "output_tokens": 479,
+      "total_tokens": 3868
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Superblock"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהו התפקיד העיקרי של ה-Super Block במערכת קבצים?",
+      "code_snippet": null,
+      "options": [
+        "א. לאחסן נתונים חיוניים אודות מבנה מערכת הקבצים והכונן, כגון סוג מערכת הקבצים, גודל הדיסק, מספר בלוקי נתונים ומיקום ה-bitmaps.",
+        "ב. לשמור רשימה מקושרת של כל הבלוקים הפנויים בדיסק כדי לשפר גישה אקראית.",
+        "ג. לתעד טרנזקציות שהושלמו כדי לאפשר שחזור מהיר לאחר קריסה.",
+        "ד. למפות דפים ל-chunks ב-SSD כדי לייעל שינויים בדפים בודדים."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "ה-Super Block הוא בלוק קריטי במערכת הקבצים המכיל מידע מהותי על הכונן ומבנה מערכת הקבצים כולה. על פי חומר ההרצאה (Lecture 20, chunk 28), הוא 'בלוק אחד שמכיל נתונים על הכונן שלנו ועל מערכת הקבצים. יהיה כתוב בו אילו מערכת קבצים מישנן כדי לדעת איזה קוד להריץ על הדיסק, יהיה כתוב מה הגודל של הדיסק, כמה data block, inodes יש לו, איפה ה-bitmaps וכו'.'. אפשרויות ב', ג' ו-ד' מתארות תפקידים אחרים או פרטים ספציפיים שאינם התפקיד העיקרי והכללי של ה-Super Block במערכת קבצים."
+    }
+  }
+}

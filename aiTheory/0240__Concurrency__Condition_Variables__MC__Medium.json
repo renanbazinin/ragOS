@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Condition Variables",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 17:52:07",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      11,
+      14
+    ],
+    "token_usage": {
+      "prompt_tokens": 1903,
+      "output_tokens": 574,
+      "total_tokens": 4380
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Condition Variables"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "בבעיית היצרן-צרכן (Bounded Buffer), כאשר ישנם מספר יצרנים וצרכנים, מדוע הפתרון המומלץ כולל שימוש בשני משתני תנאי (Condition Variables) נפרדים, כגון `empty` ו-`full`, במקום משתנה תנאי יחיד?",
+      "code_snippet": null,
+      "options": [
+        "א. כדי למנוע מצב של קיפאון (deadlock) בו גם יצרנים וגם צרכנים נחסמים באופן הדדי.",
+        "ב. כדי לייעל את ביצועי המערכת על ידי הפחתת מספר הקריאות לפעולות `wait` ו-`signal`.",
+        "ג. משתנה תנאי יחיד אינו יכול לתמוך בריבוי יצרנים וצרכנים בו-זמנית.",
+        "ד. כדי לאפשר לצרכנים וליצרנים להשתמש במנעולים (mutexes) שונים ולא לחסום זה את זה."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "החומר המצוין בשיעור 14 (chunk 13) מסביר במפורש כי בבעיית היצרן-צרכן, שימוש במשתנה תנאי יחיד עלול להוביל למצב של קיפאון (deadlock). מצב זה מתרחש כאשר צרכן חוסם (כי אין מוצרים במחסן) ויצרן חסום (כי אין מקום פנוי במחסן), או להפך, למרות שאולי יש מקום פנוי או שניתן לייצר. הפתרון לבעיה זו הוא שימוש בשני משתני תנאי נפרדים: אחד (`empty`) עבור הצרכנים שממתינים כאשר המחסן ריק, ואחד (`full`) עבור היצרנים שממתינים כאשר המחסן מלא. בדרך זו, הודעות היצרן (הוספת פריט) והצרכן (צריכת פריט) מטופלות בנפרד, ומונעות חסימה הדדית שמובילה לקיפאון."
+    }
+  }
+}

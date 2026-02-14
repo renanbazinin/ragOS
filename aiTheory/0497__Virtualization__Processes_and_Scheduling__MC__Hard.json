@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Processes and Scheduling",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-14 18:54:09",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      2,
+      3
+    ],
+    "token_usage": {
+      "prompt_tokens": 1977,
+      "output_tokens": 649,
+      "total_tokens": 4291
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Processes and Scheduling"
+    ],
+    "difficulty_estimation": "Hard",
+    "content": {
+      "text": "במערכת הפעלה המשתמשת באלגוריתם תזמון Lottery scheduling, קיימים שני תהליכים: P1 עם 150 כרטיסים ו-P2 עם 50 כרטיסים. שניהם נמצאים במצב Ready. לאחר זמן מה, P1 מבצע פעולת קלט/פלט ארוכה (כגון קריאה מקובץ) ונכנס למצב Blocked. בהנחה ש-P2 נשאר במצב Ready, ואין תהליכים אחרים במערכת, מהו אחוז זמן המעבד ש-P2 צפוי לקבל לאחר ש-P1 נכנס למצב Blocked?",
+      "code_snippet": null,
+      "options": [
+        "א. 100%",
+        "ב. 25%",
+        "ג. 75%",
+        "ד. 50%"
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "אלגוריתם Lottery scheduling מחלק את זמן המעבד באופן פרופורציונלי למספר ה'כרטיסים' (Tickets) של כל תהליך מתוך סך כל הכרטיסים של התהליכים הנמצאים במצב Ready. בתחילה, היו 200 כרטיסים בסך הכל (150 ל-P1 ו-50 ל-P2), ולכן P2 היה צפוי לקבל 25% מזמן המעבד (50/200).\nאך כאשר תהליך P1 נכנס למצב Blocked (עקב פעולת קלט/פלט, למשל), מערכת ההפעלה מפסיקה להתייחס אליו לצורך תזמון. כפי שצויין בחומר ההרצאה: \"מערכת ההפעלה בכלל לא מסתכלת על תהליכים שהם Blocked\" (Lecture 2, chunk 35). המשמעות היא שתהליך P1 אינו נכלל עוד ברשימת התהליכים הפוטנציאליים להרצה. מכיוון ש-P2 הוא התהליך היחיד שנותר במצב Ready (והנחנו שאין תהליכים אחרים במערכת), הוא יהיה התהליך היחיד שהמתזמן יכול לבחור. לכן, P2 יקבל 100% מזמן המעבד עד ש-P1 יחזור למצב Ready (או שתהליכים אחרים ייכנסו למצב Ready)."
+    }
+  }
+}

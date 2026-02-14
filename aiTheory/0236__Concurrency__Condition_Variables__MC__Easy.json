@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Condition Variables",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:51:11",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      11,
+      14
+    ],
+    "token_usage": {
+      "prompt_tokens": 1903,
+      "output_tokens": 434,
+      "total_tokens": 6298
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Condition Variables"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "איזו בעיה מרכזית משתני תנאי (Condition Variables) נועדו לפתור במערכות הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. הבטחת גישה בלעדית (mutual exclusion) לקטעים קריטיים.",
+        "ב. סנכרון פעולות בין חוטים, כך שחוט אחד ימתין לתנאי מסוים שיתקיים על ידי חוט אחר.",
+        "ג. ניהול הקצאת זיכרון משותף בין תהליכים.",
+        "ד. איתור ותיקון שגיאות זמן ריצה בקוד."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "החומר מציין במפורש שמשתני תנאי נועדו לפתור בעיות סנכרון כגון המקרה שבו \"חוט A רוצה לבצע את הפעולה שלו רק אחרי חוט B\". הפתרון כולל שימוש במשתנה משותף (דגל) שחוט A בודק וממתין שחוט B יסיים ויודיע לו בעזרת סיגנל. זוהי בדיוק המהות של סנכרון תהליכים על בסיס תנאי, כפי שמתואר ב-Lecture 14 (chunk 0). אפשרות א' מתארת את תפקידם של מנעולים (mutexes), ואילו אפשרויות ג' ו-ד' אינן קשורות למשתני תנאי."
+    }
+  }
+}
