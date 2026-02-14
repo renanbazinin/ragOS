@@ -1,6 +1,6 @@
 import { useState, useEffect, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Sparkles, Filter, ChevronDown, ChevronUp, Settings, Brain } from 'lucide-react';
+import { Search, Sparkles, Filter, ChevronDown, ChevronUp, Settings, Brain, BookOpen } from 'lucide-react';
 import { searchQuestions, generateQuestion, getTopics, getStats } from './api';
 import type { SearchResult, QuestionJSON, Stats } from './types';
 import QuestionCard from './QuestionCard';
@@ -123,6 +123,10 @@ function App() {
               <span className="settings-badge">{savedQuestions.length}</span>
             )}
           </button>
+          <Link to="/theory" className="nav-link theory-link">
+            <BookOpen size={20} />
+            Theory
+          </Link>
           <Link to="/practice" className="nav-link practice-link">
             <Brain size={20} />
             Practice

@@ -160,3 +160,37 @@ export interface ExamFilterOptions {
   years: string[];
   subjects: Record<string, number>;
 }
+
+// ── Theory types ────────────────────────────────────────────────────────────
+
+export interface TheoryQuestionItem {
+  id: number;
+  type: string;
+  subject: string;
+  topic: string[];
+  difficulty_estimation: string;
+  content: QuestionContent;
+  solution: QuestionSolution | null;
+  _source_file: string;
+  _topic_hint: string;
+  _requested_type: string;
+  _requested_difficulty: string;
+  _generated_at: string;
+  _subject: string;
+  _context_lectures: number[];
+}
+
+export interface TheoryQuestionsResponse {
+  questions: TheoryQuestionItem[];
+  total: number;
+  page: number;
+  page_size: number;
+  total_pages: number;
+}
+
+export interface TheoryStats {
+  total: number;
+  subjects: Record<string, number>;
+  difficulties: Record<string, number>;
+  topics: Record<string, number>;
+}
