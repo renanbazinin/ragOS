@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Paging",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:14:51",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      4,
+      5,
+      7
+    ],
+    "token_usage": {
+      "prompt_tokens": 2011,
+      "output_tokens": 412,
+      "total_tokens": 3920
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Paging"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהו התפקיד העיקרי של יחידת ניהול הזיכרון (MMU) בתהליך הדפדוף?",
+      "code_snippet": null,
+      "options": [
+        "א. לבצע המרה מכתובת וירטואלית לכתובת פיזית.",
+        "ב. לנהל את מזהי התהליכים (PIDs) במערכת.",
+        "ג. לאחסן את טבלת הדפים של התהליך בזיכרון.",
+        "ד. לקבוע את גודל מרחב הכתובות הוירטואלי של תהליך."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "ההסבר הנכון הוא שאחד מתפקידיו העיקריים של ה-MMU (Memory Management Unit) הוא לתרגם כתובות וירטואליות לכתובות פיזיות. כפי שמצוין בחומר ההרצאה, \"הרכיב שעוזר לנו בתהליך התרגום הוא ה-**mmu** שמתבצע המרה מכתובת וירטואלית לכתובת פיזית שבה הנתונים הרצויים נמצאים.\" ה-MMU משתמש בטבלת הדפים של התהליך כדי למצוא את המסגרת הפיזית המתאימה לדף הוירטואלי, אך תפקידו המרכזי הוא ביצוע התרגום עצמו."
+    }
+  }
+}

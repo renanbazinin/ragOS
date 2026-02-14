@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Threads",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:26:42",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      10,
+      11
+    ],
+    "token_usage": {
+      "prompt_tokens": 1730,
+      "output_tokens": 463,
+      "total_tokens": 3417
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Threads"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהי ההתנהגות של חוט (thread) שקורא לפונקציה `pthread_join`?",
+      "code_snippet": null,
+      "options": [
+        "א. החוט הקורא הופך חסום (blocked) וממתין עד שהחוט שצוין כארגומנט יסיים את ריצתו.",
+        "ב. החוט הקורא ממשיך לרוץ במקביל לחוט שצוין, ללא המתנה.",
+        "ג. החוט הקורא מסיים את התהליך כולו באופן מיידי.",
+        "ד. החוט הקורא מבטל את ריצת החוט שצוין ומסיים אותו."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "כפי שנלמד בחומר ההרצאה, כאשר חוט קורא לפונקציה `pthread_join(th, ...)`, החוט הקורא (החוט שביצע את הקריאה) הופך להיות חסום (blocked) והוא ממתין עד שהחוט שצוין כארגומנט (`th`) יסיים את ריצתו. רק לאחר שהחוט הממתין לו מסיים, החוט הקורא ממשיך בביצוע השורות הבאות בקוד. אפשרות ב' אינה נכונה מכיוון ש-`pthread_join` היא פונקציית המתנה. אפשרות ג' אינה נכונה מכיוון שסיום תהליך שלם אינו ההתנהגות הישירה של `pthread_join`. אפשרות ד' מתארת את `pthread_cancel` ולא את `pthread_join`."
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Address Space",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-14 17:26:14",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      5,
+      6,
+      7
+    ],
+    "token_usage": {
+      "prompt_tokens": 2106,
+      "output_tokens": 1119,
+      "total_tokens": 7358
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Address Space"
+    ],
+    "difficulty_estimation": "Hard",
+    "content": {
+      "text": "בהינתן המאפיינים הבאים עבור מרחב כתובות וירטואלי במערכת המשתמשת בטבלת דפים היררכית (Multi-Level Page Table), ובהנחה שכל טבלאות הדפים מאוכלסות במלואן:\n*   גודל מרחב כתובות וירטואלי: 16KB\n*   גודל דף: 32B\n*   גודל רשומת טבלת דפים (PTE): 2B\n*   ב-Page Directory יש 32 רשומות, וגודל כל רשומה בה הוא 2 בתים.\n\nמהו סך הזיכרון (בבתים) הנדרש לאחסון כל מבני טבלת הדפים (ה-Page Directory וכל טבלאות הדפים מהרמה השנייה) עבור תהליך בודד?",
+      "code_snippet": null,
+      "options": [
+        "א. 1088 בתים",
+        "ב. 512 בתים",
+        "ג. 1024 בתים",
+        "ד. 64 בתים"
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "כדי לחשב את סך הזיכרון הנדרש למבני טפי הדפים, עלינו לנתח את חלוקת הביטים בכתובת הוירטואלית ולחשב את גודל כל רמה בטבלה ההיררכית:\n\n1.  **חישוב ביטי הכתובת הוירטואלית וההיסט:**\n    *   מרחב כתובות וירטואלי: 16KB = 2^14 בתים. לכן, כתובת וירטואלית היא באורך 14 ביטים.\n    *   גודל דף: 32B = 2^5 בתים. לכן, ההיסט (Offset) הוא באורך 5 ביטים.\n    *   מספר ביטים ל-Virtual Page Number (VPN): 14 ביטים (סה\"כ) - 5 ביטים (היסט) = 9 ביטים.\n\n2.  **חישוב ביטי ה-Page Directory Index:**\n    *   נתון שב-Page Directory יש 32 רשומות. 32 = 2^5. לכן, ה-Page Directory Index הוא באורך 5 ביטים.\n\n3.  **חישוב ביטי ה-Page Table Index:**\n    *   מכיוון שה-VPN הוא 9 ביטים וה-Page Directory Index הוא 5 ביטים, הרי שה-Page Table Index הוא 9 ביטים - 5 ביטים = 4 ביטים.\n    *   כל טבלת דפים ברמה השנייה מכילה 2^4 = 16 רשומות PTE.\n\n4.  **חישוב גודל ה-Page Directory:**\n    *   מספר רשומות ב-Page Directory: 32.\n    *   גודל רשומה ב-Page Directory: 2 בתים (לפי הנתון).\n    *   גודל ה-Page Directory = 32 רשומות * 2 בתים/רשומה = 64 בתים.\n\n5.  **חישוב גודל טבלאות הדפים ברמה השנייה:**\n    *   מספר טבלאות דפים ברמה השנייה: מכיוון שה-Page Directory מאוכלס במלואו, ישנן 32 טבלאות דפים ברמה השנייה (אחת לכל רשומה ב-Page Directory).\n    *   גודל טבלת דפים אחת ברמה השנייה: 16 רשומות PTE * 2 בתים/PTE = 32 בתים.\n    *   גודל כולל של כל טבלאות הדפים ברמה השנייה = 32 טבלאות * 32 בתים/טבלה = 1024 בתים.\n\n6.  **סך הזיכרון הנדרש:**\n    *   סה\"כ = גודל ה-Page Directory + גודל טבלאות הדפים ברמה השנייה = 64 בתים + 1024 בתים = 1088 בתים.\n\nלכן, התשובה הנכונה היא א'."
+    }
+  }
+}

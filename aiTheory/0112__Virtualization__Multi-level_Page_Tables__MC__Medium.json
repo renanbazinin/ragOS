@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Multi-level Page Tables",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 17:19:00",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      7
+    ],
+    "token_usage": {
+      "prompt_tokens": 1880,
+      "output_tokens": 567,
+      "total_tokens": 4144
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Multi-level Page Tables"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "מהו היתרון העיקרי של שימוש במבנה טבלת דפים היררכית (Multi-Level Page Table) בהשוואה לטבלת דפים לינארית (Single-Level Page Table)?",
+      "code_snippet": null,
+      "options": [
+        "א. חיסכון משמעותי בזיכרון פיזי על ידי אי-הקצאת דפים עבור אזורים לא מנוצלים במרחב הכתובות הוירטואלי של תהליך.",
+        "ב. האצת תהליך תרגום הכתובות הוירטואליות לכתובות פיזיות.",
+        "ג. תמיכה במרחבי כתובות וירטואליים גדולים יותר באופן מהותי.",
+        "ד. פישוט המורכבות של יחידת ניהול הזיכרון (MMU)."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "החומר המצוין בשיעור מדגיש כי רוב התהליכים אינם מנצלים את כל מרחב הכתובות הוירטואלי שלהם. הרעיון המרכזי מאחורי טבלאות דפים היררכיות הוא \"לצמצם אותו לפחות רשומות\" על ידי אי-הקצאת זיכרון פיזי לדפים שלמים של רשומות בטבלת הדפים שאינן בשימוש. לדוגמה, מצוין \"Entire page of entries invalid? Don't allocate it. No need to allocate!\". לכן, היתרון העיקרי הוא חיסכון משמעותי בזיכרון פיזי. אפשרויות ב' ו-ד' שגויות, שכן תרגום כתובות בדרך כלל איטי יותר (דורש מספר גישות לזיכרון) וה-MMU מורכב יותר. אפשרות ג' היא תוצאה עקיפה של חיסכון בזיכרון, אך היתרון הישיר והמוצהר הוא החיסכון עצמו עבור מרחבי כתובות דלילים."
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Memory Management",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 17:08:54",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      9,
+      5,
+      6
+    ],
+    "token_usage": {
+      "prompt_tokens": 2240,
+      "output_tokens": 538,
+      "total_tokens": 4668
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Memory Management"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "איזו טכניקה לניהול זיכרון מתוארת בחומר ההרצאה כפתרון לבעיית ה-coalesce (איחוד שטחי זיכרון פנויים) על ידי פיצול הזיכרון לחצאים ואיחוד בלוקים שכנים כאשר הם משתחררים?",
+      "code_snippet": null,
+      "options": [
+        "א. Buddy Allocation",
+        "ב. Free List עם בלוקים בגודל קבוע",
+        "ג. Slab Allocation",
+        "ד. Free List עם בלוקים בגודל משתנה"
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "הסבר: שיטת Buddy Allocation נועדה במיוחד לפתור את בעיית ה-coalesce, שהיא איחוד בלוקים פנויים סמוכים לבלוק גדול יותר. לפי חומר ההרצאה, בשיטה זו, כאשר זיכרון מבוקש, הוא מפוצל לחצאים שוב ושוב עד שמגיעים לבלוק בגודל מתאים. כאשר בלוק משוחרר, המערכת בודקת את ה\"שכן\" (buddy) שלו – בלוק בגודל זהה שכתובתו נבדלת בביט אחד בלבד. אם גם השכן פנוי, שני הבלוקים מאוחדים לבלוק אחד גדול יותר (למשל, שני בלוקים של 8KB יאוחדו ל-16KB), ובכך נמנעת פיצול פנימי ומקודמת יצירת בלוקים גדולים ורציפים. שיטות ה-Free List, בין אם עם בלוקים בגודל קבוע או משתנה, אינן מתוארות כבעלות מנגנון מובנה וברור לפתרון בעיית ה-coalesce בצורה זו, ו-Slab Allocation מתמקדת בהקצאת אובייקטים בגודל קבוע ולא בפתרון כללי ל-coalesce של זיכרון כללי."
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Fragmentation",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 17:11:10",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      9,
+      5,
+      6
+    ],
+    "token_usage": {
+      "prompt_tokens": 1829,
+      "output_tokens": 595,
+      "total_tokens": 4140
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Fragmentation"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "איזו מהטענות הבאות מתארת נכונה סוג של קיטוע זיכרון (fragmentation) כפי שהוגדר בחומר ההרצאה?",
+      "code_snippet": null,
+      "options": [
+        "א. קיטוע פנימי (internal fragmentation) מתרחש כאשר מערכת ההפעלה מקצה למשתמש יותר זיכרון ממה שביקש בפועל.",
+        "ב. קיטוע חיצוני (external fragmentation) מתרחש כאשר כל הזיכרון הפנוי בוטל לחלוטין ואין אפשרות להקצות זיכרון נוסף.",
+        "ג. בדפדוף (paging) קיימת בעיה מובנית של קיטוע חיצוני (external fragmentation).",
+        "ד. פעולת ה-coalesce משמשת לפיצול בלוק זיכרון גדול לשני בלוקים קטנים יותר."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "התשובה הנכונה היא א'. חומר ההרצאה מגדיר במפורש 'internal fragmentation' כמצב בו 'אנחנו נותנים למשתמש יותר זיכרון ממה שהוא ביקש. זה בזבוז.' (הרצאה 6, קטע 9). \n\nאפשרויות אחרות אינן נכונות: \nב. זוהי אינה ההגדרה של קיטוע חיצוני. קיטוע חיצוני מתאר מצב בו יש מספיק זיכרון פנוי בסך הכל, אך הוא מפוזר במקטעים קטנים שאינם רציפים, כך שלא ניתן לספק בקשה לבלוק גדול ורציף (הרצאה 9, קטע 2; הרצאה 5, קטע 30).\nג. חומר ההרצאה קובע במפורש כי הטענה שבדפדוף יש בעיה של קיטוע חיצוני 'לא נכונה' (הרצאה 9, קטע 2).\nד. פעולת ה-coalesce משמשת לאיחוד שטחי זיכרון סמוכים פנויים לשטח אחד גדול יותר, בעוד שפיצול בלוק זיכרון מתבצע באמצעות פעולת split (הרצאה 5, קטע 32)."
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Signals",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:01:15",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      4,
+      5
+    ],
+    "token_usage": {
+      "prompt_tokens": 1860,
+      "output_tokens": 445,
+      "total_tokens": 5035
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Signals"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "על פי חומר ההרצאה, מהם סיגנלים (signals) בהקשר של תהליכים במערכת הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. אירועים או הודעות שמערכת ההפעלה שולחת לתהליך, או שתהליך אחד שולח לתהליך אחר.",
+        "ב. מנגנון המאפשר לתהליכים לבצע קריאות מערכת (system calls) באופן אסינכרוני.",
+        "ג. סוג מיוחד של תהליכים קלים (lightweight processes) המשמשים לטיפול בפסיקות חומרה.",
+        "ד. חלק מטבלת דפי הזיכרון (page table) של התהליך המשמש לניהול זיכרון וירטואלי."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "חומר ההרצאה מגדיר במפורש סיגנלים כ'אירועים של התהליך, הודעות שמערכת ההפעלה רוצה להודיע לתהליך שלנו'. הוא מוסיף ש'סיגנלים יכולים גם לשמש לתקשורת: אם תהליך אחד רוצה להודיע משהו לתהליך אחר (לשלוח סיגנל)'. לכן, אפשרות א' מתארת במדויק את תפקידם ומהותם של הסיגנלים כפי שהוצגו. אפשרויות ב', ג' ו-ד' מתארות מושגים שאינם תואמים את הגדרת הסיגנלים בחומר ההרצאה."
+    }
+  }
+}

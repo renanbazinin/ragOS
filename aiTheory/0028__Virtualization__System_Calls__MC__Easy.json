@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "System Calls",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 16:58:37",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      2,
+      5
+    ],
+    "token_usage": {
+      "prompt_tokens": 2015,
+      "output_tokens": 547,
+      "total_tokens": 4498
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "System Calls"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהי המטרה העיקרית של מנגנון קריאות המערכת (System Calls) במערכת הפעלה, כפי שתואר בחומר ההרצאה?",
+      "code_snippet": null,
+      "options": [
+        "א. לאפשר לתהליכי משתמש לבצע פעולות מיוחסות (privileged operations) באופן בטוח ומבוקר על ידי מערכת ההפעלה.",
+        "ב. להבטיח שתהליכים לעולם לא יוכלו לגשת לזיכרון ה-kernel.",
+        "ג. לשלוח סיגנלים בין תהליכים שונים לצורך תקשורת.",
+        "ד. לאפשר למערכת ההפעלה לוותר על שליטה במעבד לטובת תהליכי משתמש."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "על פי חומר ההרצאה, מנגנון קריאות המערכת (System Calls) נועד לפתור את בעיית האבטחה. הוא מאפשר לתהליכי משתמש, הפועלים במצב משתמש (user mode), לבקש שירותים מוגבלים (privileged operations) ממערכת ההפעלה, הפועלת במצב ליבה (kernel mode). הציטוט הרלוונטי הוא: \"המנגנון של ה-system call עוזר לנו להתמודד עם בעיה אחת מבין השתיים שהיו לנו: בעיית האבטחה נפתרה. ברגע שהוספנו שני מצבים למעבד, ונתנו מנגנון של קריאת מערכת, מנענו גישה של תהליכים לרכיבי חומרה, ותהליך לא יכול לבצע מה שהוא רוצה אבל עדיין יש לו את האפשרות לבקש שירותים ממערכת ההפעלה והיא תבצע זאת עבורו בצורה בטוחה.\" לכן, המטרה העיקרית היא לאפשר גישה בטוחה ומבוקרת למשאבי חומרה ולשירותי מערכת שדורשים הרשאות גבוהות."
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Address Space",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:24:47",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      5,
+      6,
+      7
+    ],
+    "token_usage": {
+      "prompt_tokens": 2106,
+      "output_tokens": 508,
+      "total_tokens": 3969
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Address Space"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "כיצד מחולקת כתובת וירטואלית על ידי יחידת ניהול הזיכרון (MMU) לצורך תרגום כתובות?",
+      "code_snippet": null,
+      "options": [
+        "א. אינדקס ספריית דפים (Page Directory Index) ואינדקס טבלת דפים (Page Table Index)",
+        "ב. מספר דף וירטואלי (VPN) והיסט (Offset)",
+        "ג. מספר מסגרת פיזית (PFN) והיסט (Offset)",
+        "ד. מצביע מחסנית (Stack Pointer) ומונה תוכנית (Program Counter)"
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "על פי חומר ההרצאה (Lecture 6, chunk 32), כתובת וירטואלית מחולקת לשני חלקים עיקריים: מספר דף וירטואלי (VPN) המזהה את הדף הוירטואלי, והיסט (Offset) המציין את המיקום בתוך הדף. חלוקה זו מאפשרת ל-MMU לאתר את הדף המתאים בטבלת הדפים ולאחר מכן למצוא את המיקום המדויק בתוך המסגרת הפיזית. אפשרות א' מתארת חלוקה נוספת של ה-VPN במקרה של טבלאות דפים היררכיות (Multi-Level Page Table), אך החלוקה הבסיסית ביותר של כתובת וירטואלית היא ל-VPN והיסט. אפשרות ג' מתארת את רכיבי הכתובת הפיזית, לא הוירטואלית. אפשרות ד' מתייחסת לרגיסטרים של המעבד ואינה קשורה לחלוקת כתובת וירטואלית לצורך תרגום."
+    }
+  }
+}

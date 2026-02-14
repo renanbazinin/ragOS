@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Paging",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:14:30",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      4,
+      5,
+      7
+    ],
+    "token_usage": {
+      "prompt_tokens": 2011,
+      "output_tokens": 372,
+      "total_tokens": 3424
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Paging"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהו תפקידו העיקרי של ה-MMU (Memory Management Unit) בתהליך הדפדוף?",
+      "code_snippet": null,
+      "options": [
+        "א. תרגום כתובת וירטואלית לכתובת פיזית.",
+        "ב. קביעת גודל הדף בזיכרון הווירטואלי.",
+        "ג. ניהול מזהי התהליכים (PIDs) במערכת ההפעלה.",
+        "ד. שמירת קוד התהליכים בזיכרון הפיזי."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "על פי חומר ההרצאה, ה-MMU הוא הרכיב העיקרי שעוזר בתהליך התרגום מכתובת וירטואלית לכתובת פיזית. הוא לוקח כתובת וירטואלית (המחולקת למספר דף והיסט), משתמש במספר הדף כדי למצוא את מספר המסגרת המתאים בטבלת הדפים, ומשלב אותו עם ההיסט ליצירת הכתובת הפיזית. שאר האפשרויות אינן מתארות את תפקידו העיקרי של ה-MMU."
+    }
+  }
+}

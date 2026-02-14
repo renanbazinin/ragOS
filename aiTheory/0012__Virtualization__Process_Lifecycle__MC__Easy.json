@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Process Lifecycle",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 16:54:31",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      2,
+      4,
+      5
+    ],
+    "token_usage": {
+      "prompt_tokens": 1884,
+      "output_tokens": 372,
+      "total_tokens": 3641
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Process Lifecycle"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהי המשמעות של תהליך הנמצא במצב 'Running' (רץ) במחזור החיים שלו?",
+      "code_snippet": null,
+      "options": [
+        "א. המעבד מריץ כרגע את הפקודות של התהליך.",
+        "ב. התהליך מוכן לרוץ אך ממתין לתורו במעבד.",
+        "ג. התהליך סיים את ריצתו אך רשומתו עדיין קיימת בטבלת התהליכים.",
+        "ד. התהליך הופסק באופן יזום והוחזר למחסן ההמתנה."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "על פי חומר ההרצאה (Lecture 2, chunk 34), תהליך הנמצא במצב 'Running' הוא תהליך ש'המעבד מריץ כרגע את הפקודות שלו'.\nאפשרות ב' מתארת תהליך במצב 'Ready'.\nאפשרות ג' מתארת תהליך 'זומבי' (defunct).\nאפשרות ד' מתארת את הפעולה 'Descheduled' שמעבירה תהליך ממצב 'Running' למצב 'Ready', ולא את מצב 'Running' עצמו."
+    }
+  }
+}

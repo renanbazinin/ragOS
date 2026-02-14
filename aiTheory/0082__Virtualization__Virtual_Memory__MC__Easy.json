@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:12:26",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      6
+    ],
+    "token_usage": {
+      "prompt_tokens": 1659,
+      "output_tokens": 361,
+      "total_tokens": 3232
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Virtual Memory"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "על פי חומר ההרצאה, כיצד נקראת יחידת הזיכרון אליה מחולק הזיכרון הוירטואלי של תהליך לחלקים שווים?",
+      "code_snippet": null,
+      "options": [
+        "א. דף (Page)",
+        "ב. מסגרת (Page Frame)",
+        "ג. סגמנט (Segment)",
+        "ד. שטח כתובות (Address Space)"
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "חומר ההרצאה מציין במפורש: \"לוקחים את הזיכרון הוירטואלי של התהליך ומחלקים אותו לחלקים שווים. לכל חלק אנחנו קוראים **דף**.\" (Lecture 6, chunk 25 ו-26). 'מסגרת' (Page Frame) היא יחידה בזיכרון הפיזי, 'סגמנט' אינו היחידה שבה מתבצעת חלוקה שווה של הזיכרון הוירטואלי לפי החומר, ו'שטח כתובות' הוא מרחב הזיכרון הכולל, לא היחידה הקטנה אליה הוא מחולק."
+    }
+  }
+}

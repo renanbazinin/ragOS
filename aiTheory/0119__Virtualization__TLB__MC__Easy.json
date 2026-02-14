@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "TLB",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:20:32",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      8,
+      7
+    ],
+    "token_usage": {
+      "prompt_tokens": 2114,
+      "output_tokens": 394,
+      "total_tokens": 3759
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "TLB"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהו השלב הראשון בחיפוש כתובת פיזית על ידי ה-MMU כאשר ניגשים לזיכרון וירטואלי?",
+      "code_snippet": null,
+      "options": [
+        "א. ה-MMU ניגש ישירות לטבלת הדפים (Page Table) כדי למצוא את המיפוי.",
+        "ב. ה-MMU בודק תחילה את ה-TLB (Translation Lookaside Buffer) עבור המיפוי הנדרש.",
+        "ג. ה-MMU שולח trap למערכת ההפעלה כדי שהיא תמצא את המיפוי.",
+        "ד. ה-MMU מחשב את ה-PFN (Page Frame Number) ישירות מהכתובת הוירטואלית."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "על פי חומר ההרצאה, בכל פעם שיש גישה לזיכרון, ה-MMU \"קודם יבדוק את ה-tlb\". ה-TLB הוא רכיב חומרה מהיר במעבד המשמש כמטמון למיפויי כתובות וירטואליות לפיזיות. בדיקתו תחילה מאפשרת קיצור משמעותי בזמן הגישה לזיכרון אם המיפוי כבר קיים בו (TLB hit)."
+    }
+  }
+}

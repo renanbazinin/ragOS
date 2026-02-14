@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:12:46",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      6
+    ],
+    "token_usage": {
+      "prompt_tokens": 1659,
+      "output_tokens": 373,
+      "total_tokens": 3459
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Virtual Memory"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "על פי החומר הנלמד, באיזו יחידה בסיסית מערכת ההפעלה מחלקת את מרחב הכתובות הווירטואלי של תהליך?",
+      "code_snippet": null,
+      "options": [
+        "א. סגמנטים",
+        "ב. בלוקים",
+        "ג. דפים",
+        "ד. מסגרות"
+      ]
+    },
+    "solution": {
+      "correct_option": "ג",
+      "explanation": "החומר הנלמד מציין במפורש כי מערכת ההפעלה לוקחת את הזיכרון הוירטואלי של התהליך ומחלקת אותו לחלקים שווים, ולכל חלק כזה אנו קוראים 'דף'. 'מסגרת' היא יחידת חלוקה של הזיכרון הפיזי, ולא של הזיכרון הוירטואלי. 'סגמנטים' מתייחסים לשיטת ניהול זיכרון שאינה בשימוש בזיכרון וירטואלי המבוסס על דפים (כפי שצוין שאין יותר base&bounds). 'בלוקים' הוא מונח כללי ואינו היחידה הספציפית לחלוקת הזיכרון הוירטואלי."
+    }
+  }
+}

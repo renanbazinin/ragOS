@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Signals",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-14 17:02:23",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      4,
+      5
+    ],
+    "token_usage": {
+      "prompt_tokens": 1860,
+      "output_tokens": 973,
+      "total_tokens": 6677
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Signals"
+    ],
+    "difficulty_estimation": "Hard",
+    "content": {
+      "text": "תהליך אב יוצר תהליך בן. מהי ההבחנה התיאורטית המרכזית בין הגדרת הטיפול באות SIGCHLD של תהליך האב ל-SIG_IGN (התעלמות מוחלטת) לבין הגדרת פונקציית מטפל מותאמת אישית (custom handler) שקוראת ל-wait()?",
+      "code_snippet": "void signal_handler(int signal) {\n    if (signal == SIGCHLD) {\n        int rc = wait(NULL);\n        printf(\"child terminated %d (pid:%d)\\n\", rc, getpid());\n    }\n}\n\nint main(int argc, char *argv[])\n{\n    struct sigaction act;\n    sigemptyset(&act.sa_mask);\n    act.sa_handler = signal_handler;\n    act.sa_flags = 0;\n    \n    sigaction(SIGCHLD, &act, NULL);\n    if (fork()) {\n        while (1);\n    }\n}",
+      "options": [
+        "א. בשני המקרים, מערכת ההפעלה מונעת היווצרות תהליכי זומבי, אך רק במקרה של SIG_IGN האב לא מקבל הודעה על סיום הבן.",
+        "ב. במקרה של SIG_IGN, מערכת ההפעלה מונעת זומבים באופן אוטומטי, בעוד שבמקרה של מטפל מותאם אישית, תהליך הזומבי נוצר אך נמחק מיד על ידי קריאת wait().",
+        "ג. במקרה של SIG_IGN, מערכת ההפעלה תמיד תיצור תהליך זומבי כדי להבטיח שהאב יוכל לבדוק את סטטוס הסיום של הבן מאוחר יותר, בעוד שמטפל מותאם אישית מונע זאת.",
+        "ד. ההבדל העיקרי הוא ש-SIG_IGN מאפשר לאב להמשיך לפעול ללא הפרעה, בעוד שמטפל מותאם אישית גורם להשהיה קצרה של האב בזמן ביצוע ה-wait()."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "התשובה הנכונה היא א'. על פי חומר ההרצאה, בשני המקרים – בין אם תהליך האב מתעלם מסיגנל SIGCHLD באמצעות SIG_IGN, ובין אם הוא מטפל בו באמצעות פונקציית מטפל מותאמת אישית שקוראת ל-wait() – מערכת ההפעלה תדאג למנוע יצירת תהליכי זומבי. ההבדל המהותי והמפורש בחומר ההרצאה הוא שרק במקרה של התעלמות מוחלטת (SIG_IGN), מערכת ההפעלה לא תשלח הודעה לתהליך האב על סיום תהליך הבן, אלא תפנה את משאביו באופן מיידי ושקט. לעומת זאת, כאשר מוגדר מטפל מותאם אישית, הסיגנל נשלח, פונקציית המטפל מופעלת, וקריאת ה-wait() שבתוכה היא זו שמבצעת את ניקוי המשאבים של הבן. האפשרויות האחרות אינן מדויקות: אפשרות ב' אינה מתארת את ההבדל המהותי בנוגע להיווצרות זומבים (החומר מציין ש-SIG_IGN מונע יצירתם מלכתחילה); אפשרות ג' סותרת ישירות את החומר הקובע ש-SIG_IGN מונע זומבים; ואפשרות ד' מתארת תוצאת לוואי ולא את ההבחנה התיאורטית המרכזית בנוגע למנגנון מניעת זומבים והודעות."
+    }
+  }
+}

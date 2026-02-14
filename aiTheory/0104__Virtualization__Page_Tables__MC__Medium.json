@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Page Tables",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 17:17:19",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      7
+    ],
+    "token_usage": {
+      "prompt_tokens": 1759,
+      "output_tokens": 531,
+      "total_tokens": 4407
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Page Tables"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "מהו היתרון העיקרי של שימוש בטבלת דפים היררכית (Multi-Level Page Table) בהשוואה לטבלת דפים ברמה אחת?",
+      "code_snippet": null,
+      "options": [
+        "א. הקטנת צריכת הזיכרון הפיזי הנדרש לאחסון טבלאות הדפים, על ידי אי הקצאת רשומות לאזורים לא מנוצלים במרחב הכתובות הוירטואלי.",
+        "ב. פישוט לוגיקת תרגום הכתובות של יחידת ניהול הזיכרון (MMU).",
+        "ג. שיפור קצב הפגיעות (hit rate) במטמון ה-TLB.",
+        "ד. אפשרות לניהול מרחבי כתובות וירטואליים גדולים יותר באופן ישיר ויעיל."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "החומר המצוין בשיעור מדגיש כי רוב התהליכים אינם מנצלים את כל מרחב הכתובות הוירטואלי שלהם, מה שמוביל לשטחים 'אפורים' (דפים לא בשימוש) בטבלת הדפים. הרעיון המרכזי מאחורי טבלת דפים היררכית (Multi-Level Page Table) הוא 'להוציא את כל השטח האפור, לצמצם אותו לפחות רשומות' ו'אם דף שלם של רשומות אינו חוקי, אל תקצה אותו'. בכך, היתרון העיקרי הוא חיסכון משמעותי בזיכרון הפיזי הנדרש לאחסון טבלאות הדפים, על ידי כך שלא מקצים זיכרון לחלקי טבלת דפים המכסים אזורים לא מנוצלים במרחב הכתובות הוירטואלי."
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Process Lifecycle",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 16:54:43",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      2,
+      4,
+      5
+    ],
+    "token_usage": {
+      "prompt_tokens": 1884,
+      "output_tokens": 696,
+      "total_tokens": 4612
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Process Lifecycle"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "לפי חומר ההרצאה, מהו המצב שאליו עובר תהליך שהיה במצב Running (רץ) והופסק על ידי פסיקת שעון (timer interrupt), ומה קורה למידע שלו?",
+      "code_snippet": null,
+      "options": [
+        "א. הוא עובר למצב Ready, ומערכת ההפעלה שומרת את ה-CPU context שלו (לדוגמה, ערכי הרגיסטרים) ואת מצב הזיכרון שלו.",
+        "ב. הוא עובר למצב Blocked, וכל המידע הקשור אליו נמחק מהזיכרון כדי לפנות מקום לתהליכים אחרים.",
+        "ג. הוא נשאר במצב Running אך מפסיק לבצע פקודות עד שהמעבד יתפנה.",
+        "ד. הוא הופך לתהליך Zombie, ומחכה שאביו יבצע עליו wait."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "כאשר תהליך במצב Running מופסק על ידי פסיקת שעון (timer interrupt) או קריאת מערכת, הוא עובר למצב Ready. תהליך זה נקרא Descheduled (הוצא מלוח הזמנים). במצב Ready, התהליך מוכן לרוץ אך ממתין לתורו לקבל את המעבד. חשוב לציין שבעת המעבר ממצב Running למצב Ready, מערכת ההפעלה שומרת את כל המידע הנדרש עבור חידוש הריצה של התהליך, כולל ה-CPU context (כמו ערכי הרגיסטרים במעבד) ואת מצב הזיכרון הקשור לתהליך. מידע זה נשמר ב-PCB (Process Control Block) של התהליך ומאפשר למערכת ההפעלה לשחזר את מצבו המדויק ולהמשיך את ריצתו מאותה נקודה מאוחר יותר (כפי שמפורט ב-Lecture 2, chunk 19 ו-chunk 34). אפשרות ב' אינה נכונה מכיוון שהתהליך לא עובר למצב Blocked במקרה זה, ומידע לא נמחק אלא נשמר. אפשרות ג' אינה נכונה מכיוון שהתהליך אינו נשאר במצב Running אם הוא הפסיק לבצע פקודות. אפשרות ד' אינה נכונה מכיוון שתהליך זומבי הוא תהליך שסיים את ריצתו אך רשומתו עדיין קיימת, ואינו תוצאה של פסיקת שעון (כפי שמפורט ב-Lecture 5, chunk 6)."
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Threads",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-14 17:27:57",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      10,
+      11
+    ],
+    "token_usage": {
+      "prompt_tokens": 1730,
+      "output_tokens": 1063,
+      "total_tokens": 5019
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Threads"
+    ],
+    "difficulty_estimation": "Hard",
+    "content": {
+      "text": "נתון קטע הקוד הבא:\n```c\n#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h>\n\nvoid* worker_thread(void* arg) {\n    printf(\"Worker thread: Starting work...\\n\");\n    sleep(5); // Simulate long computation\n    printf(\"Worker thread: Done.\\n\");\n    return NULL;\n}\n\nint main() {\n    pthread_t tid;\n    printf(\"Main thread: Creating worker thread.\\n\");\n    pthread_create(&tid, NULL, worker_thread, NULL);\n    printf(\"Main thread: Calling pthread_exit().\\n\");\n    pthread_exit(NULL); // Key point\n    printf(\"Main thread: This line will not be reached.\\n\");\n    return 0;\n}\n```\nבהתבסס על קטע הקוד שלעיל והבנתך את אופן פעולת `pthread_exit()` כאשר הוא נקרא מהחוט הראשי, מה תהיה התוצאה הסופית של התהליך?",
+      "code_snippet": "#include <pthread.h>\n#include <stdio.h>\n#include <unistd.h>\n\nvoid* worker_thread(void* arg) {\n    printf(\"Worker thread: Starting work...\\n\");\n    sleep(5); // Simulate long computation\n    printf(\"Worker thread: Done.\\n\");\n    return NULL;\n}\n\nint main() {\n    pthread_t tid;\n    printf(\"Main thread: Creating worker thread.\\n\");\n    pthread_create(&tid, NULL, worker_thread, NULL);\n    printf(\"Main thread: Calling pthread_exit().\\n\");\n    pthread_exit(NULL); // Key point\n    printf(\"Main thread: This line will not be reached.\\n\");\n    return 0;\n}",
+      "options": [
+        "א. התהליך יסתיים מיד לאחר קריאת `pthread_exit()` בחוט הראשי, ולפני שהחוט `worker_thread` יסיים את פעולתו.",
+        "ב. התהליך ימשיך לרוץ עד שכל החוטים שאינם החוט הראשי (במקרה זה, `worker_thread`) יסיימו את פעולתם, ורק אז התהליך יסתיים.",
+        "ג. הקריאה ל-`pthread_exit()` בחוט הראשי תגרום לשגיאת זמן ריצה (runtime error) מכיוון שחוט ראשי אינו יכול לצאת לפני שכל החוטים הצאצאים שלו סיימו.",
+        "ד. החוט הראשי ימתין באופן פעיל (busy-wait) עד ש-`worker_thread` יסיים את פעולתו, ואז התהליך יסתיים."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "החומר המצורף מציין במפורש: \"מקרה אחד מיוחד: כשהחוט הראשי קורא ל-()pthread_exit, כלומר כאשר החוט הראשי מסתיים ע\"י הקריאה הזו, הוא לא מסיים את התהליך. מערכת ההפעלה מחכה עד שכל החוטים בתהליך הזה יסיימו ורק אז התהליך יסתיים. כלומר, כאשר החוט הראשי קורא לקריאה זו, הוא מסיים מבלי לסיים את התהליך.\" בהתאם לכך, בקטע הקוד הנתון, החוט הראשי קורא ל-`pthread_exit(NULL)` אך התהליך כולו לא יסתיים מיד. במקום זאת, מערכת ההפעלה תאפשר לחוט `worker_thread` להמשיך בריצתו ולסיים את פעולתו (כולל ההמתנה של 5 השניות). רק לאחר שכל החוטים שאינם הראשי (במקרה זה, `worker_thread`) יסיימו, התהליך כולו יסתיים. זאת בניגוד לקריאה ל-`exit()` מכל חוט, שהייתה גורמת לסיום מיידי של כל התהליך וכל החוטים שבו."
+    }
+  }
+}

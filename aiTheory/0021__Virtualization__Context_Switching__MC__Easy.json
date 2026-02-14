@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Context Switching",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 16:56:39",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      2,
+      6
+    ],
+    "token_usage": {
+      "prompt_tokens": 1956,
+      "output_tokens": 597,
+      "total_tokens": 4791
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Context Switching"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "איזו מהאפשרויות הבאות מתארת בצורה הטובה ביותר את מנגנון ה-Context Switch (החלפת הקשר) במערכת הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. העברת השליטה הבלעדית מהמעבד לתהליך משתמש יחיד עד לסיומו.",
+        "ב. שמירת מצבו של תהליך רץ, הוצאתו מהמעבד וטעינת מצבו של תהליך אחר כדי שימשיך לרוץ.",
+        "ג. ביצוע קריאות מערכת (system calls) כדי לאפשר גישה לפעולות מורשות (privileged operations).",
+        "ד. עדכון רגיסטרי ה-Base&Bounds במעבד על מנת להגן על מרחב הזיכרון של תהליכים."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "מנגנון ה-Context Switch, כפי שמתואר בחומר ההרצאה (Chunk 16), הוא התהליך שבו מערכת ההפעלה 'מוציאה' תהליך אחד מהמעבד, שומרת את מצבו (כפי שמפורט ב-Chunk 20, כולל רישומים, מיקומי זיכרון וקבצים פתוחים), ולאחר מכן 'טוענת' תהליך חדש למעבד כדי שימשיך את ריצתו מהנקודה שבה הופסק. אפשרות ב' מתארת במדויק פעולה זו. אפשרות א' מתארת את רעיון ה-Direct Execution שבו תהליך שולט באופן מלא במעבד עד לסיומו, אך לא את מנגנון ההחלפה עצמו. אפשרות ג' מתארת קריאות מערכת, שהן מנגנון למעבר בין User Mode ל-Kernel Mode וביצוע פעולות מורשות (Chunk 24), אך אינן ההגדרה המלאה של Context Switch. אפשרות ד' מתארת פעולה ספציפית שמתרחשת במהלך Context Switch בהקשר של ניהול זיכרון (עדכון Base&Bounds, Chunk 15), אך אינה תיאור כולל של כל המנגנון."
+    }
+  }
+}

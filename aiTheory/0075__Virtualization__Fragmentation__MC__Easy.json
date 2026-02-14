@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Fragmentation",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:10:42",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      9,
+      5,
+      6
+    ],
+    "token_usage": {
+      "prompt_tokens": 1829,
+      "output_tokens": 454,
+      "total_tokens": 3172
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Fragmentation"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהו קיטוע פנימי (internal fragmentation) בהקשר של ניהול זיכרון, על פי חומר ההרצאה?",
+      "code_snippet": null,
+      "options": [
+        "א. מצב שבו מערכת ההפעלה מקצה למשתמש יותר זיכרון ממה שביקש בפועל.",
+        "ב. מצב שבו קיים מספיק זיכרון פנוי בסך הכל, אך הוא מפוצל למקטעים קטנים ולא רציפים.",
+        "ג. מצב שבו תהליך מסוים אינו מקבל זמן מעבד או משאבים אחרים לתקופה ארוכה.",
+        "ד. פעולה של פיצול בלוק זיכרון פנוי גדול לשני בלוקים קטנים יותר, האחד עבור הבקשה והשני נשאר פנוי."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "קיטוע פנימי (internal fragmentation) מוגדר בחומר ההרצאה כ\"מצב בו אנחנו נותנים למשתמש יותר זיכרון ממה שהוא ביקש. זה בזבוז.\" (Lecture 6, chunk 9 ו-8). אפשרות א' מתארת במדויק הגדרה זו. אפשרות ב' מתארת קיטוע חיצוני (external fragmentation). אפשרות ג' מתארת תופעת הרעבה (starvation) של תהליכים, ואילו אפשרות ד' מתארת פעולת פיצול (split) בניהול זיכרון, שהיא טכניקה ולא סוג של קיטוע פנימי בפני עצמו."
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Signals",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-14 17:03:15",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      4,
+      5
+    ],
+    "token_usage": {
+      "prompt_tokens": 1860,
+      "output_tokens": 1103,
+      "total_tokens": 7048
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Signals"
+    ],
+    "difficulty_estimation": "Hard",
+    "content": {
+      "text": "בהתייחס לטיפול בסיגנל SIGCHLD למניעת תהליכי זומבי, כפי שתואר בחומר הקורס, מהי הטענה הנכונה ביותר לגבי ההבדל המהותי בין הגדרת הטיפול ב-SIGCHLD כ-SIG_IGN לבין שימוש בפונקציית טיפול (signal handler) ייעודית המבצעת קריאה ל-`wait()`?",
+      "code_snippet": "void signal_handler(int signal) {\n    if (signal == SIGCHLD) {\n        int rc = wait(NULL);\n        printf(\"child terminated %d (pid:%d)\\n\", rc, getpid());\n    }\n}\n\nint main(int argc, char *argv[])\n{\n    struct sigaction act;\n    sigemptyset(&act.sa_mask);\n    act.sa_handler = signal_handler;\n    act.sa_flags = 0;\n    \n    sigaction(SIGCHLD, &act, NULL); // Setting a custom handler\n    if (fork()) {\n        while (1);\n    }\n    // Contrast this with: sigaction(SIGCHLD, &(struct sigaction){.sa_handler = SIG_IGN, .sa_flags = 0}, NULL); \n}",
+      "options": [
+        "א. כאשר SIGCHLD מוגדר כ-SIG_IGN, מערכת ההפעלה מבצעת את איסוף המשאבים של תהליך הבן באופן אוטומטי ואינה שולחת את הסיגנל לתהליך האב כלל, בעוד שעם handler, תהליך האב מקבל את הסיגנל ואחראי לקרוא ל-`wait()`.",
+        "ב. בשני המקרים, תהליך האב מקבל את הסיגנל SIGCHLD, אך רק במקרה של SIG_IGN מערכת ההפעלה מונעת מצב זומבי באופן אוטומטי ללא צורך בקריאה ל-`wait()`.",
+        "ג. השימוש ב-SIG_IGN מונע מצב זומבי ביעילות רבה יותר מכיוון שהוא מאפשר לתהליך האב להמשיך בפעילותו ללא הפרעה, בניגוד ל-handler הדורש הקפצה של הקשר (context switch) לביצוע.",
+        "ד. ההבדל העיקרי הוא ש-SIG_IGN מאפשר לתהליך האב לשלוח סיגנלים נוספים לתהליך הבן גם לאחר סיומו, בעוד ש-handler מונע זאת."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "האפשרות הנכונה היא א'. חומר הקורס מציין במפורש: \"אך ורק במקרה כזה של התעלמות מסיגנל sigchld, מערכת ההפעלה לא תיוצר זומבים. כלומר, היא מיד תפנה אותו ורק לא תודיע לו, כי הוא רואה שאנחנו מתעלמים מ-sigchld.\" \nמשמעות הדבר היא שכאשר SIGCHLD מוגדר כ-SIG_IGN, מערכת ההפעלה מטפלת באיסוף משאבי תהליך הבן באופן אוטומטי לחלוטין ואינה שולחת את הסיגנל לתהליך האב כלל (כלומר, האב אינו מקבל התראה). לעומת זאת, כאשר מוגדרת פונקציית טיפול (handler) עבור SIGCHLD, מערכת ההפעלה אכן שולחת את הסיגנל לתהליך האב, והאב נדרש לבצע קריאה ל-`wait()` בתוך ה-handler כדי לאסוף את משאבי הבן ולמנוע מצב זומבי.\nאפשרות ב' שגויה מכיוון שהיא טוענת שבשני המקרים האב מקבל את הסיגנל, בניגוד למצוין בחומר לגבי SIG_IGN.\nאפשרות ג' עשויה להכיל היבטים של יעילות, אך אינה מתארת את ההבדל המהותי כפי שהודגש בחומר, וההסבר על \"הקפצת הקשר\" אינו מפורט במובן זה בחומר הקורס.\nאפשרות ד' שגויה לחלוטין מכיוון שלא ניתן לשלוח סיגנלים לתהליך שסיים את פעולתו."
+    }
+  }
+}

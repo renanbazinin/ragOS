@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Fragmentation",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 17:10:58",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      9,
+      5,
+      6
+    ],
+    "token_usage": {
+      "prompt_tokens": 1829,
+      "output_tokens": 538,
+      "total_tokens": 5142
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Fragmentation"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "מהו המאפיין העיקרי של קיטוע פנימי (internal fragmentation) בניהול זיכרון במערכת הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. מצב שבו מערכת ההפעלה מקצה למשתמש יותר זיכרון ממה שהוא ביקש בפועל, מה שמוביל לבזבוז.",
+        "ב. מצב שבו יש מספיק זיכרון פנוי בסך הכל כדי למלא בקשה, אך הוא מפוזר במקטעים לא רציפים ולכן לא ניתן להקצותו.",
+        "ג. מצב שבו תהליכים ארוכי טווח אינם מקבלים זמן מעבד מספיק בגלל הגעת תהליכים קצרים יותר.",
+        "ד. מצב שבו הזיכרון הפיזי קטן משמעותית מהזיכרון הוירטואלי שמערכת ההפעלה מספקת לתהליכים."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "קיטוע פנימי (internal fragmentation) מוגדר במפורש בחומר ההרצאה כמצב שבו 'אנחנו נותנים למשתמש יותר זיכרון ממה שהוא ביקש. זה בזבוז.' (הרצאה 6, קטע 9, וגם הרצאה 6, קטע 8). אפשרות א' מתארת בדיוק מצב זה. אפשרות ב' מתארת קיטוע חיצוני (external fragmentation), כפי שמוסבר בהרצאה 9, קטע 2 ובהרצאה 5, קטע 30. אפשרות ג' מתייחסת לבעיית הרעבה (starvation), כפי שמוסבר בהרצאה 9, קטע 2. אפשרות ד' מתארת את עקרון הכללי של וירטואליזציה של זיכרון, אך לא את המאפיין הספציפי של קיטוע פנימי."
+    }
+  }
+}

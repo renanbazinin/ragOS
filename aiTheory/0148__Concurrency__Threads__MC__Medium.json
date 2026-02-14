@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Threads",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 17:27:14",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      10,
+      11
+    ],
+    "token_usage": {
+      "prompt_tokens": 1730,
+      "output_tokens": 523,
+      "total_tokens": 4475
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Threads"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "איזו טענה נכונה לגבי השימוש בפונקציה pthread_join בהקשר של חוטים באותו תהליך?",
+      "code_snippet": null,
+      "options": [
+        "א. רק חוטים שנוצרו על ידי חוט האב יכולים להצטרף (join) אליו.",
+        "ב. כל חוט בתהליך יכול להצטרף (join) לכל חוט אחר באותו תהליך, ללא צורך ביחסי אב וילד.",
+        "ג. קריאה ל-pthread_join חוסמת את החוט הקורא רק אם לחוט המצטרף יש ערך החזר.",
+        "ד. pthread_join משמשת בעיקר לביטול חוטים (cancel threads) ואינה גורמת לחסימה."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "התשובה הנכונה היא ב'. לפי חומר ההרצאה, 'כל חוט יכול לעשות join לכל חוט אחר באותו תהליך, ולא צריך יחסי אב וילדים'. אפשרות א' אינה נכונה מכיוון שהיא מציגה הגבלה של יחסי אב-ילד שאינה קיימת עבור pthread_join. אפשרות ג' אינה נכונה מכיוון שקריאה ל-pthread_join תמיד חוסמת את החוט הקורא עד שהחוט המיועד מסתיים, ללא קשר לשאלה אם יש ערך החזר או אם הוא נאסף, כפי שמצוין בחומר: 'הופך להיות blocked כלומר הוא נחסם והוא מחכה'. אפשרות ד' אינה נכונה מכיוון ש-pthread_join נועדה להמתין לסיום חוטים ולחסום את החוט הקורא, בעוד שביטול חוטים מתבצע באמצעות פונקציה אחרת (pthread_cancel)."
+    }
+  }
+}

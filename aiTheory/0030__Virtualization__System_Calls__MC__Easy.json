@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "System Calls",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 16:59:07",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      2,
+      5
+    ],
+    "token_usage": {
+      "prompt_tokens": 2015,
+      "output_tokens": 472,
+      "total_tokens": 4944
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "System Calls"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהי המטרה העיקרית של קריאת מערכת (System Call) עבור תהליך במצב משתמש (User Mode)?",
+      "code_snippet": null,
+      "options": [
+        "א. לאפשר לתהליך לגשת ישירות לרכיבי חומרה.",
+        "ב. להעביר את השליטה למערכת ההפעלה כדי לבצע פעולות מיוחסות (privileged operations) בצורה בטוחה.",
+        "ג. לשלוח אותות (signals) לתהליכים אחרים.",
+        "ד. לעדכן את טבלת התהליכים (process table) בקרנל."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "קריאת מערכת (System Call) היא מנגנון המאפשר לתהליך הרץ במצב משתמש (User Mode) לבקש ממערכת ההפעלה לבצע עבורו פעולות הדורשות הרשאות מיוחדות (privileged operations), כגון גישה לחומרה, ניהול קבצים או הקצאת זיכרון. כפי שצויין בחומר ההרצאה, ברגע שתהליך מבצע קריאת מערכת, מתבצעת החלפה ממצב משתמש למצב קרנל (kernel mode), מה שמאפשר למערכת ההפעלה לבצע את הפעולה בצורה בטוחה ומבוקרת. מנגנון זה פותר את \"בעיית האבטחה\" בכך שהוא מונע מתהליכים גישה ישירה ומסוכנת למשאבי המערכת, תוך מתן אפשרות לבקש שירותים ממערכת ההפעלה שתבצע אותם עבורם בצורה בטוחה."
+    }
+  }
+}

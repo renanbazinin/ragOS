@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Context Switching",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 16:56:25",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      2,
+      6
+    ],
+    "token_usage": {
+      "prompt_tokens": 1956,
+      "output_tokens": 371,
+      "total_tokens": 3347
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Context Switching"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "איזה מידע נשמר או נטען באופן טיפוסי במהלך מנגנון ה-Context Switch (החלפת הקשר) בין תהליכים?",
+      "code_snippet": null,
+      "options": [
+        "א. מצב רגיסטרי המעבד (CPU context), מיקומי זיכרון, וקבצים פתוחים.",
+        "ב. רק כתובת ההתחלה של קוד התוכנית (Text segment).",
+        "ג. רק גודל ה-Stack וה-Heap של התהליך.",
+        "ד. רק כתובות ה-Base וה-Bounds של התהליך בזיכרון הפיזי."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "מנגנון ה-Context Switch נועד לשמור את כל המידע הנדרש עבור ריצתו של תהליך אחד, כדי שניתן יהיה לטעון תהליך אחר, ולאחר מכן לחזור ולהמשיך את התהליך שהופסק מאותה נקודה. לפי חומר ההרצאה (chunk 20), מידע זה כולל את מצב רגיסטרי המעבד (CPU context), מיקומי זיכרון (Memory locations), וקבצים פתוחים (Open files) שהתהליך מחזיק."
+    }
+  }
+}

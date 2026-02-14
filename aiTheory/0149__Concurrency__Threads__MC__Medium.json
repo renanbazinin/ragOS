@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Threads",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 17:27:31",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      10,
+      11
+    ],
+    "token_usage": {
+      "prompt_tokens": 1730,
+      "output_tokens": 896,
+      "total_tokens": 5133
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Threads"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "איזו מהטענות הבאות מתארת בצורה הנכונה ביותר את אופן הפעולה והמאפיינים של הפונקציה `pthread_join`?",
+      "code_snippet": "pthread_t thread_id;\nvoid *thread_result;\n\n// ... יצירת thread_id ...\n\nint status = pthread_join(thread_id, &thread_result);\n// לאחר שורה זו, thread_id סיים את ריצתו, וערך ההחזר שלו נמצא ב-thread_result",
+      "options": [
+        "א. חוט המבצע קריאה ל-`pthread_join` נחסם (blocked) וממתין עד שהחוט שאליו הוא מצטרף (th) יסיים את ריצתו. כל חוט בתוך התהליך יכול לבצע join לכל חוט אחר באותו תהליך.",
+        "ב. הפונקציה `pthread_join` מאפשרת לחוט הקורא להמשיך בריצתו באופן אסינכרוני תוך כדי בדיקה תקופתית אם החוט שאליו הוא מצטרף סיים, בדומה ל-busy-waiting.",
+        "ג. `pthread_join` יכולה להתבצע רק על ידי חוט האב (parent thread) שייצר את חוט הילד (child thread), ובכך לקבל את ערך ההחזר שלו.",
+        "ד. קריאה ל-`pthread_join` תמיד גורמת לסיום מיידי של התהליך כולו ברגע שהחוט שאליו הצטרפו סיים, ללא קשר לסטטוס של חוטים אחרים בתהליך."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "התשובה הנכונה היא א'. על פי חומר ההרצאה, כאשר חוט מבצע קריאה ל-`pthread_join`, 'הוא הופך להיות blocked כלומר הוא נחסם והוא מחכה' עד שהחוט המיועד יסיים את ריצתו. בנוסף, חומר ההרצאה מציין במפורש כי 'כל חוט יכול לעשות join לכל חוט אחר באותו תהליך, ולא צריך יחסי אב וילדים'.\n\nתשובה ב' שגויה מכיוון ש-`pthread_join` היא קריאה חוסמת (blocking) ולא אסינכרונית או מבוססת busy-waiting. busy-waiting הוא מנגנון סנכרון שונה המוצג בחומר ההרצאה (במנגנון הדגלים), אך אינו קשור לאופן הפעולה של `pthread_join`.\n\nתשובה ג' שגויה מכיוון שחומר ההרצאה קובע במפורש כי 'כל חוט יכול לעשות join לכל חוט אחר באותו תהליך, ולא צריך יחסי אב וילדים', מה שמפריך את הטענה שרק חוט אב יכול לבצע join על חוט ילד.\n\nתשובה ד' שגויה מכיוון ש-`pthread_join` גורמת לחוט הקורא להמתין לחוט ספציפי אחד בלבד, ואינה גורמת בהכרח לסיום מיידי של התהליך כולו. סיום התהליך תלוי בגורמים אחרים, כמו קריאה ל-`exit()` מכל חוט, או במקרה מיוחד של `pthread_exit` מהחוט הראשי הממתין לסיום כל החוטים האחרים, אך לא `pthread_join`."
+    }
+  }
+}

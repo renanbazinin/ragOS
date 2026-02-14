@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Page Tables",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:16:50",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      7
+    ],
+    "token_usage": {
+      "prompt_tokens": 1759,
+      "output_tokens": 518,
+      "total_tokens": 3334
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Page Tables"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהי הסיבה העיקרית לשימוש בטבלת דפים רב-שכבתית (Multi-Level Page Table) במערכות הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. כדי לחסוך בזיכרון פיזי המשמש לאחסון טבלת הדפים עצמה.",
+        "ב. כדי להאיץ את תהליך תרגום הכתובות הוירטואליות לכתובות פיזיות.",
+        "ג. כדי לאפשר לתהליכים לגשת ליותר זיכרון וירטואלי ממה שקיים בזיכרון הפיזי.",
+        "ד. כדי לפשט את המימוש של החלפת הקשר (Context Switching) בין תהליכים."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "החומר המצוין בשיעור מדגיש כי רוב התהליכים אינם משתמשים בכל מרחב הכתובות הוירטואלי שלהם, מה שמוביל לכך שחלקים נרחבים מטבלת הדפים אינם בשימוש (ה'שטח האפור'). הרעיון של טבלת דפים רב-שכבתית (Multi-Level Page Table) נועד לטפל בבעיה זו על ידי צמצום מספר הרשומות והימנעות מהקצאת זיכרון פיזי לחלקי טבלת דפים שאינם רלוונטיים או אינם בשימוש. על ידי פיצול טבלת הדפים ליחידות בגודל דף ומעקב אחריהן באמצעות 'page directory', ניתן להימנע מהקצאת דף שלם של רשומות אם הוא אינו חוקי או אינו בשימוש, ובכך לחסוך משמעותית בזיכרון הפיזי שנדרש לטבלת הדפים עצמה."
+    }
+  }
+}

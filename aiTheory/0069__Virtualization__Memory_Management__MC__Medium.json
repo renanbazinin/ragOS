@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Memory Management",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 17:09:12",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      9,
+      5,
+      6
+    ],
+    "token_usage": {
+      "prompt_tokens": 2240,
+      "output_tokens": 544,
+      "total_tokens": 6039
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Memory Management"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "בהתבסס על חומר ההרצאה, מהו היתרון המרכזי של אלגוריתם Buddy Allocation בהשוואה לניהול זיכרון באמצעות רשימת בלוקים פנויים בגודל קבוע, במיוחד בהקשר של התמודדות עם פיצול זיכרון?",
+      "code_snippet": null,
+      "options": [
+        "א. היכולת להקצות זיכרון למקטעים בגדלים משתנים ללא צורך במבנה נתונים מורכב.",
+        "ב. מניעת Overheads של ניהול זיכרון (כמו header) עבור כל בלוק שהוקצה.",
+        "ג. התמודדות יעילה עם בעיית איחוד שטחי זיכרון פנויים סמוכים (coalesce) ויצירת בלוקים גדולים יותר.",
+        "ד. הקצאת זיכרון מהירה יותר עבור אובייקטים קטנים וקבועים בגודלם, כמו אלו המשמשים את ליבת מערכת ההפעלה."
+      ]
+    },
+    "solution": {
+      "correct_option": "ג",
+      "explanation": "על פי חומר ההרצאה, אלגוריתם Buddy Allocation \"בא לפתור את הבעיה של coalesce (איחוד שטחי זיכרון בודדים ופנויים)\". שיטה זו מפצלת בלוקי זיכרון גדולים לבלוקים קטנים יותר לפי הצורך, וברגע שבלוקים שכנים פנויים הם מאוחדים בחזרה ליצירת בלוקים גדולים יותר. בכך, Buddy Allocation מתמודד ביעילות עם פיצול זיכרון חיצוני ומאפשר הקצאות גדולות יותר. רשימת בלוקים פנויים בגודל קבוע, לעומת זאת, מתוארת כלא מציאותית עבור גדלים משתנים ועלולה לסבול ממצבים בהם לא ניתן להקצות זיכרון נדרש למרות שיש מספיק זיכרון פנוי בסך הכל, עקב פיצול."
+    }
+  }
+}

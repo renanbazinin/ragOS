@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Copy-on-Write",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:22:30",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      8,
+      9,
+      4,
+      7
+    ],
+    "token_usage": {
+      "prompt_tokens": 1949,
+      "output_tokens": 506,
+      "total_tokens": 3877
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Copy-on-Write"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהי המטרה העיקרית של מנגנון Copy-on-Write (CoW) ביצירת תהליך חדש (למשל, באמצעות `fork`)?",
+      "code_snippet": null,
+      "options": [
+        "א. למנוע שכפול מיידי של זיכרון בין תהליך אב לבן, ובכך לחסוך פעולה יקרה.",
+        "ב. לאפשר לתהליכים שונים לכתוב לאותו דף זיכרון משותף בו זמנית ללא יצירת עותקים.",
+        "ג. להבטיח שכל דפי הזיכרון של תהליך הבן ישוכפלו באופן מלא מיד עם יצירתו.",
+        "ד. לטעון דפי זיכרון מהדיסק ל-RAM בצורה מקובצת (clustering) כאשר מתרחש Page Fault."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "ההסבר הנכון הוא א'. כפי שמוסבר בחומר ההרצאה (הרצאה 4, קטע 4), מנגנון ה-Copy-on-Write נועד לשפר ביצועים על ידי מניעת שכפול מיידי ויקר של כל זיכרון התהליך בעת יצירת תהליך חדש (למשל, באמצעות `fork`). במקום זאת, תהליך האב והבן חולקים את אותו זיכרון פיזי. שכפול הזיכרון מתרחש רק כאשר אחד התהליכים מנסה לבצע פעולת כתיבה (write) לדף משותף, ורק אז נוצר עותק חדש של אותו דף ספציפי עבור התהליך הכותב. זה חוסך את הצורך להעתיק את כל הזיכרון אם התהליך הבן לא משנה את כל הדפים או משנה רק מעטים."
+    }
+  }
+}

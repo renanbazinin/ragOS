@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Multi-level Page Tables",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:18:37",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      7
+    ],
+    "token_usage": {
+      "prompt_tokens": 1880,
+      "output_tokens": 573,
+      "total_tokens": 4065
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Multi-level Page Tables"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהי הסיבה העיקרית לשימוש בטבלאות דפים רב-שכבתיות (Multi-Level Page Tables) במערכות הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. חיסכון בזיכרון פיזי על ידי אי-הקצאת דפי טבלה עבור חלקים לא בשימוש של מרחב הכתובות הווירטואלי.",
+        "ב. האצת תהליך תרגום הכתובות מכתובת וירטואלית לפיזית.",
+        "ג. הגדלת גודל מרחב הכתובות הווירטואלי הזמין לכל תהליך.",
+        "ד. פישוט ניהול הזיכרון על ידי ביטול הצורך במטמון TLB."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "החומר המצורף מציין במפורש כי 'רוב התהליכים לא משתמשים בכל הזיכרון של מרחב הכתובות שלהם. רעיון: נציא את כל השטח האפור, נצמצם אותו לפחות רשומות.' וכן 'Entire page of entries invalid? Don't allocate it'. טבלאות דפים רב-שכבתיות מאפשרות למערכת ההפעלה לא להקצות זיכרון פיזי עבור טבלאות דפים (או חלקים מהן) של אזורים ממרחב הכתובות הווירטואלי שאינם בשימוש, ובכך לחסוך באופן משמעותי בזיכרון. האפשרויות האחרות אינן נכונות: טבלאות רב-שכבתיות דווקא מוסיפות גישות זיכרון בתהליך התרגום (ולכן לא מאיצות), אינן מגדילות את גודל מרחב הכתובות הווירטואלי הכולל, ואינן מבטלות את הצורך ב-TLB (אלא ה-TLB נחוץ יותר כדי למזער את עלות הביצועים שלהן)."
+    }
+  }
+}

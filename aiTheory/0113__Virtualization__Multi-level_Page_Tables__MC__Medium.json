@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Multi-level Page Tables",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 17:19:12",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      7
+    ],
+    "token_usage": {
+      "prompt_tokens": 1880,
+      "output_tokens": 510,
+      "total_tokens": 4166
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Multi-level Page Tables"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "מהי הסיבה העיקרית שבגללה מערכות הפעלה משתמשות בטבלאות דפים היררכיות (Multi-Level Page Tables)?",
+      "code_snippet": null,
+      "options": [
+        "א. כדי להאיץ את תהליך תרגום הכתובות הוירטואליות לכתובות פיזיות.",
+        "ב. כדי לצמצם את כמות הזיכרון הפיזי הנדרש לאחסון טבלאות הדפים עצמן, במיוחד עבור אזורים לא מנוצלים במרחב הכתובות הוירטואלי.",
+        "ג. כדי לאפשר גמישות רבה יותר בהגדרת גדלי דפים שונים עבור תהליכים שונים.",
+        "ד. כדי לפשט את ארגון הזיכרון הפיזי ולמנוע פיצול חיצוני (external fragmentation)."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "החומר המצוין מדגיש כי רוב התהליכים אינם משתמשים בכל הזיכרון של מרחב הכתובות הוירטואלי שלהם, וכי הרעיון הוא 'נציא את כל השטח האפור, נצמצם אותו לפחות רשומות'. טבלאות דפים היררכיות, כמו ה-Multi-Level Page Table, נועדו לחסוך בזיכרון על ידי הפיכת טבלת הדפים למבנה דמוי עץ ואי-הקצאה של דפים שלמים של רשומות שאינם בשימוש (כפי שמתואר ב'No need to allocate!'). ה-page directory מכיל מצביעים רק לחלקים הרלוונטיים של טבלת הדפים, ובכך נמנעת הקצאת זיכרון מיותרת."
+    }
+  }
+}

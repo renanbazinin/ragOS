@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Multi-core Processors",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:28:58",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      10,
+      12,
+      15
+    ],
+    "token_usage": {
+      "prompt_tokens": 2191,
+      "output_tokens": 457,
+      "total_tokens": 4164
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Multi-core Processors"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "איזו גישת תזמון במערכות מרובות מעבדים (multi-core processors) משפרת באופן טבעי את ה-cache affinity?",
+      "code_snippet": null,
+      "options": [
+        "א. תזמון המעביר ג'ובים בין מעבדים שונים בכל קוואנטה.",
+        "ב. תזמון המשתמש בתור משימות יחיד עבור כל המעבדים.",
+        "ג. תזמון מרובה תורים למעבדים (Multi-queue multiprocessor scheduling), שבו לכל מעבד יש תור משלו.",
+        "ד. תזמון שבו כל חוט (thread) מומר לתהליך (process) נפרד לפני ריצה."
+      ]
+    },
+    "solution": {
+      "correct_option": "ג",
+      "explanation": "על פי חומר ההרצאה, תזמון מרובה תורים למעבדים (Multi-queue multiprocessor scheduling) מטפל בבעיית ה-cache affinity באופן טבעי. בגישה זו, לכל מעבד יש תור משלו, וברגע שג'וב מגיע הוא משויך לתור של מעבד ספציפי ורץ תמיד על אותו המעבד. דבר זה מבטיח שהנתונים שהג'וב משתמש בהם יישארו במטמון הפרטי של אותו מעבד (cache affinity), ובכך משפר את ביצועי המערכת. לעומת זאת, גישות כמו תזמון המעביר ג'ובים בין מעבדים (כמו SQMS שהוזכר כבעל cache affinity גרוע) פוגעות ב-cache affinity."
+    }
+  }
+}

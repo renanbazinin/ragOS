@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Threads",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:26:50",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      10,
+      11
+    ],
+    "token_usage": {
+      "prompt_tokens": 1730,
+      "output_tokens": 393,
+      "total_tokens": 3167
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Threads"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "איזו מהטענות הבאות נכונה לגבי הפונקציה `pthread_join`?",
+      "code_snippet": null,
+      "options": [
+        "א. כל חוט יכול לעשות join לכל חוט אחר באותו תהליך.",
+        "ב. רק חוט אב יכול לעשות join לחוט ילד.",
+        "ג. קריאה ל-`pthread_join` גורמת לחוט שאליו מצטרפים להיחסם.",
+        "ד. הפונקציה `pthread_join` משמשת ליצירת חוט חדש בתהליך."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "החומר המצורף מציין במפורש: \"כל חוט יכול לעשות join לכל חוט אחר באותו תהליך, ולא צריך יחסי אב וילדים.\" לכן, אפשרות א' נכונה. אפשרות ב' שגויה מכיוון שאין צורך ביחסי אב-ילד. אפשרות ג' שגויה, שכן החוט שקורא ל-`pthread_join` הוא זה שנחסם וממתין, ולא החוט שאליו מצטרפים. אפשרות ד' שגויה, `pthread_join` ממתינה לסיום חוט קיים, בעוד ש-`pthread_create` היא הפונקציה ליצירת חוט חדש."
+    }
+  }
+}

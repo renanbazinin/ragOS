@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Context Switching",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-14 16:57:43",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      2,
+      6
+    ],
+    "token_usage": {
+      "prompt_tokens": 1956,
+      "output_tokens": 715,
+      "total_tokens": 6276
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Context Switching"
+    ],
+    "difficulty_estimation": "Hard",
+    "content": {
+      "text": "בהתבסס על אתגר השליטה במנגנון ה-Context Switch, ובהתחשב בכך שפעולות קריטיות כמו עדכון רגיסטרי ה-Base&Bounds במעבד מותרות רק ב-kernel mode, איזו מסקנה נכונה לגבי אופן ביצוע החלפת הקשר (Context Switch) על ידי מערכת ההפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. מערכת ההפעלה יכולה לבצע החלפת הקשר גם ב-User Mode, כל עוד התהליך הרץ לא מבקש פעולה מוגנת.",
+        "ב. על מנת לבצע החלפת הקשר, מערכת ההפעלה חייבת תמיד לעלות ל-Kernel Mode, מכיוון שפעולות קריטיות לניהול תהליכים דורשות הרשאות אלו.",
+        "ג. מנגנון ה-Direct Execution מאפשר למערכת ההפעלה להחליף הקשר על ידי \"הקפאת\" התהליך הרץ ישירות, ללא צורך בשינוי מצב ההרשאה.",
+        "ד. החלפת הקשר מתרחשת רק בתגובה לקריאת מערכת יזומה של התהליך הרץ, ובכך מבטיחה מעבר ל-Kernel Mode לצורך הביצוע."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "מנגנון ה-Context Switch כולל פעולות שדורשות הרשאות גבוהות, כפי שמצוין בחומר ההרצאה. בפרט, עדכון רגיסטרי ה-Base&Bounds במעבד, אשר הכרחי לניהול זיכרון של התהליך החדש שנטען, מותר רק ב-Kernel Mode. מכאן שמערכת ההפעלה חייבת לעלות למצב Kernel Mode על מנת לבצע את תהליך החלפת ההקשר באופן תקין ובטוח, ובכך להתגבר על אתגר השליטה כשהתהליך הרץ שולט באופן מלא במעבד ב-User Mode. אפשרות א' שגויה כי פעולות קריטיות כמו עדכון Base&Bounds דורשות Kernel Mode תמיד. אפשרות ג' שגויה כי מנגנון Direct Execution מעניק שליטה מלאה לתהליך הרץ, ומערכת ההפעלה אינה יכולה 'להקפיא' אותו ללא מעבר הרשאות. אפשרות ד' שגויה מכיוון שהחלפת הקשר אינה מתרחשת 'רק' בתגובה לקריאת מערכת, וקיימים מנגנונים נוספים (כמו פסיקות תזמון) שמאפשרים למערכת ההפעלה להשיג שליטה ולבצע החלפת הקשר."
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Paging",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:14:41",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      4,
+      5,
+      7
+    ],
+    "token_usage": {
+      "prompt_tokens": 2011,
+      "output_tokens": 401,
+      "total_tokens": 4263
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Paging"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "על פי חומר ההרצאה, מהו תפקידו העיקרי של רכיב ה-MMU בתהליך הדפדוף?",
+      "code_snippet": null,
+      "options": [
+        "א. תרגום כתובות וירטואליות לכתובות פיזיות.",
+        "ב. קביעת מספר הביטים לכתובת וירטואלית.",
+        "ג. אחסון טבלת הדפים של כל תהליך בזיכרון.",
+        "ד. פיצול טבלת הדפים לחלקים בגודל דף."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "על פי חומר ההרצאה, ה-MMU הוא הרכיב העיקרי המסייע בתהליך תרגום הכתובות. ההרצאה מציינת במפורש: 'הרכיב שעוזר לנו בתהליך התרגום הוא ה-MMU שמתבצע המרה מכתובת וירטואלית לכתובת פיזית שבה הנתונים הרצויים נמצאים.' תפקידו של ה-MMU הוא לקחת את מספר הדף הווירטואלי, לפנות איתו לטבלת הדפים ולקבל ממנה את מספר המסגרת המתאים (PFN), ובכך להשלים את הכתובת הפיזית יחד עם ההיסט."
+    }
+  }
+}

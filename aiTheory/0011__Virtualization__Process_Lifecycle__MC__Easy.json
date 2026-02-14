@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Process Lifecycle",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 16:54:22",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      2,
+      4,
+      5
+    ],
+    "token_usage": {
+      "prompt_tokens": 1884,
+      "output_tokens": 337,
+      "total_tokens": 3956
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Process Lifecycle"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהו המצב המתאר תהליך שמוכן לרוץ וממתין שמערכת ההפעלה תבחר אותו כדי שירוץ על המעבד?",
+      "code_snippet": null,
+      "options": [
+        "א. Running",
+        "ב. Ready",
+        "ג. Zombie",
+        "ד. Descheduled"
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "לפי חומר ההרצאה (Lecture 2, chunk 34), המצב 'Ready' מתאר תהליך ש'מוכן לרוץ'. מערכת ההפעלה בוחרת את התהליך הבא להרצה מתוך רשימת התהליכים שנמצאים במצב זה. מצב 'Running' מתאר תהליך שרץ כרגע על המעבד. 'Zombie' (Lecture 5, chunk 6) מתאר תהליך שהסתיים אך רשומתו עדיין קיימת בטבלת התהליכים. 'Descheduled' הוא פעולה (לא מצב) שבה תהליך מופסק ועובר למצב 'Ready', ולא מצב בפני עצמו."
+    }
+  }
+}

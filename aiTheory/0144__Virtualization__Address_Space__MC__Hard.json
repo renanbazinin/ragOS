@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Address Space",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-14 17:26:33",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      5,
+      6,
+      7
+    ],
+    "token_usage": {
+      "prompt_tokens": 2106,
+      "output_tokens": 715,
+      "total_tokens": 5995
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Address Space"
+    ],
+    "difficulty_estimation": "Hard",
+    "content": {
+      "text": "בהתבסס על מערכת זיכרון וירטואלי המשתמשת בטבלת דפים היררכית (Multi-Level Page Table), נתונים הפרטים הבאים:\n*   מרחב כתובות וירטואלי: 1GB (2³⁰)\n*   גודל דף: 512B (2⁹)\n*   מספר רשומות PTEs לכל דף: 128 (2⁷)\nבהינתן חלוקה זו, כמה רשומות (entries) יכולה להכיל טבלת ה-Page Directory?",
+      "code_snippet": null,
+      "options": [
+        "א. 2¹⁴",
+        "ב. 2²¹",
+        "ג. 2⁷",
+        "ד. 2⁹"
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "הסבר:\n1.  מרחב הכתובות הוירטואלי הוא 1GB, כלומר 2 בחזקת 30 בתים, ולכן כתובת וירטואלית מיוצגת על ידי 30 ביטים.\n2.  גודל הדף הוא 512B, כלומר 2 בחזקת 9 בתים, ולכן ההיסט (Offset) דורש 9 ביטים.\n3.  מספר הביטים של ה-Virtual Page Number (VPN) הוא סך הביטים פחות ביטי ההיסט: 30 - 9 = 21 ביטים.\n4.  המערכת משתמשת בטבלת דפים היררכית (Multi-Level Page Table). הנתון \"מספר רשומות PTEs לכל דף: 128 (2⁷)\" אומר שכל טבלת דפים מהרמה השנייה (Page Table), שנמצאת בעצמה בדף זיכרון אחד, יכולה להכיל 2 בחזקת 7 רשומות. משמעות הדבר היא שאינדקס ה-Page Table (החלק ב-VPN שמצביע על רשומה בתוך טבלת דפים ספציפית) דורש 7 ביטים.\n5.  את יתרת הביטים של ה-VPN משמשים לאינדקס ה-Page Directory. מספר הביטים לאינדקס ה-Page Directory הוא: 21 (VPN ביטים) - 7 (Page Table Index ביטים) = 14 ביטים.\n6.  מספר הרשומות שיכולה להכיל טבלת ה-Page Directory הוא 2 בחזקת מספר הביטים של האינדקס שלה. לכן, 2 בחזקת 14 רשומות.\nהאפשרות הנכונה היא א'."
+    }
+  }
+}

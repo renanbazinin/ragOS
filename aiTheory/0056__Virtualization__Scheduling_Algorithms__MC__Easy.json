@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Scheduling Algorithms",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:06:04",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      3
+    ],
+    "token_usage": {
+      "prompt_tokens": 2139,
+      "output_tokens": 454,
+      "total_tokens": 3818
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Scheduling Algorithms"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהו המנגנון העיקרי שבו משתמש אלגוריתם תזמון ה-\"Lottery scheduling\" כדי להקצות זמן מעבד באופן פרופורציונלי?",
+      "code_snippet": null,
+      "options": [
+        "א. על ידי בחירת התהליך עם ערך ה-PASS הנמוך ביותר.",
+        "ב. על ידי חלוקת \"כרטיסים\" (Tickets) לתהליכים ועריכת הגרלה.",
+        "ג. על ידי הרצת הג'וב שהגיע ראשון עד לסיומו.",
+        "ד. על ידי פיצול ג'ובים לתת-ג'ובים קטנים יותר."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "על פי חומר ההרצאה, אלגוריתם ה-Lottery scheduling מקצה זמן מעבד באופן פרופורציונלי על ידי הקצאת 'כרטיסי הגרלה' (Tickets) לתהליכים. לאחר מכן, נערכת 'הגרלה' ובוחרים ג'וב מנצח. ככל שלתהליך יש יותר כרטיסים, כך גדל הסיכוי שלו להיבחר ולקבל את זמן המעבד. אפשרות א' מתארת את מנגנון ה-stride scheduling. אפשרות ג' מתארת תזמון מסוג First-Come, First-Served. אפשרות ד' מתארת טכניקה לטיפול בקלט/פלט, למשל בשילוב עם SRTF, ולא את מנגנון ההקצאה הפרופורציונלית של Lottery scheduling."
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Scheduling Algorithms",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:05:55",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      3
+    ],
+    "token_usage": {
+      "prompt_tokens": 2139,
+      "output_tokens": 531,
+      "total_tokens": 4665
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Scheduling Algorithms"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהו המנגנון העיקרי שבו משתמש אלגוריתם תזמון \"הגרלה\" (Lottery scheduling) כדי להקצות זמן מעבד באופן פרופורציונלי?",
+      "code_snippet": null,
+      "options": [
+        "א. בחירת התהליך בעל ערך ה-PASS הנמוך ביותר ועדכון ערך ה-STRIDE שלו.",
+        "ב. הקצאת \"כרטיסים\" (tickets) לתהליכים וביצוע הגרלה אקראית לבחירת התהליך הבא.",
+        "ג. ריצת תהליכים בסדר הגעתם (First-Come, First-Served) מתחילתם ועד סופם.",
+        "ד. חלוקת תהליכים ארוכים לתתי-תהליכים קצרים לצורך חפיפה עם פעולות קלט/פלט."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "אלגוריתם תזמון \"הגרלה\" (Lottery scheduling) הוא מתזמן מסוג \"חלוקה פרופורציונלית\" (proportional share). המנגנון העיקרי שלו מבוסס על הקצאת \"כרטיסים\" (tickets) לכל תהליך. ככל שלתהליך יש יותר כרטיסים, כך גדל הסיכוי שלו לזכות בהגרלה ולקבל את זמן המעבד. בכל פעם שיש לבחור תהליך לריצה, מתבצעת \"הגרלה\" אקראית, והתהליך שזוכה מקבל את זמן המעבד. אפשרות א' מתארת את מנגנון ה-Stride scheduling. אפשרות ג' מתארת את אלגוריתם FCFS. אפשרות ד' מתייחסת לטיפול בתהליכי קלט/פלט באמצעות פיצול ג'ובים, ולא למנגנון ליבה של תזמון פרופורציונלי."
+    }
+  }
+}
