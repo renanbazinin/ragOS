@@ -77,6 +77,7 @@ export async function getAIQuestions(params: {
   difficulty?: string;
   page?: number;
   page_size?: number;
+  shuffle?: boolean;
 }): Promise<AIQuestionsResponse> {
   const all = await loadAI();
   let filtered = [...all];
@@ -103,6 +104,14 @@ export async function getAIQuestions(params: {
   }
   if (params.difficulty) {
     filtered = filtered.filter(q => q.difficulty_estimation === params.difficulty);
+  }
+
+  // Shuffle entire filtered set before paginating
+  if (params.shuffle) {
+    for (let i = filtered.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [filtered[i], filtered[j]] = [filtered[j], filtered[i]];
+    }
   }
 
   const page = params.page ?? 1;
@@ -324,6 +333,7 @@ export async function getTheoryQuestions(params: {
   difficulty?: string;
   page?: number;
   page_size?: number;
+  shuffle?: boolean;
 }): Promise<TheoryQuestionsResponse> {
   const all = await loadTheory();
   let filtered = [...all];
@@ -350,6 +360,14 @@ export async function getTheoryQuestions(params: {
       q.difficulty_estimation === params.difficulty ||
       q._requested_difficulty === params.difficulty
     );
+  }
+
+  // Shuffle entire filtered set before paginating
+  if (params.shuffle) {
+    for (let i = filtered.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [filtered[i], filtered[j]] = [filtered[j], filtered[i]];
+    }
   }
 
   const page = params.page ?? 1;
