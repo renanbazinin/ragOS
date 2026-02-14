@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Inodes and Data Blocks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 19:08:48",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      20,
+      21
+    ],
+    "token_usage": {
+      "prompt_tokens": 1910,
+      "output_tokens": 522,
+      "total_tokens": 3907
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Inodes and Data Blocks"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "כאשר מערכת קבצים נדרשת להרחיב קובץ קיים על ידי כתיבת נתונים נוספים הדורשים הקצאת בלוק נתונים חדש, איזה סדר פעולות על הדיסק מומלץ לבצע פיזית תחילה על מנת לשמור על עקביות מערכת הקבצים במקרה של קריסה?",
+      "code_snippet": null,
+      "options": [
+        "א. כתיבת הנתונים בפועל לבלוק הנתונים החדש.",
+        "ב. עדכון ה-inode של הקובץ עם המצביע לבלוק הנתונים החדש.",
+        "ג. עדכון ה-data bitmap לסימון בלוק הנתונים החדש כתפוס.",
+        "ד. קריאת ה-data bitmap כדי למצוא בלוק נתונים פנוי."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "החומר המצוין בשיעור קובע במפורש כי \"הפעולה הראשונה שאנחנו חייבים לבצע (פיזית על הדיסק) היא כתיבה של הדאטה\". זאת מכיוון שאם נכתוב את הנתונים לבלוק החדש ומיד לאחר מכן תתרחש קריסה, מערכת הקבצים תישאר עקבית. הנתונים שנכתבו אומנם יאבדו (מכיוון שאין inode המצביע אליהם וה-data bitmap עדיין מסמן את הבלוק כפנוי), אך לא ייווצר מצב של אי-עקביות כמו בלוק תפוס שאינו בשימוש או inode המצביע לבלוק לא חוקי. לעומת זאת, כתיבה ל-inode או ל-data bitmap לפני כתיבת הדאטה עלולה להוביל למצב לא תקין של מערכת הקבצים במקרה של קריסה."
+    }
+  }
+}

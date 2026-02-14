@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Spinlocks and Cache Coherence",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-14 19:05:29",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      16,
+      14,
+      15
+    ],
+    "token_usage": {
+      "prompt_tokens": 2074,
+      "output_tokens": 1361,
+      "total_tokens": 8808
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Spinlocks and Cache Coherence"
+    ],
+    "difficulty_estimation": "Hard",
+    "content": {
+      "text": "בהתבסס על מימוש המנעול FlakyLock שהוצג בחומר ההרצאה, ובהתחשב באתגרים של תזמון בקוד מקבילי עם מספר חוטים:\n```c\ntypedef struct { int turn; int busy; } FlakyLock;\nvoid init(FlakyLock *lock) {\n    lock->busy = 0;\n}\nvoid lock(FlakyLock *lock, int me) {\n    do {\n        do {\n            lock->turn = me;\n        } while (lock->busy);\n        lock->busy = 1;\n    } while (lock->turn != me);\n}\nvoid unlock(FlakyLock *lock) {\n    lock->busy = 0;\n}\n```\nאיזו מהטענות הבאות מתארת בצורה הנכונה ביותר את תכונות המנעול FlakyLock?",
+      "code_snippet": "typedef struct { int turn; int busy; } FlakyLock;\nvoid init(FlakyLock *lock) {\n    lock->busy = 0;\n}\nvoid lock(FlakyLock *lock, int me) {\n    do {\n        do {\n            lock->turn = me;\n        } while (lock->busy);\n        lock->busy = 1;\n    } while (lock->turn != me);\n}\nvoid unlock(FlakyLock *lock) {\n    lock->busy = 0;\n}",
+      "options": [
+        "א. המנעול מקיים מניעה הדדית (mutual exclusion) אך אינו מבטיח חופש מקיפאון (deadlock freedom), שכן קיים תרחיש תזמון בו ערך turn נדרס ומוביל לקיפאון.",
+        "ב. המנעול אינו מקיים מניעה הדדית, מכיוון שבתזמון מסוים שני חוטים יכולים להגדיר את busy=1 בו-זמנית.",
+        "ג. המנעול מבטיח חופש מקיפאון ומהוגנות (fairness), כיוון שהוא משתמש במשתנה turn כדי לוודא שכל חוט יקבל את תורו.",
+        "ד. המנעול מונע קיפאון, אך עלול לגרום להרעבה (starvation) מכיוון שחוטים בעלי עדיפות נמוכה עלולים להידרס באופן תמידי בגישה למשתנה turn."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "הבעיה המרכזית במימוש המנעול FlakyLock היא שההשמה `lock->turn = me;` והבדיקה שלאחריה `while (lock->turn != me);` אינן אטומיות ביחס לפעולות של חוטים אחרים על המשתנים `lock->turn` ו-`lock->busy`. \n\nנשקול את רצף האירועים הבא עם שני חוטים, T1 ו-T2, המנסים לרכוש את המנעול:\n1.  `lock->busy` מאותחל ל-0.\n2.  T1 נכנס לפונקציה `lock()`: `lock->turn = T1_id;`\n3.  T2 נכנס לפונקציה `lock()`: `lock->turn = T2_id;` (דורס את הערך ש-T1 כתב).\n4.  T1 ממשיך: התנאי בלולאה הפנימית `while (lock->busy);` הוא שקר (כי `busy` עדיין 0). T1 יוצא מהלולאה הפנימית `do-while`.\n5.  T1 קובע: `lock->busy = 1;`\n6.  T1 ממשיך: הוא בודק `while (lock->turn != T1_id);`. מכיוון ש-`lock->turn` מכיל כעת את `T2_id`, התנאי הזה נכון. T1 נכנס כעת ללולאת המתנה פעילה אינסופית בלולאה החיצונית `do-while`, כשהוא מחזיק את `lock->busy = 1`.\n7.  T2 ממשיך: הוא מבצע שוב `lock->turn = T2_id;` (או היה שם). לאחר מכן הוא בודק `while (lock->busy);`. מכיוון ש-`lock->busy` הוא כעת 1 (מוחזק על ידי T1), T2 נכנס ללולאת המתנה פעילה אינסופית בלולאה הפנימית שלו.\n\nבתרחיש זה, גם T1 וגם T2 תקועים בלולאות המתנה פעילה, ואף אחד מהם לא יכול להתקדם. T1 מחזיק את `busy=1` אך אינו יכול להגיע לאזור הקריטי או לשחרר את `busy`, ו-T2 אינו יכול לרכוש את המנעול מכיוון ש-`busy` הוא 1. מצב זה מהווה קיפאון (deadlock).\n\nלגבי מניעה הדדית: במקרה זה, אף חוט לא נכנס בפועל לאזור הקריטי, כך שהמניעה ההדדית נשמרת טכנית על ידי מניעת כניסה כלשהי, אך המנגנון עצמו נכשל בקיפאון.\n\nלכן, טענה א' מתארת בצורה הנכונה ביותר את הבעיה המרכזית במנעול זה."
+    }
+  }
+}

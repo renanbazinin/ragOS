@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Crash Consistency and Journaling",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-14 19:09:29",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      21
+    ],
+    "token_usage": {
+      "prompt_tokens": 1920,
+      "output_tokens": 678,
+      "total_tokens": 4832
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Crash Consistency and Journaling"
+    ],
+    "difficulty_estimation": "Hard",
+    "content": {
+      "text": "בהתחשב במנגנון ה-Journaling (write-ahead logging ו-redo logging) לפתרון בעיית ה-Crash Consistency, מהי הסיבה העיקרית לכך ש-Journal גדול יותר, על אף שהוא מאפשר אחסון של יותר טרנזקציות ממתינות, עלול באופן פרדוקסלי *להאריך* את זמן ההתאוששות של המערכת לאחר קריסה?",
+      "code_snippet": null,
+      "options": [
+        "א. ככל שה-Journal גדול יותר, כך יש יותר פעולות פוטנציאליות לבצע Redo עליהן במהלך השחזור, מה שמאריך את זמן המעבר על ה-log.",
+        "ב. Journal גדול יותר דורש יותר משאבי זיכרון RAM כדי לנהל את מבנה ה-Journal Superblock, מה שמאט את תהליך האתחול.",
+        "ג. כתיבה ל-Journal גדול יותר גורמת ליותר פעולות דיסק סנכרוניות, מה שמגדיל את הסיכוי לקריסה במהלך פעולת כתיבה.",
+        "ד. Journal גדול יותר דורש תהליך \"ניקוי\" (trimming) מורכב יותר של טרנזקציות שהושלמו, מה שמעמיס על המעבד בזמן פעילות רגילה."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "ההסבר הנכון טמון בכך שבמצב של התאוששות מקריסה, מערכת ההפעלה נדרשת לעבור על כל ה-Journal (ה-log) כדי לזהות ולבצע מחדש (redo) את הפעולות שסומנו כ-committed אך לא הספיקו להיכתב למערכת הקבצים הראשית. כפי שמצוין בחומר ההרצאה: \"הבעיה היא שככל שה-journal שלנו גדול יותר, ייקח לנו יותר זמן להתאושש מקריסה. אם המחשב קרס, אנחנו עוברים על ה-log, אנחנו צריכים לעבור על כל הפעולות.\" (Lecture 21, chunk 31). לכן, Journal גדול יותר מכיל פוטנציאלית מספר רב יותר של טרנזקציות שיש לעבור עליהן ולעבד אותן, מה שמאריך באופן ישיר את זמן השחזור. המטרה של Redo Logging היא להבטיח את תקינות מערכת הקבצים על ידי שחזור מצב עקבי, וגודל ה-Journal משפיע ישירות על משך תהליך זה."
+    }
+  }
+}

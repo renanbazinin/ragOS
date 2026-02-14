@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Inodes and Data Blocks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 19:09:14",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      20,
+      21
+    ],
+    "token_usage": {
+      "prompt_tokens": 1910,
+      "output_tokens": 638,
+      "total_tokens": 4981
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Inodes and Data Blocks"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "על פי חומר ההרצאה, כאשר מערכת קבצים מקצה בלוק נתונים חדש לצורך כתיבה נוספת לקובץ קיים, אילו מהרכיבים הבאים *חייבים* להתעדכן על הדיסק כדי לשקף נכונה את השינוי?",
+      "code_snippet": null,
+      "options": [
+        "א. בלוק הנתונים החדש, ה-inode של הקובץ, ובלוק ה-bitmap של הנתונים.",
+        "ב. ה-Super Block, ה-inode של הקובץ, ובלוק ה-bitmap של ה-inodes.",
+        "ג. ה-inode של הקובץ בלבד, כיוון שהוא מכיל את כל המידע על הקובץ.",
+        "ד. בלוק הנתונים החדש ובלוק ה-bitmap של ה-inodes בלבד."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "התשובה הנכונה היא א. על פי חומר ההרצאה (Lecture 20, chunk 31), כאשר מתבצעת כתיבה נוספת לקובץ קיים המצריכה הקצאת בלוק נתונים חדש, מערכת הקבצים מבצעת מספר פעולות כתיבה על הדיסק. פעולות אלו כוללות: 1) כתיבת בלוק הנתונים החדש עצמו (Write the actual block itself) – כדי לשמור את הנתונים החדשים. 2) עדכון ה-inode של הקובץ (Write updated inode with new block location) – כדי שה-inode יצביע על בלוק הנתונים החדש שהוקצה. 3) עדכון בלוק ה-bitmap של הנתונים (Write updated data bitmap) – כדי לסמן את בלוק הנתונים החדש כבלוק תפוס ולא פנוי. שאר האפשרויות אינן נכונות מכיוון שהן כוללות עדכון רכיבים שאינם משתנים בהכרח בפעולה זו (כמו ה-Super Block או ה-inode bitmap, שמתעדכן רק בהקצאת או שחרור inodes), או שהן משמיטות רכיבים חיוניים לעדכון. חומר ההרצאה גם מדגיש שפעולות אלו חייבות להתבצע בסדר מסוים כדי לשמור על עקביות מערכת הקבצים במקרה של קריסה (Lecture 21, chunk 10)."
+    }
+  }
+}

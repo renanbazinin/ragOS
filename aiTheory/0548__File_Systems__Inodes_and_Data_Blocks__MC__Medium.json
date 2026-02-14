@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "Inodes and Data Blocks",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 19:09:00",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      20,
+      21
+    ],
+    "token_usage": {
+      "prompt_tokens": 1910,
+      "output_tokens": 565,
+      "total_tokens": 4159
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "Inodes and Data Blocks"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "לפי חומר ההרצאה, כאשר מתבצעת פעולת כתיבה לקובץ (למשל, הוספת בלוק נתונים חדש), מהי הפעולה הפיזית הראשונה שחייבת להתבצע על הדיסק כדי להבטיח את עקביות מערכת הקבצים במקרה של קריסה?",
+      "code_snippet": null,
+      "options": [
+        "א. כתיבת הבלוק בפועל (data block) עם הנתונים החדשים.",
+        "ב. עדכון ה-inode של הקובץ עם המצביע לבלוק הנתונים החדש.",
+        "ג. קריאת ה-data bitmap כדי למצוא בלוק פנוי.",
+        "ד. עדכון ה-data bitmap כדי לסמן את הבלוק החדש כתפוס."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "התשובה הנכונה היא א'. חומר ההרצאה מציין במפורש כי \"המסקנה: מבין שלושת הכתיבות, ניתן להסיק כי הפעולה הראשונה שאנחנו חייבים לבצע (פיזית על הדיסק) היא כתיבה של הדאטה\". הסיבה לכך היא שבמקרה של קריסת המערכת לאחר כתיבת בלוק הנתונים אך לפני עדכון ה-inode או ה-data bitmap, מערכת הקבצים נשארת עקבית. הנתונים שנכתבו אמנם יאבדו (כי אף inode לא יצביע אליהם והבלוק עדיין יסומן כפנוי ב-bitmap), אך לא נוצר מצב של אי-עקביות במערכת הקבצים (לדוגמה, inode המצביע לנתונים שגויים או בלוקים אבודים המסומנים כתפוסים ללא שימוש). לעומת זאת, אם נכתוב תחילה ל-inode או ל-data bitmap ונקרוס, המערכת עלולה להיכנס למצב לא עקבי, כפי שהודגש בחומר ההרצאה לגבי כתיבה ל-inode."
+    }
+  }
+}

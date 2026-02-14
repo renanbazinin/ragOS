@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Atomic Operations and Synchronization",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 19:07:06",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      11,
+      14,
+      15
+    ],
+    "token_usage": {
+      "prompt_tokens": 1926,
+      "output_tokens": 678,
+      "total_tokens": 5499
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Atomic Operations and Synchronization"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "מהי מטרתן העיקרית של פעולות אטומיות הנתמכות בחומרה, כגון `__sync_fetch_and_add` או `TestAndSet`, בהקשר של תכנות מקבילי?",
+      "code_snippet": "void* mythread(void *arg) {\n  for (int i = 0; i < 1e7; ++i) {\n    __sync_fetch_and_add(&counter, 1);\n  }\n  return NULL;\n}",
+      "options": [
+        "א. למנוע מצבי Deadlock במערכת על ידי אכיפת סדר ביצוע קבוע מראש בין חוטים שונים.",
+        "ב. להבטיח שרצף של פעולות יתבצע כיחידה בלתי ניתנת להפרעה (אטומית), ובכך למנוע הפרות אטומיות.",
+        "ג. לשפר את יעילות ניצול זיכרון המטמון (cache affinity) על ידי קיבוע תהליכים למעבדים ספציפיים.",
+        "ד. לאפשר לחוטים לקרוא ישירות את הערך הפנימי של סמפורים (semaphores) לצורך קבלת החלטות."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "הבעיה המרכזית שפעולות אטומיות נועדו לפתור היא 'הפרת אטומיות' (atomicity violation), כפי שמצוין בחומר הלימוד. הפרת אטומיות מתרחשת כאשר רצף פעולות שנועד להתבצע כיחידה אחת מופרע על ידי חוט אחר, מה שמוביל למצב לא עקבי. פעולות אטומיות חומרתיות, כמו `__sync_fetch_and_add` או `TestAndSet`, פותרות זאת על ידי ביצוע מספר פעולות כפקודת חומרה יחידה ובלתי ניתנת להפרעה ('מתבצע בפקודה אחת'), ובכך מבטיחות את שלמות הנתונים בסביבה מקבילית.\nאפשרויות אחרות אינן נכונות על פי חומר הלימוד: א. פעולות אטומיות אינן מיועדות ישירות למנוע Deadlock על ידי אכיפת סדר קבוע. ג. שיפור cache affinity קשור למדיניות תזמון ולא לפעולות אטומיות. ד. חומר הלימוד מציין במפורש שלא ניתן 'לשאול מה פעם מה הערך' של סמפור."
+    }
+  }
+}

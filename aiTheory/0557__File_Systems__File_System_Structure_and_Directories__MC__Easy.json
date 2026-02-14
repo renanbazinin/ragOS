@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "File Systems",
+    "topic_hint": "File System Structure and Directories",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 19:11:28",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      20,
+      21
+    ],
+    "token_usage": {
+      "prompt_tokens": 1963,
+      "output_tokens": 381,
+      "total_tokens": 3738
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "File Systems",
+    "topic": [
+      "File System Structure and Directories"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהי המטרה העיקרית של ה-inode במערכת קבצים, כפי שתואר בחומר הלימוד?",
+      "code_snippet": null,
+      "options": [
+        "א. לאחסן את התוכן בפועל של הקובץ (כלומר, את הנתונים).",
+        "ב. להכיל את כל המידע על הקבצים (metadata), כגון סוג, הרשאות וגודל.",
+        "ג. לנהל רשימה של מקומות פנויים בדיסק.",
+        "ד. לתאר את מבנה הזיכרון הווירטואלי של התהליכים."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "על פי חומר הלימוד (שיעור 20, chunk 4), ה-inode הוא אזור בדיסק שנשמר במיוחד \"שיכיל את ה-metadata, כלומר את כל המידע על הקבצים\". מידע זה כולל פרטים כמו סוג (קובץ / תיקייה), UID (בעלים), הרשאות (rwx), גודל בבתים, וזמני גישה/יצירה. ה-inode אינו מכיל את נתוני הקובץ עצמם, אלא מצביע לבלוקי הנתונים."
+    }
+  }
+}
