@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Signals",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 17:01:31",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      4,
+      5
+    ],
+    "token_usage": {
+      "prompt_tokens": 1860,
+      "output_tokens": 805,
+      "total_tokens": 5140
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Signals"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "בהתייחס לטיפול בסיגנלים, אילו מהאפשרויות הבאות מתארת נכונה דרכים למנוע יצירת תהליכי זומבי (zombie processes) באמצעות הסיגנל SIGCHLD?",
+      "code_snippet": "void signal_handler(int signal) {\n    if (signal == SIGCHLD) {\n        int rc = wait(NULL);\n        printf(\"child terminated %d (pid:%d)\\n\", rc, getpid());\n    }\n}\n\nint main(int argc, char *argv[])\n{\n    struct sigaction act;\n    sigemptyset(&act.sa_mask);\n    act.sa_handler = signal_handler;\n    act.sa_flags = 0;\n    \n    sigaction(SIGCHLD, &act, NULL);\n    if (fork()) {\n        while (1);\n    }\n}",
+      "options": [
+        "א. על ידי הגדרת פונקציית מטפל (signal handler) לסיגנל SIGCHLD המבצעת קריאה ל-wait(), או על ידי התעלמות מוחלטת מהסיגנל באמצעות SIG_IGN.",
+        "ב. רק על ידי הגדרת פונקציית מטפל לסיגנל SIGCHLD המבצעת קריאה ל-wait().",
+        "ג. רק על ידי התעלמות מוחלטת מהסיגנל SIGCHLD באמצעות SIG_IGN.",
+        "ד. על ידי שליחת סיגנל SIGKILL לתהליך הבן מיד לאחר יצירתו."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "החומר המצורף מתאר שתי דרכים עיקריות למנוע יצירת תהליכי זומבי (zombie processes) באמצעות הסיגנל SIGCHLD. הדרך הראשונה היא להגדיר פונקציית מטפל (signal handler) עבור הסיגנל SIGCHLD, שבתוכה מתבצעת קריאה לפונקציית המערכת wait(). קריאה זו גורמת למערכת ההפעלה לאסוף את משאבי התהליך הבן שסיים את ריצתו ולמחוק אותו, כפי שמודגם בקוד המצורף. הדרך השנייה, כפי שצוין בחומר, היא להתעלם מוחלטת מהסיגנל SIGCHLD על ידי הגדרתו ל-SIG_IGN. במקרה זה, מערכת ההפעלה מנקה את התהליך הבן מיד עם סיומו, מבלי להודיע לתהליך האב, ובכך מונעת יצירת זומבים. לכן, תשובה א' היא הנכונה שכן היא כוללת את שתי השיטות הללו. תשובות ב' ו-ג' שגויות מכיוון שהן מציגות רק אחת מהשיטות כבלעדית. תשובה ד' אינה רלוונטית למניעת זומבים באמצעות טיפול ב-SIGCHLD, ואינה מתוארת בחומר כדרך למנוע זומבים בהקשר זה."
+    }
+  }
+}

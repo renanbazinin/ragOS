@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "TLB",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 17:21:06",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      8,
+      7
+    ],
+    "token_usage": {
+      "prompt_tokens": 2114,
+      "output_tokens": 522,
+      "total_tokens": 4351
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "TLB"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "חומר הלימוד מציין: \"אם נעשה עכשיו context switch, הבעיה תהיה ש-TLB לא יהיה מעודכן עבור התהליך הנוכחי.\" מהו הפתרון העיקרי המתואר בחומר הלימוד להתמודדות עם בעיה זו ב-TLB?",
+      "code_snippet": null,
+      "options": [
+        "א. לרוקן את כל רשומות ה-TLB עם כל החלפת קשר (context switch).",
+        "ב. להוסיף לכל רשומה ב-TLB מזהה מרחב כתובות (ASID) כדי להבחין בין רשומות של תהליכים שונים.",
+        "ג. להגדיל באופן משמעותי את נפח ה-TLB כך שיוכל להכיל מיפויים מכל התהליכים הפועלים.",
+        "ד. לדרוש מכל התהליכים להשתמש באותו מרחב כתובות וירטואלי כדי למנוע התנגשויות."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "חומר הלימוד מציין במפורש כי הפתרון לבעיה שבה ה-TLB אינו מעודכן לאחר החלפת קשר הוא: \"נוסיף לכל רשומה ב-TLB מזהה נוסף שנקרא ASID (address space id) שיציין לאיזה תהליך הרשומה הזו שייכת וכך ניתן להבדיל בין רשומות של תהליכים שונים.\" פתרון זה מאפשר ל-TLB להחזיק מיפויים מתהליכים שונים במקביל מבלי לרוקן את תוכנו, ובכך משפר את הביצועים. האפשרויות האחרות אינן מתוארות כפתרון בחומר הלימוד, או שהן אינן יעילות/אפשריות."
+    }
+  }
+}

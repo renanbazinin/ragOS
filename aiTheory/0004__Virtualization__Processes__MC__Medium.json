@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Processes",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 16:52:46",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      2,
+      4
+    ],
+    "token_usage": {
+      "prompt_tokens": 1825,
+      "output_tokens": 697,
+      "total_tokens": 5184
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Processes"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "על מנת שמערכת ההפעלה תוכל לנהל מספר רב של תהליכים בו-זמנית וליצור אשליה של ריצה מקבילה, היא שומרת מידע רב עבור כל תהליך. איזה מהבאים *אינו* נכון לגבי מאפייני תהליך או המידע שנשמר עליו?",
+      "code_snippet": null,
+      "options": [
+        "א. לכל תהליך יש מרחב כתובות זיכרון משלו, הכולל מקטעים כמו Text (קוד), Data (נתונים גלובליים), Heap (הקצאות דינמיות) ו-Stack (משתנים מקומיים וארגומנטים).",
+        "ב. כל תהליך מקבל מזהה ייחודי (PID) שאינו משותף עם אף תהליך אחר במערכת, וניתן לאחזר גם את מזהה תהליך ההורה שלו.",
+        "ג. מערכת ההפעלה שומרת עבור כל תהליך את מצבו הנוכחי (למשל, Running או Ready), את מצב הרגיסטרים במעבד בעת הקפאתו, ואת רשימת הקבצים הפתוחים שהוא מחזיק.",
+        "ד. תהליך יכול לשנות ישירות את מצב הריצה (state) של כל תהליך אחר במערכת, כל עוד הוא מכיר את ה-PID שלו, ובכך להשפיע על הקצאת המעבד."
+      ]
+    },
+    "solution": {
+      "correct_option": "ד",
+      "explanation": "הטענה הנכונה היא ד' כי היא אינה נכונה. על פי חומר ההרצאה, 'לתהליך אין דרך לשנות תהליך מעבר לתהליך ההורה שלו' (Lecture 4, chunk 2). מערכת ההפעלה היא זו שאחראית לנהל את מצבי התהליכים (Running, Ready) ואת שיבוץ המעבד (scheduling), ולא תהליכים עצמם באופן ישיר. האפשרויות א, ב, ו-ג נכונות: א. לכל תהליך מרחב כתובות משלו הכולל Text, Data, Heap ו-Stack (Lecture 2, chunk 7). ב. לכל תהליך PID ייחודי וניתן לאחזר את ה-PID של ההורה (Lecture 2, chunk 19; Lecture 4, chunk 2). ג. ה-PCB של תהליך מכיל את מצבו הנוכחי (state), מצב הרגיסטרים (CPU context) ורשימת הקבצים הפתוחים (Lecture 2, chunk 19; Lecture 2, chunk 34)."
+    }
+  }
+}

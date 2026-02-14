@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Context Switching",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 16:56:52",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      2,
+      6
+    ],
+    "token_usage": {
+      "prompt_tokens": 1956,
+      "output_tokens": 500,
+      "total_tokens": 4699
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Context Switching"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "מהי אחת הסיבות המרכזיות לכך שמערכת ההפעלה נדרשת לפעול במצב ליבה (kernel mode) במהלך ביצוע החלפת הקשר (context switch) בין תהליכים?",
+      "code_snippet": null,
+      "options": [
+        "א. עדכון רגיסטרי ה-Base וה-Bounds במעבד, המאפשרים ניהול זיכרון תקין עבור התהליך הנכנס.",
+        "ב. כדי לאפשר לתהליך החדש גישה ישירה ובלתי מוגבלת לכל משאבי המערכת באופן מיידי.",
+        "ג. לשמור את מצב הרגיסטרים של המעבד (CPU context) עבור התהליך היוצא בתוך ה-PCB שלו.",
+        "ד. למנוע מהתהליך הנכנס לבצע פעולות בעלות הרשאות גבוהות לפני שקיבל את השליטה המלאה במעבד."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "על פי חומר ההרצאה (Lecture 6, chunk 15), במהלך החלפת הקשר (context switch), מערכת ההפעלה שומרת ב-PCB של כל תהליך את ה-Base וה-Bounds שלו. כאשר מתבצעת החלפה בין תהליכים, מערכת ההפעלה מעדכנת את רגיסטרי ה-Base וה-Bounds במעבד (רגיסטרים אלו קיימים גם במעבד) כדי להגדיר את מרחב הזיכרון של התהליך החדש. עדכון של שני רגיסטרים אלו במעבד מותר אך ורק במצב ליבה (kernel mode), ולכן זוהי סיבה קריטית לכך שמערכת ההפעלה חייבת לפעול במצב זה בעת ביצוע החלפת הקשר."
+    }
+  }
+}

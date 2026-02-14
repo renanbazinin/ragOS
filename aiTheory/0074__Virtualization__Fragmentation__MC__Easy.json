@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Fragmentation",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:10:34",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      9,
+      5,
+      6
+    ],
+    "token_usage": {
+      "prompt_tokens": 1829,
+      "output_tokens": 431,
+      "total_tokens": 3814
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Fragmentation"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהו קיטוע פנימי (internal fragmentation) בהקשר של ניהול זיכרון במערכת הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. מצב שבו המערכת מקצה למשתמש יותר זיכרון ממה שביקש בפועל, מה שמוביל לבזבוז.",
+        "ב. מצב שבו יש מספיק זיכרון פנוי לטפל בבקשה מסוימת, אך הוא מפוצל למקטעים קטנים ומרוחקים.",
+        "ג. בעיה המתרחשת כאשר תהליכים ארוכים אינם מקבלים זמן מעבד עקב תהליכים קצרים המגיעים כל הזמן.",
+        "ד. מצב שבו זיכרון פיזי מומר לזיכרון וירטואלי כדי לאפשר ליותר תהליכים לרוץ במקביל."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "האפשרות הנכונה היא א'. על פי חומר ההרצאה, קיטוע פנימי (internal fragmentation) מוגדר כ\"מצב בו אנחנו נותנים למשתמש יותר זיכרון ממה שהוא ביקש. זה בזבוז.\" מצב זה מתרחש כאשר מערכת ההפעלה מקצה בלוק זיכרון גדול יותר מהכמות המדויקת שנדרשה על ידי המשתמש, וכתוצאה מכך חלק מבלוק הזיכרון המוקצה נשאר בלתי מנוצל."
+    }
+  }
+}

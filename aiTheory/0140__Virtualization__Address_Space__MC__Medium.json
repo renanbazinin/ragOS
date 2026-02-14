@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Address Space",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 17:25:16",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      5,
+      6,
+      7
+    ],
+    "token_usage": {
+      "prompt_tokens": 2106,
+      "output_tokens": 754,
+      "total_tokens": 5234
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Address Space"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "בהינתן מערכת המשתמשת בטבלת דפים רב-שכבתית (Multi-Level Page Table), עם מרחב כתובות וירטואלי בגודל 1GB, גודל דף של 512 בתים, ו-128 רשומות PTEs בכל דף, מהו מספר הביטים המוקצה לכל אחד מהרכיבים הבאים בכתובת וירטואלית: Offset, Page Table Index, ו-Page Directory Index?",
+      "code_snippet": null,
+      "options": [
+        "א. Offset: 9 ביטים, Page Table Index: 7 ביטים, Page Directory Index: 14 ביטים.",
+        "ב. Offset: 9 ביטים, Page Table Index: 14 ביטים, Page Directory Index: 7 ביטים.",
+        "ג. Offset: 5 ביטים, Page Table Index: 7 ביטים, Page Directory Index: 18 ביטים.",
+        "ד. Offset: 9 ביטים, Page Table Index: 8 ביטים, Page Directory Index: 13 ביטים."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "הסבר מפורט:\n1.  **חישוב גודל ה-Offset:** גודל ה-Offset נקבע על ידי גודל הדף. גודל דף של 512 בתים הוא 2 בחזקת 9 (2^9), ולכן ה-Offset דורש 9 ביטים.\n2.  **חישוב גודל ה-VPN (Virtual Page Number):** מרחב הכתובות הוירטואלי הוא 1GB, שזה 2 בחזקת 30 (2^30) בתים. לכן, הכתובת הוירטואלית היא באורך 30 ביטים. גודל ה-VPN הוא סך הביטים בכתובת הוירטואלית פחות גודל ה-Offset: 30 - 9 = 21 ביטים.\n3.  **חישוב גודל ה-Page Table Index:** נתון שיש 128 רשומות PTEs בכל דף. 128 הוא 2 בחזקת 7 (2^7), ולכן ה-Page Table Index דורש 7 ביטים.\n4.  **חישוב גודל ה-Page Directory Index:** ה-Page Directory Index הוא יתר הביטים של ה-VPN לאחר שחישבנו את ה-Page Table Index: 21 - 7 = 14 ביטים.\n\nלכן, החלוקה הנכונה היא: Offset: 9 ביטים, Page Table Index: 7 ביטים, Page Directory Index: 14 ביטים. חלוקה זו תואמת במדויק לדוגמא המופיעה ב-Lecture 7, chunk 24, המדגימה את פירוק הכתובת הוירטואלית."
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Memory Management",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:08:08",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      9,
+      5,
+      6
+    ],
+    "token_usage": {
+      "prompt_tokens": 2240,
+      "output_tokens": 548,
+      "total_tokens": 3912
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Memory Management"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "על פי חומר ההרצאה, מהי הנחת יסוד מפשטת מרכזית של אלגוריתם ה-\"free list\" כפי שתואר בתחילה כ\"פשוט ויעיל\"?",
+      "code_snippet": null,
+      "options": [
+        "א. כל הבלוקים בזיכרון הם בגודל שווה.",
+        "ב. הזיכרון מחולק תמיד למקטעים בגודל קבוע של 4KB.",
+        "ג. המשתמש תמיד משחרר זיכרון באותו סדר שבו הקצה אותו.",
+        "ד. הכתובות של בלוקים פנויים סמוכים תמיד נבדלות בביט אחד."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "חומר ההרצאה מתאר את אלגוריתם ה-\"free list\" הפשוט כיעיל מאוד כאשר הוא מניח ש\"נחלק את הזיכרון לבלוקים ונחזיק רשימה מקושרת שתגיד לנו מה הבלוקים פנוי.\" ובמיוחד מציין ש\"כל הבלוקים באותו גודל\". הנחה זו מפשטת מאוד את הניהול, שכן אין צורך לנהל גדלים משתנים או למיין את הרשימה. בהמשך ההרצאה מצוין כי אם מנסים להחיל את אותם כללים על גדלים משתנים, זה הופך להיות בעייתי.\nאפשרות ב' אינה נכונה, שכן גודל הבלוקים (100MB בדוגמה) אינו קבוע ל-4KB.\nאפשרות ג' אינה נכונה, שכן ההרצאה מציינת בהקשר של ניהול ערימה (heap) ש\"המשתמש יכול להקצות זיכרון ולשחרר אותו בסדר אחר\".\nאפשרות ד' מתייחסת למאפיין של אלגוריתם \"Buddy Allocation\" ולא של \"free list\" הפשוט."
+    }
+  }
+}

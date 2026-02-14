@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "TLB",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 17:21:18",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      8,
+      7
+    ],
+    "token_usage": {
+      "prompt_tokens": 2114,
+      "output_tokens": 711,
+      "total_tokens": 4668
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "TLB"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "מהו הרצף הנכון של פעולות ה-MMU בעת גישה לכתובת וירטואלית, אם המיפוי אינו נמצא ב-TLB (TLB miss), אך הדף הוירטואלי אכן נמצא בזיכרון הפיזי (RAM)?",
+      "code_snippet": null,
+      "options": [
+        "א. ה-MMU ניגש לטבלת הדפים, מוצא את המיפוי, בודק שה-Present bit הוא 1, מעדכן את ה-TLB, וממשיך בגישה לזיכרון הפיזי.",
+        "ב. ה-MMU יוצר Trap למערכת ההפעלה באופן מיידי, מכיוון שהמיפוי לא נמצא ב-TLB.",
+        "ג. ה-MMU ניגש לטבלת הדפים, מוצא את המיפוי, בודק שה-Present bit הוא 0, ורק אז מעדכן את ה-TLB.",
+        "ד. ה-MMU מעדכן את ה-TLB עם מיפוי ריק, ויוצר Trap למערכת ההפעלה."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "על פי חומר ההרצאה, כאשר מתרחש TLB miss, ה-MMU אינו יוצר trap מיד אלא ממשיך לחפש את המיפוי בטבלת הדפים (Lecture 7, chunk 29). אם המיפוי נמצא בטבלת הדפים וה-Present bit שלו הוא 1 (כפי שמשתמע מהשאלה שהדף נמצא בזיכרון הפיזי), אז ה-MMU מתרגם את הכתובת, מעדכן את ה-TLB עם המיפוי החדש כדי לזרז גישות עתידיות לאותו דף, ורק אז ממשיך בגישה לזיכרון הפיזי (Lecture 8, chunk 10). לכן, אפשרות א' היא הנכונה.\nאפשרות ב' שגויה מכיוון ש-TLB miss אינו גורם ל-trap מיידי; ה-MMU מנסה תחילה לגשת לטבלת הדפים. אפשרות ג' שגויה מכיוון שאם ה-Present bit הוא 0, הדף אינו ב-RAM, וזה מוביל ל-trap (Page Fault) ולא לעדכון ה-TLB עם רשומה כזו (ה-TLB מחזיק רק רשומות עם Present bit=1). אפשרות ד' שגויה מכיוון שה-TLB מתעדכן במיפויים תקינים ולא ב\"מיפויים ריקים\", ו-trap אינו תוצאה ודאית של TLB miss."
+    }
+  }
+}

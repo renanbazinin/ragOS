@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Threads",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:27:00",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      10,
+      11
+    ],
+    "token_usage": {
+      "prompt_tokens": 1730,
+      "output_tokens": 424,
+      "total_tokens": 3639
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Threads"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהי ההשפעה העיקרית של קריאה לפונקציה `pthread_join` על החוט המבצע את הקריאה?",
+      "code_snippet": "int pthread_join(\n    pthread_t th,\n    void **thread_return);",
+      "options": [
+        "א. החוט המבצע את הקריאה ממשיך בריצה רגילה במקביל לחוט שעבורו נקראה הפונקציה.",
+        "ב. החוט המבצע את הקריאה נחסם (blocked) וממתין עד שהחוט שעבורו נקראה הפונקציה יסיים את ריצתו.",
+        "ג. החוט שעבורו נקראה הפונקציה נחסם באופן מיידי וממתין לאישור מהחוט המבצע את הקריאה.",
+        "ד. החוט המבצע את הקריאה מסיים את ריצתו באופן מיידי."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "על פי חומר ההרצאה, כאשר חוט מבצע קריאה לפונקציה `pthread_join`, הוא 'הופך להיות blocked כלומר הוא נחסם והוא מחכה' עד שהחוט שעבורו נקראה הפונקציה יסיים את ריצתו. רק לאחר שהחוט הממתין לו מסיים, החוט הקורא ממשיך בביצוע. האפשרויות האחרות אינן מתארות נכונה את התנהגות `pthread_join`."
+    }
+  }
+}

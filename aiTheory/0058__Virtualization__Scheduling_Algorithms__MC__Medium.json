@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Scheduling Algorithms",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 17:06:33",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      3
+    ],
+    "token_usage": {
+      "prompt_tokens": 2139,
+      "output_tokens": 710,
+      "total_tokens": 5382
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Scheduling Algorithms"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "איזו טענה מתארת באופן הטוב ביותר את הגישה הייחודית של אלגוריתם תזמון Stride Scheduling לחלוקה פרופורציונלית של זמן מעבד, בהשוואה לאלגוריתם Lottery Scheduling?",
+      "code_snippet": null,
+      "options": [
+        "א. הוא מבטיח חלוקה פרופורציונלית מדויקת יותר לאורך זמן על ידי מעקב דטרמיניסטי אחר זמן הריצה היחסי של כל תהליך באמצעות ערכי PASS ו-STRIDE.",
+        "ב. הוא מאפשר לתהליכים 'לנפח' באופן זמני את חלקם בזמן המעבד על ידי הוספה דינמית של ערכים ל-STRIDE שלהם.",
+        "ג. הוא מסתמך על בחירה אקראית של תהליך לריצה מתוך קבוצה של תהליכים זמינים, כאשר ההסתברות תלויה במספר ה'כרטיסים' שברשותו.",
+        "ד. הוא מותאם במיוחד למצבים שבהם זמן הריצה של כל ג'וב אינו ידוע מראש, ומחלק את זמן המעבד באופן שווה בין כל התהליכים."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "האלגוריתם Stride Scheduling משתמש בערכים דטרמיניסטיים (PASS ו-STRIDE) כדי להבטיח חלוקה פרופורציונלית של זמן המעבד. לכל ג'וב מוגדר ערך STRIDE, המייצג את חלקו היחסי, וערך PASS שמתעד כמה זמן הוא רץ עד כה. המתזמן בוחר תמיד את הג'וב עם ערך ה-PASS הנמוך ביותר, ולאחר הריצה מוסיף את ערך ה-STRIDE שלו ל-PASS שלו. גישה זו, כפי שמתוארת בחומר ההרצאה ('כשנרצה לבחור ג'וב לריצה, נבחר את הג'וב עם ה-pass הנמוך ביותר, ואז כל ריצה נוסיף את ה- stride שלו לערך ה-pass שלו'), מובילה לחלוקה פרופורציונלית מדויקת ודטרמיניסטית לאורך זמן. לעומת זאת, Lottery Scheduling מסתמך על בחירה אקראית באמצעות 'כרטיסים' (אפשרות ג'), ו'ניפוח כרטיסים' (Ticket inflation) הוא מנגנון השייך ל-Lottery ולא ל-Stride (אפשרות ב'). ההנחה בחומר ההרצאה היא שזמני הריצה ידועים עבור האלגוריתמים הנידונים (אפשרות ד' שגויה)."
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Threads",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 17:27:41",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      10,
+      11
+    ],
+    "token_usage": {
+      "prompt_tokens": 1730,
+      "output_tokens": 533,
+      "total_tokens": 3633
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Threads"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "איזו מהטענות הבאות מתארת נכונה את פעולת הפונקציה pthread_join?",
+      "code_snippet": null,
+      "options": [
+        "א. הפונקציה גורמת לחוט הקורא להיחסם (blocked) עד שהחוט המיועד (target thread) מסיים את ריצתו.",
+        "ב. הפונקציה מאפשרת לחוט אב בלבד להמתין לסיום ריצתם של חוטי הבן שלו.",
+        "ג. הפונקציה מיועדת ליצירת חוט חדש בתוך התהליך הנוכחי.",
+        "ד. הפונקציה מביאה לסיום מיידי של החוט המיועד, ללא קשר למצב ריצתו."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "התשובה הנכונה היא א'. על פי חומר ההרצאה (Lecture 10, chunk 31), כאשר חוט מבצע קריאה ל-pthread_join, הוא \"הופך להיות blocked כלומר הוא נחסם והוא מחכה\" עד שהחוט שהועבר כארגומנט יסיים את ריצתו. טענה ב' אינה נכונה, מכיוון שחומר ההרצאה מציין במפורש: \"כל חוט יכול לעשות join לכל חוט אחר באותו תהליך, ולא צריך יחסי אב וילדים\" (Lecture 10, chunk 32). טענה ג' אינה נכונה; pthread_join משמשת להמתנה לסיום חוט קיים, ולא ליצירת חוט חדש (לשם כך קיימת pthread_create). טענה ד' אינה נכונה; pthread_join אינה מביאה לסיום מיידי של חוט, אלא ממתינה לסיום הטבעי שלו או לסיום מבוקר על ידי pthread_exit. הפסקת חוט באופן מיידי מתבצעת על ידי pthread_cancel."
+    }
+  }
+}

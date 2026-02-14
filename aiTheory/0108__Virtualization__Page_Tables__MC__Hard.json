@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Page Tables",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-14 17:18:15",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      7
+    ],
+    "token_usage": {
+      "prompt_tokens": 1759,
+      "output_tokens": 637,
+      "total_tokens": 4370
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Page Tables"
+    ],
+    "difficulty_estimation": "Hard",
+    "content": {
+      "text": "בהקשר של טבלאות דפים היררכיות (Multi-Level Page Tables), חומר ההרצאה מציין שגם לאחר הפיכת טבלת הדפים למבנה עץ ושימוש ב-Page Directory, ה-Page Directory עצמו עלול להיות 'עצום' ולתפוס שטח זיכרון רב (למשל, 128 דפים). איזו אסטרטגיה מוצעת בחומר ההרצאה כדי להמשיך ולצמצם את צריכת הזיכרון עבור מבנה טבלת הדפים במקרה זה?",
+      "code_snippet": null,
+      "options": [
+        "א. הקטנת גודל הדף הפיזי (page size) כדי לאפשר יותר דפים בזיכרון הפיזי.",
+        "ב. הוספת רמה היררכית נוספת למבנה טבלת הדפים, כלומר יצירת 'מדריך למדריך' (directory to the directory).",
+        "ג. שימוש בטבלאות דפים הפוכות (Inverted Page Tables) במקום טבלאות דפים היררכיות.",
+        "ד. אחסון כל ה-Page Directory בזיכרון מטמון (cache) ייעודי ב-MMU."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "חומר ההרצאה מציין בפירוש כי למרות שטבלאות דפים היררכיות נועדו לצמצם את שטח הזיכרון הלא מנוצל על ידי אי-הקצאת דפים אפורים, ה-Page Directory עצמו יכול לתפוס שטח רב ('עצום', 'תופס 128 דפים'). כדי לטפל בבעיה זו, מוצעת האפשרות 'Can add a directory to the directory!', כלומר, הוספת רמה היררכית נוספת. גישה זו מאפשרת לצמצם עוד יותר את ההקצאה על ידי אי-הקצאה של חלקים ב-Page Directory עצמו, בדומה לאופן שבו ה-Page Directory המקורי אינו מקצה טבלאות דפים שלמות שאינן בשימוש. אפשרויות אחרות אינן מוזכרות כפתרון לבעיה ספציפית זו בחומר ההרצאה, או שהן אינן פתרון מבני לגודל ה-Page Directory."
+    }
+  }
+}

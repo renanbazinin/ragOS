@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "TLB",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:20:42",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      8,
+      7
+    ],
+    "token_usage": {
+      "prompt_tokens": 2114,
+      "output_tokens": 490,
+      "total_tokens": 3978
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "TLB"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהי המטרה העיקרית של ה-TLB (Translation Lookaside Buffer) במערכת הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. לקצר את זמן הגישה לזיכרון הפיזי על ידי שמירת מיפויי כתובות וירטואליות לכתובות פיזיות.",
+        "ב. לאחסן נתונים של דפים שנגשו אליהם לאחרונה מהדיסק.",
+        "ג. לנהל את סדר הגישה לדפים בטבלת הדפים (page table) עבור תהליכים שונים.",
+        "ד. להבטיח שכל הדפים של תהליך מסוים יהיו בזיכרון הפיזי באופן רציף."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "ה-TLB הוא מטמון חומרה מהיר הממוקם במעבד, ותפקידו העיקרי הוא לשמש כזיכרון מטמון (cache) למיפויי כתובות וירטואליות לכתובות פיזיות שנעשה בהן שימוש לאחרונה. מטרתו היא לקצר את זמן הגישה לזיכרון על ידי הימנעות מהצורך לבצע חיפוש ארוך בטבלת הדפים בכל גישה לזיכרון וירטואלי. אם המיפוי נמצא ב-TLB (TLB hit), הגישה מהירה מאוד. אם המיפוי אינו נמצא (TLB miss), הוא נשלף מטבלת הדפים ולאחר מכן מעודכן ב-TLB לשימוש עתידי, כפי שמתואר בחומר הלימוד: 'מה ש-tlb נותן לנו זה קיצור בגישות לזיכרון'."
+    }
+  }
+}

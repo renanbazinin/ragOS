@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "System Calls",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 16:58:53",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      2,
+      5
+    ],
+    "token_usage": {
+      "prompt_tokens": 2015,
+      "output_tokens": 872,
+      "total_tokens": 5178
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "System Calls"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהי המטרה העיקרית של קריאת מערכת (System Call) במערכת הפעלה, כפי שתואר בחומר ההרצאה?",
+      "code_snippet": "```c\n#include <stdio.h>\n#include <fcntl.h> // For open()\n#include <unistd.h> // For close()\n\nint main() {\n    int fd;\n    // The open() function is a library call that typically\n    // makes a system call to the OS kernel to open a file.\n    fd = open(\"example.txt\", O_CREAT | O_WRONLY, 0644);\n    if (fd == -1) {\n        perror(\"Error opening file\");\n        return 1;\n    }\n    printf(\"File opened successfully with file descriptor: %d\\n\", fd);\n    close(fd); // close() also involves a system call\n    return 0;\n}\n```",
+      "options": [
+        "א. לאפשר לתהליכי משתמש לבצע פעולות מורשות (privileged operations) באופן בטוח, תוך העברת שליטה למצב ליבה (kernel mode).",
+        "ב. להעביר הודעות (signals) בין תהליכים שונים לצורך תקשורת.",
+        "ג. לאפשר גישה ישירה של תהליכי משתמש לטבלת התהליכים (process table) של מערכת ההפעלה.",
+        "ד. לוותר על שימוש במעבד ולהחזיר את השליטה למערכת ההפעלה באופן וולונטרי (yield)."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "על פי חומר ההרצאה (Lecture 2, chunk 28 ו-24), המנגנון של קריאת מערכת (System Call) נועד לפתור את בעיית האבטחה ולאפשר לתהליכים במצב משתמש (user mode) לבקש שירותים מרכיבי חומרה או לבצע פעולות מורשות (privileged operations) בצורה בטוחה. כאשר תהליך מבצע קריאת מערכת, ההרשאות שלו עולות ומתבצעת החלפה ממצב משתמש למצב ליבה (kernel mode), מה שמעביר את השליטה לגרעין מערכת ההפעלה כדי שיבצע את הפעולה המבוקשת בצורה מבוקרת ומאובטחת.\n\nאפשרויות אחרות אינן נכונות:\nב. העברת הודעות (signals) בין תהליכים היא מנגנון נפרד, ובעוד שקריאת מערכת יכולה לשמש לשליחת signal, זו אינה המטרה העיקרית של קריאות מערכת באופן כללי (Lecture 5, chunk 9).\nג. חומר ההרצאה מציין במפורש כי לתהליכי משתמש אין גישה ישירה לטבלת התהליכים (process table) של מערכת ההפעלה; גישה זו שמורה ל-kernel בלבד (Lecture 2, chunk 17).\nד. 'yield' היא קריאת מערכת ספציפית שנועדה לוותר על המעבד באופן וולונטרי, אך זוהי מטרה מאוד ספציפית ואינה המטרה העיקרית והכוללת של כלל קריאות המערכת (Lecture 2, chunk 29)."
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Process Lifecycle",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 16:54:10",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      2,
+      4,
+      5
+    ],
+    "token_usage": {
+      "prompt_tokens": 1884,
+      "output_tokens": 393,
+      "total_tokens": 3252
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Process Lifecycle"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מה המשמעות של תהליך הנמצא במצב \"Running\" במחזור החיים שלו?",
+      "code_snippet": null,
+      "options": [
+        "א. המעבד מריץ כרגע את הפקודות שלו.",
+        "ב. התהליך מוכן לרוץ וממתין למערכת ההפעלה שתשבץ אותו.",
+        "ג. התהליך סיים את ריצתו אך הרשומה שלו עדיין קיימת בטבלת התהליכים.",
+        "ד. התהליך ממתין להשלמת פעולת קלט/פלט."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "לפי חומר ההרצאה (Lecture 2, chunk 34), אם תהליך נמצא במצב \"Running\", המשמעות היא \"שהמעבד מריץ כרגע את הפקודות שלו\". אפשרות ב' מתארת את מצב \"Ready\", שבו התהליך מוכן לרוץ אך עדיין לא שובץ למעבד. אפשרות ג' מתארת תהליך \"זומבי\" (defunct). אפשרות ד' מתארת מצב של המתנה לפעולת קלט/פלט, אשר אינו אחד המצבים העיקריים המתוארים במפורש בחומר ההרצאה בקשר למצב \"Running\"."
+    }
+  }
+}

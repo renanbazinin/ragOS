@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Signals",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:00:50",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      4,
+      5
+    ],
+    "token_usage": {
+      "prompt_tokens": 1860,
+      "output_tokens": 406,
+      "total_tokens": 3731
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Signals"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהי המטרה העיקרית של סיגנלים (signals) במערכת הפעלה, כפי שתוארו בחומר הנלמד?",
+      "code_snippet": null,
+      "options": [
+        "א. לאפשר למערכת ההפעלה להודיע אירועים לתהליכים, או לתהליכים לתקשר ביניהם.",
+        "ב. לטפל באופן בלעדי בפסיקות חומרה (hardware interrupts).",
+        "ג. לוודא שתהליכי בן (child processes) תמיד יסיימו את ריצתם לפני תהליכי אב (parent processes).",
+        "ד. למנוע מצב של לולאה אינסופית בתהליכים."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "על פי חומר ההרצאה (Chunk 9 ו-10), סיגנלים מתוארים כ'אירועים של התהליך, הודעות שמערכת ההפעלה רוצה להודיע לתהליך שלנו' וכן ש'סיגנלים יכולים גם לשמש לתקשורת: אם תהליך אחד רוצה להודיע משהו לתהליך אחר (לשלוח סיגנל)'. לכן, האפשרות הנכונה ביותר היא שאותות מאפשרים למערכת ההפעלה להודיע לתהליכים על אירועים, וכן לתהליכים לתקשר ביניהם."
+    }
+  }
+}

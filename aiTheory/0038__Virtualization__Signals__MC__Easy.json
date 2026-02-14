@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Signals",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:01:00",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      4,
+      5
+    ],
+    "token_usage": {
+      "prompt_tokens": 1860,
+      "output_tokens": 397,
+      "total_tokens": 3625
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Signals"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהי המטרה העיקרית של סיגנלים (Signals) בהקשר של תהליכים במערכת הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. לאפשר למערכת ההפעלה להודיע אירועים לתהליכים, או לתהליכים לתקשר ביניהם.",
+        "ב. לנהל את הקצאת הזיכרון בין תהליכים שונים.",
+        "ג. לאפשר לתהליכים לעצור את ביצועם ולעבור למצב המתנה (waiting) באופן יזום בלבד.",
+        "ד. לאבטח את המערכת מפני גישה לא מורשית לקבצים."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "על פי חומר ההרצאה (Chunk 9), סיגנלים מוגדרים כ'אירועים של התהליך, הודעות שמערכת ההפעלה רוצה להודיע לתהליך שלנו'. בנוסף, נכתב ש'סיגנלים יכולים גם לשמש לתקשורת: אם תהליך אחד רוצה להודיע משהו לתהליך אחר (לשלוח סיגנל)'. לכן, המטרה העיקרית של סיגנלים היא להודיע על אירועים לתהליכים ולשמש לתקשורת ביניהם."
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Context Switching",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 16:57:22",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      2,
+      6
+    ],
+    "token_usage": {
+      "prompt_tokens": 1956,
+      "output_tokens": 562,
+      "total_tokens": 5024
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Context Switching"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "מהי הסיבה העיקרית לכך שעדכון רגיסטרי ה-Base וה-Bounds במעבד, כחלק ממנגנון ה-Context Switch, חייב להתבצע במצב Kernel Mode?",
+      "code_snippet": null,
+      "options": [
+        "א. כדי למנוע מתהליך משתמש לשנות את גבולות הזיכרון שהוקצו לו ולגשת לזיכרון של תהליכים אחרים או של מערכת ההפעלה.",
+        "ב. מכיוון שרגיסטרי ה-Base וה-Bounds מכילים מידע קריטי לביצוע System Calls, אשר נגיש רק במצב Kernel Mode.",
+        "ג. כי רק במצב Kernel Mode ניתן לבצע גישה ישירה לזיכרון הפיזי של המחשב.",
+        "ד. מפני שעדכון רגיסטרים אלו דורש השהייה של כל התהליכים האחרים במערכת, פעולה שרק ה-Kernel רשאי לבצע."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "על פי חומר ההרצאה (Lecture 6, chunk 15), עדכון רגיסטרי ה-Base וה-Bounds במעבד מותר רק במצב Kernel Mode. הסיבה לכך היא שרגיסטרים אלו משמשים את יחידת ניהול הזיכרון (MMU) כדי לוודא שכל גישה לזיכרון על ידי תהליך המשתמש נמצאת בתוך גבולות הזיכרון שהוקצו לו. אם תהליך משתמש היה יכול לשנות רגיסטרים אלו באופן עצמאי, הוא היה יכול לעקוף את מנגנון הגנת הזיכרון, לגשת לזיכרון של תהליכים אחרים או של מערכת ההפעלה, ובכך לפגוע באבטחת ויציבות המערכת. לכן, פעולה זו היא פעולה מיוחסת (privileged operation) שרק מערכת ההפעלה יכולה לבצע במצב Kernel Mode במהלך Context Switch, כדי להבטיח את הפרדת הזיכרון והגנתו."
+    }
+  }
+}

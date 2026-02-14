@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Page Tables",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 17:17:30",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      7
+    ],
+    "token_usage": {
+      "prompt_tokens": 1759,
+      "output_tokens": 584,
+      "total_tokens": 4092
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Page Tables"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "מהי הסיבה העיקרית לשימוש בטבלת דפים היררכית (Multi-Level Page Table) במערכות הפעלה מודרניות?",
+      "code_snippet": null,
+      "options": [
+        "א. כדי להפחית את מספר הגישות לזיכרון הפיזי במהלך תרגום כתובות.",
+        "ב. כדי לאפשר שימוש בדפים בגדלים שונים עבור אזורים שונים במרחב הכתובות הוירטואלי.",
+        "ג. כדי לחסוך בזיכרון פיזי על ידי אי-הקצאת טבלאות דפים שלמות (או חלקים מהן) עבור אזורים ריקים או לא מנוצלים במרחב הכתובות הוירטואלי של התהליך.",
+        "ד. כדי להגביל את גודל מרחב הכתובות הוירטואלי שכל תהליך יכול להשתמש בו."
+      ]
+    },
+    "solution": {
+      "correct_option": "ג",
+      "explanation": "ההסבר: טבלאות דפים היררכיות (Multi-Level Page Tables) נועדו לטפל בבעיה שבה רוב מרחב הכתובות הוירטואלי של תהליך אינו בשימוש, כפי שצוין בחומר הלימוד: \"רוב התהליכים לא משתמשים בכל הזיכרון של מרחב הכתובות שלהם. רעיון: נציא את כל השטח האפור, נצמצם אותו לפחות רשומות\". במקום להקצות רשומות טבלה לכל כתובת וירטואלית אפשרית (גם אם אינה בשימוש), המבנה ההיררכי מאפשר ל-Page Directory להצביע רק לחלקי טבלת הדפים הרלוונטיים. אם אזור שלם במרחב הכתובות הוירטואלי אינו בשימוש (כלומר, \"Entire page of entries invalid?\"), אין צורך להקצות את טבלת הדפים המלאה עבורו בזיכרון הפיזי (\"Don't allocate it\"), ובכך נחסך זיכרון רב."
+    }
+  }
+}

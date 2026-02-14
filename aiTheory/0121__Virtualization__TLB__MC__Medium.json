@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "TLB",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 17:20:54",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      8,
+      7
+    ],
+    "token_usage": {
+      "prompt_tokens": 2114,
+      "output_tokens": 558,
+      "total_tokens": 4488
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "TLB"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "מהי המטרה העיקרית של הוספת מזהה ASID (Address Space ID) לרשומות ה-TLB?",
+      "code_snippet": null,
+      "options": [
+        "א. כדי לאפשר ל-TLB להחזיק רשומות רק עבור דפים הנמצאים בזיכרון הפיזי (RAM).",
+        "ב. כדי למנוע מצב של TLB miss כאשר מתרחש context switch בין תהליכים שונים.",
+        "ג. כדי להבחין בין רשומות TLB השייכות לתהליכים שונים ולאפשר שמירת רשומות של מספר תהליכים במקביל.",
+        "ד. כדי לקצר את תהליך החיפוש בטבלת הדפים במקרה של TLB miss."
+      ]
+    },
+    "solution": {
+      "correct_option": "ג",
+      "explanation": "ה-ASID (Address Space ID) מתווסף לכל רשומה ב-TLB על מנת לזהות לאיזה תהליך (מרחב כתובות) הרשומה שייכת. פתרון זה מאפשר ל-MMU להבחין בין רשומות TLB השייכות לתהליכים שונים. כאשר מתבצע context switch בין תהליכים, ה-TLB לא צריך להתרוקן לחלוטין. במקום זאת, ה-MMU יכול להשתמש ב-ASID כדי לוודא שרשומות ה-TLB הרלוונטיות לתהליך הנוכחי הן אלה שנעשה בהן שימוש, תוך התעלמות מרשומות של תהליכים אחרים שעדיין נמצאות במטמון. זה משפר את הביצועים על ידי שמירת מיפויים של תהליכים שונים במקביל ב-TLB ומניעת הצורך לטעון אותם מחדש לאחר כל החלפת קשר. אפשרות א' מתייחסת ל-Present bit, ואפשרויות ב' ו-ד' אינן המטרה העיקרית או המדויקת של ה-ASID."
+    }
+  }
+}

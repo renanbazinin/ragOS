@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Scheduling Algorithms",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 17:06:45",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      3
+    ],
+    "token_usage": {
+      "prompt_tokens": 2139,
+      "output_tokens": 656,
+      "total_tokens": 4128
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Scheduling Algorithms"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "מהו ההבדל העיקרי בין אלגוריתם תזמון Lottery Scheduling לבין אלגוריתם Stride Scheduling בדרך שבה הם מקצים זמן מעבד באופן פרופורציונלי?",
+      "code_snippet": null,
+      "options": [
+        "א. Lottery Scheduling משתמש בהגרלה אקראית של כרטיסים, בעוד ש-Stride Scheduling משתמש בערכי PASS ו-STRIDE כדי להבטיח תזמון דטרמיניסטי.",
+        "ב. Lottery Scheduling מתמקד במניעת רעבון (starvation), בעוד ש-Stride Scheduling מתמקד בהקטנת זמן ההמתנה הממוצע.",
+        "ג. Stride Scheduling דורש ידע מוקדם על משך הריצה המדויק של כל ג'וב, בעוד ש-Lottery Scheduling אינו דורש זאת.",
+        "ד. Lottery Scheduling מאפשר לג'ובים להגדיל או להקטין באופן זמני את מספר הכרטיסים שלהם (ticket inflation), בעוד ש-Stride Scheduling אינו תומך במנגנון גמישות דומה."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "ההבדל העיקרי והמהותי בין שני האלגוריתמים טמון במנגנון התזמון שלהם. Lottery Scheduling הוא אלגוריתם הסתברותי המקצה זמן מעבד באופן פרופורציונלי על ידי בחירה אקראית של ג'וב מנצח מתוך מאגר כרטיסים (Tickets), כאשר הסיכוי לזכות פרופורציונלי למספר הכרטיסים שבידי הג'וב. לעומת זאת, Stride Scheduling הוא אלגוריתם דטרמיניסטי המבטיח הקצאה פרופורציונלית על ידי ניהול ערכי PASS ו-STRIDE לכל ג'וב. הוא בוחר תמיד את הג'וב עם ערך ה-PASS הנמוך ביותר, ולאחר הרצתו מעדכן את ערך ה-PASS שלו על ידי הוספת ה-STRIDE שלו. שיטה זו מבטיחה תזמון מדויק וצפוי יותר לאורך זמן, בניגוד לאקראיות של Lottery Scheduling. אפשרות ד' מתארת תכונה של Lottery Scheduling שאינה קיימת ב-Stride Scheduling, אך היא אינה ההבדל העיקרי במנגנון הליבה של הקצאה פרופורציונלית, אלא תוספת גמישות."
+    }
+  }
+}

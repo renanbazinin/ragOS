@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Multi-level Page Tables",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:18:25",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      7
+    ],
+    "token_usage": {
+      "prompt_tokens": 1880,
+      "output_tokens": 473,
+      "total_tokens": 3825
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Multi-level Page Tables"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהו היתרון המרכזי בשימוש בטבלאות דפים היררכיות (Multi-Level Page Tables) בהשוואה לטבלת דפים ברמה אחת?",
+      "code_snippet": null,
+      "options": [
+        "א. חיסכון משמעותי בזיכרון פיזי על ידי אי-הקצאת רשומות טבלה עבור חלקי מרחב הכתובות הוירטואלי שאינם בשימוש.",
+        "ב. האצת זמן הגישה לזיכרון הפיזי עבור כל תרגום כתובת.",
+        "ג. פישוט ארכיטקטורת יחידת ניהול הזיכרון (MMU).",
+        "ד. תמיכה במספר גדול יותר של דפים וירטואליים בכל תהליך."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "החומר המצוין בשיעור מסביר כי הרעיון המרכזי מאחורי טבלאות דפים היררכיות (Multi-Level Page Tables) הוא לצמצם את כמות הזיכרון הפיזי הנדרש לטבלאות הדפים עצמן. נאמר במפורש: \"רוב התהליכים לא משתמשים בכל הזיכרון של מרחב הכתובות שלהם. רעיון: נציא את כל השטח האפור, נצמצם אותו לפחות רשומות.\" וכן \"No need to allocate!\" עבור דפים לא תקפים או לא בשימוש. זה מוביל לחיסכון בזיכרון פיזי, ובכך הופך את אפשרות א' לנכונה ביותר."
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Scheduling Algorithms",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:06:18",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      3
+    ],
+    "token_usage": {
+      "prompt_tokens": 2139,
+      "output_tokens": 535,
+      "total_tokens": 4946
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Scheduling Algorithms"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "על פי חומר ההרצאה, מהו העיקרון המרכזי שבו מתזמן \"הגרלה\" (Lottery scheduling) משתמש כדי להקצות זמן מעבד באופן פרופורציונלי לתהליכים?",
+      "code_snippet": null,
+      "options": [
+        "א. הוא מקצה \"כרטיסי הגרלה\" (tickets) לתהליכים ובוחר באופן אקראי זוכה, כאשר לתהליכים עם יותר כרטיסים יש סיכוי גבוה יותר להיבחר.",
+        "ב. הוא עוקב אחר ערך \"PASS\" וערך \"STRIDE\" עבור כל תהליך, ובוחר להריץ את התהליך עם ערך ה-PASS הנמוך ביותר.",
+        "ג. הוא תמיד מריץ את התהליך עם זמן הריצה הנותר הקצר ביותר.",
+        "ד. הוא מריץ תהליכים לפי סדר הגעתם, מתחילתם ועד סופם."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "מתזמן \"הגרלה\" (Lottery scheduling) פועל באמצעות הקצאת \"כרטיסי הגרלה\" (tickets) לכל תהליך. בכל פעם שיש צורך לבחור תהליך לריצה, מתבצעת הגרלה אקראית. ככל שלתהליך מסוים יש יותר כרטיסים, כך גדל הסיכוי שלו לזכות בהגרלה ולקבל זמן מעבד. באופן זה, מושגת הקצאה פרופורציונלית של זמן המעבד בהתאם למספר הכרטיסים של כל תהליך. אפשרות ב' מתארת את אלגוריתם Stride scheduling. אפשרות ג' מתארת את אלגוריתם SRTF (Shortest Remaining Time First) המוזכר בחומר. אפשרות ד' מתארת אלגוריתם מסוג FCFS (First-Come, First-Served)."
+    }
+  }
+}

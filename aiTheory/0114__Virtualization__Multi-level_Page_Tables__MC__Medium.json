@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Multi-level Page Tables",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 17:19:26",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      7
+    ],
+    "token_usage": {
+      "prompt_tokens": 1880,
+      "output_tokens": 603,
+      "total_tokens": 4864
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Multi-level Page Tables"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "מהו היתרון העיקרי של שימוש בטבלת דפים רב-שכבתית (Multi-Level Page Table) בהשוואה לטבלת דפים שטוחה (Single-Level Page Table), כפי שמתואר בחומר ההרצאה?",
+      "code_snippet": null,
+      "options": [
+        "א. חיסכון משמעותי בזיכרון פיזי על ידי אי-הקצאה של טבלאות דפים שלמות עבור אזורים לא מנוצלים במרחב הכתובות הוירטואלי.",
+        "ב. הגדלה מהירה יותר של מרחב הכתובות הוירטואלי מעבר למה שניתן להשיג בטבלה שטוחה.",
+        "ג. שיפור ביצועים בתרגום כתובות באמצעות הפחתת מספר הגישות לזיכרון הראשי עבור כל תרגום.",
+        "ד. תמיכה מובנית בזיכרון וירטואלי בגדלים שונים (Variable Page Sizes) ללא צורך במנגנונים נוספים."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "החומר המצורף מציין במפורש כי רוב התהליכים אינם מנצלים את כל מרחב הכתובות הוירטואלי שלהם. הרעיון המרכזי מאחורי טבלאות דפים רב-שכבתיות הוא \"נצמצם אותו לפחות רשומות\" ו-\"Don't allocate it\" כאשר \"Entire page of entries invalid?\". מבנה זה, המכונה גם \"עץ\" או \"היררכי\", מאפשר למערכת ההפעלה לא להקצות זיכרון פיזי לטבלאות דפים שלמות (או לחלקים מהן) שאינן בשימוש. לדוגמה, אם חלק גדול ממרחב הכתובות אינו ממופה, אין צורך להקצות Page Table עבורו, ורשומת ה-Page Directory המתאימה תצביע על חוסר תוקף. זה מוביל לחיסכון משמעותי בזיכרון פיזי, שהיה מוקצה לטבלאות דפים בגישה שטוחה עבור אזורים אלו."
+    }
+  }
+}

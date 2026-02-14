@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Multi-level Page Tables",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:18:49",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      7
+    ],
+    "token_usage": {
+      "prompt_tokens": 1880,
+      "output_tokens": 436,
+      "total_tokens": 4233
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Multi-level Page Tables"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהי המטרה העיקרית של שימוש בטבלאות דפים היררכיות (Multi-Level Page Tables) במערכות הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. לחסוך בזיכרון על ידי אי-הקצאת רשומות טבלה עבור חלקים לא מנוצלים במרחב הכתובות הוירטואלי.",
+        "ב. להאיץ את תהליך תרגום הכתובות הוירטואליות לכתובות פיזיות.",
+        "ג. לפשט את ניהול הזיכרון עבור תהליכים מרובים הפועלים במקביל.",
+        "ד. לאפשר תמיכה בגדלים גדולים יותר של זיכרון פיזי (RAM)."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "החומר המצורף מציין במפורש כי המטרה העיקרית של טבלאות דפים היררכיות היא 'לצמצם אותו לפחות רשומות' ו'לא להקצות' דפים שלמים של רשומות אם הם לא בשימוש (שטח אפור). רוב התהליכים אינם משתמשים בכל מרחב הכתובות הוירטואלי שלהם, ולכן טבלאות דפים היררכיות מאפשרות לחסוך בזיכרון על ידי אי-הקצאת טבלאות דפים עבור חלקים לא מנוצלים אלה."
+    }
+  }
+}

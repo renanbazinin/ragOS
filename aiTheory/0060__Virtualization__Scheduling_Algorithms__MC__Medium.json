@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Scheduling Algorithms",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 17:07:02",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      3
+    ],
+    "token_usage": {
+      "prompt_tokens": 2139,
+      "output_tokens": 688,
+      "total_tokens": 5489
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Scheduling Algorithms"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "באלגוריתם תזמון Stride Scheduling, כיצד מושגת הקצאת זמן מעבד פרופורציונלית בין תהליכים שונים, ומה המשמעות של ערך ה-STRIDE?",
+      "code_snippet": null,
+      "options": [
+        "א. תהליך בעל ערך STRIDE נמוך יותר יקבל זמן מעבד רב יותר, מכיוון שערך ה-PASS שלו יגדל לאט יותר, מה שיגרום לו להיבחר לעיתים קרובות יותר.",
+        "ב. תהליך בעל ערך STRIDE גבוה יותר יקבל זמן מעבד רב יותר, מכיוון שערך ה-PASS שלו יגדל מהר יותר, מה שיבטיח לו עדיפות בבחירה הבאה.",
+        "ג. ערך ה-STRIDE קובע את משך הזמן שתהליך ירוץ בכל פעם שהוא נבחר, ללא קשר לערך ה-PASS.",
+        "ד. הקצאת זמן המעבד נקבעת באופן אקראי על בסיס ערך ה-STRIDE, בדומה לאלגוריתם Lottery Scheduling."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "אלגוריתם Stride Scheduling נועד להקצות זמן מעבד באופן פרופורציונלי. לכל תהליך מוגדר ערך STRIDE וערך PASS (שמתחיל מ-0). בכל פעם שיש לבחור תהליך לריצה, נבחר התהליך בעל ערך ה-PASS הנמוך ביותר. לאחר ריצת התהליך, ערך ה-STRIDE שלו מתווסף לערך ה-PASS שלו. משמעות הדבר היא שתהליך בעל ערך STRIDE נמוך יותר יגרום לערך ה-PASS שלו לגדול בקצב איטי יותר, ולכן הוא יישאר עם ערך PASS נמוך יחסית למשך זמן רב יותר, מה שיגדיל את הסיכויים שלו להיבחר שוב ושוב. כפי שמצוין בחומר ההרצאה: 'אם A יהיה בעל ערך 100 ו-B יהיה בעל ערך 200, אז זה אומר שנרצה להריץ את A פי 2 פעמים כל פעם שנריץ את B'. לפיכך, STRIDE נמוך יותר מקנה עדיפות גבוהה יותר וזמן מעבד רב יותר, ואילו STRIDE גבוה יותר פירושו פחות זמן מעבד. האלגוריתם פועל באופן דטרמיניסטי ולא אקראי כמו Lottery Scheduling."
+    }
+  }
+}

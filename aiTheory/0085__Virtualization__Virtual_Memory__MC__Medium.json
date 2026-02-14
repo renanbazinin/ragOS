@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Virtual Memory",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 17:12:58",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      6
+    ],
+    "token_usage": {
+      "prompt_tokens": 1659,
+      "output_tokens": 607,
+      "total_tokens": 4020
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Virtual Memory"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "במערכת הפעלה המשתמשת בזיכרון וירטואלי, מהו תפקידו העיקרי של רכיב ה-MMU (Memory Management Unit) ואיזה מבנה נתונים הוא מנצל לביצוע תפקיד זה?",
+      "code_snippet": null,
+      "options": [
+        "א. ה-MMU אחראי לתרגום כתובות וירטואליות לכתובות פיזיות, והוא נעזר ב\"טבלת הדפים\" (Page Table) של התהליך לצורך כך.",
+        "ב. ה-MMU אחראי להקצות 4GB של זיכרון פיזי לכל תהליך, והוא משתמש ברגיסטרי base&bounds כדי לוודא גישה חוקית.",
+        "ג. ה-MMU אחראי לניהול הדיסק הקשיח כהרחבה לזיכרון הפיזי, והוא משתמש במבנה נתונים ייעודי לניהול קבצים.",
+        "ד. ה-MMU אחראי לחלוקת הזיכרון הפיזי לדפים שווים בגודלם, והוא שומר את המידע הזה ב-kernel."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "התשובה הנכונה היא א'. על פי חומר ההרצאה, ה-MMU (Memory Management Unit) הוא רכיב חומרה שתפקידו לקבל כתובת וירטואלית ולתרגם אותה לכתובת פיזית (chunk 14). לצורך תרגום זה, ה-MMU נעזר ב\"טבלת הדפים\" (Page Table), שהיא מבנה נתונים הנשמר עבור כל תהליך ב-kernel ומכיל את המיפויים בין דפים וירטואליים למסגרות פיזיות (chunk 28). אפשרויות ב', ג' ו-ד' מתארות תפקידים שאינם התפקיד העיקרי של ה-MMU או שהן שגויות בפרטים לגבי אופן פעולת הזיכרון הווירטואלי (למשל, ביטול השימוש ב-base&bounds בזיכרון וירטואלי, chunk 25)."
+    }
+  }
+}

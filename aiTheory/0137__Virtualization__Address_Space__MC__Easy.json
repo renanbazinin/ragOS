@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Address Space",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:24:37",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      5,
+      6,
+      7
+    ],
+    "token_usage": {
+      "prompt_tokens": 2106,
+      "output_tokens": 479,
+      "total_tokens": 4300
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Address Space"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "במערכת הפעלה המשתמשת בטבלאות דפים (paging), למה מחולקת בדרך כלל כתובת וירטואלית?",
+      "code_snippet": null,
+      "options": [
+        "א. מספר דף וירטואלי (VPN) והיסט בתוך הדף (Offset).",
+        "ב. מספר מסגרת פיזית (PFN) וגודל הזיכרון הפיזי.",
+        "ג. כתובת התחלה של התוכנית וכתובת סיום של התוכנית.",
+        "ד. גודל ה-Stack וגודל ה-Heap."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "במערכת הפעלה המשתמשת בטבלאות דפים (paging), כתובת וירטואלית מחולקת לשני חלקים עיקריים: מספר דף וירטואלי (VPN) והיסט (Offset) בתוך הדף. ה-VPN משמש לאיתור הרשומה המתאימה בטבלת הדפים, שממנה נגזר מספר המסגרת הפיזית (PFN). ההיסט נשאר ללא שינוי ומשמש לאיתור המיקום הספציפי בתוך המסגרת הפיזית. חלוקה זו מתוארת בחומר ההרצאה, לדוגמה, במבנה הכתובת הוירטואלית המוצג ב-Lecture 6 (chunk 32) כ- \"VPN | Offset\". אפשרויות ב', ג' ו-ד' אינן מתארות את החלוקה הבסיסית של כתובת וירטואלית למטרות paging."
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Multi-core Processors",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:29:11",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      10,
+      12,
+      15
+    ],
+    "token_usage": {
+      "prompt_tokens": 2191,
+      "output_tokens": 458,
+      "total_tokens": 4636
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Multi-core Processors"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהו היתרון העיקרי בשמירה על 'זיקת מטמון' (cache affinity) במערכת מרובת ליבות?",
+      "code_snippet": null,
+      "options": [
+        "א. שיפור ביצועים על ידי גישה מהירה יותר לנתונים מהמטמון המקומי של המעבד.",
+        "ב. הפחתת עומס החלפת ההקשר (context switch) בין תהליכים.",
+        "ג. פישוט התקשורת בין תהליכים (IPC).",
+        "ד. הבטחת מקביליות אמיתית לכל ה-threads במערכת."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "על פי חומר ההרצאה, 'אידיאלית, היינו רוצים תזמון כזה ששומר על cache affinity (כלומר שתהליך ירוץ על המעבד הראשון שהריץ אותו)'. הסיבה לכך היא שלכל מעבד במערכת מרובת ליבות יש מטמון (cache L1) פרטי ומהיר משלו. שמירה על זיקת מטמון מבטיחה שהתהליך ימשיך לרוץ על אותו מעבד, וכך הנתונים שהוא זקוק להם יימצאו כבר במטמון המקומי והמהיר של אותו מעבד. זה מוביל ל'זיכרון של התוכנית שלנו נראה מהיר', ובכך לשיפור בביצועים, מכיוון ש'אם כל פעם שהיינו קוראים מהזיכרון, המעבד באמת היה ניגש לזיכרון, הביצועים שלנו היו גרועים'."
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Address Space",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 17:25:30",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      5,
+      6,
+      7
+    ],
+    "token_usage": {
+      "prompt_tokens": 2106,
+      "output_tokens": 564,
+      "total_tokens": 4839
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Address Space"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "בהתבסס על קטע הקוד וההסברים שסופקו בחומר ההרצאה, היכן יאוחסן התוכן שאליו מצביע המשתנה `z` (כלומר `*z`) במרחב הכתובות הוירטואלי של התהליך?",
+      "code_snippet": "int x;\nint main(int argc, char *argv[]) {\n    int y;\n    int *z = malloc(sizeof(int));\n}",
+      "options": [
+        "א. באזור ה-Text, שכן הוא מייצג קטע קוד של התוכנית.",
+        "ב. באזור ה-Data, שכן הוא משתנה גלובלי או קבוע.",
+        "ג. באזור ה-Stack, שכן המשתנה `z` עצמו הוא משתנה מקומי לפונקציה `main`.",
+        "ד. באזור ה-Heap, שכן הזיכרון עבורו הוקצה באופן דינאמי באמצעות `malloc`."
+      ]
+    },
+    "solution": {
+      "correct_option": "ד",
+      "explanation": "התשובה הנכונה היא ד'. על פי חומר ההרצאה (Lecture 5, chunk 24), המשתנה `z` עצמו הוא משתנה מקומי ולכן מאוחסן ב-Stack. עם זאת, התוכן שאליו מצביע `z` (כלומר `*z`) מוקצה באופן דינאמי באמצעות הפונקציה `malloc`. זיכרון המוקצה באופן דינאמי בזמן ריצה באמצעות `malloc` מאוחסן באזור ה-Heap של מרחב הכתובות הוירטואלי של התהליך. אפשרויות א' וב' שגויות מכיוון ש-`*z` אינו קוד ואינו משתנה גלובלי או קבוע. אפשרות ג' שגויה מכיוון שה-Stack מאחסן משתנים מקומיים וארגומנטים לפונקציות, אך לא את הזיכרון הדינאמי שאליו מצביע משתנה מקומי זה."
+    }
+  }
+}

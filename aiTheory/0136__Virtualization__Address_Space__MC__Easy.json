@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Address Space",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:24:26",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      5,
+      6,
+      7
+    ],
+    "token_usage": {
+      "prompt_tokens": 2106,
+      "output_tokens": 491,
+      "total_tokens": 3994
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Address Space"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהם שני החלקים העיקריים המרכיבים כתובת וירטואלית לצורך תרגום כתובות?",
+      "code_snippet": null,
+      "options": [
+        "א. מספר דף וירטואלי (VPN) והיסט (Offset)",
+        "ב. מספר מסגרת פיזית (PFN) והיסט (Offset)",
+        "ג. אינדקס ספריית דפים (Page Directory Index) ואינדקס טבלת דפים (Page Table Index)",
+        "ד. גודל מרחב כתובות וירטואלי וגודל דף"
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "על פי חומר ההרצאה (במיוחד בפרקים 6.32 ו-7.19), כתובת וירטואלית מורכבת משני חלקים עיקריים: מספר הדף הוירטואלי (VPN) וההיסט (Offset). ה-VPN מצביע על הדף הוירטואלי הספציפי בזיכרון, וההיסט מציין את המיקום בתוך אותו דף. לדוגמה, בפרק 6.32 מוצגת כתובת וירטואלית המחולקת במפורש ל-VPN ול-Offset. אפשרויות ב', ג' ו-ד' אינן מתארות את שני החלקים העיקריים של הכתובת הוירטואלית עצמה; מספר מסגרת פיזית (PFN) הוא חלק מהכתובת הפיזית המתורגמת, ואינדקסים של ספריות וטבלאות דפים הם חלוקה פנימית של ה-VPN במקרה של טבלאות דפים רב-שכבתיות."
+    }
+  }
+}

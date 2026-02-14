@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Concurrency",
+    "topic_hint": "Multi-core Processors",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:28:48",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      10,
+      12,
+      15
+    ],
+    "token_usage": {
+      "prompt_tokens": 2191,
+      "output_tokens": 471,
+      "total_tokens": 3885
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Concurrency",
+    "topic": [
+      "Multi-core Processors"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהו אחד היתרונות המרכזיים של תזמון מעבדים מרובי תורים (Multi-queue multiprocessor scheduling) במערכות מרובות ליבות, כפי שמתואר בחומר הלימוד?",
+      "code_snippet": null,
+      "options": [
+        "א. הוא מאפשר לכל המעבדים לשתף תור עבודה יחיד ביעילות.",
+        "ב. הוא משפר באופן טבעי את ה-cache affinity (זיקת מטמון).",
+        "ג. הוא מבטל את הצורך בחוטי ליבה (kernel threads).",
+        "ד. הוא מפחית את מספר ה-context switches הנדרשים בין תהליכים שונים."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "על פי חומר הלימוד (Lecture 15, chunk 29), אחד היתרונות המרכזיים של תזמון מעבדים מרובי תורים (Multi-queue multiprocessor scheduling) הוא שיש לו 'cache affinity באופן טבעי: ברגע שג'וב מסוים מגיע, הוא מקבל תור, משויך למעבד ותמיד הוא יורץ על אותו המעבד.' יתרון זה מודגש כפתרון לבעיות שהיו בתזמונים קודמים בהקשר של זיקת מטמון. אפשרות א' אינה נכונה מכיוון שתזמון מרובה תורים פירושו שלכל מעבד יש תור משלו, ולא תור משותף. אפשרויות ג' ו-ד' אינן מוזכרות כיתרונות מרכזיים או ישירים של שיטה זו בחומר הלימוד."
+    }
+  }
+}

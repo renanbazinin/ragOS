@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Scheduling Algorithms",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Hard",
+    "generated_at": "2026-02-14 17:07:21",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      3
+    ],
+    "token_usage": {
+      "prompt_tokens": 2139,
+      "output_tokens": 949,
+      "total_tokens": 5951
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Scheduling Algorithms"
+    ],
+    "difficulty_estimation": "Hard",
+    "content": {
+      "text": "בהתבסס על החומר שהוצג אודות אלגוריתמי תזמון פרופורציונליים, Lottery Scheduling ו-Stride Scheduling, איזה מהיתרונות הבאים מתאר בצורה המדויקת ביותר את Stride Scheduling בהשוואה ל-Lottery Scheduling, במיוחד בהקשר של השגת הקצאת זמן מעבד יחסית מדויקת וצפויה על פני פרקי זמן קצרים?",
+      "code_snippet": null,
+      "options": [
+        "א. Stride Scheduling מאפשר לתהליכים להוסיף או להוריד לעצמם כרטיסים באופן זמני (Ticket Inflation), מה שמגביר את הגמישות בתגובה לשינויים בעומס.",
+        "ב. Stride Scheduling מבטיח חלוקה פרופורציונלית של זמן המעבד באופן דטרמיניסטי ומדויק יותר לאורך פרקי זמן קצרים, בניגוד לאופי ההסתברותי של Lottery Scheduling.",
+        "ג. Stride Scheduling מטפל ביעילות רבה יותר בתהליכי קלט/פלט על ידי פיצול אוטומטי של ג'ובים לתת-ג'ובים קצרים יותר המאפשרים חפיפה.",
+        "ד. Stride Scheduling מונע לחלוטין מצבי רעב (starvation) עבור תהליכים בעלי עדיפות נמוכה או מעט כרטיסים, מה שאינו מובטח ב-Lottery Scheduling."
+      ]
+    },
+    "solution": {
+      "correct_option": "ב",
+      "explanation": "החומר המצורף מתאר את Lottery Scheduling כאלגוריתם שבו הבחירה נעשית 'באופן אקראי' על ידי 'כרטיסי הגרלה', מה שמקנה לתהליכים 'עדיפות גבוהה יותר (עם יחס מסוים)' או 'נבחר בהם בהסתברות גבוהה יותר'. אופי זה של בחירה אקראית, גם אם הוא פרופורציונלי בטווח הארוך, עלול לגרום לחוסר דיוק ואי-צפיות בהקצאת זמן המעבד בפרקי זמן קצרים. לעומת זאת, Stride Scheduling מתואר כאלגוריתם דטרמיניסטי שבו 'נבחר את הג'וב עם ה-pass הנמוך ביותר, ואז כל ריצה נוסיף את ה- stride שלו לערך ה-pass שלו'. מנגנון זה מבטיח התקדמות פרופורציונלית עקבית ומדויקת יותר של כל התהליכים, ובכך משיג חלוקה צפויה ומדויקת יותר של זמן המעבד גם בפרקי זמן קצרים.\n\nא. אפשרות זו שגויה. 'Ticket Inflation' היא תכונה המתוארת בחומר בהקשר של Lottery Scheduling, לא Stride Scheduling.\nג. אפשרות זו שגויה. הטיפול בתהליכי קלט/פלט על ידי פיצול ג'ובים לתת-ג'ובים מוזכר בחומר כ'גישה נפוצה' עבור מתזמן SRTF, ולא כתכונה ייחודית או אוטומטית של Stride Scheduling.\nד. אפשרות זו שגויה. אף שהאופי הדטרמיניסטי של Stride Scheduling הופך אותו לעמיד יותר בפני רעב מאשר Lottery Scheduling (שבו תהליך בעל כרטיסים מעטים יכול תיאורטית לא להיבחר לזמן מה), החומר אינו דן במפורש במושג 'רעב' עבור אף אחד מהאלגוריתמים, וכן הטענה 'מונע לחלוטין' היא חזקה מדי ולרוב אינה מדויקת במערכות מורכבות ללא תיאור מפורט נוסף."
+    }
+  }
+}

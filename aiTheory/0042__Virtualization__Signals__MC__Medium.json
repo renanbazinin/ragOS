@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Signals",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Medium",
+    "generated_at": "2026-02-14 17:02:01",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      4,
+      5
+    ],
+    "token_usage": {
+      "prompt_tokens": 1860,
+      "output_tokens": 774,
+      "total_tokens": 4619
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Signals"
+    ],
+    "difficulty_estimation": "Medium",
+    "content": {
+      "text": "על פי חומר ההרצאה, מהו תפקידו העיקרי של האות SIGCHLD ושל פונקציית הטיפול (signal handler) בו במניעת תהליכי זומבי?",
+      "code_snippet": "void signal_handler(int signal) {\n    if (signal == SIGCHLD) {\n        int rc = wait(NULL);\n        printf(\"child terminated %d (pid:%d)\\n\", rc, getpid());\n    }\n}\n\nint main(int argc, char *argv[])\n{\n    struct sigaction act;\n    sigemptyset(&act.sa_mask);\n    act.sa_handler = signal_handler;\n    act.sa_flags = 0;\n    \n    sigaction(SIGCHLD, &act, NULL);\n    if (fork()) {\n        while (1);\n    }\n}",
+      "options": [
+        "א. האות SIGCHLD נשלח לתהליך האב כאשר תהליך בן מסיים את ריצתו, ופונקציית הטיפול בו קוראת ל-wait כדי לאסוף את משאבי הבן.",
+        "ב. האות SIGCHLD מורה לתהליך האב להתעלם מסיום ריצת הבן, ובכך מונע היווצרות זומבים באופן אוטומטי ללא צורך בקריאה ל-wait.",
+        "ג. האות SIGCHLD מאפשר לתהליך האב לבטל את תהליך הבן לפני סיומו, ובכך למנוע מצב של זומבי.",
+        "ד. האות SIGCHLD מציין מצב שבו תהליך הבן נכנס ללולאה אינסופית, ופונקציית הטיפול בו מנסה להרוג את הבן."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "התשובה הנכונה היא א'. על פי חומר ההרצאה, כאשר תהליך בן מסיים את ריצתו, מערכת ההפעלה שולחת אות SIGCHLD לתהליך האב. אם תהליך האב הגדיר פונקציית טיפול (signal handler) עבור אות זה, פונקציה זו תופעל. בתוך פונקציית הטיפול, קריאה לפונקציית המערכת wait (כמו wait(NULL) בדוגמת הקוד) מאפשרת לאסוף את משאבי התהליך הבן שהסתיים, ובכך למנוע את הפיכתו לתהליך זומבי. אפשרות ב' מתארת דרך אחרת למנוע זומבים, על ידי הגדרת התעלמות מהאות (SIG_IGN), שבמקרה כזה מערכת ההפעלה מפנה את משאבי הבן באופן אוטומטי מבלי שהאב יצטרך לקרוא ל-wait. אפשרויות ג' ו-ד' אינן מתארות נכונה את תפקיד ה-SIGCHLD."
+    }
+  }
+}

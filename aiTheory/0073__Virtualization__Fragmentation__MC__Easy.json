@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "Fragmentation",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:10:22",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      9,
+      5,
+      6
+    ],
+    "token_usage": {
+      "prompt_tokens": 1829,
+      "output_tokens": 457,
+      "total_tokens": 3325
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "Fragmentation"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהו המצב המתואר כ\"קיטוע פנימי\" (Internal Fragmentation) במערכות הפעלה?",
+      "code_snippet": null,
+      "options": [
+        "א. מצב שבו מערכת ההפעלה מקצה למשתמש יותר זיכרון ממה שהוא ביקש, מה שמוביל לבזבוז.",
+        "ב. מצב שבו יש מספיק זיכרון פנוי בסך הכל, אך הוא מפוזר במקטעים קטנים ולא רציפים, ולכן לא ניתן להקצותו לבקשה גדולה.",
+        "ג. מצב שבו תהליכים ארוכים אינם מקבלים זמן מעבד בגלל הגעת תהליכים קצרים רבים.",
+        "ד. מצב שבו הזיכרון הפיזי מנוצל במלואו, ולא נשאר שום זיכרון פנוי עבור תהליכים חדשים."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "קיטוע פנימי (Internal Fragmentation) מתרחש כאשר מערכת ההפעלה מקצה למשתמש יחידת זיכרון גדולה יותר מהכמות המדויקת שביקש. העודף הלא מנוצל בתוך היחידה המוקצית נחשב לבזבוז. חומר ההרצאה מגדיר זאת במפורש: \"מצב בו אנחנו נותנים למשתמש יותר זיכרון ממה שהוא ביקש. זה בזבוז.\" אפשרות ב' מתארת קיטוע חיצוני, ואפשרויות ג' ו-ד' מתארות מצבים אחרים שאינם קיטוע זיכרון."
+    }
+  }
+}

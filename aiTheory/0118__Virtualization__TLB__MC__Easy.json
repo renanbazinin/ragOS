@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "source": "ai_generated_from_summary",
+    "subject": "Virtualization",
+    "topic_hint": "TLB",
+    "requested_type": "MultipleChoice",
+    "requested_difficulty": "Easy",
+    "generated_at": "2026-02-14 17:20:23",
+    "context_chunks_used": 5,
+    "context_lectures": [
+      8,
+      7
+    ],
+    "token_usage": {
+      "prompt_tokens": 2114,
+      "output_tokens": 365,
+      "total_tokens": 3561
+    }
+  },
+  "question": {
+    "id": 1,
+    "type": "MultipleChoice",
+    "subject": "Virtualization",
+    "topic": [
+      "TLB"
+    ],
+    "difficulty_estimation": "Easy",
+    "content": {
+      "text": "מהי הפעולה הראשונה שמבצע ה-MMU כאשר מתרחשת גישה לזיכרון וירטואלי, בהקשר ל-TLB?",
+      "code_snippet": null,
+      "options": [
+        "א. בודק אם המיפוי לכתובת הוירטואלית קיים ב-TLB.",
+        "ב. ניגש ישירות לטבלת הדפים כדי למצוא את המיפוי לכתובת הפיזית.",
+        "ג. מעדכן את ה-TLB במיפוי חדש שהתגלה בטבלת הדפים.",
+        "ד. יוצר trap למערכת ההפעלה עקב חוסר מיפוי."
+      ]
+    },
+    "solution": {
+      "correct_option": "א",
+      "explanation": "על פי חומר ההרצאה, בכל פעם שיש גישה לזיכרון וירטואלי, ה-MMU \"קודם יבדוק את ה-TLB\". רק אם המיפוי לא קיים ב-TLB (כלומר 'miss'), אז הוא יבצע את התהליך הארוך יותר של חיפוש בטבלת הדפים. לכן, הפעולה הראשונה היא תמיד בדיקת ה-TLB."
+    }
+  }
+}
