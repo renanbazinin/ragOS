@@ -49,12 +49,12 @@
   </text>
   
   <text x="500" y="400" font-family="system-ui, -apple-system, sans-serif" 
-        font-size="32" font-weight="400" fill="#64748b">
+        font-size="27" font-weight="400" fill="#64748b">
     AI-powered question generation • RAG-based search
   </text>
   
   <text x="500" y="460" font-family="system-ui, -apple-system, sans-serif" 
-        font-size="32" font-weight="400" fill="#64748b">
+        font-size="27" font-weight="400" fill="#64748b">
     Past exam archives • Practice modes
   </text>
   
